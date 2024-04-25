@@ -1,0 +1,65 @@
+/*================ Countdown Timer ================*/
+
+.countdown-timer {
+  --gap: 80px;
+  max-width: 600px;
+  display: block;
+
+  @include media-query ($large-down) {
+    --gap: 50px;
+  }
+
+  @include media-query ($medium-down) {
+    --gap: 40px;
+  }
+
+  @include media-query ($small) {
+    --gap: 32px;
+  }
+}
+
+.countdown-timer__wrapper {
+  display: inline-grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+
+  @include media-query ($mobile) {
+    display: flex;
+    justify-content: space-between;
+    gap: unset;
+    width: 100%;
+  }
+
+  .countdown-timer--show-message & {
+    display: none;
+  }
+}
+
+.countdown-timer__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.countdown-timer__digit {
+  @include font-heading;
+  --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * 1.4);
+  margin: 0;
+  font-weight: var(--FONT-WEIGHT-HEADING-BOLD);
+  line-height: 1.2;
+}
+
+.countdown-timer__unit {
+  font-size: calc(1rem * var(--FONT-ADJUST-SUBHEADING));
+}
+
+.countdown-timer__message {
+  @include font-body;
+  @include font-size-h6-body;
+  display: none;
+
+  .countdown-timer--show-message & {
+    display: block;
+    animation: fadeIn 1s ease;
+  }
+}

@@ -1,0 +1,82 @@
+/*================ Sub-collections ================*/
+.subcollections {
+  overflow: hidden;
+
+  .carousel--mobile-one {
+    @include media-query ($small) {
+      overflow-x: hidden;
+      padding-right: var(--gutter-mobile);
+    }
+  }
+}
+
+// Fix mobile rounded corners
+.subcollection {
+  transform: translateZ(0);
+
+  .carousel--inactive &:only-child {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+.subcollection__outer {
+  position: relative;
+
+  &:after {
+    @include pseudo-overlay;
+    pointer-events: none;
+  }
+}
+
+.subcollection__image {
+  display: block;
+  position: relative;
+  padding-top: var(--collection-image-padding-top);
+  overflow: hidden;
+
+  .placeholder-svg--overlayed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+.subcollection__title {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  max-width: 100%;
+  padding: 20px;
+  margin: 0;
+  word-break: break-word;
+  text-align: left;
+  color: var(--text);
+
+  span {
+    display: block;
+    position: relative;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 0;
+      height: var(--BORDER-WIDTH);
+      background: var(--text);
+      transition: width 0.25s ease-in;
+
+      // Don't show on touch devices as it causes poor UX
+      .supports-touch & { content: none; }
+    }
+  }
+}
+
+.subcollection__image:hover .subcollection__title span:after {
+  width: 100%;
+  transition: width 0.5s ease-out;
+}

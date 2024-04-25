@@ -1,0 +1,17 @@
+{%- comment -%}
+  Determine if current option matches size handle translations
+  Inherited variables:
+    - option_name_handle_separator: {String} handle option.name surrounded by commas
+  Returns variables:
+    - is_size_option: {Boolean}
+{%- endcomment -%}
+
+{%- liquid
+  assign is_size_option = false
+  assign size_translation = 'general.size_chart.size' | t
+  assign translation_string = size_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+
+  if translation_string contains option_name_handle_separator
+    assign is_size_option = true
+  endif
+-%}

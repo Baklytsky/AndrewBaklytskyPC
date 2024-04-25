@@ -1,0 +1,28 @@
+          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort-bar">
+            <button type="button" class="collection__sort__label" data-sort-toggle>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-select' -%}
+            </button>
+
+            <div class="collection__sort__option-wrapper" data-collection-sort-options>
+              <div class="collection__sort__options">
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by_bar" value="{{ option.value }}" id="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" tabindex="0">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>

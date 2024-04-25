@@ -1,0 +1,206 @@
+/*================ Countdown ================*/
+
+.countdown {
+  --text-gap: 15px;
+  --scale: 1;
+  position: relative;
+
+  @include media-query ($large-up) {
+    --content: calc(33.33% + var(--gutter) * 2); // .countdown--content-narrow
+    --aside: calc(100% - var(--content));
+  }
+
+  @include media-query ($medium) {
+    --content: calc(50% + var(--gutter) * 2);
+    --aside: var(--content);
+  }
+}
+
+.countdown--content-normal {
+  @include media-query ($large-up) {
+    --content: calc(45% + var(--gutter) * 2);
+  }
+
+  @include media-query ($medium) {
+    --content: calc(75% + var(--gutter) * 2);
+  }
+}
+
+.countdown__inner {
+  position: relative;
+  min-height: var(--min-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.countdown .overlay,
+.countdown__image-container,
+.countdown__text-container {
+  grid-row-start: 1;
+  grid-column-start: 1;
+  min-height: 100%;
+
+  @media only screen and (max-width: #{$grid-medium - 1}) and (orientation: landscape) {
+    min-height: auto;
+  }
+}
+
+.countdown__text-container {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+
+  @include media-query ($large-up) {
+    flex-direction: row;
+  }
+
+  @include media-query ($medium-up) {
+    justify-content: center;
+  }
+}
+
+.countdown__link ~ .countdown__text-container { pointer-events: none; }
+.countdown__link ~ .countdown__text-container a { pointer-events: auto; }
+
+.countdown__link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.countdown__content {
+  padding: calc(var(--gutter) / 2) var(--gutter-mobile);
+  max-width: var(--content, 100%);
+
+  @include media-query ($large-up) {
+    padding: calc(var(--gutter) / 2) var(--gutter);
+  }
+
+  @include media-query ($mobile) {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  &:empty { display: none; }
+}
+
+.countdown__aside {
+  padding: calc(var(--gutter) / 2) var(--gutter-mobile);
+  max-width: var(--aside, 100%);
+
+  @include media-query ($mobile) {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.countdown__image {
+  will-change: transform;
+  transform: scale(var(--scale));
+}
+
+.countdown__block--subheading p,
+.countdown__block--heading p,
+.countdown__block--text p { margin: 0; }
+
+.countdown__block--text { font-size: calc(1rem * var(--adjust-body)); }
+
+.countdown__block--heading a,
+.countdown__block--text a {
+  text-decoration: underline;
+  text-decoration-thickness: var(--BORDER-WIDTH);
+}
+
+.countdown__block--heading {
+  font-weight: var(--FONT-WEIGHT-HEADING-BOLD);
+
+  a {
+    @include animated-border-hover;
+  }
+
+  [data-has-highlight],
+  .section__link {
+    &:before,
+    &:after { display: none; }
+  }
+
+  &:not(.text-highlight-wrapper) .text-reveal__cropper a:before,
+  &:not(.text-highlight-wrapper) .text-reveal__cropper a:after { bottom: 0; }
+}
+
+.countdown__block--button,
+.countdown__block--video { margin-top: 0; }
+
+.countdown__block--button .main-buttons__item {
+  @include media-query($medium-up) {
+    margin-top: 0;
+  }
+}
+
+.countdown__block--button .main-buttons__item:first-child {
+  @include media-query($small) {
+    margin-top: 0;
+  }
+}
+
+.countdown__block--video .main-buttons__item,
+.countdown__content > div:last-child {
+  margin-bottom: 0;
+}
+
+.countdown__block {
+  margin-bottom: var(--text-gap);
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.countdown__block--video:last-child,
+.countdown__block--button:last-child {
+  padding-top: var(--text-gap);
+}
+
+.countdown--inline {
+  .item--center .countdown__content,
+  .item--center .countdown-timer__message { text-align: left; }
+
+  .item--center .main-buttons { justify-content: flex-start; }
+
+  .countdown__text-container {
+    align-items: flex-start;
+
+    @include media-query ($large-up) {
+      align-items: center;
+    }
+  }
+
+  .countdown__content:not(:empty) + .countdown__aside {
+    @include media-query ($medium-down) {
+      padding-top: 0;
+    }
+
+    @include media-query ($large-up) {
+      padding-left: 0;
+      padding-right: var(--gutter);
+    }
+  }
+
+  .countdown-timer {
+    @include media-query($small) {
+      display: flex;
+      flex-flow: row wrap;
+    }
+  }
+
+  .main-buttons__item {
+    @include media-query($mobile) {
+      justify-content: flex-start;
+    }
+  }
+}

@@ -1,0 +1,134 @@
+name: qa-master
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.vscode/**'
+  workflow_dispatch:
+jobs:
+  cancel:
+    name: 'Cancel Previous Runs'
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+    - uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        workflow_id: 10963554
+  yarn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-v1-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-v1-
+    - name: Yarn install
+      run: yarn install --frozen-lockfile
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+  build:
+    needs: [yarn]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - uses: actions/cache@v3
+      id: node_modules-cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-v1-${{ hashFiles('yarn.lock') }}
+        fail-on-cache-miss: true
+    - uses: actions/cache@v3
+      id: build-cache
+      with:
+        path: dist
+        key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+    - name: Build Theme
+      run: yarn build
+    - name: Get latest commit SHA
+      id: get_latest_sha
+      run: echo "sha=$(git log -n 1 --format="%h")" >> $GITHUB_OUTPUT
+    - name: Update versions in files
+      run: |
+        jq '.[0].theme_version = "${{ steps.get_latest_sha.outputs.sha }}"' dist/config/settings_schema.json > settings.tmp && mv settings.tmp dist/config/settings_schema.json
+    - name: Ensure dist/ is not empty
+      run: if [ -z "$(ls -A dist 2>/dev/null)" ]; then exit 1; fi
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ vars.THEME_NAME }}-dist
+        path: dist/*
+        retention-days: 5
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ vars.THEME_NAME }}-zip
+        path: upload/*
+        retention-days: 5
+  main-demo-staging:
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHOPIFY_SHOP: ${{ vars.DEMO_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CLOTHING_THEME_ACCESS_TOKEN }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v3
+      id: build-cache
+      with:
+        path: dist
+        key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+        fail-on-cache-miss: true
+    - name: Copy qa environment config
+      run: cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}config/** dist/config && cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}templates/** dist/templates && cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}sections/*.json dist/sections
+    - uses: actions/cache@v3
+      with:
+        path: .preview_url
+        key: ${{ runner.os }}-preview-url-v1-${{ hashFiles('src/**/*', 'dist/**/*', 'yarn.lock') }}
+    - name: Push theme
+      id: theme-push
+      uses: invisiblethemes/rosey@4.0.1
+      with:
+        theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+        store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+        theme_root: dist
+        theme_command: push --live --allow-live --json --path=dist --ignore="config/settings_data.json" --ignore="sections/*.json" --ignore="templates/*.json" --ignore="templates/*.*.json" --ignore="templates/customers/.*.json"
+  chaos-store:
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHOPIFY_SHOP: ${{ vars.CHAOS_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CHAOS_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+          fail-on-cache-miss: true
+      - name: Copy qa environment config
+        run: cp -r environments/chaos/config/** dist/config && cp -r environments/chaos/templates/** dist/templates && cp -r environments/chaos/sections/*.json dist/sections
+      - name: Push theme
+        id: theme-push
+        uses: invisiblethemes/rosey@4.0.1
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_root: dist
+          theme_command: push --live --allow-live --json --path=dist --ignore="config/settings_data.json" --ignore="sections/*.json" --ignore="templates/*.json" --ignore="templates/*.*.json" --ignore="templates/customers/.*.json"

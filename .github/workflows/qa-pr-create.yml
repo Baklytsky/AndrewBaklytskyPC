@@ -1,0 +1,155 @@
+name: qa-pr-create
+on:
+  pull_request:
+    types: [opened, reopened]
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+jobs:
+  cancel:
+    name: 'Cancel Previous Runs'
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+    - uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        workflow_id: 10963554
+  yarn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-v1-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-v1-
+    - name: Yarn install
+      run: yarn install --frozen-lockfile
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+  build:
+    needs: [yarn]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      theme_name: ${{ steps.get_theme_name.outputs.theme_name }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - uses: actions/cache@v3
+        id: node_modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-v1-${{ hashFiles('yarn.lock') }}
+          fail-on-cache-miss: true
+      - uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+      - name: Build Theme
+        run: yarn build
+      - name: Get theme name
+        id: get_theme_name
+        run: echo "theme_name=[${{ env.PR_NUMBER }}] ${{ env.BRANCH_NAME }}" | cut -c1-40 >> $GITHUB_OUTPUT
+      - name: Get latest commit SHA
+        id: get_latest_sha
+        run: echo "sha=$(git log -n 1 --format="%h")" >> $GITHUB_OUTPUT
+      - name: Update versions in files
+        run: |
+          jq '.[0].theme_version = "${{ steps.get_latest_sha.outputs.sha }}"' dist/config/settings_schema.json > settings.tmp && mv settings.tmp dist/config/settings_schema.json
+      - name: Ensure dist/ is not empty
+        run: if [ -z "$(ls -A dist 2>/dev/null)" ]; then exit 1; fi
+  main-demo-staging:
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      preview_url: ${{ steps.theme-push.outputs.preview_url }}
+      editor_url: ${{ steps.theme-push.outputs.editor_url }}
+    env:
+      SHOPIFY_SHOP: ${{ vars.DEMO_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CLOTHING_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+          fail-on-cache-miss: true
+      - name: Copy qa environment config
+        run: cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}config/** dist/config && cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}templates/** dist/templates && cp -r ${{ vars.MAIN_DEMO_ENV_FOLDER_LOCATION }}sections/*.json dist/sections
+      - name: Create theme
+        uses: invisiblethemes/rosey@4.0.1
+        id: theme-push
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_command: push --theme="${{ needs.build.outputs.theme_name }}" --unpublished --json --path=dist
+      - run: echo "${{ steps.theme-push.outputs.preview_url }}" > .preview_url
+      - run: echo "${{ steps.theme-push.outputs.editor_url }}" > .editor_url
+  chaos-store:
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      preview_url: ${{ steps.theme-push.outputs.preview_url }}
+      editor_url: ${{ steps.theme-push.outputs.editor_url }}
+    env:
+      SHOPIFY_SHOP: ${{ vars.CHAOS_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CHAOS_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-v1.5-${{ hashFiles('src/**/*', 'yarn.lock') }}
+          fail-on-cache-miss: true
+      - name: Copy qa environment config
+        run: cp -r environments/chaos/config/** dist/config && cp -r environments/chaos/templates/** dist/templates && cp -r environments/chaos/sections/*.json dist/sections
+      - name: Create theme
+        uses: invisiblethemes/rosey@4.0.1
+        id: theme-push
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_command: push --theme="${{ needs.build.outputs.theme_name }}" --unpublished --json --path=dist
+      - run: echo "${{ steps.theme-push.outputs.preview_url }}" > .preview_url
+      - run: echo "${{ steps.theme-push.outputs.editor_url }}" > .editor_url
+  sticky-comment:
+    needs: [chaos-store, main-demo-staging]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event.pull_request.number
+        with:
+          number: ${{ github.event.pull_request.number }}
+          message: |
+            Chaos Shop Preview: ${{ needs.chaos-store.outputs.preview_url }}
+            Chaos Shop Editor: ${{ needs.chaos-store.outputs.editor_url }}
+
+            Clothing Demo Staging Preview: ${{ needs.main-demo-staging.outputs.preview_url }}
+            Clothing Demo Shop Editor: ${{ needs.main-demo-staging.outputs.editor_url }}
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: failure() && github.event.pull_request.number
+        with:
+          number: ${{ github.event.pull_request.number }}
+          message: |
+            Failed to build review theme.

@@ -1,0 +1,38 @@
+{%- liquid
+  assign loading_appearance = settings.loading_appearance
+  assign image_width = settings.loading_image_width
+  assign image = settings.loading_image
+-%}
+{%- unless loading_appearance == 'never' -%}
+  {%- if image != blank -%}
+    {%- assign image_height = image_width | divided_by: image.aspect_ratio | round -%}
+    {%- capture preload_image_size -%}{{ image_width }}x{{ image_height }}{%- endcapture -%}
+    <link rel="preload" as="image" href="{{ image | img_url: preload_image_size }}" data-preload="{{ preload_image_size }}">
+  {%- endif -%}
+
+  {%- style -%}
+    :root { --loader-image-size: {{ image_width }}px; }
+    {%- if image == blank -%}
+      :root { --loader-image-size: 320px; }
+    {%- endif -%}
+    html:not(.is-loading) .loading-overlay { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-overlay { position: fixed; top: 0; left: 0; z-index: 99999; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: opacity 0.3s ease-out, visibility 0s linear 0.3s; }
+    .loading-overlay .loader__image--fallback { width: 320px; height: 100%; background: var(--loader-image) no-repeat center center/contain; }
+    .loader__image__holder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; font-size: 0; display: flex; align-items: center; justify-content: center; animation: pulse-loading 2s infinite ease-in-out; }
+    .loader__image { max-width: {{ image_width }}px; height: auto; object-fit: contain; }
+  {%- endstyle -%}
+
+  <script>
+    const loadingAppearance = {{ loading_appearance | json }};
+    const loaded = sessionStorage.getItem('loaded');
+
+    if (loadingAppearance === 'once') {
+      if (loaded === null) {
+        sessionStorage.setItem('loaded', true);
+        document.documentElement.classList.add('is-loading');
+      }
+    } else {
+      document.documentElement.classList.add('is-loading');
+    }
+  </script>
+{%- endunless -%}

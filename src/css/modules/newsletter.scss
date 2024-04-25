@@ -1,0 +1,214 @@
+/*================ Newsletter ================*/
+
+.newsletter { width: 100%; }
+
+/*=== Newsletter section ===*/
+
+.newsletter-section {
+  position: relative;
+
+  .wrapper,
+  .wrapper--full-padded,
+  .wrapper--narrow {
+    height: 100%;
+    position: relative;
+    z-index: 10;
+  }
+
+  .shopify-block { width: 100%; }
+}
+
+.newsletter-section__bg { background-color: var(--bg); }
+
+.newsletter-section__content__wrapper {
+  display: flex;
+  flex-flow: row wrap;
+  height: 100%;
+}
+
+.newsletter-section__content {
+  flex-basis: 100%;
+
+  .btn.input-group__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.newsletter-section__entry h2 { color: inherit; }
+
+/*=== Newsletter form ===*/
+
+.newsletter-form {
+  .form-success,
+  .errors { display: none; }
+
+  .input-group__field,
+  .input-group__btn--icon { background: transparent; }
+}
+
+.newsletter-form.has-error .errors { display: inline-block; }
+.newsletter-form.has-success .form-success { display: inline-block; }
+
+// Hide newsletter form if successfully submitted
+.newsletter-form.has-success .input-group__item:not(.input-group__item--text) { display: none; }
+
+.newsletter-form .errors,
+.newsletter-form .form-success {
+  margin: var(--form-margin) 0;
+  text-align: left;
+
+  @include media-query($mobile) {
+    width: 100%;
+    flex-basis: 100%;
+    text-align: center;
+  }
+}
+
+.newsletter-form .input-group--inline ~ .form-success {
+  @include media-query ($medium-up) {
+    margin: 0;
+  }
+}
+
+.input-group__fields {
+  display: flex;
+  flex: 1 1 auto;
+  padding: 0;
+  flex-flow: row wrap;
+
+  @include media-query ($large-up) {
+    max-width: 280px;
+  }
+
+  @include media-query ($medium-up) {
+    flex-basis: 50%;
+  }
+
+  @include media-query ($widescreen) {
+    flex-basis: 25%;
+  }
+}
+
+.input-group__fields--name {
+  flex-basis: 100%;
+
+  @include media-query ($large-up) {
+    max-width: 560px;
+  }
+}
+
+.input-group__fields--name .errors,
+.input-group__fields--first-last-name .errors,
+.input-group__fields--name .form-success,
+.input-group__fields--first-last-name .form-success {
+  margin: calc(var(--form-margin) / 2);
+}
+
+.input-group__fields--first-last-name {
+  flex-basis: 100%;
+
+  @include media-query ($large-up) {
+    max-width: 840px;
+  }
+}
+
+.input-group__btn--icon {
+  height: 100%;
+  width: 54px;
+  max-width: 54px;
+  color: var(--text);
+  background: transparent;
+  border: var(--BORDER-WIDTH) solid var(--text);
+
+  .icon-select {
+    transition: transform 0.3s ease;
+  }
+
+  &::before { content: none; }
+  &:hover { background: transparent; }
+  &:hover .icon-select { transform: translate(5px); }
+}
+
+.input-group__field {
+  display: block;
+  width: 100%;
+  border: var(--BORDER-WIDTH) solid var(--text);
+  border-radius: var(--RADIUS);
+  padding: 12px 0 12px 20px;
+
+  &::-webkit-input-placeholder { color: var(--text); }
+  &::-moz-placeholder { color: var(--text); }
+  &:-ms-input-placeholder { color: var(--text); }
+  &:-moz-placeholder { color: var(--text); }
+}
+
+.mailer-response { display: none; }
+
+/*=== Newsletter Layouts ===*/
+
+.align--middle-split {
+  align-items: flex-start;
+
+  .newsletter {
+    width: auto;
+    flex-basis: 50%;
+  }
+
+  /* Newsletter section  */
+
+  .newsletter-section__entry {
+    text-align: left;
+    flex: 1;
+    padding-right: var(--gutter);
+
+    @include media-query ($small) {
+      padding: 0 0 var(--gutter-mobile);
+      max-width: 100%;
+    }
+  }
+
+  .newsletter-section__content {
+    @include media-query ($medium-up) {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+    }
+  }
+
+  /* Newsletter form */
+
+  .newsletter-form { text-align: center; }
+
+  .newsletter-form .input-group { justify-content: flex-start; }
+
+  .input-group--inline {
+    margin: auto;
+  }
+
+  .input-group__fields,
+  .input-group__item {
+    @include media-query ($medium-up) {
+      max-width: 100%;
+    }
+  }
+
+  .input-group__item--btn-width {
+    @include media-query ($medium-up) {
+      flex-basis: 100%;
+      max-width: 100%;
+    }
+  }
+
+  .input-group--inline .input-group__item--btn {
+    flex-basis: 54px;
+    max-width: 54px;
+  }
+}
+
+.align--middle-right .form-success {
+  @include media-query ($medium-up) {
+    justify-content: flex-end;
+  }
+}

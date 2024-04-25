@@ -1,0 +1,78 @@
+{%- if logo or logo_not_home -%}
+  {%- capture sizes -%}(max-width: {{ logo_width | times: 2 }}px) 50vw, {{ logo_width }}px{%- endcapture -%}
+  {%- capture widths -%}{{ logo_width }}, {{ logo_width | times: 1.5 | round }}, {{ logo_width | times: 2 }}{%- endcapture -%}
+
+  {%- style -%}
+    .logo__image-link {
+      width: {{ logo_width | append: 'px' }};
+      height: {{ logo_height | round | append: 'px' }};
+    }
+
+    .has-scrolled .logo__image-link {
+      width: {{ logo_height_scrolled | times: logo_aspect_ratio | round | append: 'px' }};
+      height: {{ logo_height_scrolled | round | append: 'px' }};
+    }
+  {%- endstyle -%}
+{%- endif -%}
+
+{%- capture logo_not_home_markup -%}
+  {%- if logo_not_home != blank -%}
+    {%- liquid
+      assign logo_padding_top = 1 | divided_by: logo_not_home.aspect_ratio | times: 100 | round: 1
+      assign image_alt = logo_not_home.alt | escape
+    -%}
+
+    <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}" class="logo__image-link logo__image-link--other{% unless logo %} logo__image-link--single{% endunless %}">
+      {%- assign logo_height = logo_width | divided_by: logo_not_home.aspect_ratio -%}
+
+      {{ logo_not_home | image_url: width: 500 | image_tag:
+        widths: widths,
+        height: logo_height,
+        width: logo_width,
+        alt: image_alt,
+        sizes: sizes,
+        class: 'logo__image',
+        loading: 'eager',
+        fetchpriority: 'high',
+        preload: true
+      }}
+
+      <span class="logo__image-push" style="padding-top: {{ logo_padding_top }}%"></span>
+    </a>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture logo_markup -%}
+  {%- if logo != blank -%}
+    {%- liquid
+      assign logo_padding_top = 1 | divided_by: logo.aspect_ratio | times: 100 | round: 1
+      assign image_alt = logo.alt | escape
+    -%}
+
+    <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}" class="logo__image-link logo__image-link--home{% unless logo_not_home %} logo__image-link--single{% endunless %}">
+      {%- assign logo_height = logo_width | divided_by: logo.aspect_ratio -%}
+      {{ logo | image_url: width: 500 | image_tag:
+        widths: widths,
+        height: logo_height,
+        width: logo_width,
+        alt: image_alt,
+        sizes: sizes,
+        class: 'logo__image',
+        loading: 'eager',
+        fetchpriority: 'high',
+        preload: true
+      }}
+
+      <span class="logo__image-push" style="padding-top: {{ logo_padding_top }}%"></span>
+    </a>
+  {%- endif -%}
+{%- endcapture -%}
+
+<h1 class="logo" data-logo data-takes-space>
+  {%- if logo_not_home_markup != blank or logo_markup != blank -%}
+    {{- logo_not_home_markup -}}
+    {{- logo_markup -}}
+  {%- else -%}
+    <a href="{{ routes.root_url }}" class="logo__text-link" data-logo-text-link>{{ shop.name }}</a>
+  {%- endif -%}
+</h1>

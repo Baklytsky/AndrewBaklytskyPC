@@ -1,0 +1,113 @@
+/*================ Drawers ================*/
+.drawer {
+  @include promote-layer;
+  position: fixed;
+  width: var(--drawer-width);
+  overflow-y: auto;
+  overflow-x: hidden;
+  top: 0;
+  bottom: 0;
+  z-index: 9999;
+  color: var(--text);
+  background-color: var(--bg);
+  transition: var(--drawer-transition), visibility 0s linear 0.4s;
+  visibility: hidden;
+
+  input { border: none; }
+  textarea { border-color: var(--border); }
+
+  .btn { min-width: 0; }
+}
+
+.drawer.is-open {
+  content-visibility: visible;
+  visibility: visible;
+  transform: translateX(calc(-1 * var(--drawer-width)));
+  transition: var(--drawer-transition), visibility 0s linear 0s;
+}
+
+.drawer--left { right: 100vw; }
+.drawer--left.is-open { transform: translateX(var(--drawer-width)); }
+.drawer--right { left: 100vw; }
+.drawer--bottom { transform: translateY(100vh); }
+.drawer--bottom.is-open { transform: none; }
+
+.drawer--nav {
+  padding-bottom: var(--inner);
+}
+
+.drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--inner);
+  position: relative;
+
+  .drawer__close-button {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.drawer__close-button {
+  @include sidebar-close;
+  z-index: 1;
+}
+
+.drawer__secondary-close-button {
+  display: block;
+  margin: calc(var(--gutter-mobile) + 25px) auto;
+  width: 100%;
+}
+
+.drawer__title {
+  margin: 0;
+  max-width: calc(100% - 70px);
+  font-weight: var(--FONT-WEIGHT-HEADING-BOLD);
+}
+.drawer__logo {
+  display: block;
+  position: relative;
+  max-width: 100%;
+  margin: 0;
+}
+.drawer__logo-image {
+  display: block;
+  width: auto;
+  max-height: 60px;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left;
+}
+
+.cart-drawer__spacer-line {
+  clear: both;
+  display: block;
+  width: 100%;
+  margin-bottom: var(--inner);
+  border-bottom: var(--BORDER-WIDTH) solid var(--accent);
+}
+
+.drawer__overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--black);
+  opacity: 0;
+  visibility: hidden;
+  content: '';
+  z-index: 9998;
+  transition: visibility 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.modal--is-visible .drawer__overlay,
+.js-drawer-open-cart .drawer__overlay,
+.js-drawer-open .drawer__overlay {
+  opacity: 0.2;
+  visibility: visible;
+  will-change: opacity;
+}

@@ -1,0 +1,517 @@
+/*
+* Links and Buttons
+*/
+a {
+  color: var(--text);
+  background: transparent;
+}
+
+button[disabled],
+input[disabled] { cursor: default; }
+
+.btn {
+  @include button-typography;
+  --top-bottom-padding: 15px; // default top/bottom padding for "btn--large"
+  --left-right-padding: 22px; // default left/right padding for "btn--large"
+  --btn-inner-top-bottom: calc(var(--top-bottom-padding) * var(--adjust-button));
+  --btn-inner-left-right: calc(var(--left-right-padding) * var(--adjust-button));
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: var(--btn-inner-top-bottom) var(--btn-inner-left-right);
+  line-height: 1.53;
+  border-radius: var(--RADIUS);
+  border: var(--BORDER-WIDTH) solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  text-decoration: none;
+  box-shadow: none;
+  font-size: calc(1.0rem * var(--adjust-button));
+  text-align: center;
+  will-change: color, border, background;
+  transition: color 0.3s ease, border 0.3s ease, background 0s linear 0s;
+  z-index: 1;
+  -webkit-tap-highlight-color: initial;
+
+  &:before {
+    content: '';
+    position: absolute;
+    display: flex;
+    left: calc(var(--BORDER-WIDTH) * -1);
+    top: calc(var(--BORDER-WIDTH) * -1);
+    right: calc(var(--BORDER-WIDTH) * -1);
+    bottom: calc(var(--BORDER-WIDTH) * -1);
+    transform: scale(1, 0);
+    transform-origin: top center;
+    will-change: transform;
+    z-index: -1;
+    opacity: 0.3;
+    transition: transform 0.3s ease;
+    background: var(--btn-bg-hover);
+  }
+
+  &[disabled],
+  &:disabled,
+  &.disabled {
+    cursor: default;
+    opacity: 0.65;
+
+    &:before {
+      content: none;
+      transform: scaleY(0);
+    }
+  }
+
+  &:hover {
+    transition: color 0.3s ease, border 0.3s ease, background 0s linear 0.3s;
+
+    &:before {
+      transform-origin: bottom center;
+      transform: none;
+    }
+  }
+
+  @include media-query ($small-up) {
+    min-width: 120px;
+  }
+
+  @include media-query ($widescreen) {
+    min-width: 180px;
+  }
+
+  @include media-query ($mobile) {
+    width: 100%;
+  }
+}
+
+.btn {
+  --btn-border: var(--text);
+  --btn-bg: var(--text);
+  --btn-text: var(--bg);
+  --btn-bg-hover: var(--bg-lighten-darken);
+}
+
+/*=== Button Primary ===*/
+.btn--primary {
+  --btn-border: var(--PRIMARY-BUTTONS-COLOR-BORDER);
+  --btn-bg: var(--PRIMARY-BUTTONS-COLOR-BG);
+  --btn-text: var(--PRIMARY-BUTTONS-COLOR-TEXT);
+  --btn-bg-hover: var(--COLOR-PRIMARY-OPPOSITE-ALPHA-20);
+}
+
+.btn--primary-outline,
+.btn--primary.btn--outline {
+  --btn-border: var(--OUTLINE-BUTTONS-PRIMARY-BORDER);
+  --btn-bg: var(--OUTLINE-BUTTONS-PRIMARY-BG);
+  --btn-text: var(--OUTLINE-BUTTONS-PRIMARY-TEXT);
+  --btn-bg-hover: var(--OUTLINE-BUTTONS-PRIMARY-BG-HOVER);
+}
+
+.btn--primary-solid-border,
+.btn--primary.btn--solid-border {
+  --btn-border: var(--OUTLINE-SOLID-BUTTONS-PRIMARY-BORDER);
+  --btn-bg: var(--OUTLINE-SOLID-BUTTONS-PRIMARY-BG);
+  --btn-text: var(--OUTLINE-SOLID-BUTTONS-PRIMARY-TEXT);
+  --btn-bg-hover: var(--OUTLINE-SOLID-BUTTONS-PRIMARY-BG-HOVER);
+}
+
+.btn--primary.btn--text {
+  --btn-text: var(--PRIMARY-BUTTONS-COLOR-BG);
+}
+
+/*=== Button Secondary ===*/
+.btn--secondary {
+  --btn-border: var(--SECONDARY-BUTTONS-COLOR-BORDER);
+  --btn-bg: var(--SECONDARY-BUTTONS-COLOR-BG);
+  --btn-text: var(--SECONDARY-BUTTONS-COLOR-TEXT);
+  --btn-bg-hover: var(--COLOR-SECONDARY-OPPOSITE-ALPHA-20);
+}
+
+.btn--secondary-outline,
+.btn--secondary.btn--outline {
+  --btn-border: var(--OUTLINE-BUTTONS-SECONDARY-BORDER);
+  --btn-bg: var(--OUTLINE-BUTTONS-SECONDARY-BG);
+  --btn-text: var(--OUTLINE-BUTTONS-SECONDARY-TEXT);
+  --btn-bg-hover: var(--OUTLINE-BUTTONS-SECONDARY-BG-HOVER);
+}
+
+.btn--secondary-solid-border,
+.btn--secondary.btn--solid-border {
+  --btn-border: var(--OUTLINE-SOLID-BUTTONS-SECONDARY-BORDER);
+  --btn-bg: var(--OUTLINE-SOLID-BUTTONS-SECONDARY-BG);
+  --btn-text: var(--OUTLINE-SOLID-BUTTONS-SECONDARY-TEXT);
+  --btn-bg-hover: var(--OUTLINE-SOLID-BUTTONS-SECONDARY-BG-HOVER);
+}
+
+.btn--secondary.btn--text {
+  --btn-text: var(--SECONDARY-BUTTONS-COLOR-BG);
+}
+
+/*=== Button White ====*/
+.btn--white {
+  --btn-border: var(--white);
+  --btn-bg: var(--white);
+  --btn-text: var(--black);
+  --btn-bg-hover: var(--black-alpha-25);
+}
+
+.btn--white-outline,
+.btn--white.btn--outline {
+  --btn-border: var(--OUTLINE-BUTTONS-WHITE-BORDER);
+  --btn-bg: var(--OUTLINE-BUTTONS-WHITE-BG);
+  --btn-text: var(--OUTLINE-BUTTONS-WHITE-TEXT);
+}
+
+.btn--white-solid-border,
+.btn--white.btn--solid-border {
+  --btn-border: var(--OUTLINE-SOLID-BUTTONS-WHITE-BORDER);
+  --btn-bg: var(--OUTLINE-SOLID-BUTTONS-WHITE-BG);
+  --btn-text: var(--OUTLINE-SOLID-BUTTONS-WHITE-TEXT);
+}
+
+.btn--white.btn--text {
+  --btn-text: var(--white);
+}
+
+/*=== Button Black ====*/
+.btn--black {
+  --btn-border: var(--black);
+  --btn-bg: var(--black);
+  --btn-text: var(--white);
+  --btn-bg-hover: var(--white-alpha-50);
+}
+
+.btn--black-outline,
+.btn--black.btn--outline {
+  --btn-border: var(--OUTLINE-BUTTONS-BLACK-BORDER);
+  --btn-bg: var(--OUTLINE-BUTTONS-BLACK-BG);
+  --btn-text: var(--OUTLINE-BUTTONS-BLACK-TEXT);
+}
+
+.btn--black-solid-border,
+.btn--black.btn--solid-border {
+  --btn-border: var(--OUTLINE-SOLID-BUTTONS-BLACK-BORDER);
+  --btn-bg: var(--OUTLINE-SOLID-BUTTONS-BLACK-BG);
+  --btn-text: var(--OUTLINE-SOLID-BUTTONS-BLACK-TEXT);
+}
+
+.btn--black.btn--text {
+  --btn-text: var(--black);
+}
+
+.btn--ar:before { content: none; }
+
+.btn--small {
+  --top-bottom-padding: 10px;
+  --left-right-padding: 18px;
+  min-width: 0;
+}
+
+.btn--medium {
+  --top-bottom-padding: 12px;
+  --left-right-padding: 20px;
+
+  @include media-query ($small-up) {
+    min-width: 100px;
+  }
+
+  @include media-query ($widescreen) {
+    min-width: 150px;
+  }
+
+  @include media-query ($mobile) {
+    width: 100%;
+  }
+}
+
+.btn--solid { border-width: 0; }
+
+.btn--solid.btn--large,
+.btn--solid.btn--medium,
+.btn--solid.btn--small {
+  --btn-inner-top-bottom: calc(var(--top-bottom-padding) * var(--adjust-button) + var(--BORDER-WIDTH));
+  --btn-inner-left-right: calc(var(--left-right-padding) * var(--adjust-button) + var(--BORDER-WIDTH));
+}
+
+.btn--text {
+  @include animated-border-hover;
+  --btn-text: var(--text);
+  font-weight: var(--FONT-WEIGHT-BUTTON-BOLD);
+  line-height: 1.25;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  min-width: 0;
+  width: auto;
+  overflow: initial;
+  transition: none;
+
+  &:before {
+    top: auto;
+    bottom: -0.1rem;
+    left: 0;
+    right: 0;
+    opacity: 1;
+    transform-origin: left;
+  }
+
+  &:hover { transition: none; }
+
+  &:hover:before { transform-origin: left; }
+
+  .no-touch &[disabled],
+  .no-touch &:disabled,
+  .no-touch &.disabled {
+    &:after {
+      transform: none;
+    }
+  }
+}
+
+input.btn {
+  @extend .btn--primary;
+  transition: none;
+
+  &:hover {
+    color: var(--btn-text);
+    background: var(--btn-bg);
+    transition: none;
+  }
+
+  &:before { content: none; }
+}
+
+/*=== Smart Button styles ===*/
+.additional-checkout-buttons {
+  overflow: hidden;
+}
+
+.additional-checkout-buttons .dynamic-checkout__content .shopify-cleanslate > div > div { margin: 0 !important; }
+
+.additional-checkout-buttons .dynamic-checkout__content .shopify-cleanslate > div > div > div {
+  height: auto !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.additional-checkout-buttons .dynamic-checkout__content .shopify-cleanslate div[role='button'],
+.additional-checkout-buttons .dynamic-checkout__content .shopify-cleanslate iframe,
+.additional-checkout-buttons .dynamic-checkout__content .shopify-cleanslate form {
+  border-radius: var(--RADIUS) !important;
+  overflow: hidden !important;
+}
+
+.shopify-payment-button {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0 !important;
+  max-width: 100%;
+
+  .shopify-payment-button__button {
+    min-width: 100%;
+    border-radius: var(--RADIUS);
+  }
+}
+
+.cart__checkout {
+  width: 100%;
+  max-width: 300px;
+}
+
+.shopify-payment-button__button button[type='submit'] {
+  border-radius: var(--RADIUS) !important;
+}
+
+.shopify-payment-button__button--branded {
+  border-radius: var(--RADIUS);
+  overflow: hidden;
+}
+
+.shopify-payment-button__button--unbranded {
+  @extend .btn;
+  padding: var(--btn-inner-top-bottom) var(--btn-inner-left-right) !important;
+  border-radius: var(--RADIUS) !important;
+  border: var(--BORDER-WIDTH) solid var(--btn-border) !important;
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  font-family: var(--FONT-STACK-BUTTON) !important;
+  font-style: var(--FONT-STYLE-BUTTON) !important;
+  font-weight: var(--FONT-WEIGHT-BUTTON) !important;
+  font-size: calc(1rem * var(--adjust-button)) !important;
+  letter-spacing: var(--LETTER-SPACING-BUTTON);
+  line-height: 1.53 !important;
+  transition: color 0.3s ease, border 0.3s ease, background 0s linear 0s !important;
+
+  &:hover {
+    border-color: var(--btn-border) !important;
+    background: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+    transition: color 0.3s ease, border 0.3s ease, background 0s linear 0.3s !important;
+  }
+}
+
+.shopify-payment-button__button--unbranded {
+  .btn--primary & { @extend .btn--primary; }
+  .btn--secondary & { @extend .btn--secondary; }
+  .btn--white & { @extend .btn--white; }
+  .btn--black & { @extend .btn--black; }
+  .btn--outline & { @extend .btn--outline; }
+  .btn--solid-border & { @extend .btn--solid-border; }
+  .btn--primary.btn--outline & { @extend .btn--primary-outline; }
+  .btn--primary.btn--solid-border & { @extend .btn--primary-solid-border; }
+  .btn--secondary.btn--outline & { @extend .btn--secondary-outline; }
+  .btn--secondary.btn--solid-border & { @extend .btn--secondary-solid-border; }
+  .btn--white.btn--outline & { @extend .btn--white-outline; }
+  .btn--white.btn--solid-border & { @extend .btn--white-solid-border; }
+  .btn--black.btn--outline & { @extend .btn--black-outline; }
+  .btn--black.btn--solid-border & { @extend .btn--black-solid-border; }
+}
+
+.btn--quick {
+  @include button-typography;
+  --btn-size: 37px;
+  font-size: calc(1.0rem * var(--adjust-button));
+  text-align: center;
+  display: grid;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.btn--quick.cart__toggle--has-items .cart-indicator { visibility: hidden; }
+
+.btn--quick .icon-toggle-plus {
+  width: 15px;
+  height: 15px;
+  display: block;
+  color: var(--SECONDARY-BUTTONS-COLOR-TEXT);
+}
+
+.btn--quick .btn__inner {
+  width: var(--btn-size);
+  min-height: var(--btn-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  border-radius: var(--RADIUS);
+  padding: 6px 0;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--black);
+  @include box_shadow(4);
+  transition: width 0.3s ease;
+}
+
+.btn--quick .icon {
+  stroke-width: calc(var(--STROKE-WIDTH) - 4px);
+  width: 20px;
+  overflow: hidden;
+  flex: 0 0 20px;
+  margin: 0 8px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.btn--quick .btn__text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, padding 0.3s ease;
+  font-size: calc(0.9rem * var(--adjust-button)) !important;
+
+  @include media-query ($medium-down) {
+    display: none;
+  }
+}
+
+.btn--quick:hover .btn__inner {
+  width: 100%;
+  transition: width 0.3s ease;
+
+  @include media-query ($medium-down) {
+    width: var(--btn-size);
+  }
+}
+
+.btn--quick:hover .icon { transform: none; }
+
+.btn--quick:hover .btn__text {
+  opacity: 1;
+  padding-right: 12px;
+}
+
+.btn--quick .btn__loader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  content-visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.1s ease-in;
+}
+
+.btn--quick .svg-loader circle { stroke: var(--black); }
+.btn--quick .svg-loader circle:first-child { opacity: 0.1; }
+
+.btn--quick.is-loading { pointer-events: none; }
+.btn--quick.is-loading .icon { opacity: 0; }
+.btn--quick.is-loading .btn__inner { width: var(--btn-size); }
+.btn--quick.is-loading .btn__text { opacity: 0; padding: 0; }
+.btn--quick.is-loading .btn__loader {
+  content-visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.btn--quick.is-loading .btn__loader circle ~ circle { animation-play-state: running; }
+
+.share-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(0.9rem * var(--adjust-body));
+}
+
+.no-touch .share-link {
+  &:after { opacity: 0; }
+  &:hover:after { opacity: 1; }
+}
+
+//Add 10px more padding if there is a progress bar and a quick buy button
+.progress-bar + .quick__form .btn--quick,
+.progress-bar + .btn--quick { bottom: 25px; }
+
+.btn--continue-shopping { width: 100%; }
+
+/*=== Scroll to top button ==*/
+.btn--scroll-top {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  margin: calc(var(--gutter) / 2);
+  z-index: 200;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgb(0 0 0 / 20%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+  min-width: 0;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+
+  .icon { transform: rotate(270deg); }
+}
+
+.btn--scroll-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+}

@@ -1,0 +1,48 @@
+{%- capture cart_empty_drawer_markup -%}
+  {{- 'cart.general.empty' | t -}}
+
+  {%- render 'cart-empty-buttons', animations_enabled: animations_enabled, animation_delay: animation_delay, bg_color_secondary: bg_color_secondary -%}
+{%- endcapture -%}
+
+{%- capture cart_empty_page_markup -%}
+  {%- assign animation_delay = 150 -%}
+
+  <div class="section__header">
+    <h1 class="section__heading h2"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 100 -%}
+      {% endif %}>
+      {{ 'cart.general.title' | t }}
+    </h1>
+
+    {%- if settings.show_spacer_lines -%}
+      <hr class="section__heading-line"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 100 -%}
+        {% endif %}>
+    {%- endif -%}
+
+    <p
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 100 -%}
+      {% endif %}>
+      {{ 'cart.general.empty' | t }}
+    </p>
+  </div>
+
+  {%- render 'cart-empty-buttons', animations_enabled: animations_enabled, animation_delay: animation_delay, bg_color_secondary: bg_color_secondary -%}
+{%- endcapture -%}
+
+{%- if template.name == 'cart' -%}
+  {{ cart_empty_page_markup }}
+{%- else -%}
+  {{ cart_empty_drawer_markup }}
+{%- endif -%}
+
+

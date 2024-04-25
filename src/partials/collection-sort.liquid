@@ -1,0 +1,32 @@
+          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort">
+            <button type="button" class="collection__sort__label label-typography" aria-expanded="false" aria-controls="CollectionSorting" data-collapsible-trigger>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-toggle-plus' -%}
+              {%- render 'icon-toggle-minus' -%}
+            </button>
+
+            <div id="CollectionSorting"
+              class="collection__sort__option-wrapper"
+              aria-expanded="false"
+              data-collapsible-container>
+              <div class="collection__sort__options" data-collapsible-content>
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by" value="{{ option.value }}" id="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>

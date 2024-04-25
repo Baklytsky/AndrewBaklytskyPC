@@ -1,0 +1,134 @@
+{%- liquid
+  assign filters_available = false
+  assign filter_count = 0
+
+  if search.types.size > 1
+    assign current_type = ''
+  else
+    assign current_type = search.types[0]
+  endif
+
+  assign search_param = '?type=' | append: current_type | append: '&q=' | append: search.terms
+
+  capture sort_param
+    if search.sort_by != search.default_sort_by
+      echo '&sort_by=' | append: search.sort_by
+    endif
+  endcapture
+-%}
+
+{%- if enable_filters -%}
+  {%- capture filters -%}
+    {%- liquid
+      if search.filters != empty
+        assign filters_available = true
+      endif
+
+      for filter in search.filters
+        render 'filter', filter: filter, filters_layout: filters_layout, index: forloop.index, show_more: show_more
+      endfor
+    -%}
+
+    <noscript>
+      <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.filter_button' | t }}</button>
+    </noscript>
+  {%- endcapture -%}
+
+  {%- capture filter_reset_buttons -%}
+    {%- for filter in search.filters -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove" href="{{ filter.url_to_remove }}" data-filter-reset-button>
+            {%- liquid
+              assign min_value = filter.min_value.value | default: 0
+              assign max_value = filter.max_value.value | default: filter.range_max
+              if settings.currency_code_enable
+                assign min_value = min_value | money_with_currency | remove: '.00' | remove: ',00'
+                assign max_value = max_value | money_with_currency | remove: '.00' | remove: ',00'
+              else
+                assign min_value = min_value | money_without_trailing_zeros
+                assign max_value = max_value | money_without_trailing_zeros
+              endif
+              echo min_value | append: ' - ' | append: max_value
+            -%}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endif -%}
+      {%- else -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove" href="{{ filter_value.url_to_remove }}" data-filter-reset-button>
+            {{ filter_value.label }}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- if enable_sorting or enable_filters -%}
+  <div class="collection__filters" data-collection-filters data-s="{{ search.sort_by }}" data-s-d="{{ search.default_sort_by }}">
+    <div class="collection__filters-wrapper" data-collection-filters-wrapper>
+      <div class="collection__filters-list">
+        <div class="collection__filters-list__inner" data-collection-filters-list>
+          <form action="{{ routes.search_url }}"
+            data-collection-filters-form
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+            {% endif %}>
+
+            <div class="collection__filters-header{% if filter_count == 0 %} hidden{% endif %}">
+              <button class="collection__filters__close" type="button" data-close-filters>
+                <span class="visually-hidden">{{ 'products.general.close' | t }}</span>
+                {%- render 'icon-close' -%}
+              </button>
+
+              <div class="collection__filters__top">
+                <div class="collection__filters__title">
+                  {{ 'products.general.filters' | t }}
+                  {%- if filter_count > 0 -%}<span>({{ filter_count }})</span>{%- endif -%}
+                </div>
+
+                {%- if enable_filters -%}
+                  <a href="{{ request.path | append: search_param | append: sort_param }}" class="collection__filters__reset {% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}" data-filter-reset-button>
+                    {{- 'products.general.clear_filters' | t }}
+                  </a>
+                {%- endif -%}
+              </div>
+
+              <div class="collection__filters__clear" data-filters-reset>
+                {{- filter_reset_buttons -}}
+              </div>
+
+              <hr class="hr--full collection__filters__line">
+            </div>
+
+            {%- if enable_sorting -%}
+              [%- render 'partials/collection-sort' -%]
+            {%- endif -%}
+
+            {%- if enable_filters and filters_available -%}
+              {{- filters -}}
+            {%- endif -%}
+
+            <input type="hidden" name="q" value="{{ search.terms | escape }}">
+            <input type="hidden" name="type" value="{{ current_type }}">
+            <input name="options[prefix]" type="hidden" value="last">
+          </form>
+        </div>
+
+        {%- if enable_filters -%}
+          <div class="collection__filters-bottom{% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}">
+            <button class="collection__filters__close-bottom btn btn--primary" type="button" data-close-filters>
+              {{- 'collection.filters.close' | t -}}
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

@@ -1,0 +1,69 @@
+name: qa-pr-close
+on:
+  pull_request:
+    types: [closed]
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+jobs:
+  shared:
+    outputs:
+      theme_name: ${{ steps.get_theme_name.outputs.theme_name }}
+    name: 'Shared'
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+    - uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        workflow_id: 10963554
+    - name: Get theme name
+      id: get_theme_name
+      run: echo "theme_name=[${{ env.PR_NUMBER }}] ${{ env.BRANCH_NAME }}" | cut -c1-40 >> $GITHUB_OUTPUT
+  main-demo-staging:
+    needs: [shared]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHOPIFY_SHOP: ${{ vars.DEMO_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CLOTHING_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Delete theme
+        id: theme-push
+        uses: invisiblethemes/rosey@4.0.1
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_command: delete --theme="${{ needs.shared.outputs.theme_name }}" -f || true
+  chaos-store:
+    needs: [shared]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHOPIFY_SHOP: ${{ vars.CHAOS_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.CHAOS_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Delete theme
+        id: theme-push
+        uses: invisiblethemes/rosey@4.0.1
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_command: delete --theme="${{ needs.shared.outputs.theme_name }}" -f
+  e2e-store:
+    needs: [shared]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SHOPIFY_SHOP: ${{ vars.E2E_STORE }}
+      SHOPIFY_THEME_TOKEN: ${{ secrets.SPEC_THEME_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Delete theme
+        id: theme-push
+        uses: invisiblethemes/rosey@4.0.1
+        with:
+          theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+          store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+          theme_command: delete --theme="${{ needs.shared.outputs.theme_name }}" -f

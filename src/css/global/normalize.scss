@@ -1,0 +1,318 @@
+/*================ Normalize ================*/
+*, input, :before, :after {
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+input { background: none; }
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {
+  display: block;
+}
+
+details, header, main {
+  overflow: hidden;
+}
+
+audio, canvas, progress, video {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+[hidden],
+template {
+  display: none;
+}
+
+/*================ Blockquotes ================*/
+blockquote {
+  @include font-size-compact;
+  line-height: 1.45;
+  font-style: var(--FONT-STYLE-BODY-ITALIC);
+  margin: 0 0 var(--gutter);
+  padding: calc(var(--gutter) / 2) var(--gutter);
+
+  p {
+    margin-bottom: 0;
+
+    & + cite {
+      margin-top: calc(var(--gutter) / 2);
+    }
+  }
+
+  cite {
+    display: block;
+    font-size: calc( 0.6875rem * var(--adjust-body));
+
+    &:before {
+      content: '\2014 \0020';
+    }
+  }
+}
+
+/*================ Code ================*/
+code, pre {
+  background-color: #FAF7F5;
+  font-family: Consolas,monospace;
+  font-size: calc( 0.875rem * var(--adjust-body));
+  border: 0 none;
+  padding: 0 2px;
+  color: #51AB62;
+}
+
+pre {
+  overflow: auto;
+  padding: calc(var(--gutter) / 2);
+  margin: 0 0 var(--gutter);
+}
+
+/*================ Horizontal Rules ================*/
+hr {
+  clear: both;
+  border-top: solid var(--accent);
+  border-width: var(--BORDER-WIDTH) 0 0;
+  margin: var(--gutter) 0;
+  height: 0;
+}
+
+/*================ Lists ================*/
+ul, ol {
+  margin: 0 0 calc(var(--gutter) / 2) 20px;
+  padding: 0;
+}
+
+ol { list-style: decimal; }
+ul ul, ul ol,
+ol ol, ol ul { margin: 4px 0 5px 20px; }
+li { margin-bottom: 0.25em; }
+
+ul.square { list-style: square outside; }
+ul.disc { list-style: disc outside; }
+ol.alpha { list-style: lower-alpha outside; }
+
+.no-bullets {
+  list-style: none outside;
+  margin-left: 0;
+}
+
+.inline-list {
+  margin-left: 0;
+
+  li {
+    display: inline-block;
+    margin-bottom: 0;
+  }
+}
+
+/*================ Tables ================*/
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: var(--BORDER-WIDTH) solid var(--border);
+}
+
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  @include media-query ($small) {
+    margin-bottom: 20px;
+  }
+}
+
+th, td {
+  text-align: left;
+  padding: 20px;
+  font-weight: inherit;
+  border: var(--BORDER-WIDTH) solid var(--border);
+
+  @include media-query ($small) {
+    padding: 15px;
+  }
+
+  @include media-query ($mobile) {
+    padding: 10px;
+  }
+}
+
+/*================ Images and iframes ================*/
+img { border: 0 none; }
+svg:not(:root) { overflow: hidden; }
+img,
+iframe { max-width: 100%; }
+
+/*================ Forms ================*/
+form { margin-bottom: 0; }
+
+/*================ Prevent zoom on touch devices in active inputs ================*/
+input,
+textarea,
+button,
+select {
+  color: var(--text);
+  padding: 0;
+  margin: 0;
+  line-height: 26px;
+  @include user-select(text);
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+button,
+input,
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+button {
+  background: none;
+  border: none;
+  display: inline-block;
+  cursor: pointer;
+  @include font-body;
+}
+
+input[type="image"] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+fieldset {
+  padding: calc(var(--gutter) / 2);
+}
+
+legend {
+  border: 0;
+  padding: 0;
+}
+
+button,
+input[type="submit"] {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-size: var(--FONT-SIZE-INPUT);
+  border: var(--BORDER-WIDTH) solid var(--border);
+  background: var(--input-bg);
+  max-width: 100%;
+  padding: 13px 20px;
+
+  &[disabled],
+  &.disabled {
+    cursor: default;
+    background-color: var(--disabled-grey);
+    border-color: var(--disabled-grey-darken);
+  }
+}
+
+/*================ Input element overrides ================*/
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline-block;
+  padding: 0;
+  width: auto;
+}
+
+input[type="checkbox"] {
+  -webkit-appearance: checkbox;
+  -moz-appearance: checkbox;
+}
+
+input[type="radio"] {
+  -webkit-appearance: radio;
+  -moz-appearance: radio;
+}
+
+input[type="image"] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  text-overflow: '';
+  cursor: pointer;
+}
+
+::-webkit-input-placeholder { color: var(--text); }
+::-moz-placeholder { color: var(--text); }
+:-ms-input-placeholder { color: var(--text); }
+:-moz-placeholder { color: var(--text); }
+
+optgroup { font-weight: var(--FONT-WEIGHT-BODY-BOLD); }
+
+// Force option color (affects IE only)
+option {
+  color: var(--black);
+  background-color: var(--white);
+}
+
+select::-ms-expand { display: none; }
+
+/*
+* Responsive tables, defined with .table--responsive on table element.
+* Only defined for IE9+
+*/
+.table--responsive {
+  @include media-query ($small) {
+    h2, h3 { text-align: center; }
+
+    thead { display: none; }
+
+    tr {
+      display: block;
+      position: relative;
+    }
+
+    th { padding: 10px 10px 0px 10px; }
+
+    // IE9 table layout fixes
+    tr,
+    td {
+      float: left;
+      clear: both;
+      width: 100%;
+    }
+
+    th,
+    td {
+      display: block;
+      padding: 15px 15px 15px 0;
+    }
+  }
+}
+
+@include media-query ($mobile) {
+  .table--small-hide {
+    display: none !important;
+  }
+}

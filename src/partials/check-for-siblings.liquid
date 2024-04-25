@@ -1,0 +1,38 @@
+{%- comment -%}
+  Determine if current option matches siblings handle translations
+  Inherited variables:
+    - product: {Object} Product object.
+    - section: {Object} the current Section this code block belongs to.
+    - option_name_handle_separator: {String} handle option.name surrounded by commas
+  Returns variables:
+    - hide_sib_option: {Boolean}
+    - is_current_product_in_siblings: {Boolean}
+{%- endcomment -%}
+
+{%- liquid
+  assign sib_options_count = 0
+  assign hide_sib_option = false
+  assign sib_translation = 'general.siblings.swatches' | t
+  assign sib_translation_string = sib_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+
+  if sib_translation_string contains option_name_handle_separator
+    assign sib_options = product.options_with_values | where: 'name', option.name
+    assign sib_options_count = sib_options[0].values.size
+  endif
+  if sib_options_count == 1
+    assign hide_sib_option = true
+  endif
+
+  assign is_current_product_in_siblings = false
+  assign siblings_blocks = section.blocks | map: 'settings' | where: 'siblings_product_list'
+  if siblings_blocks.size > 0
+    assign sib_lists = siblings_blocks | map: 'siblings_product_list'
+
+    for sib_list in sib_lists
+      assign sib_ids = sib_list | map: 'id'
+      if sib_ids contains product.id
+        assign is_current_product_in_siblings = true
+      endif
+    endfor
+  endif
+-%}

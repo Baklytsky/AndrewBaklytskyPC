@@ -1,0 +1,115 @@
+/*================ Tabs ================*/
+.tabs { position: relative; }
+
+.tabs__head {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+
+  @include media-query ($medium-down) { overflow: visible; }
+}
+
+.tabs__arrow {
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 24px;
+  height: 24px;
+  max-height: none;
+  margin-top: -12px;
+  border-radius: 0;
+  background-color: var(--bg);
+  box-shadow: none;
+}
+
+.tabs__arrow--prev {
+  left: 0;
+  transform: rotate(90deg);
+}
+
+.tabs__arrow--next {
+  right: 0;
+  transform: rotate(-90deg);
+}
+
+.tabs__contents { position: relative; }
+
+.tabs__nav {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+  white-space: nowrap;
+  font-size: calc(1rem * var(--adjust-accent));
+  color: var(--text-lighten);
+  @include hide-scrollbar;
+  @include media-query ($medium-up) { text-align: center; }
+}
+
+.tabs__link {
+  margin-right: 30px;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+  background: none;
+  cursor: pointer;
+  vertical-align: bottom;
+  border-bottom: 3px solid transparent;
+  white-space: normal;
+
+  &:last-child { margin-right: 0; }
+}
+
+.tab {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding-top: 15px;
+  opacity: 0;
+  visibility: hidden;
+
+  .flickity-button { display: none; }
+}
+
+.tab.current {
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  display: inherit;
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
+
+  .flickity-button {
+    display: block;
+    background: var(--bg);
+  }
+}
+
+/*================ Tabs Wrapper ================*/
+.tabs-wrapper {
+  overflow: hidden;
+  position: relative;
+  padding-top: 30px;
+}
+
+/*================ Tabs scrollbar ================*/
+.tabs-scrollbar { width: 100%; }
+
+.tabs-scrollbar__holder {
+  display: inline-block;
+  overflow-x: auto;
+  max-width: 100%;
+  text-align: center;
+  @include hide-scrollbar;
+
+  @include media-query ($medium-down) {
+    max-width: calc(100% + (var(--gutter-mobile) * 2));
+    padding: 0 var(--gutter-mobile);
+    margin: 0 calc(var(--gutter-mobile) * -1);
+  }
+
+  .tabs__nav {
+    overflow: visible;
+  }
+}

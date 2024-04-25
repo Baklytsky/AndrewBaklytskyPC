@@ -1,0 +1,58 @@
+/*================ Circle Text ================*/
+.circle-text__content {
+  width: var(--circle-size);
+
+  @include media-query ($small) {
+    max-width: 125px;
+    max-height: 125px;
+  }
+}
+
+.circle-text__content img {
+  display: block;
+  max-width: var(--circle-size);
+  height: auto;
+  margin: 0 auto;
+
+  @include media-query ($small) {
+    width: auto;
+    max-width: 125px;
+    max-height: 125px;
+  }
+}
+
+.circle-text__content svg {
+  @include font-heading;
+
+  display: block;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  color: var(--circle-color);
+  word-spacing: var(--circle-word-spacing);
+
+  @include media-query ($small) {
+    max-width: 125px;
+    max-height: 125px;
+  }
+}
+
+.circle-text {
+  transform: rotate(var(--rotate, 0deg));
+
+  @include media-query ($small) {
+    transition: transform 0.1s linear;
+  }
+
+  &.is-rotating {
+    animation: rotate 20s infinite linear;
+    animation-direction: reverse;
+
+    @include media-query ($small) {
+      transition: none;
+    }
+  }
+
+  &.is-static-text {
+    --rotate: 75deg;
+  }
+}

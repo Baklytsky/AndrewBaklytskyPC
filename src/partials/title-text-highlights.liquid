@@ -1,0 +1,133 @@
+{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}

@@ -1,0 +1,53 @@
+/*================ Contact form section ================*/
+
+.contact-form__message {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  z-index: 8995;
+  background: var(--bg);
+  box-shadow: 0 -5px 5px 0 rgba(0,0,0,0.05);
+  opacity: 1;
+  transition: transform 0.45s ease, visibility 0s;
+  max-height: 50vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &.hide-down {
+    transform: translateY(100%);
+    visibility: hidden;
+    transition-delay: 0s, 0.45s;
+  }
+
+  .errors,
+  .note {
+    margin: 0;
+    border: 0;
+    padding: var(--inner);
+    font-size: calc(1rem * var(--adjust-body));
+    background: none;
+  }
+
+  @include media-query ($medium) {
+    .errors,
+    .note {
+      padding-top: var(--inner-tablet);
+      padding-bottom: var(--inner-tablet);
+    }
+  }
+
+  @include media-query ($small) {
+    .errors,
+    .note {
+      padding-top: var(--inner-mobile);
+      padding-bottom: var(--inner-mobile);
+    }
+  }
+}
+
+.contact-form__message__close {
+  @include sidebar-close;
+  top: 50%;
+  transform: translateY(-50%);
+}

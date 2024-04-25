@@ -1,0 +1,542 @@
+{%- comment -%} /sections/collection.liquid {%- endcomment -%}
+
+{%- liquid
+  assign carousel = false
+  assign collection_count = collection.all_products_count
+  assign filter_mode = section.settings.filter_mode
+  assign filter_by_tags = false
+  assign enable_filters = section.settings.enable_filters
+  assign filters_layout = section.settings.filters_layout
+  assign show_more = section.settings.show_more
+
+  assign columns_mobile = settings.products_per_row_on_mobile | plus: 0
+
+  case columns_mobile
+    when 1
+      assign size_mobile = 'mobile--one-whole'
+    when 2
+      assign size_mobile = 'mobile--one-half'
+  endcase
+
+  if enable_filters
+    if filter_mode == 'tag' or filter_mode == 'group'
+      assign filter_by_tags = true
+    endif
+  endif
+
+  if enable_filters and filter_by_tags
+    for tag in current_tags
+      unless tag contains '_badge' and tag contains '_preorder'
+        assign current_tag_handle = tag | replace: '&#39;', '' | replace: '&#34;', '' | handle
+        assign selected_tags = selected_tags | append: current_tag_handle
+        unless forloop.last
+          assign selected_tags = selected_tags | append: '+'
+        endunless
+      endunless
+    endfor
+  endif
+
+  assign columns = settings.products_per_row_on_desktop | plus: 0
+  assign enable_sorting = section.settings.enable_sorting
+  assign enable_infinity_scroll = settings.enable_infinity_scroll
+  assign pagination_limit = columns | times: 12
+  assign show_breadcrumbs = section.settings.show_breadcrumbs
+  assign bg_color = section.settings.bg_color
+  assign products_count = 'products.general.products_with_count' | t: count: collection.products_count
+
+  assign section_class = 'collection collection-items section-padding'
+  if enable_filters == false and enable_sorting == false
+    assign section_class = section_class | append: ' collection--filters-sorting-disabled'
+  else
+    if enable_filters == false
+      assign section_class = section_class | append: ' collection--filters-disabled'
+    elsif enable_sorting == false
+      assign section_class = section_class | append: ' collection--sorting-disabled'
+    endif
+  endif
+
+  unless show_breadcrumbs
+    assign section_class = section_class | append: ' collection--breadcrumbs-disabled'
+  endunless
+
+  assign id = 'Collection--' | append: section.id
+  assign selector_id = '#' | append: id
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = selector_id
+  assign animation_delay = 150
+  assign min_sticky_bar_gutter = 40
+-%}
+
+{%- style -%}
+  :root {
+    {%- comment -%}
+      Collection sticky bar initial height which is dynamically changed on window load/resize.
+      Setting the variable here is mostly helpful for no-js Collection filters positioning.
+    {%- endcomment -%}
+    {%- if show_breadcrumbs or enable_sorting or enable_filters -%}
+      --collection-sticky-bar-height: calc(.75rem * var(--FONT-ADJUST-BODY) + {{ min_sticky_bar_gutter }}px);
+    {%- endif -%}
+  }
+
+  {{ selector_id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+
+  {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+    .template-collection .collection-section {
+      background-color: {{ bg_color }};
+    }
+    .collection__sticky-bar,
+    .collection__filters {
+      --bg: {{ bg_color }};
+    }
+  {%- endif -%}
+{%- endstyle -%}
+
+<div id="{{ id }}"
+  class="{{ section_class }}"
+  data-section-type="collection-template"
+  data-section-id="{{ section.id }}"
+  data-enable-filters="{{ enable_filters }}"
+  data-enable-sorting="{{ enable_sorting }}"
+  data-filters-default-state="{{ filters_layout }}"
+  data-collapsible-transition-override
+  data-filter-mode="{{ filter_mode }}"
+  {% if filter_by_tags %}
+    data-collection="{{ collection.url | default: routes.all_products_collection_url }}"
+    data-tags="{{ selected_tags }}"
+  {% endif %}>
+
+  <div class="collection__wrapper" data-collection-wrapper>
+    <div class="wrapper--full-padded">
+      <div class="collection__inner">
+        {%- if show_breadcrumbs or enable_filters or enable_sorting -%}
+          <div id="CollectionStickyBar"
+            class="collection__sticky-bar"
+            data-collection-sticky-bar
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+
+            {%- if show_breadcrumbs -%}
+              {%- render 'breadcrumbs' -%}
+            {%- endif -%}
+
+            {%- if enable_sorting -%}
+              [%- render 'partials/collection-sort-bar' -%]
+            {%- endif -%}
+
+            <div class="collection__products-count" data-products-count="{{ products_count }}">
+              {{- products_count -}}
+            </div>
+
+            {%- if enable_filters or enable_sorting -%}
+              <button class="collection__filters__toggle" aria-label="{{ 'products.general.filters' | t }}" data-toggle-filters>
+                {%- render 'icon-filter' -%}
+              </button>
+            {%- endif -%}
+          </div>
+
+          {%- if enable_filters or enable_sorting -%}
+            [%- render 'partials/collection-filters' -%]
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- paginate collection.products by pagination_limit -%}
+          [%- render 'partials/collection-promo-blocks' -%]
+
+          <div class="collection__products collection-items--{{ columns }} collection-items--{{ size_mobile }}" data-collection-products>
+            {%- if collection_count > 0 -%}
+              {%- if collection.products_count > 0 -%}
+                <div class="grid"{% if enable_infinity_scroll %} id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}"{% endif %}>
+                  {%- assign tablet_counter = 1 -%}
+                  {%- assign mobile_counter = 1 -%}
+
+                  {%- if promos_array.size > 0 -%}
+                    {%- liquid
+                      assign counter_grid = 1
+                      assign counter_delay = 0
+                      assign added_promos_index = ''
+                      assign items_on_row_remaining = columns
+                    -%}
+
+                    {%- for product in collection.products -%}
+                      [%- render 'partials/collection-grid-items-and-promos' -%]
+                    {%- endfor -%}
+                  {%- else -%}
+                    {%- liquid
+                      for product in collection.products
+                        assign animation_delay = forloop.index0 | modulo: columns | times: 1
+                        render 'product-grid-item', product: product, animation_delay: animation_delay, tablet_counter: tablet_counter, mobile_counter: mobile_counter, item_index: forloop.index0
+                        assign tablet_counter = tablet_counter | plus: 1
+                        assign mobile_counter = mobile_counter | plus: 1
+                      endfor
+                    -%}
+                  {%- endif -%}
+                </div>
+              {%- else -%}
+                <div class="collection--no-results">
+                  <p class="no-matches">{{ 'collections.general.no_matches_by_filter' | t : products_count: collection.products_count }}</p>
+                </div>
+              {%- endif -%}
+
+            {%- elsif collection.handle != 'all' and collection_count == 0 -%}
+              <div class="collection--no-results">
+                <p class="no-matches">{{ 'collections.general.no_matches' | t }}</p>
+                <a href="{{ routes.root_url }}" class="btn btn--primary btn--solid">{{ 'general.404.button_text' | t }}</a>
+              </div>
+            {%- endif -%}
+
+            {%- if enable_infinity_scroll -%}
+              <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}">
+                {%- if paginate.next -%}
+                  <div class="pagination__loading">
+                    <a href="{{ paginate.next.url }}">
+                      <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
+                    </a>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- if paginate.pages > 1 -%}
+                <noscript>
+                  {%- render 'pagination', paginate: paginate -%}
+                </noscript>
+              {%- endif -%}
+
+            {%- else -%}
+              {%- if paginate.pages > 1 -%}
+                {%- render 'pagination', paginate: paginate -%}
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        {%- endpaginate -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Collection pages",
+    "class": "collection-section",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_breadcrumbs",
+        "label": "Show breadcrumbs",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Filters and sorting"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_sorting",
+        "label": "Enable sorting",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_filters",
+        "label": "Enable filters",
+        "default": true
+      },
+      {
+        "type": "select",
+        "label": "Default filter layout",
+        "id": "filters_layout",
+        "info": "Desktop only",
+        "default": "open",
+        "options": [
+          { "label": "All filters open", "value": "open" },
+          { "label": "All filters closed", "value": "closed" },
+          { "label": "First filter open", "value": "first-open" }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "show_more",
+        "label": "Show a subset of filters from each group",
+        "info": "Check this setting if you have a large number of filters, and want them to take up less space",
+        "default": true
+      },
+      {
+        "type": "select",
+        "label": "Filter mode",
+        "id": "filter_mode",
+        "info": "Filters by group requires specific tag formatting. [Learn more](https://presidiocreative.com/link/palo-alto/docs/collection-filtering)",
+        "default": "default",
+        "options": [
+          { "label": "Default (Faceted)", "value": "default" },
+          { "label": "By tag", "value": "tag" },
+          { "label": "By group", "value": "group" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background"
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 30
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "blocks": [
+      {
+        "type": "promo",
+        "name": "Promo",
+        "limit": 5,
+        "settings": [
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "Collection",
+            "info": "Show on specific collection only"
+          },
+          {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+          },
+          {
+            "type": "header",
+            "content": "Layout"
+          },
+          {
+            "type": "range",
+            "id": "position",
+            "label": "Show in position",
+            "min": 1,
+            "max": 48,
+            "step": 1,
+            "default": 1
+          },
+          {
+            "type": "select",
+            "id": "width",
+            "label": "Width",
+            "default": "auto",
+            "options": [
+              { "value": "full", "label": "Full width" },
+              { "value": "half", "label": "2 grid items" },
+              { "value": "auto", "label": "Grid item" }
+            ]
+          },
+          {
+            "type": "header",
+            "content": "Text"
+          },
+          {
+            "type": "richtext",
+            "id": "title",
+            "label": "Heading",
+            "default": "<p>Promotion title</p>",
+            "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below"
+          },
+          {
+            "type": "header",
+            "content": "Highlight"
+          },
+          {
+            "type": "select",
+            "id": "heading_highlight_type",
+            "label": "Type",
+            "default": "circle",
+            "options": [
+              { "value": "italics", "label": "Italics (no decoration)" },
+              { "value": "highlight", "label": "Highlight" },
+              { "value": "highlight-color", "label": "Text color" },
+              { "value": "underline", "label": "Underline" },
+              { "value": "squiggle", "label": "Squiggle" },
+              { "value": "circle", "label": "Circle" },
+              { "value": "stroke", "label": "Stroke (outlined text)" }
+            ]
+          },
+          {
+            "type": "color",
+            "id": "highlight_color",
+            "label": "Highlight color",
+            "default": "#D43747"
+          },
+          {
+            "type": "color",
+            "id": "highlight_text_color",
+            "label": "Text color",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "range",
+            "id": "heading_size",
+            "label": "Heading size",
+            "default": 100,
+            "min": 100,
+            "max": 200,
+            "step": 10,
+            "unit": "%"
+          },
+          {
+            "type": "textarea",
+            "id": "content",
+            "label": "Text",
+            "default": "Advertise a promotion or a sale"
+          },
+          {
+            "type": "range",
+            "id": "text_size",
+            "label": "Text size",
+            "default": 100,
+            "min": 100,
+            "max": 200,
+            "step": 5,
+            "unit": "%"
+          },
+          {
+            "type": "select",
+            "id": "text_color",
+            "label": "Text color",
+            "default": "text-light",
+            "options": [
+              {
+                "value": "text-light",
+                "label": "Light"
+              },
+              {
+                "value": "text-dark",
+                "label": "Dark"
+              }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "text_position",
+            "label": "Content position",
+            "default": "bottom-left",
+            "options": [
+              { "value": "left", "label": "Left" },
+              { "value": "center", "label": "Center" },
+              { "value": "right", "label": "Right" },
+              { "value": "bottom-left", "label": "Bottom left" },
+              { "value": "bottom-right", "label": "Bottom right" },
+              { "value": "top-left", "label": "Top left" },
+              { "value": "top-right", "label": "Top right" }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "layout",
+            "label": "Content layout",
+            "default": "stacked",
+            "options": [
+              { "label": "Inline", "value": "inline" },
+              { "label": "Stacked", "value": "stacked" }
+            ],
+            "info": "The 'Inline' option only applies on desktop when the promo width is 'Full width'"
+          },
+          {
+            "type": "range",
+            "id": "overlay_opacity",
+            "label": "Text contrast",
+            "info": "Improves readability of text",
+            "min": 0,
+            "max": 95,
+            "step": 5,
+            "unit": "%",
+            "default": 10
+          },
+          {
+            "type": "color",
+            "id": "bg_color",
+            "label": "Background color",
+            "default": "#D3D3D3",
+            "info": "Applies if no image is chosen"
+          },
+          {
+            "type": "header",
+            "content": "Button"
+          },
+          {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button text",
+            "info": "Leave blank to link entire image"
+          },
+          {
+            "type": "url",
+            "id": "button_link",
+            "label": "Button URL"
+          },
+          {
+            "type": "select",
+            "id": "button_color",
+            "label": "Button color",
+            "default": "btn--white",
+            "options": [
+              { "label": "Primary", "value": "btn--primary" },
+              { "label": "Secondary", "value": "btn--secondary" },
+              { "label": "White", "value": "btn--white" },
+              { "label": "Black", "value": "btn--black" }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "button_style",
+            "label": "Button style",
+            "default": "btn--solid-border",
+            "options": [
+              { "label": "Solid", "value": "btn--solid" },
+              { "label": "Outline", "value": "btn--outline" },
+              { "label": "Solid with border", "value": "btn--solid-border" },
+              { "label": "Text", "value": "btn--text" }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "button_size",
+            "label": "Size",
+            "default": "btn--small",
+            "options": [
+              { "label": "Large", "value": "btn--large" },
+              { "label": "Medium", "value": "btn--medium" },
+              { "label": "Small", "value": "btn--small" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

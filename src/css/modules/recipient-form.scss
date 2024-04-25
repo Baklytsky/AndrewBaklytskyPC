@@ -1,0 +1,59 @@
+.recipient-form {
+  .form__label {
+    margin: 10px 0;
+    font-size: calc(1.1rem * var(--adjust-label));
+
+    @include media-query ($small) {
+      margin: var(--form-margin-mobile) 0;
+      font-size: calc(0.95rem * var(--adjust-label));
+    }
+  }
+
+  .recipient-fields__message {
+    margin-top: 0;
+  }
+}
+
+.recipient-form input[type='checkbox']:checked ~ .recipient-fields {
+  display: block;
+
+  [data-animations='true'] & .recipient-fields__field {
+    @for $i from 1 through 4 {
+      &:nth-child(#{$i}) {
+        animation: fadeInUp $i * (0.2s);
+      }
+    }
+  }
+}
+
+.recipient-fields { display: none; }
+
+.recipient-fields__field {
+  margin: var(--inner) 0 0;
+
+  @include media-query ($small) {
+    margin: var(--form-margin-mobile) 0 0;
+  }
+
+  .popup-quick-view__item & {
+    @include media-query ($medium-up) {
+      margin-top: calc(var(--inner) / 2);
+    }
+  }
+}
+
+.recipient-fields__message {
+  font-size: calc(0.875rem * var(--adjust-body));
+  text-align: right;
+}
+
+.no-js {
+  .recipient-form .recipient-fields__field:first-child { margin-top: 0; }
+
+  .recipient-form input[type='checkbox'],
+  .recipient-form input[type='checkbox'] + label { display: none; }
+
+  .recipient-fields { display: block; }
+
+  .recipient-fields .errors { margin-top: calc(var(--form-margin) / 2); }
+}

@@ -1,0 +1,101 @@
+{%- liquid
+  assign block_id = block.id
+  assign prev_index = forloop.index0 | minus: 1
+  assign next_index = forloop.index0 | plus: 1
+  assign prev_block = section.blocks[prev_index]
+  assign next_block = section.blocks[next_index]
+  assign bg_color = block.settings.bg_color
+  assign text_color = block.settings.text_color
+  assign icon_name = block.settings.icon_name
+  assign title = block.settings.title
+  assign text = block.settings.text
+  assign icon_image = block.settings.icon_image
+  assign icon_width = block.settings.icon_width
+
+  capture style
+    echo '--bg: ' | append: bg_color | append: ';'
+
+    if text_color != '' and text_color != 'rgba(0,0,0,0)'
+      echo '--text: ' | append: text_color | append: ';'
+      echo '--heading: ' | append: text_color | append: ';'
+    endif
+
+    if bg_color != 'rgba(0,0,0,0)' and bg_color != '' and bg_color != section.settings.bg_color
+      echo 'padding: ' | append: 'var(--grid-gutter);'
+    endif
+  endcapture
+
+  capture icon_style
+    echo '--icon-size: ' | append: icon_width | append: 'px;'
+
+    if icon_image
+      echo 1 | divided_by: icon_image.aspect_ratio | times: 100 | round: 1 | append: '%;' | prepend: '--aspect-ratio: '
+    endif
+
+    if text_color != '' and text_color != 'rgba(0,0,0,0)' and icon_image == blank
+      echo '--text: ' | append: text_color | append: ';'
+    endif
+  endcapture
+-%}
+
+{%- if forloop.index0 == 0 or prev_block.type != 'feature' -%}
+  <div class="product__block product__features"
+    {% if animations_enabled %}
+      data-aos="hero"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-order="{{ animation_order }}"
+      {%- assign animation_order = animation_order | plus: 1 -%}
+    {% endif %}
+    data-slider
+    {{ block_style }}>
+{%- endif -%}
+
+<div class="product__feature"
+  data-block-id="{{ block_id }}"
+  style="{{ style }}"
+  {{ block.shopify_attributes }}>
+
+  <div class="product__feature__content">
+    {%- unless icon_image == blank and icon_name == 'none' and title == blank -%}
+      <div class="product__feature__icon__container">
+        {%- unless icon_image == blank and icon_name == 'none' -%}
+          <div class="product__icon icon-stroke" style="{{ icon_style }}">
+            {%- if icon_image != blank -%}
+              {%- liquid
+                assign retina_size = icon_width | times: 2
+                assign image_widths = icon_width | append: ', ' | append: retina_size
+                assign sizes = icon_width | append: 'px'
+              -%}
+              <div class="product__icon__holder">
+                {%- render 'image',
+                  image: icon_image,
+                  width: retina_size,
+                  sizes: sizes,
+                  widths: image_widths,
+                  classes: 'product__icon__img' -%}
+              </div>
+            {%- else -%}
+              {%- render 'icons', icon: icon_name -%}
+            {%- endif -%}
+          </div>
+        {%- endunless -%}
+
+        {%- if title != blank -%}
+          <div class="product__feature__heading">
+            <h5>{{ title }}</h5>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endunless -%}
+
+    {%- if text != blank -%}
+      <div class="product__feature__text">
+        {{ text }}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if forloop.index == section.blocks.size or next_block.type != 'feature' -%}
+  </div>
+{%- endif -%}

@@ -1,0 +1,308 @@
+/*================ Typography ================*/
+:root {
+  --adjust-body: var(--FONT-ADJUST-BODY);
+  --adjust-heading: var(--FONT-ADJUST-HEADING);
+  --adjust-button: var(--FONT-ADJUST-BUTTON);
+  --adjust-nav: var(--FONT-ADJUST-NAV);
+  --adjust-nav-top-level: var(--FONT-ADJUST-NAV-TOP-LEVEL);
+  --adjust-accent: var(--FONT-ADJUST-SUBHEADING);
+  --adjust-label: var(--FONT-ADJUST-LABEL);
+  --adjust-product-grid: var(--FONT-ADJUST-PRODUCT-GRID);
+}
+
+@mixin font-body {
+  font-family: var(--FONT-STACK-BODY);
+  font-weight: var(--FONT-WEIGHT-BODY);
+  font-style: var(--FONT-STYLE-BODY);
+}
+
+@mixin font-heading {
+  font-family: var(--FONT-STACK-HEADING);
+  font-weight: var(--FONT-WEIGHT-HEADING);
+  font-style: var(--FONT-STYLE-HEADING);
+  text-transform: var(--HEADING-TEXT-CAPS);
+}
+
+@mixin font-size-h1 {
+  --heading-size: calc(3rem * var(--adjust-heading));
+
+  @include media-query ($large-down) {
+    --heading-size: calc(2.5rem * var(--adjust-heading));
+  }
+  @include media-query ($small) {
+    --heading-size: calc(2.25rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+@mixin font-size-h2 {
+  --heading-size: calc(2.5rem * var(--adjust-heading));
+
+  @include media-query ($large-down) {
+    --heading-size: calc(2.1rem * var(--adjust-heading));
+  }
+  @include media-query ($small) {
+    --heading-size: calc(1.75rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+@mixin font-size-h3 {
+  --heading-size: calc(1.75rem * var(--adjust-heading));
+
+  @include media-query ($large-down) {
+    --heading-size: calc(1.5rem * var(--adjust-heading));
+  }
+  @include media-query ($small) {
+    --heading-size: calc(1.25rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+@mixin font-size-h4 {
+  --heading-size: calc(1.3125rem * var(--adjust-heading));
+
+  @include media-query ($large-down) {
+    --heading-size: calc(1.28rem * var(--adjust-heading));
+  }
+  @include media-query ($small) {
+    --heading-size: calc(1.25rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+@mixin font-size-h5 {
+  --heading-size: calc(1.1rem * var(--adjust-heading));
+
+  @include media-query ($small) {
+    --heading-size: calc(1rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+@mixin font-size-h6 {
+  --heading-size: calc(1rem * var(--adjust-heading));
+
+  @include media-query ($small) {
+    --heading-size: calc(0.875rem * var(--adjust-heading));
+  }
+
+  font-size: var(--heading-size);
+}
+
+@mixin font-size-h1-body {
+  --text-size: calc(3rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(2rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+@mixin font-size-h2-body {
+  --text-size: calc(3rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(2rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+@mixin font-size-h3-body {
+  --text-size: calc(2rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(1.5rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+@mixin font-size-h4-body {
+  --text-size: calc(1.3125rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(1.25rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+@mixin font-size-h5-body {
+  --text-size: calc(1.1rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(1rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+@mixin font-size-h6-body {
+  --text-size: calc(1rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    --text-size: calc(0.875rem * var(--adjust-body));
+  }
+
+  font-size: var(--text-size);
+}
+
+@mixin font-size-compact {
+  --text-size: calc(0.9375rem * var(--adjust-body));
+  font-size: var(--text-size);
+}
+
+@mixin font-size-small {
+  --text-size: calc(0.75rem * var(--adjust-body));
+  font-size: var(--text-size);
+}
+
+@mixin button-typography {
+  font-family: var(--FONT-STACK-BUTTON);
+  font-weight: var(--FONT-WEIGHT-BUTTON);
+  font-style: var(--FONT-STYLE-BUTTON);
+  text-transform: var(--BUTTON-TEXT-CAPS);
+  letter-spacing: var(--LETTER-SPACING-BUTTON);
+}
+
+@mixin label-typography {
+  font-family: var(--FONT-STACK-LABEL);
+  font-weight: var(--FONT-WEIGHT-LABEL);
+  font-style: var(--FONT-STYLE-LABEL);
+  font-size: calc(1.2rem * var(--adjust-label));
+  text-transform: var(--LABEL-TEXT-CAPS);
+  letter-spacing: var(--LETTER-SPACING-LABEL);
+}
+
+a { text-decoration: none; }
+
+html,
+body {
+  font-size: 1rem;
+}
+
+body {
+  @include font-body;
+  line-height: 1.5625;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+input,
+textarea,
+select,
+button {
+  @include font-body;
+  font-size: calc(1rem * var(--adjust-body));
+  line-height: 26px;
+  border-radius: var(--RADIUS);
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  @include font-heading;
+  display: block;
+  color: var(--heading);
+  margin: 0 0 0.5em;
+  font-size: var(--heading-size, 3rem);
+  line-height: 1.25;
+
+  a {
+    text-decoration: none;
+    font-weight: inherit;
+    color: inherit;
+  }
+
+  .strong,
+  &.strong,
+  strong {
+    font-weight: var(--FONT-WEIGHT-HEADING-BOLD);
+  }
+}
+
+h1, .h1 { @include font-size-h1; }
+h2, .h2 { @include font-size-h2; }
+h3, .h3 { @include font-size-h3; }
+h4, .h4 { @include font-size-h4; }
+h5, .h5 { @include font-size-h5; }
+h6, .h6 { @include font-size-h6; }
+
+.h1-body { @include font-size-h1-body; }
+.h2-body { @include font-size-h2-body; }
+.h3-body { @include font-size-h3-body; }
+.h4-body { @include font-size-h4-body; }
+.h5-body { @include font-size-h5-body; }
+.h6-body { @include font-size-h6-body; }
+
+.h1-body,
+.h2-body,
+.h3-body,
+.h4-body,
+.h5-body,
+.h6-body { font-size: var(--text-size, 1rem); }
+
+p,
+.p {
+  font-size: calc(1rem * var(--adjust-body));
+  .h1 &,
+  .h2 &,
+  .h3 &,
+  .h4 &,
+  .h5 &,
+  .h6 & { font-size: inherit; }
+}
+
+p img { margin: 0; }
+p a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--BORDER-WIDTH);
+}
+
+em { font-style: var(--FONT-STYLE-BODY-ITALIC); }
+
+b, strong { font-weight: var(--FONT-WEIGHT-BODY-BOLD); }
+
+small { @include font-size-small; }
+
+sup, sub {
+  position: relative;
+  font-size: 60%;
+  vertical-align: baseline;
+}
+
+sup { top: -0.5em; }
+sub { bottom: -0.5em; }
+
+.font-heading { @include font-heading; }
+.font-body { @include font-body; }
+
+.main-heading {
+  @include font-size-h1;
+  text-transform: var(--HEADING-TEXT-CAPS);
+  line-height: 1.2;
+}
+.main-text {
+  text-transform: none;
+  @include font-size-h4-body;
+  @include font-body;
+}
+
+.section-header__subheading,
+.subheading-text {
+  font-family: var(--FONT-STACK-SUBHEADING);
+  font-weight: var(--FONT-WEIGHT-SUBHEADING);
+  font-size: calc(0.875rem * var(--FONT-ADJUST-SUBHEADING));
+  text-transform: var(--SUBHEADING-TEXT-CAPS);
+  letter-spacing: var(--LETTER-SPACING-SUBHEADING);
+  color: inherit;
+}
+
+.button-typography { @include button-typography; }
+
+.label-typography { @include label-typography; }
+
+.text-discounts {
+  opacity: 0.7;
+  font-size: calc(0.875rem * var(--adjust-body));
+  .price { color: inherit; }
+}

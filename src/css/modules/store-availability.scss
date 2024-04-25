@@ -1,0 +1,193 @@
+.store-availability-container {
+  .icon {
+    --icon-size: calc(12px * var(--adjust-body));
+    width: var(--icon-size);;
+    height: var(--icon-size);;
+    flex-basis: var(--icon-size);
+    flex-shrink: 0;
+    margin: calc(4px * var(--adjust-body)) 4px 0 0;
+  }
+
+  .icon-in-stock { fill: var(--success); }
+  .icon-out-of-stock { fill: var(--error); }
+
+  .store-availability-list__stock .icon {
+    margin: 0 2px 3px 0;
+  }
+
+  .icon-close {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+
+  .store-availabilities-modal { display: none; }
+}
+
+.icon-in-stock,
+.icon-out-of-stock {
+  stroke: none;
+}
+
+.product-single__store-availability-container:empty { display: none; }
+
+.store-availability-small-text {
+  margin: 0;
+  font-size: calc(0.9rem * var(--adjust-body));
+}
+
+.store-availability-information {
+  display: flex;
+  margin-left: 0;
+}
+
+.store-availability-information-container {
+  line-height: 1.5;
+  margin-left: 5px;
+}
+.store-availability-information__title { margin: 0; }
+.store-availability-information__stock { margin: 0; }
+.store-availability-information__stores { margin: 8px 0 0; }
+.store-availability-information__link {
+  text-decoration: underline;
+  text-decoration-thickness: var(--BORDER-WIDTH);
+  cursor: pointer;
+  &:hover, &:focus {
+    opacity: 0.6;
+  }
+}
+
+.store-availabilities-modal {
+  @include promote-layer();
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 100vw;
+  right: auto;
+  z-index: 9999;
+  width: var(--drawer-width);
+  max-width: 100%;
+  max-height: 100vh;
+  color: var(--text);
+  background-color: var(--bg);
+  transition: var(--drawer-transition);
+  opacity: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform: translateY(0);
+  padding: var(--inner);
+
+  .icon-in-stock,
+  .icon-out-of-stock {
+    width: 12px;
+    height: 12px;
+    vertical-align: middle;
+  }
+
+  .icon-in-stock {
+    fill: var(--success);
+    margin: 5px 0 0 0;
+  }
+
+  .icon-out-of-stock {
+    fill: var(--error);
+    margin: 5px 0 0 0;
+  }
+
+  .store-availability-list__stock {
+    .icon-in-stock { margin: 0 0 2px 0; }
+    .icon-out-of-stock { margin: 0 0 2px 0; }
+  }
+}
+
+.store-availabilities-modal--active {
+  transform: translateX(calc(-1 * var(--drawer-width)));
+}
+
+.store-availabilities-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+  position: relative;
+}
+
+.store-availabilities-modal__close { z-index: 1; }
+
+.store-availabilities-modal__product-information {
+  position: relative;
+  width: calc(100% - 30px);
+}
+
+.store-availabilities-modal__product__title {
+  text-transform: none;
+  margin: 0 0 15px;
+  padding: 0;
+  color: var(--text);
+  font-size: calc(1.375rem * var(--adjust-heading));
+  font-weight: var(--FONT-WEIGHT-HEADING-BOLD);
+}
+
+.store-availabilities-list {
+  border-top: var(--BORDER-WIDTH) solid var(--text);
+  overflow: auto;
+  list-style: none;
+  margin: var(--inner) 0 0;
+}
+
+.store-availability-list__item {
+  margin: 0;
+  padding: var(--inner) 0;
+
+  p {
+    font-size: calc( 0.8125rem * var(--adjust-body));
+    margin-bottom: 0;
+  }
+}
+
+.store-availability-list__phone {
+  a {
+    text-decoration: none;
+  }
+}
+
+.store-availability-list__location {
+  display: flex;
+  justify-content: space-between;
+}
+
+.store-availability-list__stock {
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.store-availability-list__address {
+  font-size: 90%;
+  font-style: var(--FONT-STYLE-BODY);
+
+  p {
+    margin: 0;
+    font-size: inherit;
+  }
+}
+
+.store-availability-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.store-availability-list-header__location {
+  font-weight: var(--FONT-WEIGHT-BODY-BOLD);
+  padding-right: 5px;
+}
+.store-availability-list-header__location,
+.store-availability-list-header__distance {
+  margin-bottom: 0;
+  font-size: calc(1rem * var(--adjust-body));
+  color: var(--text);
+}

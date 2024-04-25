@@ -1,0 +1,551 @@
+{%- liquid
+  assign filters_available = false
+  assign filter_count = 0
+  assign all_active_tags_count = 0
+
+  capture sort_param
+    if collection.sort_by != collection.default_sort_by
+      assign sort_parameter = '/?'
+      if collection.current_type or collection.current_vendor
+        assign sort_parameter = '&'
+      endif
+      echo sort_parameter | append: 'sort_by=' | append: collection.sort_by
+    endif
+  endcapture
+-%}
+
+{%- capture filters -%}
+  {%- case filter_mode -%}
+
+    {%- when 'default' -%}
+      {%- liquid
+        if collection.filters != empty
+          assign filters_available = true
+        endif
+
+        for filter in collection.filters
+          render 'filter', filter: filter, animation_delay: animation_delay, filters_layout: filters_layout, index: forloop.index, show_more: show_more
+        endfor
+      -%}
+
+      <noscript>
+        <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.filter_button' | t }}</button>
+      </noscript>
+
+    {%- when 'tag' -%}
+      {%- liquid
+        assign is_active = false
+        assign active_count = 0
+        assign active_tag_filters = ''
+        assign tags_list = ''
+        assign filters_counter = 0
+        assign filters_markup_first_part = ''
+        assign filters_markup_the_rest = ''
+        assign show_more_active_filters_counter = 0
+        assign count_threshold = 10
+
+        for tag in collection.all_tags
+          assign filters_available = true
+          unless tag contains '_badge' or tag contains '_preorder'
+            if current_tags contains tag
+              assign is_active = true
+              assign active_count = active_count | plus: 1
+              assign all_active_tags_count = all_active_tags_count | plus: 1
+            endif
+          endunless
+        endfor
+
+        assign toggle_state = true
+
+        if filters_layout == 'closed'
+          assign toggle_state = false
+        endif
+
+        if is_active
+          assign toggle_state = true
+        endif
+
+        capture filters_list_class
+          echo 'collection__filter-tags'
+          if is_color
+            echo ' collection__filter-tags--swatches' | append: ' collection__filter-tags--swatches-' | append: settings.color_swatches_product_style
+          endif
+        endcapture
+      -%}
+
+      <div class="collection__filter"{% if show_more %} data-show-more{% endif %} data-collection-filter>
+        <button type="button" class="collection__filter__title label-typography{% if toggle_state %} is-expanded{% endif %}"
+          aria-expanded="{{ toggle_state }}"
+          aria-controls="CollectionFilter--tags"
+          data-filter-active="{{ is_active }}"
+          data-collapsible-trigger>
+
+          {{- 'products.general.filter_by' | t -}}
+
+          <span class="collection__filter__count">
+            {%- render 'icon-toggle-plus' -%}
+            {%- render 'icon-toggle-minus' -%}
+          </span>
+        </button>
+
+        <div id="CollectionFilter--tags"
+          class="collection__filter-tags-wrapper{% if toggle_state %} is-expanded{% endif %}"
+          aria-expanded="{% if toggle_state %}true{% else %}false{% endif %}"
+          data-collapsible-container
+          {% if toggle_state %}style="height:auto;"{% endif %}>
+          <ul class="{{ filters_list_class }}" data-collapsible-content>
+            {%- for tag in collection.all_tags -%}
+              {%- unless tags_list contains tag or tag contains '_badge' or tag contains '_preorder' -%}
+                {%- capture temp_list -%}{{ tags_list | append: tag | append: ' ' }}{%- endcapture -%}
+                {%- liquid
+                  assign tags_list = temp_list
+                  assign current_tag_handle = tag | replace: '&#39;', '' | replace: '&#34;', '' | handle
+
+                  if current_tags contains tag
+                    assign linked_tags = selected_tags | remove: current_tag_handle
+                    assign filter_count = filter_count | plus: 1
+                  else
+                    assign linked_tags = selected_tags | append: '+' | append: current_tag_handle
+                  endif
+
+                  capture tag_link
+                    echo collection.url
+                    if linked_tags != blank
+                      echo '/' | append: linked_tags
+                    endif
+                    echo sort_param
+                  endcapture
+
+                  assign tag_link = tag_link | replace: '/+', '/' | replace: '++', '+' | replace: '+?', '?'
+
+                  capture filter_classes
+                    echo 'collection__filter-tag collection__filter-tag--default'
+                    if current_tags contains tag
+                      echo ' is-active'
+                    endif
+                  endcapture
+                -%}
+
+                {%- capture current_filter -%}
+                  <li class="{{ filter_classes }}" data-collection-filter-tag>
+                    <a href="{{ tag_link }}"
+                      class="filter__button"
+                      data-tag="{{ tag | handleize }}"
+                      data-collection-filter-tag-button>
+                      {{ tag }}
+                    </a>
+                  </li>
+                {%- endcapture -%}
+
+                {%- liquid
+                  assign filters_counter = filters_counter | plus: 1
+                  if filters_counter <= count_threshold
+                    assign filters_markup_first_part = filters_markup_first_part | append: current_filter
+                  else
+                    assign filters_markup_the_rest = filters_markup_the_rest | append: current_filter
+                    if current_tags contains tag
+                      assign show_more_active_filters_counter = show_more_active_filters_counter | plus: 1
+                    endif
+                  endif
+                -%}
+
+                {%- if current_tags contains tag -%}
+                  {%- capture active_tag_filters -%}
+                    {{- active_tag_filters -}}
+                    <a class="filter__active__remove" href="{{ tag_link }}" data-tag="{{ tag | handleize }}" data-filter-tag-reset-button>
+                      {{ tag }}
+                      <span class="filter__x">✕</span>
+                    </a>
+                  {%- endcapture -%}
+                {%- endif -%}
+              {%- endunless -%}
+            {%- endfor -%}
+
+            {%- if show_more -%}
+              {{- filters_markup_first_part -}}
+
+              {%- if filters_markup_the_rest != '' -%}
+                {%- liquid
+                  assign open_show_more = false
+                  if show_more_active_filters_counter > 0
+                    assign open_show_more = true
+                  endif
+                -%}
+                <li class="collection__filter-actions" data-show-more-actions>
+                  <div id="CollectionFilterActions--tags"
+                    class="collection__filter-actions-container{% if open_show_more %} is-expanded{% endif %}"
+                    data-collapsible-container
+                    data-show-more-container
+                    aria-expanded="{{ open_show_more }}"
+                    {% if open_show_more %} style="height:auto;"{% endif %}>
+                    <ul class="{{ filters_list_class }}" data-collapsible-content>
+                      {{- filters_markup_the_rest -}}
+                    </ul>
+                  </div>
+
+                  <button type="button"
+                    class="collection__filters-more btn btn--text{% if open_show_more %} is-expanded{% endif %}"
+                    aria-expanded="{{ open_show_more }}"
+                    aria-controls="CollectionFilterActions--tags"
+                    data-collapsible-trigger
+                    data-show-more-trigger>
+                    <span>{{ 'collection.filters.show_more' | t }}</span>
+                    <span>{{ 'collection.filters.show_less' | t }}</span>
+                  </button>
+                </li>
+              {%- endif -%}
+
+            {%- else -%}
+             {{- filters_markup_first_part -}}
+             {{- filters_markup_the_rest -}}
+            {%- endif -%}
+          </ul>
+        </div>
+      </div>
+
+    {%- when 'group' -%}
+      {%- liquid
+        assign groups = ''
+        assign active_tag_filters = ''
+
+        for tag in collection.all_tags
+          assign tag_parts = tag | split: '_'
+
+          if tag_parts.size == 2
+            assign groups = groups | append: tag_parts.first | append: ','
+          endif
+        endfor
+
+        assign groups = groups | split: ',' | compact | uniq
+        assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ','
+
+        comment
+          These tags will be hidden from the Filters
+        endcomment
+        assign special_tags = '_preorder,_badge' | split: ','
+      -%}
+
+      {%- for group in groups -%}
+        {%- liquid
+          assign filters_counter = 0
+          assign filters_markup_first_part = ''
+          assign filters_markup_the_rest = ''
+          assign show_more_active_filters_counter = 0
+          assign is_active = false
+          assign active_count = 0
+          assign group_label = group | downcase
+          assign group_with_suffix = group | append: '_'
+
+          comment
+            group_with_suffix is needed in order to avoid edge cases where group tags contain the same words
+            For example:
+            Color_Metalic
+            Metalic_Yes
+          endcomment
+        -%}
+
+        {%- comment -%} Don't show "_badge" and "_preorder" as filters {%- endcomment -%}
+        {%- unless special_tags contains group_label or group_label == blank -%}
+          {%- liquid
+            assign filters_available = true
+            for tag in current_tags
+              if tag contains group_with_suffix
+                assign is_active = true
+                assign active_count = active_count | plus: 1
+                assign all_active_tags_count = all_active_tags_count | plus: 1
+              endif
+            endfor
+
+            assign toggle_state = false
+            case filters_layout
+              when 'open'
+                assign toggle_state = true
+              when 'first-open'
+                if forloop.index == 1
+                  assign toggle_state = true
+                endif
+            endcase
+
+            if is_active
+              assign toggle_state = true
+            endif
+
+            if color_label contains group_label and settings.enable_color_swatches_collection
+              assign is_color = true
+            else
+              assign is_color = false
+            endif
+
+            assign count_threshold = 10
+            if is_color
+              assign count_threshold = 20
+            endif
+
+            capture filters_list_class
+              echo 'collection__filter-tags'
+              if is_color
+                echo ' collection__filter-tags--swatches' | append: ' collection__filter-tags--swatches-' | append: settings.color_swatches_product_style
+              endif
+            endcapture
+          -%}
+
+          <div class="collection__filter"{% if show_more %} data-show-more{% endif %} data-collection-filter>
+            <button type="button" class="collection__filter__title label-typography{% if toggle_state %} is-expanded{% endif %}"
+              aria-expanded="{{ toggle_state }}"
+              aria-controls="CollectionFilter--{{ group | handle }}-{{ forloop.index }}"
+              data-filter-active="{{ is_active }}"
+              data-collapsible-trigger>
+              <span>{{- group -}}{% if active_count > 0 %} ({{ active_count }}){% endif %}</span>
+
+              <span class="collection__filter__count">
+                {%- render 'icon-toggle-plus' -%}
+                {%- render 'icon-toggle-minus' -%}
+              </span>
+            </button>
+
+            <div id="CollectionFilter--{{ group | handle }}-{{ forloop.index }}"
+              class="collection__filter-tags-wrapper{% if toggle_state %} is-expanded{% endif %}"
+              aria-expanded="{% if toggle_state %}true{% else %}false{% endif %}"
+              data-collapsible-container
+              {% if toggle_state %}style="height:auto;"{% endif %}>
+              <ul class="{{ filters_list_class }}" data-collapsible-content>
+                {%- for tag in collection.all_tags -%}
+                  {%- liquid
+                    assign tag_parts = tag | split: '_'
+                    assign group_tag = tag_parts.last
+
+                    assign current_tag_handle = tag | replace: '&#39;', '' | replace: '&#34;', '' | handle
+
+                    if current_tags contains tag
+                      assign linked_tags = selected_tags | remove: current_tag_handle
+                    else
+                      assign linked_tags = selected_tags | append: '+' | append: current_tag_handle
+                    endif
+
+                    capture tag_link
+                      echo collection.url
+                      if linked_tags != blank
+                        echo '/' | append: linked_tags
+                      endif
+                      echo sort_param
+                    endcapture
+
+                    assign tag_link = tag_link | replace: '/+', '/' | replace: '++', '+' | replace: '+?', '?'
+                  -%}
+
+                  {%- if tag_parts.first == group -%}
+                    {%- liquid
+                      capture filter_classes
+                        echo 'collection__filter-tag'
+                        if is_color
+                          echo ' collection__filter-tag--swatch'
+                        else
+                          echo ' collection__filter-tag--default'
+                        endif
+                        if current_tags contains tag
+                          echo ' is-active'
+                        endif
+                      endcapture
+                    -%}
+
+                    {%- capture current_filter -%}
+                      <li class="{{ filter_classes }}" data-collection-filter-tag>
+                        {%- if is_color -%}
+                          <a href="{{ tag_link }}"
+                            class="swatch__button swatch__button--{{ settings.color_swatches_product_style }} filter__button"
+                            title="{{ group_tag }}"
+                            data-value="{{ group_tag }}"
+                            data-tag="{{ tag | handleize }}"
+                            data-collection-filter-tag-button>
+                            <div class="swatch__label" data-swatch="{{ group_tag | escape_once }}" data-tooltip="{{ group_tag | escape_once | capitalize }}">
+                              <span class="icon icon-check"></span>
+                            </div>
+                          </a>
+                          <span class="visually-hidden">{{ group_tag }}</span>
+                        {%- else -%}
+                          <a href="{{ tag_link }}"
+                            class="filter__button filter__button--{{ group_tag | handle }}"
+                            data-tag="{{ tag | handleize }}"
+                            data-collection-filter-tag-button>
+                            {{- group_tag -}}
+                          </a>
+                        {%- endif -%}
+                      </li>
+                    {%- endcapture -%}
+
+                    {%- liquid
+                      assign filters_counter = filters_counter | plus: 1
+                      if filters_counter <= count_threshold
+                        assign filters_markup_first_part = filters_markup_first_part | append: current_filter
+                      else
+                        assign filters_markup_the_rest = filters_markup_the_rest | append: current_filter
+                        if current_tags contains tag
+                          assign show_more_active_filters_counter = show_more_active_filters_counter | plus: 1
+                        endif
+                      endif
+                    -%}
+
+                    {%- if current_tags contains tag -%}
+                      {%- capture active_tag_filters -%}
+                        {{- active_tag_filters -}}
+                        <a class="filter__active__remove" href="{{ tag_link }}" data-tag="{{ tag | handleize }}" data-filter-tag-reset-button>
+                          {{ group_tag }}
+                          <span class="filter__x">✕</span>
+                        </a>
+                      {%- endcapture -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if show_more -%}
+                  {{- filters_markup_first_part -}}
+
+                  {%- if filters_markup_the_rest != '' -%}
+                    {%- liquid
+                      assign open_show_more = false
+                      if show_more_active_filters_counter > 0
+                        assign open_show_more = true
+                      endif
+                    -%}
+                    <li class="collection__filter-actions" data-show-more-actions>
+                      <div id="CollectionFilterActions--{{ group | handle }}-{{ forloop.index }}"
+                        class="collection__filter-actions-container{% if open_show_more %} is-expanded{% endif %}"
+                        data-collapsible-container
+                        data-show-more-container
+                        aria-expanded="{{ open_show_more }}"
+                        {% if open_show_more %} style="height:auto;"{% endif %}>
+                        <ul class="{{ filters_list_class }}" data-collapsible-content>
+                          {{- filters_markup_the_rest -}}
+                        </ul>
+                      </div>
+
+                      <button type="button"
+                        class="collection__filters-more btn btn--text{% if open_show_more %} is-expanded{% endif %}"
+                        aria-expanded="{{ open_show_more }}"
+                        aria-controls="CollectionFilterActions--{{ group | handle }}-{{ forloop.index }}"
+                        data-collapsible-trigger
+                        data-show-more-trigger>
+                        <span>{{ 'collection.filters.show_more' | t }}</span>
+                        <span>{{ 'collection.filters.show_less' | t }}</span>
+                      </button>
+                    </li>
+                  {%- endif -%}
+
+                {%- else -%}
+                 {{- filters_markup_first_part -}}
+                 {{- filters_markup_the_rest -}}
+                {%- endif -%}
+              </ul>
+            </div>
+          </div>
+        {%- endunless -%}
+      {%- endfor -%}
+  {%- endcase -%}
+{%- endcapture -%}
+
+{%- capture filter_reset_buttons -%}
+  {%- if filter_mode == 'default' -%}
+    {%- for filter in collection.filters -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+          {%- if filter.min_value.value != 0 or filter.max_value.value != filter.range_max -%}
+            {%- assign filter_count = filter_count | plus: 1 -%}
+            <a class="filter__active__remove" href="{{ filter.url_to_remove }}" data-filter-reset-button>
+              {%- liquid
+                assign min_value = filter.min_value.value | default: 0
+                assign max_value = filter.max_value.value | default: filter.range_max
+                if settings.currency_code_enable
+                  assign min_value = min_value | money_with_currency | remove: '.00' | remove: ',00'
+                  assign max_value = max_value | money_with_currency | remove: '.00' | remove: ',00'
+                else
+                  assign min_value = min_value | money_without_trailing_zeros
+                  assign max_value = max_value | money_without_trailing_zeros
+                endif
+              -%}
+              {{ min_value }} - {{ max_value }}
+              <span class="filter__x">✕</span>
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove" href="{{ filter_value.url_to_remove }}" data-filter-reset-button>
+            {{ filter_value.label }}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- elsif filter_mode == 'tag' or filter_mode == 'group' -%}
+    {%- assign filter_count = all_active_tags_count -%}
+    {{- active_tag_filters -}}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if enable_sorting or enable_filters -%}
+  <div class="collection__filters" data-collection-filters>
+    <div class="collection__filters-wrapper" data-collection-filters-wrapper>
+      <div class="collection__filters-list">
+        <div class="collection__filters-list__inner" data-collection-filters-list>
+
+          <form data-collection-filters-form
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+            {% if collection.current_type %}
+              <input type="hidden" name="q" value="{{ collection.current_type }}">
+            {% endif %}
+            {% if collection.current_vendor %}
+              <input type="hidden" name="q" value="{{ collection.current_vendor }}">
+            {% endif %}
+
+            <div class="collection__filters-header{% if filter_count == 0 %} hidden{% endif %}">
+              <button class="collection__filters__close" type="button" data-close-filters>
+                <span class="visually-hidden">{{ 'products.general.close' | t }}</span>
+                {%- render 'icon-close' -%}
+              </button>
+
+              {%- if enable_filters -%}
+                <div class="collection__filters__top">
+                  <div class="collection__filters__title">
+                    <span>{{- 'products.general.filters' | t -}}{% if filter_count > 0 %} ({{ filter_count }}){% endif %}</span>
+                  </div>
+
+                  <a href="{{ collection.url }}{{ sort_param }}" class="collection__filters__reset {% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}" data-filter-reset-button>
+                    {{- 'products.general.clear_filters' | t -}}
+                  </a>
+                </div>
+
+                <div class="collection__filters__clear" data-filters-reset>
+                  {{- filter_reset_buttons -}}
+                </div>
+
+                <hr class="hr--full collection__filters__line">
+              {%- endif -%}
+            </div>
+
+            {%- if enable_sorting -%}
+              [%- render 'partials/collection-sort' -%]
+            {%- endif -%}
+
+            {%- if enable_filters and filters_available -%}
+              {{- filters -}}
+            {%- endif -%}
+          </form>
+        </div>
+
+        {%- if enable_filters -%}
+          <div class="collection__filters-bottom{% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}">
+            <button class="collection__filters__close-bottom btn btn--primary" type="button" data-close-filters>
+              {{- 'collection.filters.close' | t -}}
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

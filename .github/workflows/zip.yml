@@ -1,0 +1,33 @@
+name: Create Zip
+on: [workflow_dispatch]
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version-file: '.nvmrc'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+    - uses: actions/cache@v3
+      id: yarn-cache
+      with:
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          'node_modules'
+        key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-v3-
+    - run: yarn install
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+    - run: yarn zip
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ vars.THEME_NAME }}-zip
+        path: dist/*
+        retention-days: 5

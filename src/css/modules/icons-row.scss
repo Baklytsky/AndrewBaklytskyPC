@@ -1,0 +1,415 @@
+/*================ Icons row ================*/
+.icons-row {
+  --item-width: 100%;
+  overflow: hidden;
+  color: var(--text);
+  background-color: var(--bg);
+
+  @include media-query ($small) {
+    --item-width: calc((var(--wrapper-width) * 0.9 - var(--grid-gutter)) / 2);
+  }
+
+  p { font-size: inherit; }
+}
+
+.icons-row__headings {
+  margin-bottom: calc(var(--gutter-mobile) * 1.5);
+
+  @include media-query ($medium-up) {
+    margin-bottom: calc(var(--gutter) / 1.5);
+  }
+
+  @include media-query ($small) {
+    padding: 0 var(--gutter-mobile);
+  }
+}
+
+.icons-row__heading {
+  text-align: inherit;
+  margin-bottom: 0;
+  color: var(--text);
+}
+
+.icons-row__slider {
+  @include media-query ($medium-up) {
+    display: grid;
+    gap: var(--gutter);
+  }
+}
+
+.icons-row__slider:after {
+  @include media-query ($small) {
+    content: '';
+    display: block;
+    position: relative;
+    padding-right: var(--gutter-mobile);
+  }
+}
+
+.icons-row__slider.items--2 {
+  @include media-query ($medium-up) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.icons-row__slider.items--3 {
+  @include media-query ($medium-up) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.icons-row__slider.items--4 {
+  @include media-query ($medium-up) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.icons-row__slider--flex {
+  @include media-query ($medium-up) {
+    display: flex;
+    gap: 0;
+    margin: 0 calc(var(--gutter) / -2);
+  }
+
+  .icons-row__item {
+    @include media-query ($medium-up) {
+      margin: 0 calc(var(--gutter) / 2);
+    }
+  }
+}
+
+.icons-row__slider--flex.items--2 {
+  @include media-query ($medium-up) {
+    --item-width: calc((100% - var(--gutter)) / 2);
+  }
+}
+
+.icons-row__slider--flex.items--3 {
+  @include media-query ($medium-up) {
+    --item-width: calc((100% - var(--gutter) * 2) / 3);
+  }
+}
+
+.icons-row__slider--flex.items--4 {
+  @include media-query ($medium-up) {
+    --item-width: calc((100% - var(--gutter) * 3) / 4);
+  }
+}
+
+.icons-row__wrapper {
+  position: relative;
+
+  @include media-query ($small) {
+    margin: 0 calc(var(--gutter-mobile) * -1);
+  }
+}
+
+.icons-row__wrapper.text-inline-center { text-align: center; }
+
+.icons-row__slider.text-center,
+.icons-row__slider.text-inline-center {
+  @include media-query ($medium-up) {
+    justify-content: center;
+  }
+
+  @include media-query ($small) {
+    justify-content: flex-start;
+  }
+}
+
+.text-inline-center .icons-row__item {
+  justify-content: center;
+}
+
+.icons-row__wrapper--single-block-center .icons-row__slider,
+.icons-row__wrapper--single-block-center .icons-row__slider .icons-row__item { justify-content: center; }
+
+.text-inline-center .icons-row__item,
+.text-inline-left .icons-row__item {
+  display: flex;
+  text-align: initial;
+}
+
+.text-inline-center .icons-row__icon,
+.text-inline-left .icons-row__icon {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  margin-right: 14px;
+}
+
+.text-inline-center .icons-row__slider.grid--mobile .icons-row__icon,
+.text-inline-left .icons-row__slider.grid--mobile .icons-row__icon {
+  @include media-query ($small) {
+    margin-right: 0;
+  }
+}
+
+.icons-row__item--center { align-items: center; }
+
+.icons-row__item {
+  @include media-query ($medium-up) {
+    width: var(--item-width);
+  }
+
+  @include media-query ($small) {
+    display: inline-block;
+    min-width: var(--item-width);
+    margin-right: var(--grid-gutter);
+    scroll-snap-align: start;
+  }
+}
+
+.icons-row__slider.grid--mobile {
+  @include media-query ($small) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0;
+    text-align: center;
+  }
+}
+
+.icons-row__slider.grid--mobile .icons-row__item.grid__item {
+  @include media-query ($small) {
+    min-width: 0;
+    width: calc(50% - (var(--grid-gutter) / 2));
+  }
+}
+
+.icons-row__slider.grid--mobile .icons-row__item.grid__item:only-child {
+  @include media-query ($small) {
+    margin: 0;
+  }
+}
+
+.icons-row__slider.grid--mobile .icons-row__item.grid__item:nth-child(n + 3) {
+  @include media-query ($small) {
+    margin-top: var(--grid-gutter);
+  }
+}
+
+.icons-row__slider.grid--mobile .icons-row__item.grid__item:nth-child(even),
+.icons-row__slider.grid--mobile .icons-row__item.grid__item:last-child {
+  @include media-query ($small) {
+    margin-right: 0;
+  }
+}
+
+.text-inline-center .icons-row__slider.grid--mobile .icons-row__item,
+.text-inline-left .icons-row__slider.grid--mobile .icons-row__item {
+  @include media-query ($small) {
+    display: block;
+    text-align: center;
+  }
+}
+
+.icons-row__slider.carousel--mobile .icons-row__item.carousel__item {
+  @include media-query ($small) {
+    width: 60%;
+    min-width: var(--item-width);
+    margin-right: calc(var(--gutter-mobile));
+  }
+}
+
+.icons-row__slider.carousel--mobile .icons-row__item.carousel__item:last-child,
+.icons-row__slider.carousel--mobile .icons-row__item.carousel__item:only-of-type {
+  @include media-query ($small) {
+    margin-right: 0;
+  }
+}
+
+.icons-row__item:last-child {
+  @include media-query ($small) {
+    margin-right: 0;
+  }
+}
+
+.icons-row__item:only-child {
+  @include media-query ($small) {
+    --item-width: var(--wrapper-width);
+  }
+}
+
+.icons-row__item--box {
+  background: var(--bg);
+  padding: calc(var(--gutter) / 2);
+
+  @include media-query ($small) {
+    padding: var(--gutter-mobile);
+  }
+}
+
+.carousel--mobile .icons-row__item--box {
+  @include media-query ($small) {
+    padding: var(--gutter-mobile);
+  }
+}
+
+.icons-row__icon {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 14px;
+  width: min(var(--icon-size), var(--icon-max-size));
+
+  @include media-query ($small) {
+    margin-bottom: 0;
+  }
+}
+
+.icons-row__icon .icon {
+  display: block;
+  width: 100%;
+  height: min(var(--icon-size), var(--icon-max-size));
+}
+
+.icons-row__image { width: 100%; }
+
+.icons-row__title {
+  margin-bottom: 0;
+  color: var(--text);
+  font-size: calc(1.333rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    font-size: calc(1.064rem * var(--adjust-body));
+  }
+}
+
+.icons-row__subheading p { margin: 0.25em 0; }
+
+.icons-row__subheading p:last-child { margin-bottom: 0; }
+
+.icons-row__text {
+  color: var(--text-lighten);
+  font-size: calc(1rem * var(--adjust-body));
+
+  @include media-query ($small) {
+    font-size: calc(0.8rem * var(--adjust-body));
+  }
+}
+
+.icons-row__text p { margin-top: 6px; }
+
+.icons-row__text p:first-child {
+  @include media-query ($small) {
+    margin-top: 0;
+  }
+}
+
+.icons-row__text p:last-child { margin-bottom: 0; }
+
+.icons-row__actions {
+  margin-top: calc(var(--gutter-mobile) * 1.5);
+
+  @include media-query ($medium-up) {
+    margin-top: calc(var(--gutter) / 1.5);
+  }
+
+  @include media-query ($small) {
+    padding: 0 var(--gutter-mobile);
+  }
+}
+
+// Icon row block on PDP, FP and Text sections
+.icons-row-block__item {
+  --offset-top: calc(var(--icon-size) + var(--inner) * 1);
+  position: relative;
+  padding-top: var(--offset-top);
+  min-height: calc(1rem * var(--adjust-body) * var(--line-height));
+  display: flex;
+  flex-direction: column;
+  flex-basis: var(--icon-size);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  color: var(--icon-color);
+
+  @include media-query ($small) {
+    min-width: calc(50% - (var(--grid-gutter) / 2));
+    margin-right: var(--grid-gutter);
+    text-align: center;
+
+    &:nth-child(n + 3) {
+      @include media-query ($small) {
+        margin-top: var(--grid-gutter);
+      }
+    }
+
+    &:nth-child(even),
+    &:last-child {
+      @include media-query ($small) {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+.icons-row-block__item .icon {
+  display: block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+
+  @supports (-webkit-hyphens: none) { // used to fix clipped icons on IOS mobile
+    width: calc(var(--icon-size) + 2px);
+    height: calc(var(--icon-size) + 2px);
+    padding: 1px;
+    margin: -1px;
+  }
+}
+
+.icons-row-block__item--center { align-self: center; }
+
+.icons-row-block__holder {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: var(--icon-size);
+}
+
+.icons-row-block__icon {
+  width: var(--icon-size);
+  color: var(--icon-color);
+  align-self: center;
+  overflow: hidden;
+  position: absolute;
+  top: calc(var(--offset-top) / 2);
+  max-height: var(--icon-size);
+
+  @supports (-webkit-hyphens: none) { // used to fix clipped icons on IOS mobile
+    width: calc(var(--icon-size) + 2px);
+    max-height: calc(var(--icon-size) + 2px);
+    padding: 1px;
+    margin: -1px;
+  }
+}
+
+.text-left .icons-row-block__icon {
+  transform: translate(0, -50%);
+  @include media-query ($medium-up) {
+    left: 0;
+  }
+}
+
+.text-center .icons-row-block__icon {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.text-right .icons-row-block__icon {
+  transform: translate(0, -50%);
+  @include media-query ($medium-up) {
+    right: 0;
+  }
+}
+
+.icons-row-block__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.icons-row-block__text { width: 100%; }

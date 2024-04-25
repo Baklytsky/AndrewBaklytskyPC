@@ -1,0 +1,327 @@
+<!-- /partials/product-form-quickview-body.liquid -->
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign variants_style = settings.variants_style
+  assign show_payment_button = false
+  assign gift_card_recipient_feature_active = false
+
+  if settings.show_gift_card_recipient and product.gift_card?
+    assign gift_card_recipient_feature_active = true
+  endif
+
+  if settings.show_payment_button and gift_card_recipient_feature_active == false
+    assign show_payment_button = true
+  endif
+
+  comment
+    Override buy button setting if there are selling plan groups and cart terms
+  endcomment
+  if show_payment_button and product.selling_plan_groups.size < 1 and settings.enable_accept_terms == false
+    assign show_payment_button = true
+  else
+    assign show_payment_button = false
+  endif
+-%}
+
+[%- render 'partials/size-chart' -%]
+
+<div class="product__form">
+  {% comment %} The input with name="id" submits to cart {% endcomment %}
+  <input type="hidden" name="id" value="{{ current_variant.id }}" data-product-select>
+
+  {%- unless show_quantity -%}
+    <input type="hidden" name="quantity" value="1">
+  {%- endunless -%}
+
+  {%- if show_remaining -%}
+    {%- render 'inventory-countdown',
+      current_variant: current_variant,
+      product_variants: product.variants
+    -%}
+  {%- endif -%}
+
+  {%- unless size_chart_button_as_label or size_chart_button == blank -%}
+    <div class="product__form__size-chart"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 100 -%}
+      {% endif %}>
+      {{- size_chart_button -}}
+    </div>
+  {%- endunless -%}
+
+  {% comment %} Shop pay split payment terms {% endcomment %}
+  <div class="shop-pay-terms"
+    {% if animations_enabled %}
+      data-aos="fade-up"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {% endif %}>{{ form | payment_terms }}</div>
+
+  {%- capture quantity_selector -%}
+    <div class="select__fieldset">
+      <span class="select__label label-typography" id="{{ unique }}-select-quantity-label">{{ 'products.product.quantity' | t }}</span>
+
+      <div class="select-popout select-popout--small" data-popout data-popout-prevent="true">
+        <button type="button" class="select-popout__toggle{% if variants_style == 'boxes' %} select-popout__toggle--qty{% endif %}" aria-expanded="false" aria-controls="{{ unique }}-select-quantity" aria-labelledby="{{ unique }}-select-quantity-label" data-popout-toggle data-popout-quantity>
+          <span class="select-popout__value" data-popout-text data-quantity-select>1</span>
+          {%- render 'icon-select' -%}
+        </button>
+
+        <div id="{{ unique }}-select-quantity" class="select-popout__list" data-popout-list>
+          <ul class="select-popout__list__scroll">
+            {%- for idx in (1..10) -%}
+              <li class="select-popout__item{% if forloop.index == 1 %} select-popout__item--current{% endif %}">
+                <a class="select-popout__option" href="#" {% if forloop.index == 1 %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                  <span>{{ forloop.index }} {% if forloop.last %}+{% endif %}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <div class="quantity-selector" data-quantity-holder>
+          <label for="product-quantity-buttons-{{ section.id }}" class="label-hidden">{{ 'products.product.quantity' | t }}</label>
+
+          <button type="button" class="quantity__btn quantity__btn--decrease" data-quantity-minus data-quantity-button tabindex="0" title="{{ 'general.accessibility.decrease' | t }} - {{ product.title | strip_html -}}">
+            <span class="visually-hidden">{{ 'general.accessibility.decrease' | t }}</span>
+            {%- render 'icon-toggle-minus' -%}
+          </button>
+
+          <input id="product-quantity-buttons-{{ section.id }}" data-popout-input type="number" class="quantity__selector quantity__input" value="1" min="1" aria-label="quantity" autocomplete="off" name="quantity" data-quantity-field title="{{- 'products.product.quantity' | t }} - {{ product.title | strip_html -}}" pattern="[0-9]*" />
+
+          <button type="button" class="quantity__btn quantity__btn--increase" data-quantity-plus data-quantity-button tabindex="0" title="{{- 'general.accessibility.increase' | t }} - {{ product.title | strip_html -}}">
+            <span class="visually-hidden">{{ 'general.accessibility.increase' | t }}</span>
+            {%- render 'icon-toggle-plus' -%}
+          </button>
+        </div>
+      </div>
+    </div>
+  {%- endcapture -%}
+
+  {%- capture form_fields -%}
+    {%- unless product.has_only_default_variant -%}
+      {%- assign selects_counter = 0 -%}
+      <div class="product__selectors">
+        {%- for option in product.options_with_values -%}
+          {%- comment -%} Use select over radio for long inputs and mismatched lengths {%- endcomment -%}
+
+          {%- assign option_name_handle_separator = option.name | handle | prepend: ',' | append: ',' -%}
+          {%- assign enable_color_swatches = settings.enable_color_swatches_product -%}
+          {%- assign current_option_position = option.position | prepend: 'option' -%}
+
+          [%- render 'partials/check-for-color' -%]
+          [%- render 'partials/check-for-size' -%]
+
+          {%- liquid
+            assign size_options_less_two = false
+            assign show_size_guide_as_label = false
+            if show_size_guide and is_size_option and size_chart_button_as_label
+              assign show_size_guide_as_label = true
+
+              if option.values.size <= 2
+                assign size_options_less_two = true
+              endif
+            endif
+
+            assign longest_value = 0
+            assign shortest_value = 100
+            for value in option.values
+              if value.size > longest_value
+                assign longest_value = value.size
+              endif
+
+              if value.size < shortest_value
+                assign shortest_value = value.size
+              endif
+            endfor
+
+            assign flexible = true
+            assign chars_diff = longest_value | minus: shortest_value
+            if chars_diff < 5 and longest_value < 6
+              assign flexible = false
+            endif
+
+            assign enable_variant_boxes = false
+            if variants_style == 'boxes' or variants_style == 'auto' and longest_value < 16
+              assign enable_variant_boxes = true
+            endif
+
+            capture selector_wrapper_class
+              echo 'selector-wrapper'
+              if enable_variant_boxes
+                echo ' selector-wrapper--boxes'
+
+                unless flexible or is_swatch_option
+                  echo ' selector-wrapper--grid'
+
+                  if size_options_less_two
+                    echo ' selector-wrapper--grid-small'
+                  endif
+                endunless
+              endif
+
+              if is_swatch_option
+                echo ' selector-wrapper--swatches'
+              endif
+            endcapture
+          -%}
+
+          <div class="{{ selector_wrapper_class }}"
+            data-option-position="{{ option.position }}"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 100 -%}
+            {% endif %}>
+            {%- if enable_variant_boxes or is_swatch_option -%}
+              {%- assign current_value = current_variant.options[forloop.index0] -%}
+              <fieldset class="radio__fieldset radio__fieldset--{{ settings.color_swatches_product_style }}{% if show_size_guide_as_label %} radio__fieldset--sizeguide{% endif %}"{% if is_swatch_option %} data-swatches-container{% endif %}>
+                <legend class="radio__legend"{% if is_swatch_option %} data-swatches-label{% endif %}>
+                  <span class="radio__legend__label label-typography">{{ option.name | escape_once }}</span>
+                  {%- if show_size_guide_as_label -%}{{- size_chart_button -}}{%- endif -%}
+                </legend>
+                {%- for value in option.values -%}
+                  {%- capture input_id -%}{{ unique }}-{{ product.id }}-{{ option.name | escape_once }}-{{ value | handle }}{%- endcapture -%}
+
+                  {%- if is_swatch_option -%}
+                    {%- liquid
+                      assign current_option_variants = product | map: 'variants' | where: current_option_position, value
+                      assign current_option_variants_id = current_option_variants | map: 'id' | join: ','
+                    -%}
+                    <span class="swatch__button swatch__button--{{ settings.color_swatches_product_style }}" data-swatches-button>
+                      <input type="radio"
+                        class="swatch__input"
+                        data-single-option-selector
+                        data-index="{{ current_option_position }}"
+                        name="options[{{ option.name | escape_once }}]"
+                        value="{{ value | escape_once }}"
+                        id="{{ input_id }}"
+                        {% if value == current_value %}checked{% endif %}>
+                      <label for="{{ input_id }}" class="swatch__label" data-swatch="{{ value | escape_once }}" data-tooltip="{{ value | escape_once | capitalize }}" data-swatch-variant="{{ current_option_variants_id }}">
+                        <span class="visually-hidden">{{ value | escape_once }}</span>
+                        <span class="icon icon-check"></span>
+                      </label>
+                    </span>
+                  {%- else -%}
+                    {% comment %} radio button {% endcomment %}
+                    <span class="radio__button">
+                      <input
+                        type="radio"
+                        class="radio__input"
+                        data-single-option-selector
+                        data-index="{{ current_option_position }}"
+                        name="options[{{ option.name | escape_once }}]"
+                        value="{{ value | escape_once }}" id="{{ input_id }}"
+                        {% if value == current_value %}checked{% endif %}>
+                      <label for="{{ input_id }}" class="radio__label">
+                        <span>{{ value | escape_once }}</span>
+                      </label>
+                    </span>
+                  {%- endif -%}
+                {%- endfor -%}
+              </fieldset>
+              {%- if is_swatch_option -%}
+                <button type="button" class="btn btn--text swatch__more" data-swatches-more>
+                  <span>{{ 'products.product.show_more' | t }}</span>
+                  <span>{{ 'products.product.show_less' | t }}</span>
+                </button>
+              {%- endif -%}
+            {%- else -%}
+              {%- assign selects_counter = selects_counter | plus: 1 -%}
+              <div class="select__fieldset">
+                {%- capture input_id -%}{{ unique }}-{{ product.id }}-option-{{ option.position }}{%- endcapture -%}
+                <div class="select__label label-typography" id="{{ unique }}-select-{{ option.name | handle }}-label">
+                  {%- if show_size_guide_as_label -%}
+                    {{- size_chart_button -}}
+                  {%- else -%}
+                    {{- option.name | escape_once -}}
+                  {%- endif -%}
+                </div>
+
+                <div class="select-popout" data-popout data-popout-prevent="true">
+                  <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="{{ unique }}-select-{{ option.name | handle }}" aria-labelledby="{{ unique }}-select-{{ option.name | handle }}-label" data-popout-toggle>
+                    <span class="select-popout__value" data-popout-text>{{ option.selected_value }}</span>
+                    {%- render 'icon-select' -%}
+                  </button>
+
+                  <div id="{{ unique }}-select-{{ option.name | handle }}" class="select-popout__list" data-popout-list>
+                    <ul class="select-popout__list__scroll">
+                      {%- for value in option.values -%}
+                        <li class="select-popout__item {% if option.selected_value == value %}select-popout__item--current{% endif %}">
+                          <a class="select-popout__option" href="#" {% if option.selected_value == value %}aria-current="true"{% endif %} data-value="{{ value | escape_once }}" data-popout-option>
+                            <span>
+                              {{ value | escape_once }}
+                            </span>
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                  <input type="hidden" name="options[{{ option.name | escape_once }}]" id="{{ input_id }}" value="{{ option.selected_value | escape_once }}" data-popout-input data-single-option-selector data-index="option{{ option.position }}"/>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endunless -%}
+  {%- endcapture -%}
+
+  {{- form_fields -}}
+
+  <noscript>
+    <select name="id" class="product__form__select" aria-label="{{ product.options_with_values | map: 'name' | uniq | join: ', ' }}">
+      {%- for variant in product.variants -%}
+        <option
+          {% if variant == current_variant %}selected="selected"{% endif %}
+          {% unless variant.available %}disabled="disabled"{% endunless %}
+          value="{{ variant.id }}">
+            {{- variant.title -}}
+        </option>
+      {%- endfor -%}
+    </select>
+  </noscript>
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form',
+      product: product,
+      form: form,
+      section: section,
+      animation_delay: animation_delay,
+      animation_anchor: animation_anchor -%}
+  {%- endif -%}
+
+  {%- if product.selling_plan_groups.size > 0 -%}
+    {%- if enable_subscriptions_selectors -%}
+      {%- render 'subscription-form',
+        product: product,
+        animations_enabled: animations_enabled,
+        animation_anchor: animation_anchor,
+        animation_delay: animation_delay
+      -%}
+    {%- endif -%}
+    {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {%- comment -%} Delete the following line to block the theme from updating subscription prices {%- endcomment -%}
+    <span data-subscription-watch-price></span>
+  {%- endif -%}
+
+  {%- if show_quantity -%}
+    <div class="selector-wrapper selector-wrapper--qty"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 100 -%}
+      {% endif %}>
+      {{ quantity_selector }}
+    </div>
+  {%- endif -%}
+
+  {%- assign sold_out_text = 'products.product.sold_out' | t -%}
+</div>

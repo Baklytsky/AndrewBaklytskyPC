@@ -1,0 +1,55 @@
+{%- style -%}
+  #FeaturedImage--{{ section.id }}--{{ block.id }} { --overlay-opacity: {{ overlay_opacity }}; }
+  #FeaturedImage--{{ section.id }}--{{ block.id }} .main-heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }}) }
+{%- endstyle -%}
+
+{%- assign image_classes = 'featured-image__bg' -%}
+
+{%- if button_text == blank and button_link != '#!' -%}
+  {%- assign image_classes = image_classes | append: ' hover-scale' -%}
+
+  <a class="featured-image__link" href="{{ button_link }}">
+    <span class="visually-hidden">{{ title | strip_html | strip }}</span>
+  </a>
+{%- endif -%}
+
+{%- render 'image-fill', is_background: true, img_object: image, sizes: sizes, classes: image_classes -%}
+
+<div class="overlay"></div>
+
+<div class="featured-image__content">
+  <div class="featured-image__content-inner{% if show_text_shadow %} backdrop--radial{% endif %}">
+    {%- if title != blank -%}
+      <h1 class="featured-image__heading main-heading"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>{{ title | escape }}</h1>
+    {%- endif -%}
+
+    {%- if text != blank -%}
+      <div class="featured-image__caption main-text h2"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>{{ text }}</div>
+    {%- endif -%}
+
+    {%- if button_text != blank -%}
+      <div class="featured-image__buttons main-buttons">
+        <div class="main-buttons__item"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+          {% endif %}>
+          <a class="btn {{ button_style }} {{ button_size }} {{ button_color }} call-to-action" href="{{ button_link }}">{{ button_text | escape }}</a>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

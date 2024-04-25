@@ -1,0 +1,37 @@
+{%- assign promos_array = '' -%}
+
+{%- if paginate.current_page == 1 -%}
+  {%- for block in section.blocks -%}
+    {%- capture current_promo -%}
+      {%- liquid
+        assign block_id = 'CollectionPromo--' | append: block.id
+        assign promo_collection = block.settings.collection
+        assign promo_position = block.settings.position
+        assign promo_width = block.settings.width
+        assign promo_width_class = 'collection-promo--two-columns'
+        assign promo_order = promo_position | append: '-' | append: forloop.index
+
+        if promo_position < 10
+          assign promo_order = promo_order | prepend: '0'
+        endif
+
+        case promo_width
+          when 'full'
+            assign promo_width_class = 'collection-promo--full'
+            assign current_promo_width = columns
+          when 'half'
+            assign current_promo_width = 2
+          when 'auto'
+            assign promo_width_class = 'collection-promo--one-column'
+            assign promo_height = settings.image_aspect_ratio | times: 100
+            assign current_promo_width = 1
+        endcase
+      -%}
+      [%- render 'partials/collection-promo' -%]
+    {%- endcapture -%}
+
+    {%- assign promos_array = promos_array | append: promo_order | append: '#promo_position#' | append: promo_position | append: '#promo_html#' | append: current_promo | append: '#block_id#' | append: block_id | append: '#promo_collection#' | append: promo_collection | append: '#promo_width#' | append: current_promo_width | append: '#promo_width_class#' | append: promo_width_class | append: '@@' -%}
+  {%- endfor -%}
+
+  {%- assign promos_array = promos_array | split: '@@' | sort -%}
+{%- endif -%}

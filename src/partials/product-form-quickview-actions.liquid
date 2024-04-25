@@ -1,0 +1,47 @@
+<!-- /partials/product-form-quickview-actions.liquid -->
+
+<div class="product__submit__holder{% if show_payment_button %} product__submit__holder--spb{% endif %}">
+  <div class="product__submit__buttons">
+    <div class="product__submit__item"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      <button
+        type="submit"
+        name="add"
+        id="AddToCart--{{ unique }}"
+        class="btn {{ atc_button_color }} {{ atc_button_style }} btn--large btn--submit product__submit__add"
+        data-add-to-cart>
+        <span data-add-to-cart-text>
+          {%- if current_variant.available and product.tags contains '_preorder' -%}
+            {{ 'products.product.preorder' | t }}
+          {%- elsif current_variant.available -%}
+            {{ 'products.product.add_to_cart' | t }}
+          {%- else -%}
+            {{ sold_out_text }}
+          {%- endif -%}
+        </span>
+
+        <em class="loader loader--line"><em class="loader-indeterminate"></em></em>
+      </button>
+    </div>
+
+    {%- if show_payment_button -%}
+      <div class="product__submit__item{% if sold_out %} hidden{% endif %} {{ buynow_btn_color }} {{ buynow_btn_style }}"
+        data-buy-it-now
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 100 -%}
+        {% endif %}>
+        {{ form | payment_button }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div data-cart-errors-container role="alert" class="product__form__errors"></div>
+</div>

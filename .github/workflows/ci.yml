@@ -1,0 +1,254 @@
+name: ci
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     types: [opened, reopened, synchronize]
+#     paths-ignore:
+#       - '**.md'
+#       - '.gitignore'
+#       - '.vscode/**'
+# env:
+#   SHOPIFY_SHOP: ${{ vars.E2E_STORE }}
+#   SHOPIFY_THEME_TOKEN: ${{ secrets.SPEC_THEME_ACCESS_TOKEN }}
+# jobs:
+#   cancel:
+#     name: "Cancel Previous Runs"
+#     runs-on: ubuntu-20.04
+#     timeout-minutes: 3
+#     steps:
+#       - uses: styfle/cancel-workflow-action@0.9.0
+#   yarn:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 14
+#     container:
+#       image: invisiblethemes/gha-cypress-shopify-cli:1.0.1
+#     outputs:
+#       theme_id: ${{ steps.theme-push.outputs.theme_id }}
+#       theme_name: ${{ steps.get_theme_name.outputs.theme_name }}
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version: "14"
+#           cache: "yarn"
+#       - uses: actions/cache@v3
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-modules-v1.1-
+#       - name: Yarn install
+#         run: yarn install --frozen-lockfile
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+#           CYPRESS_INSTALL_BINARY: 0
+#       - run: npx cypress -v > .cypress-version
+#       - uses: actions/cache@v3
+#         id: cypress-cache
+#         with:
+#           path: ~/.cache/Cypress
+#           key: cypress-cache-v1-${{ runner.os }}-${{ hashFiles('.cypress-version') }}
+#       - name: Install Cypress
+#         run: yarn cypress install
+#         if: steps.cypress-cache.outputs.cache-hit != 'true'
+#   build:
+#     needs: [yarn]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 14
+#     container:
+#       image: invisiblethemes/gha-cypress-shopify-cli:1.0.1
+#     outputs:
+#       theme_id: ${{ steps.theme-push.outputs.theme_id }}
+#       theme_name: ${{ steps.get_theme_name.outputs.theme_name }}
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version: "14"
+#           cache: "yarn"
+#       - uses: actions/cache@v3
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-modules-v1.1-
+#       - uses: actions/cache@v3
+#         id: build-cache
+#         with:
+#           path: |
+#             dist
+#             .theme-id
+#           key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+
+#       # If build cache did not exist, build & push theme and output the resulting theme ID
+#       - name: Build Theme
+#         run: yarn build --strip-test-ids=false
+#       - name: Ensure dist/ is not empty
+#         run: if [ -z "$(ls -A dist 2>/dev/null)" ]; then exit 1; fi
+#       - name: Push to new theme
+#         id: theme-push
+#         uses: invisiblethemes/rosey@4.0.1
+#         with:
+#           theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+#           store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+#           theme_command: push --development --json --path=dist
+#       - name: Write theme ID to file
+#         run: echo ${{ steps.theme-push.outputs.theme_id }} > .theme-id
+#   lint:
+#     needs: [yarn]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+#     steps:
+#     - uses: actions/checkout@v2
+#     - uses: actions/setup-node@v2
+#       with:
+#         node-version-file: '.nvmrc'
+#         cache: 'yarn'
+#     - uses: actions/cache@v3
+#       with:
+#         path: node_modules
+#         key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#         restore-keys: |
+#           ${{ runner.os }}-node-modules-v1.1-
+#     - name: Yarn install
+#       run: yarn install --frozen-lockfile
+#       env:
+#         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+#         CYPRESS_INSTALL_BINARY: 0
+#     - uses: actions/cache@v3
+#       id: build-cache
+#       with:
+#         path: |
+#           dist
+#           .theme-id
+#         key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+#     - name: Lint JS
+#       run: yarn lint:ci
+#     - name: Check types
+#       run: yarn lint:types
+#   integration-tests:
+#     needs: [build]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 14
+#     container:
+#       image: invisiblethemes/gha-cypress-shopify-cli:1.0.1
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version: "14"
+#           cache: "yarn"
+#       - uses: actions/cache@v3
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-modules-v1.1-
+#       - uses: actions/cache@v3
+#         id: cypress-cache
+#         with:
+#           path: ~/.cache/Cypress
+#           key: cypress-cache-v1-${{ runner.os }}-${{ hashFiles('.cypress-version') }}
+#       - name: Install Cypress
+#         run: yarn cypress install
+#         if: steps.cypress-cache.outputs.cache-hit != 'true'
+#       - uses: actions/cache@v3
+#         id: build-cache
+#         with:
+#           path: |
+#             dist
+#             .theme-id
+#           key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+#       - uses: cypress-io/github-action@v5
+#         name: Run Integration Tests
+#         env:
+#           CYPRESS_BASE_URL: "https://${{env.SHOPIFY_SHOP}}.myshopify.com/"
+#           CYPRESS_SHOPIFY_STORE: "${{ env.SHOPIFY_SHOP }}"
+#           CYPRESS_THEME_ID: "${{ needs.build.outputs.theme_id }}"
+#           CYPRESS_SHOPIFY_THEME_TOKEN: "${{ env.SHOPIFY_THEME_TOKEN }}"
+#         with:
+#           install: false
+#           command: yarn cypress run --browser=chrome
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-screenshots
+#           path: cypress/screenshots
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-videos
+#           path: cypress/videos
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-logs
+#           path: cypress/logs
+#   component-tests:
+#     needs: [yarn]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 14
+#     container:
+#       image: invisiblethemes/gha-cypress-shopify-cli:1.0.1
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version: "14"
+#           cache: "yarn"
+#       - uses: actions/cache@v3
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-modules-v1.1-
+#       - uses: actions/cache@v3
+#         id: cypress-cache
+#         with:
+#           path: ~/.cache/Cypress
+#           key: cypress-cache-v1-${{ runner.os }}-${{ hashFiles('.cypress-version') }}
+#       - name: Install Cypress
+#         run: yarn cypress install
+#         if: steps.cypress-cache.outputs.cache-hit != 'true'
+#       - uses: cypress-io/github-action@v5
+#         name: Run Component Tests
+#         with:
+#           install: false
+#           command: yarn cypress run --component
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-screenshots
+#           path: cypress/screenshots
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-videos
+#           path: cypress/videos
+#       - uses: actions/upload-artifact@v2
+#         if: failure()
+#         with:
+#           name: cypress-logs
+#           path: cypress/logs
+#   unit-tests:
+#     needs: [yarn]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 14
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version: "14"
+#           cache: "yarn"
+#       - uses: actions/cache@v3
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-modules-v1.1-
+#       - name: Yarn install
+#         run: yarn install --frozen-lockfile
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+#           CYPRESS_INSTALL_BINARY: 0

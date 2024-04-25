@@ -1,0 +1,120 @@
+/* ============================================================================
+  #Images
+============================================================================== */
+
+.lazy-image {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+
+  &:after {
+    content: none;
+    display: none;
+  }
+
+  /* === image shimmer effect === */
+  &.is-loading {
+    background: var(--bg-lighten-darken-shimmer-bg);
+    z-index: 1;
+
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      right: -10%;
+      bottom: -10%;
+      z-index: -1;
+      animation-duration: 1.6s;
+      animation-fill-mode: forwards;
+      animation-iteration-count: infinite;
+      animation-name: shimmer;
+      animation-timing-function: linear;
+      background: linear-gradient(98deg, var(--bg-lighten-darken-shimmer-bg) 16%, var(--bg-lighten-darken-shimmer-effect) 32%, var(--bg-lighten-darken-shimmer-bg) 48%);
+      transform: translateX(-100%);
+    }
+  }
+}
+
+.lazy-image--cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+img[loading] {
+  transition: opacity 0.3s ease;
+
+  &.is-loading {
+    opacity: 0.000001;
+  }
+}
+
+.background-size-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-color: var(--bg);
+
+  img {
+    display: block;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+  }
+}
+
+.img-object-cover {
+  display: block;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.img-object-contain {
+  display: block;
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.image-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-fill .placeholder-svg--overlayed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.placeholder-svg-rect,
+.placeholder-svg-sqr {
+  position: relative;
+  height: auto;
+  min-width: 300px;
+  padding-top: 100%;
+
+  svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.placeholder-svg-rect { padding-top: 38.4%; }

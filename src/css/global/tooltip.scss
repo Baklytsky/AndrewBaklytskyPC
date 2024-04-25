@@ -1,0 +1,74 @@
+/* Tooltip Default */
+.tooltip-default {
+  position: absolute;
+  z-index: 10001;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+
+  @media (pointer: coarse) {
+    opacity: 0;
+  }
+}
+
+.tooltip-default__inner {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.tooltip-default__arrow {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  background: var(--bg);
+  border: var(--BORDER-WIDTH) solid var(--border);
+  border-width: 0 0 var(--BORDER-WIDTH) var(--BORDER-WIDTH);
+  transform: rotate(135deg);
+}
+
+.tooltip-default__text {
+  position: relative;
+  margin-top: 10px;
+  background: var(--bg);
+  color: var(--text-dark);
+  padding: 2px 8px;
+  border-radius: 0;
+  box-shadow: 0 0 0 var(--BORDER-WIDTH) var(--border);
+  font-size: calc(1rem * var(--adjust-label));
+  text-align: center;
+}
+
+@keyframes tooltip {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*=== Modifiers ===*/
+.aos-initialized .tooltip-default.is-animating { opacity: 0; }
+
+.tooltip-default.is-hiding .tooltip-default__inner {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-default.is-visible .tooltip-default__inner {
+  transition: none;
+  animation: tooltip 0.2s ease-out;
+  animation-fill-mode: forwards;
+}

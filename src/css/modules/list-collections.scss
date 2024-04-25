@@ -1,0 +1,403 @@
+/*================ Collection list ================*/
+.list-collections-section {
+  background-color: var(--bg);
+  overflow: hidden;
+
+  .grid {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    gap: 0;
+    row-gap: calc(var(--grid-gutter) * 2);
+
+    .buttons-list & { row-gap: var(--grid-gutter); }
+  }
+
+  .grid__item {
+    flex-basis: var(--grid-item);
+  }
+
+  .carousel--mobile {
+    @include media-query ($small) {
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+    }
+  }
+
+  .carousel--mobile .grid__item {
+    @include media-query ($small) {
+      flex-basis: var(--item-width-mobile);
+    }
+  }
+
+  .carousel--mobile .list-collections__item:only-child {
+    @include media-query ($small) {
+      flex-basis: calc(var(--wrapper-width));
+    }
+  }
+
+  .grid--mobile {
+    @include media-query ($small) {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-start;
+      gap: 0;
+      row-gap: calc(var(--grid-gutter) * 2);
+    }
+  }
+
+  .grid--mobile .carousel__item {
+    @include media-query ($small) {
+      flex-basis: var(--grid-item);
+    }
+  }
+
+  .grid__container {
+    .grid {
+      margin: 0 calc(-1 * var(--grid-gutter) / 2);
+    }
+
+    .list-collections__item {
+      margin: 0;
+      padding: 0 calc(var(--grid-gutter) / 2);
+    }
+
+    .carousel--mobile {
+      @include media-query ($small) {
+        margin: -15px 0;
+      }
+    }
+
+    .carousel--mobile .list-collections__item {
+      @include media-query ($small) {
+        margin: 0 var(--grid-gutter) 0 0;
+        padding: 0;
+      }
+    }
+
+    .carousel--mobile .list-collections__item:last-child {
+      @include media-query ($small) {
+        margin: 0;
+      }
+    }
+  }
+
+  .carousel__container {
+    .grid--mobile {
+      @include media-query ($small) {
+        margin: 0 calc(-1 * var(--grid-gutter) / 2);
+      }
+    }
+
+    .grid--mobile .list-collections__item {
+      @include media-query ($small) {
+        margin: 0;
+        padding: 0 calc(var(--grid-gutter) / 2);
+      }
+    }
+  }
+
+  .section__header {
+    margin-bottom: calc(var(--heading-margin) * 3 + var(--inner) / 2);
+
+    .buttons-list & { margin-bottom: calc(var(--heading-margin) * 2); }
+  }
+}
+
+.list-collections-section--center {
+  .grid,
+  .grid--mobile,
+  .carousel--inactive {
+    justify-content: center;
+  }
+
+  .carousel--mobile {
+    @include media-query ($small) {
+      justify-content: flex-start;
+    }
+  }
+}
+
+.list-collections__item {
+  position: relative;
+
+  .buttons-list .carousel__container & {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.list-collections__item__outer {
+  position: relative;
+  display: block;
+  width: 100%;
+
+  .buttons-list & {
+    height: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+
+    &:hover { opacity: 0.85; }
+  }
+}
+
+.list-collections__item__image {
+  display: block;
+  position: relative;
+  height: 0;
+  padding-top: var(--image-height);
+  backface-visibility: hidden;
+  overflow: hidden;
+
+  .buttons-list & {
+    --border: var(--btn-border);
+    border: var(--BORDER-WIDTH) solid var(--border);
+    border-radius: var(--radius);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding-top: 0;
+  }
+}
+
+.list-collections__item__image-bg {
+  pointer-events: none;
+
+  .buttons-list & {
+    // Fix parent border white lines
+    top: calc(-1 * var(--BORDER-WIDTH));
+    left: calc(-1 * var(--BORDER-WIDTH));
+    width: calc(100% + 2 * var(--BORDER-WIDTH));
+    height: calc(100% + 2 * var(--BORDER-WIDTH));
+  }
+}
+
+.list-collections__item__image__empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.list-collections__item__content {
+  display: block;
+  padding-top: var(--inner);
+  text-align: center;
+}
+
+.list-collections__item__content--overlayed {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  backface-visibility: hidden;
+
+  .buttons-list & {
+    --top-bottom-padding: 15px; // default top/bottom padding for "btn--large"
+    --left-right-padding: 22px; // default left/right padding for "btn--large"
+    --btn-inner-top-bottom: calc(var(--top-bottom-padding) * var(--adjust-text));
+    --btn-inner-left-right: calc(var(--left-right-padding) * var(--adjust-text));
+    --text: var(--btn-text);
+    position: relative;
+    height: 100%;
+    padding: var(--btn-inner-top-bottom) var(--btn-inner-left-right);
+  }
+}
+
+.list-collections__item__title {
+  font-size: calc(1rem * var(--adjust-text));
+  margin: 0;
+  color: var(--text);
+  word-break: break-word;
+
+  .buttons-list & {
+    letter-spacing: var(--letter-spacing);
+  }
+}
+
+.list-collections__item__overlayed {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+
+  @include media-query ($mobile) {
+    margin-left: calc(var(--grid-gutter) / 2);
+    width: calc(100% - var(--grid-gutter));
+  }
+}
+
+.list-collections__item .list-collections__item__image-bg:before {
+  @include pseudo-overlay;
+  z-index: 1;
+
+  .buttons-list & { background: var(--btn-bg); }
+}
+
+.list-collections__item--circle .list-collections__item__image,
+.list-collections__item--circle .list-collections__item__image-bg { border-radius: 50%; }
+
+.list-collections-section--grid .list-collections-section__container {
+  @include media-query ($small) {
+    overflow: initial;
+  }
+}
+
+.list-collections-section .carousel--mobile {
+  @include media-query ($small) {
+    // Prevent items getting cut off while fade up animation is running
+    margin-top: -15px;
+    margin-bottom: -15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+}
+
+// Make the out of view slides unclickable on Mobile
+.list-collections-section--carousel-mobile .list-collections-section__container {
+  @include media-query ($small) {
+    position: relative;
+
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 5;
+      width: var(--gutter-mobile);
+    }
+  }
+}
+
+.list-collections-section--carousel-mobile .list-collections-section__container.is-last-slide-visible:before {
+  @include media-query ($small) {
+    right: auto;
+    left: 0;
+  }
+}
+
+/* Carousel */
+.list-collections-section--carousel .wrapper--full .list-collections-section__container { margin: 0; }
+
+// Make the out of view items unclickable
+.list-collections-section--carousel {
+  @include media-query($medium) {
+    --cells-count: 2;
+    --cells-width: calc((var(--wrapper-width) * 0.9 - var(--grid-gutter)) / 2);
+    --cells-gutter-offset: calc(var(--cells-count) * var(--grid-gutter));
+  }
+
+  &[data-columns='5'],
+  &[data-columns='6'] {
+    @include media-query($medium) {
+      --cells-count: 4;
+      --cells-width: calc((var(--wrapper-width) * 0.9 - var(--grid-gutter)) / 4);
+    }
+  }
+}
+
+.list-collections-section--carousel .flickity-viewport:before,
+.list-collections-section--carousel .flickity-viewport:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  width: 50vw;
+  height: 100%;
+}
+
+.list-collections-section--carousel .flickity-viewport:before {
+  right: calc(100% + var(--grid-gutter));
+
+  @include media-query($medium) {
+    display: none; // Hide it initially
+    right: calc(var(--cells-width) * var(--cells-count) + var(--cells-gutter-offset));
+  }
+}
+
+.list-collections-section--carousel .is-last-slide-visible .flickity-viewport:before {
+  @include media-query($medium) {
+    display: block; // Only show it when the last slide is visible and hide the partially visible slide on the left
+  }
+}
+
+.list-collections-section--carousel .is-last-slide-visible .flickity-viewport:after {
+  @include media-query($medium) {
+    display: none;
+  }
+}
+
+.list-collections-section--carousel .flickity-viewport:after {
+  left: calc(100% + var(--grid-gutter));
+
+  @include media-query($medium) {
+    left: calc(var(--cells-width) * var(--cells-count) + var(--cells-gutter-offset));
+  }
+}
+
+.list-collections-section--carousel .flickity-button {
+  z-index: 5;
+  background: var(--bg);
+}
+
+/* NO JS */
+.no-js .list-collections-section {
+  .carousel {
+    @include media-query ($medium-up) {
+      margin-bottom: calc(var(--grid-gutter) * -2);
+    }
+  }
+
+  .carousel .list-collections__item {
+    @include media-query ($medium-up) {
+      margin-bottom: calc(var(--grid-gutter) * 2);
+    }
+    @include media-query ($medium) {
+      width: calc(50% - var(--grid-gutter) / 2);
+    }
+  }
+
+  .grid--mobile .carousel__item {
+    @include media-query ($small) {
+      margin-bottom: calc(var(--grid-gutter) * 2);
+    }
+  }
+
+  .carousel--mobile .list-collections__item {
+    @include media-query ($small) {
+      margin-right: var(--grid-gutter) !important;
+      margin-bottom: 0;
+    }
+  }
+
+  .carousel--mobile .list-collections__item:last-child {
+    @include media-query ($small) {
+      margin-right: 0 !important;
+    }
+  }
+
+  .carousel--mobile .list-collections__item:only-child {
+    @include media-query ($small) {
+      --wrapper-width: calc(100% - var(--gutter-mobile));
+    }
+  }
+}

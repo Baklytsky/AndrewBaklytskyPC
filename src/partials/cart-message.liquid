@@ -1,0 +1,74 @@
+{%- liquid
+  assign free_shipping_text = block.settings.message | default: settings.message
+  assign is_enable = false
+
+  if block.settings.message != blank
+    assign is_enable = true
+  endif
+
+  if settings.show_free_shipping_message and settings.free_shipping_limit != blank and free_shipping_text != blank
+    assign is_enable = true
+  endif
+-%}
+
+{%- if is_enable -%}
+  {%- liquid
+    assign limit = settings.free_shipping_limit | plus: 0
+    assign limit_currency = limit | times: 100
+    assign cart_total_price = cart.total_price
+    assign subtotal_without_currency = cart_total_price | plus: 0 | divided_by: 100
+  -%}
+
+  {%- capture left_to_spend -%}
+    <span data-left-to-spend>
+      {%- if settings.currency_code_enable -%}
+        {{- limit_currency | minus: cart_total_price | money_with_currency | remove: '.00' | remove: ',00' -}}
+      {%- else -%}
+        {{- limit_currency | minus: cart_total_price | money_without_trailing_zeros -}}
+      {%- endif -%}
+    </span>
+  {%- endcapture -%}
+
+  {%- liquid
+    assign free_shipping_message = free_shipping_text | replace: '||amount||', left_to_spend
+    assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
+    assign class_message = ''
+
+    if subtotal_without_currency >= limit
+      if qualified_shipping_message != blank
+        assign class_message = ' is-success'
+        assign is_default_message_hidden = ' is-hidden'
+      else
+        assign class_message = ' is-hidden'
+      endif
+    elsif subtotal_without_currency == 0
+      assign class_message = ' is-hidden'
+    endif
+
+    assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
+    assign percent = 100 | minus: percent
+  -%}
+
+  <p class="{% unless template.name == 'cart' or section.id == 'announcement-bar' %}cart-drawer__message {% endunless %}cart__message{{ class_message }}"
+    data-cart-message="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
+    data-limit="{{ limit }}"
+    {% if animations_enabled %}
+      data-aos="fade-up"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {% endif %}>
+    <span class="cart__message__default{{ is_default_message_hidden }}" data-message-default>{{ free_shipping_message }}</span>
+
+    {%- if qualified_shipping_message != blank -%}
+      <span class="cart__message__success">{{ qualified_shipping_message }}</span>
+    {%- endif -%}
+
+    {%- if has_progress_holder -%}
+      <span class="cart__message__progress__holder">
+        <progress class="cart__message__progress" data-cart-message-progress value="{{ percent }}" max="100" style="--progress-width: {{ percent }}%;"></progress>
+        {%- comment -%}Second progress bar shows only on Firefox{%- endcomment -%}
+        <progress class="cart__message__progress" data-cart-message-progress max="100" style="--progress-width: {{ percent }}%;"></progress>
+      </span>
+    {%- endif -%}
+  </p>
+{%- endif -%}

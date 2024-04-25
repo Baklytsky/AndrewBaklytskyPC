@@ -1,0 +1,115 @@
+{%- assign currency_code_enable = settings.currency_code_enable -%}
+
+<div class="product__block product__price-and-badge"
+  {% if animations_enabled %}
+    data-aos="hero"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-order="{{ animation_order }}"
+    {%- assign animation_order = animation_order | plus: 1 -%}
+  {% endif %}
+  {{ block_style }}>
+  <div class="product__price-and-rating">
+    <div class="product__price" data-price-wrapper>
+      {%- unless product == blank -%}
+        <span data-product-price class="product__price--regular{% if current_variant.compare_at_price > current_variant.price %} product__price--sale{% endif %}">
+          {%- liquid
+            if current_variant.price == 0
+              echo 'products.product.free' | t
+            elsif currency_code_enable
+              echo current_variant.price | money_with_currency
+            else
+              echo current_variant.price | money
+            endif
+          -%}
+        </span>
+      {%- else -%}
+        <span id="ProductPrice">
+          {%- liquid
+            if currency_code_enable
+              echo 1999 | money_with_currency
+            else
+              echo 1999 | money
+            endif
+          -%}
+        </span>
+      {%- endunless -%}
+
+      <s data-compare-price class="product__price--compare">
+        {%- liquid
+          if current_variant.compare_at_price
+            if currency_code_enable
+              echo current_variant.compare_at_price | money_with_currency
+            else
+              echo current_variant.compare_at_price | money
+            endif
+          endif
+        -%}
+      </s>
+
+      {%- liquid
+        assign units = product.variants | map: 'unit_price' | compact
+        if units[0]
+          assign has_units = true
+        else
+          assign has_units = false
+        endif
+      -%}
+
+      {%- if has_units -%}
+        {%- assign current_variant_unit_price = current_variant.unit_price -%}
+        {%- capture show_units -%}
+          {%- unless current_variant_unit_price -%}style="display: none;"{%- endunless -%}
+        {%- endcapture -%}
+
+        {%- capture unit_price_separator -%}
+          <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+        {%- endcapture -%}
+
+        {%- capture unit_price_base_unit -%}
+          <span>
+            {%- if current_variant.unit_price_measurement -%}
+              {% if current_variant.unit_price_measurement.reference_value != 1 %}
+                {{ current_variant.unit_price_measurement.reference_value }}
+              {% endif %}
+              {{ current_variant.unit_price_measurement.reference_unit }}
+            {%- endif -%}
+          </span>
+        {%- endcapture -%}
+
+        <span class="product__unit-price">
+          <span data-product-unit class="product__price--unit{% unless current_variant_unit_price %} hidden{% endunless %}">
+            <span class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</span>
+            <span data-product-unit-price id="unit-price-{{ section.id }}">{{ current_variant_unit_price | money }}</span>
+            {{ unit_price_separator }}
+            <span data-product-base id="unit-price-base-{{ section.id }}">{{ unit_price_base_unit }}</span>
+          </span>
+        </span>
+      {%- endif -%}
+      {% if section_type != 'quickview' %}
+        <span data-price-off class="product__price--off hidden">
+          <span data-price-off-type>{{ 'products.product.sale' | t }}</span>
+          <em>•</em>
+          {{ 'products.product.save' | t }}
+          <span data-price-off-amount></span>
+        </span>
+      {% endif %}
+    </div>
+
+    {%- if block.settings.show_rating or settings.show_rating and section_type == 'quickview' -%}
+      {%- unless product == blank -%}
+        {%- render 'rating', show_rating_count: block.settings.show_rating_count, single_star: true, reviews: product.metafields.reviews -%}
+      {%- else -%}
+        {%- render 'rating', show_rating_count: block.settings.show_rating_count, single_star: true, onboarding: true -%}
+      {%- endunless -%}
+    {%- endif -%}
+  </div>
+
+  {% if section_type == 'quickview' %}
+    <span data-price-off class="product__price--off hidden">
+      <span data-price-off-type>{{ 'products.product.sale' | t }}</span>
+      <em>•</em>
+      {{ 'products.product.save' | t }}
+      <span data-price-off-amount></span>
+    </span>
+  {% endif %}
+</div>

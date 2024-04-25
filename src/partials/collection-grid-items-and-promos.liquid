@@ -1,0 +1,158 @@
+{%- for promo in promos_array -%}
+  {%- liquid
+    if promo == ''
+      continue
+    endif
+
+    assign promo_index = forloop.index
+    assign current_promo_markup = promo | split: '#promo_html#' | last | split: '#block_id#' | first
+    assign block_id = promo | split: '#block_id#' | last | split: '#promo_collection#' | first
+    assign promo_collection = promo | split: '#promo_collection#' | last | split: '#promo_width#' | first
+    assign promo_position = promo | split: '#promo_position#' | last | split: '#promo_html#' | first | times: 1
+    assign promo_width = promo | split: '#promo_width#' | last | split: '#promo_width_class#' | first | times: 1
+    assign promo_width_class = promo | split: '#promo_width_class#' | last
+    assign promo_index_tag = '@' | append: promo_index | append: '@'
+    assign block_class = 'collection-promo' | append: ' ' | append: promo_width_class
+    assign block_tablet_class = ''
+    assign promo_tablet_class = 'collection-promo--'
+    assign tablet_class = 'tablet-grid'
+    assign tablet_even_class = tablet_class | append: ' collection-promo--grid-even'
+    assign tablet_second_class = ' collection-promo--grid-second'
+    assign tablet_third_class = ' collection-promo--grid-third'
+    assign tablet_full_class = 'tablet-full'
+    assign animation_delay = counter_delay | modulo: columns | times: 1
+
+    if carousel
+      assign block_class = block_class | append: ' carousel__item'
+
+      case columns
+        when 2
+          assign block_class = block_class | append: ' one-half'
+        when 3
+          assign block_class = block_class | append: ' one-third'
+        when 4
+          assign block_class = block_class | append: ' one-quarter'
+      endcase
+    else
+      assign block_class = block_class | append: ' grid__item'
+    endif
+  -%}
+
+  {%- if promo_position <= counter_grid -%}
+    {%- unless added_promos_index contains promo_index_tag -%}
+      {%- if promo_collection == empty or promo_collection == collection.handle -%}
+        {%- liquid
+          if items_on_row_remaining < promo_width
+            assign animation_delay = 0
+            assign counter_delay = 0
+            assign items_on_row_remaining = columns
+          endif
+
+          assign promo_even = mobile_counter | modulo: 2
+          assign promo_second = tablet_counter | plus: 1 | modulo: 3
+          assign promo_third = tablet_counter | modulo: 3
+          assign counter_grid = counter_grid | plus: promo_width
+          assign items_on_row_remaining = items_on_row_remaining | minus: promo_width
+          assign counter_delay = counter_delay | plus: promo_width
+          assign block_tablet_class = tablet_class
+
+          case promo_width
+            when 1
+              if promo_even == 0
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: 1
+              assign mobile_counter = mobile_counter | plus: 1
+
+            when columns
+              assign counter_delay = 0
+              assign items_on_row_remaining = columns
+
+            when 2 or columns
+              assign counter_increase_mobile = 2
+              assign block_tablet_class = tablet_full_class
+
+              if promo_even == 0
+                assign counter_increase_mobile = 1
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign counter_increase_tablet = 2
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign counter_increase_tablet = 1
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                else
+                  if promo_width == 2
+                    assign counter_increase_tablet = 2
+                  else
+                    assign counter_increase_tablet = 3
+                  endif
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: counter_increase_tablet
+              assign mobile_counter = mobile_counter | plus: counter_increase_mobile
+          endcase
+
+          assign promo_tablet_class = promo_tablet_class | append: block_tablet_class
+          assign added_promos_index = added_promos_index | append: '@' | append: promo_index | append: '@#'
+        -%}
+        <div id="{{ block_id }}"
+          class="{{ block_class }} {{ promo_tablet_class }}"
+          {% if carousel %} data-slide{% endif %}
+          {% if animations_enabled %}
+            data-aos="fade"
+            data-aos-delay="{{ animation_delay | times: 150 }}"
+          {% endif %}
+          data-promo>
+          {{ current_promo_markup }}
+        </div>
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- liquid
+    assign mod = counter_delay | modulo: columns
+    if mod < 1
+      assign items_on_row_remaining = columns
+      assign counter_delay = 0
+    endif
+  -%}
+{%- endfor -%}
+
+{%- liquid
+  assign animation_delay = counter_delay | modulo: columns | times: 1
+  assign counter_delay = counter_delay | plus: 1
+  assign counter_grid = counter_grid | plus: 1
+  assign items_on_row_remaining = items_on_row_remaining | minus: 1
+
+  if collection
+    render 'product-grid-item', product: product, animation_delay: animation_delay, tablet_counter: tablet_counter, mobile_counter: mobile_counter, carousel: carousel, columns: columns, section_width: section.settings.width, item_index: forloop.index0
+  else
+    capture placeholder_index
+      cycle 1, 2, 3, 5, 6
+    endcapture
+    render 'product-grid-item--onboarding', columns_mobile: columns_mobile, carousel: carousel, index: placeholder_index, animation_delay: animation_delay, columns: columns
+  endif
+
+  assign tablet_counter = tablet_counter | plus: 1
+  assign mobile_counter = mobile_counter | plus: 1
+
+  assign mod = counter_delay | modulo: columns
+  if mod < 1
+    assign items_on_row_remaining = columns
+    assign counter_delay = 0
+  endif
+-%}

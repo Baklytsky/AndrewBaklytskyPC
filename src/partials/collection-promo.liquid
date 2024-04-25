@@ -1,0 +1,260 @@
+
+{%- liquid
+  assign promo_bg_color = block.settings.bg_color
+  assign promo_image = block.settings.image
+  assign title = block.settings.title
+  assign heading_highlight_type = block.settings.heading_highlight_type
+  assign highlight_color = block.settings.highlight_color
+  assign highlight_text_color = block.settings.highlight_text_color
+  assign promo_heading_size = block.settings.heading_size | times: 0.01
+  assign promo_text_size = block.settings.text_size | times: 0.01
+  assign promo_content = block.settings.content | strip_html
+  assign promo_layout = block.settings.layout
+  assign promo_btn_text = block.settings.button_text | strip_html
+  assign promo_btn_link = block.settings.button_link
+  assign promo_button_style = block.settings.button_style
+  assign promo_button_size = block.settings.button_size
+  assign promo_button_color = block.settings.button_color
+  assign promo_text_color = block.settings.text_color
+  assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+  assign promo_height = settings.image_aspect_ratio | times: 100
+  assign show_text_shadow = settings.show_text_shadow
+  assign block_class = 'collection-promo__inner'
+  assign block_id = 'CollectionPromo--' | append: block.id
+  assign block_selector_id = '#' | append: block_id
+  assign animation_delay = 150
+  assign animation_anchor = block_selector_id
+
+  assign block_class = block_class | append: ' ' | append: promo_text_color
+
+  if promo_image != blank
+    assign block_class = block_class | append: ' collection-promo--image'
+  endif
+
+  assign whole_link = false
+  if promo_btn_text == blank and promo_btn_link != blank
+    assign whole_link = true
+    assign block_class = block_class | append: ' collection-promo--outer-link'
+  endif
+
+  capture content_position_class
+    case block.settings.text_position
+      when 'left'
+        echo 'item--left'
+      when 'center'
+        echo 'item--center'
+      when 'right'
+        echo 'item--right'
+      when 'bottom-left'
+        echo 'item--bottom-left'
+      when 'bottom-right'
+        echo 'item--bottom-right'
+      when 'top-left'
+        echo 'item--top-left'
+      when 'top-right'
+        echo 'item--top-right'
+    endcase
+  endcapture
+
+  assign block_class = block_class | append: ' ' | append: content_position_class
+
+  capture promo_layout_class
+    case promo_layout
+      when 'inline'
+        echo 'collection-promo__content--inline'
+      when 'stacked'
+        echo 'collection-promo__content--stacked'
+    endcase
+  endcapture
+
+  comment
+    Image desktop sizes
+  endcomment
+
+  assign wrapper_width_desktop = '(100vw - 120px)'
+
+  if section.settings.width == 'wrapper'
+    assign wrapper_width_desktop = '(1440px - 120px)'
+  endif
+
+  assign img_width_lg = 'calc' | append: wrapper_width_desktop
+
+  if columns == 4
+    case promo_width
+      when 'auto'
+        assign img_width_lg = 'calc((' | append: wrapper_width_desktop | append: ' - 20px * 3) / 4)'
+      when 'half'
+        assign img_width_lg = 'calc((' | append: wrapper_width_desktop | append: ' - 20px * 2) / 2)'
+    endcase
+  elsif columns == 3
+    case promo_width
+      when 'auto'
+        assign img_width_lg = 'calc((' | append: wrapper_width_desktop | append: ' - 20px * 2) / 3)'
+      when 'half'
+        assign img_width_lg = 'calc(((' | append: wrapper_width_desktop | append: ' - 20px) / 3) * 2)'
+    endcase
+  else
+    case promo_width
+      when 'auto'
+        assign img_width_lg = 'calc((' | append: wrapper_width_desktop | append: ' - 20px) / 2)'
+    endcase
+  endif
+
+  comment
+    Image tablet sizes
+  endcomment
+
+  assign img_width_md = 'calc(100vw - 40px)'
+
+  case promo_width
+    when 'auto'
+      assign img_width_md = 'calc(((100vw - 40px) - 20px * 2) / 3)'
+    when 'half'
+      assign img_width_md = 'calc((((100vw - 40px) - 20px) / 3) * 2)'
+  endcase
+
+  comment
+    Split image desktop sizes
+  endcomment
+
+  if section.settings.products_layout == 'split-left' or section.settings.products_layout == 'split-right'
+    assign img_width_lg = 'calc((' | append: wrapper_width_desktop | append: ' - 40px) / 2)'
+    assign img_width_md = 'calc(((100vw - 40px) - 40px) / 2)'
+
+    if promo_width == 'auto'
+      assign img_width_lg = 'calc((((' | append: wrapper_width_desktop | append: ' - 40px) / 2) - 20px) / 2)'
+      assign img_width_md = 'calc(((((100vw - 40px) - 40px) / 2) - 20px) / 2)'
+    endif
+  endif
+
+  assign wrapper_width_mobile = '(100vw - 40px)'
+  assign img_width_sm = 'calc' | append: wrapper_width_mobile
+
+  if promo_width == 'auto' and columns_mobile == 2
+    assign img_width_sm = 'calc((' | append: wrapper_width_mobile | append: ' - 20px) /2)'
+  endif
+
+  if section.settings.enable_slider_mobile
+    assign wrapper_width_mobile = '(100vw - 20px)'
+    assign img_width_sm = 'calc(' | append: wrapper_width_mobile | append: ' - 40px)'
+
+    if columns_mobile == 2
+      assign img_width_sm = 'calc(((' | append: wrapper_width_mobile | append: ' * 0.9) / 2) - 20px)'
+    endif
+  endif
+
+  assign sizes = '(min-width: 1024px) ' | append: img_width_lg | append: ', (min-width: 768px) ' | append: img_width_md | append: ', ' | append: img_width_sm
+-%}
+
+[%- render 'partials/title-text-highlights' -%]
+
+{%- style -%}
+  {{ block_selector_id }} {
+    --overlay-opacity: {{ overlay_opacity }};
+    --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ promo_heading_size }});
+    --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ promo_text_size }});
+    --promo-height: {{ promo_height }}%;
+
+    {%- if promo_bg_color != 'rgba(0,0,0,0)' and promo_bg_color != '' and promo_image == blank -%}
+      --bg: {{ promo_bg_color }};
+    {%- endif -%}
+  }
+
+  {{ block_selector_id }} .collection-promo__heading {
+    {%- if heading_highlight_type != 'highlight' -%}
+      --highlight-color: var(--text);
+    {%- endif -%}
+
+    {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+      --highlight-color: {{ highlight_color }};
+    {%- endif -%}
+
+    {%- if highlight_text_color != 'rgba(0,0,0,0)' and highlight_text_color != '' -%}
+      --highlight-text-color: {{ highlight_text_color }};
+    {%- endif -%}
+  }
+{%- endstyle -%}
+
+<div class="{{ block_class }}" {{ block.shopify_attributes }}>
+  {%- if whole_link -%}
+    {%- assign hover_scale = ' hover-scale' -%}
+    <a class="collection-promo__link" href="{{ promo_btn_link }}">
+        <span class="visually-hidden">{{ title | strip_html | strip }}</span>
+    </a>
+  {%- endif -%}
+
+  <div class="collection-promo__bg{{ hover_scale }}">
+    {%- render 'image-fill', is_background: true, img_object: promo_image, sizes: sizes, classes: 'collection-promo__image' -%}
+  </div>
+
+  {%- if promo_image != blank -%}
+    <div class="overlay"></div>
+  {%- endif -%}
+
+  <div class="collection-promo__content {{ promo_layout_class }}{% if show_text_shadow and promo_image != blank %} backdrop--radial{% endif %}">
+    <div class="collection-promo__body">
+      {%- if title != blank -%}
+        {%- liquid
+          assign numbers_string = '0%,1%,2%,3%,4%,5%,6%,7%,8%,9%' | split: ','
+          assign has_percent_off = false
+          assign has_number_percent = false
+          for num in numbers_string
+            if title contains num
+              assign has_number_percent = true
+            endif
+          endfor
+
+          if has_number_percent
+            assign title = title | replace: '%', '<sup>%</sup>'
+
+            if title contains '<sup>%</sup> off' or title contains '<sup>%</sup> OFF' or title contains '<sup>%</sup> Off'
+              assign has_percent_off = true
+              assign title = title | replace: '<sup>%</sup> off', '<sup>%</sup> <small>off</small>'
+              assign title = title | replace: '<sup>%</sup> OFF', '<sup>%</sup> <small>OFF</small>'
+              assign title = title | replace: '<sup>%</sup> Off', '<sup>%</sup> <small>Off</small>'
+            endif
+          endif
+        -%}
+
+        <h3 class="collection-promo__heading{% if has_text_highlight %} {{ text_highlight_wrapper_class }}{% endif %}{% if has_percent_off %} haspercentoff{% elsif has_number_percent %} hasnumberpercent{% endif %}"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {%- render 'title-with-highlights',
+            title: title,
+            heading_highlight_type: heading_highlight_type,
+            highlight_color: highlight_color,
+            has_text_highlight: has_text_highlight
+          -%}
+        </h3>
+      {%- endif -%}
+
+      {%- if promo_content != blank -%}
+        <div class="collection-promo__text"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {{- promo_content -}}
+        </div>
+      {%- endif -%}
+
+      {%- if promo_btn_text != blank -%}
+        <div class="collection-promo__button"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          <a class="btn {{ promo_button_style }} {{ promo_button_size }} {{ promo_button_color }}" href="{{ promo_btn_link }}">{{ promo_btn_text }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

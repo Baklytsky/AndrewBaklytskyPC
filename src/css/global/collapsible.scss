@@ -1,0 +1,94 @@
+[data-collapsible-container] {
+  position: relative;
+  width: 100%;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  will-change: height;
+  transition: opacity 0.3s ease, height 0.3s ease, visibility 0s 0.3s;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+[data-collapsible-container].is-expanded {
+  opacity: 1;
+  overflow: unset; // Fixes content jumping when item is sliding down
+  visibility: visible;
+  transition: opacity 1s ease, height 0.5s ease, visibility 0s;
+}
+
+[data-collapsible-content] {
+  overflow: hidden;
+  will-change: transform;
+  transform: translateY(25px);
+  transition: transform 0.5s ease;
+}
+
+.is-expanded > [data-collapsible-content] { transform: translateY(0); }
+
+[data-collapsible-trigger],
+[data-collapsible-trigger-mobile] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  cursor: pointer;
+  min-width: 22px;
+
+  .icon {
+    position: absolute;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-toggle-plus,
+  .icon-toggle-minus {
+    width: 16px;
+    height: 16px;
+  }
+
+  .icon-toggle-plus,
+  .icon-toggle-minus { transition: opacity 0.3s ease, transform 0.3s ease; }
+  .icon-toggle-minus { opacity: 0; }
+}
+
+[data-collapsible-trigger].is-expanded > .icon-toggle-plus,
+[data-collapsible-trigger-mobile].is-expanded > .icon-toggle-plus { opacity: 0; transform: rotate(180deg); }
+
+[data-collapsible-trigger].is-expanded > .icon-toggle-minus,
+[data-collapsible-trigger-mobile].is-expanded > .icon-toggle-minus { opacity: 1; transform: rotate(180deg); }
+
+@include media-query ($small) {
+  [data-collapsible-container-mobile] {
+    position: relative;
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    visibility: hidden;
+    will-change: height;
+    transition: opacity 0.3s ease, height 0.3s ease, visibility 0s 0.3s;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  [data-collapsible-container-mobile].is-expanded {
+    opacity: 1;
+    overflow: unset;
+    visibility: visible;
+    transition: opacity 1s ease, height 0.5s ease, visibility 0s;
+  }
+
+  [data-collapsible-content-mobile] {
+    transform: translateY(25px);
+    transition: transform 0.5s ease;
+  }
+
+  .is-expanded > [data-collapsible-content-mobile] {
+    transform: translateY(0);
+  }
+}

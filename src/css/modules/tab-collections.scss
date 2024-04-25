@@ -1,0 +1,134 @@
+/*================ Tab collections ================*/
+.tab-collections {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  background-color: var(--bg);
+
+  .btn--view-all { margin-top: var(--gutter); }
+
+  & > .flickity-prev-next-button.next { right: calc(var(--gutter) / 2); }
+  & > .flickity-prev-next-button.previous { left: calc(var(--gutter) / 2); }
+}
+
+.tab-collections-wrapper {
+  margin-top: -10px; // Make space between heading & tabs consistent when there's line between
+}
+
+.tab-collections__featured-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 0 0 100%;
+  max-width: 100%;
+  height: 100%;
+  text-align: left;
+  padding: 40px;
+  position: relative;
+}
+.tab-collections__featured-item .overlay { pointer-events: none; }
+
+.product-grid-item--featured {
+  align-self: stretch;
+
+  @include media-query ($medium-up) {
+    height: 100%;
+
+    .carousel--inactive & { height: auto; }
+  }
+}
+
+.tab-collections__featured-item__content {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.tab-collections__heading {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+  p { line-height: 1; }
+}
+.tab-collections__heading p { margin: 0.5em 0; }
+.tab-collections__btn-wrapper {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+}
+.tab-collections__container .flickity-slider {
+  position: relative !important;
+  display: flex;
+  left: 0 !important;
+  width: auto;
+}
+
+// Support for left and right content alignment
+.tab-collections__head {
+  --btn-max-width: 150px;
+  --btn-space: calc(var(--inner) + var(--btn-max-width));
+
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &.text-center {
+    flex-flow: column wrap;
+    justify-content: center;
+  }
+}
+
+.tab-collections__head--has-button {
+  &.tabs__head {
+    @include media-query($medium-up) {
+      overflow: visible;
+    }
+  }
+
+  .tabs-scrollbar {
+    @include media-query($medium-up) {
+      max-width: calc(100% - var(--btn-space));
+    }
+  }
+
+  .tabs-scrollbar__holder {
+    @include media-query($medium-up) {
+      margin: 0;
+      max-width: 100%;
+      padding: 0;
+    }
+  }
+
+  &.text-center .tabs-scrollbar {
+    @include media-query($medium-up) {
+      max-width: 100%;
+    }
+  }
+}
+
+.tab-collections__text {
+  margin-top: calc(var(--gutter) / -2.5);
+  margin-bottom: calc(var(--gutter) / 2);
+  font-size: calc(1.1rem * var(--adjust-body));
+}
+
+.tab-collections__button {
+  margin-top: -7px; // (.custom-scrollbar + inline-block gap) height
+  max-width: var(--btn-max-width);
+  display: none;
+
+  &.current {
+    @include media-query($medium-up) {
+      display: inline-block;
+    }
+  }
+
+  &.tab-collections__button--center {
+    @include media-query($medium-up) {
+      margin: calc(var(--grid-gutter) / 1.5) auto calc(var(--grid-gutter) / 4); // based on tabs contents' ".grid-gutter", each ".tab" padding-top and inline-block's native gap
+    }
+  }
+}

@@ -1,0 +1,433 @@
+/*================ Banner with text columns ================*/
+
+.section-banner-with-text-columns {
+  --sticky-position: var(--header-sticky-height, 0);
+  display: flex;
+  position: relative;
+}
+
+.banners {
+  --inner-gutter: 16px;
+  display: flex;
+  align-items: flex-end;
+
+  .flickity-slider {
+    display: flex;
+  }
+
+  .flickity-page-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+
+    @include media-query ($medium-up) { display: none; }
+  }
+
+  .dot {
+    border-color: currentcolor;
+    transition: border 0.5s ease, width 0.5s ease, opacity 0.5s ease;
+    position: relative;
+
+    &:after {
+      content: '';
+      position: absolute;
+      left: -2px;
+      right: -2px;
+      top: -2px;
+      bottom: -2px;
+    }
+
+    &:hover { opacity: 1; }
+  }
+
+  .banner {
+    position: static;
+    display: flex;
+    padding: var(--gutter) var(--inner-gutter);
+
+    @include media-query ($medium-up) {
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    @include media-query ($small) {
+      padding: var(--gutter) var(--gutter-mobile);
+      min-width: 100%;
+    }
+  }
+
+  .banner--col:only-child,
+  .banner--col.is-selected {
+    @include media-query ($medium-up) {
+      opacity: 1;
+    }
+  }
+
+  &.text-center .banner {
+    justify-content: center;
+  }
+}
+
+/* Layout modifiers */
+
+.banners--row {
+  --inner-gutter: 30px;
+
+  @include media-query ($small) {
+    --inner-gutter: 20px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: var(--min-h);
+  }
+
+  .banners__content {
+    padding: var(--gutter) 0;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    row-gap: var(--inner-gutter);
+    pointer-events: none;
+
+    @include media-query ($small) {
+      position: sticky;
+      top: var(--sticky-position, 0);
+      row-gap: var(--gutter-mobile);
+      min-height: var(--min-h);
+      align-content: center;
+      align-items: center;
+      grid-row-start: 1;
+      grid-column-start: 1;
+    }
+  }
+
+  .is-full-height & .banners__content {
+    @include media-query ($small) {
+      --min-h: min(var(--full-height), 100%);
+    }
+  }
+
+  .banners__media {
+    @include media-query ($small) {
+      position: relative;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      margin: 0 calc(var(--gutter-mobile) * -1);
+      width: calc(100% + var(--gutter-mobile) * 2);
+      min-height: var(--min-h);
+      height: 100%;
+      grid-row-start: 1;
+      grid-column-start: 1;
+      pointer-events: all;
+    }
+  }
+
+  .banners__image {
+    @include media-query ($small) {
+      position: relative;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      min-height: var(--min-h);
+    }
+  }
+
+  .banners__image-inner {
+    @include media-query ($small) {
+      transform: none;
+    }
+  }
+
+  .flickity-viewport {
+    @include media-query ($small) {
+      position: relative;
+      left: auto;
+      top: auto;
+      bottom: auto;
+    }
+  }
+
+  .banner--row {
+    min-width: unset;
+    max-width: 50%;
+    padding: calc(var(--inner-gutter) / 4) var(--inner-gutter);
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+
+    @include media-query ($small) {
+      padding: 0 var(--inner-gutter);
+      max-width: none;
+    }
+  }
+
+  .banner--row:only-child,
+  .banner--row.is-selected {
+    opacity: 1;
+  }
+
+  .banner__content > *:not(.banner__link):last-child {
+    @include media-query ($small) {
+      margin-bottom: calc(var(--inner-gutter) / 1.25);
+    }
+  }
+
+  .banner--row:last-child .banner__content > *:last-child {
+    @include media-query ($small) {
+      margin-bottom: 0;
+    }
+  }
+
+  &.text-left .banners__content {
+    justify-content: flex-start;
+  }
+
+  &.banners--single-image .banners__image {
+    @include media-query ($small) {
+      height: 100%;
+    }
+  }
+
+  &.banners--top,
+  &.banners--center,
+  &.banners--bottom {
+    @include media-query ($small) {
+      align-items: flex-start;
+    }
+  }
+}
+
+.banners--single-image {
+  .banner {
+    @include media-query ($small) {
+      opacity: 1;
+    }
+  }
+}
+
+/* Alignment modifiers */
+
+.banners--top {
+  align-items: flex-start;
+
+  .banner,
+  .flickity-slider {
+    align-items: flex-start;
+  }
+}
+
+.banners--center {
+  align-items: center;
+
+  .banner,
+  .flickity-slider {
+    align-items: center;
+  }
+}
+
+.banners--bottom {
+  align-items: flex-end;
+
+  .banner,
+  .flickity-slider {
+    align-items: flex-end;
+  }
+}
+
+/* Banners elements */
+
+.banners__media {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: var(--PT);
+  bottom: var(--PB);
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden; // Fix overflowing image when we only have a single image and the slider isn't initialized
+
+  .flickity-viewport {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+.banner__image,
+.banners__image {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(0deg, rgb(0 0 0 / 40%) 0%, rgb(0 0 0 / 0%) 100%);
+  }
+}
+
+.banners__image {
+  .svg-placeholder,
+  svg,
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+.banners__image figure { height: 100%; }
+
+.banners__image-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transition: transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform: scale(1.1);
+}
+
+// Activate the zoom-in animation when we reach the section
+.banners__media.aos-animate .is-selected .banners__image-inner,
+.banners__media.aos-animate .banners__image:only-child .banners__image-inner { transform: scale(1); } // The :only-child selector fixes the animation when we only have a single image and the slider isn't initialized
+// But also keep the animation when AOS is turned off
+.banners__media:not(.aos-init) .is-selected .banners__image-inner,
+.banners__media:not(.aos-init) .banners__image:only-child .banners__image-inner { transform: scale(1); } // The :only-child selector fixes the animation when we only have a single image and the slider isn't initialized
+
+.banners__content {
+  z-index: 1;
+  width: calc(100% + var(--grid-gutter) * 2);
+  margin: 0 calc(var(--grid-gutter) * -1);
+
+  @include media-query ($small) {
+    width: calc(100% + var(--gutter-mobile) * 2);
+    margin: 0 calc(var(--gutter-mobile) * -1);
+  }
+
+  .flickity-viewport .flickity-slider,
+  &:not(.flickity-enabled) .flickity-slider {
+    @include media-query ($medium-up) {
+      transform: translateX(0%) !important;
+    }
+  }
+
+  .flickity-viewport .banner--col,
+  &:not(.flickity-enabled) .banner--col {
+    @include media-query ($medium-up) {
+      width: calc(100% / var(--item-count, 1));
+    }
+  }
+}
+
+.banner__content {
+  position: relative;
+  z-index: 1;
+
+  @include media-query ($medium-up) {
+    pointer-events: all;
+  }
+
+  a { pointer-events: all; }
+}
+
+.banner__entry p,
+.banner__entry,
+.banner__subheading,
+.banner__heading {
+  color: inherit;
+}
+
+.banner__entry p,
+.banner__entry,
+.banner__btn.btn--text,
+.banner__subheading,
+.banner__heading {
+  margin: 0 0 calc(var(--inner-gutter) / 2);
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.no-touch .banner .btn--text {
+  &:before,
+  &:after { background: currentcolor; }
+}
+
+.banner__subheading,
+.banner__entry { line-height: 1.25; }
+
+.banner__entry p { font-size: calc(0.875rem * var(--adjust-body)); }
+
+.banner__btn {
+  line-height: 1.25;
+  text-transform: var(--BUTTON-TEXT-CAPS);
+}
+
+.banner__link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+}
+
+/* No js */
+
+.no-js {
+  .banners__content {
+    display: flex;
+
+    @include media-query ($small) {
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+  }
+
+  .banners__content .banner {
+    @include media-query ($small) {
+      width: 100vw;
+      white-space: initial;
+      display: inline-flex;
+      align-content: center;
+    }
+  }
+
+  .banners--cols .banners__image ~ .banners__image { display: none; }
+
+  .banner {
+    opacity: 1;
+
+    @include media-query ($small) {
+      position: relative;
+    }
+  }
+
+  .banner__image {
+    position: absolute;
+    z-index: 0;
+
+    @include media-query ($medium-up) {
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+  }
+
+  .banner__image .svg-placeholder,
+  .banner__image svg,
+  .banner__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}

@@ -1,0 +1,118 @@
+name: lighthouse-master
+# on:
+#   push:
+#     branches: [master]
+#     paths-ignore:
+#       - '**.md'
+#       - '.gitignore'
+#       - '.vscode/**'
+# env:
+#   SHOPIFY_SHOP: ${{ vars.DEMO_STORE }}
+#   SHOPIFY_THEME_TOKEN: ${{ secrets.CLOTHING_THEME_ACCESS_TOKEN }}
+# jobs:
+#   cancel:
+#     name: 'Cancel Previous Runs'
+#     runs-on: ubuntu-20.04
+#     timeout-minutes: 3
+#     steps:
+#     - uses: styfle/cancel-workflow-action@0.9.0
+#       with:
+#         workflow_id: 10963554
+#   yarn:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+#     steps:
+#     - uses: actions/checkout@v3
+#     - uses: actions/setup-node@v2
+#       with:
+#         node-version-file: '.nvmrc'
+#         cache: 'yarn'
+#         always-auth: true
+#         registry-url: https://npm.pkg.github.com/
+#     - uses: actions/cache@v3
+#       with:
+#         path: node_modules
+#         key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#         restore-keys: |
+#           ${{ runner.os }}-node-modules-v1.1-
+#     - name: Yarn install
+#       run: yarn install --frozen-lockfile
+#       env:
+#         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+#   build:
+#     needs: [yarn]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: actions/setup-node@v2
+#         with:
+#           node-version-file: '.nvmrc'
+#           cache: 'yarn'
+#       - uses: actions/cache@v3
+#         id: node_modules-cache
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+#           fail-on-cache-miss: true
+#       - uses: actions/cache@v3
+#         id: build-cache
+#         with:
+#           path: dist
+#           key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+#       - name: Build Theme
+#         run: yarn build
+#       - name: Ensure dist/ is not empty
+#         run: if [ -z "$(ls -A dist 2>/dev/null)" ]; then exit 1; fi
+#   lumos-store:
+#     needs: [build]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/cache@v3
+#         id: build-cache
+#         with:
+#           path: dist
+#           key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+#           fail-on-cache-miss: true
+#       - name: Push theme
+#         id: theme-push
+#         uses: invisiblethemes/rosey@4.0.1
+#         with:
+#           theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+#           store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+#           theme_root: dist
+#           theme_command: push --live --allow-live --json --path=dist
+#   lighthouse:
+#     needs: [build]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 30
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: actions/cache@v3
+#         id: build-cache
+#         with:
+#           path: dist
+#           key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+#           fail-on-cache-miss: true
+#       - name: Lighthouse
+#         id: lighthouse
+#         uses: invisiblethemes/lighthouse-ci-action@3.0.0
+#         env:
+#           LHCI_UPLOAD__TARGET: lhci
+#           LHCI_UPLOAD__SERVER_BASE_URL: ${{ vars.LHCI_SERVER_BASE_URL }}
+#           LHCI_UPLOAD__TOKEN: ${{ secrets.LHCI_SERVER_TOKEN }}
+#           LHCI_UPLOAD__BASIC_AUTH__USERNAME: ${{ secrets.LHCI_SERVER_USERNAME }}
+#           LHCI_UPLOAD__BASIC_AUTH__PASSWORD: ${{ secrets.LHCI_SERVER_PASSWORD }}
+#           LHCI_COLLECT__NUMBER_OF_RUNS: 3
+#         with:
+#           theme_token: ${{ env.SHOPIFY_THEME_TOKEN }}
+#           store: ${{ env.SHOPIFY_SHOP }}.myshopify.com
+#           password: password
+#           lhci_github_app_token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+#           lhci_github_token: ${{ github.token }}
+#           product_handle: miro-signet-in-gold
+#           collection_handle: all
+#           lhci_min_score_performance: 0.0 # We only care about tracking perf over time right now
+#           lhci_min_score_accessibility: 0.8
