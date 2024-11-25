@@ -20,6 +20,12 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+    - name: Remove existing new-theme-dist folder if it exists
+      run: |
+        if [ -d "new-theme-dist" ]; then
+          rm -rf new-theme-dist
+        fi
+
     - name: Clone target repository
       run: |
         git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
@@ -33,5 +39,4 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "github-actions@github.com"
         git add .
-        git commit -m "Update /dist from new-theme commit $GITHUB_SHA" || echo "No changes to commit"
-        git push origin main
+        git commit -m "Update
