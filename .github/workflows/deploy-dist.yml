@@ -1,0 +1,30 @@
+name: Deploy /dist to new-theme-dist
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dist:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v3
+
+    - name: Sync /dist to new-theme-dist
+      run: |
+        # Clone the target repository
+        git clone git@github.com:username/new-theme-dist.git target-repo
+
+        # Copy the /dist folder to the target repository
+        rsync -av --delete ./dist/ ./target-repo/
+
+        # Commit and push changes
+        cd target-repo
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Update /dist from new-theme commit $GITHUB_SHA"
+        git push origin main
