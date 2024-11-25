@@ -18,12 +18,12 @@ const sass = require('gulp-dart-sass');
 const gulpIf = require('gulp-if');
 const autoprefixer = require('autoprefixer');
 
-const config = require('./dev/lib/config');
-const {startShopifyDevProcesses, deployShopifyStores} = require('./dev/lib/build/shopify.js');
-const {renderDevelopmentLiquid} = require('./dev/lib/build/liquid.js');
-const {stripDataTestId, insertNoIndexHeader} = require('./dev/lib/build/html.js');
+const config = require('./lib/config');
+const {startShopifyDevProcesses, deployShopifyStores} = require('./lib/build/shopify.js');
+const {renderDevelopmentLiquid} = require('./lib/build/liquid.js');
+const {stripDataTestId, insertNoIndexHeader} = require('./lib/build/html.js');
 
-const configPath = path.join(__dirname, './dev/rollup.config.js');
+const configPath = path.join(__dirname, 'rollup.config.js');
 
 /*
 Command functions
@@ -157,15 +157,15 @@ function zip() {
     .pipe(dest(config.upload.root));
 }
 
-// // Delete config.yml from dist, very important that this does not end up in the theme store!!!
-// function cleanConfig() {
-//   return del(path.join(config.dist.root, config.tkConfig));
-// }
+// Delete config.yml from dist, very important that this does not end up in the theme store!!!
+function cleanConfig() {
+  return del(path.join(config.dist.root, config.tkConfig));
+}
 
-// // Clean dist folder
-// function cleanAll() {
-//   return del(path.join(config.dist.root, '**/*'));
-// }
+// Clean dist folder
+function cleanAll() {
+  return del(path.join(config.dist.root, '**/*'));
+}
 
 const buildAll = parallel(compileCss, compileJS, compileAssets, compileIcons);
 

@@ -10,8 +10,19 @@
     "deploy": "NODE_ENV=production gulp deploy",
     "deploy:prod": "NODE_ENV=production gulp deploy --index=false --env clean-prod,modern-prod,bold-prod,bright-prod,groove-prod",
     "deploy:master": "NODE_ENV=production gulp deploy --index=false --env clean-master,modern-master,bold-master,bright-master,groove-master",
+    "copy:chaos": "cp -r environments/chaos/templates/** dist/templates && cp -r environments/chaos/sections/*.json dist/sections",
+    "push:chaos": "shopify theme push --path=dist --store=broadcast-qa-chaos",
+    "pull:demo": "shopify theme pull --path=environments/demo --store=broadcast-clean.myshopify.com --only='config/settings_data.json' --only='sections/*.json' --only='templates/*.json' --only='templates/*.*.json' --only='templates/customers/.*.json'",
+    "pull:chaos": "shopify theme pull --path=environments/chaos --store=broadcast-qa-chaos.myshopify.com --only='config/settings_data.json' --only='sections/*.json' --only='templates/*.json' --only='templates/*.*.json' --only='templates/customers/.*.json'",
+    "pull:spec": "shopify theme pull --path=environments/spec --store=broadcast-qa-spec.myshopify.com --only='config/settings_data.json' --only='sections/*.json' --only='templates/*.json' --only='templates/*.*.json' --only='templates/customers/.*.json'",
+    "pull:mine": "shopify theme pull --path=src --only='config/settings_data.json' --only='templates/*.json' --only='templates/*.*.json' --only='sections/*.json' --only='templates/customers/.*.json'",
     "test": "gulp && theme-check",
-    "lint": "eslint --max-warnings 0 /"
+    "lint": "eslint --max-warnings 0 src/",
+    "lint:ci": " eslint --config=.eslintrc-ci src cypress",
+    "cypress:run": "cypress run --headless --browser chrome",
+    "cypress:open": "cypress open",
+    "cypress:run-ct": "cypress run --component --headless --browser chrome",
+    "cypress:open-ct": "cypress open --component --browser chrome"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",
@@ -85,7 +96,6 @@
     "flickity": "3.0.0",
     "flickity-fade": "2.0.0",
     "photoswipe": "4.1.3",
-    "rellax": "gideonb/rellax#broadcast",
     "scroll-lock": "^2.1.5"
   }
 }

@@ -9,8 +9,8 @@ import sizes from 'rollup-plugin-sizes';
 import swc from 'rollup-plugin-swc';
 import glob from 'glob';
 
-const src = path.join(__dirname, './dev');
-const dist = path.join(__dirname, './');
+const src = path.join(__dirname, './src');
+const dist = path.join(__dirname, './dist');
 const nodeModules = path.join(__dirname, './node_modules');
 const production = process.env.NODE_ENV === 'production';
 
@@ -20,7 +20,7 @@ const inputComponents = glob.sync(path.join(src, 'js/components/*.js'));
 const minifiedComment = `
 /*
 * @license
-* Carbon Theme (c) Invisible Themes
+* Broadcast Theme (c) Invisible Themes
 *
 * The contents of this file should not be modified.
 * add any minor changes to assets/custom.js
@@ -31,7 +31,7 @@ const minifiedComment = `
 const developmentComment = `
 /*
 * @license
-* Carbon Theme (c) Invisible Themes
+* Broadcast Theme (c) Invisible Themes
 *
 * This file is included for advanced development by
 * Shopify Agencies.  Modified versions of the theme

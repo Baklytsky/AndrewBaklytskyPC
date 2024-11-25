@@ -55,7 +55,7 @@ export class GridSlider extends HTMLElement {
       .then(() => {
         this.slider.classList.remove(classes.scrollSnapDisabled);
       })
-      .finally(() => {
+      .catch(() => {
         this.slider.classList.remove(classes.scrollSnapDisabled);
       });
   }
