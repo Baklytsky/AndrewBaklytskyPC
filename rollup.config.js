@@ -20,7 +20,7 @@ const inputComponents = glob.sync(path.join(src, 'js/components/*.js'));
 const minifiedComment = `
 /*
 * @license
-* Broadcast Theme (c) Invisible Themes
+* New Theme (c) Presidio Creative
 *
 * The contents of this file should not be modified.
 * add any minor changes to assets/custom.js
@@ -31,11 +31,11 @@ const minifiedComment = `
 const developmentComment = `
 /*
 * @license
-* Broadcast Theme (c) Invisible Themes
+* New Theme (c) Presidio Creative
 *
 * This file is included for advanced development by
 * Shopify Agencies.  Modified versions of the theme
-* code are not supported by Shopify or Invisible Themes.
+* code are not supported by Shopify or Presidio Creative.
 *
 * In order to use this file you will need to change
 * theme.js to theme.dev.js in /layout/theme.liquid

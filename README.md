@@ -1,15 +1,13 @@
-# Broadcast Theme
+# New Theme
 
-### [🏷️ Releases](https://github.com/invisiblethemes/broadcast/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/broadcast/discussions)
-
-Demos: [Clean](https://broadcast-clean.myshopify.com) // [Modern](https://broadcast-modern.myshopify.com) // [Bold](https://broadcast-bold.myshopify.com)
+### [🏷️ Releases](https://github.com/invisiblethemes/new-theme/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/new-theme/discussions)
 
 ## Installation
 
 #### Clone the repo:
 
 ```
-git clone git@github.com:invisiblethemes/broadcast.git
+git clone git@github.com:invisiblethemes/new-theme.git
 ```
 
 #### Install packages
@@ -18,7 +16,7 @@ git clone git@github.com:invisiblethemes/broadcast.git
 yarn install
 ```
 
-⚠️ The recommended node version for running broadcast is Node v20.9.x
+⚠️ The recommended node version for running new-theme is Node v20.9.x
 
 Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
 If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
@@ -47,16 +45,6 @@ This will:
 - Open a browser window pointed to theme URL
 - Watch for changes and rebuild which will trigger shopify CLI to push changes
 
-### Copying environment settings
-
-To copy preset settings files in `environments/**` to a given store, use the `--settings` flag:
-
-```
-yarn start -s=chaos
-```
-
-This will copy the settings in `environments/chaos` to the dist folder before pushing
-
 ### Changing environments
 
 During development, it's useful to be able to quickly switch between different combos of themes, stores and settings.
@@ -74,7 +62,7 @@ To setup different environments create a `shopify.theme.toml` file and add entri
 ```toml
 [environments.development]
   theme = 123456789
-  store = "broadcast-qa-chaos.myshopify.com"
+  store = "new-theme-qa-chaos.myshopify.com"
   ignore = [
     "config/settings_data.json", # To avoid resetting theme settings
     "sections/*.json",
@@ -83,17 +71,9 @@ To setup different environments create a `shopify.theme.toml` file and add entri
     "templates/customers/.*.json"
   ]
 
-[environments.templates]
-  theme = 123456789
-  store = "broadcast-qa-chaos.myshopify.com"
-  ignore = ["config/settings_data.json"]
-
 [environments.bulldoze]
   theme = 123456789
-  store = "broadcast-qa-chaos.myshopify.com"
-
-[environments.e2e]
-  store = "broadcast-qa-spec.myshopify.com"
+  store = "new-theme-qa-chaos.myshopify.com"
 ```
 
 Then, start your dev environment with `yarn start --env=my-env` or  `yarn start -e my-env`. This will effectively just call `shopify theme dev dist --store=my-store.myshopify.com --theme=12345`
@@ -128,23 +108,6 @@ A command to deploy to all the demos might look something like this:
 
 🚨 Never use the `--index=false` flag on a merchant store. This command exists strictly for Shopify Theme Store demo stores. This line of code would *destroy* the SEO of a merchant store.
 
-
-
-## Tests
-
-### E2E Tests
-
-Note: Make sure you have been added to the `broadcast-qa-spec.myshopify.com` store
-
-Integration testing is done with [Cypress](https://www.cypress.io/)
-
-Just run the following:
-
-```
-yarn test:e2e
-```
-
-That will start the theme server then start cypress. Cypress should now open and you can test stuff!
 
 ## Lighthouse
 
