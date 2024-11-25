@@ -23,13 +23,13 @@ jobs:
     - name: Sync /dist to new-theme-dist
       run: |
         # Clone the target repository
-        git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
+        git clone git@github.com:invisiblethemes/new-theme-dist.git target-repo
 
         # Copy the /dist folder to the target repository
-        rsync -av --delete ./dist/ ./new-theme-dist/
+        rsync -av --delete ./dist/ ./target-repo/
 
         # Commit and push changes
-        cd new-theme-dist
+        cd target-repo
         git config user.name "GitHub Actions"
         git config user.email "github-actions@github.com"
         git add .
