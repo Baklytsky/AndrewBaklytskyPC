@@ -1,0 +1,224 @@
+/*====== Product Upsell ======*/
+
+.product-upsell__holder { text-align: left; }
+
+.product-upsell__holder__title { margin-top: 0; }
+
+.product-upsell__holder--button .product-upsell__content {
+  @include media-query($small-up) { padding-right: 85px; }
+}
+
+.product-upsell {
+  --bg: var(--bg-accent);
+  --text: var(--text-dark);
+  position: relative;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.product-upsell__image { width: 120px; }
+.product-upsell__image__link {
+  display: block;
+  height: 100%;
+}
+
+.product-upsell__image__thumb {
+  overflow: hidden;
+  position: relative;
+  padding-top: var(--PRODUCT-GRID-ASPECT-RATIO);
+  min-height: 100%;
+  filter: brightness(var(--filter-bg));
+}
+
+.product-upsell__image__thumb .image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.product-upsell__content {
+  --inner: 16px;
+  width: calc(100% - 120px);
+  padding: var(--inner);
+  @include media-query($large-up) {
+    --inner: 24px;
+  }
+}
+
+.product-upsell__link {
+  --link: var(--text);
+  --link-hover: var(--text-light);
+}
+
+.product-upsell__title {
+  @include body;
+  font-size: var(--font-body-medium);
+  margin-top: 0;
+}
+
+.product-upsell__variant-title {
+  @include body;
+  font-size: var(--font-body-x-small);
+  color: var(--text-light);
+}
+
+.product-upsell__variant-title span {
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  margin: 0 4px;
+  background-color: currentcolor;
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
+.product-upsell__price {
+  @include body;
+  font-size: var(--font-body-small);
+}
+
+.product-upsell__price .unit {
+  @include body;
+  display: block;
+  margin-top: 5px;
+  color: var(--text-light);
+}
+
+.btn__outer {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-grid;
+
+  @include media-query($mobile) {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 10px 0 0;
+  }
+}
+
+.product-upsell__btn {
+  --bg: var(--COLOR-BG);
+  --btn-size: 32px;
+  --icon-size: 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  min-width: var(--btn-size);
+  min-height: var(--btn-size);
+  padding: 0;
+  width: var(--btn-size);
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-body-small);
+  line-height: 32px;
+  color: var(--accent);
+  background: var(--bg);
+  transition: width 0.3s ease;
+
+  @include media-query($mobile) {
+    justify-self: flex-start;
+  }
+
+  .btn__text {
+    display: block;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.3s ease, padding 0.3s ease, visibility 0.3s;
+  }
+
+  .btn__plus {
+    position: relative;
+    transition: opacity 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    flex: 0 0 var(--icon-size);
+    margin: 0 4px;
+  }
+
+  .btn__loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .icon-plus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    fill: currentcolor;
+    transform: translate(-50%, -50%);
+  }
+
+  &.is-loading,
+  &.is-added {
+    .btn__inner { width: var(--btn-size); }
+    .btn__plus,
+    .btn__text { opacity: 0; }
+  }
+}
+
+@media (hover: hover) {
+  .btn__outer:hover {
+    .product-upsell__btn { width: 100%; }
+    .btn__text {
+      padding-right: 10px;
+      opacity: 1;
+    }
+
+    .is-added,
+    .is-loading { width: var(--btn-size); }
+
+    .is-added .btn__text,
+    .is-loading .btn__text {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}
+
+.product-upsell__out-of-stock { font-size: var(--font-body-small); }
+
+.product-upsell__errors {
+  overflow: hidden;
+  position: relative;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s cubic-bezier(0, 0.75, 0.25, 1), visibility 0.5s;
+  font-size: var(--font-body-small);
+
+  &.is-visible {
+    visibility: visible;
+    max-height: 300px;
+    opacity: 1;
+    transition-timing-function: cubic-bezier(0.5, 0.25, 0.75, 1);
+  }
+
+  .errors {
+    position: relative;
+    padding: 10px 30px 10px 10px;
+    margin: 10px 0;
+    border: 1px solid var(--COLOR-ERROR-BORDER);
+    border-radius: var(--RADIUS);
+    background-color: var(--COLOR-ERROR-BG);
+    color: var(--COLOR-ERROR);
+  }
+}
+
+quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc(var(--gutter) / 2); }

@@ -1,0 +1,56 @@
+/**
+ * List Collections Index
+ */
+
+.collection-item {
+  --link: var(--text);
+  --link-hover: var(--text);
+  --bg: var(--COLOR-BG);
+
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  background: var(--bg);
+  scroll-snap-align: start;
+}
+
+.collection-item--transparent { background: transparent; }
+
+.collection-item__content { flex: 0 1 100%; }
+.has-line-design .hide-image-border .collection-item__image:last-child { border-bottom: none; }
+
+.collection-item__image {
+  position: relative;
+  overflow: hidden;
+
+  .has-line-design & { border-bottom: 1px solid var(--border); }
+}
+
+.collection-item__actions,
+.collection-item__info {
+  flex: 0 1 100%;
+  padding: var(--inner);
+  overflow: hidden;
+
+  @include media-query($small) {
+    padding: 12px;
+  }
+}
+
+.collection-item--centered .collection-item__actions,
+.collection-item--centered .collection-item__info { text-align: center; }
+
+@media (hover: hover) {
+  .collection-item__bg .image-wrapper {
+    --transform-scale: scale(1.08);
+    transition: transform 2s $ease-out-fast;
+  }
+
+  .collection-item__info span {
+    --bg-size: 100% 1px;
+    @include animate-underline-from-center-on-hover;
+  }
+
+  .collection-item:hover .collection-item__bg .image-wrapper { transform: var(--transform-scale); }
+  .collection-item:hover .collection-item__info span { background-size: var(--bg-size); }
+}
