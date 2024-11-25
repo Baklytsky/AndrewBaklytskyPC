@@ -13,6 +13,13 @@ jobs:
     - name: Checkout source repository
       uses: actions/checkout@v3
 
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+
     - name: Sync /dist to new-theme-dist
       run: |
         # Clone the target repository
@@ -28,10 +35,3 @@ jobs:
         git add .
         git commit -m "Update /dist from new-theme commit $GITHUB_SHA"
         git push origin main
-
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
