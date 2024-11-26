@@ -461,6 +461,8 @@ class ProductForm extends HTMLElement {
     if (finalSaleBadge) {
       finalSaleBadge.classList.toggle(classes.hidden, !isFinalSale);
     }
+
+    this.priceOffWrap.classList.remove(classes.hidden);
   }
 
   updateSubscriptionText(formState) {
