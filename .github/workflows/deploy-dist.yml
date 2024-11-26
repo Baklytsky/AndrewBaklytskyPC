@@ -34,14 +34,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
     - name: "Build assets"
-      run: |
-        yarn build:assets
-        pwd
-
-    - uses: actions/upload-artifact@v4
-      with:
-          path: dist/*
-          retention-days: 1
+      run: yarn build:assets
 
     - name: Checkout source repository
       uses: actions/checkout@v3
