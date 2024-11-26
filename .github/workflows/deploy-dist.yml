@@ -9,6 +9,36 @@ on:
       - '.vscode/**'
 
 jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+    - uses: actions/cache@v4
+      id: yarn-cache
+      with:
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          'node_modules'
+        key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-v3-
+    - run: yarn install
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+    - run: yarn build:assets
+    - uses: actions/upload-artifact@v4
+      with:
+          path: dist/*
+          retention-days: 1
+
   deploy-dist:
     runs-on: ubuntu-latest
 
@@ -34,24 +64,18 @@ jobs:
         run: |
           cd ~/
           git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
-          pwd
 
       - name: Sync /dist contents to the root of new-theme-dist
         run: |
           # Ensure the dist folder exists
-          pwd
           if [ -d "dist" ]; then
             rsync -av --delete --exclude '.git/' ~/work/new-theme/new-theme/dist/ ~/new-theme-dist/
-            ls ~/new-theme-dist
           else
             echo "No dist folder found, skipping sync."
             exit 1
           fi
           # Commit and push changes
           cd ~/new-theme-dist
-          ls .
-          echo "commit and push"
-          pwd
           git remote set-url origin git@github.com:invisiblethemes/new-theme-dist.git
           git config user.name "GitHub Actions"
           git config user.email "github-actions@github.com"
