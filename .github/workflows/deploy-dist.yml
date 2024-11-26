@@ -36,59 +36,49 @@ jobs:
     - name: "Build assets"
       run: |
         yarn build:assets
+        pwd
 
     - uses: actions/upload-artifact@v4
       with:
           path: dist/*
           retention-days: 1
-    - name: "Check for dist"
+
+    - name: Checkout source repository
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
       run: |
-        cd dist
-        ls .
-        echo "check for dist"
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
         pwd
 
-  deploy-dist:
-    runs-on: ubuntu-latest
-    needs: build # Wait for the 'zip' job to complete successfully
+    - name: Remove existing new-theme-dist folder if it exists
+      run: |
+        if [ -d "new-theme-dist" ]; then
+          rm -rf new-theme-dist
+        fi
 
-    steps:
-      - name: Checkout source repository
-        uses: actions/checkout@v3
+    - name: Clone target repository
+      run: |
+        cd ~/
+        git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          pwd
-
-      - name: Remove existing new-theme-dist folder if it exists
-        run: |
-          if [ -d "new-theme-dist" ]; then
-            rm -rf new-theme-dist
-          fi
-
-      - name: Clone target repository
-        run: |
-          cd ~/
-          git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
-
-      - name: Sync /dist contents to the root of new-theme-dist
-        run: |
-          # Ensure the dist folder exists
-          if [ -d "dist" ]; then
-            rsync -av --delete --exclude '.git/' ~/work/new-theme/new-theme/dist/ ~/new-theme-dist/
-          else
-            echo "No dist folder found, skipping sync."
-            exit 1
-          fi
-          # Commit and push changes
-          cd ~/new-theme-dist
-          git remote set-url origin git@github.com:invisiblethemes/new-theme-dist.git
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions@github.com"
-          git add .
-          git commit -m "Update files from /dist (commit $GITHUB_SHA)" || echo "No changes to commit"
-          git push origin main
+    - name: Sync /dist contents to the root of new-theme-dist
+      run: |
+        # Ensure the dist folder exists
+        if [ -d "dist" ]; then
+          rsync -av --delete --exclude '.git/' ~/work/new-theme/new-theme/dist/ ~/new-theme-dist/
+        else
+          echo "No dist folder found, skipping sync."
+          exit 1
+        fi
+        # Commit and push changes
+        cd ~/new-theme-dist
+        git remote set-url origin git@github.com:invisiblethemes/new-theme-dist.git
+        git config user.name "GitHub Actions"
+        git config user.email "github-actions@github.com"
+        git add .
+        git commit -m "Update files from /dist (commit $GITHUB_SHA)" || echo "No changes to commit"
+        git push origin main
