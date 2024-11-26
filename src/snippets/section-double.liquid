@@ -642,7 +642,7 @@
                         {%- if collection != blank or collection_image != blank or button_text != blank -%}
                           {%- assign collection_grid_items_counter = collection_grid_items_counter | plus: 1 -%}
 
-                          <div class="grid-item collection-item{% unless block.settings.show_product_card %} collection-item--transparent{% endunless %} {{ alignment_class }}">
+                          <div class="grid-item collection-item{% if block.settings.show_product_card %} collection-item--card{% endif %} {{ alignment_class }}">
                             {%- if collection != empty and button_text == blank -%}
                               <a class="collection-item__content" href="{{ collection.url }}" aria-label="{{ collection.title | strip_html | escape }}">
                             {%- else -%}
@@ -702,7 +702,7 @@
                       {%- assign collection_grid_items_counter = 2 -%}
                       {%- capture collection_grid_items -%}
                         {%- for i in (1..2) -%}
-                          <div class="grid-item collection-item{% unless block.settings.show_product_card %} collection-item--transparent{% endunless %} {{ alignment_class }}">
+                          <div class="grid-item collection-item{% if block.settings.show_product_card %} collection-item--card{% endif %} {{ alignment_class }}">
                             <div class="collection-item__content">
                               <div class="collection-item__image" data-collection-image>
                                 <div class="collection-item__bg">

@@ -34,10 +34,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
     - name: "Build assets"
-      run: |
-        yarn build:assets
-        pwd
-        ls .
+      run: yarn build:assets
 
     - name: Set up SSH
       run: |
@@ -61,8 +58,6 @@ jobs:
     - name: Sync /dist contents to the root of new-theme-dist
       run: |
         # Ensure the dist folder exists
-        pwd
-        ls .
         if [ -d ~/work/new-theme/new-theme/dist ]; then
           rsync -av --delete --exclude '.git/' ~/work/new-theme/new-theme/dist/ ~/new-theme-dist/
         else
