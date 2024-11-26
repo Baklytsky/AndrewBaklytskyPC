@@ -22,6 +22,7 @@ jobs:
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+          pwd
 
       - name: Remove existing new-theme-dist folder if it exists
         run: |
@@ -33,6 +34,7 @@ jobs:
         run: |
           cd ~/
           git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
+          pwd
 
       - name: Sync /dist contents to the root of new-theme-dist
         run: |
@@ -45,6 +47,7 @@ jobs:
           fi
           # Commit and push changes
           cd ~/new-theme-dist
+          pwd
           git remote set-url origin git@github.com:invisiblethemes/new-theme-dist.git
           git config user.name "GitHub Actions"
           git config user.email "github-actions@github.com"
