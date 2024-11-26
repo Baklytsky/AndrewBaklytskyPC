@@ -31,19 +31,20 @@ jobs:
 
     - name: Clone target repository
       run: |
+        cd ~/
         git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
 
     - name: Sync /dist contents to the root of new-theme-dist
       run: |
         # Ensure the dist folder exists
         if [ -d "dist" ]; then
-          rsync -av --delete dist/ new-theme-dist/
+          rsync -av --delete ../dist/ new-theme-dist/
         else
           echo "No dist folder found, skipping sync."
           exit 1
         fi
         # Commit and push changes
-        cd ../new-theme-dist
+        cd new-theme-dist
         git config user.name "GitHub Actions"
         git config user.email "github-actions@github.com"
         git add .
