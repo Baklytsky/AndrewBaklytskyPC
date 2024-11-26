@@ -13,10 +13,9 @@
           this.recover = this.querySelector('[data-recover-password]');
           this.recoverSuccess = this.querySelector('[data-recover-success]');
           this.login = this.querySelector('[data-login-form]');
-          this.init();
         }
 
-        init() {
+        connectedCallback() {
           if (window.location.hash == '#recover' || this.recoverSuccess) {
             this.showRecoverPasswordForm();
           } else {
