@@ -31,14 +31,14 @@ jobs:
 
       - name: Clone target repository
         run: |
-          cd ~/
+          cd ~/runner
           git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
 
       - name: Sync /dist contents to the root of new-theme-dist
         run: |
           # Ensure the dist folder exists
           if [ -d "dist" ]; then
-            rsync -av --delete ~/new-theme/dist/ ~/new-theme-dist/
+            rsync -av --delete ~/runner/new-theme/dist/ ~/runner/new-theme-dist/
           else
             echo "No dist folder found, skipping sync."
             exit 1
