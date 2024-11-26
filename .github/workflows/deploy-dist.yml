@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths-ignore:
-    - '**.md'
-    - '.gitignore'
-    - '.vscode/**'
+      - '**.md'
+      - '.gitignore'
+      - '.vscode/**'
 
 jobs:
   deploy-dist:
@@ -33,14 +33,19 @@ jobs:
       run: |
         git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
 
-    - name: Sync /dist to new-theme-dist
+    - name: Sync /dist contents to the root of new-theme-dist
       run: |
-        # Copy the /dist folder to the target repository
-        rsync -av --delete dist/ new-theme-dist/
+        # Ensure the dist folder exists
+        if [ -d "dist" ]; then
+          rsync -av --delete dist/ new-theme-dist/
+        else
+          echo "No dist folder found, skipping sync."
+          exit 1
+        fi
         # Commit and push changes
         cd new-theme-dist
         git config user.name "GitHub Actions"
         git config user.email "github-actions@github.com"
         git add .
-        git commit -m "Update /dist from new-theme commit $GITHUB_SHA" || echo "No changes to commit"
+        git commit -m "Update files from /dist (commit $GITHUB_SHA)" || echo "No changes to commit"
         git push origin main
