@@ -15,7 +15,6 @@ import {initAnimations} from '../globals/animations';
 
 import DeferredMedia from '../globals/deferred-media';
 import {GridSlider} from '../features/grid-slider';
-import {CountdownTimer} from '../features/countdown-timer';
 import {HeaderMobileSliderule} from '../features/header-mobile-sliderule';
 
 // Safari requestIdleCallback polyfill
@@ -94,8 +93,4 @@ if (!customElements.get('deferred-media')) {
 
 if (!customElements.get('grid-slider')) {
   customElements.define('grid-slider', GridSlider);
-}
-
-if (!customElements.get('countdown-timer')) {
-  customElements.define('countdown-timer', CountdownTimer);
 }

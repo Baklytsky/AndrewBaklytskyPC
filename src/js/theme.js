@@ -22,24 +22,16 @@ import './sections/blog';
 import './sections/double';
 import './sections/footer';
 import './sections/collection';
-import './sections/announcement';
 import './sections/header';
-import './sections/look';
 import './sections/product-grid';
 import './sections/product';
 import './sections/related';
-import './sections/reviews';
-import './sections/logo-list';
 import './sections/slideshow';
 import './sections/custom-content';
-import './sections/popups';
 import './sections/password';
 import './sections/list-collections';
 import './sections/columns';
 import './sections/newsletter';
-import './sections/sidebar';
-import './sections/collections-hover';
-import './sections/featured-product';
 
 /* ================ Main ================ */
 import './main/main';
