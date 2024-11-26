@@ -39,8 +39,9 @@ jobs:
       - name: Sync /dist contents to the root of new-theme-dist
         run: |
           # Ensure the dist folder exists
+          pwd
           if [ -d "dist" ]; then
-            rsync -av --delete ~/new-theme/dist/ ~/new-theme-dist/
+            rsync -av --delete ~/runner/new-theme/dist/ ~/new-theme-dist/
           else
             echo "No dist folder found, skipping sync."
             exit 1
