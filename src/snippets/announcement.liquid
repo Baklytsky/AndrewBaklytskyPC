@@ -6,7 +6,6 @@
     assign show_browser_error = true
   endif
 
-  assign href = request.origin | append: request.path
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
   assign bg_color = section.settings.bg_color
@@ -74,18 +73,8 @@
       assign show_bar = false
     endif
 
-    if block.settings.target_referrer_enabled and block.settings.target_referrer != blank
-      assign show_bar = false
-    endif
-
     if block.settings.target_url_enabled and block.settings.target_url != blank
       if block.settings.target_url == request.path
-        assign show_bar = true
-      endif
-    endif
-
-    if block.settings.target_referrer_enabled and block.settings.target_referrer != blank
-      if href contains block.settings.target_referrer
         assign show_bar = true
       endif
     endif
