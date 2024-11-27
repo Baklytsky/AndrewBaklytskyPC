@@ -90,14 +90,12 @@ class Popout extends HTMLElement {
   }
 
   toggleListPosition() {
-    console.log('toggle list position');
     const button = this.querySelector(selectors.popoutToggle);
     const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
     const windowHeight = window.innerHeight;
     const popoutTop = this.getBoundingClientRect().top;
 
     const removeTopClass = () => {
-      console.log('rmeove top class on transitionend');
       this.popoutList.classList.remove(classes.popoutListTop);
       this.popoutList.removeEventListener('transitionend', removeTopClass);
     };
