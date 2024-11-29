@@ -35,10 +35,6 @@ class NativeScrollbar {
   }
 
   listen() {
-    document.addEventListener('theme:modal:open', () => {
-      this.toggleNextArrow();
-    });
-
     document.addEventListener('theme:resize', () => {
       this.toggleNextArrow();
     });
