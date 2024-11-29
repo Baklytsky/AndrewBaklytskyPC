@@ -239,10 +239,6 @@ class QuickAddProduct extends HTMLElement {
       }
     });
 
-    this.modal.addEventListener('theme:modal:close', () => {
-      this.modalClose();
-    });
-
     // Close dialog after animation completes
     this.modal.addEventListener('animationend', (event) => {
       if (event.target !== this.modal) return;
