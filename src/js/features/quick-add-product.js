@@ -13,7 +13,6 @@ const classes = {
   open: 'is-open',
   overlayText: 'product-item--overlay-text',
   visible: 'is-visible',
-  siblingLinkCurrent: 'sibling__link--current',
 };
 
 const settings = {
@@ -47,7 +46,6 @@ const attributes = {
   closing: 'closing',
   productId: 'data-product-id',
   modalHandle: 'data-quick-add-modal-handle',
-  siblingSwapper: 'data-sibling-swapper',
   quickAddHolder: 'data-quick-add-holder',
 };
 
@@ -113,19 +111,8 @@ class QuickAddProduct extends HTMLElement {
   modalButtonClickEvent(e) {
     e.preventDefault();
 
-    const isSiblingSwapper = this.modalButton.hasAttribute(attributes.siblingSwapper);
-    const isSiblingLinkCurrent = this.modalButton.classList.contains(classes.siblingLinkCurrent);
-
-    if (isSiblingLinkCurrent) return;
-
     this.modalButton.classList.add(classes.loading);
     this.modalButton.disabled = true;
-
-    // Siblings product modal swapper
-    if (isSiblingSwapper && !isSiblingLinkCurrent) {
-      this.currentModal = e.target.closest(selectors.quickAddModal);
-      this.currentModal.classList.add(classes.loading);
-    }
 
     this.renderModal();
   }
