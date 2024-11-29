@@ -20,4 +20,23 @@ module.exports = {
 
   // "" =>
   singleQuote: true,
+
+  overrides: [
+    /**
+     * Use this to override options for specific files
+     */
+    {
+      files: '*.something_special.js',
+      options: {
+        semi: true,
+      },
+    },
+    {
+      files: '**/*.liquid',
+      options: {
+        singleQuote: false,
+        printWidth: 120,
+      },
+    },
+  ],
 };
