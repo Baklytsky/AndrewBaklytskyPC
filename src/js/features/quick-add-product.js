@@ -58,7 +58,6 @@ class QuickAddProduct extends HTMLElement {
 
     if (this.quickAddHolder) {
       this.modal = null;
-      this.currentModal = null;
       this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
       this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
       this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
@@ -147,10 +146,6 @@ class QuickAddProduct extends HTMLElement {
   }
 
   modalOpen() {
-    if (this.currentModal) {
-      this.currentModal.dispatchEvent(new CustomEvent('theme:modal:close', {bubbles: false}));
-    }
-
     // Check if browser supports Dialog tags
     if (typeof this.modal.show === 'function') {
       this.modal.show();
