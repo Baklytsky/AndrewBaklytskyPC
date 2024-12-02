@@ -12,7 +12,7 @@
   --base: 16px;
   --line: 1rem;
   --line-offset: calc(var(--line) * -1);
-  --content-max: 1100px;
+  --content-max: var(--PAGE-WIDTH, 1100px);
   --sidebar-width: var(--SIDEBAR-WIDTH);
 
   @include media-query($medium) {
@@ -32,7 +32,7 @@
   }
 
   @include media-query($widescreen) {
-    --content-max: 80vw;
+    --content-max: var(--PAGE-WIDTH, 80vw);
   }
 }
 
@@ -57,7 +57,7 @@ body {
   background-color: var(--bg);
   font-size: var(--FONT-SIZE-BASE);
   text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 
   * { -webkit-font-smoothing: antialiased; }
 }
@@ -129,7 +129,7 @@ body {
 }
 
 .block-padding {
-  margin-top: var(--block-padding-top, 0px);
+  margin-top: var(--block-padding-top, 0);
   margin-bottom: var(--block-padding-bottom, 16px);
 }
 
