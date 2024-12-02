@@ -29,8 +29,6 @@
   assign unique = section.id | append: '-' | append: upsell_product.id
   assign product_form_id = 'ProductFormUpsell--' | append: unique
 
-  assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
-
   assign is_product_list = is_product_list | default: false
   assign show_avaialable_upsell_only = show_avaialable_upsell_only | default: false
 
@@ -85,10 +83,6 @@
           {%- if upsell_error -%}
             <p class="product-upsell__title h3">{{ product_title }}</p>
 
-            {%- if sibling_color != blank -%}
-              <p class="product-upsell__variant-title h4">{{ 'general.siblings.label' | t }}: {{ sibling_color }}</p>
-            {%- endif -%}
-
             <p class="product-upsell__variant-title h4">{{ product_info }}</p>
 
             {%- if onboarding and upsell_quick_add_hide == false -%}
@@ -106,10 +100,6 @@
           {%- else -%}
             <a href="{{ upsell_product.url }}" class="product-upsell__link">
               <p class="product-upsell__title h3">{{ upsell_product.title | strip_html }}</p>
-
-              {%- unless sibling_color == blank or upsell_product.title contains sibling_color -%}
-                <p class="product-upsell__variant-title h4">{{ 'general.siblings.label' | t }}: {{ sibling_color }}</p>
-              {%- endunless -%}
 
               {%- if upsell_product.variants.size == 1 and upsell_variant.title != 'Default Title' -%}
                 <p class="product-upsell__variant-title h4">{{ upsell_variant.title | replace: '/', '<span>&nbsp;</span>' }}</p>
@@ -177,9 +167,6 @@
                 {%- if upsell_product.variants.size == 1 -%}
                   {%- form 'product', upsell_product, id: product_form_id, class: 'product-upsell__form' -%}
                     <input type="hidden" name="id" value="{{ upsell_variant.id }}">
-
-                    {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
-                    <input type="hidden" form="{{ product_form_id }}" name="properties[{{ 'general.siblings.label' | t }}]" value="{{ sibling_color }}">
 
                     <div class="btn__outer">
                       <button class="product-upsell__btn"

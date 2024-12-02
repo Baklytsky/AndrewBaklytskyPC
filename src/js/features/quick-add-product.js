@@ -13,7 +13,6 @@ const classes = {
   open: 'is-open',
   overlayText: 'product-item--overlay-text',
   visible: 'is-visible',
-  siblingLinkCurrent: 'sibling__link--current',
 };
 
 const settings = {
@@ -47,7 +46,6 @@ const attributes = {
   closing: 'closing',
   productId: 'data-product-id',
   modalHandle: 'data-quick-add-modal-handle',
-  siblingSwapper: 'data-sibling-swapper',
   quickAddHolder: 'data-quick-add-holder',
 };
 
@@ -60,7 +58,6 @@ class QuickAddProduct extends HTMLElement {
 
     if (this.quickAddHolder) {
       this.modal = null;
-      this.currentModal = null;
       this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
       this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
       this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
@@ -113,19 +110,8 @@ class QuickAddProduct extends HTMLElement {
   modalButtonClickEvent(e) {
     e.preventDefault();
 
-    const isSiblingSwapper = this.modalButton.hasAttribute(attributes.siblingSwapper);
-    const isSiblingLinkCurrent = this.modalButton.classList.contains(classes.siblingLinkCurrent);
-
-    if (isSiblingLinkCurrent) return;
-
     this.modalButton.classList.add(classes.loading);
     this.modalButton.disabled = true;
-
-    // Siblings product modal swapper
-    if (isSiblingSwapper && !isSiblingLinkCurrent) {
-      this.currentModal = e.target.closest(selectors.quickAddModal);
-      this.currentModal.classList.add(classes.loading);
-    }
 
     this.renderModal();
   }
@@ -160,10 +146,6 @@ class QuickAddProduct extends HTMLElement {
   }
 
   modalOpen() {
-    if (this.currentModal) {
-      this.currentModal.dispatchEvent(new CustomEvent('theme:modal:close', {bubbles: false}));
-    }
-
     // Check if browser supports Dialog tags
     if (typeof this.modal.show === 'function') {
       this.modal.show();
@@ -255,10 +237,6 @@ class QuickAddProduct extends HTMLElement {
         event.preventDefault();
         this.modalClose();
       }
-    });
-
-    this.modal.addEventListener('theme:modal:close', () => {
-      this.modalClose();
     });
 
     // Close dialog after animation completes

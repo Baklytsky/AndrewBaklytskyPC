@@ -62,7 +62,7 @@ To setup different environments create a `shopify.theme.toml` file and add entri
 ```toml
 [environments.development]
   theme = 123456789
-  store = "new-theme-qa-chaos.myshopify.com"
+  store = "my-store.myshopify.com"
   ignore = [
     "config/settings_data.json", # To avoid resetting theme settings
     "sections/*.json",
@@ -73,7 +73,7 @@ To setup different environments create a `shopify.theme.toml` file and add entri
 
 [environments.bulldoze]
   theme = 123456789
-  store = "new-theme-qa-chaos.myshopify.com"
+  store = "my-store.myshopify.com"
 ```
 
 Then, start your dev environment with `yarn start --env=my-env` or  `yarn start -e my-env`. This will effectively just call `shopify theme dev dist --store=my-store.myshopify.com --theme=12345`

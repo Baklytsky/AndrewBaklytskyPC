@@ -4,7 +4,6 @@ import {RadioSwatch} from '../features/swatch';
 import {tooltipSection} from '../features/tooltip';
 import {productStickySection} from '../features/product-sticky';
 import {Slider} from '../features/slider';
-import {ProductSiblings} from '../features/siblings';
 import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {isDesktop} from '../util/media-query';
@@ -216,10 +215,6 @@ if (!customElements.get('product-modal')) {
 
 if (!customElements.get('product-model')) {
   customElements.define('product-model', ProductModel);
-}
-
-if (!customElements.get('product-siblings')) {
-  customElements.define('product-siblings', ProductSiblings);
 }
 
 if (!customElements.get('radio-swatch')) {

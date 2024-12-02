@@ -32,11 +32,10 @@ module.exports = {
       },
     },
     {
-      files: '*.scss',
+      files: '**/*.liquid',
       options: {
-        css: {
-          zeroUnit: 'px',
-        },
+        singleQuote: false,
+        printWidth: 120,
       },
     },
   ],
