@@ -1,27 +1,32 @@
 <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-  {%- liquid
-    assign selected_color_scheme = settings.color_scheme | strip
-    assign scheme_accent = settings.color_schemes[selected_color_scheme].settings.accent
-  -%}
+{%- liquid
+  assign selected_color_scheme = settings.color_scheme | strip
+  assign scheme_accent = settings.color_schemes[selected_color_scheme].settings.accent
+-%}
 
-  <meta name="theme-color" content="{{ scheme_accent }}">
-  <link rel="canonical" href="{{ canonical_url }}">
+<meta name="theme-color" content="{{ scheme_accent }}">
+<link rel="canonical" href="{{ canonical_url }}">
 
-  <!-- ======================= New Theme V1.0.0 ========================= -->
+<!-- ======================= New Theme V1.0.0 ========================= -->
 
-  {% if settings.favicon %}
-    <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
-  {% endif %}
+{% if settings.favicon %}
+  <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+{% endif %}
 
-  {%- unless settings.type_header_font.system? and settings.type_base_font.system? and settings.type_nav_font.system? and settings.type_btn_font.system? and settings.type_subheading_font.system? -%}
-    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-  {%- endunless -%}
+{%- unless settings.type_header_font.system?
+  and settings.type_base_font.system?
+  and settings.type_nav_font.system?
+  and settings.type_btn_font.system?
+  and settings.type_subheading_font.system?
+-%}
+  <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+{%- endunless -%}
 
-  <!-- Title and description ================================================ -->
-  {% capture seo_title %}
+<!-- Title and description ================================================ -->
+{% capture seo_title %}
     {% assign title_content = page_title %}
     {% if template == 'password' %}
       {% assign title_content = shop.name %}
@@ -38,107 +43,106 @@
     {% endunless %}
   {% endcapture %}
 
-  <title>{{ seo_title }}</title>
+<title>{{ seo_title }}</title>
 
-  {% if page_description %}
-    <meta name="description" content="{{ page_description | escape }}">
-  {% else %}
-    <meta name="description" content="{{ shop.description | escape }}">
-  {% endif %}
+{% if page_description %}
+  <meta name="description" content="{{ page_description | escape }}">
+{% else %}
+  <meta name="description" content="{{ shop.description | escape }}">
+{% endif %}
 
-  {% render 'social-meta' %}
+{% render 'social-meta' %}
 
-  {%- if settings.loading_image_1 != blank or settings.loading_image_2 != blank -%}
-    {%- style -%}
-      .loading { position: fixed; top: 0; left: 0; z-index: 99999; width: 100%; height: 100%; background: var(--bg); transition: opacity 0.2s ease-out, visibility 0.2s ease-out; }
-      body.is-loaded .loading { opacity: 0; visibility: hidden; pointer-events: none; }
-      .loading__image__holder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; font-size: 0; display: flex; align-items: center; justify-content: center; }
-      .loading__image__holder:nth-child(2) { opacity: 0; }
-      .loading__image { max-width: {{ settings.loading_image_width }}px; max-height: {{ settings.loading_image_width }}px; object-fit: contain; }
-      .loading--animate .loading__image__holder:nth-child(1) { animation: pulse1 2s infinite ease-in-out; }
-      .loading--animate .loading__image__holder:nth-child(2) { animation: pulse2 2s infinite ease-in-out; }
-      @keyframes pulse1 {
-        0% { opacity: 1; }
-        50% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-      @keyframes pulse2 {
-        0% { opacity: 0; }
-        50% { opacity: 1; }
-        100% { opacity: 0; }
-      }
-    {%- endstyle -%}
-  {%- endif -%}
+{%- if settings.loading_image_1 != blank or settings.loading_image_2 != blank -%}
+  {%- style -%}
+    .loading { position: fixed; top: 0; left: 0; z-index: 99999; width: 100%; height: 100%; background: var(--bg); transition: opacity 0.2s ease-out, visibility 0.2s ease-out; }
+    body.is-loaded .loading { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading__image__holder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; font-size: 0; display: flex; align-items: center; justify-content: center; }
+    .loading__image__holder:nth-child(2) { opacity: 0; }
+    .loading__image { max-width: {{ settings.loading_image_width }}px; max-height: {{ settings.loading_image_width }}px; object-fit: contain; }
+    .loading--animate .loading__image__holder:nth-child(1) { animation: pulse1 2s infinite ease-in-out; }
+    .loading--animate .loading__image__holder:nth-child(2) { animation: pulse2 2s infinite ease-in-out; }
+    @keyframes pulse1 {
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes pulse2 {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  {%- endstyle -%}
+{%- endif -%}
 
-  {%- liquid
-    assign heading_font = settings.type_header_font
-    assign subheading_font = settings.type_subheading_font
-    assign base_font = settings.type_base_font
-    assign nav_font = settings.type_nav_font
-    assign btn_font = settings.type_btn_font
+{%- liquid
+  assign heading_font = settings.type_header_font
+  assign subheading_font = settings.type_subheading_font
+  assign base_font = settings.type_base_font
+  assign nav_font = settings.type_nav_font
+  assign btn_font = settings.type_btn_font
 
-    assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
-    assign base_font_100 = base_font | font_modify: 'weight', '+100'
-    assign base_font_200 = base_font | font_modify: 'weight', '+200'
-    assign base_font_300 = base_font | font_modify: 'weight', '+300'
-    assign base_font_400 = base_font | font_modify: 'weight', '+400'
-    if base_font_100 and base_font_100.weight > base_font.weight
-      assign base_font_bold = base_font_100
-    elsif base_font_200 and base_font_200.weight > base_font.weight
-      assign base_font_bold = base_font_200
-    elsif base_font_300 and base_font_300.weight > base_font.weight
-      assign base_font_bold = base_font_300
-    elsif base_font_400 and base_font_400.weight > base_font.weight
-      assign base_font_bold = base_font_400
-    endif
+  assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
+  assign base_font_100 = base_font | font_modify: 'weight', '+100'
+  assign base_font_200 = base_font | font_modify: 'weight', '+200'
+  assign base_font_300 = base_font | font_modify: 'weight', '+300'
+  assign base_font_400 = base_font | font_modify: 'weight', '+400'
+  if base_font_100 and base_font_100.weight > base_font.weight
+    assign base_font_bold = base_font_100
+  elsif base_font_200 and base_font_200.weight > base_font.weight
+    assign base_font_bold = base_font_200
+  elsif base_font_300 and base_font_300.weight > base_font.weight
+    assign base_font_bold = base_font_300
+  elsif base_font_400 and base_font_400.weight > base_font.weight
+    assign base_font_bold = base_font_400
+  endif
 
-    assign base_font_italic = settings.type_base_font | font_modify: 'style', 'italic'
-    assign base_font_bold_italic = base_font_bold | font_modify: 'style', 'italic'
+  assign base_font_italic = settings.type_base_font | font_modify: 'style', 'italic'
+  assign base_font_bold_italic = base_font_bold | font_modify: 'style', 'italic'
 
-    assign nav_font_bold = nav_font | font_modify: 'weight', 'bolder'
-    assign nav_font_100 = nav_font | font_modify: 'weight', '+100'
-    assign nav_font_200 = nav_font | font_modify: 'weight', '+200'
-    assign nav_font_300 = nav_font | font_modify: 'weight', '+300'
-    assign nav_font_400 = nav_font | font_modify: 'weight', '+400'
-    if nav_font_100 and nav_font_100.weight > nav_font.weight
-      assign nav_font_bold = nav_font_100
-    elsif nav_font_200 and nav_font_200.weight > nav_font.weight
-      assign nav_font_bold = nav_font_200
-    elsif nav_font_300 and nav_font_300.weight > nav_font.weight
-      assign nav_font_bold = nav_font_300
-    elsif nav_font_400 and nav_font_400.weight > nav_font.weight
-      assign nav_font_bold = nav_font_400
-    endif
+  assign nav_font_bold = nav_font | font_modify: 'weight', 'bolder'
+  assign nav_font_100 = nav_font | font_modify: 'weight', '+100'
+  assign nav_font_200 = nav_font | font_modify: 'weight', '+200'
+  assign nav_font_300 = nav_font | font_modify: 'weight', '+300'
+  assign nav_font_400 = nav_font | font_modify: 'weight', '+400'
+  if nav_font_100 and nav_font_100.weight > nav_font.weight
+    assign nav_font_bold = nav_font_100
+  elsif nav_font_200 and nav_font_200.weight > nav_font.weight
+    assign nav_font_bold = nav_font_200
+  elsif nav_font_300 and nav_font_300.weight > nav_font.weight
+    assign nav_font_bold = nav_font_300
+  elsif nav_font_400 and nav_font_400.weight > nav_font.weight
+    assign nav_font_bold = nav_font_400
+  endif
 
-    assign heading_font_uppercase = 'none'
-    if settings.type_header_uppercase
-      assign heading_font_uppercase = 'uppercase'
-    endif
+  assign heading_font_uppercase = 'none'
+  if settings.type_header_uppercase
+    assign heading_font_uppercase = 'uppercase'
+  endif
 
-    assign subheading_font_uppercase = 'none'
-    if settings.type_sub_uppercase
-      assign subheading_font_uppercase = 'uppercase'
-    endif
+  assign subheading_font_uppercase = 'none'
+  if settings.type_sub_uppercase
+    assign subheading_font_uppercase = 'uppercase'
+  endif
 
-    case settings.swatch_size
-      when 'regular'
-        assign swatch_size_filters = '1.15'
-        assign swatch_size_product = '2.2'
-      when 'large'
-        assign swatch_size_filters = '1.5'
-        assign swatch_size_product = '3.0'
-    endcase
+  case settings.swatch_size
+    when 'regular'
+      assign swatch_size_filters = '1.15'
+      assign swatch_size_product = '2.2'
+    when 'large'
+      assign swatch_size_filters = '1.5'
+      assign swatch_size_product = '3.0'
+  endcase
 
-    assign backdrop_bg = 'rgba(0,0,0,0.4)'
-    assign backdrop_opacity = 1
+  assign backdrop_bg = 'rgba(0,0,0,0.4)'
+  assign backdrop_opacity = 1
 
-    assign white = '#ffffff'
-    assign black = '#000000'
-  -%}
+  assign white = '#ffffff'
+  assign black = '#000000'
+-%}
 
-  <!-- CSS ================================================================== -->
-  {% style %}
-
+<!-- CSS ================================================================== -->
+{% style %}
   {{ heading_font | font_face: font_display: 'swap' }}
   {{ base_font | font_face: font_display: 'swap' }}
   {{ nav_font | font_face: font_display: 'swap' }}
@@ -475,8 +479,6 @@
     --COLUMNS-MOBILE: 1;
 
     {%- unless settings.grid_override -%}
-      --PAGE-WIDTH: 1400px;
-
       {%- if settings.grid_style == 'compact' -%}
         --LAYOUT-OUTER: 32px;
         --LAYOUT-GUTTER: 32px;
@@ -501,11 +503,11 @@
       {%- endif -%}
     {%- else -%}
       --PAGE-WIDTH: {{ settings.page_width }}px;
-      --LAYOUT-OUTER: {{ settings.grid_gap_horizontal }}px;
+      --LAYOUT-OUTER: 50px;
       --LAYOUT-GUTTER: {{ settings.grid_gap_horizontal }}px;
-      --LAYOUT-OUTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 }}px;
+      --LAYOUT-OUTER-MEDIUM: 30px;
       --LAYOUT-GUTTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 }}px;
-      --LAYOUT-OUTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 }}px;
+      --LAYOUT-OUTER-SMALL: 16px;
       --LAYOUT-GUTTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 }}px;
     {%- endunless -%}
 
@@ -587,37 +589,36 @@
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
   }
+{% endstyle %}
 
-  {% endstyle %}
+{%- unless settings.type_base_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
+{%- endunless -%}
+{%- unless settings.type_header_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
+{%- endunless -%}
+{%- unless settings.type_nav_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_nav_font | font_url }}" type="font/woff2" crossorigin>
+{%- endunless -%}
+{%- unless settings.type_btn_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
+{%- endunless -%}
+{%- unless settings.type_subheading_font.system? -%}
+  <link rel="preload" as="font" href="{{ settings.type_subheading_font | font_url }}" type="font/woff2" crossorigin>
+{%- endunless -%}
 
-  {%- unless settings.type_base_font.system? -%}
-    <link rel="preload" as="font" href="{{ settings.type_base_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-  {%- unless settings.type_header_font.system? -%}
-    <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-  {%- unless settings.type_nav_font.system? -%}
-    <link rel="preload" as="font" href="{{ settings.type_nav_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-  {%- unless settings.type_btn_font.system? -%}
-    <link rel="preload" as="font" href="{{ settings.type_btn_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-  {%- unless settings.type_subheading_font.system? -%}
-    <link rel="preload" as="font" href="{{ settings.type_subheading_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
 
-  {{ 'theme.css' | asset_url | stylesheet_tag }}
+{%- if settings.swatches_type != 'disabled' -%}
+  {{ 'swatches.css' | asset_url | stylesheet_tag }}
+  {%- render 'swatch-color-list' -%}
+{%- endif %}
 
-  {%- if settings.swatches_type != 'disabled' -%}
-    {{ 'swatches.css' | asset_url | stylesheet_tag }}
-    {%- render 'swatch-color-list' -%}
-  {%- endif %}
+{%- if request.design_mode -%}
+  {{ 'design-mode.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
 
-  {%- if request.design_mode -%}
-    {{ 'design-mode.css' | asset_url | stylesheet_tag }}
-  {%- endif -%}
-
-  <script>
+<script>
     if (window.navigator.userAgent.indexOf('MSIE ') > 0 || window.navigator.userAgent.indexOf('Trident/') > 0) {
       document.documentElement.className = document.documentElement.className + ' ie';
 
@@ -728,29 +729,34 @@
     document.documentElement.style.setProperty('--one-half', `${windowInnerHeight * 0.5}px`);
     document.documentElement.style.setProperty('--one-third', `${windowInnerHeight * 0.33}px`);
     document.documentElement.style.setProperty('--one-fifth', `${windowInnerHeight * 0.2}px`);
-  </script>
+</script>
 
-  {% if template.directory == 'customers' or template contains 'cart' %}
-    <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
-  {% endif %}
+{% if template.directory == 'customers' or template contains 'cart' %}
+  <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+{% endif %}
 
-  <!-- Theme Javascript ============================================================== -->
-  <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
+<!-- Theme Javascript ============================================================== -->
+<script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+{%- if request.design_mode -%}
+  <script
+    src="{{ 'theme-editor.js' | asset_url }}"
+    defer="defer"
+    data-owner-email="{{ shop.email }}"
+    data-owner-id="{{ shop.id }}"
+  ></script>
+{%- endif -%}
+
+{%- comment -%}
+  If you need to do some edits in Theme JS use theme.dev.js file
+
+  *** DO NOT EDIT theme.js file ***
+
+  Then call theme.dev.js file by editing the row above from:
   <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+  to
+  <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
+{%- endcomment -%}
 
-  {%- if request.design_mode -%}
-    <script src="{{ 'theme-editor.js' | asset_url }}" defer="defer" data-owner-email="{{ shop.email }}" data-owner-id="{{ shop.id }}"></script>
-  {%- endif -%}
-
-  {%- comment -%}
-    If you need to do some edits in Theme JS use theme.dev.js file
-
-    *** DO NOT EDIT theme.js file ***
-
-    Then call theme.dev.js file by editing the row above from:
-    <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
-    to
-    <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
-  {%- endcomment -%}
-
-  <!-- Shopify app scripts =========================================================== -->
+<!-- Shopify app scripts =========================================================== -->
