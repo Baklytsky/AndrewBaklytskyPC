@@ -37,7 +37,7 @@
   assign columns_small = 2
   assign columns_mobile = layout_mobile | plus: 0
 
-	if columns_desktop == 2 or columns_desktop == 4
+  if columns_desktop == 2 or columns_desktop == 4
     assign columns_medium = 2
   endif
 
@@ -61,10 +61,12 @@
   }
 {%- endstyle -%}
 
-<section id="CollectionsList--{{ section.id }}"
+<section
+  id="CollectionsList--{{ section.id }}"
   class="index-collections-list section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="list-collections">
+  data-section-type="list-collections"
+>
   <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--inline{% endif %}">
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% else %} grid__heading-holder--sticky{% endif %}">
@@ -80,16 +82,20 @@
                 endunless
               -%}
 
-              <{{ heading_tag }} class="grid__heading {{ section.settings.heading_font_size }}"
+              <{{ heading_tag }}
+                class="grid__heading {{ section.settings.heading_font_size }}"
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
-              >{{ title }}</{{ heading_tag }}>
+              >
+                {{- title -}}
+              </{{ heading_tag }}>
             {%- endif -%}
 
             {%- if description != blank -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
-              <div class="grid__description {{ section.settings.text_font_size }}"
+              <div
+                class="grid__description {{ section.settings.text_font_size }}"
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
@@ -102,11 +108,16 @@
 
         {%- if button_text != blank -%}
           {%- assign animation_order = animation_order | plus: 1 -%}
-          <div class="grid__heading-actions"
+          <div
+            class="grid__heading-actions"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
-            data-aos-order="{{ animation_order }}">
-            <a class="btn {{ button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}" href="{{ section.settings.button_url }}">
+            data-aos-order="{{ animation_order }}"
+          >
+            <a
+              class="btn {{ button_style }} {{ section.settings.button_size }} {{ section.settings.button_type }}"
+              href="{{ section.settings.button_url }}"
+            >
               <span>{{ button_text | escape }}</span>
 
               {%- if section.settings.show_arrow -%}
@@ -144,7 +155,13 @@
 
         {%- if layout == 'slider' -%}
           <grid-slider align-arrows>
-            <div class="collection-list {{ grid_classes }}" data-grid-slider{% if request.design_mode %} data-block-scroll{% endif %}>
+            <div
+              class="collection-list {{ grid_classes }}"
+              data-grid-slider
+              {% if request.design_mode %}
+                data-block-scroll
+              {% endif %}
+            >
               {{ collection_items }}
             </div>
           </grid-slider>
@@ -226,10 +243,10 @@
       "label": "Color",
       "default": "btn--primary",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -238,9 +255,9 @@
       "label": "Size",
       "default": "",
       "options": [
-        { "label": "Small", "value": "btn--small" },
-        { "label": "Medium", "value": "" },
-        { "label": "Large", "value": "btn--large" }
+        {"label": "Small", "value": "btn--small"},
+        {"label": "Medium", "value": ""},
+        {"label": "Large", "value": "btn--large"}
       ]
     },
     {
@@ -249,9 +266,9 @@
       "label": "Style",
       "default": "btn--solid",
       "options": [
-        { "label": "Solid", "value": "btn--solid" },
-        { "label": "Outline", "value": "btn--outline" },
-        { "label": "Text", "value": "btn--text" }
+        {"label": "Solid", "value": "btn--solid"},
+        {"label": "Outline", "value": "btn--outline"},
+        {"label": "Text", "value": "btn--text"}
       ]
     },
     {
@@ -301,12 +318,12 @@
       "info": "Applies only when layout is set to Grid"
     },
     {
-      "type":    "range",
-      "id":      "grid",
-      "label":   "Collections per row",
-      "min":     2,
-      "max":     6,
-      "step":    1,
+      "type": "range",
+      "id": "grid",
+      "label": "Collections per row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
       "default": 4
     },
     {
@@ -414,7 +431,33 @@
   "presets": [
     {
       "category": "Collection",
-      "name": "Collection list",
+      "name": "Collection list grid",
+      "settings": {
+        "layout": "grid",
+        "layout_mobile": "2"
+      },
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    },
+    {
+      "category": "Collection",
+      "name": "Collection list slider",
+      "settings": {
+        "layout": "slider",
+        "layout_mobile": "slider"
+      },
       "blocks": [
         {
           "type": "collection"
