@@ -72,7 +72,7 @@
     <div class="drawer__items-title">{{ 'cart.general.products_with_count' | t: count: cart.item_count  }}</div>
 
     <cart-items class="drawer__items" data-items-holder style="--base-animation-delay: {{ animation_delay }}ms">
-      {%- render 'cart-line-items', part: 'line-items' -%}
+      {%- render 'cart-line-items' -%}
     </cart-items>
   </div>
 {%- endcapture -%}
@@ -206,9 +206,6 @@
 
                   {%- when 'products' -%}
                     {{ cart_items }}
-
-                  {%- when 'upsell-products' -%}
-                    {%- render 'cart-block-upsell', block: block -%}
 
                   {%- when 'product-list' -%}
                     {%- render 'cart-block-upsell', block: block -%}
@@ -451,25 +448,6 @@
         "name": "Products",
         "limit": 1,
         "settings": [
-          {
-            "type": "checkbox",
-            "id": "pin_to_bottom",
-            "label": "Pin to bottom",
-            "default": false
-          }
-        ]
-      },
-      {
-        "type": "upsell-products",
-        "name": "Upsell products",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "checkbox",
-            "id": "upsell_auto_open",
-            "label": "Show upsell products automatically when cart drawer is open",
-            "default": true
-          },
           {
             "type": "checkbox",
             "id": "pin_to_bottom",
@@ -746,11 +724,6 @@
           },
           {
             "type": "products",
-            "settings": {
-            }
-          },
-          {
-            "type": "upsell-products",
             "settings": {
             }
           },

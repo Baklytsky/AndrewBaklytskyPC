@@ -129,7 +129,7 @@ function compileJS() {
 
 // Process CSS with PostCSS and copy to dist/assets
 function compileCss() {
-  return src([config.src.cssTheme, config.src.cssTemplateGiftCard])
+  return src([config.src.cssTheme, config.src.cssTemplateGiftCard, config.src.cssComponents])
     .pipe(plumber(handleError))
     .pipe(
       cssimport({
