@@ -248,7 +248,7 @@
                       echo '--block-padding-bottom: ' | append: block.settings.padding_bottom | append: 'px;'
                     endif
 
-                    if block.type == 'upsell' or block.type == 'complementary-products'
+                    if block.type == 'complementary-products'
                       unless bg_accent == 'rgba(0,0,0,0)' or bg_accent == blank
                         echo '--bg-accent: ' | append: bg_accent | append: ';'
                       endunless
@@ -291,37 +291,6 @@
 
                   {%- when 'inventory_countdown' -%}
                     {%- render 'product-inventory' product: product, block: block, block_style: block_style -%}
-
-                  {%- when 'upsell' -%}
-                    {%- assign upsell_product = product.metafields.theme.upsell.value | default: block.settings.upsell_product -%}
-                    {%- assign upsell_product_list = product.metafields.theme.upsell_list.value | default: block.settings.upsell_product_list -%}
-
-                    {%- if upsell_product != blank or upsell_product_list != blank or request.design_mode -%}
-                      <div class="product__block product__upsell block-padding" {{ block.shopify_attributes }} {{ block_style }}>
-                        {%- assign upsell_title = 'products.general.upsell_title' | t -%}
-
-                        {%- capture upsell_products -%}
-                          {%- if upsell_product == blank and upsell_product_list == blank -%}
-                            {%- render 'upsell-product' -%}
-                          {%- else -%}
-                            {%- if upsell_product != blank -%}
-                              {%- render 'upsell-product', upsell_product: upsell_product, show_avaialable_upsell_only: block.settings.show_avaialable_upsell_only, is_product_block: true -%}
-                            {%- endif -%}
-
-                            {%- if upsell_product_list != blank -%}
-                              {%- for upsell_product in upsell_product_list -%}
-                                {%- render 'upsell-product', upsell_product: upsell_product, show_avaialable_upsell_only: block.settings.show_avaialable_upsell_only, is_product_block: true -%}
-                              {%- endfor -%}
-                            {%- endif -%}
-                          {%- endif -%}
-                        {%- endcapture -%}
-
-                        {%- if upsell_products != blank -%}
-                          <p class="product-upsell__holder__title">{{ upsell_title }}</p>
-                          {{ upsell_products }}
-                        {%- endif -%}
-                      </div>
-                    {%- endif -%}
 
                   {%- when 'pickup' -%}
                     <pickup-availability class="product__block product__pickup block-padding" data-store-availability-container="{{ current_variant.id }}" {{ block.shopify_attributes }} {{ block_style }}></pickup-availability>
@@ -454,7 +423,7 @@
                             <p class="complementary-products__title">{{ complementary_products_title }}</p>
                           {%- endif -%}
 
-                          {%- for product in recommendations.products limit: block.settings.complementary_limit-%}
+                          {%- for product in recommendations.products limit: block.settings.complementary_limit -%}
                             {%- render 'upsell-product', upsell_product: product -%}
                           {%- endfor -%}
                         {%- endif -%}
@@ -1151,66 +1120,6 @@
             "unit": "px",
             "label": "Bottom",
             "default": 0
-          }
-        ]
-      },
-      {
-        "type": "upsell",
-        "name": "Upsell",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "product",
-            "id": "upsell_product",
-            "label": "Single product"
-          },
-          {
-            "type": "product_list",
-            "id": "upsell_product_list",
-            "label": "Product list",
-            "limit": 3,
-            "info": "Choose up to 3 upsell products"
-          },
-          {
-            "type": "checkbox",
-            "id": "show_avaialable_upsell_only",
-            "label": "Show only items in stock",
-            "default": false
-          },
-          {
-            "type": "header",
-            "content": "Cart"
-          },
-          {
-            "type": "paragraph",
-            "content": "Use a dynamic source with the metafield 'theme.upsell' for single product or 'theme.upsell_list' for product list to allow product upsells to follow users into the cart. Use any other name to limit this feature to the product page. [Learn more](https://broadcast.invisiblethemes.com/products/upselling)"
-          },
-          {
-            "type": "header",
-            "content": "Colors"
-          },
-          {
-            "type": "paragraph",
-            "content": "Overrides color scheme. Set to Transparent to revert back to using color schemes."
-          },
-          {
-            "type": "color",
-            "id": "bg_color",
-            "label": "Background"
-          },
-          {
-            "type": "header",
-            "content": "Padding"
-          },
-          {
-            "type": "range",
-            "id": "padding_bottom",
-            "min": 0,
-            "max": 50,
-            "step": 2,
-            "unit": "px",
-            "label": "Bottom",
-            "default": 16
           }
         ]
       },

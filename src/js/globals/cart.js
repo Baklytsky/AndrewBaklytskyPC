@@ -29,11 +29,9 @@ const classes = {
 const selectors = {
   apiContent: '[data-api-content]',
   apiLineItems: '[data-api-line-items]',
-  apiUpsellItems: '[data-api-upsell-items]',
   apiCartPrice: '[data-api-cart-price]',
   animation: '[data-animation]',
   additionalCheckoutButtons: '.additional-checkout-buttons',
-  buttonSkipUpsellProduct: '[data-skip-upsell-product]',
   cartBarAdd: '[data-add-to-cart-bar]',
   cartCloseError: '[data-cart-error-close]',
   cartDrawer: 'cart-drawer',
@@ -65,10 +63,7 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
-  upsellProductsHolder: '[data-upsell-products]',
-  upsellWidget: '[data-upsell-widget]',
   termsErrorMessage: '[data-terms-error-message]',
-  collapsibleBody: '[data-collapsible-body]',
   recentlyViewedHolderId: 'recently-viewed-products-cart',
   noscript: 'noscript',
 };
@@ -81,11 +76,9 @@ const attributes = {
   item: 'data-item',
   itemIndex: 'data-item-index',
   itemTitle: 'data-item-title',
-  open: 'open',
   quickAddHolder: 'data-quick-add-holder',
   quickAddVariant: 'data-quick-add-variant',
   scrollLocked: 'data-scroll-locked',
-  upsellAutoOpen: 'data-upsell-auto-open',
   name: 'name',
 };
 
@@ -113,7 +106,6 @@ class CartItems extends HTMLElement {
     this.cartCloseErrorMessage = document.querySelector(selectors.cartCloseError);
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
-    this.upsellProductsHolder = document.querySelector(selectors.upsellProductsHolder);
     this.subtotal = window.theme.subtotal;
 
     // Define Cart object depending on if we have cart drawer or cart page
@@ -134,12 +126,6 @@ class CartItems extends HTMLElement {
       document.addEventListener('theme:cart-drawer:open', this.animateItems);
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
-
-    // Upsell products
-    this.skipUpsellProductsArray = [];
-    this.skipUpsellProductEvent();
-    this.checkSkippedUpsellProductsFromStorage();
-    this.toggleCartUpsellWidgetVisibility();
 
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
@@ -793,8 +779,7 @@ class CartItems extends HTMLElement {
 
   build(data) {
     const cartItemsData = data.querySelector(selectors.apiLineItems);
-    const upsellItemsData = data.querySelector(selectors.apiUpsellItems);
-    const cartEmptyData = Boolean(cartItemsData === null && upsellItemsData === null);
+    const cartEmptyData = Boolean(cartItemsData === null);
     const priceData = data.querySelector(selectors.apiCartPrice);
     const cartTotal = data.querySelector(selectors.cartTotal);
 
@@ -804,20 +789,8 @@ class CartItems extends HTMLElement {
 
     if (cartEmptyData) {
       this.itemsHolder.innerHTML = data.innerHTML;
-
-      if (this.upsellProductsHolder) {
-        this.upsellProductsHolder.innerHTML = '';
-      }
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
-
-      if (this.upsellProductsHolder) {
-        this.upsellProductsHolder.innerHTML = upsellItemsData.innerHTML;
-      }
-
-      this.skipUpsellProductEvent();
-      this.checkSkippedUpsellProductsFromStorage();
-      this.toggleCartUpsellWidgetVisibility();
     }
 
     this.newTotalItems = cartItemsData && cartItemsData.querySelectorAll(selectors.item).length ? cartItemsData.querySelectorAll(selectors.item).length : 0;
@@ -944,89 +917,6 @@ class CartItems extends HTMLElement {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
     });
-  }
-
-  /**
-   * Skip upsell product
-   */
-  skipUpsellProductEvent() {
-    if (this.upsellProductsHolder === null) {
-      return;
-    }
-    const skipButtons = this.upsellProductsHolder.querySelectorAll(selectors.buttonSkipUpsellProduct);
-
-    if (skipButtons.length) {
-      skipButtons.forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.preventDefault();
-          const productID = button.closest(selectors.quickAddHolder).getAttribute(attributes.quickAddHolder);
-
-          if (!this.skipUpsellProductsArray.includes(productID)) {
-            this.skipUpsellProductsArray.push(productID);
-          }
-
-          // Add skipped upsell product to session storage
-          window.sessionStorage.setItem('skip_upsell_products', this.skipUpsellProductsArray);
-
-          // Remove upsell product from cart
-          this.removeUpsellProduct(productID);
-          this.toggleCartUpsellWidgetVisibility();
-        });
-      });
-    }
-  }
-
-  /**
-   * Check for skipped upsell product added to session storage
-   */
-  checkSkippedUpsellProductsFromStorage() {
-    const skippedUpsellItemsFromStorage = window.sessionStorage.getItem('skip_upsell_products');
-    if (!skippedUpsellItemsFromStorage) return;
-
-    const skippedUpsellItemsFromStorageArray = skippedUpsellItemsFromStorage.split(',');
-
-    skippedUpsellItemsFromStorageArray.forEach((productID) => {
-      if (!this.skipUpsellProductsArray.includes(productID)) {
-        this.skipUpsellProductsArray.push(productID);
-      }
-
-      this.removeUpsellProduct(productID);
-    });
-  }
-
-  removeUpsellProduct(productID) {
-    if (!this.upsellProductsHolder) return;
-
-    // Remove skipped upsell product from Cart
-    const upsellProduct = this.upsellProductsHolder.querySelector(`[${attributes.quickAddHolder}="${productID}"]`);
-
-    if (upsellProduct) {
-      upsellProduct.parentNode.remove();
-    }
-  }
-
-  /**
-   * Show or hide cart upsell products widget visibility
-   */
-  toggleCartUpsellWidgetVisibility() {
-    if (!this.upsellProductsHolder) return;
-
-    // Hide upsell container if no items
-    const upsellItems = this.upsellProductsHolder.querySelectorAll(selectors.quickAddHolder);
-    const upsellWidget = this.upsellProductsHolder.closest(selectors.upsellWidget);
-
-    if (!upsellWidget) return;
-
-    upsellWidget.classList.toggle(classes.hidden, !upsellItems.length);
-
-    if (upsellItems.length && !upsellWidget.hasAttribute(attributes.open) && upsellWidget.hasAttribute(attributes.upsellAutoOpen)) {
-      upsellWidget.setAttribute(attributes.open, true);
-      const upsellWidgetBody = upsellWidget.querySelector(selectors.collapsibleBody);
-
-      if (upsellWidgetBody) {
-        upsellWidgetBody.style.height = 'auto';
-      }
-    }
   }
 
   /**

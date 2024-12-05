@@ -162,7 +162,7 @@
             data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
           >
-            {%- render 'cart-line-items', part: 'line-items', animation_delay: animation_delay, is_cart: true -%}
+            {%- render 'cart-line-items', animation_delay: animation_delay, is_cart: true -%}
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
           </cart-items>
         </div>
@@ -216,9 +216,6 @@
                     <div class="cart__message cart__message--custom" style="{{ style }}">
                       {{ block.settings.cart_custom_message_text }}
                     </div>
-
-                  {%- when 'upsell-products' -%}
-                    {%- render 'cart-block-upsell', block: block -%}
 
                   {%- when 'product-list' -%}
                     {%- render 'cart-block-upsell' block: block -%}
@@ -383,19 +380,6 @@
           "type": "color_background",
           "id": "free_shipping_gradient",
           "label": "Custom progress bar gradient"
-        }
-      ]
-    },
-    {
-      "type": "upsell-products",
-      "name": "Upsell products",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "checkbox",
-          "id": "upsell_auto_open",
-          "label": "Show upsell products automatically on cart page",
-          "default": true
         }
       ]
     },
