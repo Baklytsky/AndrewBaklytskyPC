@@ -21,9 +21,9 @@
 
   assign show_video_popup = false
   assign show_video_background = false
-  assign video_blocks = section.blocks | where: "type", "video"
+  assign video_blocks = section.blocks | where: 'type', 'video'
   for block in video_blocks
-    if block.settings.video != nil
+    if block.settings.video != null
       assign show_video_background = true
     endif
 
@@ -49,11 +49,15 @@
   }
 {%- endstyle -%}
 
-<section id="BrickSection--{{ section.id }}"
+<section
+  id="BrickSection--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="custom-content"
-  {% if transparent_header %}data-overlay-header{% endif %}
-  class="section-padding {{ color_scheme }}">
+  {% if transparent_header %}
+    data-overlay-header
+  {% endif %}
+  class="section-padding {{ color_scheme }}"
+>
   {%- if section.blocks.size > 0 -%}
     <div class="brick__section{% if section.settings.reverse_blocks %} brick__section--reversed-mobile{% endif %}{% if section.settings.gutters %} brick--margin{% endif %} {{ border_class }} {{ width }}">
       {%- for block in section.blocks -%}
@@ -86,30 +90,49 @@
             {%- render 'brick-image', block: block, style: style, animation_anchor: animation_anchor -%}
 
           {%- when 'text' -%}
-            {%- render 'brick-text', block: block, style: style, padding_class: padding_class, animation_anchor: animation_anchor -%}
+            {%- render 'brick-text',
+              block: block,
+              style: style,
+              padding_class: padding_class,
+              animation_anchor: animation_anchor
+            -%}
 
           {%- when 'newsletter' -%}
-            {%- render 'brick-newsletter', block: block, style: style, padding_class: padding_class, animation_anchor: animation_anchor -%}
-
-          {%- when 'review' -%}
-            {%- render 'brick-review', block: block, style: style, padding_class: padding_class, animation_anchor: animation_anchor -%}
+            {%- render 'brick-newsletter',
+              block: block,
+              style: style,
+              padding_class: padding_class,
+              animation_anchor: animation_anchor
+            -%}
 
           {%- when 'product' -%}
-            <div class="brick__block"{% if style != blank %} style="{{ style }}"{% endif %} {{ block.shopify_attributes }}>
+            <div
+              class="brick__block"
+              {% if style != blank %}
+                style="{{ style }}"
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               <div class="brick__block__text brick__block__text--column{{ padding_class }} text-center">
                 {%- if block.settings.title != blank -%}
                   {%- assign animation_order = animation_order | plus: 1 -%}
-                  <p class="brick__product__subheading subheading"
+                  <p
+                    class="brick__product__subheading subheading"
                     data-aos="hero"
                     data-aos-anchor="{{ animation_anchor }}"
-                    data-aos-order="{{ animation_order }}">{{ block.settings.title }}</p>
+                    data-aos-order="{{ animation_order }}"
+                  >
+                    {{ block.settings.title }}
+                  </p>
                 {%- endif -%}
 
                 {%- assign animation_order = animation_order | plus: 1 -%}
-                <div class="brick__product"
+                <div
+                  class="brick__product"
                   data-aos="hero"
                   data-aos-anchor="{{ animation_anchor }}"
-                  data-aos-order="{{ animation_order }}">
+                  data-aos-order="{{ animation_order }}"
+                >
                   {%- assign product = all_products[block.settings.product] -%}
                   {%- if product != blank -%}
                     {%- render 'product-grid-item', product: product, index: forloop.index -%}
@@ -120,23 +143,45 @@
               </div>
             </div>
           {%- when 'video' -%}
-            <div class="brick__block {{ desktop_height }} {{ mobile_height }}"{% if style != blank %} style="{{ style }}"{% endif %} {{ block.shopify_attributes }}>
+            <div
+              class="brick__block {{ desktop_height }} {{ mobile_height }}"
+              {% if style != blank %}
+                style="{{ style }}"
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               <div class="brick__block__video frame wide-image">
-                {%- render 'video' block_settings: block.settings, desktop_height: desktop_height, mobile_height: mobile_height, block_element: true -%}
+                {%- render 'video',
+                  block_settings: block.settings,
+                  desktop_height: desktop_height,
+                  mobile_height: mobile_height,
+                  block_element: true
+                -%}
               </div>
             </div>
           {%- when 'collection' -%}
             {%- assign block_collection = collections[block.settings.collection] -%}
-            <div class="brick__block brick__block--collection"{% if style != blank %} style="{{ style }}"{% endif %} {{ block.shopify_attributes }}>
+            <div
+              class="brick__block brick__block--collection"
+              {% if style != blank %}
+                style="{{ style }}"
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               <div class="brick__block__collection{{ padding_class }}">
                 {%- if block.settings.title != blank -%}
-                  <p class="look__title text-center subheading"
+                  <p
+                    class="look__title text-center subheading"
                     data-aos="hero"
                     data-aos-anchor="{{ animation_anchor }}"
-                    data-aos-order="1">{{ block.settings.title }}</p>
+                    data-aos-order="1"
+                  >
+                    {{ block.settings.title }}
+                  </p>
                 {%- endif -%}
 
-                <div class="look__slider"
+                <div
+                  class="look__slider"
                   data-slider="{{ block.id }}"
                   data-options='{"watchCSS": true, "fade": true, "pageDots": false, "prevNextButtons": true, "adaptiveHeight": false}'
                   data-arrow-position-middle
@@ -152,7 +197,12 @@
                           endif
                         -%}
 
-                        <div class="look__slide look__slide--{{ block.id }}-{{ forloop.index0 }}" data-slide="{{ block.id }}-{{ forloop.index0 }}" data-slide-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                        <div
+                          class="look__slide look__slide--{{ block.id }}-{{ forloop.index0 }}"
+                          data-slide="{{ block.id }}-{{ forloop.index0 }}"
+                          data-slide-index="{{ forloop.index0 }}"
+                          {{ block.shopify_attributes }}
+                        >
                           {%- render 'product-grid-item', product: product, index: forloop.index -%}
                         </div>
 
@@ -165,12 +215,19 @@
                       {%- endfor -%}
                     {%- else -%}
                       <div class="no-results">
-                        <p><strong>{{ 'collections.general.no_matches' | t }}</strong></p>
+                        <p>
+                          <strong>{{ 'collections.general.no_matches' | t }}</strong>
+                        </p>
                       </div>
                     {%- endif -%}
                   {%- else -%}
                     {%- for i in (1..2) -%}
-                      <div class="look__slide look__slide--{{ block.id }}" data-slide="{{ block.id }}" data-slide-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                      <div
+                        class="look__slide look__slide--{{ block.id }}"
+                        data-slide="{{ block.id }}"
+                        data-slide-index="{{ forloop.index0 }}"
+                        {{ block.shopify_attributes }}
+                      >
                         {%- liquid
                           assign product_index = forloop.index | plus: 2
                           assign placeholder = 'product-' | append: product_index
@@ -183,13 +240,24 @@
                     {%- endfor -%}
                   {%- endif -%}
                 </div>
-
               </div>
             </div>
           {%- when 'before-and-after' -%}
-            <div class="brick__block brick__block--compare {{ desktop_height }} {{ mobile_height }}"{% if style != blank %} style="{{ style }}"{% endif %} {{ block.shopify_attributes }}>
+            <div
+              class="brick__block brick__block--compare {{ desktop_height }} {{ mobile_height }}"
+              {% if style != blank %}
+                style="{{ style }}"
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               <div class="brick__block__compare">
-                {%- render 'compare-images', image_1: block.settings.image_1, image_2: block.settings.image_2, image_position: block.settings.image_position, animation_anchor: animation_anchor, wrapper: section.settings.width -%}
+                {%- render 'compare-images',
+                  image_1: block.settings.image_1,
+                  image_2: block.settings.image_2,
+                  image_position: block.settings.image_position,
+                  animation_anchor: animation_anchor,
+                  wrapper: section.settings.width
+                -%}
               </div>
             </div>
         {%- endcase -%}
@@ -242,16 +310,16 @@
       "label": "Height",
       "default": "screen-height-one-half",
       "options": [
-        { "value": "image-height", "label": "Image height" },
-        { "value": "screen-height-full", "label": "Full screen height"},
-        { "value": "screen-height-three-quarters", "label": "3/4 of screen"},
-        { "value": "screen-height-two-thirds", "label": "2/3 of screen"},
-        { "value": "screen-height-one-half", "label": "1/2 of screen"},
-        { "value": "screen-height-one-third", "label": "1/3 of screen"},
-        { "value": "seven-fifty-height-hero", "label": "750px" },
-        { "value": "sixty-fifty-height-hero", "label": "650px" },
-        { "value": "five-fifty-height-hero", "label": "550px" },
-        { "value": "four-fifty-height-hero", "label": "450px" }
+        {"value": "image-height", "label": "Image height"},
+        {"value": "screen-height-full", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero", "label": "750px"},
+        {"value": "sixty-fifty-height-hero", "label": "650px"},
+        {"value": "five-fifty-height-hero", "label": "550px"},
+        {"value": "four-fifty-height-hero", "label": "450px"}
       ]
     },
     {
@@ -264,16 +332,16 @@
       "label": "Height",
       "default": "screen-height-one-half--mobile",
       "options": [
-        { "value": "image-height--mobile", "label": "Image height" },
-        { "value": "screen-height-full--mobile", "label": "Full screen height"},
-        { "value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
-        { "value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
-        { "value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
-        { "value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
-        { "value": "seven-fifty-height-hero--mobile", "label": "750px" },
-        { "value": "sixty-fifty-height-hero--mobile", "label": "650px" },
-        { "value": "five-fifty-height-hero--mobile", "label": "550px" },
-        { "value": "four-fifty-height-hero--mobile", "label": "450px" }
+        {"value": "image-height--mobile", "label": "Image height"},
+        {"value": "screen-height-full--mobile", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero--mobile", "label": "750px"},
+        {"value": "sixty-fifty-height-hero--mobile", "label": "650px"},
+        {"value": "five-fifty-height-hero--mobile", "label": "550px"},
+        {"value": "four-fifty-height-hero--mobile", "label": "450px"}
       ]
     },
     {
@@ -375,15 +443,15 @@
           "label": "Block alignment",
           "default": "align--middle-center",
           "options": [
-            { "value": "align--top-left", "label": "Top left"},
-            { "value": "align--top-center", "label": "Top center"},
-            { "value": "align--top-right", "label": "Top right"},
-            { "value": "align--middle-left", "label": "Middle left"},
-            { "value": "align--middle-center", "label": "Absolute center"},
-            { "value": "align--middle-right", "label": "Middle right"},
-            { "value": "align--bottom-left", "label": "Bottom left"},
-            { "value": "align--bottom-center", "label": "Bottom center"},
-            { "value": "align--bottom-right", "label": "Bottom right"}
+            {"value": "align--top-left", "label": "Top left"},
+            {"value": "align--top-center", "label": "Top center"},
+            {"value": "align--top-right", "label": "Top right"},
+            {"value": "align--middle-left", "label": "Middle left"},
+            {"value": "align--middle-center", "label": "Absolute center"},
+            {"value": "align--middle-right", "label": "Middle right"},
+            {"value": "align--bottom-left", "label": "Bottom left"},
+            {"value": "align--bottom-center", "label": "Bottom center"},
+            {"value": "align--bottom-right", "label": "Bottom right"}
           ]
         },
         {
@@ -419,7 +487,7 @@
           "max": 100,
           "step": 5,
           "unit": "%",
-          "default":0
+          "default": 0
         },
         {
           "type": "color",
@@ -453,10 +521,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -465,9 +533,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -476,9 +544,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -583,10 +651,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -595,9 +663,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -606,9 +674,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -625,13 +693,13 @@
           "default": false
         },
         {
-          "type":  "range",
-          "id":    "text_columns",
+          "type": "range",
+          "id": "text_columns",
           "label": "Columns",
-          "min":    1,
-          "max":    3,
-          "step":   1,
-          "default":1,
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 1,
           "info": "Desktop only"
         },
         {
@@ -640,8 +708,8 @@
           "label": "Text alignment",
           "default": "text-left",
           "options": [
-            {"value": "text-left","label": "Left"},
-            {"value": "text-center","label": "Centered"}
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"}
           ]
         },
         {
@@ -739,13 +807,13 @@
           ]
         },
         {
-          "type":  "range",
-          "id":    "text_columns",
+          "type": "range",
+          "id": "text_columns",
           "label": "Columns",
-          "min":    1,
-          "max":    3,
-          "step":   1,
-          "default":1,
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 1,
           "info": "Desktop only"
         },
         {
@@ -754,8 +822,8 @@
           "label": "Text alignment",
           "default": "text-left",
           "options": [
-            {"value": "text-left","label": "Left"},
-            {"value": "text-center","label": "Centered"}
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"}
           ]
         },
         {
@@ -802,10 +870,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -814,9 +882,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -825,9 +893,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -877,101 +945,6 @@
             {"value": "h5", "label": "H5"},
             {"value": "h6", "label": "H6"}
           ]
-        }
-      ]
-    },
-    {
-      "type": "review",
-      "name": "Testimonial",
-      "settings": [
-        {
-          "type": "header",
-          "content":"Testimonial"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Customer name",
-          "default": "Example Customer"
-        },
-        {
-          "type": "text",
-          "id": "subheading",
-          "label": "Subheading",
-          "default":"@username"
-        },
-        {
-          "type": "textarea",
-          "id": "review",
-          "label": "Testimonial",
-          "default": "Use this text to showcase a review from one of your customers. A great review is honest and speaks to the concerns of your customers."
-        },
-        {
-          "type": "select",
-          "id": "text_font_size",
-          "label": "Text size",
-          "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
-          "default": "body-medium",
-          "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
-          ]
-        },
-        {
-          "type": "image_picker",
-          "id": "bio_image",
-          "label": "Bio image"
-        },
-        {
-          "type": "header",
-          "content": "Review link",
-          "info": "Whole block turns into a link"
-        },
-        {
-          "type": "url",
-          "id": "review_url",
-          "label": "Link"
-        },
-        {
-          "type": "header",
-          "content": "Style"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_quotation_marks",
-          "label": "Show quotation mark",
-          "default": true
-        },
-        {
-          "type": "select",
-          "id": "align_text",
-          "label": "Text alignment",
-          "default": "text-left",
-          "options": [
-            {"value": "text-left","label": "Left"},
-            {"value": "text-center","label": "Centered"}
-          ]
-        },
-        {
-          "type": "header",
-          "content": "Colors"
-        },
-        {
-          "type": "paragraph",
-          "content": "Overrides color scheme. Set to Transparent to revert back to using color schemes."
-        },
-        {
-          "type": "color",
-          "id": "bg_color",
-          "label": "Background"
-        },
-        {
-          "type": "color",
-          "id": "color",
-          "label": "Text"
         }
       ]
     },
@@ -1044,10 +1017,7 @@
           "id": "video_popup_social",
           "label": "Youtube/Vimeo link",
           "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
-          "accept": [
-            "youtube",
-            "vimeo"
-          ]
+          "accept": ["youtube", "vimeo"]
         },
         {
           "type": "header",
@@ -1112,15 +1082,15 @@
           "label": "Block alignment",
           "default": "align--middle-center",
           "options": [
-            { "value": "align--top-left", "label": "Top left"},
-            { "value": "align--top-center", "label": "Top center"},
-            { "value": "align--top-right", "label": "Top right"},
-            { "value": "align--middle-left", "label": "Middle left"},
-            { "value": "align--middle-center", "label": "Absolute center"},
-            { "value": "align--middle-right", "label": "Middle right"},
-            { "value": "align--bottom-left", "label": "Bottom left"},
-            { "value": "align--bottom-center", "label": "Bottom center"},
-            { "value": "align--bottom-right", "label": "Bottom right"}
+            {"value": "align--top-left", "label": "Top left"},
+            {"value": "align--top-center", "label": "Top center"},
+            {"value": "align--top-right", "label": "Top right"},
+            {"value": "align--middle-left", "label": "Middle left"},
+            {"value": "align--middle-center", "label": "Absolute center"},
+            {"value": "align--middle-right", "label": "Middle right"},
+            {"value": "align--bottom-left", "label": "Bottom left"},
+            {"value": "align--bottom-center", "label": "Bottom center"},
+            {"value": "align--bottom-right", "label": "Bottom right"}
           ]
         },
         {
@@ -1145,10 +1115,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -1157,9 +1127,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -1168,9 +1138,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -1213,7 +1183,7 @@
           "max": 100,
           "step": 5,
           "unit": "%",
-          "default":0
+          "default": 0
         },
         {
           "type": "color",
