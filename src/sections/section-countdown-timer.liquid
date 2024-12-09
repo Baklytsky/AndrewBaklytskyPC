@@ -53,10 +53,15 @@
   {%- endstyle -%}
 {%- endif -%}
 
-<section id="Countdown--{{ section.id }}"
+{{ 'section-countdown.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+
+<section
+  id="Countdown--{{ section.id }}"
   class="section-countdown section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="countdown">
+  data-section-type="countdown"
+>
   <div class="{{ section_width }}">
     {%- if image_desktop or image_mobile -%}
       <div class="hero__bg">
@@ -71,7 +76,6 @@
     {%- endif -%}
 
     <div class="brick__section {{ layout }} {{ desktop_height }} {{ mobile_height }}">
-
       {%- if section.blocks.size > 0 -%}
         <div class="brick__block">
           <div class="hero__content__wrapper">
@@ -82,9 +86,7 @@
               {% endif %}
             >
               {%- for block in section.blocks -%}
-
                 {%- case block.type -%}
-
                   {%- when 'heading' -%}
                     {%- if block.settings.title != blank -%}
                       {%- liquid
@@ -96,11 +98,13 @@
                         endunless
                       -%}
 
-                      <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }}"
+                      <{{ heading_tag }}
+                        class="hero__title {{ block.settings.heading_font_size }}"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
-                        {{ block.shopify_attributes }}>
+                        {{ block.shopify_attributes }}
+                      >
                         {{ block.settings.title }}
                       </{{ heading_tag }}>
                     {%- endif -%}
@@ -108,11 +112,13 @@
                   {%- when 'subheading' -%}
                     {%- if block.settings.subheading != blank -%}
                       {%- assign animation_order = animation_order | plus: 1 -%}
-                      <p class="hero__subheading"
+                      <p
+                        class="hero__subheading"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
-                        {{ block.shopify_attributes }}>
+                        {{ block.shopify_attributes }}
+                      >
                         {{ block.settings.subheading }}
                       </p>
                     {%- endif -%}
@@ -120,11 +126,13 @@
                   {%- when 'text' -%}
                     {%- if block.settings.text != blank -%}
                       {%- assign animation_order = animation_order | plus: 1 -%}
-                      <div class="hero__rte {{ block.settings.text_font_size }}"
+                      <div
+                        class="hero__rte {{ block.settings.text_font_size }}"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
-                        {{ block.shopify_attributes }}>
+                        {{ block.shopify_attributes }}
+                      >
                         {{ block.settings.text }}
                       </div>
                     {%- endif -%}
@@ -145,17 +153,26 @@
                         assign next_block = section.blocks[next_index]
                         assign animation_order = animation_order | plus: 1
                       -%}
-                      {%- if next_block.type == 'buttons' and forloop.index0 == 0 or prev_block.type != 'buttons' and next_index != section.blocks.size and next_block.type == 'buttons' -%}
+                      {%- if next_block.type == 'buttons'
+                        and forloop.index0 == 0
+                        or prev_block.type != 'buttons'
+                        and next_index != section.blocks.size
+                        and next_block.type == 'buttons'
+                      -%}
                         <div class="hero__button-group">
                       {%- endif -%}
 
-                      <div class="hero__button"
+                      <div
+                        class="hero__button"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
                         {{ block.shopify_attributes }}
                       >
-                        <a href="{{ block.settings.button_url | default: '#!' }}" class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}">
+                        <a
+                          href="{{ block.settings.button_url | default: '#!' }}"
+                          class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        >
                           <span>{{ block.settings.button_text }}</span>
 
                           {%- if block.settings.show_arrow -%}
@@ -164,11 +181,16 @@
                         </a>
                       </div>
 
-                      {%- if prev_block.type == 'buttons' and next_block.type != 'buttons' and prev_index != -1 or forloop.index == section.blocks.size and prev_block.type == 'buttons' and prev_index != -1 -%}
+                      {%- if prev_block.type == 'buttons'
+                        and next_block.type != 'buttons'
+                        and prev_index != -1
+                        or forloop.index == section.blocks.size
+                        and prev_block.type == 'buttons'
+                        and prev_index != -1
+                      -%}
                         </div>
                       {%- endif -%}
                     {%- endif -%}
-
                 {%- endcase -%}
               {%- endfor -%}
             </div>
@@ -195,388 +217,388 @@
 </section>
 
 {% schema %}
-  {
-    "name": "Countdown timer",
-    "settings": [
-      {
-        "type": "header",
-        "content": "Content"
-      },
-      {
-        "type": "image_picker",
-        "id": "image",
-        "label": "Background image",
-        "info": "Optional"
-      },
-      {
-        "type": "header",
-        "content": "Timer"
-      },
-      {
-        "type": "text",
-        "id": "end_date",
-        "label": "End date",
-        "placeholder": "2024-12-31 23:59",
-        "default": "2024-12-31",
-        "info": "Use format \"YYYY-MM-DD\". Expiration date is based on the [store primary timezone](/admin/settings/general)."
-      },
-      {
-        "type": "text",
-        "id": "end_time",
-        "label": "End time",
-        "default": "11:59",
-        "placeholder": "11:59",
-        "info": "Use 12-hour time convention in format \"HH:MM\""
-      },
-      {
-        "type": "radio",
-        "id": "period",
-        "label": "AM/PM",
-        "options": [
-          { "value": "am", "label": "AM" },
-          { "value": "pm", "label": "PM" }
-        ],
-        "default": "am"
-      },
-      {
-        "type": "richtext",
-        "id": "end_message",
-        "label": "End of timer message",
-        "default": "<p>Offer has expired</p>"
-      },
-      {
-        "type": "checkbox",
-        "id": "hide_on_complete",
-        "label": "Hide section after end of timer",
-        "default": true
-      },
-      {
-        "type": "select",
-        "id": "digits_font_size",
-        "label": "Digits size",
-        "default": "heading-x-large",
-        "options": [
-          {"value": "heading-mini", "label": "Mini"},
-          {"value": "heading-x-small", "label": "Extra small"},
-          {"value": "heading-small", "label": "Small"},
-          {"value": "heading-medium", "label": "Medium"},
-          {"value": "heading-large", "label": "Large"},
-          {"value": "heading-x-large", "label": "Extra large"}
-        ]
-      },
-      {
-        "type": "select",
-        "id": "text_font_size",
-        "label": "Date size",
-        "info": "Automatically generated by the base size.",
-        "default": "body-small",
-        "options": [
-          {"value": "body-x-small", "label": "Extra small"},
-          {"value": "body-small", "label": "Small"},
-          {"value": "body-medium", "label": "Medium"},
-          {"value": "body-large", "label": "Large"},
-          {"value": "body-x-large", "label": "Extra large"}
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Layout"
-      },
-      {
-        "type": "select",
-        "id": "width",
-        "label": "Width",
-        "default": "wrapper",
-        "options": [
-          {"value": "wrapper--full-padded", "label": "Full width padded"},
-          {"value": "wrapper", "label": "Normal"},
-          {"value": "wrapper--narrow", "label": "Narrow"}
-        ]
-      },
-      {
-        "type": "select",
-        "id": "text_align",
-        "label": "Style",
-        "default": "text-left",
-        "options": [
-          {"value": "text-left","label": "Split"},
-          {"value": "text-center","label": "Centered"}
-        ],
-        "info": "\"Split\" works with \"Normal\" and \"Full width padded\" layout only."
-      },
-      {
-        "type": "header",
-        "content": "Desktop"
-      },
-      {
-        "type": "select",
-        "id": "height",
-        "label": "Height",
-        "default": "four-fifty-height-hero",
-        "options": [
-          { "value": "four-fifty-height-hero", "label": "450px" },
-          { "value": "four-hundred-height-hero", "label": "400px" },
-          { "value": "three-fifty-height-hero", "label": "350px" },
-          { "value": "three-hundred-height-hero", "label": "300px" },
-          { "value": "two-fifty-height-hero", "label": "250px" },
-          { "value": "two-hundred-height-hero", "label": "200px" },
-          { "value": "one-fifty-height-hero", "label": "150px" }
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Mobile"
-      },
-      {
-        "type": "image_picker",
-        "id": "image_mobile",
-        "label": "Background image",
-        "info": "Optional"
-      },
-      {
-        "type": "select",
-        "id": "mobile_height",
-        "label": "Height",
-        "default": "four-fifty-height-hero--mobile",
-        "options": [
-          { "value": "four-fifty-height-hero--mobile", "label": "450px" },
-          { "value": "four-hundred-height-hero--mobile", "label": "400px" },
-          { "value": "three-fifty-height-hero--mobile", "label": "350px" },
-          { "value": "three-hundred-height-hero--mobile", "label": "300px" },
-          { "value": "two-fifty-height-hero--mobile", "label": "250px" },
-          { "value": "two-hundred-height-hero--mobile", "label": "200px" },
-          { "value": "one-fifty-height-hero--mobile", "label": "150px" }
-        ]
-      },
+{
+  "name": "Countdown timer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image",
+      "info": "Optional"
+    },
+    {
+      "type": "header",
+      "content": "Timer"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date",
+      "placeholder": "2024-12-31 23:59",
+      "default": "2024-12-31",
+      "info": "Use format \"YYYY-MM-DD\". Expiration date is based on the [store primary timezone](/admin/settings/general)."
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time",
+      "default": "11:59",
+      "placeholder": "11:59",
+      "info": "Use 12-hour time convention in format \"HH:MM\""
+    },
+    {
+      "type": "radio",
+      "id": "period",
+      "label": "AM/PM",
+      "options": [
+        {"value": "am", "label": "AM"},
+        {"value": "pm", "label": "PM"}
+      ],
+      "default": "am"
+    },
+    {
+      "type": "richtext",
+      "id": "end_message",
+      "label": "End of timer message",
+      "default": "<p>Offer has expired</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_complete",
+      "label": "Hide section after end of timer",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "digits_font_size",
+      "label": "Digits size",
+      "default": "heading-x-large",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_font_size",
+      "label": "Date size",
+      "info": "Automatically generated by the base size.",
+      "default": "body-small",
+      "options": [
+        {"value": "body-x-small", "label": "Extra small"},
+        {"value": "body-small", "label": "Small"},
+        {"value": "body-medium", "label": "Medium"},
+        {"value": "body-large", "label": "Large"},
+        {"value": "body-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Style",
+      "default": "text-left",
+      "options": [
+        {"value": "text-left", "label": "Split"},
+        {"value": "text-center", "label": "Centered"}
+      ],
+      "info": "\"Split\" works with \"Normal\" and \"Full width padded\" layout only."
+    },
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "default": "four-fifty-height-hero",
+      "options": [
+        {"value": "four-fifty-height-hero", "label": "450px"},
+        {"value": "four-hundred-height-hero", "label": "400px"},
+        {"value": "three-fifty-height-hero", "label": "350px"},
+        {"value": "three-hundred-height-hero", "label": "300px"},
+        {"value": "two-fifty-height-hero", "label": "250px"},
+        {"value": "two-hundred-height-hero", "label": "200px"},
+        {"value": "one-fifty-height-hero", "label": "150px"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Background image",
+      "info": "Optional"
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Height",
+      "default": "four-fifty-height-hero--mobile",
+      "options": [
+        {"value": "four-fifty-height-hero--mobile", "label": "450px"},
+        {"value": "four-hundred-height-hero--mobile", "label": "400px"},
+        {"value": "three-fifty-height-hero--mobile", "label": "350px"},
+        {"value": "three-hundred-height-hero--mobile", "label": "300px"},
+        {"value": "two-fifty-height-hero--mobile", "label": "250px"},
+        {"value": "two-hundred-height-hero--mobile", "label": "200px"},
+        {"value": "one-fifty-height-hero--mobile", "label": "150px"}
+      ]
+    },
 
-      {
-        "type": "select",
-        "id": "text_align_mobile",
-        "label": "Text alignment",
-        "default": "text-left--mobile",
-        "options": [
-          { "value": "text-left--mobile","label": "Left" },
-          { "value": "text-center--mobile","label": "Centered" }
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Colors"
-      },
-      {
-        "type": "color_scheme",
-        "id": "color_scheme",
-        "default": "scheme_1",
-        "label": "Color scheme"
-      },
-      {
-        "type": "color_background",
-        "id": "digits_gradient",
-        "label": "Digits gradient"
-      },
-      {
-        "type": "range",
-        "id": "overlay_opacity",
-        "label": "Overlay opacity",
-        "info": "Increase contrast for legible text.",
-        "min": 0,
-        "max": 100,
-        "step": 5,
-        "unit": "%",
-        "default": 0
-      },
-      {
-        "type": "checkbox",
-        "id": "show_overlay_text",
-        "label": "Overlay behind text only",
-        "info": "Overlay opacity must be greater than 0.",
-        "default": false
-      },
-      {
-        "type": "header",
-        "content": "Padding"
-      },
-      {
-        "type": "range",
-        "id": "padding_top",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Top",
-        "default": 0
-      },
-      {
-        "type": "range",
-        "id": "padding_bottom",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Bottom",
-        "default": 0
-      }
-    ],
-    "blocks": [
-      {
-        "type": "subheading",
-        "name": "Subheading",
-        "settings": [
-          {
-            "type": "text",
-            "id": "subheading",
-            "label": "Subheading",
-            "default": "Countdown is on"
-          }
-        ]
-      },
-      {
-        "type": "heading",
-        "name": "Heading",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading",
-            "default": "Shop Before It Ends"
-          },
-          {
-            "type": "select",
-            "id": "heading_font_size",
-            "label": "Heading size",
-            "default": "heading-large",
-            "options": [
-              {"value": "heading-mini", "label": "Mini"},
-              {"value": "heading-x-small", "label": "Extra small"},
-              {"value": "heading-small", "label": "Small"},
-              {"value": "heading-medium", "label": "Medium"},
-              {"value": "heading-large", "label": "Large"},
-              {"value": "heading-x-large", "label": "Extra large"}
-            ]
-          },
-          {
-            "type": "header",
-            "content": "Advanced"
-          },
-          {
-            "type": "select",
-            "id": "heading_tag",
-            "label": "Heading SEO tag",
-            "default": "automatic",
-            "options": [
-              {"value": "automatic", "label": "Automatic"},
-              {"value": "h1", "label": "H1"},
-              {"value": "h2", "label": "H2"},
-              {"value": "h3", "label": "H3"},
-              {"value": "h4", "label": "H4"},
-              {"value": "h5", "label": "H5"},
-              {"value": "h6", "label": "H6"}
-            ]
-          }
-        ]
-      },
-      {
-        "type": "text",
-        "name": "Text",
-        "settings": [
-          {
-            "type": "richtext",
-            "id": "text",
-            "label": "Text",
-            "default": "<p>Share information about your limited offer or temporary promotion.</p>"
-          },
-          {
-            "type": "select",
-            "id": "text_font_size",
-            "label": "Text size",
-            "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
-            "default": "body-medium",
-            "options": [
-              {"value": "body-x-small", "label": "Extra small"},
-              {"value": "body-small", "label": "Small"},
-              {"value": "body-medium", "label": "Medium"},
-              {"value": "body-large", "label": "Large"},
-              {"value": "body-x-large", "label": "Extra large"}
-            ]
-          }
-        ]
-      },
-      {
-        "type": "buttons",
-        "name": "Button",
-        "settings": [
-          {
-            "type": "text",
-            "id": "button_text",
-            "label": "Text",
-            "default": "Shop now"
-          },
-          {
-            "type": "url",
-            "id": "button_url",
-            "label": "Link"
-          },
-          {
-            "type": "select",
-            "id": "button_type",
-            "label": "Color",
-            "default": "btn--primary",
-            "options": [
-              { "value": "btn--black", "label": "Black" },
-              { "value": "btn--white", "label": "White" },
-              { "value": "btn--primary", "label": "Primary" },
-              { "value": "btn--secondary", "label": "Secondary" }
-            ]
-          },
-          {
-            "type": "select",
-            "id": "button_size",
-            "label": "Size",
-            "default": "",
-            "options": [
-              { "label": "Small", "value": "btn--small" },
-              { "label": "Medium", "value": "" },
-              { "label": "Large", "value": "btn--large" }
-            ]
-          },
-          {
-            "type": "select",
-            "id": "button_style",
-            "label": "Style",
-            "default": "btn--solid",
-            "options": [
-              { "label": "Solid", "value": "btn--solid" },
-              { "label": "Outline", "value": "btn--outline" },
-              { "label": "Text", "value": "btn--text" }
-            ]
-          },
-          {
-            "type": "checkbox",
-            "id": "show_arrow",
-            "label": "Show arrow",
-            "default": false
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Countdown timer",
-        "blocks": [
-          {
-            "type": "subheading"
-          },
-          {
-            "type": "heading"
-          },
-          {
-            "type": "buttons"
-          }
-        ]
-      }
-    ],
-    "disabled_on": {
-      "groups": ["header", "footer", "aside"]
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Text alignment",
+      "default": "text-left--mobile",
+      "options": [
+        {"value": "text-left--mobile", "label": "Left"},
+        {"value": "text-center--mobile", "label": "Centered"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color_background",
+      "id": "digits_gradient",
+      "label": "Digits gradient"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "info": "Increase contrast for legible text.",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay_text",
+      "label": "Overlay behind text only",
+      "info": "Overlay opacity must be greater than 0.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
     }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Countdown is on"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Shop Before It Ends"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-large",
+          "options": [
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading SEO tag",
+          "default": "automatic",
+          "options": [
+            {"value": "automatic", "label": "Automatic"},
+            {"value": "h1", "label": "H1"},
+            {"value": "h2", "label": "H2"},
+            {"value": "h3", "label": "H3"},
+            {"value": "h4", "label": "H4"},
+            {"value": "h5", "label": "H5"},
+            {"value": "h6", "label": "H6"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Share information about your limited offer or temporary promotion.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Automatically generated by the base size. Applies only when content in Text field is set to Paragraph.",
+          "default": "body-medium",
+          "options": [
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "button_type",
+          "label": "Color",
+          "default": "btn--primary",
+          "options": [
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Size",
+          "default": "",
+          "options": [
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Style",
+          "default": "btn--solid",
+          "options": [
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "show_arrow",
+          "label": "Show arrow",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown timer",
+      "blocks": [
+        {
+          "type": "subheading"
+        },
+        {
+          "type": "heading"
+        },
+        {
+          "type": "buttons"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer", "aside"]
   }
+}
 {% endschema %}
