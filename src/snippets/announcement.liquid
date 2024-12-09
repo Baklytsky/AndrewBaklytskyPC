@@ -146,27 +146,6 @@
                 {{ block.settings.code }}
               {%- endif -%}
 
-            {%- when 'countdown' -%}
-              <div class="countdown-block" data-countdown-block>
-                <div class="countdown-block__text">
-                  {%- if block.settings.text != blank -%}
-                    {{ block.settings.text }}
-                  {%- endif -%}
-                </div>
-
-                <div class="countdown-block__timer">
-                  {%- render 'countdown-timer',
-                    digits_size_desktop: 1,
-                    digits_size_mobile: 1,
-                    end_date: block.settings.end_date,
-                    end_time: block.settings.end_time,
-                    period: block.settings.period,
-                    end_message: block.settings.end_message,
-                    hide_on_complete: block.settings.hide_on_complete,
-                  -%}
-                </div>
-              </div>
-
             {%- when 'collection' -%}
               {%- assign collection = collections[block.settings.collection] -%}
 
@@ -301,12 +280,14 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-<div id="Announcement--{{ section.id }}"
+<div
+  id="Announcement--{{ section.id }}"
   class="announcement__wrapper{% if is_top %} announcement__wrapper--top{% endif %}{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
   data-announcement-wrapper
   data-section-id="{{ section.id }}"
   data-section-type="announcement"
-  style="{{ style }}">
+  style="{{ style }}"
+>
   {%- if show_browser_error -%}
     <div class="announcement__bar announcement__bar--error section-padding">
       <div class="announcement__message">
@@ -319,20 +300,23 @@
 
   {%- if is_top == false and section.settings.background_image != blank -%}
     <div class="announcement__bg-image">
-      {%- render 'image' image: section.settings.background_image, sizes: '100vw', cover: true -%}
+      {%- render 'image', image: section.settings.background_image, sizes: '100vw', cover: true -%}
     </div>
   {%- endif -%}
 
   {%- if section.blocks.size > 0 -%}
     {%- if bar_markup != blank -%}
-      <announcement-bar class="announcement__bar-outer section-padding{{ announcement_modifier }}"
-        style="--padding-scrolling: {{ section.settings.message_spacing }}px;">
+      <announcement-bar
+        class="announcement__bar-outer section-padding{{ announcement_modifier }}"
+        style="--padding-scrolling: {{ section.settings.message_spacing }}px;"
+      >
         {%- if section.settings.layout == 'slider' -%}
-
           <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
-            <div class="announcement__slider"
+            <div
+              class="announcement__slider"
               data-slider
-              data-options='{"fade": true, "pageDots": false, "adaptiveHeight": false, "autoPlay": {{ section.settings.slider_speed | times: 1000 }}, "prevNextButtons": {{ show_arrows }}, "draggable": ">1"}'>
+              data-options='{"fade": true, "pageDots": false, "adaptiveHeight": false, "autoPlay": {{ section.settings.slider_speed | times: 1000 }}, "prevNextButtons": {{ show_arrows }}, "draggable": ">1"}'
+            >
               {{ bar_markup }}
             </div>
           </div>
@@ -341,12 +325,14 @@
         {%- if section.settings.layout == 'marquee' -%}
           <div class="announcement__bar-holder announcement__bar-holder--marquee">
             <div class="announcement__bar">
-
               {%- comment -%}
                 The "autoplay" attribute forces ticker to start playing by cloning its text elements 10 times
               {%- endcomment -%}
 
-              <ticker-bar autoplay speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}">
+              <ticker-bar
+                autoplay
+                speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}"
+              >
                 <div data-ticker-frame class="announcement__message">
                   <div data-ticker-scale class="announcement__scale ticker--unloaded">
                     <div data-ticker-text class="announcement__text">
@@ -368,10 +354,14 @@
 {%- if request.design_mode -%}
   <script defer>
     document.addEventListener('shopify:block:select', (event) => {
-      event.target.closest('announcement-bar')?.dispatchEvent(new CustomEvent('theme:block:select', { detail: event.detail }))
+      event.target
+        .closest('announcement-bar')
+        ?.dispatchEvent(new CustomEvent('theme:block:select', {detail: event.detail}));
     });
     document.addEventListener('shopify:block:deselect', (event) => {
-      event.target.closest('announcement-bar')?.dispatchEvent(new CustomEvent('theme:block:deselect', { detail: event.detail }))
+      event.target
+        .closest('announcement-bar')
+        ?.dispatchEvent(new CustomEvent('theme:block:deselect', {detail: event.detail}));
     });
   </script>
 {%- endif -%}
