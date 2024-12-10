@@ -197,6 +197,35 @@ $rem-px-only: false !default;
   }
 }
 
+@mixin sidebar-close {
+  --icon-size: 24px;
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  color: var(--link);
+  background: transparent;
+  border-radius: var(--RADIUS);
+  font-size: 0;
+  text-decoration: none;
+  transform: translate3d(0, -50%, 0);
+  transition: color 0.3s ease;
+
+  .icon {
+    display: block;
+    fill: currentColor;
+    transition: transform 0.3s;
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    &:hover { color: var(--link-hover); }
+    &:hover .icon { transform: rotate(90deg); }
+  }
+}
+
 // Typography
 @mixin heading {
   font-family: var(--FONT-STACK-HEADING);
