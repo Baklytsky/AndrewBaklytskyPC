@@ -8,6 +8,8 @@
   assign animation_order = 1
 -%}
 
+{{ 'section-sidebar.css' | asset_url | stylesheet_tag }}
+
 {%- style -%}
   #Sidebar--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
@@ -23,22 +25,26 @@
       assign title = block.settings.title
       assign text = block.settings.text
       assign content = block.settings.content
-      assign unique = 'Widget--' | append: block.id
+      assign unique = 'Widget--' | append: section.id | append: '-' | append: block.id
     -%}
 
     {%- capture aside_html -%}
-      {{ aside_html }}
+      {{- aside_html -}}
 
       {%- if block.type == 'header' and title != blank -%}
         <li>
-          <button type="button" class="widget__link{% if first_element_flag %} is-selected{% endif %}"
-            data-scroll-to="#{{ unique }}"
-            data-scroll-spy="#{{ unique }}"
-            data-scroll-spy-desktop
-            data-scroll-trigger-point="top"
-            {{ block.shopify_attributes }}>
-            {{- title -}}
-          </button>
+          <scroll-spy data-scroll-spy-container="#Sidebar--{{ section.id }}">
+            <scroll-to-element>
+              <button type="button" class="widget__link{% if first_element_flag %} is-selected{% endif %}"
+                data-scroll-to="#{{ unique }}"
+                data-scroll-spy="#{{ unique }}"
+                data-scroll-spy-desktop
+                data-scroll-trigger-point="top"
+                {{ block.shopify_attributes }}>
+                {{- title -}}
+              </button>
+            </scroll-to-element>
+          </scroll-spy>
         </li>
         {%- assign first_element_flag = false -%}
       {%- endif -%}
@@ -75,29 +81,38 @@
   {%- endfor -%}
 {%- endif -%}
 
-<section id="Sidebar--{{ section.id }}"
+{%- if aside_html != '' -%}
+  <script src="{{ 'scroll-to-element.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'scroll-spy.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<section
+  id="Sidebar--{{ section.id }}"
   class="section-sidebar section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="sidebar">
+  data-section-type="sidebar"
+>
   {%- if section.blocks.size > 0 -%}
     <div class="{{ section.settings.width }}">
       <div class="section-sidebar__body">
-        <div class="section-sidebar__aside"
-          data-aos="hero"
-          data-aos-anchor="{{ animation_anchor }}"
-          data-aos-order="{{ animation_order }}"
-        >
-          <div class="section-sidebar__widget">
-            {%- if aside_html != '' -%}
+        {%- if aside_html != '' -%}
+          <div
+            class="section-sidebar__aside"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            <div class="section-sidebar__widget">
               <ul class="widget__links widget__links--secondary">
                 {{ aside_html }}
               </ul>
-            {%- endif -%}
+            </div>
           </div>
-        </div>
-        {%- assign animation_order = animation_order | plus: 1 -%}
+          {%- assign animation_order = animation_order | plus: 1 -%}
+        {%- endif -%}
 
-        <div class="section-sidebar__content"
+        <div
+          class="section-sidebar__content"
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
