@@ -8,7 +8,10 @@ document.addEventListener('shopify:block:select', (event) => {
   // Select slide on Block select
   const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (blockSelectedIsSlide) {
-    const slider = event.target.closest('[data-slider]');
+    const slide = event.target;
+    const slider = event.target.closest('slider-component');
+    const slideIndex = parseInt(slide.hasAttribute('data-slide-index') ? slide.getAttribute('data-slide-index') : 0);
+    const flickityEnabled = slider.classList.contains('flickity-enabled');
 
     if (slider) {
       setTimeout(() => {
@@ -16,6 +19,19 @@ document.addEventListener('shopify:block:select', (event) => {
           left: event.target.offsetLeft,
         });
       }, 200);
+    }
+
+    // Go to selected slide, pause autoplay
+    if (flickityEnabled) {
+      slide.classList.add('is-selected');
+      slider.dispatchEvent(
+        new CustomEvent('theme:slider:select', {
+          bubbles: false,
+          detail: {
+            index: slideIndex,
+          },
+        })
+      );
     }
   }
 
@@ -50,6 +66,20 @@ document.addEventListener('shopify:block:deselect', (event) => {
   const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
   if (ticker) {
     ticker.removeAttribute('paused');
+  }
+
+  // Resume slider on block deselect
+  const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
+  if (blockSelectedIsSlide) {
+    const slide = event.target;
+    const slider = event.target.closest('slider-component');
+    const flickityEnabled = slider.classList.contains('flickity-enabled');
+
+    // Go to selected slide, pause autoplay
+    if (flickityEnabled) {
+      slide.classList.remove('is-selected');
+      slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
+    }
   }
 });
 

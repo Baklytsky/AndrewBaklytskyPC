@@ -1,6 +1,5 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import {slider} from '../features/slider';
 import {tooltipSection} from '../features/tooltip';
 import {isMobile} from '../util/media-query';
 
@@ -176,4 +175,4 @@ const collectionSection = {
   },
 };
 
-register('collection', [slider, collectionSection, tooltipSection]);
+register('collection', [collectionSection, tooltipSection]);

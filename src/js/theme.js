@@ -14,23 +14,19 @@ import './globals/cart-drawer';
 import './globals/collapsible';
 import './globals/header-search-popdown';
 import './globals/main-search';
+import './globals/slider';
 import './globals/toggle-ellipsis';
 
 /* ================ Sections ================ */
 import './sections/article';
-import './sections/blog';
-import './sections/double';
 import './sections/footer';
 import './sections/collection';
 import './sections/header';
 import './sections/product-grid';
 import './sections/product';
 import './sections/related';
-import './sections/slideshow';
 import './sections/custom-content';
 import './sections/password';
-import './sections/list-collections';
-import './sections/columns';
 import './sections/newsletter';
 
 /* ================ Main ================ */

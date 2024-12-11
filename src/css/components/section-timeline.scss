@@ -3,6 +3,8 @@
 @import "../tools/mixins.scss";
 @import "../settings/variables.scss";
 
+timeline-component { display: block; }
+
 .timeline {
   --height: calc(100vh - var(--header-sticky-height));
   --top: 0;
@@ -66,6 +68,7 @@
     padding-right: var(--outer);
     margin-left: var(--outer-offset);
     margin-right: var(--outer-offset);
+
     @include hide-scrollbar;
   }
 }
@@ -73,6 +76,7 @@
 .timeline__row {
   --part-width: 50px;
   --dot-position: ((5% + var(--outer)) / 2) - (var(--width-indicator) / 2);
+
   flex: 0 0 auto;
   position: relative;
   width: 100%;
@@ -123,7 +127,7 @@
   }
 
   @include media-query($small) {
-    opacity: .5;
+    opacity: 0.5;
     transition: opacity 0.5s;
   }
 }
@@ -151,7 +155,7 @@
     height: 100%;
     padding-top: 0;
     transform: translateY(100%);
-    transition: transform .5s;
+    transition: transform 0.5s;
 
     img { object-fit: cover; }
   }
@@ -178,8 +182,11 @@
   margin: 0 auto;
 
   @include media-query($widescreen) { max-width: 76%; }
+
   @include media-query($large) { max-width: 84%; }
+
   @include media-query($medium) { max-width: 90%; }
+
   @include media-query($medium-up) { padding-right: var(--outer); }
 }
 
@@ -198,6 +205,7 @@
 /* Timeline indicator */
 .timeline__indicator {
   --bg: var(--COLOR-BG);
+
   position: absolute;
   top: calc((var(--width-indicator) / 2) - (var(--width-line) / 2));
   left: var(--dot-margin);
@@ -256,12 +264,12 @@
   @include media-query($small) { display: none; }
 }
 
-.timeline__indicator__line:before,
-.timeline__indicator:before,
-.timeline__indicator:after {
+.timeline__indicator__line::before,
+.timeline__indicator::before,
+.timeline__indicator::after {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   min-width: 0;
   max-width: 100%;
   min-height: 0;
@@ -269,10 +277,10 @@
   width: 100%;
   height: 100%;
   background: var(--text);
-  content: '';
+  content: "";
 }
 
-.timeline__indicator:after {
+.timeline__indicator::after {
   @include media-query($medium-up) {
     height: var(--percent-desktop, 0%);
     opacity: 0;
@@ -284,7 +292,7 @@
   }
 }
 
-.timeline__indicator:before { opacity: 0.2; }
+.timeline__indicator::before { opacity: 0.2; }
 
 .timeline__dot__holder,
 .timeline__content__outer {
@@ -293,7 +301,7 @@
 }
 
 .timeline__row.is-selected {
-  .timeline__indicator:after,
+  .timeline__indicator::after,
   .timeline__dot__holder,
   .timeline__content__outer { opacity: 1; }
 
@@ -325,13 +333,13 @@
   @include media-query($medium-up) { display: none; }
 }
 
-.timeline__indicator__line:before {
+.timeline__indicator__line::before {
   width: var(--percent-mobile, 0%);
   height: 100%;
 }
 
-.timeline__row:not(:first-child) .timeline__indicator:before,
-.timeline__row:not(:first-child) .timeline__indicator__line:before {
+.timeline__row:not(:first-child) .timeline__indicator::before,
+.timeline__row:not(:first-child) .timeline__indicator__line::before {
   @include media-query($small) {
     content: none;
   }
@@ -374,6 +382,7 @@
 
 .timeline__dot__button {
   --bg: var(--COLOR-BG);
+
   position: absolute;
   top: 50%;
   left: var(--dot-margin);
@@ -391,8 +400,8 @@
 }
 
 @media (hover: hover) {
-  .timeline__dot__button.is-selected .timeline__dot:before { animation: pulseDot 2.5s linear infinite; }
-  .timeline__dot__button:hover .timeline__dot:after { animation: pulseDotHover 1.5s linear infinite; }
+  .timeline__dot__button.is-selected .timeline__dot::before { animation: pulseDot 2.5s linear infinite; }
+  .timeline__dot__button:hover .timeline__dot::after { animation: pulseDotHover 1.5s linear infinite; }
 }
 
 .timeline__dot {
@@ -426,8 +435,8 @@
   &::before { opacity: 0; }
 }
 
-.timeline__dot__button:before {
-  content: '';
+.timeline__dot__button::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;

@@ -9,14 +9,14 @@
   assign width = section.settings.width
   assign enable_slider = false
   assign enable_text_slider = false
-  assign text_slide_blocks = section.blocks | where: "type", "text-slide"
+  assign text_slide_blocks = section.blocks | where: 'type', 'text-slide'
   assign show_placeholder = section.settings.show_placeholder
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign show_video_background = false
 
   assign animation_anchor = '#BrickSection--' | append: section.id
   assign animation_order = 0
-  assign accordion_blocks = section.blocks | where: "type", "accordion"
+  assign accordion_blocks = section.blocks | where: 'type', 'accordion'
 
   assign autoplay = section.settings.autoplay
   assign autoplay_speed = false
@@ -133,14 +133,16 @@
   {%- endif -%}
 {%- endcapture -%}
 
-<section id="BrickSection--{{ section.id }}"
+<section
+  id="BrickSection--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="double"
   class="index-image-text section-padding {{ section.settings.text_alignment }} {{ color_scheme }}"
-  style="{{ style }}">
+  style="{{ style }}"
+>
   {%- if section.blocks.size > 0 -%}
     {%- if enable_slider -%}
-      <div
+      <slider-component
         class="brick__slider"
         data-slider
         data-dots="{{ settings.dots_style }}"
@@ -163,14 +165,24 @@
             <div class="brick__block brick__block--images{{ figure_width_class }}">
               {%- if image -%}
                 <div class="brick__block__image wide-image">
-                  {%- render 'image-hero' image: image, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
+                  {%- render 'image-hero',
+                    image: image,
+                    sizes: sizes,
+                    desktop_height: desktop_height,
+                    mobile_height: mobile_height
+                  -%}
                 </div>
               {%- else -%}
                 {{ section_images }}
               {%- endif -%}
             </div>
 
-            <div class="brick__block brick__block--text"{% if style != blank %} style="{{ style }}"{% endif %}>
+            <div
+              class="brick__block brick__block--text"
+              {% if style != blank %}
+                style="{{ style }}"
+              {% endif %}
+            >
               <div class="brick__block__text">
                 <div class="hero__content hero__content--compact">
                   {%- if subheading != blank -%}
@@ -208,7 +220,10 @@
                     -%}
 
                     <div class="hero__button">
-                      <a href="{{ block.settings.button_url | default: '#!' }}" class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}">
+                      <a
+                        href="{{ block.settings.button_url | default: '#!' }}"
+                        class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                      >
                         <span>{{ button_text }}</span>
 
                         {%- if block.settings.show_arrow -%}
@@ -222,17 +237,24 @@
             </div>
           </div>
         {%- endfor -%}
-      </div>
+      </slider-component>
     {%- else -%}
       <div class="brick__section{% if section.settings.layout == 'is-reversed' %} brick__section--reversed{% endif %}{% if section.settings.reverse_blocks %} brick__section--reversed-mobile{% endif %}{% if accordion_blocks.size > 0 %} brick__section--accordion{% endif %} {{ width }} {{ desktop_height }} {{ mobile_height }}">
-        <div class="brick__block {{ figure_width_class }} brick__block--images"
+        {%- liquid
+          assign block_images_tag = 'div'
+          if image_1 != blank and image_2 != blank
+            assign block_images_tag = 'slider-component'
+          endif
+        -%}
+        <{{ block_images_tag }}
+          class="brick__block {{ figure_width_class }} brick__block--images"
           {% if image_1 != blank and image_2 != blank %}
             data-slider
             data-slider-fullwidth
             data-dots="{{ settings.dots_style }}"
             data-options='{"watchCSS": true, "pageDots": false, "prevNextButtons": false, "autoPlay": 4000, "pauseAutoPlayOnHover": false}'
-          {% endif %}>
-
+          {% endif %}
+        >
           {%- if image_1 != blank or image_2 != blank or show_placeholder -%}
             {{ section_images }}
           {%- elsif request.design_mode -%}
@@ -240,22 +262,31 @@
               {{ 'products.general.missing_metafield_image' | t }}
             </div>
           {%- endif -%}
-        </div>
+        </{{ block_images_tag }}>
 
-        <div class="brick__block brick__block--text{% if enable_slider %} brick__block--slider{% endif %}"
+        <div
+          class="brick__block brick__block--text{% if enable_slider %} brick__block--slider{% endif %}"
           {% if style != blank %}
             style="{{ style }}"
           {% endif %}
-          {{ block.shopify_attributes }}>
+          {{ block.shopify_attributes }}
+        >
           <div class="brick__block__text">
-            <div class="hero__content hero__content--compact{% if enable_text_slider %} grid--mobile-slider{% else %} hero__content--no-padding{% endif %}"
+            {%- liquid
+              assign content_tag = 'div'
+              if enable_text_slider
+                assign content_tag = 'slider-component'
+              endif
+            -%}
+            <{{ content_tag }}
+              class="hero__content hero__content--compact{% if enable_text_slider %} grid--mobile-slider{% else %} hero__content--no-padding{% endif %}"
               {% if enable_text_slider %}
                 data-slider="BrickSlider--{{ section.id }}"
                 data-slider-desktop
                 data-dots="{{ settings.dots_style }}"
                 data-options='{"watchCSS": true, "wrapAround": true, "pageDots": true, "prevNextButtons": false, "autoPlay": {{ autoplay_speed }}, "pauseAutoPlayOnHover": false }'
-              {% endif %}>
-
+              {% endif %}
+            >
               {%- if accordion_blocks.size > 0 -%}
                 <collapsible-elements single="true">
               {%- endif -%}
@@ -277,7 +308,6 @@
                 {%- endif -%}
 
                 {%- case block.type -%}
-
                   {%- when 'text-slide' -%}
                     {%- if block.settings.subheading != blank -%}
                       <p class="hero__subheading">
@@ -314,7 +344,10 @@
                       -%}
 
                       <div class="hero__button">
-                        <a href="{{ block.settings.button_url | default: '#!' }}" class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}">
+                        <a
+                          href="{{ block.settings.button_url | default: '#!' }}"
+                          class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        >
                           <span>{{ block.settings.button_text }}</span>
 
                           {%- if block.settings.show_arrow -%}
@@ -335,7 +368,8 @@
                         endunless
                       -%}
 
-                      <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }} block-padding"
+                      <{{ heading_tag }}
+                        class="hero__title {{ block.settings.heading_font_size }} block-padding"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
@@ -349,7 +383,8 @@
                   {%- when 'subheading' -%}
                     {%- if block.settings.subheading != blank -%}
                       {%- assign animation_order = animation_order | plus: 1 -%}
-                      <p class="hero__subheading {{ block.settings.text_font_size }} block-padding"
+                      <p
+                        class="hero__subheading {{ block.settings.text_font_size }} block-padding"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
@@ -363,7 +398,8 @@
                   {%- when 'text' -%}
                     {%- if block.settings.text != blank -%}
                       {%- assign animation_order = animation_order | plus: 1 -%}
-                      <div class="hero__rte {{ block.settings.text_font_size }} block-padding"
+                      <div
+                        class="hero__rte {{ block.settings.text_font_size }} block-padding"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
@@ -402,14 +438,18 @@
                         <div class="hero__button-group">
                       {%- endif -%}
 
-                      <div class="hero__button block-padding"
+                      <div
+                        class="hero__button block-padding"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"
                         {{ block.shopify_attributes }}
                         style="{{ block_style }}"
                       >
-                        <a href="{{ block.settings.button_url | default: '#!' }}" class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}">
+                        <a
+                          href="{{ block.settings.button_url | default: '#!' }}"
+                          class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        >
                           <span>{{ block.settings.button_text }}</span>
 
                           {%- if block.settings.show_arrow -%}
@@ -418,10 +458,10 @@
                         </a>
                       </div>
 
-                    {%- if last_button_of_group -%}
-                      </div>
+                      {%- if last_button_of_group -%}
+                        </div>
+                      {%- endif -%}
                     {%- endif -%}
-                  {%- endif -%}
 
                   {%- when 'divider' -%}
                     {%- assign animation_order = animation_order | plus: 1 -%}
@@ -431,7 +471,7 @@
                       data-aos-order="{{ animation_order }}"
                     {%- endcapture -%}
 
-                    {%- render 'divider' block: block, attributes: attributes -%}
+                    {%- render 'divider', block: block, attributes: attributes -%}
 
                   {%- when 'accordion' -%}
                     {%- assign title = block.settings.title -%}
@@ -463,7 +503,10 @@
                               endcapture
                             -%}
 
-                            <div class="icon__animated icon__animated--{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}" {{ icon_style }}>
+                            <div
+                              class="icon__animated icon__animated--{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}"
+                              {{ icon_style }}
+                            >
                               {%- liquid
                                 if icon_image
                                   assign icon_width = icon_size
@@ -471,7 +514,7 @@
                                   assign icon_sizes = icon_width | append: 'px'
                                   assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-                                  render 'image' image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
+                                  render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
                                 else
                                   render 'animated-icon', filename: block.settings.icon_name
                                 endif
@@ -517,14 +560,15 @@
                       endcapture
                     -%}
 
-                    <div class="hero__media block-padding"
+                    <div
+                      class="hero__media block-padding"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       style="{{ block_style }}"
                       {{ block.shopify_attributes }}
                     >
-                      {%- render 'image' image: block.settings.image, sizes: sizes -%}
+                      {%- render 'image', image: block.settings.image, sizes: sizes -%}
                     </div>
 
                   {%- when 'video' -%}
@@ -543,28 +587,49 @@
                       endcapture
                     -%}
 
-                    <div class="hero__media block-padding"
+                    <div
+                      class="hero__media block-padding"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       style="{{ block_style }}"
                       {{ block.shopify_attributes }}
                     >
-                      <div class="video-background image-height image-height--mobile" {{ attributes }} style="--aspect-ratio: {{ video_aspect_ratio }};">
-                        {%- if video != nil -%}
+                      <div
+                        class="video-background image-height image-height--mobile"
+                        {{ attributes }}
+                        style="--aspect-ratio: {{ video_aspect_ratio }};"
+                      >
+                        {%- if video != null -%}
                           {%- unless show_video_background -%}
                             {%- assign show_video_background = true -%}
 
                             <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
                           {%- endunless -%}
 
-                          <video-background class="video__player" data-video-player data-video-id="{{ section.id }}-video-background">
+                          <video-background
+                            class="video__player"
+                            data-video-player
+                            data-video-id="{{ section.id }}-video-background"
+                          >
                             <template data-video-template>
-                              {{ video | video_tag: image_size: '500x', autoplay: true, loop: true, muted: true, controls: false }}
+                              {{
+                                video
+                                | video_tag:
+                                  image_size: '500x',
+                                  autoplay: true,
+                                  loop: true,
+                                  muted: true,
+                                  controls: false
+                              }}
                             </template>
                           </video-background>
                         {%- else -%}
-                          {%- render 'image' placeholder: 'lifestyle-1', aspect_ratio: video_aspect_ratio, attributes: attributes -%}
+                          {%- render 'image',
+                            placeholder: 'lifestyle-1',
+                            aspect_ratio: video_aspect_ratio,
+                            attributes: attributes
+                          -%}
                         {%- endif -%}
                       </div>
                     </div>
@@ -581,12 +646,14 @@
                       assign block_style = block_style | append: style_products
                     -%}
 
-                    <div class="hero__products grid block-padding"
+                    <div
+                      class="hero__products grid block-padding"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       style="{{ block_style }}"
-                      {{ block.shopify_attributes }}>
+                      {{ block.shopify_attributes }}
+                    >
                       {%- liquid
                         if product_list_count > 0
                           assign product_sizes_images = item_sizes_images | replace: item_placeholder, product_list_count
@@ -730,19 +797,22 @@
                       assign block_style = block_style | append: style_collection
                     -%}
 
-                    <div class="hero__collections block-padding grid{% if collection_grid_items_counter == button_empty_counter %} hide-image-border{% endif %}"
+                    <div
+                      class="hero__collections block-padding grid{% if collection_grid_items_counter == button_empty_counter %} hide-image-border{% endif %}"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       style="{{ block_style }}"
-                      {{ block.shopify_attributes }}>
+                      {{ block.shopify_attributes }}
+                    >
                       {{- collection_grid_items | replace: collection_sizes_placeholder, collection_sizes_images -}}
                     </div>
 
                   {%- when 'code' -%}
                     {%- assign animation_order = animation_order | plus: 1 -%}
 
-                    <div class="hero__custom-code block-padding"
+                    <div
+                      class="hero__custom-code block-padding"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
@@ -761,7 +831,7 @@
               {%- if accordion_blocks.size > 0 -%}
                 </collapsible-elements>
               {%- endif -%}
-            </div>
+            </{{ content_tag }}>
           </div>
         </div>
       </div>
