@@ -34,7 +34,6 @@ const classes = {
   isSelected: 'is-selected',
   mobile: 'mobile',
   singleSlide: 'single-slide',
-  sliderInitialized: 'js-slider--initialized',
 };
 
 if (!customElements.get('slider-component')) {
@@ -55,8 +54,6 @@ if (!customElements.get('slider-component')) {
         if (this.hasAttribute(attributes.sliderOptions)) {
           this.customOptions = JSON.parse(decodeURIComponent(this.getAttribute(attributes.sliderOptions)));
         }
-
-        console.log(this.customOptions);
 
         this.classList.add(classes.isLoading);
 
