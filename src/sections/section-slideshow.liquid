@@ -41,7 +41,9 @@
 {%- if request.visual_preview_mode -%}
   {%- style -%}
     .slideshow,
-    .slideshow .flickity-viewport { height: 100vh; }
+    .slideshow .flickity-viewport {
+      height: 100vh;
+    }
   {%- endstyle -%}
 {%- endif -%}
 
@@ -50,18 +52,23 @@
   --PB: {{ section.settings.padding_bottom }}px;
 {%- endcapture -%}
 
-<div class="index-hero slideshow {{ desktop_height }} {{ mobile_height }} section-padding {{ color_scheme }}"
+<div
+  class="index-hero slideshow {{ desktop_height }} {{ mobile_height }} section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="slideshow"
   data-overlay-header
-  style="{{ style }}">
+  style="{{ style }}"
+>
   <div class="{{ section.settings.width }}">
     {%- if section.blocks.size > 0 -%}
-      <div id="slideshow-{{ section.id }}" class="{{ slideshow_class }}"
+      <slider-component
+        id="slideshow-{{ section.id }}"
+        class="{{ slideshow_class }}"
         data-slider="{{ section.id }}"
         data-slider-fullwidth
         data-options='{"fade": {{ fade_option }}, "autoPlay": {{ autoplay_speed }}, "pageDots": {{ page_dots }}, "prevNextButtons": {{ show_arrows }} }'
-        data-dots="{{ settings.dots_style }}">
+        data-dots="{{ settings.dots_style }}"
+      >
         {%- for block in section.blocks -%}
           {%- liquid
             assign image_desktop = block.settings.image
@@ -137,36 +144,41 @@
             {%- endif -%}
           {%- endcapture -%}
 
-          <div class="slideshow__slide slideshow__slide--{{ block.id }} frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }}{% if forloop.first %} is-selected{% endif %}"
+          <div
+            class="slideshow__slide slideshow__slide--{{ block.id }} frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }}{% if forloop.first %} is-selected{% endif %}"
             style="{{ block_style }}"
             data-slide="{{ block.id }}"
             data-slide-index="{{ forloop.index0 }}"
             data-slide-text-color="{{ text_color }}"
-            {{ block.shopify_attributes }}>
-
+            {{ block.shopify_attributes }}
+          >
             {%- if first_button_text == blank and first_button_link != blank -%}
-              <a class="hero__image frame__item" href="{{ first_button_link }}" aria-label="{{ block.settings.title | default: default_slide_label | escape }}">
+              <a
+                class="hero__image frame__item"
+                href="{{ first_button_link }}"
+                aria-label="{{ block.settings.title | default: default_slide_label | escape }}"
+              >
             {%- else -%}
               <div class="hero__image frame__item">
             {%- endif -%}
 
-              {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
-                <div class="image-overlay"></div>
-              {%- endunless -%}
+            {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
+              <div class="image-overlay"></div>
+            {%- endunless -%}
 
-              {%- liquid
-                if forloop.first and section.index < 3
-                  assign loading = 'eager'
-                  assign fetchpriority = 'high'
-                  assign preload = true
-                else
-                  assign loading = 'lazy'
-                  assign fetchpriority = 'auto'
-                  assign preload = false
-                endif
+            {%- liquid
+              if forloop.first and section.index < 3
+                assign loading = 'eager'
+                assign fetchpriority = 'high'
+                assign preload = true
+              else
+                assign loading = 'lazy'
+                assign fetchpriority = 'auto'
+                assign preload = false
+              endif
 
-                render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, alt: alt, loading: loading, fetchpriority: fetchpriority, preload: preload
-              -%}
+              render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, alt: alt, loading: loading, fetchpriority: fetchpriority, preload: preload
+            -%}
 
             {%- if first_button_text == blank and first_button_link != blank -%}
               </a>
@@ -174,12 +186,22 @@
               </div>
             {%- endif -%}
 
-            {%- if block.settings.title != blank or block.settings.description != blank or first_button_text != blank -%}
-              <div class="hero__content__wrapper frame__item {{ block.settings.flex_align_desktop }} {{ block.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+            {%- if block.settings.title != blank
+              or block.settings.description != blank
+              or first_button_text != blank
+            -%}
+              <div
+                class="hero__content__wrapper frame__item {{ block.settings.flex_align_desktop }} {{ block.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}">
-                <div class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"{% if show_header_backdrop %} style="--overlay-opacity: {{ overlay_opacity }};"{% endif %}>
+                data-aos-order="{{ animation_order }}"
+              >
+                <div
+                  class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+                  {% if show_header_backdrop %}
+                    style="--overlay-opacity: {{ overlay_opacity }};"
+                  {% endif %}
+                >
                   {%- unless block.settings.title == '' -%}
                     {%- liquid
                       assign heading_tag = 'h2'
@@ -189,20 +211,24 @@
                       endunless
                     -%}
 
-                    <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }}"
+                    <{{ heading_tag }}
+                      class="hero__title {{ block.settings.heading_font_size }}"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
-                      data-aos-order="{{ animation_order }}">
+                      data-aos-order="{{ animation_order }}"
+                    >
                       {{ block.settings.title }}
                     </{{ heading_tag }}>
                     {%- assign animation_order = animation_order | plus: 1 -%}
                   {%- endunless -%}
 
                   {%- unless block.settings.description == '' -%}
-                    <p class="hero__description {{ block.settings.text_font_size }}"
+                    <p
+                      class="hero__description {{ block.settings.text_font_size }}"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
-                      data-aos-order="{{ animation_order }}">
+                      data-aos-order="{{ animation_order }}"
+                    >
                       {{ block.settings.description }}
                     </p>
                     {%- assign animation_order = animation_order | plus: 1 -%}
@@ -211,11 +237,16 @@
                   {%- if first_button_text != blank or second_button_text != blank -%}
                     <div class="hero__button-group">
                       {%- unless first_button_text == blank -%}
-                        <div class="hero__button"
+                        <div
+                          class="hero__button"
                           data-aos="hero"
                           data-aos-anchor="{{ animation_anchor }}"
-                          data-aos-order="{{ animation_order }}">
-                          <a class="btn {{ first_button_size }} {{ first_button_style }} {{ first_button_type }}" href="{{ first_button_link }}">
+                          data-aos-order="{{ animation_order }}"
+                        >
+                          <a
+                            class="btn {{ first_button_size }} {{ first_button_style }} {{ first_button_type }}"
+                            href="{{ first_button_link }}"
+                          >
                             <span>{{ first_button_text | escape }}</span>
 
                             {%- if first_button_show_arrow -%}
@@ -226,12 +257,16 @@
                       {%- endunless -%}
 
                       {%- unless second_button_text == blank -%}
-                        <div class="hero__button"
+                        <div
+                          class="hero__button"
                           data-aos="hero"
                           data-aos-anchor="{{ animation_anchor }}"
-                          data-aos-order="{{ animation_order }}">
-                          <a class="btn {{ second_button_size }} {{ second_button_style }} {{ second_button_type }}"
-                            href="{{ second_button_link | default: '#!' }}">
+                          data-aos-order="{{ animation_order }}"
+                        >
+                          <a
+                            class="btn {{ second_button_size }} {{ second_button_style }} {{ second_button_type }}"
+                            href="{{ second_button_link | default: '#!' }}"
+                          >
                             <span>{{ second_button_text | escape }}</span>
 
                             {%- if second_button_show_arrow -%}
@@ -247,7 +282,7 @@
             {%- endif -%}
           </div>
         {%- endfor -%}
-      </div>
+      </slider-component>
     {%- endif -%}
 
     {%- if section.blocks.size == 0 -%}
@@ -270,10 +305,10 @@
       "label": "Transition style",
       "default": "slide",
       "options": [
-        { "label": "Slide", "value": "slide" },
-        { "label": "Fade", "value": "fade" },
-        { "label": "Zoom out", "value": "zoom-out" },
-        { "label": "Wipe", "value": "wipe" }
+        {"label": "Slide", "value": "slide"},
+        {"label": "Fade", "value": "fade"},
+        {"label": "Zoom out", "value": "zoom-out"},
+        {"label": "Wipe", "value": "wipe"}
       ]
     },
     {
@@ -293,13 +328,13 @@
       "default": false
     },
     {
-      "type":    "range",
-      "id":      "autoplay_speed",
-      "min":     4,
-      "max":     15,
-      "step":    1,
-      "unit":    "sec",
-      "label":   "Change slides every",
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 4,
+      "max": 15,
+      "step": 1,
+      "unit": "sec",
+      "label": "Change slides every",
       "default": 8
     },
     {
@@ -326,16 +361,16 @@
       "label": "Height",
       "default": "screen-height-three-quarters",
       "options": [
-        { "value": "image-height", "label": "Image height" },
-        { "value": "screen-height-full", "label": "Full screen height"},
-        { "value": "screen-height-three-quarters", "label": "3/4 of screen"},
-        { "value": "screen-height-two-thirds", "label": "2/3 of screen"},
-        { "value": "screen-height-one-half", "label": "1/2 of screen"},
-        { "value": "screen-height-one-third", "label": "1/3 of screen"},
-        { "value": "seven-fifty-height-hero", "label": "750px" },
-        { "value": "sixty-fifty-height-hero", "label": "650px" },
-        { "value": "five-fifty-height-hero ", "label": "550px" },
-        { "value": "four-fifty-height-hero", "label": "450px" }
+        {"value": "image-height", "label": "Image height"},
+        {"value": "screen-height-full", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero", "label": "750px"},
+        {"value": "sixty-fifty-height-hero", "label": "650px"},
+        {"value": "five-fifty-height-hero ", "label": "550px"},
+        {"value": "four-fifty-height-hero", "label": "450px"}
       ]
     },
     {
@@ -348,16 +383,16 @@
       "label": "Height",
       "default": "screen-height-three-quarters--mobile",
       "options": [
-        { "value": "image-height--mobile", "label": "Image height" },
-        { "value": "screen-height-full--mobile", "label": "Full screen height"},
-        { "value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
-        { "value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
-        { "value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
-        { "value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
-        { "value": "seven-fifty-height-hero--mobile", "label": "750px" },
-        { "value": "sixty-fifty-height-hero--mobile", "label": "650px" },
-        { "value": "five-fifty-height-hero--mobile", "label": "550px" },
-        { "value": "four-fifty-height-hero--mobile", "label": "450px" }
+        {"value": "image-height--mobile", "label": "Image height"},
+        {"value": "screen-height-full--mobile", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero--mobile", "label": "750px"},
+        {"value": "sixty-fifty-height-hero--mobile", "label": "650px"},
+        {"value": "five-fifty-height-hero--mobile", "label": "550px"},
+        {"value": "four-fifty-height-hero--mobile", "label": "450px"}
       ]
     },
     {
@@ -476,10 +511,10 @@
           "label": "Type",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -488,9 +523,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -499,9 +534,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -530,10 +565,10 @@
           "label": "Type",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -542,9 +577,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -553,9 +588,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -574,15 +609,15 @@
           "label": "Alignment",
           "default": "align--middle-center-desktop",
           "options": [
-            { "value": "align--top-left-desktop", "label": "Top left"},
-            { "value": "align--top-center-desktop", "label": "Top center"},
-            { "value": "align--top-right-desktop", "label": "Top right"},
-            { "value": "align--middle-left-desktop", "label": "Middle left"},
-            { "value": "align--middle-center-desktop", "label": "Absolute center"},
-            { "value": "align--middle-right-desktop", "label": "Middle right"},
-            { "value": "align--bottom-left-desktop", "label": "Bottom left"},
-            { "value": "align--bottom-center-desktop", "label": "Bottom center"},
-            { "value": "align--bottom-right-desktop", "label": "Bottom right"}
+            {"value": "align--top-left-desktop", "label": "Top left"},
+            {"value": "align--top-center-desktop", "label": "Top center"},
+            {"value": "align--top-right-desktop", "label": "Top right"},
+            {"value": "align--middle-left-desktop", "label": "Middle left"},
+            {"value": "align--middle-center-desktop", "label": "Absolute center"},
+            {"value": "align--middle-right-desktop", "label": "Middle right"},
+            {"value": "align--bottom-left-desktop", "label": "Bottom left"},
+            {"value": "align--bottom-center-desktop", "label": "Bottom center"},
+            {"value": "align--bottom-right-desktop", "label": "Bottom right"}
           ]
         },
         {
@@ -601,15 +636,15 @@
           "label": "Alignment",
           "default": "align--middle-center-mobile",
           "options": [
-            { "value": "align--top-left-mobile", "label": "Top left"},
-            { "value": "align--top-center-mobile", "label": "Top center"},
-            { "value": "align--top-right-mobile", "label": "Top right"},
-            { "value": "align--middle-left-mobile", "label": "Middle left"},
-            { "value": "align--middle-center-mobile", "label": "Absolute center"},
-            { "value": "align--middle-right-mobile", "label": "Middle right"},
-            { "value": "align--bottom-left-mobile", "label": "Bottom left"},
-            { "value": "align--bottom-center-mobile", "label": "Bottom center"},
-            { "value": "align--bottom-right-mobile", "label": "Bottom right"}
+            {"value": "align--top-left-mobile", "label": "Top left"},
+            {"value": "align--top-center-mobile", "label": "Top center"},
+            {"value": "align--top-right-mobile", "label": "Top right"},
+            {"value": "align--middle-left-mobile", "label": "Middle left"},
+            {"value": "align--middle-center-mobile", "label": "Absolute center"},
+            {"value": "align--middle-right-mobile", "label": "Middle right"},
+            {"value": "align--bottom-left-mobile", "label": "Bottom left"},
+            {"value": "align--bottom-center-mobile", "label": "Bottom center"},
+            {"value": "align--bottom-right-mobile", "label": "Bottom right"}
           ]
         },
         {
@@ -645,7 +680,7 @@
           "min": 0,
           "max": 100,
           "step": 5,
-          "default":0
+          "default": 0
         },
         {
           "type": "color",

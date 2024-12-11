@@ -1,4 +1,3 @@
-import {Slider} from '../features/slider';
 import {isDesktop} from '../util/media-query';
 
 const selectors = {
@@ -27,9 +26,9 @@ if (!customElements.get('announcement-bar')) {
       }
 
       connectedCallback() {
-        if (this.slider) {
-          this.initSliders();
-        }
+        // if (this.slider) {
+        //   this.initSliders();
+        // }
 
         this.addEventListener('theme:block:select', (e) => {
           this.onBlockSelect(e);

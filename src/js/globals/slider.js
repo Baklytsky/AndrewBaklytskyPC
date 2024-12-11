@@ -1,0 +1,219 @@
+import Flickity from 'flickity';
+import FlickityFade from 'flickity-fade';
+
+import {isDesktop} from '../util/media-query';
+
+const selectors = {
+  aos: '[data-aos]',
+  collectionImage: '.collection-item__image',
+  columnImage: '[data-column-image]',
+  flickityNextArrow: '.flickity-button.next',
+  flickityPrevArrow: '.flickity-button.previous',
+  link: 'a:not(.btn)',
+  productItemImage: '.product-item__image',
+  slide: '[data-slide]',
+  slideValue: 'data-slide',
+  sliderThumb: '[data-slider-thumb]',
+};
+
+const attributes = {
+  arrowPositionMiddle: 'data-arrow-position-middle',
+  slideIndex: 'data-slide-index',
+  sliderOptions: 'data-options',
+  slideTextColor: 'data-slide-text-color',
+};
+
+const classes = {
+  aosAnimate: 'aos-animate',
+  desktop: 'desktop',
+  focused: 'is-focused',
+  flickityEnabled: 'flickity-enabled',
+  heroContentTransparent: 'hero__content--transparent',
+  initialized: 'is-initialized',
+  isLoading: 'is-loading',
+  isSelected: 'is-selected',
+  mobile: 'mobile',
+  singleSlide: 'single-slide',
+  sliderInitialized: 'js-slider--initialized',
+};
+
+if (!customElements.get('slider-component')) {
+  customElements.define(
+    'slider-component',
+    class SliderComponent extends HTMLElement {
+      constructor() {
+        super();
+
+        this.flkty = null;
+        this.slides = this.querySelectorAll(selectors.slide);
+        this.thumbs = this.querySelectorAll(selectors.sliderThumb);
+      }
+
+      connectedCallback() {
+        if (this.slides.length <= 1) return;
+
+        if (this.hasAttribute(attributes.sliderOptions)) {
+          this.customOptions = JSON.parse(decodeURIComponent(this.getAttribute(attributes.sliderOptions)));
+        }
+
+        console.log(this.customOptions);
+
+        this.classList.add(classes.isLoading);
+
+        let slideSelector = selectors.slide;
+        const isDesktopView = isDesktop();
+        const slideMobile = `${selectors.slide}:not(.${classes.mobile})`;
+        const slideDesktop = `${selectors.slide}:not(.${classes.desktop})`;
+        const hasDeviceSpecificSelectors = this.querySelectorAll(slideDesktop).length || this.querySelectorAll(slideMobile).length;
+
+        if (hasDeviceSpecificSelectors) {
+          if (isDesktopView) {
+            slideSelector = slideMobile;
+          } else {
+            slideSelector = slideDesktop;
+          }
+        }
+
+        if (this.querySelectorAll(slideSelector).length <= 1) {
+          this.classList.add(classes.singleSlide);
+          this.classList.remove(classes.isLoading);
+        }
+
+        this.sliderOptions = {
+          cellSelector: slideSelector,
+          contain: true,
+          wrapAround: true,
+          adaptiveHeight: true,
+          ...this.customOptions,
+          on: {
+            ready: () => {
+              requestAnimationFrame(() => {
+                this.classList.add(classes.initialized);
+                this.classList.remove(classes.isLoading);
+                this.parentNode.dispatchEvent(
+                  new CustomEvent('theme:slider:loaded', {
+                    bubbles: true,
+                    detail: {
+                      slider: this,
+                    },
+                  })
+                );
+              });
+
+              this.slideActions();
+
+              if (this.sliderOptions.prevNextButtons) {
+                this.positionArrows();
+              }
+            },
+            change: (index) => {
+              const slide = this.slides[index];
+              if (!slide || this.sliderOptions.groupCells) return;
+
+              const elementsToAnimate = slide.querySelectorAll(selectors.aos);
+              if (elementsToAnimate.length) {
+                elementsToAnimate.forEach((el) => {
+                  el.classList.remove(classes.aosAnimate);
+                  requestAnimationFrame(() => {
+                    // setTimeout with `0` delay fixes functionality on Mobile and Firefox
+                    setTimeout(() => {
+                      el.classList.add(classes.aosAnimate);
+                    }, 0);
+                  });
+                });
+              }
+            },
+            resize: () => {
+              if (this.sliderOptions.prevNextButtons) {
+                this.positionArrows();
+              }
+            },
+          },
+        };
+
+        if (this.sliderOptions.fade) {
+          this.flkty = new FlickityFade(this, this.sliderOptions);
+        } else {
+          this.flkty = new Flickity(this, this.sliderOptions);
+        }
+
+        this.flkty.on('change', () => this.slideActions(true));
+
+        this.thumbs?.forEach((thumb) => {
+          thumb.addEventListener('click', (e) => {
+            e.preventDefault();
+            const slideIndex = [...thumb.parentElement.children].indexOf(thumb);
+            this.flkty.select(slideIndex);
+          });
+        });
+
+        if (!this.flkty || !this.flkty.isActive) {
+          this.classList.remove(classes.isLoading);
+        }
+
+        this.addEventListener('theme:slider:select', (e) => {
+          this.flkty.selectCell(e.detail.index);
+          this.flkty.stopPlayer();
+        });
+
+        this.addEventListener('theme:slider:deselect', (e) => {
+          if (this.flkty && this.sliderOptions.hasOwnProperty('autoPlay') && this.sliderOptions.autoPlay) {
+            this.flkty.playPlayer();
+          }
+        });
+      }
+
+      slideActions(changeEvent = false) {
+        const currentSlide = this.querySelector(`.${classes.isSelected}`);
+        if (!currentSlide) return;
+        const currentSlideTextColor = currentSlide.hasAttribute(attributes.slideTextColor) ? currentSlide.getAttribute(attributes.slideTextColor) : '';
+        const currentSlideLink = currentSlide.querySelector(selectors.link);
+        const buttons = this.querySelectorAll(`${selectors.slide} a, ${selectors.slide} button`);
+
+        if (document.body.classList.contains(classes.focused) && currentSlideLink && this.sliderOptions.groupCells && changeEvent) {
+          currentSlideLink.focus();
+        }
+
+        if (buttons.length) {
+          buttons.forEach((button) => {
+            const slide = button.closest(selectors.slide);
+            if (slide) {
+              const tabIndex = slide.classList.contains(classes.isSelected) ? 0 : -1;
+              button.setAttribute('tabindex', tabIndex);
+            }
+          });
+        }
+
+        this.style.setProperty('--text', currentSlideTextColor);
+
+        if (this.thumbs.length && this.thumbs.length === this.slides.length && currentSlide.hasAttribute(attributes.slideIndex)) {
+          const slideIndex = parseInt(currentSlide.getAttribute(attributes.slideIndex));
+          const currentThumb = this.querySelector(`${selectors.sliderThumb}.${classes.isSelected}`);
+          if (currentThumb) {
+            currentThumb.classList.remove(classes.isSelected);
+          }
+          this.thumbs[slideIndex].classList.add(classes.isSelected);
+        }
+      }
+
+      positionArrows() {
+        if (this.hasAttribute(attributes.arrowPositionMiddle) && this.sliderOptions.prevNextButtons) {
+          const itemImage = this.querySelector(selectors.collectionImage) || this.querySelector(selectors.productItemImage) || this.querySelector(selectors.columnImage);
+
+          // Prevent 'clientHeight' of null error if no image
+          if (!itemImage) return;
+
+          this.querySelector(selectors.flickityPrevArrow).style.top = itemImage.clientHeight / 2 + 'px';
+          this.querySelector(selectors.flickityNextArrow).style.top = itemImage.clientHeight / 2 + 'px';
+        }
+      }
+
+      disconnectedCallback() {
+        if (this.flkty) {
+          this.flkty.options.watchCSS = false;
+          this.flkty.destroy();
+        }
+      }
+    }
+  );
+}
