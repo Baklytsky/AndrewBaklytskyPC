@@ -1,4 +1,3 @@
-import {Slider} from '../features/slider';
 import {isDesktop} from '../util/media-query';
 
 const selectors = {
@@ -7,10 +6,6 @@ const selectors = {
   slider: '[data-slider]',
   ticker: 'ticker-bar',
   tickerSlide: '.announcement__slide',
-};
-
-const classes = {
-  hidden: 'hidden',
 };
 
 if (!customElements.get('announcement-bar')) {
@@ -30,14 +25,6 @@ if (!customElements.get('announcement-bar')) {
         if (this.slider) {
           this.initSliders();
         }
-
-        this.addEventListener('theme:block:select', (e) => {
-          this.onBlockSelect(e);
-        });
-
-        this.addEventListener('theme:block:deselect', (e) => {
-          this.onBlockDeselect(e);
-        });
 
         this.addEventListener('theme:countdown:hide', (e) => {
           if (window.Shopify.designMode) return;
@@ -86,7 +73,7 @@ if (!customElements.get('announcement-bar')) {
         const isMobileView = !isDesktopView;
 
         if ((isDesktopView && this.enableSlider) || (isMobileView && !this.enableSlider)) {
-          this.slider.flkty?.destroy();
+          this.slider.dispatchEvent(new CustomEvent('theme:slider:destroy', {bubbles: false}));
 
           if (isDesktopView && this.enableSlider) {
             this.enableSlider = false;
@@ -94,17 +81,20 @@ if (!customElements.get('announcement-bar')) {
             this.enableSlider = true;
           }
 
-          this.slider = new Slider(this, this.querySelector(selectors.slider));
-          this.slider.flkty?.reposition();
+          this.slider.dispatchEvent(new CustomEvent('theme:slider:init', {bubbles: false}));
+          this.slider.dispatchEvent(new CustomEvent('theme:slider:reposition', {bubbles: false}));
         }
       }
 
       removeSlide(slide) {
-        this.slider.flkty?.remove(slide);
-
-        if (this.slider.flkty?.cells.length === 0) {
-          this.section.classList.add(classes.hidden);
-        }
+        this.slider.dispatchEvent(
+          new CustomEvent('theme:slider:remove-cell', {
+            bubbles: false,
+            detail: {
+              slide,
+            },
+          })
+        );
       }
 
       removeTickerText(tickerText) {
@@ -113,29 +103,9 @@ if (!customElements.get('announcement-bar')) {
         ticker.dispatchEvent(new CustomEvent('theme:ticker:refresh'));
       }
 
-      onBlockSelect(e) {
-        if (this.slider) {
-          this.slider.onBlockSelect(e);
-        }
-      }
-
-      onBlockDeselect(e) {
-        if (this.slider) {
-          this.slider.onBlockDeselect(e);
-        }
-      }
-
       disconnectedCallback() {
         document.removeEventListener('theme:resize:width', this.initSliderEvent);
         document.removeEventListener('theme:resize:width', this.tickerResizeEvent);
-
-        this.removeEventListener('theme:block:select', (e) => {
-          this.onBlockSelect(e);
-        });
-
-        this.removeEventListener('theme:block:deselect', (e) => {
-          this.onBlockDeselect(e);
-        });
       }
     }
   );

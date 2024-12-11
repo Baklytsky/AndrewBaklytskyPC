@@ -3,7 +3,6 @@ import {register} from '../vendor/theme-scripts/theme-sections';
 import {RadioSwatch} from '../features/swatch';
 import {tooltipSection} from '../features/tooltip';
 import {productStickySection} from '../features/product-sticky';
-import {Slider} from '../features/slider';
 import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {isDesktop} from '../util/media-query';
@@ -21,7 +20,6 @@ const selectors = {
   productSubmitAdd: '.product__submit__add',
   formWrapper: '[data-form-wrapper]',
   productVariants: '[data-product-variants]',
-  slider: '[data-slider]',
 };
 
 const classes = {
@@ -37,7 +35,6 @@ const attributes = {
   cartBarScroll: 'data-cart-bar-scroll',
   cartBarProductNotification: 'data-cart-bar-product-notification',
   sectionId: 'data-section-id',
-  sliderIndex: 'data-slider-index',
 };
 
 const sections = {};
@@ -51,8 +48,6 @@ class Product {
     this.section = section;
     this.container = section.container;
     this.id = this.container.getAttribute(attributes.sectionId);
-    this.sliders = this.container.querySelectorAll(selectors.slider);
-    this.slider = [];
     this.formWrapper = this.container.querySelector(selectors.formWrapper);
     this.cartBarEnabled = this.container.hasAttribute(attributes.cartBarEnabled);
     this.cartBar = this.container.querySelector(selectors.cartBar);
@@ -81,13 +76,6 @@ class Product {
     Shopify.Products.recordRecentlyViewed(recentObj);
 
     this.form = this.container.querySelector(selectors.form);
-
-    if (this.sliders.length) {
-      this.sliders.forEach((slider, index) => {
-        slider.setAttribute(attributes.sliderIndex, index);
-        this.slider.push(new Slider(this.container, slider));
-      });
-    }
 
     if (this.cartBarEnabled) {
       this.initCartBar();
@@ -166,24 +154,6 @@ class Product {
     if (this.cartBarEnabled) {
       document.removeEventListener('theme:scroll', this.toggleCartBarOnScroll);
       document.removeEventListener('theme:resize', this.setCartBarHeight);
-    }
-  }
-
-  onBlockSelect(e) {
-    const slider = e.srcElement.closest(selectors.slider);
-    if (slider && this.slider.length) {
-      const sliderIndex = slider.hasAttribute(attributes.sliderIndex) ? slider.getAttribute(attributes.sliderIndex) : 0;
-      if (!this.slider[sliderIndex]) return;
-      this.slider[sliderIndex].onBlockSelect(e);
-    }
-  }
-
-  onBlockDeselect(e) {
-    const slider = e.srcElement.closest(selectors.slider);
-    if (slider && this.slider.length) {
-      const sliderIndex = slider.hasAttribute(attributes.sliderIndex) ? slider.getAttribute(attributes.sliderIndex) : 0;
-      if (!this.slider[sliderIndex]) return;
-      this.slider[sliderIndex].onBlockDeselect(e);
     }
   }
 }
