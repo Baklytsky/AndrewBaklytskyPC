@@ -342,13 +342,6 @@
     /* === Product sale color ===*/
     --COLOR-SALE: {{ settings.sale_color }};
 
-    /* === Gray background on Product grid items ===*/
-    {%- if settings.show_gray_bg -%}
-      --filter-bg: .97;
-    {%- else -%}
-      --filter-bg: 1.0;
-    {%- endif -%}
-
     /* === Helper colors for form error states ===*/
     --COLOR-ERROR: #721C24;
     --COLOR-ERROR-BG: #F8D7DA;
@@ -565,6 +558,25 @@
     --underlay-opacity: {{ backdrop_opacity }};
     --underlay-bg: {{ backdrop_bg }};
   }
+
+  /* === Gray background on Product grid items ===*/
+  {%- if settings.show_gray_bg -%}
+    .cart__item__image a::before,
+    .product__photo::before,
+    .product__thumb__link::before,
+    .product-item__image::before,
+    .product-upsell__image__thumb::before,
+    .pswp__img::before,
+    .pswp__thumb::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, .025);
+    }
+  {%- endif -%}
 
   *,
   *::before,
