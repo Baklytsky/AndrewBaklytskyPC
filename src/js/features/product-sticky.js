@@ -1,6 +1,3 @@
-import {isDesktop} from '../util/media-query';
-import {readHeights} from '../globals/height';
-
 const selectors = {
   productPage: '.product__page',
   formWrapper: '[data-form-wrapper]',
@@ -99,7 +96,7 @@ class ProductSticky {
 
     if (!targetFormWrapper) return;
 
-    if (isDesktop()) {
+    if (!window.theme.isMobile()) {
       const form = this.container.querySelector(selectors.formWrapper);
       const productMediaList = this.container.querySelector(selectors.productMediaList);
 
@@ -144,7 +141,7 @@ class ProductSticky {
 
     if (this.stickyFormLoad) {
       if (document.querySelector(selectors.headerSticky)) {
-        let {headerHeight} = readHeights();
+        const {headerHeight} = window.theme.readHeights();
         this.stickyDefaultTop = headerHeight;
       } else {
         this.stickyDefaultTop = this.defaultTopBottomSpacings;

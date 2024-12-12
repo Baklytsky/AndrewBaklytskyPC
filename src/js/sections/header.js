@@ -1,8 +1,6 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
 import stickyHeader from '../features/header-sticky';
 import hoverDisclosure from '../features/header-hover-disclosure';
-import {isDesktop} from '../util/media-query';
-import {readHeights} from '../globals/height';
 
 const selectors = {
   wrapper: '[data-header-wrapper]',
@@ -87,7 +85,7 @@ class Header {
         const key = button.hasAttribute(attributes.drawerToggle) ? button.getAttribute(attributes.drawerToggle) : '';
         const desktopDrawer = document.querySelector(`[${attributes.drawer}="${key}"]`);
         const mobileDrawer = document.querySelector(`mobile-menu > [${attributes.drawer}]`);
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
 
         if (isDesktopView) {
           drawer = desktopDrawer;
@@ -120,7 +118,7 @@ class Header {
       this.wrapper.classList.add(classes.showMobileClass);
 
       // Update --header-height CSS variable when switching to a mobile nav
-      const {headerHeight} = readHeights();
+      const {headerHeight} = window.theme.readHeights();
       document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
     } else {
       this.wrapper.classList.remove(classes.showMobileClass);

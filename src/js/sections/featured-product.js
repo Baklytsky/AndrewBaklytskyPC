@@ -1,5 +1,4 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
-import {readHeights} from '../globals/height';
 
 const selectors = {
   image: '[data-featured-image]',
@@ -93,7 +92,7 @@ class FeaturedProduct {
   }
 
   calculateHeight() {
-    let {stickyHeaderHeight} = readHeights();
+    const {stickyHeaderHeight} = window.theme.readHeights();
     this.container.style.removeProperty('--min-height');
     this.container.style.setProperty('--min-height', `${this.wrapper.offsetHeight + this.contentHolder.offsetHeight}px`);
     this.headerHeight = stickyHeaderHeight;

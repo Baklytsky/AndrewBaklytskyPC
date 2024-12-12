@@ -14,6 +14,7 @@ import './globals/cart-drawer';
 import './globals/collapsible';
 import './globals/header-search-popdown';
 import './globals/main-search';
+import './globals/media-query';
 import './globals/slider';
 import './globals/toggle-ellipsis';
 import './globals/scroll-to';

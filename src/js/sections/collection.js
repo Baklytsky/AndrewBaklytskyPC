@@ -1,7 +1,6 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {tooltipSection} from '../features/tooltip';
-import {isMobile} from '../util/media-query';
 
 const selectors = {
   collectionSidebar: '[data-collection-sidebar]',
@@ -94,7 +93,7 @@ class Collection {
     const collectionSidebarSlideOut = this.container.querySelector(selectors.collectionSidebarSlideOut);
     const isScrollLocked = document.documentElement.hasAttribute('data-scroll-locked');
 
-    const isMobileView = isMobile();
+    const isMobileView = window.theme.isMobile();
     this.collectionSidebar.classList.add(classes.animated);
 
     if (collectionSidebarSlideOut === null) {
@@ -131,7 +130,7 @@ class Collection {
   }
 
   toggleSidebarSlider() {
-    if (isMobile()) {
+    if (window.theme.isMobile()) {
       this.hideSidebar();
     } else if (this.collectionSidebar.classList.contains(classes.expanded)) {
       this.showSidebarCallback();

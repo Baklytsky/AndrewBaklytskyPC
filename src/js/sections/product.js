@@ -4,7 +4,6 @@ import {tooltipSection} from '../features/tooltip';
 import {productStickySection} from '../features/product-sticky';
 import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import {isDesktop} from '../util/media-query';
 import {ProductForm} from '../features/product-form';
 import {ProductModal} from '../features/product-modal';
 import {ProductModel} from '../features/product-model';
@@ -122,10 +121,10 @@ class Product {
 
   scrollToTop() {
     const productVariants = this.container.querySelector(selectors.productVariants);
-    const scrollTarget = isDesktop() ? this.container : productVariants ? productVariants : this.form;
+    const scrollTarget = !window.theme.isMobile() ? this.container : productVariants ? productVariants : this.form;
     const scrollTargetTop = scrollTarget.getBoundingClientRect().top;
 
-    window.theme.scrollTo(isDesktop() ? scrollTargetTop : scrollTargetTop - 10);
+    window.theme.scrollTo(!window.theme.isMobile() ? scrollTargetTop : scrollTargetTop - 10);
   }
 
   toggleCartBarOnScroll() {

@@ -1,5 +1,4 @@
 import throttle from '../util/throttle';
-import {getWindowWidth} from '../util/media-query';
 
 const selectors = {
   sectionId: '[data-section-id]',
@@ -68,7 +67,7 @@ export default class Tooltip {
       let tooltipTargetPositionLeft = tooltipRect.left - tooltipTargetWidth / 2 + tooltipWidth / 2;
       const tooltipLeftWithWidth = tooltipTargetPositionLeft + tooltipTargetWidth;
       const sideOffset = 24;
-      const tooltipTargetWindowDifference = tooltipLeftWithWidth - getWindowWidth() + sideOffset;
+      const tooltipTargetWindowDifference = tooltipLeftWithWidth - window.theme.getWindowWidth() + sideOffset;
 
       if (tooltipTargetWindowDifference > 0) {
         tooltipTargetPositionLeft -= tooltipTargetWindowDifference;

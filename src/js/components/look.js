@@ -1,5 +1,4 @@
-import {isMobile} from '../util/media-query';
-import {readHeights} from '../globals/height';
+import {isMobile} from '../globals/media-query';
 
 const selectors = {
   slider: '[data-slider-mobile]',
@@ -65,7 +64,7 @@ if (!customElements.get('look-component')) {
               e.preventDefault();
               const idx = thumb.hasAttribute(attributes.thumbValue) && thumb.getAttribute(attributes.thumbValue) !== '' ? parseInt(thumb.getAttribute(attributes.thumbValue)) : i;
               const slide = this.slides[idx];
-              if (isMobile()) {
+              if (window.theme.isMobile()) {
                 const parentPadding = parseInt(window.getComputedStyle(this.slider).paddingLeft);
                 this.slider.scrollTo({
                   top: 0,
@@ -75,7 +74,7 @@ if (!customElements.get('look-component')) {
                 document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
                 this.popupContainer.classList.add(classes.isAnimating, classes.isOpen);
               } else {
-                let {stickyHeaderHeight} = readHeights();
+                const {stickyHeaderHeight} = window.theme.readHeights();
                 const slideTop = slide.getBoundingClientRect().top;
                 const slideHeightHalf = slide.offsetHeight / 2;
                 const windowHeight = window.innerHeight;

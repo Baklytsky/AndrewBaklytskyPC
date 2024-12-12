@@ -1,4 +1,3 @@
-import {getWindowHeight, getWindowWidth} from '../util/media-query';
 import {PopupCookie} from './popup-cookie';
 
 const selectors = {
@@ -118,7 +117,7 @@ class NewsletterCheckForResult {
 
   scrollToForm(newsletter) {
     const rect = newsletter.getBoundingClientRect();
-    const isVisible = rect.top >= 0 && rect.left >= 0 && rect.bottom <= getWindowHeight() && rect.right <= getWindowWidth();
+    const isVisible = rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.theme.getWindowHeight() && rect.right <= window.theme.getWindowWidth();
 
     if (!isVisible) {
       setTimeout(() => {

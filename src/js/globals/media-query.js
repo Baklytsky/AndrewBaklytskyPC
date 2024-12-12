@@ -1,17 +1,11 @@
-function getWindowWidth() {
+window.theme.getWindowWidth = function () {
   return document.documentElement.clientWidth || document.body.clientWidth || window.innerWidth;
-}
+};
 
-function getWindowHeight() {
+window.theme.getWindowHeight = function () {
   return document.documentElement.clientHeight || document.body.clientHeight || window.innerHeight;
-}
+};
 
-function isDesktop() {
-  return getWindowWidth() >= window.theme.sizes.small;
-}
-
-function isMobile() {
+window.theme.isMobile = function () {
   return getWindowWidth() < window.theme.sizes.small;
-}
-
-export {getWindowWidth, getWindowHeight, isMobile, isDesktop};
+};

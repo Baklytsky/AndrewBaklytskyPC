@@ -4,8 +4,6 @@
     "top", "middle", "bottom"
 */
 
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   scrollSpy: '[data-scroll-spy]',
 };
@@ -63,7 +61,7 @@ if (!customElements.get('scroll-spy')) {
       }
 
       isEligible() {
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
         const isMobileView = !isDesktopView;
         return (
           (isMobileView && this.anchor.hasAttribute(attributes.mobile)) ||

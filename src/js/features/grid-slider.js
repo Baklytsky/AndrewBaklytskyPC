@@ -1,4 +1,3 @@
-import {isDesktop} from '../util/media-query';
 import {IsInView} from '../globals/is-in-view';
 import {DraggableSlider} from './draggable-slider';
 import waitForAllAnimationsEnd from '../globals/section-animations-end-promise';
@@ -65,7 +64,7 @@ export class GridSlider extends HTMLElement {
     const slidesWidth = this.getSlidesWidth();
     const isEnabled = sliderWidth < slidesWidth;
 
-    if (isEnabled && (isDesktop() || !window.theme.touch)) {
+    if (isEnabled && (!window.theme.isMobile() || !window.theme.touch)) {
       if (this.isInitialized) return;
 
       this.slidesObserver = new IsInView(this.slider, selectors.slide);
