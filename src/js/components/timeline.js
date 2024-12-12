@@ -1,4 +1,3 @@
-import scrollTo from '../util/scroll-to';
 import {isDesktop} from '../util/media-query';
 
 const selectors = {
@@ -63,7 +62,7 @@ if (!customElements.get('timeline-component')) {
                 const holderTop = this.getBoundingClientRect().top;
                 const elementPosition = index > 0 && hightestRow < rowHeight ? rowHeight * index + holderTop : holderTop;
                 const scrollPosition = elementPosition + 1;
-                scrollTo(scrollPosition);
+                window.theme.scrollTo(scrollPosition);
               } else {
                 const padding = 16;
                 const holderLeft = row.offsetLeft - padding;

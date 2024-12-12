@@ -16,6 +16,7 @@ import './globals/header-search-popdown';
 import './globals/main-search';
 import './globals/slider';
 import './globals/toggle-ellipsis';
+import './globals/scroll-to';
 
 /* ================ Sections ================ */
 import './sections/article';
