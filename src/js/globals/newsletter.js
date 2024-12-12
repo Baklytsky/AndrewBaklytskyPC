@@ -1,6 +1,4 @@
 import {getWindowHeight, getWindowWidth} from '../util/media-query';
-import scrollTo from '../util/scroll-to';
-
 import {PopupCookie} from './popup-cookie';
 
 const selectors = {
@@ -124,7 +122,7 @@ class NewsletterCheckForResult {
 
     if (!isVisible) {
       setTimeout(() => {
-        scrollTo(newsletter.getBoundingClientRect().top);
+        window.theme.scrollTo(newsletter.getBoundingClientRect().top);
       }, 500);
     }
   }
