@@ -15,6 +15,7 @@ import './globals/collapsible';
 import './globals/header-search-popdown';
 import './globals/main-search';
 import './globals/toggle-ellipsis';
+import './globals/scroll-to';
 
 /* ================ Sections ================ */
 import './sections/article';

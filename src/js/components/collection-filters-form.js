@@ -1,7 +1,6 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import debounce from '../util/debounce';
 import {isMobile} from '../util/media-query';
-import scrollTo from '../util/scroll-to';
 
 const selectors = {
   section: '[data-section-type]',
@@ -322,7 +321,7 @@ class CollectionFiltersForm extends HTMLElement {
           }
 
           if (this.collectionNav) {
-            scrollTo(this.productsContainer.getBoundingClientRect().top - this.collectionNav.offsetHeight);
+            window.theme.scrollTo(this.productsContainer.getBoundingClientRect().top - this.collectionNav.offsetHeight);
           }
 
           setTimeout(() => {

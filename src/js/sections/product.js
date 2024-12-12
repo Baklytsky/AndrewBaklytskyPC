@@ -1,4 +1,3 @@
-import scrollTo from '../util/scroll-to';
 import {register} from '../vendor/theme-scripts/theme-sections';
 import {RadioSwatch} from '../features/swatch';
 import {tooltipSection} from '../features/tooltip';
@@ -138,7 +137,7 @@ class Product {
     const scrollTarget = isDesktop() ? this.container : productVariants ? productVariants : this.form;
     const scrollTargetTop = scrollTarget.getBoundingClientRect().top;
 
-    scrollTo(isDesktop() ? scrollTargetTop : scrollTargetTop - 10);
+    window.theme.scrollTo(isDesktop() ? scrollTargetTop : scrollTargetTop - 10);
   }
 
   toggleCartBarOnScroll() {

@@ -1,5 +1,3 @@
-import scrollTo from '../util/scroll-to';
-
 const selectors = {
   scrollToElement: '[data-scroll-to]',
   tooltip: '[data-tooltip]',
@@ -35,7 +33,7 @@ if (!customElements.get('scroll-to-element')) {
       }
 
       scrollToElement(element) {
-        scrollTo(element.getBoundingClientRect().top + 1);
+        window.theme.scrollTo(element.getBoundingClientRect().top + 1);
 
         const collapsibleElement = element.nextElementSibling.matches('details') ? element.nextElementSibling : null;
 
