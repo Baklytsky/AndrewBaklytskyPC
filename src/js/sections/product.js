@@ -5,7 +5,6 @@ import {productStickySection} from '../features/product-sticky';
 import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {ProductForm} from '../features/product-form';
-import {ProductModal} from '../features/product-modal';
 import {ProductModel} from '../features/product-model';
 
 const selectors = {
@@ -175,10 +174,6 @@ register('product', [productSection, tooltipSection, tabs, productStickySection]
 
 if (!customElements.get('product-form')) {
   customElements.define('product-form', ProductForm);
-}
-
-if (!customElements.get('product-modal')) {
-  customElements.define('product-modal', ProductModal);
 }
 
 if (!customElements.get('product-model')) {

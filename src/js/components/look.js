@@ -1,5 +1,3 @@
-import {isMobile} from '../globals/media-query';
-
 const selectors = {
   slider: '[data-slider-mobile]',
   slide: '[data-slide]',

@@ -1,5 +1,4 @@
 import FetchError from '../util/fetch-error';
-import {PopupActions} from '../features/popup-actions';
 
 const selectors = {
   pickupContainer: 'data-store-availability-container',
@@ -33,7 +32,6 @@ class PickupAvailability extends HTMLElement {
     const variantID = event && event.detail.variant ? event.detail.variant.id : this.getAttribute(selectors.pickupContainer);
 
     if (variantID) {
-      this.popupActions = null;
       fetch(`${window.theme.routes.root}variants/${variantID}/?section_id=api-pickup-availability`)
         .then(this.handleErrors)
         .then((response) => response.text())
@@ -48,8 +46,6 @@ class PickupAvailability extends HTMLElement {
           }
 
           this.classList.remove(classes.isHidden);
-
-          this.popupActions = new PopupActions(this.drawer, this, true, true);
         })
         .catch((e) => {
           console.error(e);

@@ -1,6 +1,5 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import debounce from '../util/debounce';
-import {isMobile} from '../globals/media-query';
 
 const selectors = {
   section: '[data-section-type]',

@@ -1,7 +1,6 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import FetchError from '../util/fetch-error';
 import wrapElements from '../globals/wrap';
-import hasOpenModals from '../globals/has-open-modals';
 import Tooltip from './tooltip';
 
 const classes = {
@@ -207,7 +206,7 @@ class QuickAddProduct extends HTMLElement {
     this.resetAnimatedItems();
 
     // Unlock scroll if no other drawers & modals are open
-    if (!hasOpenModals()) {
+    if (!window.theme.hasOpenModals()) {
       document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
     }
 

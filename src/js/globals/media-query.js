@@ -7,5 +7,5 @@ window.theme.getWindowHeight = function () {
 };
 
 window.theme.isMobile = function () {
-  return getWindowWidth() < window.theme.sizes.small;
+  return window.theme.getWindowWidth() < window.theme.sizes.small;
 };
