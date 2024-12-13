@@ -1,5 +1,3 @@
-import {isMobile} from '../globals/media-query';
-
 const selectors = {
   buttonArrow: '[data-button-arrow]',
   deferredMediaButton: '[data-deferred-media-button]',

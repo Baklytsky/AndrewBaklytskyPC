@@ -16,15 +16,14 @@ if (!customElements.get('popup-component')) {
   customElements.define(
     'popup-component',
     class PopupComponent extends HTMLElement {
-      // constructor(popup, holder, showPopup = true, scrollLock = true) {
       constructor() {
         super();
 
         this.popup = this.querySelector(selectors.dialog);
         this.a11y = a11y;
         this.isAnimating = false;
-        this.showPopup = showPopup;
-        this.enableScrollLock = scrollLock;
+        this.showPopup = true;
+        this.enableScrollLock = true;
         this.buttonPopupOpen = this.querySelector(selectors.open);
       }
 

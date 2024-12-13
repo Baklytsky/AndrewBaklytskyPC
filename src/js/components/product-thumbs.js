@@ -1,5 +1,3 @@
-import {isMobile} from '../globals/media-query';
-
 const selectors = {
   productImage: '[data-image-id]',
   productImagesContainer: 'product-images',

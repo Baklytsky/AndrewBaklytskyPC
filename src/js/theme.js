@@ -13,7 +13,7 @@ import './globals/collapsible';
 import './globals/has-open-modals';
 import './globals/header-search-popdown';
 import './globals/main-search';
-import './globals/popup-component';
+import './globals/popup';
 import './globals/slider';
 import './globals/toggle-ellipsis';
 import './globals/scroll-to';
@@ -23,14 +23,11 @@ import './slate/recent-products';
 
 /* ================ Sections ================ */
 import './sections/article';
-import './sections/footer';
 import './sections/collection';
 import './sections/header';
 import './sections/product-grid';
 import './sections/product';
 import './sections/related';
-import './sections/custom-content';
-import './sections/newsletter';
 
 /* ================ Main ================ */
 import './main/main';
