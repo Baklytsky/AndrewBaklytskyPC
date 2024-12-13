@@ -9,10 +9,6 @@ const classes = {
   hidden: 'hidden',
 };
 
-const attributes = {
-  cookieNameAttribute: 'data-cookie-name',
-};
-
 if (!customElements.get('newsletter-component')) {
   customElements.define(
     'newsletter-component',
