@@ -22,7 +22,6 @@ if (!customElements.get('popup-component')) {
         this.popup = this.querySelector(selectors.dialog);
         this.a11y = a11y;
         this.isAnimating = false;
-        this.showPopup = true;
         this.enableScrollLock = true;
         this.buttonPopupOpen = this.querySelector(selectors.open);
       }
@@ -53,13 +52,11 @@ if (!customElements.get('popup-component')) {
         }
 
         // Close dialog on click outside content
-        if (this.showPopup) {
-          this.popup.addEventListener('click', (event) => {
-            if (event.target.nodeName === 'DIALOG' && event.type === 'click') {
-              this.popupClose();
-            }
-          });
-        }
+        this.popup.addEventListener('click', (event) => {
+          if (event.target.nodeName === 'DIALOG' && event.type === 'click') {
+            this.popupClose();
+          }
+        });
 
         // Close dialog on click ESC key pressed
         this.popup.addEventListener('keydown', (event) => {
@@ -78,9 +75,9 @@ if (!customElements.get('popup-component')) {
         this.isAnimating = true;
 
         // Check if browser supports Dialog tags
-        if (this.showPopup && typeof this.popup.showPopup === 'function') {
-          this.popup.showPopup();
-        } else if (!this.showPopup && typeof this.popup.show === 'function') {
+        if (typeof this.popup.showModal === 'function') {
+          this.popup.showModal();
+        } else if (typeof this.popup.show === 'function') {
           this.popup.show();
         } else {
           this.popup.setAttribute('open', '');

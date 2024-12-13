@@ -9,7 +9,7 @@
   assign specific_pages = ''
   assign show_size_link_separated = true
   assign has_form_buttons = true
-  assign form_button_blocks = section.blocks | where: "type", "buttons"
+  assign form_button_blocks = section.blocks | where: 'type', 'buttons'
   if form_button_blocks.size == 0 and quickview == false
     assign has_form_buttons = false
   endif
@@ -66,7 +66,7 @@
       {%- endcapture -%}
 
       {%- capture size_chart_link -%}
-        <product-modal>
+        <popup-component>
           <a href="{{ info_page.url }}" data-popup-open class="radio__legend__link body-x-small{% if product.has_only_default_variant %} size-popup-link{% endif %}{% if size_style == 'text' or show_size_link_separated %} text-link{% endif %}">
             {{ size_button }}
           </a>
@@ -161,7 +161,7 @@
               </div>
             </div>
           </dialog>
-        </product-modal>
+        </popup-component>
       {%- endcapture -%}
 
     {%- endif -%}
@@ -478,20 +478,22 @@
 {%- endcapture -%}
 
 {%- if product_variant_options != blank -%}
-  <div class="product__block{% if settings.show_lines %} product__block--lines{% endif %} product__form__holder block-padding"
+  <div
+    class="product__block{% if settings.show_lines %} product__block--lines{% endif %} product__form__holder block-padding"
     {{ block_style }}
     {{ block.shopify_attributes }}
     {% if animation_name %}
       data-animation="{{ animation_name }}"
       data-animation-duration="{{ animation_duration }}"
       data-animation-delay="{{ animation_delay }}"
-    {% endif %}>
+    {% endif %}
+  >
     {%- unless has_form_buttons -%}
       <product-form>
     {%- endunless -%}
-      <div class="product__form__outer{{ hide_labels_class }}">
-        {{ product_variant_options }}
-      </div>
+    <div class="product__form__outer{{ hide_labels_class }}">
+      {{ product_variant_options }}
+    </div>
     {%- unless has_form_buttons -%}
       </product-form>
     {%- endunless -%}
