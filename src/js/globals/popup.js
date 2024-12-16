@@ -1,5 +1,4 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import waitForAnimationEnd from './animation-end-promise';
 
 const selectors = {
   open: '[data-popup-open]',
@@ -91,7 +90,7 @@ if (!customElements.get('popup-component')) {
           document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
         }
 
-        waitForAnimationEnd(this.popup).then(() => {
+        window.theme.waitForAnimationEnd(this.popup).then(() => {
           this.isAnimating = false;
 
           if (this.enableScrollLock) {
@@ -112,7 +111,7 @@ if (!customElements.get('popup-component')) {
           this.popup.setAttribute(attributes.closing, '');
           this.isAnimating = true;
 
-          waitForAnimationEnd(this.popup).then(() => {
+          window.theme.waitForAnimationEnd(this.popup).then(() => {
             this.isAnimating = false;
             this.popupClose();
           });

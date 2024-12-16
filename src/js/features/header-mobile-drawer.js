@@ -1,5 +1,4 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import waitForAnimationEnd from '../globals/animation-end-promise';
 
 const selectors = {
   drawerInner: '[data-drawer-inner]',
@@ -94,7 +93,7 @@ class HeaderDrawer extends HTMLElement {
     if (this.drawerInner) {
       a11y.removeTrapFocus();
 
-      waitForAnimationEnd(this.drawerInner).then(() => {
+      window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
         this.isAnimating = false;
 
         a11y.trapFocus(this.drawerInner, {
@@ -124,7 +123,7 @@ class HeaderDrawer extends HTMLElement {
 
     document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
-    waitForAnimationEnd(this.drawerInner).then(() => {
+    window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
       this.classList.remove(classes.closing, classes.animated);
 
       this.isAnimating = false;

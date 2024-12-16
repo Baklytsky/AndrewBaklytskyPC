@@ -1,7 +1,7 @@
 /*
   Trigger event after animation completes
 */
-function waitForAnimationEnd(element) {
+window.theme.waitForAnimationEnd = function (element) {
   return new Promise((resolve) => {
     function onAnimationEnd(event) {
       if (event.target != element) return;
@@ -12,6 +12,4 @@ function waitForAnimationEnd(element) {
 
     element?.addEventListener('animationend', onAnimationEnd);
   });
-}
-
-export default waitForAnimationEnd;
+};

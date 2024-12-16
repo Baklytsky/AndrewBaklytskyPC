@@ -1,19 +1,19 @@
 {% comment %}
-    Renders list of products in grid layout
+  Renders list of products in grid layout
 
-    Accepts:
-    - product: {Object} product (required)
-    - animation_delay: {Int} animation timing for load
-    - last_element: {Boolean} True when custom image is taking up the first slot for the collection
-                              and the loop is on the last element for the page.
-    - index: element index in the loop
-    - block_index: index of the block in Tab collections section
-    - sizes: Image sizes
-    - attributes: Accept html attributes
-    - modifier_class: Accept custom class
+  Accepts:
+  - product: {Object} product (required)
+  - animation_delay: {Int} animation timing for load
+  - last_element: {Boolean} True when custom image is taking up the first slot for the collection
+                            and the loop is on the last element for the page.
+  - index: element index in the loop
+  - block_index: index of the block in Tab collections section
+  - sizes: Image sizes
+  - attributes: Accept html attributes
+  - modifier_class: Accept custom class
 
-    Usage:
-    {% render 'product-grid-item', product: product, index: index, sizes: image_sizes, attributes: '', modifier_class: '' %}
+  Usage:
+  {% render 'product-grid-item', product: product, index: index, sizes: image_sizes, attributes: '', modifier_class: '' %}
 {% endcomment %}
 
 {%- liquid
@@ -91,7 +91,6 @@
 
       else
         assign sizes = '500px'
-
     endcase
   endif
 
@@ -405,13 +404,22 @@
 {%- endcapture -%}
 
 {%- unless hidden_product -%}
-  <div class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+  <div
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     {{ attributes }}
   >
-    <div class="product-item__image{% if double_img %} double__image{% endif %}" data-product-image>
-      <a class="product-link" href="{{ product_url }}" aria-label="{{ product.title | strip_html | escape }}" data-product-link="{{ product_url }}">
+    <div
+      class="product-item__image{% if double_img %} double__image{% endif %}{% if settings.show_gray_bg %} show-gray-bg{% endif %}"
+      data-product-image
+    >
+      <a
+        class="product-link"
+        href="{{ product_url }}"
+        aria-label="{{ product.title | strip_html | escape }}"
+        data-product-link="{{ product_url }}"
+      >
         {%- if product.media.size > 0 -%}
           <div class="product-item__bg" data-product-image-default>
             {%- liquid
@@ -423,7 +431,7 @@
               endif
 
               capture featured_image
-                render 'image' image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: image_animations, cover: true
+                render 'image', image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: image_animations, cover: true
               endcapture
             -%}
 
@@ -445,7 +453,15 @@
                     -%}
 
                     <div class="product-item__bg__inner" data-variant-title="{{ variant_title }}">
-                      {%- render 'image' image: variant.featured_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, cover: true, loading: 'lazy', fetchpriority: 'high' -%}
+                      {%- render 'image',
+                        image: variant.featured_image,
+                        aspect_ratio: aspect_ratio,
+                        sizes: sizes,
+                        widths: widths,
+                        cover: true,
+                        loading: 'lazy',
+                        fetchpriority: 'high'
+                      -%}
                     </div>
                   {%- endunless -%}
                 {%- endif -%}
@@ -463,7 +479,8 @@
             <hover-images class="product-item__bg__under">
               <div class="product-item__bg__slider" data-hover-slider>
                 {%- for media in product.media limit: settings.image_hover_limit -%}
-                  <div class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}"
+                  <div
+                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}"
                     {% unless forloop.first %}
                       data-hover-slide
                     {% endunless %}
@@ -483,7 +500,15 @@
                         endcase
                       -%}
                     {%- else -%}
-                      {%- render 'image' image: media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, cover: true, loading: 'lazy', fetchpriority: 'high' -%}
+                      {%- render 'image',
+                        image: media.preview_image,
+                        aspect_ratio: aspect_ratio,
+                        sizes: sizes,
+                        widths: widths,
+                        cover: true,
+                        loading: 'lazy',
+                        fetchpriority: 'high'
+                      -%}
                     {%- endif -%}
                   </div>
                 {%- endfor -%}
@@ -499,9 +524,11 @@
       {{ over_image_content }}
     </div>
 
-    <div class="product-information"
+    <div
+      class="product-information"
       style="--swatch-size: var(--swatch-size-filters);"
-      data-product-information>
+      data-product-information
+    >
       <div class="product-item__info {{ settings.product_grid_font_size }}">
         <a class="product-link" href="{{ product_url }}" data-product-link="{{ product_url }}">
           <p class="product-item__title">{{ product.title | strip_html | escape }}</p>
@@ -514,15 +541,18 @@
                 {%- assign style = '--text-light:' | append: cutline_color -%}
               {%- endunless -%}
 
-              <span class="product-item__cutline"
+              <span
+                class="product-item__cutline"
                 {% if style != blank %}
                   style="{{ style }}"
                 {% endif %}
-              >{{ product_item_cutline }}</span>
+              >
+                {{- product_item_cutline -}}
+              </span>
             {%- endif -%}
 
             <div class="product-item__price" data-product-price>
-              {%- render 'product-grid-price' product: product, current_variant: current_variant -%}
+              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
             </div>
           </div>
         </a>

@@ -18,7 +18,8 @@
     assign cart_products = cart_products | append: line_item.product.id | append: ','
   -%}
 
-  <div class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
+  <div
+    class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
     data-item="{{ line_item.key }}"
     data-item-index="{{ forloop.index }}"
     data-item-title="{{ line_item.title | strip_html }}"
@@ -28,10 +29,25 @@
     {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
   >
     <div class="cart__item__image{% unless line_item.image %} image--empty{% endunless %}">
-      <a href="{{ line_item.url }}" aria-label="{{ line_item.title | escape }}">
+      <a
+        href="{{ line_item.url }}"
+        aria-label="{{ line_item.title | escape }}"
+        {% if settings.show_gray_bg %}
+          class="show-gray-bg"
+        {% endif %}
+      >
         {%- if line_item.image -%}
           <div class="lazy-image is-loading">
-            {{ line_item.image | image_url: width: 180 | image_tag: widths: '90, 180, 270, 360', sizes: '90px', class: 'is-loading', loading: 'lazy', fetchpriority: fetchpriority }}
+            {{
+              line_item.image
+              | image_url: width: 180
+              | image_tag:
+                widths: '90, 180, 270, 360',
+                sizes: '90px',
+                class: 'is-loading',
+                loading: 'lazy',
+                fetchpriority: fetchpriority
+            }}
           </div>
         {%- endif -%}
       </a>
@@ -163,7 +179,11 @@
           <span class="line__price">
             <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
 
-            <small>{{ line_item_unit_price }}{{ unit_price_separator }}{{ unit_price_base_unit }}</small>
+            <small>
+              {{- line_item_unit_price -}}
+              {{- unit_price_separator -}}
+              {{- unit_price_base_unit -}}
+            </small>
           </span>
         {%- endif -%}
       </p>
@@ -174,13 +194,17 @@
             class="cart__quantity-minus"
             type="button"
             name="decrease"
-            title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
+            title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+          >
             {%- render 'icon-minus' -%}
           </button>
 
           {%- assign quantity = line_item.quantity -%}
 
-          {%- if line_item.variant.inventory_policy == 'deny' and line_item.variant.inventory_management != nil and line_item.variant.inventory_quantity < quantity -%}
+          {%- if line_item.variant.inventory_policy == 'deny'
+            and line_item.variant.inventory_management != null
+            and line_item.variant.inventory_quantity < quantity
+          -%}
             {%- assign quantity = line_item.variant.inventory_quantity -%}
           {%- endif -%}
 
@@ -192,23 +216,27 @@
             data-id="{{ line_item.key }}"
             value="{{ quantity }}"
             title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-            pattern="[0-9]*">
+            pattern="[0-9]*"
+          >
 
           <button
             class="cart__quantity-plus"
             type="button"
             name="increase"
-            title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}">
+            title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+          >
             {%- render 'icon-plus' -%}
           </button>
         </div>
 
-        <a class="cart__item__remove"
+        <a
+          class="cart__item__remove"
           href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
           data-item-remove
           data-id="{{ line_item.key }}"
-          title="{{ 'cart.general.remove' | t }}">
-            {{- 'cart.general.remove' | t -}}
+          title="{{ 'cart.general.remove' | t }}"
+        >
+          {{- 'cart.general.remove' | t -}}
         </a>
       </quantity-counter>
     </div>
@@ -220,7 +248,12 @@
 
           {%- assign discount_price = discount.amount | money -%}
 
-          <span>{{ 'cart.general.discount_label' | t: amount: discount_price, title: discount.discount_application.title }}</span>
+          <span>
+            {{-
+              'cart.general.discount_label'
+              | t: amount: discount_price, title: discount.discount_application.title
+            -}}
+          </span>
         </p>
       {%- endfor -%}
     {%- endif -%}
