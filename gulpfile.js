@@ -43,7 +43,7 @@ function compileAssets() {
     .pipe(dest(config.dist.root));
 
   // Render files in "official" shopify folders with liquid and then copy to their respective folders in dist/
-  src([config.src.snippets, config.src.sections, config.src.templates, config.src.locales, config.src.config, config.src.layout], {
+  src([config.src.snippets, config.src.blocks, config.src.sections, config.src.templates, config.src.locales, config.src.config, config.src.layout], {
     base: config.src.root,
     allowEmpty: true,
   })
