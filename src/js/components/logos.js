@@ -118,7 +118,7 @@ class LogoList {
   setSlideshowNavState() {
     const sliderInitialized = this.slideshowNav.classList.contains(classes.flickityEnabled);
 
-    if (this.logoSlidesWidth > getWindowWidth()) {
+    if (this.logoSlidesWidth > getWindowWidth) {
       if (!sliderInitialized) {
         this.slideshowNav.classList.add(classes.isInitialized);
 
