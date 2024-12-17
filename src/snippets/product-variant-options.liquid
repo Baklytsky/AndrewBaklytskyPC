@@ -298,12 +298,13 @@
                           endif
                         -%}
 
-                        <radio-swatch
-                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
+                        <tooltip-component
                           data-tooltip="{{ value | escape | capitalize }}"
+                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
                           {% if is_swatch_option %}style="--swatch: var(--{{ value | handle }});"{% endif %}
                           {% if is_native_swatch_option %}style="--swatch: {{ swatch_value }};"{% endif %}
                         >
+
                           <input type="radio"
                               form="{{ product_form_id }}"
                               data-single-option-selector
@@ -315,7 +316,7 @@
                           <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
                             <span class="visually-hidden">{{ value }}</span>
                           </label>
-                        </radio-swatch>
+                        </tooltip-component>
 
                       {%- else -%}
                         {% comment %} radio button {% endcomment %}

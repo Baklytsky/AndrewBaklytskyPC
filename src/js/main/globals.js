@@ -8,14 +8,7 @@ import isTouch from '../util/touch';
 import {ariaToggle} from '../globals/aria-toggle';
 import {loading} from '../globals/loading';
 import {loadedImagesEventHook, removeLoadingClassFromLoadedImages} from '../globals/images';
-import {HeaderDrawer} from '../features/header-mobile-drawer';
-import {PredictiveSearch} from '../globals/predictive-search';
-import {Popout} from '../globals/popout';
 import {initAnimations} from '../globals/animations';
-
-import DeferredMedia from '../globals/deferred-media';
-import {GridSlider} from '../features/grid-slider';
-import {HeaderMobileSliderule} from '../features/header-mobile-sliderule';
 
 // Safari requestIdleCallback polyfill
 window.requestIdleCallback =
@@ -70,27 +63,3 @@ document.addEventListener('shopify:section:load', (e) => {
   ariaToggle(document);
   setVars();
 });
-
-if (!customElements.get('header-drawer')) {
-  customElements.define('header-drawer', HeaderDrawer);
-}
-
-if (!customElements.get('mobile-sliderule')) {
-  customElements.define('mobile-sliderule', HeaderMobileSliderule);
-}
-
-if (!customElements.get('popout-select')) {
-  customElements.define('popout-select', Popout);
-}
-
-if (!customElements.get('predictive-search')) {
-  customElements.define('predictive-search', PredictiveSearch);
-}
-
-if (!customElements.get('deferred-media')) {
-  customElements.define('deferred-media', DeferredMedia);
-}
-
-if (!customElements.get('grid-slider')) {
-  customElements.define('grid-slider', GridSlider);
-}

@@ -62,6 +62,12 @@ document.addEventListener('shopify:block:select', (event) => {
     const collectionsHoverButton = collectionsHoverComponent?.querySelector('[data-hover-target="' + collectionsHoverImageId + '"]');
     collectionsHoverButton?.dispatchEvent(new Event('mouseenter'));
   }
+
+  // Show mega menu on block select
+  const hoverDisclosure = event.target.closest('hover-disclosure');
+  if (hoverDisclosure) {
+    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:show', {bubbles: false}));
+  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -89,6 +95,12 @@ document.addEventListener('shopify:block:deselect', (event) => {
       slide.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
+  }
+
+  // Hide mega menu on block select
+  const hoverDisclosure = event.target.closest('hover-disclosure');
+  if (hoverDisclosure) {
+    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:hide', {bubbles: false}));
   }
 });
 

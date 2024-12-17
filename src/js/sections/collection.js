@@ -1,6 +1,5 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import {tooltipSection} from '../features/tooltip';
 
 const selectors = {
   collectionSidebar: '[data-collection-sidebar]',
@@ -174,4 +173,4 @@ const collectionSection = {
   },
 };
 
-register('collection', [collectionSection, tooltipSection]);
+register('collection', [collectionSection]);

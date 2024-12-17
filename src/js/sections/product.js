@@ -1,11 +1,8 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
-import {RadioSwatch} from '../features/swatch';
-import {tooltipSection} from '../features/tooltip';
 import {productStickySection} from '../features/product-sticky';
 import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {ProductForm} from '../features/product-form';
-import {ProductModel} from '../features/product-model';
 
 const selectors = {
   addToCart: '[data-add-to-cart]',
@@ -170,16 +167,8 @@ const productSection = {
   },
 };
 
-register('product', [productSection, tooltipSection, tabs, productStickySection]);
+register('product', [productSection, tabs, productStickySection]);
 
 if (!customElements.get('product-form')) {
   customElements.define('product-form', ProductForm);
-}
-
-if (!customElements.get('product-model')) {
-  customElements.define('product-model', ProductModel);
-}
-
-if (!customElements.get('radio-swatch')) {
-  customElements.define('radio-swatch', RadioSwatch);
 }
