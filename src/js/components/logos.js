@@ -1,6 +1,3 @@
-import FlickityFade from 'flickity-fade';
-import Flickity from 'flickity';
-
 const selectors = {
   sliderLogos: '[data-slider-logos]',
   sliderText: '[data-slider-text]',
@@ -50,7 +47,7 @@ if (!customElements.get('logos-component')) {
       initSlideshowText() {
         if (!this.slideshowText) return;
 
-        this.flkty = new FlickityFade(this.slideshowText, {
+        this.flkty = new window.theme.FlickityFade(this.slideshowText, {
           fade: true,
           autoPlay: false,
           prevNextButtons: false,
@@ -133,7 +130,7 @@ if (!customElements.get('logos-component')) {
 
             // Init slider only once and then listen for watchCSS events
             if (!this.flktyNav) {
-              this.flktyNav = new Flickity(this.slideshowNav, {
+              this.flktyNav = new window.theme.Flickity(this.slideshowNav, {
                 autoPlay: 4000,
                 prevNextButtons: false,
                 contain: false,

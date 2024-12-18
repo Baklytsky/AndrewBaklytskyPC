@@ -84,6 +84,7 @@ document.addEventListener('shopify:block:select', (event) => {
       left: tab.offsetLeft - tab.clientWidth,
       behavior: 'smooth',
     });
+  }
 
   // Logos - select logos slide on block select
   const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
@@ -129,19 +130,18 @@ document.addEventListener('shopify:block:deselect', (event) => {
     }
   }
 
-<<<<<<< HEAD
   // Hide mega menu on block select
   const hoverDisclosure = event.target.closest('hover-disclosure');
   if (hoverDisclosure) {
     hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:hide', {bubbles: false}));
-=======
+  }
+
   // Logos - resume logos slider on block deselect
   const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (logosBlockSelectedIsSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
->>>>>>> main
   }
 });
 
