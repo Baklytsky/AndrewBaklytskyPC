@@ -68,6 +68,18 @@ document.addEventListener('shopify:block:select', (event) => {
   if (hoverDisclosure) {
     hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:show', {bubbles: false}));
   }
+
+  const tabs = event.target.closest('tabs-component');
+  if (tabs) {
+    const tab = event.target;
+    tab.dispatchEvent(new Event('click'));
+
+    tab.parentNode.scrollTo({
+      top: 0,
+      left: tab.offsetLeft - tab.clientWidth,
+      behavior: 'smooth',
+    });
+  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {

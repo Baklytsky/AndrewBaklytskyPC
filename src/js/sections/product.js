@@ -1,6 +1,5 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
 import {productStickySection} from '../features/product-sticky';
-import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import {ProductForm} from '../features/product-form';
 
@@ -167,7 +166,7 @@ const productSection = {
   },
 };
 
-register('product', [productSection, tabs, productStickySection]);
+register('product', [productSection, productStickySection]);
 
 if (!customElements.get('product-form')) {
   customElements.define('product-form', ProductForm);

@@ -1,6 +1,5 @@
 import {getUrlWithVariant} from '../vendor/theme-scripts/theme-product-form';
 import {fetchProduct} from '../util/fetch-product';
-import NativeScrollbar from './native-scrollbar';
 
 const selectors = {
   gridSwatchForm: '[data-grid-swatch-form]',
@@ -172,12 +171,6 @@ class GridSwatch extends HTMLElement {
         if (swatchesLeft > 0) {
           this.innerHTML += `<div class="swatch-limited">+${swatchesLeft}</div>`;
         }
-      }
-    }
-
-    if (this.swatchesStyle == 'text-slider' || this.swatchesStyle == 'slider') {
-      if (this.hasAttribute(attributes.scrollbar)) {
-        new NativeScrollbar(this);
       }
     }
 
