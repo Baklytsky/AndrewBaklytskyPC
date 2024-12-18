@@ -10,6 +10,9 @@
   assign animation_order = 1
 -%}
 
+{{ 'section-logos.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'logos.js' | asset_url }}" defer="defer"></script>
+
 {%- style -%}
   #Logos--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
@@ -117,7 +120,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="logos"
 >
-  <div class="logos__wrapper">
+  <logos-component class="logos__wrapper">
     {{ heading }}
 
     {%- if section.blocks.size > 0 -%}
@@ -156,19 +159,19 @@
         {{ contents }}
       </div>
     {%- endif -%}
-  </div>
+  </logos-component>
 </div>
 
 {% schema %}
 {
-  "name": "Press logos",
+  "name": "Logos",
   "max_blocks": 25,
   "settings": [
     {
       "type": "checkbox",
       "id": "enable_heading_slider",
       "label": "Enable heading slider",
-      "default": true
+      "default": false
     },
     {
       "type": "range",
@@ -284,8 +287,29 @@
   ],
   "presets": [
     {
-      "name": "Press logos",
+      "name": "Logos",
       "category": "Image",
+      "settings": {
+        "enable_heading_slider": false
+      },
+      "blocks": [
+        {
+          "type": "logo-item"
+        },
+        {
+          "type": "logo-item"
+        },
+        {
+          "type": "logo-item"
+        }
+      ]
+    },
+    {
+      "name": "Press",
+      "category": "Image",
+      "settings": {
+        "enable_heading_slider": true
+      },
       "blocks": [
         {
           "type": "logo-item"
