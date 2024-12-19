@@ -1,5 +1,3 @@
-import {formatMoney} from '../globals/currency';
-
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
 
 import throttle from '../util/throttle';
@@ -803,7 +801,7 @@ class CartItems extends HTMLElement {
     );
 
     // Update cart total price
-    this.cartTotal.innerHTML = this.subtotal === 0 ? window.theme.strings.free : formatMoney(this.subtotal, theme.moneyWithCurrencyFormat);
+    this.cartTotal.innerHTML = this.subtotal === 0 ? window.theme.strings.free : window.theme.formatMoney(this.subtotal, theme.moneyWithCurrencyFormat);
 
     if (this.totalItems !== this.newTotalItems) {
       this.totalItems = this.newTotalItems;
@@ -892,7 +890,7 @@ class CartItems extends HTMLElement {
     const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
     const percent = Math.min(percentValue * 100, 100);
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpend = formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);

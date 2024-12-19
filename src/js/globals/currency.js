@@ -17,7 +17,7 @@ const moneyFormat = '${{amount}}';
  * @param  {String} format - shop money_format setting
  * @return {String} value - formatted value
  */
-export function formatMoney(cents, format) {
+window.theme.formatMoney = function (cents, format) {
   if (typeof cents === 'string') {
     cents = cents.replace('.', '');
   }
@@ -67,4 +67,4 @@ export function formatMoney(cents, format) {
   }
 
   return formatString.replace(placeholderRegex, value);
-}
+};
