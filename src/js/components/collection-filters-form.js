@@ -1,5 +1,4 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import debounce from '../util/debounce';
 
 const selectors = {
   section: '[data-section-type]',
@@ -61,7 +60,7 @@ class CollectionFiltersForm extends HTMLElement {
     this.showMoreOptions = this.querySelectorAll(selectors.showMore);
     this.a11y = a11y;
 
-    this.updatePriceEvent = debounce((e) => this.updatePrice(e), 500);
+    this.updatePriceEvent = window.theme.debounce((e) => this.updatePrice(e), 500);
     this.updateRangeEvent = (e) => this.updateRange(e);
     this.showMoreEvent = (e) => this.showMore(e);
     this.onSortButtonClickEvent = (e) => this.onSortButtonClick(e);

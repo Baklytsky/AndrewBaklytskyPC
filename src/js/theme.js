@@ -12,6 +12,7 @@ import './globals/cart';
 import './globals/cart-count';
 import './globals/cart-drawer';
 import './globals/collapsible';
+import './globals/debounce';
 import './globals/grid-slider';
 import './globals/has-open-modals';
 import './globals/header';
