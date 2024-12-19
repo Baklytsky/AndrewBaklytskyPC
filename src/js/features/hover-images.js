@@ -1,5 +1,3 @@
-import Flickity from 'flickity';
-
 const selectors = {
   slide: '[data-hover-slide]',
   slideTouch: '[data-hover-slide-touch]',
@@ -45,7 +43,7 @@ class HoverImages extends HTMLElement {
   initFlickity() {
     if (this.querySelectorAll(selectors.slide).length < 2) return;
 
-    this.flkty = new Flickity(this.slider, {
+    this.flkty = new window.theme.Flickity(this.slider, {
       cellSelector: selectors.slide,
       contain: true,
       wrapAround: true,

@@ -1,7 +1,7 @@
 /*
   Trigger event after all animations complete in a specific section
 */
-function waitForAllAnimationsEnd(section) {
+window.theme.waitForAllAnimationsEnd = function (section) {
   return new Promise((resolve, rejected) => {
     const animatedElements = section.querySelectorAll('[data-aos]');
     let animationCount = 0;
@@ -23,6 +23,4 @@ function waitForAllAnimationsEnd(section) {
 
     if (!animationCount) rejected();
   });
-}
-
-export default waitForAllAnimationsEnd;
+};

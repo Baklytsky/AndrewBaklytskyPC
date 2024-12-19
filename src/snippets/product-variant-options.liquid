@@ -82,7 +82,7 @@
                   {%- render 'icon-cancel' -%}
                 </button>
 
-                <div class="rte product-tabs" data-tabs-holder>
+                <tabs-component class="rte product-tabs">
                   {%- liquid
                     assign tabs_navigation = ''
                     assign tabs = ''
@@ -137,7 +137,7 @@
                   {%- endif -%}
 
                   {%- if specific_pages_arr.size > 1 -%}
-                    <div class="tabs__head product-tabs__head">
+                    <native-scrollbar class="tabs__head product-tabs__head">
                       <ul class="tabs product-tabs-title" data-scrollbar data-scrollbar-slider data-scroll-lock-scrollable>
                         {{ tabs_navigation }}
                       </ul>
@@ -151,13 +151,13 @@
                         {%- render 'icon-nav-arrow-right' -%}
                         <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
                       </button>
-                    </div>
+                    </native-scrollbar>
                   {%- endif -%}
 
                   {%- if tabs != '' -%}
                     {{ tabs }}
                   {%- endif -%}
-                </div>
+                </tabs-component>
               </div>
             </div>
           </dialog>
@@ -298,12 +298,13 @@
                           endif
                         -%}
 
-                        <radio-swatch
-                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
+                        <tooltip-component
                           data-tooltip="{{ value | escape | capitalize }}"
+                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
                           {% if is_swatch_option %}style="--swatch: var(--{{ value | handle }});"{% endif %}
                           {% if is_native_swatch_option %}style="--swatch: {{ swatch_value }};"{% endif %}
                         >
+
                           <input type="radio"
                               form="{{ product_form_id }}"
                               data-single-option-selector
@@ -315,7 +316,7 @@
                           <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
                             <span class="visually-hidden">{{ value }}</span>
                           </label>
-                        </radio-swatch>
+                        </tooltip-component>
 
                       {%- else -%}
                         {% comment %} radio button {% endcomment %}

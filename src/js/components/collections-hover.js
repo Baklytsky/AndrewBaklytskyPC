@@ -1,5 +1,3 @@
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   button: '[data-hover-target]',
   image: '[data-collection-image]',
@@ -42,7 +40,7 @@ if (!customElements.get('collections-hover')) {
         const buttonSelected = this.querySelector(`${selectors.button}.${classes.selected}`);
         const imageVisible = this.querySelector(`${selectors.image}.${classes.visible}`);
 
-        if (target && isDesktop()) {
+        if (target && !window.theme.isMobile()) {
           imageVisible?.classList.remove(classes.visible);
           buttonSelected?.classList.remove(classes.selected);
 

@@ -1,5 +1,4 @@
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import waitForAnimationEnd from '../globals/animation-end-promise';
 import appendCartItems from '../globals/append-cart-items';
 
 const classes = {
@@ -150,7 +149,7 @@ class CartDrawer extends HTMLElement {
     // Observe Additional Checkout Buttons
     this.observeAdditionalCheckoutButtons();
 
-    waitForAnimationEnd(this.cartDrawerInner).then(() => {
+    window.theme.waitForAnimationEnd(this.cartDrawerInner).then(() => {
       a11y.trapFocus(this, {
         elementToFocus: this.querySelector(selectors.cartDrawerClose),
       });
@@ -183,7 +182,7 @@ class CartDrawer extends HTMLElement {
     document.body.removeEventListener('click', this.onBodyClickEvent);
     document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
-    waitForAnimationEnd(this.cartDrawerInner).then(() => {
+    window.theme.waitForAnimationEnd(this.cartDrawerInner).then(() => {
       this.classList.remove(classes.closing);
     });
   }

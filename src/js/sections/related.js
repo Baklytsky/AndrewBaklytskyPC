@@ -1,5 +1,4 @@
 import {register} from '../vendor/theme-scripts/theme-sections';
-import tabs from '../features/tabs';
 
 const selectors = {
   apiRelatedProductsTemplate: '[data-api-related-template]',
@@ -133,4 +132,4 @@ const relatedSection = {
   },
 };
 
-register('related', [relatedSection, tabs]);
+register('related', [relatedSection]);
