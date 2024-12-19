@@ -31,14 +31,10 @@ import './globals/tabs';
 import './globals/toggle-ellipsis';
 import './globals/tooltip';
 
-/* ================ Slate ================ */
-import './slate/recent-products';
-
 /* ================ Sections ================ */
 import './sections/collection';
 import './sections/product-grid';
 import './sections/product';
-import './sections/related';
 
 /* ================ Main ================ */
 import './main/main';

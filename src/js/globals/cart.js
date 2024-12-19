@@ -64,7 +64,6 @@ const selectors = {
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
   termsErrorMessage: '[data-terms-error-message]',
-  recentlyViewedHolderId: 'recently-viewed-products-cart',
   noscript: 'noscript',
 };
 
@@ -144,9 +143,6 @@ class CartItems extends HTMLElement {
     }
 
     if (this.cart) {
-      // Recently viewed products
-      this.recentlyViewedProducts();
-
       // Checking
       this.hasItemsInCart = this.hasItemsInCart.bind(this);
       this.cartCount = this.getCartItemCount();
@@ -948,18 +944,6 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.animated);
       });
     });
-  }
-
-  recentlyViewedProducts() {
-    const recentlyViewedHolder = this.cart.querySelector(`#${selectors.recentlyViewedHolderId}`);
-    if (recentlyViewedHolder) {
-      Shopify.Products.showRecentlyViewed({
-        howManyToShow: 3,
-        wrapperId: selectors.recentlyViewedHolderId,
-        section: this,
-        target: 'api-upsell-product',
-      });
-    }
   }
 }
 
