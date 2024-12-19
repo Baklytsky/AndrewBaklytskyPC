@@ -24,198 +24,201 @@ const attributes = {
   submit: 'submit',
 };
 
-class Popout extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.popoutList = this.querySelector(selectors.popoutList);
-    this.popoutToggle = this.querySelector(selectors.popoutToggle);
-    this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
-    this.popoutInput = this.querySelector(selectors.popoutInput);
-    this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
-    this.productGridItem = this.popoutList.closest(selectors.productGridItem);
-    this.fireSubmitEvent = this.hasAttribute(attributes.submit);
-
-    this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
-    this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
-    this.popupToggleClickEvent = (evt) => this.onPopupToggleClick(evt);
-    this.keyUpEvent = (evt) => this.onKeyUp(evt);
-    this.bodyClickEvent = (evt) => this.onBodyClick(evt);
-
-    this._connectOptions();
-    this._connectToggle();
-    this._onFocusOut();
-    this.popupListSetDimensions();
-  }
-
-  onPopupToggleClick(evt) {
-    const button = evt.currentTarget;
-    const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
-
-    if (this.productGridItem) {
-      const productGridItemImage = this.productGridItem.querySelector(selectors.productGridImage);
-
-      if (productGridItemImage) {
-        productGridItemImage.classList.toggle(classes.visible, !ariaExpanded);
+if (!customElements.get('popout-select')) {
+  customElements.define(
+    'popout-select',
+    class Popout extends HTMLElement {
+      constructor() {
+        super();
       }
 
-      this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
-    }
+      connectedCallback() {
+        this.popoutList = this.querySelector(selectors.popoutList);
+        this.popoutToggle = this.querySelector(selectors.popoutToggle);
+        this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
+        this.popoutInput = this.querySelector(selectors.popoutInput);
+        this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
+        this.productGridItem = this.popoutList.closest(selectors.productGridItem);
+        this.fireSubmitEvent = this.hasAttribute(attributes.submit);
 
-    evt.currentTarget.setAttribute(attributes.ariaExpanded, !ariaExpanded);
-    this.popoutList.classList.toggle(classes.listVisible);
-    this.popupListSetDimensions();
-    this.toggleListPosition();
+        this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
+        this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
+        this.popupToggleClickEvent = (evt) => this.onPopupToggleClick(evt);
+        this.keyUpEvent = (evt) => this.onKeyUp(evt);
+        this.bodyClickEvent = (evt) => this.onBodyClick(evt);
 
-    document.body.addEventListener('click', this.bodyClickEvent);
-  }
-
-  onPopupToggleFocusout(evt) {
-    const popoutLostFocus = this.contains(evt.relatedTarget);
-
-    if (!popoutLostFocus) {
-      this._hideList();
-    }
-  }
-
-  onPopupListFocusout(evt) {
-    const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
-    const isVisible = this.popoutList.classList.contains(classes.listVisible);
-
-    if (isVisible && !childInFocus) {
-      this._hideList();
-    }
-  }
-
-  toggleListPosition() {
-    const button = this.querySelector(selectors.popoutToggle);
-    const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
-    const windowHeight = window.innerHeight;
-    const popoutTop = this.getBoundingClientRect().top;
-
-    const removeTopClass = () => {
-      this.popoutList.classList.remove(classes.popoutListTop);
-      this.popoutList.removeEventListener('transitionend', removeTopClass);
-    };
-
-    if (ariaExpanded) {
-      if (windowHeight / 2 > popoutTop) {
-        this.popoutList.classList.add(classes.popoutListTop);
-      }
-    } else {
-      this.popoutList.addEventListener('transitionend', removeTopClass);
-    }
-  }
-
-  popupListSetDimensions() {
-    this.popoutList.style.setProperty('--max-width', '100vw');
-    this.popoutList.style.setProperty('--max-height', '100vh');
-
-    requestAnimationFrame(() => {
-      this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
-      this.popoutList.style.setProperty('--max-height', `${parseInt(window.innerHeight - this.popoutList.getBoundingClientRect().top)}px`);
-    });
-  }
-
-  popupOptionsClick(evt) {
-    const link = evt.target.closest(selectors.popoutOptions);
-    if (link.attributes.href.value === '#') {
-      evt.preventDefault();
-
-      const attrValue = evt.currentTarget.hasAttribute(attributes.dataValue) ? evt.currentTarget.getAttribute(attributes.dataValue) : '';
-
-      this.popoutInput.value = attrValue;
-
-      if (this.popoutInput.disabled) {
-        this.popoutInput.removeAttribute('disabled');
+        this._connectOptions();
+        this._connectToggle();
+        this._onFocusOut();
+        this.popupListSetDimensions();
       }
 
-      if (this.fireSubmitEvent) {
-        this._submitForm(attrValue);
-      } else {
-        const currentTarget = evt.currentTarget.parentElement;
-        const listTargetElement = this.popoutList.querySelector(`.${classes.active}`);
-        const targetAttribute = this.popoutList.querySelector(`[${attributes.ariaCurrent}]`);
+      onPopupToggleClick(evt) {
+        const button = evt.currentTarget;
+        const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
 
-        this.popoutInput.dispatchEvent(new Event('change'));
+        if (this.productGridItem) {
+          const productGridItemImage = this.productGridItem.querySelector(selectors.productGridImage);
 
-        if (listTargetElement) {
-          listTargetElement.classList.remove(classes.active);
-          currentTarget.classList.add(classes.active);
+          if (productGridItemImage) {
+            productGridItemImage.classList.toggle(classes.visible, !ariaExpanded);
+          }
+
+          this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
         }
 
-        if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
-          this.classList.add(classes.active);
+        evt.currentTarget.setAttribute(attributes.ariaExpanded, !ariaExpanded);
+        this.popoutList.classList.toggle(classes.listVisible);
+        this.popupListSetDimensions();
+        this.toggleListPosition();
+
+        document.body.addEventListener('click', this.bodyClickEvent);
+      }
+
+      onPopupToggleFocusout(evt) {
+        const popoutLostFocus = this.contains(evt.relatedTarget);
+
+        if (!popoutLostFocus) {
+          this._hideList();
         }
+      }
 
-        if (targetAttribute && targetAttribute.hasAttribute(`${attributes.ariaCurrent}`)) {
-          targetAttribute.removeAttribute(`${attributes.ariaCurrent}`);
-          evt.currentTarget.setAttribute(`${attributes.ariaCurrent}`, 'true');
+      onPopupListFocusout(evt) {
+        const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
+        const isVisible = this.popoutList.classList.contains(classes.listVisible);
+
+        if (isVisible && !childInFocus) {
+          this._hideList();
         }
+      }
 
-        if (attrValue !== '') {
-          this.popoutToggleText.innerHTML = attrValue;
+      toggleListPosition() {
+        const button = this.querySelector(selectors.popoutToggle);
+        const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
+        const windowHeight = window.innerHeight;
+        const popoutTop = this.getBoundingClientRect().top;
 
-          if (this.popoutToggleText.hasAttribute(attributes.popoutToggleText) && this.popoutToggleText.getAttribute(attributes.popoutToggleText) !== '') {
-            this.popoutToggleText.setAttribute(attributes.popoutToggleText, attrValue);
+        const removeTopClass = () => {
+          this.popoutList.classList.remove(classes.popoutListTop);
+          this.popoutList.removeEventListener('transitionend', removeTopClass);
+        };
+
+        if (ariaExpanded) {
+          if (windowHeight / 2 > popoutTop) {
+            this.popoutList.classList.add(classes.popoutListTop);
+          }
+        } else {
+          this.popoutList.addEventListener('transitionend', removeTopClass);
+        }
+      }
+
+      popupListSetDimensions() {
+        this.popoutList.style.setProperty('--max-width', '100vw');
+        this.popoutList.style.setProperty('--max-height', '100vh');
+
+        requestAnimationFrame(() => {
+          this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
+          this.popoutList.style.setProperty('--max-height', `${parseInt(window.innerHeight - this.popoutList.getBoundingClientRect().top)}px`);
+        });
+      }
+
+      popupOptionsClick(evt) {
+        const link = evt.target.closest(selectors.popoutOptions);
+        if (link.attributes.href.value === '#') {
+          evt.preventDefault();
+
+          const attrValue = evt.currentTarget.hasAttribute(attributes.dataValue) ? evt.currentTarget.getAttribute(attributes.dataValue) : '';
+
+          this.popoutInput.value = attrValue;
+
+          if (this.popoutInput.disabled) {
+            this.popoutInput.removeAttribute('disabled');
+          }
+
+          if (this.fireSubmitEvent) {
+            this._submitForm(attrValue);
+          } else {
+            const currentTarget = evt.currentTarget.parentElement;
+            const listTargetElement = this.popoutList.querySelector(`.${classes.active}`);
+            const targetAttribute = this.popoutList.querySelector(`[${attributes.ariaCurrent}]`);
+
+            this.popoutInput.dispatchEvent(new Event('change'));
+
+            if (listTargetElement) {
+              listTargetElement.classList.remove(classes.active);
+              currentTarget.classList.add(classes.active);
+            }
+
+            if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
+              this.classList.add(classes.active);
+            }
+
+            if (targetAttribute && targetAttribute.hasAttribute(`${attributes.ariaCurrent}`)) {
+              targetAttribute.removeAttribute(`${attributes.ariaCurrent}`);
+              evt.currentTarget.setAttribute(`${attributes.ariaCurrent}`, 'true');
+            }
+
+            if (attrValue !== '') {
+              this.popoutToggleText.innerHTML = attrValue;
+
+              if (this.popoutToggleText.hasAttribute(attributes.popoutToggleText) && this.popoutToggleText.getAttribute(attributes.popoutToggleText) !== '') {
+                this.popoutToggleText.setAttribute(attributes.popoutToggleText, attrValue);
+              }
+            }
+            this.onPopupToggleFocusout(evt);
+            this.onPopupListFocusout(evt);
           }
         }
-        this.onPopupToggleFocusout(evt);
-        this.onPopupListFocusout(evt);
+      }
+
+      onKeyUp(evt) {
+        if (evt.code !== 'Escape') {
+          return;
+        }
+        this._hideList();
+        this.popoutToggle.focus();
+      }
+
+      onBodyClick(evt) {
+        const isOption = this.contains(evt.target);
+        const isVisible = this.popoutList.classList.contains(classes.listVisible);
+
+        if (isVisible && !isOption) {
+          this._hideList();
+        }
+      }
+
+      _connectToggle() {
+        this.popoutToggle.addEventListener('click', this.popupToggleClickEvent);
+      }
+
+      _connectOptions() {
+        if (this.popoutOptions.length) {
+          this.popoutOptions.forEach((element) => {
+            element.addEventListener('click', (evt) => this.popupOptionsClick(evt));
+          });
+        }
+      }
+
+      _onFocusOut() {
+        this.addEventListener('keyup', this.keyUpEvent);
+        this.popoutToggle.addEventListener('focusout', this.popupToggleFocusoutEvent);
+        this.popoutList.addEventListener('focusout', this.popupListFocusoutEvent);
+      }
+
+      _submitForm() {
+        const form = this.closest('form');
+        if (form) {
+          form.submit();
+        }
+      }
+
+      _hideList() {
+        this.popoutList.classList.remove(classes.listVisible);
+        this.popoutToggle.setAttribute(attributes.ariaExpanded, false);
+        this.toggleListPosition();
+        document.body.removeEventListener('click', this.bodyClickEvent);
       }
     }
-  }
-
-  onKeyUp(evt) {
-    if (evt.code !== 'Escape') {
-      return;
-    }
-    this._hideList();
-    this.popoutToggle.focus();
-  }
-
-  onBodyClick(evt) {
-    const isOption = this.contains(evt.target);
-    const isVisible = this.popoutList.classList.contains(classes.listVisible);
-
-    if (isVisible && !isOption) {
-      this._hideList();
-    }
-  }
-
-  _connectToggle() {
-    this.popoutToggle.addEventListener('click', this.popupToggleClickEvent);
-  }
-
-  _connectOptions() {
-    if (this.popoutOptions.length) {
-      this.popoutOptions.forEach((element) => {
-        element.addEventListener('click', (evt) => this.popupOptionsClick(evt));
-      });
-    }
-  }
-
-  _onFocusOut() {
-    this.addEventListener('keyup', this.keyUpEvent);
-    this.popoutToggle.addEventListener('focusout', this.popupToggleFocusoutEvent);
-    this.popoutList.addEventListener('focusout', this.popupListFocusoutEvent);
-  }
-
-  _submitForm() {
-    const form = this.closest('form');
-    if (form) {
-      form.submit();
-    }
-  }
-
-  _hideList() {
-    this.popoutList.classList.remove(classes.listVisible);
-    this.popoutToggle.setAttribute(attributes.ariaExpanded, false);
-    this.toggleListPosition();
-    document.body.removeEventListener('click', this.bodyClickEvent);
-  }
+  );
 }
-
-export {Popout};

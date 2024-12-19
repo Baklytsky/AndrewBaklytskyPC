@@ -91,10 +91,12 @@
   }
 {%- endstyle -%}
 
-<section id="TabCollections--{{ section.id }}"
+<section
+  id="TabCollections--{{ section.id }}"
   class="index-tab-collections section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="product-grid">
+  data-section-type="product-grid"
+>
   {%- if section.blocks.size > 0 -%}
     {%- liquid
       assign current_idx = 0
@@ -107,7 +109,7 @@
       assign tabs_navigation = ''
     -%}
 
-    <div class="tabs-collections" data-tabs-holder>
+    <tabs-component class="tabs-collections">
       {%- for block in section.blocks -%}
         {%- liquid
           assign block_index = forloop.index
@@ -133,7 +135,6 @@
 
           <li class="tab-link tab-link-{{ forloop.index0 }}{% if forloop.index0 == current_idx %} current{% endif %}"
             data-tab="{{ forloop.index0 }}"
-            data-block-id="{{ block.id }}"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -363,21 +364,33 @@
 
             {%- if show_tabs_navigation -%}
               <div class="grid__heading-actions">
-                <div class="tabs__nav">
-                  <ul class="tabs{% if layout == 'stacked' %} text-center{% endif %}" data-scrollbar data-scrollbar-slider>
+                <native-scrollbar class="tabs__nav">
+                  <ul
+                    class="tabs{% if layout == 'stacked' %} text-center{% endif %}"
+                    data-scrollbar
+                    data-scrollbar-slider
+                  >
                     {{ tabs_navigation }}
                   </ul>
 
-                  <button type="button" class="tabs__arrow tabs__arrow--prev tabs-collections__arrow tabs-collections__arrow--prev is-hidden" data-scrollbar-arrow-prev>
+                  <button
+                    type="button"
+                    class="tabs__arrow tabs__arrow--prev tabs-collections__arrow tabs-collections__arrow--prev is-hidden"
+                    data-scrollbar-arrow-prev
+                  >
                     {%- render 'icon-nav-arrow-left' -%}
                     <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
                   </button>
 
-                  <button type="button" class="tabs__arrow tabs__arrow--next tabs-collections__arrow tabs-collections__arrow--next is-hidden" data-scrollbar-arrow-next>
+                  <button
+                    type="button"
+                    class="tabs__arrow tabs__arrow--next tabs-collections__arrow tabs-collections__arrow--next is-hidden"
+                    data-scrollbar-arrow-next
+                  >
                     {%- render 'icon-nav-arrow-right' -%}
                     <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
                   </button>
-                </div>
+                </native-scrollbar>
               </div>
             {%- endif -%}
           </div>
@@ -385,13 +398,15 @@
       {%- endif -%}
 
       {{ tabs_content }}
-    </div>
+    </tabs-component>
   {%- else -%}
     {%- assign animation_order = animation_order | plus: 1 -%}
-    <div class="grid-container text-center"
+    <div
+      class="grid-container text-center"
       data-aos="hero"
       data-aos-anchor="{{ animation_anchor }}"
-      data-aos-order="{{ animation_order }}">
+      data-aos-order="{{ animation_order }}"
+    >
       {%- if section_text != blank -%}
         <div class="grid__heading-holder">
           {{ section_text }}
@@ -401,7 +416,6 @@
       {% render 'no-blocks' %}
     </div>
   {%- endif -%}
-
 </section>
 
 {% schema %}
@@ -459,7 +473,7 @@
     },
     {
       "type": "select",
-      "id": "layout"  ,
+      "id": "layout",
       "label": "Layout",
       "options": [
         {
@@ -527,12 +541,12 @@
       "info": "Applies only when layout is set to Slider"
     },
     {
-      "type":    "range",
-      "id":      "product_limit",
-      "min":     4,
-      "max":     12,
-      "step":    1,
-      "label":   "Product limit",
+      "type": "range",
+      "id": "product_limit",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "label": "Product limit",
       "default": 6
     },
     {
@@ -541,21 +555,21 @@
       "info": "Applies only when layout is set to Grid"
     },
     {
-      "type":    "range",
-      "id":      "grid",
-      "label":   "Products per row",
-      "min":     2,
-      "max":     6,
-      "step":    1,
+      "type": "range",
+      "id": "grid",
+      "label": "Products per row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
       "default": 4
     },
     {
-      "type":    "range",
-      "id":      "rows",
-      "label":   "Number of rows",
-      "min":     1,
-      "max":     8,
-      "step":    1,
+      "type": "range",
+      "id": "rows",
+      "label": "Number of rows",
+      "min": 1,
+      "max": 8,
+      "step": 1,
       "default": 3
     },
     {
@@ -612,7 +626,7 @@
       ]
     }
   ],
-  "blocks":[
+  "blocks": [
     {
       "type": "collection",
       "name": "Collection",
@@ -662,7 +676,7 @@
           "max": 100,
           "step": 5,
           "unit": "%",
-          "default":0
+          "default": 0
         },
         {
           "type": "color",
@@ -705,10 +719,10 @@
           "label": "Color",
           "default": "btn--primary",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -717,9 +731,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -728,9 +742,9 @@
           "label": "Style",
           "default": "btn--outline",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {
@@ -767,4 +781,3 @@
   }
 }
 {% endschema %}
-

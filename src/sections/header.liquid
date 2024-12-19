@@ -4,7 +4,7 @@
   assign animation_delay = 0
   assign animation_delay_increment = 50
 
-  assign toolbar_block = section.blocks | where: "type", "toolbar"
+  assign toolbar_block = section.blocks | where: 'type', 'toolbar'
   assign toolbar_block = toolbar_block[0]
   assign show_toolbar_socials = false
   assign show_toolbar_gift_card = toolbar_block.settings.show_gift_card | default: false
@@ -155,7 +155,8 @@
     or settings.vimeo_link != ''
     or settings.tumblr_link != ''
     or settings.snapchat_link != ''
-    or settings.feed_link != '' -%}
+    or settings.feed_link != ''
+  -%}
     {%- assign show_socials = true -%}
   {%- endif -%}
 {%- endif -%}
@@ -566,17 +567,26 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-<div class="header__wrapper"
+<header-component
+  class="header__wrapper"
   data-header-wrapper
-  {% if transparent_header %}data-header-transparent{% endif %}
-  {% if section.settings.header_sticky %}data-header-sticky{% endif %}
+  {% if transparent_header %}
+    data-header-transparent
+  {% endif %}
+  {% if section.settings.header_sticky %}
+    data-header-sticky
+  {% endif %}
   data-header-style="{{ section.settings.header_style }}"
   data-section-id="{{ section.id }}"
   data-section-type="header"
-  {{ highlight_style }}>
-
-  <header class="theme__header{% if show_separator_line %} has-border{% endif %}" role="banner" data-header-height data-aos="fade">
-
+  {{ highlight_style }}
+>
+  <header
+    class="theme__header{% if show_separator_line %} has-border{% endif %}"
+    role="banner"
+    data-header-height
+    data-aos="fade"
+  >
     {%- if toolbar != blank -%}
       {{ toolbar }}
     {%- endif -%}
@@ -629,37 +639,37 @@
   </header>
 
   {{ drawer }}
-</div>
+</header-component>
 
 <div class="header__backfill" data-header-backfill></div>
 
 <script type="application/ld+json">
-{
-  "@context": "http://schema.org",
-  "@type": "Organization",
-  "name": {{ shop.name | json }},
-  {% if logo %}
-    "logo": {{ logo | image_url: width: 500 | prepend: "https:" | json }},
-  {% endif %}
-  "sameAs": [
-    {{ settings.twitter_link | json }},
-    {{ settings.facebook_link | json }},
-    {{ settings.instagram_link | json }},
-    {{ settings.pinterest_link | json }},
-    {{ settings.youtube_link | json }},
-    {{ settings.tiktok_link | json }},
-    {{ settings.linkedin_link | json }},
-    {{ settings.vimeo_link | json }},
-    {{ settings.snapchat_link | json }},
-    {{ settings.tumblr_link | json }},
-    {{ settings.feed_link | json }}
-  ],
-  "url": {{ shop.url | append: page.url | json }}
-}
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if logo %}
+      "logo": {{ logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% endif %}
+    "sameAs": [
+      {{ settings.twitter_link | json }},
+      {{ settings.facebook_link | json }},
+      {{ settings.instagram_link | json }},
+      {{ settings.pinterest_link | json }},
+      {{ settings.youtube_link | json }},
+      {{ settings.tiktok_link | json }},
+      {{ settings.linkedin_link | json }},
+      {{ settings.vimeo_link | json }},
+      {{ settings.snapchat_link | json }},
+      {{ settings.tumblr_link | json }},
+      {{ settings.feed_link | json }}
+    ],
+    "url": {{ shop.url | append: page.url | json }}
+  }
 </script>
 
 {%- if template.name == 'index' -%}
-  {%- assign potential_action_target = shop.url | append: "/search?q={search_term_string}" -%}
+  {%- assign potential_action_target = shop.url | append: '/search?q={search_term_string}' -%}
   <script type="application/ld+json">
     {
       "@context": "http://schema.org",
@@ -696,10 +706,10 @@
       "label": "Header",
       "default": "logo_beside",
       "options": [
-        { "value": "logo_above", "label": "Logo above menu"},
-        { "value": "logo_beside", "label": "Logo beside menu"},
-        { "value": "drawer", "label": "Mobile drawer menu"},
-        { "value": "logo_center_menu_left", "label": "Logo center menu left"}
+        {"value": "logo_above", "label": "Logo above menu"},
+        {"value": "logo_beside", "label": "Logo beside menu"},
+        {"value": "drawer", "label": "Mobile drawer menu"},
+        {"value": "logo_center_menu_left", "label": "Logo center menu left"}
       ]
     },
     {
@@ -740,8 +750,8 @@
       "label": "Cart icon",
       "default": "bag",
       "options": [
-        { "value": "bag", "label": "Bag"},
-        { "value": "cart", "label": "Cart"}
+        {"value": "bag", "label": "Bag"},
+        {"value": "cart", "label": "Cart"}
       ]
     },
     {
@@ -758,23 +768,23 @@
       "content": "Layout"
     },
     {
-      "type":    "range",
-      "id":      "logo_max_limit",
-      "min":     30,
-      "max":     495,
-      "step":    5,
-      "unit":    "px",
-      "label":   "Desktop width",
+      "type": "range",
+      "id": "logo_max_limit",
+      "min": 30,
+      "max": 495,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop width",
       "default": 120
     },
     {
-      "type":    "range",
-      "id":      "logo_max_limit_mobile",
-      "min":     30,
-      "max":     250,
-      "step":    5,
-      "unit":    "px",
-      "label":   "Mobile width",
+      "type": "range",
+      "id": "logo_max_limit_mobile",
+      "min": 30,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile width",
       "default": 120
     },
     {
@@ -828,10 +838,10 @@
       "label": "Color",
       "default": "btn--primary",
       "options": [
-        { "value": "btn--black", "label": "Black" },
-        { "value": "btn--white", "label": "White" },
-        { "value": "btn--primary", "label": "Primary" },
-        { "value": "btn--secondary", "label": "Secondary" }
+        {"value": "btn--black", "label": "Black"},
+        {"value": "btn--white", "label": "White"},
+        {"value": "btn--primary", "label": "Primary"},
+        {"value": "btn--secondary", "label": "Secondary"}
       ]
     },
     {
@@ -982,16 +992,16 @@
           "label": "Link position in main menu",
           "default": "1",
           "options": [
-            { "value": "1", "label": "Item 1"},
-            { "value": "2", "label": "Item 2"},
-            { "value": "3", "label": "Item 3"},
-            { "value": "4", "label": "Item 4"},
-            { "value": "5", "label": "Item 5"},
-            { "value": "6", "label": "Item 6"},
-            { "value": "7", "label": "Item 7"},
-            { "value": "8", "label": "Item 8"},
-            { "value": "9", "label": "Item 9"},
-            { "value": "10", "label": "Item 10"}
+            {"value": "1", "label": "Item 1"},
+            {"value": "2", "label": "Item 2"},
+            {"value": "3", "label": "Item 3"},
+            {"value": "4", "label": "Item 4"},
+            {"value": "5", "label": "Item 5"},
+            {"value": "6", "label": "Item 6"},
+            {"value": "7", "label": "Item 7"},
+            {"value": "8", "label": "Item 8"},
+            {"value": "9", "label": "Item 9"},
+            {"value": "10", "label": "Item 10"}
           ]
         },
         {
@@ -1029,7 +1039,7 @@
           "min": 0,
           "max": 100,
           "step": 5,
-          "default":0
+          "default": 0
         },
         {
           "type": "color",
@@ -1201,4 +1211,3 @@
   }
 }
 {% endschema %}
-

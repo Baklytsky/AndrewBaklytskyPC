@@ -1,6 +1,3 @@
-import scrollTo from '../util/scroll-to';
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   rows: '[data-timeline-rows]',
   row: '[data-timeline-row]',
@@ -33,7 +30,7 @@ if (!customElements.get('timeline-component')) {
         this.buttons = this.querySelectorAll(selectors.button);
         this.rowsHolder = this.querySelector(selectors.rows);
         this.requestAnimation = null;
-        this.isDesktopView = isDesktop();
+        this.isDesktopView = !window.theme.isMobile();
         this.isScrollEnabled = false;
 
         this.scrollEvent = (e) => this.scrollEvents(e);
@@ -57,13 +54,13 @@ if (!customElements.get('timeline-component')) {
               const row = e.currentTarget.closest(selectors.row);
               if (!row) return;
 
-              if (isDesktop()) {
+              if (!window.theme.isMobile()) {
                 const hightestRow = Math.max(...this.rowsHeight);
                 const rowHeight = this.holderHeight / this.rows.length;
                 const holderTop = this.getBoundingClientRect().top;
                 const elementPosition = index > 0 && hightestRow < rowHeight ? rowHeight * index + holderTop : holderTop;
                 const scrollPosition = elementPosition + 1;
-                scrollTo(scrollPosition);
+                window.theme.scrollTo(scrollPosition);
               } else {
                 const padding = 16;
                 const holderLeft = row.offsetLeft - padding;
@@ -83,7 +80,7 @@ if (!customElements.get('timeline-component')) {
         this.holderHeight = this.offsetHeight;
         this.calculateRowsDimensions();
         this.requestAnimation = requestAnimationFrame(() => this.calculatePosition());
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
 
         if (isDesktopView && !this.isScrollEnabled) {
           this.isScrollEnabled = true;
@@ -131,7 +128,7 @@ if (!customElements.get('timeline-component')) {
 
       calculatePosition(target = null) {
         this.removeAnimationFrame();
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
         const elementHeight = this.holderHeight / this.rows.length;
         let elementsTop = this.holderTop;
         const windowHeight = window.innerHeight;

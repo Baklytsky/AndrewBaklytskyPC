@@ -1,7 +1,5 @@
 import {getUrlWithVariant} from '../vendor/theme-scripts/theme-product-form';
 import {fetchProduct} from '../util/fetch-product';
-import Tooltip from './tooltip';
-import NativeScrollbar from './native-scrollbar';
 
 const selectors = {
   gridSwatchForm: '[data-grid-swatch-form]',
@@ -29,24 +27,11 @@ const attributes = {
   label: 'data-swatch-label',
   scrollbar: 'data-scrollbar',
   swatchCount: 'data-swatch-count',
-  tooltip: 'data-tooltip',
   variant: 'data-swatch-variant',
   variantName: 'data-swatch-variant-name',
   variantTitle: 'data-variant-title',
   swatchValues: 'data-swatch-values',
 };
-
-class RadioSwatch extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    if (this.hasAttribute(attributes.tooltip)) {
-      new Tooltip(this);
-    }
-  }
-}
 
 class GridSwatch extends HTMLElement {
   constructor() {
@@ -189,12 +174,6 @@ class GridSwatch extends HTMLElement {
       }
     }
 
-    if (this.swatchesStyle == 'text-slider' || this.swatchesStyle == 'slider') {
-      if (this.hasAttribute(attributes.scrollbar)) {
-        new NativeScrollbar(this);
-      }
-    }
-
     this.bindSwatchButtonEvents();
   }
 
@@ -202,11 +181,6 @@ class GridSwatch extends HTMLElement {
     this.querySelectorAll(selectors.swatchButton)?.forEach((swatchButton) => {
       // Show variant image when hover on color swatch
       swatchButton.addEventListener('mouseenter', this.showVariantImageEvent);
-
-      // Init Tooltips
-      if (swatchButton.hasAttribute(attributes.tooltip)) {
-        new Tooltip(swatchButton);
-      }
     });
 
     this.productItem.addEventListener('mouseleave', this.productItemMouseLeaveEvent);
@@ -253,4 +227,4 @@ class GridSwatch extends HTMLElement {
   }
 }
 
-export {RadioSwatch, GridSwatch};
+export {GridSwatch};

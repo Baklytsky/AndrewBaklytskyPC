@@ -1,8 +1,5 @@
 import {formatMoney} from '../globals/currency';
-
-import scrollTo from '../util/scroll-to';
 import {ProductFormReader} from '../vendor/theme-scripts/theme-product-form';
-import {isDesktop} from '../util/media-query';
 
 import SelloutVariants from './product-form-sellout';
 
@@ -652,7 +649,7 @@ class ProductForm extends HTMLElement {
 
         if (selectedImage) {
           const selectedImageId = selectedImage.getAttribute(attributes.mediaId);
-          const isDesktopView = isDesktop();
+          const isDesktopView = !window.theme.isMobile();
 
           selectedImage.dispatchEvent(
             new CustomEvent('theme:media:select', {
@@ -676,7 +673,7 @@ class ProductForm extends HTMLElement {
               })
             );
 
-            scrollTo(selectedImageTop);
+            window.theme.scrollTo(selectedImageTop);
           }
 
           if (!isDesktopView && !this.productImages.hasAttribute(attributes.faderMobile)) {

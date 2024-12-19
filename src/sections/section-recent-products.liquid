@@ -8,15 +8,19 @@
   }
 {%- endstyle -%}
 
-<div id="RecentProducts--{{ section.id }}"
+<script src="{{ 'related-products.js' | asset_url }}" defer="defer"></script>
+
+<related-products
+  id="RecentProducts--{{ section.id }}"
   class="recent__container section-padding js {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="related">
+  data-section-type="related"
+>
   <div class="recent__container__inner is-hidden" data-recently-viewed-wrapper>
-    <div class="tabs-wrapper related__products" data-tabs-holder>
+    <tabs-component class="tabs-wrapper related__products">
       <div class="grid__heading-holder">
         <div class="grid__heading-actions">
-          <div class="tabs__head">
+          <native-scrollbar class="tabs__head">
             {%- if section.settings.product_recently_heading != blank -%}
               <ul class="tabs text-center" data-scrollbar data-scrollbar-slider>
                 <li class="tab-link tab-link-0 tab-link__recent current" data-tab="0" tabindex="0">
@@ -28,7 +32,9 @@
                     endunless
                   -%}
 
-                  <{{ heading_tag }} class="{{ section.settings.heading_font_size }}">{{ section.settings.product_recently_heading }}</{{ heading_tag }}>
+                  <{{ heading_tag }} class="{{ section.settings.heading_font_size }}">
+                    {{- section.settings.product_recently_heading -}}
+                  </{{ heading_tag }}>
                 </li>
               </ul>
             {%- endif -%}
@@ -42,16 +48,20 @@
               {%- render 'icon-nav-arrow-right' -%}
               <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
             </button>
-          </div>
+          </native-scrollbar>
         </div>
       </div>
 
       <div class="tab-content tab-content-0 tabs__recently-viewed current" data-tab-index="0">
-        {%- render 'products-recently-viewed', product: product, limit: section.settings.product_recently_limit, product_recently_minimum: section.settings.product_recently_minimum -%}
+        {%- render 'products-recently-viewed',
+          product: product,
+          limit: section.settings.product_recently_limit,
+          product_recently_minimum: section.settings.product_recently_minimum
+        -%}
       </div>
-    </div>
+    </tabs-component>
   </div>
-</div>
+</related-products>
 
 {% schema %}
 {
@@ -181,7 +191,7 @@
   "presets": [
     {
       "category": "Collection",
-      "name":"Recently viewed products"
+      "name": "Recently viewed products"
     }
   ],
   "disabled_on": {

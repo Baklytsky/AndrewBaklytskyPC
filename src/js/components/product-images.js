@@ -1,5 +1,3 @@
-import {isMobile} from '../util/media-query';
-
 const selectors = {
   buttonArrow: '[data-button-arrow]',
   deferredMediaButton: '[data-deferred-media-button]',
@@ -83,7 +81,7 @@ if (!customElements.get('product-images')) {
       }
 
       toggleEvents() {
-        const isMobileView = isMobile();
+        const isMobileView = window.theme.isMobile();
 
         if ((isMobileView && this.hasAttribute(attributes.faderMobile)) || (!isMobileView && this.hasAttribute(attributes.faderDesktop))) {
           this.bindEventListeners();

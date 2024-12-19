@@ -1,5 +1,3 @@
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   marquee: '.announcement__bar-holder--marquee',
   slide: '[data-slide]',
@@ -16,7 +14,7 @@ if (!customElements.get('announcement-bar')) {
         super();
 
         this.slider = this.querySelector(selectors.slider);
-        this.enableSlider = isDesktop();
+        this.enableSlider = !window.theme.isMobile();
         this.slidesCount = this.querySelectorAll(selectors.tickerSlide).length;
         this.initSliderEvent = (event) => this.initSlider(event);
       }
@@ -69,7 +67,7 @@ if (!customElements.get('announcement-bar')) {
       }
 
       initSlider() {
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
         const isMobileView = !isDesktopView;
 
         if ((isDesktopView && this.enableSlider) || (isMobileView && !this.enableSlider)) {

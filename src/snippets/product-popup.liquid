@@ -1,11 +1,11 @@
 {% comment %}
-    Renders list of products in grid layout
+  Renders list of products in grid layout
 
-    Accepts:
-    - block: {Object} The block object (required)
+  Accepts:
+  - block: {Object} The block object (required)
 
-    Usage:
-    {% render 'product-popup', block: block %}
+  Usage:
+  {% render 'product-popup', block: block %}
 {% endcomment %}
 
 {%- liquid
@@ -31,7 +31,7 @@
   endcapture
 -%}
 
-<product-modal class="product__block block-padding" {{ block_style }}>
+<popup-component class="product__block block-padding" {{ block_style }}>
   <div class="block__icon__container block__icon__container--full">
     <div class="block__icon" data-aos="img-in" {{ icon_style }}>
       {%- liquid
@@ -41,14 +41,19 @@
           assign icon_sizes = icon_width | append: 'px'
           assign icon_widths = icon_width | append: ', ' | append: icon_width_x2
 
-          render 'image' image: image, width: icon_width_x2, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+          render 'image', image: image, width: icon_width_x2, sizes: icon_sizes, widths: icon_widths, show_backfill: false
         else
           render 'animated-icon', filename: block.settings.icon_name
         endif
       -%}
     </div>
 
-    <a class="radio__legend__link text-link" href="{{ block.settings.page.url }}" data-popup-open {{ block.shopify_attributes }}>
+    <a
+      class="radio__legend__link text-link"
+      href="{{ block.settings.page.url }}"
+      data-popup-open
+      {{ block.shopify_attributes }}
+    >
       {{ link_text | escape }}
     </a>
   </div>
@@ -60,7 +65,12 @@
 
     <div class="product-modal__outer">
       <div class="product-modal__content small" data-scroll-lock-scrollable>
-        <button type="button" class="product-modal__close" data-popup-close aria-label="{{ 'general.accessibility.close' | t }}">
+        <button
+          type="button"
+          class="product-modal__close"
+          data-popup-close
+          aria-label="{{ 'general.accessibility.close' | t }}"
+        >
           {%- render 'icon-cancel' -%}
         </button>
 
@@ -68,4 +78,4 @@
       </div>
     </div>
   </dialog>
-</product-modal>
+</popup-component>

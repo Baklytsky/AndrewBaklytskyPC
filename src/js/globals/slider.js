@@ -1,8 +1,3 @@
-import Flickity from 'flickity';
-import FlickityFade from 'flickity-fade';
-
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   aos: '[data-aos]',
   collectionImage: '.collection-item__image',
@@ -62,7 +57,7 @@ if (!customElements.get('slider-component')) {
         this.classList.add(classes.isLoading);
 
         let slideSelector = selectors.slide;
-        const isDesktopView = isDesktop();
+        const isDesktopView = !window.theme.isMobile();
         const slideMobile = `${selectors.slide}:not(.${classes.mobile})`;
         const slideDesktop = `${selectors.slide}:not(.${classes.desktop})`;
         const hasDeviceSpecificSelectors = this.querySelectorAll(slideDesktop).length || this.querySelectorAll(slideMobile).length;
@@ -151,9 +146,9 @@ if (!customElements.get('slider-component')) {
 
       initSlider() {
         if (this.sliderOptions.fade) {
-          this.flkty = new FlickityFade(this, this.sliderOptions);
+          this.flkty = new window.theme.FlickityFade(this, this.sliderOptions);
         } else {
-          this.flkty = new Flickity(this, this.sliderOptions);
+          this.flkty = new window.theme.Flickity(this, this.sliderOptions);
         }
       }
 

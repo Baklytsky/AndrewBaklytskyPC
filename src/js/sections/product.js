@@ -1,14 +1,7 @@
-import scrollTo from '../util/scroll-to';
 import {register} from '../vendor/theme-scripts/theme-sections';
-import {RadioSwatch} from '../features/swatch';
-import {tooltipSection} from '../features/tooltip';
 import {productStickySection} from '../features/product-sticky';
-import tabs from '../features/tabs';
 import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import {isDesktop} from '../util/media-query';
 import {ProductForm} from '../features/product-form';
-import {ProductModal} from '../features/product-modal';
-import {ProductModel} from '../features/product-model';
 
 const selectors = {
   addToCart: '[data-add-to-cart]',
@@ -123,10 +116,10 @@ class Product {
 
   scrollToTop() {
     const productVariants = this.container.querySelector(selectors.productVariants);
-    const scrollTarget = isDesktop() ? this.container : productVariants ? productVariants : this.form;
+    const scrollTarget = !window.theme.isMobile() ? this.container : productVariants ? productVariants : this.form;
     const scrollTargetTop = scrollTarget.getBoundingClientRect().top;
 
-    scrollTo(isDesktop() ? scrollTargetTop : scrollTargetTop - 10);
+    window.theme.scrollTo(!window.theme.isMobile() ? scrollTargetTop : scrollTargetTop - 10);
   }
 
   toggleCartBarOnScroll() {
@@ -173,20 +166,8 @@ const productSection = {
   },
 };
 
-register('product', [productSection, tooltipSection, tabs, productStickySection]);
+register('product', [productSection, productStickySection]);
 
 if (!customElements.get('product-form')) {
   customElements.define('product-form', ProductForm);
-}
-
-if (!customElements.get('product-modal')) {
-  customElements.define('product-modal', ProductModal);
-}
-
-if (!customElements.get('product-model')) {
-  customElements.define('product-model', ProductModel);
-}
-
-if (!customElements.get('radio-swatch')) {
-  customElements.define('radio-swatch', RadioSwatch);
 }

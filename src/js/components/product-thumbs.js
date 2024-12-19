@@ -1,5 +1,3 @@
-import {isMobile} from '../util/media-query';
-
 const selectors = {
   productImage: '[data-image-id]',
   productImagesContainer: 'product-images',
@@ -152,7 +150,7 @@ if (!customElements.get('product-thumbs')) {
           const rightCheck = thumbRightPos > thumbsPositionRight;
           const verticalCheck = bottomCheck || topCheck;
           const horizontalCheck = rightCheck || leftCheck;
-          const isMobileView = isMobile();
+          const isMobileView = window.theme.isMobile();
 
           if (verticalCheck || horizontalCheck) {
             let scrollTopPosition = thumbPosTop - thumbsHeight + thumbHeight;

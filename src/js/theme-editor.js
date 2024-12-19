@@ -8,30 +8,31 @@ document.addEventListener('shopify:block:select', (event) => {
   // Select slide on Block select
   const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (blockSelectedIsSlide) {
-    const slide = event.target;
     const slider = event.target.closest('slider-component');
-    const slideIndex = parseInt(slide.hasAttribute('data-slide-index') ? slide.getAttribute('data-slide-index') : 0);
-    const flickityEnabled = slider.classList.contains('flickity-enabled');
 
     if (slider) {
+      const slide = event.target;
+      const slideIndex = parseInt(slide.hasAttribute('data-slide-index') ? slide.getAttribute('data-slide-index') : 0);
+      const flickityEnabled = slider.classList.contains('flickity-enabled');
+
       setTimeout(() => {
         slider.scrollTo({
           left: event.target.offsetLeft,
         });
       }, 200);
-    }
 
-    // Go to selected slide, pause autoplay
-    if (flickityEnabled) {
-      slide.classList.add('is-selected');
-      slider.dispatchEvent(
-        new CustomEvent('theme:slider:select', {
-          bubbles: false,
-          detail: {
-            index: slideIndex,
-          },
-        })
-      );
+      // Go to selected slide, pause autoplay
+      if (flickityEnabled) {
+        slide.classList.add('is-selected');
+        slider.dispatchEvent(
+          new CustomEvent('theme:slider:select', {
+            bubbles: false,
+            detail: {
+              index: slideIndex,
+            },
+          })
+        );
+      }
     }
   }
 
@@ -53,6 +54,53 @@ document.addEventListener('shopify:block:select', (event) => {
       });
     }
   }
+
+  // Collections hover - force hover on block select
+  const collectionsHoverImage = event.target.matches('[data-collection-image]');
+  if (collectionsHoverImage) {
+    const collectionsHoverImageId = event.target?.id;
+    const collectionsHoverComponent = event.target.closest('collections-hover');
+    const collectionsHoverButton = collectionsHoverComponent?.querySelector('[data-hover-target="' + collectionsHoverImageId + '"]');
+    collectionsHoverButton?.dispatchEvent(new Event('mouseenter'));
+  }
+
+  // Show mega menu on block select
+  const hoverDisclosure = event.target.closest('hover-disclosure');
+  if (hoverDisclosure) {
+    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:show', {bubbles: false}));
+  }
+
+  // Show tab content on block select
+  const tabs = event.target.closest('tabs-component');
+  if (tabs) {
+    const tab = event.target;
+
+    if (tab.hasAttribute('data-tab')) {
+      tab.dispatchEvent(new Event('click'));
+    }
+
+    tab.parentNode.scrollTo({
+      top: 0,
+      left: tab.offsetLeft - tab.clientWidth,
+      behavior: 'smooth',
+    });
+  }
+
+  // Logos - select logos slide on block select
+  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
+  if (logosBlockSelectedIsSlide) {
+    const logosComponent = event.target.closest('logos-component');
+
+    // Go to selected slide, pause autoplay
+    logosComponent?.dispatchEvent(
+      new CustomEvent('theme:slider-logos:select', {
+        bubbles: false,
+        detail: {
+          evt: event,
+        },
+      })
+    );
+  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -73,13 +121,27 @@ document.addEventListener('shopify:block:deselect', (event) => {
   if (blockSelectedIsSlide) {
     const slide = event.target;
     const slider = event.target.closest('slider-component');
-    const flickityEnabled = slider.classList.contains('flickity-enabled');
+    const flickityEnabled = slider?.classList.contains('flickity-enabled');
 
     // Go to selected slide, pause autoplay
     if (flickityEnabled) {
       slide.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
+  }
+
+  // Hide mega menu on block select
+  const hoverDisclosure = event.target.closest('hover-disclosure');
+  if (hoverDisclosure) {
+    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:hide', {bubbles: false}));
+  }
+
+  // Logos - resume logos slider on block deselect
+  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
+  if (logosBlockSelectedIsSlide) {
+    const logosComponent = event.target.closest('logos-component');
+
+    logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
   }
 });
 

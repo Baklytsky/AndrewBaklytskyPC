@@ -1,12 +1,12 @@
 <!-- /snippets/product-tabs.liquid -->
 {% comment %}
-    Renders product tabs
+  Renders product tabs
 
-    Accepts:
-    - product: {Object} Current product (optional)
+  Accepts:
+  - product: {Object} Current product (optional)
 
-    Usage:
-    {% render 'product-tabs', product: product  %}
+  Usage:
+  {% render 'product-tabs', product: product  %}
 {% endcomment %}
 
 {%- liquid
@@ -69,25 +69,33 @@
   {%- endfor -%}
 
   {%- if tab_contents_html -%}
-    <div class="product-tabs" data-tabs-holder {{ block.shopify_attributes }}>
-      <div class="tabs__head product-tabs__head">
+    <tabs-component class="product-tabs" {{ block.shopify_attributes }}>
+      <native-scrollbar class="tabs__head product-tabs__head">
         <ul class="tabs product-tabs-title" data-scrollbar data-scrollbar-slider>
           {{ tab_links_html }}
         </ul>
 
-        <button type="button" class="tabs__arrow tabs__arrow--prev product-tabs__arrow product-tabs__arrow--prev is-hidden" data-scrollbar-arrow-prev>
+        <button
+          type="button"
+          class="tabs__arrow tabs__arrow--prev product-tabs__arrow product-tabs__arrow--prev is-hidden"
+          data-scrollbar-arrow-prev
+        >
           {%- render 'icon-nav-arrow-left' -%}
           <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
         </button>
 
-        <button type="button" class="tabs__arrow tabs__arrow--next product-tabs__arrow product-tabs__arrow--next is-hidden" data-scrollbar-arrow-next>
+        <button
+          type="button"
+          class="tabs__arrow tabs__arrow--next product-tabs__arrow product-tabs__arrow--next is-hidden"
+          data-scrollbar-arrow-next
+        >
           {%- render 'icon-nav-arrow-right' -%}
           <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
         </button>
-      </div>
+      </native-scrollbar>
 
       {{ tab_contents_html }}
-    </div>
+    </tabs-component>
   {%- elsif request.design_mode -%}
     <span {{ block.shopify_attributes }}></span>
   {%- endif -%}
@@ -106,7 +114,14 @@
   {%- if accordion_heading != blank and accordion_content != blank -%}
     <collapsible-elements single="true">
       <div class="product-accordion">
-        <details class="accordion" data-collapsible{% if accordion_open %} open="true"{% endif %} {{ block.shopify_attributes }}>
+        <details
+          class="accordion"
+          data-collapsible
+          {% if accordion_open %}
+            open="true"
+          {% endif %}
+          {{ block.shopify_attributes }}
+        >
           <summary class="accordion__title" data-collapsible-trigger>
             {{ accordion_heading }}
 
@@ -114,7 +129,13 @@
             {%- render 'icon-minus' -%}
           </summary>
 
-          <div class="accordion__body rte" data-collapsible-body{% if accordion_open %} style="height: auto;"{% endif %}>
+          <div
+            class="accordion__body rte"
+            data-collapsible-body
+            {% if accordion_open %}
+              style="height: auto;"
+            {% endif %}
+          >
             <div class="accordion__content" data-collapsible-content>
               {%- render 'toggle-ellipsis', content: accordion_content, show_read_more: show_read_more -%}
             </div>

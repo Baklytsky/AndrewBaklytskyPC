@@ -1,6 +1,6 @@
 import appendCartItems from '../globals/append-cart-items';
 import floatLabels from '../globals/forms';
-import {setVarsOnResize, setVars} from '../globals/height';
+import {setVars} from '../globals/height';
 import resizeListener from '../globals/resize';
 import scrollListener from '../globals/scroll';
 import wrapElements from '../globals/wrap';
@@ -8,14 +8,7 @@ import isTouch from '../util/touch';
 import {ariaToggle} from '../globals/aria-toggle';
 import {loading} from '../globals/loading';
 import {loadedImagesEventHook, removeLoadingClassFromLoadedImages} from '../globals/images';
-import {HeaderDrawer} from '../features/header-mobile-drawer';
-import {PredictiveSearch} from '../globals/predictive-search';
-import {Popout} from '../globals/popout';
 import {initAnimations} from '../globals/animations';
-
-import DeferredMedia from '../globals/deferred-media';
-import {GridSlider} from '../features/grid-slider';
-import {HeaderMobileSliderule} from '../features/header-mobile-sliderule';
 
 // Safari requestIdleCallback polyfill
 window.requestIdleCallback =
@@ -48,7 +41,7 @@ setVars();
 loadedImagesEventHook();
 
 window.addEventListener('DOMContentLoaded', () => {
-  setVarsOnResize();
+  setVars();
   ariaToggle(document);
   floatLabels(document);
   wrapElements(document);
@@ -68,29 +61,5 @@ document.addEventListener('shopify:section:load', (e) => {
   floatLabels(container);
   wrapElements(container);
   ariaToggle(document);
-  setVarsOnResize();
+  setVars();
 });
-
-if (!customElements.get('header-drawer')) {
-  customElements.define('header-drawer', HeaderDrawer);
-}
-
-if (!customElements.get('mobile-sliderule')) {
-  customElements.define('mobile-sliderule', HeaderMobileSliderule);
-}
-
-if (!customElements.get('popout-select')) {
-  customElements.define('popout-select', Popout);
-}
-
-if (!customElements.get('predictive-search')) {
-  customElements.define('predictive-search', PredictiveSearch);
-}
-
-if (!customElements.get('deferred-media')) {
-  customElements.define('deferred-media', DeferredMedia);
-}
-
-if (!customElements.get('grid-slider')) {
-  customElements.define('grid-slider', GridSlider);
-}
