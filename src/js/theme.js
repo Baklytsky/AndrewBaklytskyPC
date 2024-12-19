@@ -34,7 +34,6 @@ import './globals/tooltip';
 /* ================ Sections ================ */
 import './sections/collection';
 import './sections/product-grid';
-import './sections/product';
 
 /* ================ Main ================ */
 import './main/main';
