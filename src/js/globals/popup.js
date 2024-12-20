@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const selectors = {
   open: '[data-popup-open]',
   close: '[data-popup-close]',
@@ -19,7 +17,7 @@ if (!customElements.get('popup-component')) {
         super();
 
         this.popup = this.querySelector(selectors.dialog);
-        this.a11y = a11y;
+        this.a11y = window.theme.a11y;
         this.isAnimating = false;
         this.enableScrollLock = true;
         this.buttonPopupOpen = this.querySelector(selectors.open);

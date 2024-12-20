@@ -155,23 +155,6 @@ if (!customElements.get('product-component')) {
   );
 }
 
-// TODO:
-//  - on block select
-// const productSection = {
-//   onLoad() {
-//     sections[this.id] = new Product(this);
-//   },
-//   onUnload(e) {
-//     sections[this.id].onUnload(e);
-//   },
-//   onBlockSelect(e) {
-//     sections[this.id].onBlockSelect(e);
-//   },
-//   onBlockDeselect(e) {
-//     sections[this.id].onBlockDeselect(e);
-//   },
-// };
-
 if (!customElements.get('product-form')) {
   customElements.define('product-form', ProductForm);
 }

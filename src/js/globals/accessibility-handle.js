@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const classes = {
   focus: 'is-focused',
 };
@@ -15,7 +13,7 @@ class Accessibility {
   }
 
   init() {
-    this.a11y = a11y;
+    this.a11y = window.theme.a11y;
 
     // DOM Elements
     this.html = document.documentElement;

@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 import HeaderSearchForm from './header-search-form';
 
 const selectors = {
@@ -26,7 +24,8 @@ if (!customElements.get('predictive-search')) {
     class PredictiveSearch extends HeaderSearchForm {
       constructor() {
         super();
-        this.a11y = a11y;
+
+        this.a11y = window.theme.a11y;
         this.abortController = new AbortController();
         this.allPredictiveSearchInstances = document.querySelectorAll(selectors.predictiveSearch);
         this.cachedResults = {};

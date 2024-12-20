@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const selectors = {
   details: 'details',
   popdown: '[data-popdown]',
@@ -25,7 +23,7 @@ class SearchPopdown extends HTMLElement {
     this.popdownTransitionCallback = this.popdownTransitionCallback.bind(this);
     this.detailsToggleCallback = this.detailsToggleCallback.bind(this);
     this.mobileMenu = this.closest(selectors.mobileMenu);
-    this.a11y = a11y;
+    this.a11y = window.theme.a11y;
   }
 
   connectedCallback() {

@@ -1,5 +1,4 @@
 import loadScript from '../util/loader';
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
 
 window.theme.LoadPhotoswipe = window.theme.LoadPhotoswipe || null;
 
@@ -36,7 +35,7 @@ class LoadPhotoswipe {
     this.popupThumbsContainer = this.pswpElement.querySelector(selectors.popupThumbs);
     this.closeBtn = this.pswpElement.querySelector(selectors.popupCloseBtn);
     this.keyupCloseEvent = (e) => this.keyupClose(e);
-    this.a11y = a11y;
+    this.a11y = window.theme.a11y;
 
     const defaultOptions = {
       history: false,

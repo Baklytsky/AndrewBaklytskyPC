@@ -4,6 +4,8 @@ import './globals/media-query';
 import './globals/currency';
 import './globals/debounce';
 import './globals/height';
+import './globals/theme-a11y';
+import './globals/throttle';
 
 /* ================ Globals ================ */
 import './globals/aria-toggle';

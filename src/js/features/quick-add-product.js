@@ -1,4 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import FetchError from '../util/fetch-error';
 import wrapElements from '../globals/wrap';
 
@@ -63,7 +62,7 @@ class QuickAddProduct extends HTMLElement {
       this.button = this.modalButton || this.buttonATC;
       this.modalClose = this.modalClose.bind(this);
       this.modalCloseOnProductAdded = this.modalCloseOnProductAdded.bind(this);
-      this.a11y = a11y;
+      this.a11y = window.theme.a11y;
       this.isAnimating = false;
 
       this.modalButtonClickEvent = this.modalButtonClickEvent.bind(this);

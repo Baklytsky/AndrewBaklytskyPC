@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const selectors = {
   collectionSidebar: '[data-collection-sidebar]',
   collectionSidebarSlideOut: '[data-collection-sidebar-slide-out]',
@@ -25,7 +23,7 @@ if (!customElements.get('collection-component')) {
 
         this.collectionSidebar = this.querySelector(selectors.collectionSidebar);
         this.groupTagsButton = this.querySelector(selectors.groupTagsButton);
-        this.a11y = a11y;
+        this.a11y = window.theme.a11y;
 
         this.groupTagsButtonClickEvent = (evt) => this.groupTagsButtonClick(evt);
         this.sidebarResizeEvent = () => this.toggleSidebarSlider();

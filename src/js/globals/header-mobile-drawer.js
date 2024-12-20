@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const selectors = {
   drawerInner: '[data-drawer-inner]',
   drawerClose: '[data-drawer-close]',
@@ -24,6 +22,7 @@ if (!customElements.get('header-drawer')) {
       constructor() {
         super();
 
+        this.a11y = window.theme.a11y;
         this.isAnimating = false;
         this.drawer = this;
         this.drawerInner = this.querySelector(selectors.drawerInner);
@@ -94,12 +93,12 @@ if (!customElements.get('header-drawer')) {
         document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
 
         if (this.drawerInner) {
-          a11y.removeTrapFocus();
+          this.a11y.removeTrapFocus();
 
           window.theme.waitForAnimationEnd(this.drawerInner).then(() => {
             this.isAnimating = false;
 
-            a11y.trapFocus(this.drawerInner, {
+            this.a11y.trapFocus(this.drawerInner, {
               elementToFocus: this.querySelector(selectors.focusable),
             });
           });
@@ -114,7 +113,7 @@ if (!customElements.get('header-drawer')) {
         this.classList.add(classes.closing);
         this.classList.remove(classes.open);
 
-        a11y.removeTrapFocus();
+        this.a11y.removeTrapFocus();
 
         if (this.triggerButton) {
           this.triggerButton.setAttribute('aria-expanded', false);

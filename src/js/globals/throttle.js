@@ -1,4 +1,4 @@
-const throttle = (fn, wait) => {
+window.theme.throttle = (fn, wait) => {
   let prev, next;
   return function invokeFn(...args) {
     const now = Date.now();
@@ -12,5 +12,3 @@ const throttle = (fn, wait) => {
     }
   };
 };
-
-export default throttle;
