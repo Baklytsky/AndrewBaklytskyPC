@@ -28,15 +28,12 @@ import './globals/native-scrollbar';
 import './globals/popout';
 import './globals/popup';
 import './globals/predictive-search';
+import './globals/product-grid';
 import './globals/scroll-to';
 import './globals/slider';
 import './globals/tabs';
 import './globals/toggle-ellipsis';
 import './globals/tooltip';
-
-/* ================ Sections ================ */
-import './sections/collection';
-import './sections/product-grid';
 
 /* ================ Main ================ */
 import './main/main';
