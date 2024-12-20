@@ -5,6 +5,8 @@
 -%}
 
 {%- if section.blocks.size > 0 -%}
+  {{ 'section-accordion.css' | asset_url | stylesheet_tag }}
+
   {%- style -%}
     #Faq--{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
@@ -12,7 +14,8 @@
     }
   {%- endstyle -%}
 
-  <section id="Faq--{{ section.id }}"
+  <section
+    id="Faq--{{ section.id }}"
     class="accordion-section section-padding {{ color_scheme }}"
     data-section-id="{{ section.id }}"
     data-section-type="faq"
@@ -22,13 +25,18 @@
     <div class="{{ section.settings.width }}">
       {%- if section.settings.title != blank -%}
         <collapsible-elements>
-          <details class="accordion"
-          {% if default_open %}
-            open="true"
-          {% endif %}
-          data-collapsible>
+          <details
+            class="accordion"
+            {% if default_open %}
+              open="true"
+            {% endif %}
+            data-collapsible
+          >
             {%- if section.settings.title != blank -%}
-              <summary class="accordion__title {{ section.settings.heading_font_size }} font-heading" data-collapsible-trigger>
+              <summary
+                class="accordion__title {{ section.settings.heading_font_size }} font-heading"
+                data-collapsible-trigger
+              >
                 {%- if section.settings.show_icon -%}
                   {%- liquid
                     assign icon_size = section.settings.icon_size
@@ -44,7 +52,10 @@
                     endcapture
                   -%}
 
-                  <div class="icon__animated icon__animated--{{ section.id }}{% if icon_image != blank %} icon__animated--image{% endif %}" {{ icon_style }}>
+                  <div
+                    class="icon__animated icon__animated--{{ section.id }}{% if icon_image != blank %} icon__animated--image{% endif %}"
+                    {{ icon_style }}
+                  >
                     {%- liquid
                       if icon_image
                         assign icon_width = icon_size
@@ -52,7 +63,7 @@
                         assign icon_sizes = icon_width | append: 'px'
                         assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-                        render 'image' image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
+                        render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
                       else
                         render 'animated-icon', filename: section.settings.icon_name
                       endif
@@ -67,7 +78,13 @@
               </summary>
             {%- endif -%}
 
-            <div class="accordion__body rte"{% if default_open != blank %} style="height: auto;"{% endif %} data-collapsible-body>
+            <div
+              class="accordion__body rte"
+              {% if default_open != blank %}
+                style="height: auto;"
+              {% endif %}
+              data-collapsible-body
+            >
               <div class="accordion__content" data-collapsible-content>
                 <div class="faq-list faq-list--{{ section.blocks.size }}">
                   {%- for block in section.blocks -%}
@@ -139,7 +156,14 @@
                                 assign sizes = '(min-width: 750px) calc(1100px * 0.45), calc(100vw - 32px - 50px)'
                               endif
                             -%}
-                            {%- render 'image', image: block.settings.image, aspect_ratio: aspect_ratio, sizes: sizes, widths: '360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100', loading: 'lazy', fetchpriority: 'auto' -%}
+                            {%- render 'image',
+                              image: block.settings.image,
+                              aspect_ratio: aspect_ratio,
+                              sizes: sizes,
+                              widths: '360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100',
+                              loading: 'lazy',
+                              fetchpriority: 'auto'
+                            -%}
                           </div>
                           {{ text_content }}
                         </div>
@@ -164,22 +188,52 @@
                             {{ form.errors | default_errors }}
 
                             <div class="custom-form__block">
-                              <label for="Form-{{ section.id }}-{{ forloop.index0 }}" class="visually-hidden">{{ field_name }}</label>
-                              <input type="text" class="contactFormText field" id="Form-{{ section_block_id }}-{{ forloop.index0 }}" name="contact[{{ field_name | handleize }}]" placeholder="{{ field_name }}" autocapitalize="words" value="" required>
+                              <label for="Form-{{ section.id }}-{{ forloop.index0 }}" class="visually-hidden">
+                                {{- field_name -}}
+                              </label>
+                              <input
+                                type="text"
+                                class="contactFormText field"
+                                id="Form-{{ section_block_id }}-{{ forloop.index0 }}"
+                                name="contact[{{ field_name | handleize }}]"
+                                placeholder="{{ field_name }}"
+                                autocapitalize="words"
+                                value=""
+                                required
+                              >
                             </div>
 
                             <div class="custom-form__block">
                               <label for="contactFormEmail" class="visually-hidden">{{ field_email }}</label>
-                              <input type="email" id="{{ section_block_id }}-contactFormEmail" class="contactFormEmail field" name="contact[email]" placeholder="{{ field_email }}" autocorrect="off" autocapitalize="off" required>
+                              <input
+                                type="email"
+                                id="{{ section_block_id }}-contactFormEmail"
+                                class="contactFormEmail field"
+                                name="contact[email]"
+                                placeholder="{{ field_email }}"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                required
+                              >
                             </div>
 
                             <div class="custom-form__block">
                               <label for="ContactFormMessage" class="visually-hidden">{{ field_message }}</label>
-                              <textarea rows="10" id="{{ section_block_id }}-ContactFormMessage" class="contactFormMessage field" name="contact[body]" placeholder="{{ field_message }}"></textarea>
+                              <textarea
+                                rows="10"
+                                id="{{ section_block_id }}-ContactFormMessage"
+                                class="contactFormMessage field"
+                                name="contact[body]"
+                                placeholder="{{ field_message }}"
+                              ></textarea>
                             </div>
 
                             <div class="custom-form__block">
-                              <input type="submit" class="btn btn--black btn--solid btn--full" value="{{ 'contact.form.send' | t }}">
+                              <input
+                                type="submit"
+                                class="btn btn--black btn--solid btn--full"
+                                value="{{ 'contact.form.send' | t }}"
+                              >
                             </div>
 
                             {%- if block.settings.terms -%}
@@ -256,43 +310,43 @@
       "label": "Icon",
       "default": "icon-award",
       "options": [
-        { "label": "Award", "value": "icon-award" },
-        { "label": "Box", "value": "icon-box" },
-        { "label": "Chat", "value": "icon-chat" },
-        { "label": "Cloud", "value": "icon-cloud" },
-        { "label": "Diameter", "value": "icon-diameter" },
-        { "label": "Discount", "value": "icon-discount" },
-        { "label": "Donation", "value": "icon-donation" },
-        { "label": "Droplet", "value": "icon-droplet" },
-        { "label": "Info", "value": "icon-info-empty" },
-        { "label": "Email", "value": "icon-email" },
-        { "label": "Fast shipment", "value": "icon-fast-shipment" },
-        { "label": "Flare", "value": "icon-flare" },
-        { "label": "Flower", "value": "icon-flower" },
-        { "label": "Gift", "value": "icon-gift" },
-        { "label": "Green shipment", "value": "icon-green-shipment" },
-        { "label": "Heart", "value": "icon-heart" },
-        { "label": "Leaf", "value": "icon-leaf" },
-        { "label": "Lightning", "value": "icon-lightning" },
-        { "label": "Location", "value": "icon-location" },
-        { "label": "Mail", "value": "icon-mail" },
-        { "label": "Notes", "value": "icon-notes" },
-        { "label": "Pants", "value": "icon-pants" },
-        { "label": "Peace", "value": "icon-peace" },
-        { "label": "Pin", "value": "icon-pin" },
-        { "label": "Planet", "value": "icon-planet" },
-        { "label": "Phone", "value": "icon-phone" },
-        { "label": "Recycle", "value": "icon-recycle" },
-        { "label": "Ruler", "value": "icon-ruler" },
-        { "label": "Shield", "value": "icon-shield" },
-        { "label": "Smile", "value": "icon-smile" },
-        { "label": "Star", "value": "icon-star" },
-        { "label": "Tree", "value": "icon-tree" },
-        { "label": "Trophy", "value": "icon-trophy" },
-        { "label": "Truck", "value": "icon-truck" },
-        { "label": "Vegan", "value": "icon-vegan" },
-        { "label": "Wash", "value": "icon-wash" },
-        { "label": "Washing machine", "value": "icon-washing-machine" }
+        {"label": "Award", "value": "icon-award"},
+        {"label": "Box", "value": "icon-box"},
+        {"label": "Chat", "value": "icon-chat"},
+        {"label": "Cloud", "value": "icon-cloud"},
+        {"label": "Diameter", "value": "icon-diameter"},
+        {"label": "Discount", "value": "icon-discount"},
+        {"label": "Donation", "value": "icon-donation"},
+        {"label": "Droplet", "value": "icon-droplet"},
+        {"label": "Info", "value": "icon-info-empty"},
+        {"label": "Email", "value": "icon-email"},
+        {"label": "Fast shipment", "value": "icon-fast-shipment"},
+        {"label": "Flare", "value": "icon-flare"},
+        {"label": "Flower", "value": "icon-flower"},
+        {"label": "Gift", "value": "icon-gift"},
+        {"label": "Green shipment", "value": "icon-green-shipment"},
+        {"label": "Heart", "value": "icon-heart"},
+        {"label": "Leaf", "value": "icon-leaf"},
+        {"label": "Lightning", "value": "icon-lightning"},
+        {"label": "Location", "value": "icon-location"},
+        {"label": "Mail", "value": "icon-mail"},
+        {"label": "Notes", "value": "icon-notes"},
+        {"label": "Pants", "value": "icon-pants"},
+        {"label": "Peace", "value": "icon-peace"},
+        {"label": "Pin", "value": "icon-pin"},
+        {"label": "Planet", "value": "icon-planet"},
+        {"label": "Phone", "value": "icon-phone"},
+        {"label": "Recycle", "value": "icon-recycle"},
+        {"label": "Ruler", "value": "icon-ruler"},
+        {"label": "Shield", "value": "icon-shield"},
+        {"label": "Smile", "value": "icon-smile"},
+        {"label": "Star", "value": "icon-star"},
+        {"label": "Tree", "value": "icon-tree"},
+        {"label": "Trophy", "value": "icon-trophy"},
+        {"label": "Truck", "value": "icon-truck"},
+        {"label": "Vegan", "value": "icon-vegan"},
+        {"label": "Wash", "value": "icon-wash"},
+        {"label": "Washing machine", "value": "icon-washing-machine"}
       ]
     },
     {
@@ -452,49 +506,49 @@
       "type": "icon",
       "name": "Icon column",
       "settings": [
-      {
+        {
           "type": "select",
           "id": "icon_name",
           "label": "Icon",
           "default": "icon-award",
           "options": [
-            { "label": "Award", "value": "icon-award" },
-            { "label": "Box", "value": "icon-box" },
-            { "label": "Chat", "value": "icon-chat" },
-            { "label": "Cloud", "value": "icon-cloud" },
-            { "label": "Diameter", "value": "icon-diameter" },
-            { "label": "Discount", "value": "icon-discount" },
-            { "label": "Donation", "value": "icon-donation" },
-            { "label": "Droplet", "value": "icon-droplet" },
-            { "label": "Info", "value": "icon-info-empty" },
-            { "label": "Email", "value": "icon-email" },
-            { "label": "Fast shipment", "value": "icon-fast-shipment" },
-            { "label": "Flare", "value": "icon-flare" },
-            { "label": "Flower", "value": "icon-flower" },
-            { "label": "Gift", "value": "icon-gift" },
-            { "label": "Green shipment", "value": "icon-green-shipment" },
-            { "label": "Heart", "value": "icon-heart" },
-            { "label": "Leaf", "value": "icon-leaf" },
-            { "label": "Lightning", "value": "icon-lightning" },
-            { "label": "Location", "value": "icon-location" },
-            { "label": "Mail", "value": "icon-mail" },
-            { "label": "Notes", "value": "icon-notes" },
-            { "label": "Pants", "value": "icon-pants" },
-            { "label": "Peace", "value": "icon-peace" },
-            { "label": "Pin", "value": "icon-pin" },
-            { "label": "Planet", "value": "icon-planet" },
-            { "label": "Phone", "value": "icon-phone" },
-            { "label": "Recycle", "value": "icon-recycle" },
-            { "label": "Ruler", "value": "icon-ruler" },
-            { "label": "Shield", "value": "icon-shield" },
-            { "label": "Smile", "value": "icon-smile" },
-            { "label": "Star", "value": "icon-star" },
-            { "label": "Tree", "value": "icon-tree" },
-            { "label": "Trophy", "value": "icon-trophy" },
-            { "label": "Truck", "value": "icon-truck" },
-            { "label": "Vegan", "value": "icon-vegan" },
-            { "label": "Wash", "value": "icon-wash" },
-            { "label": "Washing machine", "value": "icon-washing-machine" }
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightning", "value": "icon-lightning"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
           ]
         },
         {
@@ -538,7 +592,7 @@
           "label": "Icon alignment",
           "default": "left",
           "options": [
-            {"value": "left","label": "Left"},
+            {"value": "left", "label": "Left"},
             {"value": "center", "label": "Center"}
           ]
         },
@@ -554,8 +608,8 @@
           "label": "Text alignment",
           "default": "text-left",
           "options": [
-            {"value": "text-left","label": "Left"},
-            {"value": "text-center","label": "Centered"}
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"}
           ]
         }
       ]
