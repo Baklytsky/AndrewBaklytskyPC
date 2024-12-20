@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
 const selectors = {
   animates: 'data-animates',
   sliderule: '[data-sliderule]',
@@ -40,7 +38,7 @@ if (!customElements.get('mobile-sliderule')) {
         this.childrenElements = this.querySelectorAll(selectors.children);
         this.drawerContent = this.closest(selectors.drawerContent);
         this.cachedButton = null;
-        this.accessibility = a11y;
+        this.a11y = window.theme.a11y;
 
         this.trigger.setAttribute('aria-haspopup', true);
         this.trigger.setAttribute('aria-expanded', false);
@@ -79,10 +77,10 @@ if (!customElements.get('mobile-sliderule')) {
       trapFocusSliderule(showSliderule = true) {
         const trapFocusButton = showSliderule ? this.querySelector(this.exitSelector) : this.cachedButton;
 
-        this.accessibility.removeTrapFocus();
+        this.a11y.removeTrapFocus();
 
         if (trapFocusButton && this.drawerContent) {
-          this.accessibility.trapFocus(this.drawerContent, {
+          this.a11y.trapFocus(this.drawerContent, {
             elementToFocus: document.body.classList.contains(classes.focused) ? trapFocusButton : null,
           });
         }
@@ -117,7 +115,7 @@ if (!customElements.get('mobile-sliderule')) {
             this.pane.classList.remove(classes.isHiding);
 
             if (lastElement) {
-              this.accessibility.removeTrapFocus();
+              this.a11y.removeTrapFocus();
               if (!close) {
                 this.trapFocusSliderule(false);
               }

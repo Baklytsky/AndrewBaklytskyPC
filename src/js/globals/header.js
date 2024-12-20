@@ -45,7 +45,7 @@ if (!customElements.get('header-component')) {
         this.checkWidth = this.checkWidth.bind(this);
         this.isSticky = this.hasAttribute(attributes.stickyHeader);
 
-        document.body.classList.toggle(classes.sticky, this.sticks);
+        document.body.classList.toggle(classes.sticky, this.isSticky);
 
         // Fallback for CSS :has() selectors
         let enableTransparentHeader = false;

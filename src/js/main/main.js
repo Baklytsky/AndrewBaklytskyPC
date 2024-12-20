@@ -1,10 +1,6 @@
-import {load} from '../vendor/theme-scripts/theme-sections';
 import loadScript from '../util/loader';
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Load all registered sections on the page.
-  load('*');
-
   // Scroll to top button
   const scrollTopButton = document.querySelector('[data-scroll-top-button]');
   if (scrollTopButton) {

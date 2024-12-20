@@ -1,4 +1,4 @@
-function debounce(fn, time) {
+window.theme.debounce = function (fn, time) {
   let timeout;
   return function () {
     // eslint-disable-next-line prefer-rest-params
@@ -8,6 +8,4 @@ function debounce(fn, time) {
       timeout = setTimeout(functionCall, time);
     }
   };
-}
-
-export default debounce;
+};

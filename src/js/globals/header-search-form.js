@@ -1,5 +1,3 @@
-import debounce from '../util/debounce';
-
 const selectors = {
   inputSearch: 'input[type="search"]',
   focusedElements: '[aria-selected="true"] a',
@@ -21,9 +19,11 @@ export default class HeaderSearchForm extends HTMLElement {
       this.input.form.addEventListener('reset', this.onFormReset.bind(this));
       this.input.addEventListener(
         'input',
-        debounce((event) => {
-          this.onChange(event);
-        }, 300).bind(this)
+        window.theme
+          .debounce((event) => {
+            this.onChange(event);
+          }, 300)
+          .bind(this)
       );
     }
   }

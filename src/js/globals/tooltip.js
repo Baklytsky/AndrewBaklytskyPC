@@ -1,5 +1,3 @@
-import throttle from '../util/throttle';
-
 const selectors = {
   sectionId: '[data-section-id]',
   tooltip: 'data-tooltip',
@@ -24,7 +22,7 @@ if (!customElements.get('tooltip-component')) {
         this.hideTransitionTimeout = 0;
         this.addPinEvent = () => this.addPin();
         this.addPinMouseEvent = () => this.addPin(true);
-        this.removePinEvent = (event) => throttle(this.removePin(event), 50);
+        this.removePinEvent = (event) => window.theme.throttle(this.removePin(event), 50);
         this.removePinMouseEvent = (event) => this.removePin(event, true, true);
       }
 

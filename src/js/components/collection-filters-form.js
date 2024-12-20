@@ -1,6 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import debounce from '../util/debounce';
-
 const selectors = {
   section: '[data-section-type]',
   collectionSidebar: '[data-collection-sidebar]',
@@ -59,9 +56,9 @@ class CollectionFiltersForm extends HTMLElement {
     this.filterUrlButtons = this.container.querySelectorAll(selectors.filterUpdateUrlButton);
     this.collectionSidebarCloseButtons = this.container.querySelectorAll(selectors.collectionSidebarCloseButton);
     this.showMoreOptions = this.querySelectorAll(selectors.showMore);
-    this.a11y = a11y;
+    this.a11y = window.theme.a11y;
 
-    this.updatePriceEvent = debounce((e) => this.updatePrice(e), 500);
+    this.updatePriceEvent = window.theme.debounce((e) => this.updatePrice(e), 500);
     this.updateRangeEvent = (e) => this.updateRange(e);
     this.showMoreEvent = (e) => this.showMore(e);
     this.onSortButtonClickEvent = (e) => this.onSortButtonClick(e);

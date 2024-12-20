@@ -1,5 +1,3 @@
-import debounce from '../util/debounce';
-
 let lastWindowWidth = window.theme.getWindowWidth();
 let lastWindowHeight = window.theme.getWindowHeight();
 
@@ -34,7 +32,7 @@ function dispatch() {
 function resizeListener() {
   window.addEventListener(
     'resize',
-    debounce(function () {
+    window.theme.debounce(function () {
       dispatch();
     }, 50)
   );
