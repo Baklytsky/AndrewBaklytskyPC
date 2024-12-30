@@ -323,7 +323,7 @@ const config = {
         output: {
           file: path.join(dist, 'assets', fileName),
           name: 'component',
-          sourcemap: true,
+          sourcemap: false,
           format: 'iife',
           plugins: [production && terser()],
         },
