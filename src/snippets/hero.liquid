@@ -53,6 +53,7 @@
     assign render_upsell = true
   endif
   if section_type == 'split-images'
+    assign render_image_1 = true
     assign render_image_2 = true
     assign render_metafield_info = false
   endif
@@ -117,7 +118,7 @@
 {%- endstyle -%}
 
 <div
-  class="index-hero wide-image section-padding {{ color_scheme }}"
+  class="index-hero index-hero--{{ section_type }} wide-image section-padding {{ color_scheme }}"
   id="Hero--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="hero"
@@ -132,7 +133,7 @@
       {%- endif -%}
 
       {%- if render_image_1 -%}
-        <div class="hero__split-image">
+        <div class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_1,
             image_mobile: mobile_image,
@@ -144,14 +145,13 @@
       {%- endif -%}
 
       {%- if render_image_2 -%}
-        <div class="hero__split-image{% if image_1 %} desktop{% endif %}">
+        <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_2,
             image_mobile: mobile_image,
             sizes: sizes,
             desktop_height: desktop_height,
-            mobile_height: mobile_height,
-            show_placeholder: show_placeholder
+            mobile_height: mobile_height
           -%}
         </div>
       {%- endif -%}
