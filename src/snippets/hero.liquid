@@ -1,24 +1,35 @@
 {%- liquid
+  assign section_type = section_type | default: 'image-banner'
+  assign image_1 = section.settings.image_1
+  assign image_2 = section.settings.image_2
+  assign banner_link = section.settings.link
+  assign section_width = section.settings.width
+  assign desktop_height = section.settings.height
+  assign flex_align_desktop = section.settings.flex_align_desktop | default: 'align--bottom-left-desktop'
+  assign mobile_image = section.settings.mobile_image
+  assign mobile_height = section.settings.mobile_height
+  assign flex_align_mobile = section.settings.flex_align_mobile
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
   assign show_text_background = section.settings.show_text_background
   assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
   assign show_overlay_text = section.settings.show_overlay_text
-  assign animation_anchor = '#Hero--' | append: section.id
-  assign desktop_height = section.settings.height
-  assign mobile_height = section.settings.mobile_height
-  assign image_1 = section.settings.image_1
-  assign image_2 = section.settings.image_2
+  assign padding_top = section.settings.padding_top | default: 0
+  assign padding_bottom = section.settings.padding_bottom | default: 0
   assign show_placeholder = section.settings.show_placeholder
-  assign mobile_image = section.settings.mobile_image
-  assign banner_link = section.settings.link
-  assign product = all_products[section.settings.product]
+
+  ## section_type: 'image-with-product' specific
   assign has_product = has_product | default: false
+  assign product = all_products[section.settings.product]
   assign color_product_bg = section.settings.color_product_bg
   assign color_product_text = section.settings.color_product_text
   assign bg_color = color_product_bg | default: settings.section_bg
 
+  assign animation_anchor = '#Hero--' | append: section.id
+
   capture sizes
-    if section.settings.width == 'wrapper--full'
+    if section_width == 'wrapper--full'
       if image_1 and image_2
         echo '(min-width: 750px) 50vw, 100vw'
       else
@@ -34,15 +45,12 @@
   endcapture
 
   capture sizes_mobile
-    if section.settings.width == 'wrapper--full'
+    if section_width == 'wrapper--full'
       echo '100vw'
     else
       echo 'calc(100vw - 32px)'
     endif
   endcapture
-
-  assign selected_color_scheme = section.settings.color_scheme | strip
-  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
 
   assign hero_transparent = true
   if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
@@ -59,8 +67,8 @@
 
 {%- style -%}
   #Hero--{{ section.id }} {
-    --PT: {{ section.settings.padding_top | default: 0 }}px;
-    --PB: {{ section.settings.padding_bottom | default: 0 }}px;
+    --PT: {{ padding_top }}px;
+    --PB: {{ padding_bottom }}px;
   }
 
   {% if color_product_text.alpha != 0.0 and color_product_text != blank or color_product_bg.alpha != 0.0 and color_product_bg != blank %}
@@ -85,7 +93,7 @@
   data-overlay-header
 >
   {%- if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode -%}
-    <div class="hero__wrapper frame {{ section.settings.width }}">
+    <div class="hero__wrapper frame {{ section_width }}">
       {%- if banner_link != blank -%}
         <a class="hero__images frame__item" href="{{ banner_link }}">
       {%- else -%}
@@ -133,7 +141,7 @@
 
       {%- if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true -%}
         <div
-          class="hero__content__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }} {{ section.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+          class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
           {% if show_header_backdrop %}
             style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
           {% endif %}
@@ -248,7 +256,7 @@
       {%- if has_product and image_1 != blank or image_2 != blank or show_placeholder == true -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
 
-        <div class="hero__aside__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }}">
+        <div class="hero__aside__wrapper frame__item {{ flex_align_desktop }}">
           <div
             class="hero__aside"
             data-aos="hero"
