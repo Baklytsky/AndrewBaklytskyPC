@@ -77,40 +77,53 @@
   {% endif %}
 {%- endstyle -%}
 
-<div class="index-hero wide-image section-padding {{ color_scheme }}"
+<div
+  class="index-hero wide-image section-padding {{ color_scheme }}"
   id="Hero--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="hero"
-  data-overlay-header>
-
+  data-overlay-header
+>
   {%- if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode -%}
     <div class="hero__wrapper frame {{ section.settings.width }}">
-
       {%- if banner_link != blank -%}
         <a class="hero__images frame__item" href="{{ banner_link }}">
       {%- else -%}
         <div class="hero__images frame__item">
       {%- endif -%}
 
-        {%- if image_1 != blank -%}
-          <div class="hero__split-image">
-            {%- render 'image-hero' image_desktop: image_1, image_mobile: mobile_image, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
-          </div>
-        {%- endif -%}
+      {%- if image_1 != blank -%}
+        <div class="hero__split-image">
+          {%- render 'image-hero',
+            image_desktop: image_1,
+            image_mobile: mobile_image,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height
+          -%}
+        </div>
+      {%- endif -%}
 
-        {%- if image_2 != blank or image_1 == blank and show_placeholder == true -%}
-          <div class="hero__split-image{% if image_1 %} desktop{% endif %}">
-            {%- render 'image-hero' image_desktop: image_2, image_mobile: mobile_image, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height, show_placeholder: show_placeholder -%}
-          </div>
-        {%- endif -%}
+      {%- if image_2 != blank or image_1 == blank and show_placeholder == true -%}
+        <div class="hero__split-image{% if image_1 %} desktop{% endif %}">
+          {%- render 'image-hero',
+            image_desktop: image_2,
+            image_mobile: mobile_image,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height,
+            show_placeholder: show_placeholder
+          -%}
+        </div>
+      {%- endif -%}
 
-        {%- if image_1 == blank and image_2 == blank and show_placeholder == false -%}
-          <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
-        {%- endif -%}
+      {%- if image_1 == blank and image_2 == blank and show_placeholder == false -%}
+        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
+      {%- endif -%}
 
-        {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
-          <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
-        {%- endunless -%}
+      {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
+        <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
+      {%- endunless -%}
 
       {%- if banner_link != blank -%}
         </a>
@@ -119,8 +132,18 @@
       {%- endif -%}
 
       {%- if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true -%}
-        <div class="hero__content__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }} {{ section.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"{% if show_header_backdrop %} style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"{% endif %}>
-          <div class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"{% if overlay_opacity != 0.0 %} style="--overlay-opacity: {{ overlay_opacity }};"{% endif %}>
+        <div
+          class="hero__content__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }} {{ section.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+          {% if show_header_backdrop %}
+            style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
+          {% endif %}
+        >
+          <div
+            class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+            {% if overlay_opacity != 0.0 %}
+              style="--overlay-opacity: {{ overlay_opacity }};"
+            {% endif %}
+          >
             {%- for block in section.blocks -%}
               {%- case block.type -%}
                 {%- when 'heading' -%}
@@ -134,22 +157,27 @@
                       endunless
                     -%}
 
-                    <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }}"
+                    <{{ heading_tag }}
+                      class="hero__title {{ block.settings.heading_font_size }}"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}>
-                    {{ block.settings.title | escape }}</{{ heading_tag }}>
+                      {{ block.shopify_attributes }}
+                    >
+                      {{ block.settings.title | escape -}}
+                    </{{ heading_tag }}>
                   {%- endif -%}
 
                 {%- when 'text' -%}
                   {%- if block.settings.text != blank -%}
                     {%- assign animation_order = animation_order | plus: 1 -%}
-                    <div class="hero__description {{ block.settings.text_font_size }}"
+                    <div
+                      class="hero__description {{ block.settings.text_font_size }}"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}>
+                      {{ block.shopify_attributes }}
+                    >
                       {{ block.settings.text }}
                     </div>
                   {%- endif -%}
@@ -175,12 +203,17 @@
                   {%- endif -%}
 
                   {%- if link_text != '' -%}
-                    <div class="hero__button"
+                    <div
+                      class="hero__button"
                       data-aos="hero"
                       data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}>
-                      <a class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}" href="{{ link_url | default: '#!' }}">
+                      {{ block.shopify_attributes }}
+                    >
+                      <a
+                        class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        href="{{ link_url | default: '#!' }}"
+                      >
                         <span>{{ link_text | escape }}</span>
 
                         {%- if block.settings.show_arrow -%}
@@ -197,7 +230,8 @@
                 {%- when 'code' -%}
                   {%- assign animation_order = animation_order | plus: 1 -%}
 
-                  <div class="hero__custom-code"
+                  <div
+                    class="hero__custom-code"
                     data-aos="hero"
                     data-aos-anchor="{{ animation_anchor }}"
                     data-aos-order="{{ animation_order }}"
@@ -215,7 +249,8 @@
         {%- assign animation_order = animation_order | plus: 1 -%}
 
         <div class="hero__aside__wrapper frame__item {{ section.settings.flex_align_desktop | default: 'align--bottom-left-desktop' }}">
-          <div class="hero__aside"
+          <div
+            class="hero__aside"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
