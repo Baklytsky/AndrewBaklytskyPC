@@ -20,11 +20,42 @@
   assign show_placeholder = section.settings.show_placeholder
 
   ## section_type: 'image-with-product' specific
-  assign has_product = has_product | default: false
   assign product = all_products[section.settings.product]
   assign color_product_bg = section.settings.color_product_bg
   assign color_product_text = section.settings.color_product_text
   assign bg_color = color_product_bg | default: settings.section_bg
+
+  # Rendering conditions
+  assign render_section = false
+  assign render_image_1 = false
+  assign render_image_2 = false
+  assign render_metafield_info = false
+  assign render_content_blocks = false
+  assign render_upsell = false
+
+  if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode
+    assign render_section = true
+  endif
+  if image_1 != blank
+    assign render_image_1 = true
+  endif
+  if image_2 != blank or image_1 == blank and show_placeholder == true
+    assign render_image_2 = true
+  endif
+  if image_1 == blank and image_2 == blank and show_placeholder == false
+    assign render_metafield_info = true
+  endif
+  if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true
+    assign render_content_blocks = true
+  endif
+
+  if section_type == 'image-with-product' and image_1 != blank or show_placeholder == true
+    assign render_upsell = true
+  endif
+  if section_type == 'split-images'
+    assign render_image_2 = true
+    assign render_metafield_info = false
+  endif
 
   assign animation_anchor = '#Hero--' | append: section.id
 
@@ -92,7 +123,7 @@
   data-section-type="hero"
   data-overlay-header
 >
-  {%- if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode -%}
+  {%- if render_section -%}
     <div class="hero__wrapper frame {{ section_width }}">
       {%- if banner_link != blank -%}
         <a class="hero__images frame__item" href="{{ banner_link }}">
@@ -100,7 +131,7 @@
         <div class="hero__images frame__item">
       {%- endif -%}
 
-      {%- if image_1 != blank -%}
+      {%- if render_image_1 -%}
         <div class="hero__split-image">
           {%- render 'image-hero',
             image_desktop: image_1,
@@ -112,7 +143,7 @@
         </div>
       {%- endif -%}
 
-      {%- if image_2 != blank or image_1 == blank and show_placeholder == true -%}
+      {%- if render_image_2 -%}
         <div class="hero__split-image{% if image_1 %} desktop{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_2,
@@ -125,7 +156,7 @@
         </div>
       {%- endif -%}
 
-      {%- if image_1 == blank and image_2 == blank and show_placeholder == false -%}
+      {%- if render_metafield_info -%}
         <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
       {%- endif -%}
 
@@ -139,7 +170,7 @@
         </div>
       {%- endif -%}
 
-      {%- if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true -%}
+      {%- if render_content_blocks -%}
         <div
           class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
           {% if show_header_backdrop %}
@@ -253,7 +284,7 @@
         </div>
       {%- endif -%}
 
-      {%- if has_product and image_1 != blank or image_2 != blank or show_placeholder == true -%}
+      {%- if render_upsell -%}
         {%- assign animation_order = animation_order | plus: 1 -%}
 
         <div class="hero__aside__wrapper frame__item {{ flex_align_desktop }}">
