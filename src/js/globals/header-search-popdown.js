@@ -84,4 +84,6 @@ class SearchPopdown extends HTMLElement {
   }
 }
 
-customElements.define('header-search-popdown', SearchPopdown);
+if (!customElements.get('header-search-popdown')) {
+  customElements.define('header-search-popdown', SearchPopdown);
+}

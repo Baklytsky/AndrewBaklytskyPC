@@ -48,4 +48,6 @@ class MainSearch extends HeaderSearchForm {
   }
 }
 
-customElements.define('main-search', MainSearch);
+if (!customElements.get('main-search')) {
+  customElements.define('main-search', MainSearch);
+}
