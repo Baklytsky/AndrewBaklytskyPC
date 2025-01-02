@@ -1,7 +1,6 @@
 <!-- /sections/section-hero.liquid -->
 {%- liquid
   assign image_1 = section.settings.image_1
-  assign image_2 = section.settings.image_2
   assign banner_link = section.settings.link
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
@@ -22,42 +21,30 @@
   # Rendering conditions
   assign render_section = false
   assign render_image_1 = false
-  assign render_image_2 = false
   assign render_image_overlay = false
   assign render_metafield_info = false
   assign render_content_blocks = false
-  if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode
+  if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode
     assign render_section = true
   endif
   if image_1 != blank or mobile_image != blank
     assign render_image_1 = true
   endif
-  if image_2 != blank or image_1 == blank and show_placeholder == true
-    assign render_image_2 = true
-  endif
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  if image_1 == blank and mobile_image == blank and image_2 == blank and show_placeholder == false
+  if image_1 == blank and mobile_image == blank and show_placeholder == false
     assign render_metafield_info = true
   endif
-  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or image_2 != blank or show_placeholder == true
+  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or show_placeholder == true
     assign render_content_blocks = true
   endif
 
   capture sizes
     if section_width == 'wrapper--full'
-      if image_1 and image_2
-        echo '(min-width: 750px) 50vw, 100vw'
-      else
-        echo '100vw'
-      endif
+      echo '100vw'
     else
-      if image_1 and image_2
-        echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
-      else
-        echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
-      endif
+      echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
     endif
   endcapture
 
@@ -108,18 +95,6 @@
         <div class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_1,
-            image_mobile: mobile_image,
-            sizes: sizes,
-            desktop_height: desktop_height,
-            mobile_height: mobile_height
-          -%}
-        </div>
-      {%- endif -%}
-
-      {%- if render_image_2 -%}
-        <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
-          {%- render 'image-hero',
-            image_desktop: image_2,
             image_mobile: mobile_image,
             sizes: sizes,
             desktop_height: desktop_height,
@@ -272,12 +247,6 @@
       "type": "image_picker",
       "id": "image_1",
       "label": "Primary image"
-    },
-    {
-      "type": "image_picker",
-      "id": "image_2",
-      "info": "Displays both images at a 50% width",
-      "label": "Secondary image"
     },
     {
       "type": "url",
