@@ -20,20 +20,18 @@
 
   # Rendering conditions
   assign render_section = false
-  assign render_image_1 = false
+  assign render_image_1 = true
   assign render_image_overlay = false
   assign render_metafield_info = false
   assign render_content_blocks = false
   if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode
     assign render_section = true
   endif
-  if image_1 != blank or mobile_image != blank
-    assign render_image_1 = true
-  endif
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
   if image_1 == blank and mobile_image == blank and show_placeholder == false
+    assign render_image_1 = false
     assign render_metafield_info = true
   endif
   if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or show_placeholder == true
