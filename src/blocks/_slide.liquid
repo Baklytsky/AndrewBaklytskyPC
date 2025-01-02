@@ -6,6 +6,9 @@
   data-slide-text-color="{{ text_color }}"
   {{ block.shopify_attributes }}
 >
+  <script>
+    console.log({{ block.shopify_attributes | json }})
+  </script>
   {%- liquid
     assign image_desktop = block.settings.image
     assign image_mobile = block.settings.mobile_image
@@ -108,7 +111,7 @@
 {% schema %}
 {
   "name": "Slide",
-  "blocks": [{"type": "_slide-heading"}, {"type": "_slide-text"}, {"type": "_slide-buttons"}, {"type": "@app"}],
+  "blocks": [{"type": "heading"}, {"type": "text"}, {"type": "buttons"}, {"type": "@app"}],
   "settings": [
     {
       "type": "header",
@@ -220,27 +223,15 @@
   "presets": [
     {
       "name": "Slide",
-      "settings": {
-        "color_scheme": "scheme-3"
-      },
       "blocks": [
         {
-          "type": "_slide-heading",
-          "settings": {
-            "title": "Image slide"
-          }
+          "type": "heading"
         },
         {
-          "type": "_slide-text",
-          "settings": {
-            "text": "Tell your brand's story through images."
-          }
+          "type": "text"
         },
         {
-          "type": "_slide-buttons",
-          "settings": {
-            "first_button_text": "View products"
-          }
+          "type": "buttons"
         }
       ]
     }

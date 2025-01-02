@@ -13,49 +13,47 @@
   assign second_button_show_arrow = block.settings.second_button_show_arrow
 -%}
 
-{%- if first_button_text != blank or second_button_text != blank -%}
-  <div class="hero__button-group">
-    {%- unless first_button_text == blank -%}
-      <div
-        class="hero__button"
-        data-aos="hero"
-        data-aos-anchor="{{ animation_anchor }}"
-        data-aos-order="{{ animation_order }}"
+<div class="hero__button-group" {{ block.shopify_attributes }}>
+  {%- unless first_button_text == blank -%}
+    <div
+      class="hero__button"
+      data-aos="hero"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-order="{{ animation_order }}"
+    >
+      <a
+        class="btn {{ first_button_size }} {{ first_button_style }} {{ first_button_type }}"
+        href="{{ first_button_link }}"
       >
-        <a
-          class="btn {{ first_button_size }} {{ first_button_style }} {{ first_button_type }}"
-          href="{{ first_button_link }}"
-        >
-          <span>{{ first_button_text | escape }}</span>
+        <span>{{ first_button_text | escape }}</span>
 
-          {%- if first_button_show_arrow -%}
-            {%- render 'icon-arrow-right' -%}
-          {%- endif -%}
-        </a>
-      </div>
-    {%- endunless -%}
+        {%- if first_button_show_arrow -%}
+          {%- render 'icon-arrow-right' -%}
+        {%- endif -%}
+      </a>
+    </div>
+  {%- endunless -%}
 
-    {%- unless second_button_text == blank -%}
-      <div
-        class="hero__button"
-        data-aos="hero"
-        data-aos-anchor="{{ animation_anchor }}"
-        data-aos-order="{{ animation_order }}"
+  {%- unless second_button_text == blank -%}
+    <div
+      class="hero__button"
+      data-aos="hero"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-order="{{ animation_order }}"
+    >
+      <a
+        class="btn {{ second_button_size }} {{ second_button_style }} {{ second_button_type }}"
+        href="{{ second_button_link | default: '#!' }}"
       >
-        <a
-          class="btn {{ second_button_size }} {{ second_button_style }} {{ second_button_type }}"
-          href="{{ second_button_link | default: '#!' }}"
-        >
-          <span>{{ second_button_text | escape }}</span>
+        <span>{{ second_button_text | escape }}</span>
 
-          {%- if second_button_show_arrow -%}
-            {%- render 'icon-arrow-right' -%}
-          {%- endif -%}
-        </a>
-      </div>
-    {%- endunless -%}
-  </div>
-{%- endif -%}
+        {%- if second_button_show_arrow -%}
+          {%- render 'icon-arrow-right' -%}
+        {%- endif -%}
+      </a>
+    </div>
+  {%- endunless -%}
+</div>
 
 {% schema %}
 {
@@ -172,6 +170,13 @@
       "default": false
     }
   ],
-  "presets": [{"name": "Buttons"}]
+  "presets": [
+    {
+      "name": "Buttons",
+      "settings": {
+        "first_button_text": "View products"
+      }
+    }
+  ]
 }
 {% endschema %}
