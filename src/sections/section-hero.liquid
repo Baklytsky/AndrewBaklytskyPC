@@ -23,6 +23,7 @@
   assign render_section = false
   assign render_image_1 = false
   assign render_image_2 = false
+  assign render_image_overlay = false
   assign render_metafield_info = false
   assign render_content_blocks = false
   if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode
@@ -34,14 +35,15 @@
   if image_2 != blank or image_1 == blank and show_placeholder == true
     assign render_image_2 = true
   endif
+  unless show_overlay_text or overlay_opacity == 0.0
+    assign render_image_overlay = true
+  endunless
   if image_1 == blank and image_2 == blank and show_placeholder == false
     assign render_metafield_info = true
   endif
   if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true
     assign render_content_blocks = true
   endif
-
-  assign animation_anchor = '#' | append: section.id
 
   capture sizes
     if section_width == 'wrapper--full'
@@ -130,9 +132,9 @@
         <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
       {%- endif -%}
 
-      {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
+      {%- if render_image_overlay -%}
         <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
-      {%- endunless -%}
+      {%- endif -%}
 
       {%- if banner_link != blank -%}
         </a>
@@ -169,7 +171,7 @@
                     <{{ heading_tag }}
                       class="hero__title {{ block.settings.heading_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -183,7 +185,7 @@
                     <div
                       class="hero__description {{ block.settings.text_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -215,7 +217,7 @@
                     <div
                       class="hero__button"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -242,7 +244,7 @@
                   <div
                     class="hero__custom-code"
                     data-aos="hero"
-                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-anchor="#{{ section.id }}"
                     data-aos-order="{{ animation_order }}"
                     {{ block.shopify_attributes }}
                   >
