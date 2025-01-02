@@ -1,56 +1,45 @@
-<div
-  class="slideshow__slide slideshow__slide--{{ block.id }} frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }} color-{{ block.settings.color_scheme }}{% if forloop.first %} is-selected{% endif %}"
-  style="{{ block_style }}"
-  data-slide="{{ block.id }}"
-  data-slide-index="{{ forloop.index0 }}"
-  data-slide-text-color="{{ text_color }}"
-  {{ block.shopify_attributes }}
->
-  {%- liquid
-    assign image_desktop = block.settings.image
-    assign image_mobile = block.settings.mobile_image
-    assign alt = image_mobile.alt | default: image_desktop.alt | default: block.settings.title | default: default_slide_label
-    assign overlay_color = block.settings.overlay_color
-    assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
-    assign show_overlay_text = block.settings.show_overlay_text
-    assign show_text_background = block.settings.show_text_background
-    assign bg_color = block.settings.bg_color
-    assign text_color = block.settings.color
-    assign bg = ''
-    assign text = ''
+{%- liquid
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
+  assign scheme_text_color = settings.color_schemes[selected_color_scheme].settings.section_text
+  assign desktop_height = section.settings.height
+  assign mobile_height = section.settings.mobile_height
+  assign image_desktop = block.settings.image
+  assign image_mobile = block.settings.mobile_image
+  assign alt = image_mobile.alt | default: image_desktop.alt | default: block.settings.title | default: default_slide_label
+  assign image_link = block.settings.link
+  assign show_text_background = block.settings.show_text_background
+  assign overlay_color = block.settings.overlay_color
+  assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+  assign show_overlay_text = block.settings.show_overlay_text
+  assign bg_color = block.settings.bg_color
+  assign text_color = block.settings.color
+  assign bg = ''
+  assign text = ''
 
-    if first_button_style == 'btn--text' and block.settings.first_button_show_arrow
-      assign first_button_style = first_button_style | append: ' btn--text-no-underline'
-    endif
+  assign hero_transparent = true
+  if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank or bg_color.alpha != 0.0 or bg_color != blank
+    assign hero_transparent = false
+  endif
 
-    if second_button_style == 'btn--text' and block.settings.second_button_show_arrow
-      assign second_button_style = second_button_style | append: ' btn--text-no-underline'
-    endif
+  if bg_color.alpha != 0.0 and bg_color != blank
+    assign bg = '--bg:' | append: bg_color | append: ';'
+  endif
 
-    assign hero_transparent = true
-    if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank or bg_color.alpha != 0.0 or bg_color != blank
-      assign hero_transparent = false
-    endif
+  assign show_header_backdrop = false
+  if hero_transparent and show_overlay_text
+    assign show_header_backdrop = true
+  endif
 
-    if bg_color.alpha != 0.0 and bg_color != blank
-      assign bg = '--bg:' | append: bg_color | append: ';'
-    endif
+  if text_color.alpha != 0.0 and text_color != blank
+    assign text = '--text:' | append: text_color | append: ';'
+  else
+    assign text = '--text:' | append: scheme_text_color | append: ';'
+  endif
+-%}
 
-    assign show_header_backdrop = false
-    if hero_transparent and show_overlay_text
-      assign show_header_backdrop = true
-    endif
-
-    if text_color.alpha != 0.0 and text_color != blank
-      assign text = '--text:' | append: text_color | append: ';'
-    else
-      assign text = '--text:' | append: scheme_text_color | append: ';'
-    endif
-
-    assign animation_order = 2
-  -%}
-
-  {%- capture block_style -%}
+{%- style -%}
+  .slideshow__slide--{{ block.id }} {
     --overlay-opacity: {{ overlay_opacity }};
 
     {%- unless overlay_color.alpha == 0.0 or overlay_color == blank -%}
@@ -66,54 +55,69 @@
       {{ bg }}
       {{ text }}
     {%- endif -%}
-  {%- endcapture -%}
+  }
+{%- endstyle -%}
 
-  <div class="hero__image frame__item">
-    {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
-      <div class="image-overlay"></div>
-    {%- endunless -%}
-
-    {%- liquid
-      if forloop.first and section.index < 3
-        assign loading = 'eager'
-        assign fetchpriority = 'high'
-        assign preload = true
-      else
-        assign loading = 'lazy'
-        assign fetchpriority = 'auto'
-        assign preload = false
-      endif
-
-      render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, alt: alt, loading: loading, fetchpriority: fetchpriority, preload: preload
-    -%}
-  </div>
-
-  <div
-    class="hero__content__wrapper frame__item {{ block.settings.flex_align_desktop }} {{ block.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
-    data-aos="hero"
-    data-aos-anchor="{{ animation_anchor }}"
-    data-aos-order="{{ animation_order }}"
-  >
-    <div
-      class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
-      {% if show_header_backdrop %}
-        style="--overlay-opacity: {{ overlay_opacity }};"
-      {% endif %}
+<div
+  class="slideshow__slide slideshow__slide--{{ block.id }} frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }}{% if forloop.first %} is-selected{% endif %}"
+  data-slide="{{ block.id }}"
+  data-slide-text-color="{{ text_color }}"
+  {{ block.shopify_attributes }}
+>
+  {%- if image_link != blank -%}
+    <a
+      class="hero__image frame__item"
+      href="{{ image_link }}"
+      aria-label="{{ block.settings.title | default: default_slide_label | escape }}"
     >
-      {% content_for 'blocks' %}
+  {%- else -%}
+    <div class="hero__image frame__item">
+  {%- endif -%}
+
+  {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
+    <div class="image-overlay"></div>
+  {%- endunless -%}
+
+  {%- liquid
+    if forloop.first and section.index < 3
+      assign loading = 'eager'
+      assign fetchpriority = 'high'
+      assign preload = true
+    else
+      assign loading = 'lazy'
+      assign fetchpriority = 'auto'
+      assign preload = false
+    endif
+
+    render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, alt: alt, loading: loading, fetchpriority: fetchpriority, preload: preload
+  -%}
+
+  {%- if image_link -%}
+    </a>
+  {%- else -%}
     </div>
-  </div>
+  {%- endif -%}
+
+  {%- if block.type != blank -%}
+    <div class="hero__content__wrapper frame__item {{ block.settings.flex_align_desktop }} {{ block.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}">
+      <div
+        class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+        {% if show_header_backdrop %}
+          style="--overlay-opacity: {{ overlay_opacity }};"
+        {% endif %}
+      >
+        {% content_for 'blocks' %}
+      </div>
+    </div>
+  {%- endif -%}
 </div>
 
 {% schema %}
 {
-  "name": "Slide",
+  "name": "Image",
   "blocks": [{"type": "heading"}, {"type": "text"}, {"type": "button"}, {"type": "_group-buttons"}, {"type": "@app"}],
+  "tag": null,
   "settings": [
-    {
-      "type": "header",
-      "content": "Desktop"
-    },
     {
       "type": "image_picker",
       "id": "image",
@@ -121,9 +125,18 @@
       "info": "Match size to other slides"
     },
     {
+      "type": "url",
+      "id": "link",
+      "label": "Image link"
+    },
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
       "type": "select",
       "id": "flex_align_desktop",
-      "label": "Alignment",
+      "label": "Text alignment",
       "default": "align--middle-center-desktop",
       "options": [
         {"value": "align--top-left-desktop", "label": "Top left"},
@@ -150,7 +163,7 @@
     {
       "type": "select",
       "id": "flex_align_mobile",
-      "label": "Alignment",
+      "label": "Text alignment",
       "default": "align--middle-center-mobile",
       "options": [
         {"value": "align--top-left-mobile", "label": "Top left"},
@@ -167,12 +180,6 @@
     {
       "type": "header",
       "content": "Colors"
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "default": "scheme_1",
-      "label": "Color scheme"
     },
     {
       "type": "paragraph",
@@ -219,10 +226,10 @@
   ],
   "presets": [
     {
-      "name": "Slide",
+      "name": "Image",
       "blocks": [
         {
-          "type": "heading"
+          "type": "title"
         },
         {
           "type": "text"
