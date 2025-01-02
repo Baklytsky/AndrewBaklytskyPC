@@ -32,10 +32,10 @@
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  if image_1 == blank and image_2 == blank and show_placeholder == false
+  if image_1 == blank and image_2 == blank and mobile_image == blank and show_placeholder == false
     assign render_metafield_info = true
   endif
-  if section.blocks.size > 0 and image_1 != blank or image_2 != blank or show_placeholder == true
+  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or image_2 != blank or show_placeholder == true
     assign render_content_blocks = true
   endif
 
@@ -106,7 +106,6 @@
         <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_2,
-            image_mobile: mobile_image,
             sizes: sizes,
             desktop_height: desktop_height,
             mobile_height: mobile_height
