@@ -13,14 +13,15 @@
   assign second_button_show_arrow = block.settings.second_button_show_arrow
 -%}
 
-<div class="hero__button-group" {{ block.shopify_attributes }}>
+<div
+  class="hero__button-group"
+  data-aos="hero"
+  data-aos-order="auto"
+  data-aos-anchor="#{{ section.id }}"
+  {{ block.shopify_attributes }}
+>
   {%- unless first_button_text == blank -%}
-    <div
-      class="hero__button"
-      data-aos="hero"
-      data-aos-anchor="{{ animation_anchor }}"
-      data-aos-order="{{ animation_order }}"
-    >
+    <div class="hero__button">
       <a
         class="btn {{ first_button_size }} {{ first_button_style }} {{ first_button_type }}"
         href="{{ first_button_link }}"
@@ -35,12 +36,7 @@
   {%- endunless -%}
 
   {%- unless second_button_text == blank -%}
-    <div
-      class="hero__button"
-      data-aos="hero"
-      data-aos-anchor="{{ animation_anchor }}"
-      data-aos-order="{{ animation_order }}"
-    >
+    <div class="hero__button">
       <a
         class="btn {{ second_button_size }} {{ second_button_style }} {{ second_button_type }}"
         href="{{ second_button_link | default: '#!' }}"
@@ -58,6 +54,7 @@
 {% schema %}
 {
   "name": "Buttons",
+  "tag": null,
   "settings": [
     {
       "type": "header",
