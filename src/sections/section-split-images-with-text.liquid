@@ -109,17 +109,21 @@
           assign button_size = block.settings.button_size
           assign button_style = block.settings.button_style
           assign show_arrow = block.settings.show_arrow
-          assign heading_tag = block.settings.heading_tag
+          assign heading_seo_tag = block.settings.heading_tag
           assign animation_order = 0
 
+          assign is_blank = false
           assign is_image_link = false
           assign render_block_content = false
           assign render_image = true
-          if desktop_image == blank and mobile_image == blank and show_placeholder == false
+          if desktop_image == blank and mobile_image == blank
+            assign is_blank = true
+          endif
+          if is_blank and show_placeholder == false
             assign render_image = false
             assign render_metafield_info = true
           endif
-          if image_link != blank and link_text == blank
+          if image_link != blank
             assign is_image_link = true
           endif
           if title != blank or text != blank or link_text != blank
@@ -139,7 +143,7 @@
             {%- endif -%}
 
             {%- if render_image -%}
-              <div class="hero__split-image{% if desktop_image == blank and mobile_image == blank %} hero__split-image--blank{% endif %}">
+              <div class="hero__split-image{% if is_blank %} hero__split-image--blank{% endif %}">
                 {%- render 'image-hero',
                   image_desktop: desktop_image,
                   image_mobile: mobile_image,
@@ -166,10 +170,9 @@
               </div>
             {%- endif -%}
 
-            {%- comment -%}TODO 👇{%- endcomment -%}
             {%- if render_block_content -%}
               <div
-                class="hero__content__wrapper frame__item {{ block.settings.flex_align }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+                class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
                 {% if show_header_backdrop %}
                   style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
                 {% endif %}
@@ -184,16 +187,15 @@
                     {%- liquid
                       assign animation_order = animation_order | plus: 1
                       assign heading_tag = 'h2'
-
-                      unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
-                        assign heading_tag = block.settings.heading_tag
+                      unless heading_seo_tag == 'automatic' or heading_seo_tag == blank
+                        assign heading_tag = heading_seo_tag
                       endunless
                     -%}
 
                     <{{ heading_tag }}
-                      class="hero__title {{ block.settings.heading_font_size }}"
+                      class="hero__title {{ heading_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                     >
                       {{- title | escape -}}
@@ -203,9 +205,9 @@
                   {%- if text != blank -%}
                     {%- assign animation_order = animation_order | plus: 1 -%}
                     <div
-                      class="hero__description {{ block.settings.text_font_size }}"
+                      class="hero__description {{ text_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                     >
                       {{ text }}
@@ -217,16 +219,16 @@
                     <div
                       class="hero__button"
                       data-aos="hero"
-                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-anchor="#{{ section.id }}"
                       data-aos-order="{{ animation_order }}"
                     >
                       <a
-                        class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        class="btn {{ button_type }} {{ button_size }} {{ button_style }}"
                         href="{{ link | default: '#!' }}"
                       >
                         <span>{{ link_text | escape }}</span>
 
-                        {%- if block.settings.show_arrow -%}
+                        {%- if show_arrow -%}
                           {%- render 'icon-arrow-right' -%}
                         {%- endif -%}
                       </a>
