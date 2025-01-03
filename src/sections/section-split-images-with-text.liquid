@@ -1,13 +1,9 @@
 <!-- /sections/section-split-images-with-text.liquid -->
 {%- liquid
-  assign image_1 = section.settings.image_1
-  assign image_2 = section.settings.image_2
-  assign banner_link = section.settings.link
   assign gutters = section.settings.gutters
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
   assign flex_align_desktop = section.settings.flex_align_desktop
-  assign mobile_image = section.settings.mobile_image
   assign mobile_height = section.settings.mobile_height
   assign flex_align_mobile = section.settings.flex_align_mobile
   assign color_scheme = 'color-' | append: section.settings.color_scheme
@@ -21,40 +17,52 @@
   assign show_placeholder = section.settings.show_placeholder
 
   # Rendering conditions
+  # assign image_1 = section.blocks[0].settings.image
+  # assign image_2 = section.blocks[1].settings.image
+  # assign mobile_image_1 = section.blocks[0].settings.mobile_image
+  # assign mobile_image_2 = section.blocks[1].settings.mobile_image
   assign render_section = false
-  assign render_image_1 = true
-  assign render_image_2 = true
+  # assign render_image_1 = true
+  # assign render_image_2 = true
   assign render_image_overlay = false
   assign render_metafield_info = false
-  assign render_content_blocks = false
-  if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode
+  if section.blocks.size > 0 or show_placeholder or request.design_mode
     assign render_section = true
   endif
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  if image_1 == blank and image_2 == blank and mobile_image == blank and show_placeholder == false
-    assign render_metafield_info = true
-  endif
-  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or image_2 != blank or show_placeholder == true
-    assign render_content_blocks = true
-  endif
+  # if image_1 == blank and mobile_image_1 == blank and image_2 == blank and mobile_image_2 == blank and show_placeholder == false
+  #  assign render_metafield_info = true
+  #  assign render_image_1 = false
+  #  assign render_image_2 = false
+  # endif
 
-  capture sizes
-    if section_width == 'wrapper--full'
-      echo '(min-width: 750px) 50vw, 100vw'
-    elsif section_width == 'wrapper--full-padded'
-      echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
-    else
-      echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
-    endif
-  endcapture
+  #  capture sizes_mobile
+  #    if section_width == 'wrapper--full'
+  #      echo '100vw'
+  #    else
+  #      echo 'calc(100vw - 32px)'
+  #    endif
+  #  endcapture
 
-  capture sizes_mobile
-    if section_width == 'wrapper--full'
-      echo '100vw'
+  capture image_sizes
+    if section.blocks.size > 1
+      if section_width == 'wrapper--full'
+        echo '(min-width: 750px) 50vw, 100vw'
+      elsif section_width == 'wrapper--full-padded'
+        echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
+      else
+        echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
+      endif
     else
-      echo 'calc(100vw - 32px)'
+      if section_width == 'wrapper--full'
+        echo '100vw'
+      elsif section_width == 'wrapper--full-padded'
+        echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+      else
+        echo '(min-width: 990px) 1100px, (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+      endif
     endif
   endcapture
 
@@ -79,79 +87,100 @@
 {%- endstyle -%}
 
 <div
-  class="index-hero index-hero--split-images wide-image section-padding {{ color_scheme }}"
+  class="index-hero index-hero--split-images index-hero--split-images-with-text wide-image section-padding {{ color_scheme }}"
   id="{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-overlay-header
 >
   {%- if render_section -%}
-    <div class="hero__wrapper frame{% if gutters %} frame--gutters{% endif %} {{ section_width }}">
-      {%- if banner_link != blank -%}
-        <a class="hero__images frame__item" href="{{ banner_link }}">
-      {%- else -%}
-        <div class="hero__images frame__item">
-      {%- endif -%}
+    <div class="brick__section{% if gutters %} brick--margin{% endif %} {{ section_width }}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign desktop_image = block.settings.image
+          assign mobile_image = block.settings.mobile_image
+          assign image_link = block.settings.image_link
+          assign title = block.settings.title
+          assign heading_font_size = block.settings.heading_font_size
+          assign text = block.settings.text
+          assign text_font_size = block.settings.text_font_size
+          assign link_text = block.settings.link_text
+          assign link = block.settings.link
+          assign button_type = block.settings.button_type
+          assign button_size = block.settings.button_size
+          assign button_style = block.settings.button_style
+          assign show_arrow = block.settings.show_arrow
+          assign heading_tag = block.settings.heading_tag
+          assign animation_order = 0
 
-      {%- if render_image_1 -%}
-        <div
-          class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
-          {% if render_image_overlay %}
-            style="--overlay-opacity: {{ overlay_opacity }};"
-          {% endif %}
-        >
-          {%- render 'image-hero',
-            image_desktop: image_1,
-            image_mobile: mobile_image,
-            sizes: sizes,
-            desktop_height: desktop_height,
-            mobile_height: mobile_height
-          -%}
-        </div>
-      {%- endif -%}
+          assign is_image_link = false
+          assign render_block_content = false
+          assign render_image = true
+          if desktop_image == blank and mobile_image == blank and show_placeholder == false
+            assign render_image = false
+            assign render_metafield_info = true
+          endif
+          if image_link != blank and link_text == blank
+            assign is_image_link = true
+          endif
+          if title != blank or text != blank or link_text != blank
+            assign render_block_content = true
+          endif
+          if button_style == 'btn--text' and show_arrow
+            assign button_style = button_style | append: ' btn--text-no-underline'
+          endif
+        -%}
 
-      {%- if render_image_2 -%}
-        <div
-          class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
-          {% if render_image_overlay %}
-            style="--overlay-opacity: {{ overlay_opacity }};"
-          {% endif %}
-        >
-          {%- render 'image-hero',
-            image_desktop: image_2,
-            sizes: sizes,
-            desktop_height: desktop_height,
-            mobile_height: mobile_height
-          -%}
-        </div>
-      {%- endif -%}
+        <div class="brick__block" {{ block.shopify_attributes }}>
+          <div class="brick__block__image frame wide-image">
+            {%- if is_image_link -%}
+              <a class="frame__item" href="{{ image_link }}">
+            {%- else -%}
+              <div class="frame__item">
+            {%- endif -%}
 
-      {%- if render_metafield_info -%}
-        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
-      {%- endif -%}
+            {%- if render_image -%}
+              <div class="hero__split-image{% if desktop_image == blank and mobile_image == blank %} hero__split-image--blank{% endif %}">
+                {%- render 'image-hero',
+                  image_desktop: desktop_image,
+                  image_mobile: mobile_image,
+                  desktop_height: desktop_height,
+                  mobile_height: mobile_height,
+                  sizes: image_sizes
+                -%}
+              </div>
+            {%- endif -%}
 
-      {%- if banner_link != blank -%}
-        </a>
-      {%- else -%}
-        </div>
-      {%- endif -%}
+            {%- if render_metafield_info -%}
+              <div class="image__hero__missing-metafield-image">
+                {{ 'products.general.missing_metafield_image' | t }}
+              </div>
+            {%- endif -%}
 
-      {%- if render_content_blocks -%}
-        <div
-          class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
-          {% if show_header_backdrop %}
-            style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
-          {% endif %}
-        >
-          <div
-            class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
-            {% if overlay_opacity != 0.0 %}
-              style="--overlay-opacity: {{ overlay_opacity }};"
-            {% endif %}
-          >
-            {%- for block in section.blocks -%}
-              {%- case block.type -%}
-                {%- when 'heading' -%}
-                  {%- if block.settings.title != '' -%}
+            {%- if render_image_overlay -%}
+              <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
+            {%- endif -%}
+
+            {%- if is_image_link -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+
+            {%- comment -%}TODO 👇{%- endcomment -%}
+            {%- if render_block_content -%}
+              <div
+                class="hero__content__wrapper frame__item {{ block.settings.flex_align }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+                {% if show_header_backdrop %}
+                  style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
+                {% endif %}
+              >
+                <div
+                  class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+                  {% if overlay_opacity != 0.0 %}
+                    style="--overlay-opacity: {{ overlay_opacity }};"
+                  {% endif %}
+                >
+                  {%- if title != blank -%}
                     {%- liquid
                       assign animation_order = animation_order | plus: 1
                       assign heading_tag = 'h2'
@@ -164,90 +193,51 @@
                     <{{ heading_tag }}
                       class="hero__title {{ block.settings.heading_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}
                     >
-                      {{ block.settings.title | escape -}}
+                      {{- title | escape -}}
                     </{{ heading_tag }}>
                   {%- endif -%}
 
-                {%- when 'text' -%}
-                  {%- if block.settings.text != blank -%}
+                  {%- if text != blank -%}
                     {%- assign animation_order = animation_order | plus: 1 -%}
                     <div
                       class="hero__description {{ block.settings.text_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}
                     >
-                      {{ block.settings.text }}
+                      {{ text }}
                     </div>
                   {%- endif -%}
 
-                {%- when 'button' -%}
-                  {%- liquid
-                    assign prev_index = forloop.index0 | minus: 1
-                    assign next_index = forloop.index0 | plus: 1
-                    assign prev_block = section.blocks[prev_index]
-                    assign next_block = section.blocks[next_index]
-                    assign link_url = block.settings.link
-                    assign link_text = block.settings.link_text
-                    assign animation_order = animation_order | plus: 1
-
-                    assign button_style = block.settings.button_style
-                    if button_style == 'btn--text' and block.settings.show_arrow
-                      assign button_style = button_style | append: ' btn--text-no-underline'
-                    endif
-                  -%}
-
-                  {%- if next_block.type == 'button' and next_index != section.blocks.size -%}
-                    <div class="hero__button-group">
-                  {%- endif -%}
-
-                  {%- if link_text != '' -%}
+                  {%- if link_text != blank -%}
+                    {%- assign animation_order = animation_order | plus: 1 -%}
                     <div
                       class="hero__button"
                       data-aos="hero"
-                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
-                      {{ block.shopify_attributes }}
                     >
                       <a
                         class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
-                        href="{{ link_url | default: '#!' }}"
+                        href="{{ link | default: '#!' }}"
                       >
                         <span>{{ link_text | escape }}</span>
 
                         {%- if block.settings.show_arrow -%}
-                          {% render 'icon-arrow-right' %}
+                          {%- render 'icon-arrow-right' -%}
                         {%- endif -%}
                       </a>
                     </div>
                   {%- endif -%}
-
-                  {%- if prev_block.type == 'button' and prev_index != -1 -%}
-                    </div>
-                  {%- endif -%}
-
-                {%- when 'code' -%}
-                  {%- assign animation_order = animation_order | plus: 1 -%}
-
-                  <div
-                    class="hero__custom-code"
-                    data-aos="hero"
-                    data-aos-anchor="#{{ section.id }}"
-                    data-aos-order="{{ animation_order }}"
-                    {{ block.shopify_attributes }}
-                  >
-                    {{ block.settings.code }}
-                  </div>
-              {%- endcase -%}
-            {%- endfor -%}
+                </div>
+              </div>
+            {%- endif -%}
           </div>
         </div>
-      {%- endif -%}
+      {%- endfor -%}
     </div>
   {%- endif -%}
 </div>
@@ -320,11 +310,6 @@
     {
       "type": "header",
       "content": "Mobile"
-    },
-    {
-      "type": "image_picker",
-      "id": "mobile_image",
-      "label": "Image"
     },
     {
       "type": "select",
@@ -441,6 +426,11 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image"
         },
         {
           "type": "url",
