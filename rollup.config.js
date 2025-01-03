@@ -44,14 +44,13 @@ const developmentComment = `
 `;
 
 const globalPackages = {
-  '@shopify/theme-a11y': 'themeVendor.a11y',
   '@shopify/theme-rte': 'themeVendor.themeRte',
   flickity: 'themeVendor.Flickity',
   'flickity-fade': 'themeVendor.FlickityFade',
   'scroll-lock': 'themeVendor.ScrollLock',
 };
 
-const externalPackages = ['@shopify/theme-a11y', '@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'flickity', 'flickity-fade', 'scroll-lock'];
+const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'flickity', 'flickity-fade', 'scroll-lock'];
 
 const config = {
   development: [
@@ -324,7 +323,7 @@ const config = {
         output: {
           file: path.join(dist, 'assets', fileName),
           name: 'component',
-          sourcemap: true,
+          sourcemap: false,
           format: 'iife',
           plugins: [production && terser()],
         },

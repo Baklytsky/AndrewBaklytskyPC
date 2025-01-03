@@ -1,5 +1,4 @@
-import DeferredMedia from '../globals/deferred-media';
-
+import {DeferredMedia} from '../features/deferred-media';
 class ProductModel extends DeferredMedia {
   constructor() {
     super();
@@ -51,8 +50,8 @@ window.ProductModel = {
   },
 };
 
-export {ProductModel};
-
 window.addEventListener('DOMContentLoaded', () => {
   if (window.ProductModel) window.ProductModel.loadShopifyXR();
 });
+
+export {ProductModel};

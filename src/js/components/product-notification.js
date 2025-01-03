@@ -1,5 +1,5 @@
 const selectors = {
-  productModal: 'product-modal',
+  popupComponent: 'popup-component',
   close: '[data-popup-close]',
   notificationForm: '[data-notification-form]',
   notificationHeading: '[data-product-notification-heading]',
@@ -38,7 +38,7 @@ if (!customElements.get('product-notification')) {
           const productNotificationHeading = this.querySelector(selectors.notificationHeading);
           productNotificationHeading.classList.add(classes.hidden);
 
-          this.closest(selectors.productModal).classList.add(classes.success);
+          this.closest(selectors.popupComponent).classList.add(classes.success);
           this.popup.removeAttribute('inert');
 
           if (typeof this.popup.showModal === 'function') {

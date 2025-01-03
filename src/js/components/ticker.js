@@ -1,5 +1,3 @@
-import debounce from '../util/debounce';
-
 const selectors = {
   frame: '[data-ticker-frame]',
   scale: '[data-ticker-scale]',
@@ -46,7 +44,7 @@ if (!customElements.get('ticker-bar')) {
         this.checkWidth();
         this.addEventListener(
           'theme:ticker:refresh',
-          debounce(() => this.checkWidthEvent(), 50)
+          window.theme.debounce(() => this.checkWidthEvent(), 50)
         );
 
         screen.orientation.addEventListener('change', this.checkWidthEvent);

@@ -1,5 +1,3 @@
-import {isDesktop} from '../util/media-query';
-
 const selectors = {
   collapsible: '[data-collapsible]',
   trigger: '[data-collapsible-trigger]',
@@ -54,7 +52,7 @@ class CollapsibleElements extends HTMLElement {
   }
 
   toggle() {
-    const isDesktopView = isDesktop();
+    const isDesktopView = !window.theme.isMobile();
 
     this.collapsibles.forEach((collapsible) => {
       if (!collapsible.hasAttribute(attributes.desktop) && !collapsible.hasAttribute(attributes.mobile)) return;

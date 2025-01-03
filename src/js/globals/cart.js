@@ -1,8 +1,3 @@
-import {formatMoney} from '../globals/currency';
-
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-
-import throttle from '../util/throttle';
 import FetchError from '../util/fetch-error';
 
 const classes = {
@@ -64,7 +59,6 @@ const selectors = {
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
   termsErrorMessage: '[data-terms-error-message]',
-  recentlyViewedHolderId: 'recently-viewed-products-cart',
   noscript: 'noscript',
 };
 
@@ -85,6 +79,8 @@ const attributes = {
 class CartItems extends HTMLElement {
   constructor() {
     super();
+
+    this.a11y = window.theme.a11y;
   }
 
   connectedCallback() {
@@ -137,16 +133,13 @@ class CartItems extends HTMLElement {
     this.build = this.build.bind(this);
     this.updateCart = this.updateCart.bind(this);
     this.productAddCallback = this.productAddCallback.bind(this);
-    this.formSubmitHandler = throttle(this.formSubmitHandler.bind(this), 50);
+    this.formSubmitHandler = window.theme.throttle(this.formSubmitHandler.bind(this), 50);
 
     if (this.cartPage) {
       this.animateItems();
     }
 
     if (this.cart) {
-      // Recently viewed products
-      this.recentlyViewedProducts();
-
       // Checking
       this.hasItemsInCart = this.hasItemsInCart.bind(this);
       this.cartCount = this.getCartItemCount();
@@ -762,7 +755,7 @@ class CartItems extends HTMLElement {
 
     if (!hasItemsInCart && this.cartDrawer) {
       setTimeout(() => {
-        a11y.trapFocus(this.cartDrawer, {
+        this.a11y.trapFocus(this.cartDrawer, {
           elementToFocus: this.cartDrawer.querySelector(selectors.cartDrawerClose),
         });
       }, 100);
@@ -807,7 +800,7 @@ class CartItems extends HTMLElement {
     );
 
     // Update cart total price
-    this.cartTotal.innerHTML = this.subtotal === 0 ? window.theme.strings.free : formatMoney(this.subtotal, theme.moneyWithCurrencyFormat);
+    this.cartTotal.innerHTML = this.subtotal === 0 ? window.theme.strings.free : window.theme.formatMoney(this.subtotal, theme.moneyWithCurrencyFormat);
 
     if (this.totalItems !== this.newTotalItems) {
       this.totalItems = this.newTotalItems;
@@ -896,7 +889,7 @@ class CartItems extends HTMLElement {
     const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
     const percent = Math.min(percentValue * 100, 100);
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpend = formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
@@ -948,18 +941,6 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.animated);
       });
     });
-  }
-
-  recentlyViewedProducts() {
-    const recentlyViewedHolder = this.cart.querySelector(`#${selectors.recentlyViewedHolderId}`);
-    if (recentlyViewedHolder) {
-      Shopify.Products.showRecentlyViewed({
-        howManyToShow: 3,
-        wrapperId: selectors.recentlyViewedHolderId,
-        section: this,
-        target: 'api-upsell-product',
-      });
-    }
   }
 }
 

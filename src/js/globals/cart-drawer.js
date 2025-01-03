@@ -1,5 +1,3 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
-import waitForAnimationEnd from '../globals/animation-end-promise';
 import appendCartItems from '../globals/append-cart-items';
 
 const classes = {
@@ -36,6 +34,7 @@ class CartDrawer extends HTMLElement {
     this.openCartDrawerOnSelect = this.openCartDrawerOnSelect.bind(this);
     this.closeCartDrawerOnDeselect = this.closeCartDrawerOnDeselect.bind(this);
     this.cartDrawerSection = this.closest(selectors.shopifySection);
+    this.a11y = window.theme.a11y;
 
     this.closeCartEvents();
   }
@@ -150,8 +149,8 @@ class CartDrawer extends HTMLElement {
     // Observe Additional Checkout Buttons
     this.observeAdditionalCheckoutButtons();
 
-    waitForAnimationEnd(this.cartDrawerInner).then(() => {
-      a11y.trapFocus(this, {
+    window.theme.waitForAnimationEnd(this.cartDrawerInner).then(() => {
+      this.a11y.trapFocus(this, {
         elementToFocus: this.querySelector(selectors.cartDrawerClose),
       });
     });
@@ -177,13 +176,13 @@ class CartDrawer extends HTMLElement {
       })
     );
 
-    a11y.removeTrapFocus();
-    a11y.autoFocusLastElement();
+    this.a11y.removeTrapFocus();
+    this.a11y.autoFocusLastElement();
 
     document.body.removeEventListener('click', this.onBodyClickEvent);
     document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
 
-    waitForAnimationEnd(this.cartDrawerInner).then(() => {
+    window.theme.waitForAnimationEnd(this.cartDrawerInner).then(() => {
       this.classList.remove(classes.closing);
     });
   }
@@ -232,7 +231,7 @@ class CartDrawer extends HTMLElement {
       // create a new instance of `MutationObserver` named `observer`,
       // passing it a callback function
       const observer = new MutationObserver(() => {
-        a11y.trapFocus(this, {
+        this.a11y.trapFocus(this, {
           elementToFocus: this.querySelector(selectors.cartDrawerClose),
         });
         observer.disconnect();

@@ -1,15 +1,17 @@
 {% comment %}
-    Renders newsletter form from a block on newsletter, footer, popup and custom content sections
+  Renders newsletter form from a block on newsletter, footer, popup and custom content sections
 
-    Accepts:
-    - block: {Object} Block object
-    - show_discount_message: {String} Discount message text (Optional)
-    - success_text: {String} Success message text (Optional)
-    - small_newsletter: {Boolean} Set true to hide the form
+  Accepts:
+  - block: {Object} Block object
+  - show_discount_message: {String} Discount message text (Optional)
+  - success_text: {String} Success message text (Optional)
+  - small_newsletter: {Boolean} Set true to hide the form
 
-    Usage:
-    {% render 'newsletter-form', block: block, show_discount_message: show_discount_message success_text: success_text, small_newsletter: small_newsletter %}
+  Usage:
+  {% render 'newsletter-form', block: block, show_discount_message: show_discount_message success_text: success_text, small_newsletter: small_newsletter %}
 {% endcomment %}
+
+<script src="{{ 'newsletter.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign unique = block.id | default: section.id
@@ -120,55 +122,61 @@
     value="{% if customer %}{{ customer.first_name }}{% endif %}">
 {%- endcapture -%}
 
-{%- form 'customer', class: form_class, id: form_id, data-newsletter-form: '', style: style -%}
-  {%- liquid
-    assign success_message = 'general.newsletter_form.thank_you' | t
-    assign success_message_discount = 'general.newsletter_form.thank_you_with_code_html' | t
+<newsletter-component>
+  {%- form 'customer', class: form_class, id: form_id, data-newsletter-form: '', style: style -%}
+    {%- liquid
+      assign success_message = 'general.newsletter_form.thank_you' | t
+      assign success_message_discount = 'general.newsletter_form.thank_you_with_code_html' | t
 
-    if success_text != blank
-      assign success_message_discount = success_text | remove: '<p>' | remove: '</p>'
-    endif
-  -%}
+      if success_text != blank
+        assign success_message_discount = success_text | remove: '<p>' | remove: '</p>'
+      endif
+    -%}
 
-  {%- if form.posted_successfully? -%}
-    <p class="newsletter__message newsletter__message--success" id="Newsletter-success--{{ unique }}" tabindex="-1" autofocus>
-      {%- if show_discount_message and success_message_discount != blank -%}
-        {{ success_message_discount }}
-      {%- else -%}
-        {{ success_message }}
-      {%- endif -%}
-    </p>
-  {%- endif -%}
-
-  <div class="newsletter__message newsletter__message--error errors" id="Newsletter-error--{{ unique }}">
-    {%- if form.errors -%}
-      {{ form.errors.translated_fields.email | capitalize }}
-      {{ form.errors.messages.email }}
-    {%- else -%}
-      <em>{{ 'general.newsletter_form.error_message' | t }}</em>
+    {%- if form.posted_successfully? -%}
+      <p
+        class="newsletter__message newsletter__message--success"
+        id="Newsletter-success--{{ unique }}"
+        tabindex="-1"
+        autofocus
+      >
+        {%- if show_discount_message and success_message_discount != blank -%}
+          {{ success_message_discount }}
+        {%- else -%}
+          {{ success_message }}
+        {%- endif -%}
+      </p>
     {%- endif -%}
-  </div>
 
-  <input type="hidden" name="contact[accepts_marketing]" value="true">
-
-  {%- if show_name -%}
-    <div class="input-row">{{ name_field }}</div>
-    <div class="input-row">{{ email_field }}</div>
-    <div class="input-row">{{ submit_button }}</div>
-  {%- endif -%}
-
-  {%- unless show_name -%}
-    <div class="input-group">
-      {{ email_field }}
-      {{ submit_button }}
+    <div class="newsletter__message newsletter__message--error errors" id="Newsletter-error--{{ unique }}">
+      {%- if form.errors -%}
+        {{ form.errors.translated_fields.email | capitalize }}
+        {{ form.errors.messages.email }}
+      {%- else -%}
+        <em>{{ 'general.newsletter_form.error_message' | t }}</em>
+      {%- endif -%}
     </div>
-  {%- else -%}
 
-  {%- endunless -%}
+    <input type="hidden" name="contact[accepts_marketing]" value="true">
 
-  {%- if block.settings.terms -%}
-    <div class="form__legal">
-      {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
-    </div>
-  {%- endif -%}
-{%- endform -%}
+    {%- if show_name -%}
+      <div class="input-row">{{ name_field }}</div>
+      <div class="input-row">{{ email_field }}</div>
+      <div class="input-row">{{ submit_button }}</div>
+    {%- endif -%}
+
+    {%- unless show_name -%}
+      <div class="input-group">
+        {{ email_field }}
+        {{ submit_button }}
+      </div>
+    {%- else -%}
+    {%- endunless -%}
+
+    {%- if block.settings.terms -%}
+      <div class="form__legal">
+        {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
+      </div>
+    {%- endif -%}
+  {%- endform -%}
+</newsletter-component>

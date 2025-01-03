@@ -1,40 +1,50 @@
 <!-- /templates/customers/login.liquid -->
-
-{% if customer %}
-<p class="center">Redirecting...</p>
-<script type="text/javascript">
-  window.location = '{{ routes.account_url }}';
-</script>
 <script src="{{ 'customer-login.js' | asset_url }}" defer="defer"></script>
 
-<login-form id="Login" class="account account--login {% if shop.checkout.guest_login %}text-justify{% else %}text-center{% endif %}">
+<login-form
+  id="Login"
+  class="account account--login {% if shop.checkout.guest_login %}text-justify{% else %}text-center{% endif %}"
+>
   <div class="wrapper wrapper--narrow">
     <div class="login fade-toggle{% if shop.checkout.guest_login %} align-left{% endif %}" data-login-form>
       <h2 class="page__heading text-left">{{ 'customer.login.title' | t }}</h2>
 
-      <p>{{ 'customer.login.create_account_prompt' | t }} <a href="{{ routes.account_register_url }}" class="text-link">{{ 'customer.login.create_account_cta' | t }}</a>.</p>
+      <p>
+        {{ 'customer.login.create_account_prompt' | t }}
+        <a href="{{ routes.account_register_url }}" class="text-link">{{ 'customer.login.create_account_cta' | t }}</a>.
+      </p>
 
       {% form 'customer_login' %}
         <div class="form-field">{{ form.errors | default_errors }}</div>
 
         <div class="form-field">
           <label for="customer_email">{{ 'customer.login.email' | t }}</label>
-          <input type="email" value="" name="customer[email]" id="customer_email"
+          <input
+            type="email"
+            value=""
+            name="customer[email]"
+            id="customer_email"
             class="{% if form.errors contains 'email' %}input-error{% endif %}"
             placeholder="{{ 'customer.login.email' | t }}"
             spellcheck="false"
             autocomplete="off"
             autocapitalize="off"
-            autofocus>
+            autofocus
+          >
         </div>
 
         {% if form.password_needed %}
           <div class="form-field">
             <label for="customer_password">{{ 'customer.login.password' | t }}</label>
 
-            <input type="password" value="" name="customer[password]" id="customer_password"
+            <input
+              type="password"
+              value=""
+              name="customer[password]"
+              id="customer_password"
               class="{% if form.errors contains 'password' %}input-error{% endif %}"
-              placeholder="{{ 'customer.login.password' | t }}">
+              placeholder="{{ 'customer.login.password' | t }}"
+            >
 
             <div class="forgot-password">
               <div>
@@ -114,5 +124,3 @@
     {%- endif -%}
   </div>
 </login-form>
-
-{%- endif -%}

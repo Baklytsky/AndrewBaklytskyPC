@@ -61,19 +61,35 @@
 
 {%- if show_upsell -%}
   <quick-add-product>
-    <div class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_cart %} product-upsell__holder--cart{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}" data-quick-add-holder="{{ upsell_product.id }}">
+    <div
+      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_cart %} product-upsell__holder--cart{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}"
+      data-quick-add-holder="{{ upsell_product.id }}"
+    >
       <div data-cart-errors-container class="product-upsell__errors"></div>
 
       <div class="product-upsell{% if upsell_modifier != '' %} {{ upsell_modifier }}{% endif %}">
         <div class="product-upsell__image">
           {%- if upsell_error -%}
-            <div class="product-upsell__image__thumb svg-placeholder" role="img">
+            <div
+              class="product-upsell__image__thumb svg-placeholder{% if settings.show_gray_bg %} show-gray-bg{% endif %}"
+              role="img"
+            >
               {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
             </div>
           {%- else -%}
-            <a href="{{ upsell_product.url }}" class="product-upsell__image__link" aria-label="{{ upsell_product.title | strip_html | escape }}">
-              <div class="product-upsell__image__thumb">
-                {%- render 'image' image: upsell_variant_image, widths: '120, 180, 240, 300, 360', width: '240', sizes: '120px', cover: true -%}
+            <a
+              href="{{ upsell_product.url }}"
+              class="product-upsell__image__link"
+              aria-label="{{ upsell_product.title | strip_html | escape }}"
+            >
+              <div class="product-upsell__image__thumb{% if settings.show_gray_bg %} show-gray-bg{% endif %}">
+                {%- render 'image',
+                  image: upsell_variant_image,
+                  widths: '120, 180, 240, 300, 360',
+                  width: '240',
+                  sizes: '120px',
+                  cover: true
+                -%}
               </div>
             </a>
           {%- endif -%}
@@ -88,7 +104,8 @@
             {%- if onboarding and upsell_quick_add_hide == false -%}
               <div class="product-upsell__actions">
                 <div class="btn__outer">
-                  <button class="product-upsell__btn"
+                  <button
+                    class="product-upsell__btn"
                     type="button"
                   >
                     <span class="btn__plus"></span>
@@ -102,7 +119,9 @@
               <p class="product-upsell__title h3">{{ upsell_product.title | strip_html }}</p>
 
               {%- if upsell_product.variants.size == 1 and upsell_variant.title != 'Default Title' -%}
-                <p class="product-upsell__variant-title h4">{{ upsell_variant.title | replace: '/', '<span>&nbsp;</span>' }}</p>
+                <p class="product-upsell__variant-title h4">
+                  {{ upsell_variant.title | replace: '/', '<span>&nbsp;</span>' }}
+                </p>
               {%- endif -%}
 
               <p class="product-upsell__price{% if upsell_variant.compare_at_price > upsell_variant.price %} sale{% endif %}">
@@ -133,7 +152,9 @@
 
                   <br>
 
-                  <span class="visually-hidden visually-hidden--inline">{{ 'products.product.unit_price_label' | t }}</span>
+                  <span class="visually-hidden visually-hidden--inline">
+                    {{- 'products.product.unit_price_label' | t -}}
+                  </span>
 
                   <span class="unit">
                     {{ upsell_variant.unit_price | money }}
@@ -169,12 +190,15 @@
                     <input type="hidden" name="id" value="{{ upsell_variant.id }}">
 
                     <div class="btn__outer">
-                      <button class="product-upsell__btn"
+                      <button
+                        class="product-upsell__btn"
                         type="submit"
                         name="add"
                         data-quick-add-btn
                         data-add-to-cart
-                        {% unless upsell_variant.available %}disabled="disabled"{% endunless %}
+                        {% unless upsell_variant.available %}
+                          disabled="disabled"
+                        {% endunless %}
                       >
                         <span class="btn__plus"></span>
                         <span class="btn__text">{{ upsell_button_text }}</span>
@@ -192,7 +216,8 @@
                   {%- endform -%}
                 {%- else -%}
                   <div class="btn__outer">
-                    <button class="product-upsell__btn"
+                    <button
+                      class="product-upsell__btn"
                       type="button"
                       data-quick-add-btn
                       data-quick-add-modal-handle="{{ upsell_product.handle }}"

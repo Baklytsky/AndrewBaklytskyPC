@@ -3,8 +3,6 @@ import loadScript from '../util/loader';
 
 window.theme.mapAPI = window.theme.mapAPI || null;
 
-/* global google */
-
 if (!customElements.get('map-component')) {
   customElements.define(
     'map-component',

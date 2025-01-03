@@ -7,11 +7,11 @@
   assign animation_delay_increment = 50
   assign animation_cart_empty_delay = 100
   assign cart_item_count = cart.item_count | plus: 0
-  assign empty_cart_products = settings.empty_cart_products | default: nil
+  assign empty_cart_products = settings.empty_cart_products | default: null
   assign show_empty_cart_menu = settings.show_empty_cart_menu
   assign empty_cart_menu = settings.empty_cart_menu
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign free_shipping_block = section.blocks | where: "type", "free-shipping"
+  assign free_shipping_block = section.blocks | where: 'type', 'free-shipping'
   assign is_free_shipping_first = false
   if section.blocks[0] == free_shipping_block[0]
     assign is_free_shipping_first = true
@@ -36,10 +36,12 @@
   }
 {%- endstyle -%}
 <div class="cart-holder {{ color_scheme }}">
-  <div class="cart section-padding{% if empty_cart %} is-empty{% endif %}"
+  <div
+    class="cart section-padding{% if empty_cart %} is-empty{% endif %}"
     data-section-id="{{ section.id }}"
     data-section-type="cart"
-    data-cart-page>
+    data-cart-page
+  >
     <div class="cart__empty" data-cart-empty>
       <h1
         class="cart__title"
@@ -88,11 +90,11 @@
             <span>{{ 'cart.general.continue_shopping' | t }}</span>
           </a>
         </div>
-
       {%- endif -%}
 
       {%- if empty_cart_products -%}
-        <div class="cart__empty__product"
+        <div
+          class="cart__empty__product"
           data-animation="{{ animation_name }}"
           data-animation-duration="{{ animation_duration }}"
           data-animation-delay="{{ animation_cart_empty_delay }}"
@@ -110,11 +112,18 @@
       {%- endif -%}
 
       {%- if settings.show_recently_viewed_products -%}
-        <div class="cart__empty__product hidden"
+        <script src="{{ 'shopify-products.js' | asset_url }}" defer="defer"></script>
+        <script src="{{ 'recently-viewed.js' | asset_url }}" defer="defer"></script>
+
+        <recently-viewed
+          class="cart__empty__product hidden"
           id="recently-viewed-products-cart"
+          data-limit="3"
+          data-target="api-upsell-product"
           data-animation="{{ animation_name }}"
           data-animation-duration="{{ animation_duration }}"
-          data-animation-delay="{{ animation_cart_empty_delay }}"></div>
+          data-animation-delay="{{ animation_cart_empty_delay }}"
+        ></recently-viewed>
       {%- endif -%}
     </div>
 
@@ -123,17 +132,22 @@
 
       <div class="cart__inner">
         <div class="cart__content">
-          <h1 class="cart__title"
+          <h1
+            class="cart__title"
             data-animation="{{ animation_name }}"
             data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
-          >{{ 'cart.general.title' | t }}
+          >
+            {{ 'cart.general.title' | t }}
 
-            <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">{{ cart_item_count }}</cart-count>
+            <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">
+              {{- cart_item_count -}}
+            </cart-count>
           </h1>
 
-          <div class="cart__button-continue"
+          <div
+            class="cart__button-continue"
             data-animation="{{ animation_name }}"
             data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
@@ -150,13 +164,19 @@
 
               <p class="cart__errors__content" data-error-message></p>
 
-              <button class="cart__errors__close" type="button" data-cart-error-close aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}">
+              <button
+                class="cart__errors__close"
+                type="button"
+                data-cart-error-close
+                aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}"
+              >
                 {%- render 'icon-cancel' -%}
               </button>
             </div>
           </div>
 
-          <cart-items class="cart__items"
+          <cart-items
+            class="cart__items"
             data-items-holder
             data-animation="{{ animation_name }}"
             data-animation-duration="{{ animation_duration }}"
@@ -170,7 +190,8 @@
         <div class="cart__aside" data-checkout-buttons>
           {%- assign animation_delay = animation_delay_initial -%}
           {%- if is_free_shipping_first -%}
-            <div class="cart-block"
+            <div
+              class="cart-block"
               data-animation="{{ animation_name }}"
               data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_delay }}"
@@ -181,7 +202,8 @@
             </div>
           {%- endif -%}
 
-          <div class="cart__price__holder"
+          <div
+            class="cart__price__holder"
             data-cart-price-holder
             data-animation="{{ animation_name }}"
             data-animation-duration="{{ animation_duration }}"
@@ -193,9 +215,13 @@
 
           <collapsible-elements single="true">
             {%- for block in section.blocks -%}
-              {%- assign animation_delay = forloop.index | times: animation_delay_increment | plus: animation_delay_initial -%}
+              {%- assign animation_delay = forloop.index
+                | times: animation_delay_increment
+                | plus: animation_delay_initial
+              -%}
 
-              <div class="cart-block"
+              <div
+                class="cart-block"
                 data-animation="{{ animation_name }}"
                 data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ animation_delay }}"
@@ -218,7 +244,7 @@
                     </div>
 
                   {%- when 'product-list' -%}
-                    {%- render 'cart-block-upsell' block: block -%}
+                    {%- render 'cart-block-upsell', block: block -%}
 
                   {%- when 'free-shipping' -%}
                     {%- unless is_free_shipping_first -%}
@@ -235,7 +261,7 @@
                     {%- render 'cart-block-shipping-calculator', block: block -%}
 
                   {%- when 'icon' -%}
-                    {%- render 'icon' block: block -%}
+                    {%- render 'icon', block: block -%}
 
                   {%- when 'payment-icons' -%}
                     {%- unless shop.enabled_payment_types == empty -%}
@@ -253,22 +279,41 @@
 
                   {%- when 'checkout-buttons' -%}
                     <div class="cart__foot__inner">
-                      <button type="submit" name="update" class="btn btn--full btn--outline btn--primary cart__checkout no-js">
+                      <button
+                        type="submit"
+                        name="update"
+                        class="btn btn--full btn--outline btn--primary cart__checkout no-js"
+                      >
                         {{- 'cart.general.update' | t -}}
                       </button>
 
                       <div class="cart__buttons-wrapper">
                         {%- if settings.enable_accept_terms -%}
-                          <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes"/>
-                          <input type="checkbox" class="cart__acceptance__input" name="acceptance" id="acceptance" data-cart-acceptance-checkbox>
-                          <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>{{ settings.accept_terms_text }}</label>
+                          <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes">
+                          <input
+                            type="checkbox"
+                            class="cart__acceptance__input"
+                            name="acceptance"
+                            id="acceptance"
+                            data-cart-acceptance-checkbox
+                          >
+                          <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>
+                            {{- settings.accept_terms_text -}}
+                          </label>
 
                           <p class="cart__terms cart__errors__content" data-terms-error-message></p>
                         {%- endif -%}
 
-                        <div class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}" data-cart-checkout-buttons>
+                        <div
+                          class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}"
+                          data-cart-checkout-buttons
+                        >
                           <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
-                            <button type="submit" name="checkout" class="btn btn--full btn--primary btn--solid cart__checkout">
+                            <button
+                              type="submit"
+                              name="checkout"
+                              class="btn btn--full btn--primary btn--solid cart__checkout"
+                            >
                               {%- if settings.show_lock_icon -%}
                                 {%- render 'animated-icon', filename: 'icon-lock' -%}
                               {%- endif -%}
@@ -289,13 +334,10 @@
                         {{- 'cart.general.subtotal_note' | t -}}
                       </em>
                     </div>
-
                 {%- endcase -%}
-
               </div>
             {%- endfor -%}
           </collapsible-elements>
-
         </div>
       </div>
     </form>
@@ -421,43 +463,43 @@
           "label": "Icon",
           "default": "icon-award",
           "options": [
-            { "label": "Award", "value": "icon-award" },
-            { "label": "Box", "value": "icon-box" },
-            { "label": "Chat", "value": "icon-chat" },
-            { "label": "Cloud", "value": "icon-cloud" },
-            { "label": "Diameter", "value": "icon-diameter" },
-            { "label": "Discount", "value": "icon-discount" },
-            { "label": "Donation", "value": "icon-donation" },
-            { "label": "Droplet", "value": "icon-droplet" },
-            { "label": "Info", "value": "icon-info-empty" },
-            { "label": "Email", "value": "icon-email" },
-            { "label": "Fast shipment", "value": "icon-fast-shipment" },
-            { "label": "Flare", "value": "icon-flare" },
-            { "label": "Flower", "value": "icon-flower" },
-            { "label": "Gift", "value": "icon-gift" },
-            { "label": "Green shipment", "value": "icon-green-shipment" },
-            { "label": "Heart", "value": "icon-heart" },
-            { "label": "Leaf", "value": "icon-leaf" },
-            { "label": "Lightning", "value": "icon-lightning" },
-            { "label": "Location", "value": "icon-location" },
-            { "label": "Mail", "value": "icon-mail" },
-            { "label": "Notes", "value": "icon-notes" },
-            { "label": "Pants", "value": "icon-pants" },
-            { "label": "Peace", "value": "icon-peace" },
-            { "label": "Pin", "value": "icon-pin" },
-            { "label": "Planet", "value": "icon-planet" },
-            { "label": "Phone", "value": "icon-phone" },
-            { "label": "Recycle", "value": "icon-recycle" },
-            { "label": "Ruler", "value": "icon-ruler" },
-            { "label": "Shield", "value": "icon-shield" },
-            { "label": "Smile", "value": "icon-smile" },
-            { "label": "Star", "value": "icon-star" },
-            { "label": "Tree", "value": "icon-tree" },
-            { "label": "Trophy", "value": "icon-trophy" },
-            { "label": "Truck", "value": "icon-truck" },
-            { "label": "Vegan", "value": "icon-vegan" },
-            { "label": "Wash", "value": "icon-wash" },
-            { "label": "Washing machine", "value": "icon-washing-machine" }
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightning", "value": "icon-lightning"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
           ]
         },
         {

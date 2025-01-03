@@ -11,7 +11,6 @@
  */
 
 import {AddressForm} from '@shopify/theme-addresses';
-import {formatMoney} from '../globals/currency';
 
 import getUrlString from '../util/get-url-string';
 import FetchError from '../util/fetch-error';
@@ -131,7 +130,7 @@ class ShippingCalculator extends HTMLElement {
   }
 
   formatRate(cents) {
-    const price = cents === '0.00' ? window.theme.strings.free : formatMoney(cents, theme.moneyFormat);
+    const price = cents === '0.00' ? window.theme.strings.free : window.theme.formatMoney(cents, theme.moneyFormat);
     return price;
   }
 

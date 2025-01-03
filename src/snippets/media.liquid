@@ -22,9 +22,9 @@
 
   capture image
     assign loading = loading | default: 'lazy'
-    assign preload = nil
-    assign fetchpriority = nil
-    assign attributes = attributes | default: nil
+    assign preload = null
+    assign fetchpriority = null
+    assign attributes = attributes | default: null
     assign cover = cover | default: false
 
     if template.name == 'product' and media == featured_media
@@ -38,8 +38,7 @@
 
     assign image_sizes = '(min-width: 1400px) ' | append: image_width | append: 'px, (min-width: 750px) calc(50vw - 30px), calc(100vw - 32px)'
 
-    render 'image' image: media.preview_image, sizes: image_sizes, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: attributes, aspect_ratio: media_aspect_ratio, cover: cover
-
+    render 'image', image: media.preview_image, sizes: image_sizes, loading: loading, fetchpriority: fetchpriority, preload: preload, attributes: attributes, aspect_ratio: media_aspect_ratio, cover: cover
   endcapture
 -%}
 
@@ -62,9 +61,9 @@
   {% endif %}
   data-slide
 >
-
   {%- if media.media_type == 'image' -%}
-    <div class="product__photo"
+    <div
+      class="product__photo{% if settings.show_gray_bg %} show-gray-bg{% endif %}"
       tabindex="0"
       style="--aspect-ratio: {{ media_aspect_ratio }}"
       {% if section.settings.enable_zoom %}
@@ -82,40 +81,44 @@
     {%- else -%}
       <deferred-media class="product__media deferred-media" style="padding-top: {{ media_padding_top }}%;">
     {%- endif -%}
-        <button type="button" class="deferred-media__poster" aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}" data-deferred-media-button>
-          <span class="deferred-media__poster-button">
-            {%- if media.media_type == 'model' -%}
-              {%- render 'icon-media-model' -%}
-            {%- else -%}
-              {%- render 'icon-media-video' -%}
-            {%- endif -%}
-          </span>
+    <button
+      type="button"
+      class="deferred-media__poster"
+      aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}"
+      data-deferred-media-button
+    >
+      <span class="deferred-media__poster-button">
+        {%- if media.media_type == 'model' -%}
+          {%- render 'icon-media-model' -%}
+        {%- else -%}
+          {%- render 'icon-media-video' -%}
+        {%- endif -%}
+      </span>
 
-          {{ image }}
-        </button>
+      {{ image }}
+    </button>
 
-        <template>
-          {%- liquid
-            case media.media_type
-              when 'model'
-                echo media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id
-              when 'video'
-                echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
-              when 'external_video'
-                if media.host == 'youtube'
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
-                else
-                  echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
-                endif
-            endcase
-          -%}
-        </template>
+    <template>
+      {%- liquid
+        case media.media_type
+          when 'model'
+            echo media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id
+          when 'video'
+            echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
+          when 'external_video'
+            if media.host == 'youtube'
+              echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
+            else
+              echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping | external_video_tag: loading: 'lazy', data-host: media.host
+            endif
+        endcase
+      -%}
+    </template>
 
     {%- if media.media_type == 'model' -%}
       </product-model>
     {%- else -%}
       </deferred-media>
     {%- endif -%}
-
   {%- endif -%}
 </div>

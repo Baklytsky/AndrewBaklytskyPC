@@ -1,8 +1,5 @@
-import * as a11y from '../vendor/theme-scripts/theme-a11y';
 import FetchError from '../util/fetch-error';
 import wrapElements from '../globals/wrap';
-import hasOpenModals from '../globals/has-open-modals';
-import Tooltip from './tooltip';
 
 const classes = {
   added: 'is-added',
@@ -39,7 +36,6 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   quickAddModalTemplate: '[data-quick-add-modal-template]',
-  tooltip: '[data-tooltip]',
 };
 
 const attributes = {
@@ -66,7 +62,7 @@ class QuickAddProduct extends HTMLElement {
       this.button = this.modalButton || this.buttonATC;
       this.modalClose = this.modalClose.bind(this);
       this.modalCloseOnProductAdded = this.modalCloseOnProductAdded.bind(this);
-      this.a11y = a11y;
+      this.a11y = window.theme.a11y;
       this.isAnimating = false;
 
       this.modalButtonClickEvent = this.modalButtonClickEvent.bind(this);
@@ -136,11 +132,6 @@ class QuickAddProduct extends HTMLElement {
       this.modal = document.querySelector(`${selectors.quickAddModal}[${attributes.productId}="${this.productId}"]`);
       this.modal.querySelector(selectors.modalContent).innerHTML = new DOMParser().parseFromString(response, 'text/html').querySelector(selectors.apiContent).innerHTML;
 
-      // Init Tooltips
-      this.modal.querySelectorAll(selectors.tooltip).forEach((tooltip) => {
-        new Tooltip(tooltip);
-      });
-
       this.modalCreatedCallback();
     }
   }
@@ -207,7 +198,7 @@ class QuickAddProduct extends HTMLElement {
     this.resetAnimatedItems();
 
     // Unlock scroll if no other drawers & modals are open
-    if (!hasOpenModals()) {
+    if (!window.theme.hasOpenModals()) {
       document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
     }
 

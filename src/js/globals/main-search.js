@@ -1,5 +1,3 @@
-import {isDesktop} from '../util/media-query';
-
 import HeaderSearchForm from './header-search-form';
 
 const selectors = {
@@ -36,7 +34,7 @@ class MainSearch extends HeaderSearchForm {
   }
 
   onInputFocus() {
-    if (!isDesktop()) {
+    if (window.theme.isMobile()) {
       this.scrollIntoView({behavior: 'smooth'});
     }
   }
@@ -50,4 +48,6 @@ class MainSearch extends HeaderSearchForm {
   }
 }
 
-customElements.define('main-search', MainSearch);
+if (!customElements.get('main-search')) {
+  customElements.define('main-search', MainSearch);
+}

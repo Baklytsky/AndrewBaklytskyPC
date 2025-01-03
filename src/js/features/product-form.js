@@ -1,6 +1,4 @@
-import {formatMoney} from '../globals/currency';
 import {ProductFormReader} from '../vendor/theme-scripts/theme-product-form';
-import {isDesktop} from '../util/media-query';
 
 import SelloutVariants from './product-form-sellout';
 
@@ -483,7 +481,7 @@ class ProductForm extends HTMLElement {
       if (adjustment && adjustment.value_type === 'percentage') {
         this.priceOffAmount.innerHTML = `${discount}%`;
       } else {
-        this.priceOffAmount.innerHTML = formatMoney(discount, theme.moneyFormat);
+        this.priceOffAmount.innerHTML = window.theme.formatMoney(discount, theme.moneyFormat);
       }
       this.priceOffWrap.classList.remove(classes.hidden);
     }
@@ -526,10 +524,10 @@ class ProductForm extends HTMLElement {
           comparePriceText.classList.add(classes.hidden);
           productPriceEl.classList.remove(classes.productPriceSale);
         }
-        comparePriceEl.innerHTML = formatMoney(comparePrice, theme.moneyFormat);
+        comparePriceEl.innerHTML = window.theme.formatMoney(comparePrice, theme.moneyFormat);
       }
 
-      productPriceEl.innerHTML = price === 0 ? window.theme.strings.free : formatMoney(price, theme.moneyFormat);
+      productPriceEl.innerHTML = price === 0 ? window.theme.strings.free : window.theme.formatMoney(price, theme.moneyFormat);
     });
 
     if (this.hasUnitPricing) {
@@ -551,7 +549,7 @@ class ProductForm extends HTMLElement {
 
     if (unitPrice) {
       const base = this.getBaseUnit(variant);
-      const formattedPrice = formatMoney(unitPrice, theme.moneyFormat);
+      const formattedPrice = window.theme.formatMoney(unitPrice, theme.moneyFormat);
       this.container.querySelector(selectors.unitPrice).innerHTML = formattedPrice;
       this.container.querySelector(selectors.unitBase).innerHTML = base;
       this.container.querySelector(selectors.unitWrapper).classList.remove(classes.hidden);
@@ -650,7 +648,7 @@ class ProductForm extends HTMLElement {
 
         if (selectedImage) {
           const selectedImageId = selectedImage.getAttribute(attributes.mediaId);
-          const isDesktopView = isDesktop();
+          const isDesktopView = !window.theme.isMobile();
 
           selectedImage.dispatchEvent(
             new CustomEvent('theme:media:select', {
