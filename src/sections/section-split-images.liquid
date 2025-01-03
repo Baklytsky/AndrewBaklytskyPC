@@ -92,7 +92,12 @@
       {%- endif -%}
 
       {%- if render_image_1 -%}
-        <div class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}">
+        <div
+          class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
+          {% if render_image_overlay %}
+            style="--overlay-opacity: {{ overlay_opacity }};"
+          {% endif %}
+        >
           {%- render 'image-hero',
             image_desktop: image_1,
             image_mobile: mobile_image,
@@ -104,7 +109,12 @@
       {%- endif -%}
 
       {%- if render_image_2 -%}
-        <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
+        <div
+          class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
+          {% if render_image_overlay %}
+            style="--overlay-opacity: {{ overlay_opacity }};"
+          {% endif %}
+        >
           {%- render 'image-hero',
             image_desktop: image_2,
             sizes: sizes,
@@ -116,10 +126,6 @@
 
       {%- if render_metafield_info -%}
         <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
-      {%- endif -%}
-
-      {%- if render_image_overlay -%}
-        <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
       {%- endif -%}
 
       {%- if banner_link != blank -%}
