@@ -11,13 +11,8 @@ document.addEventListener('shopify:block:select', (event) => {
     const slider = event.target.closest('slider-component');
 
     if (slider) {
-<<<<<<< HEAD
       const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
       const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider').children).indexOf(slide));
-=======
-      const slide = event.target;
-      const slideIndex = parseInt(slide.hasAttribute('data-slide-index') ? slide.getAttribute('data-slide-index') : 0);
->>>>>>> main
       const flickityEnabled = slider.classList.contains('flickity-enabled');
 
       setTimeout(() => {
