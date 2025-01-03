@@ -1,5 +1,299 @@
-<!-- /sections/section-hero.liquid -->
-{%- render 'hero', has_product: true -%}
+<!-- /sections/section-hero-product.liquid -->
+{%- liquid
+  assign image_1 = section.settings.image_1
+  assign banner_link = section.settings.link
+  assign product = all_products[section.settings.product]
+  assign description = section.settings.description
+  assign text_font_size = section.settings.text_font_size
+  assign enable_quick_add = section.settings.enable_quick_add
+  assign color_product_bg = section.settings.color_product_bg
+  assign color_product_text = section.settings.color_product_text
+  assign bg_color = color_product_bg | default: settings.section_bg
+  assign section_width = section.settings.width
+  assign desktop_height = section.settings.height
+  assign mobile_image = section.settings.mobile_image
+  assign mobile_height = section.settings.mobile_height
+  assign flex_align_mobile = section.settings.flex_align_mobile
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
+  assign show_text_background = section.settings.show_text_background
+  assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
+  assign show_overlay_text = section.settings.show_overlay_text
+  assign padding_top = section.settings.padding_top | default: 0
+  assign padding_bottom = section.settings.padding_bottom | default: 0
+  assign show_placeholder = section.settings.show_placeholder
+
+  # Rendering conditions
+  assign render_section = false
+  assign render_image_1 = true
+  assign render_image_overlay = false
+  assign render_metafield_info = false
+  assign render_content_blocks = false
+  assign render_upsell = false
+  if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode
+    assign render_section = true
+  endif
+  unless show_overlay_text or overlay_opacity == 0.0
+    assign render_image_overlay = true
+  endunless
+  if image_1 == blank and mobile_image == blank and show_placeholder == false
+    assign render_image_1 = false
+    assign render_metafield_info = true
+  endif
+  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or show_placeholder == true
+    assign render_content_blocks = true
+  endif
+  if image_1 != blank or mobile_image != blank or show_placeholder == true
+    assign render_upsell = true
+  endif
+
+  capture sizes
+    if section_width == 'wrapper--full'
+      echo '100vw'
+    else
+      echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+    endif
+  endcapture
+
+  capture sizes_mobile
+    if section_width == 'wrapper--full'
+      echo '100vw'
+    else
+      echo 'calc(100vw - 32px)'
+    endif
+  endcapture
+
+  assign hero_transparent = true
+  if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
+    assign hero_transparent = false
+  endif
+
+  assign show_header_backdrop = false
+  if hero_transparent and show_overlay_text
+    assign show_header_backdrop = true
+  endif
+
+  assign animation_order = 1
+-%}
+
+{%- style -%}
+  #{{ section.id }} {
+    --PT: {{ padding_top }}px;
+    --PB: {{ padding_bottom }}px;
+  }
+
+  {% if color_product_text.alpha != 0.0 and color_product_text != blank or color_product_bg.alpha != 0.0 and color_product_bg != blank %}
+    #{{ section.id }} .product-upsell {
+      {% if color_product_text.alpha != 0.0 and color_product_text != blank %}
+        --text: {{ color_product_text }};
+        --text-light: {{ color_product_text | color_mix: bg_color, 70 }};
+      {% endif %}
+
+      {% if color_product_bg.alpha != 0.0 and color_product_bg != blank %}
+        --bg: {{ color_product_bg }};
+      {% endif %}
+    }
+  {% endif %}
+{%- endstyle -%}
+
+<div
+  class="index-hero wide-image section-padding {{ color_scheme }}"
+  id="{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-overlay-header
+>
+  {%- if render_section -%}
+    <div class="hero__wrapper frame {{ section_width }}">
+      {%- if banner_link != blank -%}
+        <a class="hero__images frame__item" href="{{ banner_link }}">
+      {%- else -%}
+        <div class="hero__images frame__item">
+      {%- endif -%}
+
+      {%- if render_image_1 -%}
+        <div class="hero__split-image">
+          {%- render 'image-hero',
+            image_desktop: image_1,
+            image_mobile: mobile_image,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height
+          -%}
+        </div>
+      {%- endif -%}
+
+      {%- if render_metafield_info -%}
+        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
+      {%- endif -%}
+
+      {%- if render_image_overlay -%}
+        <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
+      {%- endif -%}
+
+      {%- if banner_link != blank -%}
+        </a>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+
+      {%- if render_content_blocks -%}
+        <div
+          class="hero__content__wrapper frame__item align--bottom-left-desktop {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+          {% if show_header_backdrop %}
+            style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
+          {% endif %}
+        >
+          <div
+            class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+            {% if overlay_opacity != 0.0 %}
+              style="--overlay-opacity: {{ overlay_opacity }};"
+            {% endif %}
+          >
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'heading' -%}
+                  {%- if block.settings.title != '' -%}
+                    {%- liquid
+                      assign animation_order = animation_order | plus: 1
+                      assign heading_tag = 'h2'
+
+                      unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                        assign heading_tag = block.settings.heading_tag
+                      endunless
+                    -%}
+
+                    <{{ heading_tag }}
+                      class="hero__title {{ block.settings.heading_font_size }}"
+                      data-aos="hero"
+                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      {{ block.settings.title | escape -}}
+                    </{{ heading_tag }}>
+                  {%- endif -%}
+
+                {%- when 'text' -%}
+                  {%- if block.settings.text != blank -%}
+                    {%- assign animation_order = animation_order | plus: 1 -%}
+                    <div
+                      class="hero__description {{ block.settings.text_font_size }}"
+                      data-aos="hero"
+                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      {{ block.settings.text }}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'button' -%}
+                  {%- liquid
+                    assign prev_index = forloop.index0 | minus: 1
+                    assign next_index = forloop.index0 | plus: 1
+                    assign prev_block = section.blocks[prev_index]
+                    assign next_block = section.blocks[next_index]
+                    assign link_url = block.settings.link
+                    assign link_text = block.settings.link_text
+                    assign animation_order = animation_order | plus: 1
+
+                    assign button_style = block.settings.button_style
+                    if button_style == 'btn--text' and block.settings.show_arrow
+                      assign button_style = button_style | append: ' btn--text-no-underline'
+                    endif
+                  -%}
+
+                  {%- if next_block.type == 'button' and next_index != section.blocks.size -%}
+                    <div class="hero__button-group">
+                  {%- endif -%}
+
+                  {%- if link_text != '' -%}
+                    <div
+                      class="hero__button"
+                      data-aos="hero"
+                      data-aos-anchor="#{{ section.id }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      <a
+                        class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                        href="{{ link_url | default: '#!' }}"
+                      >
+                        <span>{{ link_text | escape }}</span>
+
+                        {%- if block.settings.show_arrow -%}
+                          {% render 'icon-arrow-right' %}
+                        {%- endif -%}
+                      </a>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if prev_block.type == 'button' and prev_index != -1 -%}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'code' -%}
+                  {%- assign animation_order = animation_order | plus: 1 -%}
+
+                  <div
+                    class="hero__custom-code"
+                    data-aos="hero"
+                    data-aos-anchor="#{{ section.id }}"
+                    data-aos-order="{{ animation_order }}"
+                    {{ block.shopify_attributes }}
+                  >
+                    {{ block.settings.code }}
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if render_upsell -%}
+        {%- assign animation_order = animation_order | plus: 1 -%}
+
+        <div class="hero__aside__wrapper frame__item align--bottom-left-desktop">
+          <div
+            class="hero__aside"
+            data-aos="hero"
+            data-aos-anchor="#{{ section.id }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            {%- liquid
+              assign upsell_quick_add_hide = false
+              assign upsell_description = ''
+              assign onboarding = false
+              if product == blank
+                assign onboarding = true
+              endif
+
+              unless enable_quick_add
+                assign upsell_quick_add_hide = true
+              endunless
+
+              if description != blank
+                capture upsell_description
+                  echo '<p>' | append: description | append: '</p>'
+                endcapture
+              endif
+            -%}
+
+            {%- render 'upsell-product',
+              upsell_product: product,
+              upsell_modifier: 'product-upsell--block',
+              upsell_quick_add_hide: upsell_quick_add_hide,
+              upsell_description: upsell_description,
+              upsell_description_font_size: text_font_size,
+              onboarding: onboarding
+            -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
 
 {% schema %}
 {
@@ -222,7 +516,7 @@
           "type": "text",
           "id": "title",
           "label": "Heading",
-          "default": "Image banner"
+          "default": "Image with product"
         },
         {
           "type": "select",

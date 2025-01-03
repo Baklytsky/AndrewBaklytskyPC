@@ -1,7 +1,9 @@
-<!-- /sections/section-hero.liquid -->
+<!-- /sections/section-split-images.liquid -->
 {%- liquid
   assign image_1 = section.settings.image_1
+  assign image_2 = section.settings.image_2
   assign banner_link = section.settings.link
+  assign gutters = section.settings.gutters
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
   assign flex_align_desktop = section.settings.flex_align_desktop
@@ -21,28 +23,30 @@
   # Rendering conditions
   assign render_section = false
   assign render_image_1 = true
+  assign render_image_2 = true
   assign render_image_overlay = false
   assign render_metafield_info = false
   assign render_content_blocks = false
-  if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode
+  if image_1 != blank or image_2 != blank or mobile_image != blank or show_placeholder or request.design_mode
     assign render_section = true
   endif
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  if image_1 == blank and mobile_image == blank and show_placeholder == false
-    assign render_image_1 = false
+  if image_1 == blank and image_2 == blank and mobile_image == blank and show_placeholder == false
     assign render_metafield_info = true
   endif
-  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or show_placeholder == true
+  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or image_2 != blank or show_placeholder == true
     assign render_content_blocks = true
   endif
 
   capture sizes
     if section_width == 'wrapper--full'
-      echo '100vw'
+      echo '(min-width: 750px) 50vw, 100vw'
+    elsif section_width == 'wrapper--full-padded'
+      echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
     else
-      echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+      echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px)'
     endif
   endcapture
 
@@ -75,13 +79,13 @@
 {%- endstyle -%}
 
 <div
-  class="index-hero wide-image section-padding {{ color_scheme }}"
+  class="index-hero index-hero--split-images wide-image section-padding {{ color_scheme }}"
   id="{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-overlay-header
 >
   {%- if render_section -%}
-    <div class="hero__wrapper frame {{ section_width }}">
+    <div class="hero__wrapper frame{% if gutters %} frame--gutters{% endif %} {{ section_width }}">
       {%- if banner_link != blank -%}
         <a class="hero__images frame__item" href="{{ banner_link }}">
       {%- else -%}
@@ -89,7 +93,9 @@
       {%- endif -%}
 
       {%- if render_image_1 -%}
-        <div class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}">
+        <div
+          class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}"
+        >
           {%- render 'image-hero',
             image_desktop: image_1,
             image_mobile: mobile_image,
@@ -100,12 +106,23 @@
         </div>
       {%- endif -%}
 
-      {%- if render_metafield_info -%}
-        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
+      {%- if render_image_2 -%}
+        <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
+          {%- render 'image-hero',
+            image_desktop: image_2,
+            sizes: sizes,
+            desktop_height: desktop_height,
+            mobile_height: mobile_height
+          -%}
+        </div>
       {%- endif -%}
 
       {%- if render_image_overlay -%}
         <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
+      {%- endif -%}
+
+      {%- if render_metafield_info -%}
+        <div class="image__hero__missing-metafield-image">{{ 'products.general.missing_metafield_image' | t }}</div>
       {%- endif -%}
 
       {%- if banner_link != blank -%}
@@ -233,7 +250,7 @@
 
 {% schema %}
 {
-  "name": "Image banner",
+  "name": "Split images",
   "class": "section-overlay-header",
   "settings": [
     {
@@ -246,6 +263,12 @@
       "label": "Primary image"
     },
     {
+      "type": "image_picker",
+      "id": "image_2",
+      "info": "Displays both images at a 50% width",
+      "label": "Secondary image"
+    },
+    {
       "type": "url",
       "id": "link",
       "label": "Image link"
@@ -255,13 +278,20 @@
       "content": "Layout"
     },
     {
+      "type": "checkbox",
+      "id": "gutters",
+      "label": "Enable gutters",
+      "default": false
+    },
+    {
       "type": "select",
       "id": "width",
       "label": "Width",
       "default": "wrapper--full",
       "options": [
         {"value": "wrapper--full", "label": "Full width"},
-        {"value": "wrapper--full-padded", "label": "Full width padded"}
+        {"value": "wrapper--full-padded", "label": "Full width padded"},
+        {"value": "wrapper", "label": "Normal"}
       ]
     },
     {
@@ -432,7 +462,7 @@
           "type": "text",
           "id": "title",
           "label": "Heading",
-          "default": "Image banner"
+          "default": "Split images"
         },
         {
           "type": "select",
@@ -569,7 +599,7 @@
   ],
   "presets": [
     {
-      "name": "Image banner",
+      "name": "Split images",
       "category": "Image",
       "blocks": [
         {
