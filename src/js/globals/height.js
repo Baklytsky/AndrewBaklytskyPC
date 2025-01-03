@@ -65,6 +65,8 @@ function getFooterLogoWithPadding() {
   }
 }
 
-document.addEventListener('theme:resize', setVars);
+setVars();
 
-export {setVars};
+window.addEventListener('DOMContentLoaded', setVars);
+document.addEventListener('theme:resize', setVars);
+document.addEventListener('shopify:section:load', setVars);
