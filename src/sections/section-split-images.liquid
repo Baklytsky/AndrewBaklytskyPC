@@ -94,10 +94,7 @@
 
       {%- if render_image_1 -%}
         <div
-          class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
-          {% if render_image_overlay %}
-            style="--overlay-opacity: {{ overlay_opacity }};"
-          {% endif %}
+          class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}"
         >
           {%- render 'image-hero',
             image_desktop: image_1,
@@ -110,12 +107,7 @@
       {%- endif -%}
 
       {%- if render_image_2 -%}
-        <div
-          class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}{% if render_image_overlay %} has-image-overlay{% endif %}"
-          {% if render_image_overlay %}
-            style="--overlay-opacity: {{ overlay_opacity }};"
-          {% endif %}
-        >
+        <div class="hero__split-image{% if image_1 %} desktop{% endif %}{% if image_2 == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image_2,
             sizes: sizes,
@@ -123,6 +115,10 @@
             mobile_height: mobile_height
           -%}
         </div>
+      {%- endif -%}
+
+      {%- if render_image_overlay -%}
+        <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
       {%- endif -%}
 
       {%- if render_metafield_info -%}

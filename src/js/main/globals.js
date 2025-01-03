@@ -1,6 +1,5 @@
 import appendCartItems from '../globals/append-cart-items';
 import floatLabels from '../globals/forms';
-import {setVars} from '../globals/height';
 import resizeListener from '../globals/resize';
 import scrollListener from '../globals/scroll';
 import wrapElements from '../globals/wrap';
@@ -37,11 +36,9 @@ if (window.theme.settings.enableAnimations) {
 resizeListener();
 scrollListener();
 isTouch();
-setVars();
 loadedImagesEventHook();
 
 window.addEventListener('DOMContentLoaded', () => {
-  setVars();
   ariaToggle(document);
   floatLabels(document);
   wrapElements(document);
@@ -61,5 +58,4 @@ document.addEventListener('shopify:section:load', (e) => {
   floatLabels(container);
   wrapElements(container);
   ariaToggle(document);
-  setVars();
 });
