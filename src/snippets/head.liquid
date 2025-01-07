@@ -560,7 +560,7 @@
   }
 
   /* === Gray background on Product grid items ===*/
-  {%- if settings.show_gray_bg -%}
+  {% if settings.show_image_gray_bg == 'front' or settings.show_image_gray_bg == 'behind' %}
     .show-gray-bg::before,
     .pswp__img::before {
       content: '';
@@ -570,8 +570,12 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, .025);
+      pointer-events: none;
+      {% if settings.show_image_gray_bg == 'front' %}
+        z-index: 5;
+      {% endif %}
     }
-  {%- endif -%}
+  {% endif %}
 
   *,
   *::before,
