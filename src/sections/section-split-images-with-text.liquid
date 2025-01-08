@@ -4,6 +4,7 @@
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
   assign flex_align_desktop = section.settings.flex_align_desktop
+  assign layout_mobile = section.settings.layout_mobile
   assign mobile_height = section.settings.mobile_height
   assign flex_align_mobile = section.settings.flex_align_mobile
   assign color_scheme = 'color-' | append: section.settings.color_scheme
@@ -32,6 +33,10 @@
   assign show_header_backdrop = false
   if hero_transparent and show_overlay_text
     assign show_header_backdrop = true
+  endif
+  assign enable_slider_mobile = false
+  if layout_mobile == 'slider'
+    assign enable_slider_mobile = true
   endif
 
   capture image_sizes
@@ -69,7 +74,7 @@
   data-overlay-header
 >
   {%- if render_section -%}
-    <div class="brick__section{% if gutters %} brick--margin{% endif %} {{ section_width }}">
+    <div class="brick__section{% if gutters %} brick--margin{% endif %}{% if enable_slider_mobile %} brick__section--mobile-slider{% endif %} {{ section_width }}">
       {%- for block in section.blocks -%}
         {%- liquid
           assign desktop_image = block.settings.image
@@ -299,6 +304,22 @@
     {
       "type": "header",
       "content": "Mobile"
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "grid"
     },
     {
       "type": "select",
