@@ -1,0 +1,126 @@
+{%- if section.blocks.size > 0 -%}
+  {{ 'section-quote-carousel.css' | asset_url | stylesheet_tag }}
+	{%- assign anchor_link = section.settings.anchor_link -%}
+  <div class="quote-carousel__wrapper {% if section.settings.color_theme == 'black' %}landing-colors{% endif %}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+
+    {% capture config %}
+    {
+      "slidesPerView": 1,
+      "spaceBetween": 24,
+      "loop": true,
+      "effect": "fade",
+      "fadeEffect": {
+        "crossFade": true
+      },
+      "autoplay": {
+        "delay": {{ section.settings.autoplay_speed | times: 1000 }}
+      }
+    }
+    {% endcapture %}
+
+    {% capture slides %}
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank or block.settings.quote != blank -%}
+
+          <div class="swiper-slide">
+            {%- if block.settings.quote != blank -%}
+              <p class="quote-carousel__quote">{{ block.settings.quote }}</p>
+            {%- endif -%}
+            {%- if block.settings.image != blank -%}
+              <div class="quote-carousel__image-wrap" style="padding-bottom: {{ block.settings.image_height }}px;">
+                {%- assign image_attr = 'style="max-height: ' | append: block.settings.image_height | append: 'px"' -%}
+                {% render 'image', image: block.settings.image, class_name: 'quote-carousel__image', image_attr: image_attr, %}
+              </div>
+            {%- elsif block.settings.heading != blank -%}
+              <h3 class="quote-carousel__heading h4">{{ block.settings.heading }}</h3>
+            {%- endif -%}
+          </div>
+
+        {%- endif -%}
+      {%- endfor -%}
+    {% endcapture %}
+
+    <div class="page-width">
+      {% render 'slideshow-swiper', arrows: false, scrollbar: true, config: config, slides: slides %}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Quote carousel",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "select",
+      "id": "color_theme",
+      "label": "Color theme",
+      "options": [
+        {
+          "value": "black",
+          "label": "Black"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        }
+      ],
+      "default": "black"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "sec",
+      "label": "Carousel autoplay speed",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "quote",
+      "name": "Quote",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "image_height",
+          "min": 24,
+          "max": 70,
+          "step": 1,
+          "unit": "px",
+          "label": "Image height",
+          "default": 36
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Displayed if the image is not added"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quote carousel"
+    }
+  ]
+}
+{% endschema %}

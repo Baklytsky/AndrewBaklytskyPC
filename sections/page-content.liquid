@@ -1,0 +1,59 @@
+{%- if section.blocks.size > 0 -%}
+  {{ 'section-page-content.css' | asset_url | stylesheet_tag }}
+
+  <div class="page-content__wrapper">
+    <div class="page-content__heading-block">
+      {%- for block in section.blocks -%}
+        {%- assign selected_page = block.settings.selected_page -%}
+        {%- assign heading = block.settings.heading | default: selected_page.title -%}
+
+        {%- if heading != blank -%}
+          <a href="{{ selected_page.url }}" class="page-content__heading-block-heading{%- if canonical_url contains selected_page.url %} active{%- endif -%}">
+            {{ selected_page.title }}
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if page.content != blank -%}
+      <div class="page-content__content-block">
+        {{ page.content }}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Page content",
+  "tag": "section",
+  "class": "page-width",
+  "settings": [
+  ],
+  "blocks": [
+    {
+      "type": "page",
+      "name": "Page",
+      "settings": [
+        {
+          "type": "page",
+          "id": "selected_page",
+          "label": "Page"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Alternative heading",
+          "info": "By default page title"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Page content"
+    }
+  ]
+}
+{% endschema %}

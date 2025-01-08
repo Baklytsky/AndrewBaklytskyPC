@@ -1,0 +1,225 @@
+{{ 'section-animated-text.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+  {% capture config %}
+  {
+    "direction": "vertical",
+    "slidesPerView": 1,
+    "spaceBetween": 0,
+    "watchOverflow": true,
+    "allowTouchMove": false,
+    "loop": true,
+    "autoplay": {
+      "delay": {{ section.settings.animation_duration | times: 1000 }}
+    }
+  }
+  {% endcapture %}
+
+<div id="{{ section.id }}" class="page-width">
+  <div class="animated-text primary-bg" style="background-color: {{ section.settings.bg_color }};" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    <div class="animated-text__blocks" style="color: {{ section.settings.text_color }};">
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="animated-text__size rel">
+          {%- if section.settings.heading_before != blank -%}
+            <span id="animated-text__before-{{ section.id }}" class="animated-text__before">{{ section.settings.heading_before }}</span>
+            <span id="animated-text__hidden-{{ section.id }}" class="animated-text__hidden">{{ section.settings.heading_before }}</span>
+
+            <script>
+              const animatedText = document.getElementById('animated-text__before-{{ section.id }}')
+              let GetAnimatedTextWidth = function () {
+                return document.getElementById('animated-text__hidden-{{ section.id }}').offsetWidth + 'px'
+              }
+
+              document.addEventListener('resize', () => {
+                (animatedText.classList.contains('visible')) ? animatedText.style.width = GetAnimatedTextWidth() : animatedText.style.width = '0';
+              })
+
+              setInterval(() => {
+                animatedText.classList.toggle('visible');
+                (animatedText.classList.contains('visible')) ? animatedText.style.width = GetAnimatedTextWidth() : animatedText.style.width = '0';
+              }, {{ section.settings.animated_text_duration | times: 1000 }})
+            </script>
+          {%- endif -%}
+
+          {{ section.settings.heading | escape }}
+
+        {%- if section.settings.word_1 != blank or section.settings.word_2 != blank or section.settings.word_3 != blank or section.settings.word_4 != blank -%}
+          <div class="animated-text__flipper-wrapper">
+            {%- if section.settings.static_word != blank -%}
+              <span class="animated-text__size">{{ section.settings.static_word }}</span>
+            {%- endif -%}
+            <slideshow-swiper class="animated-text__flipper"
+                              data-config='{{ config }}' style="color: {{ section.settings.animated_text_color }}">
+              <div class="swiper">
+                <ul class="swiper-wrapper"
+                    role="list">
+                  {%- for i in (1..4) -%}
+                    {%- assign word = 'word_' | append: i -%}
+                    {%- assign word_item = section.settings[word] -%}
+                    {%- if word_item != blank -%}
+                      <li class="animated-text__flipper-item animated-text__size swiper-slide" role="listitem">
+                        {{ word_item | escape }}
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </slideshow-swiper>
+          </div>
+        {%- endif -%}
+
+        </h2>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+      <div class="animated-text__icons">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.icon or block.settings.text != blank -%}
+            <div class="animated-text__icons-item f aic" {{ block.shopify_attributes }}>
+              {%- if block.settings.icon -%}
+                <div class="animated-text__icons-item-img">
+                  {% render 'image', image: block.settings.icon, small_size: true %}
+                </div>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <span class="animated-text__icons-item-text"> {{ block.settings.text | escape }}</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Animated text with items",
+  "tag": "section",
+  "class": "section-margin-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "Color settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#F9F9F9",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#070707",
+      "label": "Text color"
+    },
+    {
+      "type": "header",
+      "content": "Heading settings"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Animated text"
+    },
+    {
+      "type": "range",
+      "id": "animated_text_duration",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "sec",
+      "label": "Animated text duration",
+      "default": 2
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Talk about your brand",
+      "label": "Heading"
+    },
+    {
+      "type": "header",
+      "content": "Animated text settings"
+    },
+    {
+      "type": "color",
+      "id": "animated_text_color",
+      "default": "#B4B5B6",
+      "label": "Animated text color"
+    },
+    {
+      "type": "text",
+      "id": "static_word",
+      "label": "Static word"
+    },
+    {
+      "type": "text",
+      "id": "word_1",
+      "label": "First word"
+    },
+    {
+      "type": "text",
+      "id": "word_2",
+      "label": "Second word"
+    },
+    {
+      "type": "text",
+      "id": "word_3",
+      "label": "Third word"
+    },
+    {
+      "type": "text",
+      "id": "word_4",
+      "label": "Fourth word"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.5,
+      "unit": "sec",
+      "label": "Animation duration",
+      "default": 1
+    }
+  ],
+  "blocks": [
+    {
+      "type": "items",
+      "name": "Icon with text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated text with items",
+      "blocks": [
+        {
+          "type": "items"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,87 @@
+{%- comment -%}
+{% render 'product-card-swatches',
+  product: product,
+  product_variants: product_variants,
+  color_option_values: color_option_values
+  uniq_id: uniq_id,
+  colors_to_show: colors_to_show
+%}
+{%- endcomment -%}
+
+{% assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' %}
+
+{% for product_option in product.options_with_values %}
+  {% assign option_name = product_option.name | handleize %}
+
+  {%- if color_label contains option_name -%}
+    {%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- assign hidden_colors = blank -%}
+{%- for variant in product_variants -%}
+  {%- if variant.metafields.custom.hide_variant.value -%}
+    {%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div class='product-card__variants rel'>
+  <div class='product-card__options'>
+    {% for product_option in product.options_with_values %}
+      {% assign option_name = product_option.name | handleize %}
+
+      {% if color_label contains option_name %}
+        <div class='radio-group f aic' data-option-{{ option_name }}>
+          {% for value in color_option_values %}
+            {% for variant in product_variants %}
+
+              {%- if hidden_colors != blank and hidden_colors contains value -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+                {%- assign color_name = value | handleize -%}
+
+                {%- if colors_to_show.size > 0 -%}
+                  {%- unless colors_to_show contains color_name -%}
+                  {%- continue -%}
+                  {%- endunless -%}
+                {%- endif -%}
+
+                {%- assign color_swatch_name = 'color' | append: '_' | append: color_name | append: '.png' -%}
+                {%- assign color_swatch_image = images[color_swatch_name] -%}
+
+                <label class='radio rel'
+                       data-color='{{ value | handleize }}'
+                       data-variant-url='{{ product.url | append: '?color=' | append: color_name }}'>
+                  <span class='u-sr-only'>Label for {{ product.title }} {{ option_name }}</span>
+                  <input
+                    type='radio'
+                    name='{{ product.id }}-{{ option_name }}_{{ uniq_id }}'
+                    data-value-handle='{{ value | handleize }}'
+                    data-color='{{ value | handleize }}'
+                    value='{{ value }}'
+                    data-option-selector>
+                  <div class="radio__title js-product-card-option {% if color_swatch_image != blank %}radio__title-bg-image{% endif %}"
+                    data-color='{{ value | handleize }}'
+                    {% if color_swatch_image != blank %}
+                      style="background: url({{ color_swatch_image | img_url: '64x64' }}) no-repeat center center / cover;"
+                      {% else %}
+                      style="background-color: {{ color_name }};"
+                    {% endif %}>
+                  </div>
+
+                  <script type="application/json">
+                    {{ variant | json }}
+                  </script>
+
+                </label>
+                {% break %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>

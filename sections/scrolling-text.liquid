@@ -1,0 +1,205 @@
+{{ 'section-scrolling-text.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+  assign show_divider = section.settings.show_divider
+  assign divider_svg = section.settings.divider_svg
+  assign divider_img = section.settings.divider_img
+  assign divider_color = section.settings.divider_color
+  assign animation_speed = section.settings.animation_speed
+  assign url = section.settings.url
+  assign min_iterations_count = 50
+  assign increase_size = section.settings.increase_size
+	assign autoplay = section.settings.autoplay
+-%}
+
+<div class="scrolling-text {% if increase_size %} scrolling-text--large{% endif %}"
+		 {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+     style="
+       --bg-color: {{ section_bg_color }};
+       --color: {{ text_color }};
+       --divider-color: {{ divider_color }};
+       --animation-speed: {{ animation_speed | append: 's' }};
+       ">
+
+  {%- if url != blank -%}
+    {%- liquid assign default_aria_label = url | split: '/' | last -%}
+    <a href="{{ url }}" class="scrolling-text-link image-abs-cover">
+      <span class="u-sr-only">{{ section.blocks[0].settings.title | default: default_aria_label }}</span>
+    </a>
+  {%- endif -%}
+
+	{% if condition %}
+
+	{% endif %}
+
+  {%- if section.blocks.size > 0 and autoplay -%}
+    {%- liquid
+      assign iterations_count = min_iterations_count | divided_by: section.blocks.size | ceil
+    -%}
+
+    {%- capture divider -%}
+      {%- if show_divider -%}
+        {%- assign item_class_name = 'scrolling-text__item--default-divider' -%}
+
+        {%- if divider_img != blank -%}
+          {%- assign item_class_name = blank -%}
+          {%- assign alt = 'Scrolling bar divider ' | append: divider_img.alt -%}
+          {% render 'image', image: divider_img, class_name: 'scrolling-text__item--img-divider', alt: alt, small_size: true %}
+        {%- elsif divider_svg != blank -%}
+          {%- assign item_class_name = blank -%}
+          <span class="scrolling-text__item--svg-divider">{{ divider_svg }}</span>
+        {%- endif -%}
+
+      {%- endif -%}
+    {%- endcapture -%}
+
+    <div class="scrolling-text__content">
+      {%- for i in (1..iterations_count) -%}
+        <ul class="scrolling-text__list">
+          {%- for block in section.blocks -%}
+            <li class="scrolling-text__item body4 rel {{ item_class_name }}"
+                    {{ block.shopify_attributes }}>
+              {{ block.settings.title }}
+              {{ divider }}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endfor -%}
+    </div>
+	{% elsif autoplay == false and section.blocks.size > 0 %}
+		{%- capture divider -%}
+			{%- if show_divider -%}
+				{%- assign item_class_name = 'scrolling-text__item--default-divider' -%}
+
+				{%- if divider_img != blank -%}
+					{%- assign item_class_name = blank -%}
+					{%- assign alt = 'Scrolling bar divider ' | append: divider_img.alt -%}
+					{% render 'image', image: divider_img, class_name: 'scrolling-text__item--img-divider', alt: alt, small_size: true %}
+				{%- elsif divider_svg != blank -%}
+					{%- assign item_class_name = blank -%}
+					<span class="scrolling-text__item--svg-divider">{{ divider_svg }}</span>
+				{%- endif -%}
+
+			{%- endif -%}
+		{%- endcapture -%}
+
+		<div class="scrolling-text__content">
+			<div class="static-text__list">
+				{%- for block in section.blocks -%}
+					<div class="static-text__item body4 rel {{ item_class_name }}"
+						{{ block.shopify_attributes }}>
+						{{ block.settings.title }}
+						{{ divider }}
+					</div>
+				{%- endfor -%}
+			</div>
+		</div>
+  {%- else -%}
+    <div class="scrolling-text__content">
+      {%- for i in (1..min_iterations_count) -%}
+        <ul class="scrolling-text__list">
+          <li class="scrolling-text__item body4 rel">
+            {{ 'Scrolling text ' | append: i }}
+          </li>
+        </ul>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Scrolling bar",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "increase_size",
+      "label": "Increase size"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color",
+      "default": "#FFB700"
+    },
+    {
+      "type": "html",
+      "id": "divider_svg",
+      "label": "SVG divider"
+    },
+    {
+      "type": "image_picker",
+      "id": "divider_img",
+      "label": "Image divider",
+      "info": "this divider is more prioritized than SVG"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "unit": "sec",
+      "label": "Animation speed",
+      "default": 10
+    },
+    {
+      "type": "url",
+      "id": "url",
+      "label": "Bar link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "title",
+          "default": "<p>Scrolling text</p>",
+          "label": "Heading"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling text"
+    }
+  ]
+}
+{% endschema %}

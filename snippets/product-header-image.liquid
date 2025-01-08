@@ -1,0 +1,76 @@
+{%- comment -%}
+{% render 'product-header-image', product: , hide_variants:  %}
+{%- endcomment -%}
+
+{%- assign merge_product_handles = product.metafields.pdp.merged_products | split: '|' -%}
+{%- assign product_variants = product.variants -%}
+{%- assign merge_product = false -%}
+
+{%- for merge_product_handle in merge_product_handles -%}
+  {%- assign current_merge_product = all_products[merge_product_handle] -%}
+
+  {% unless current_merge_product == empty %}
+  {%- assign merge_product = true -%}
+  {%- assign product_variants = product_variants | concat: current_merge_product.variants -%}
+  {% endunless %}
+{%- endfor -%}
+
+<div role='img' aria-label='Image of {{ product.title }}' class='product-card__img rel z0'>
+  <div class='product-card__img-container'>
+    {%- if product.metafields.header.alternative_featured_image -%}
+      {% render 'image-metafields', image: product.metafields.header.alternative_featured_image[0] , class_name: 'product-card__image image-abs-cover product-card__main-image' %}
+    {% else %}
+      {% render 'image', image: product.featured_image , class_name: 'product-card__image image-abs-cover product-card__main-image', alt: product.title %}
+    {% endif %}
+  </div>
+
+  {% if hide_variants != true and product.variants.size > 1 %}
+    {% for product_option in product.options_with_values %}
+      {%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+      {% assign option_name = product_option.name | handleize %}
+      {% assign option_values = product_option.values %}
+      {% if color_label contains option_name %}
+
+        {%- if merge_product -%}
+          {%- for merge_product_handle in merge_product_handles -%}
+            {%- assign current_merge_product = all_products[merge_product_handle] -%}
+
+            {% unless current_merge_product == empty %}
+              {%- for this_option in current_merge_product.options_with_values -%}
+                {% assign this_option_name = this_option.name | handleize %}
+
+                {% if this_option_name == option_name %}
+                  {%- assign option_values = option_values | concat: this_option.values | uniq -%}
+                {% endif %}
+              {% endfor %}
+            {% endunless %}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {% for value in option_values %}
+          {% for variant in product_variants %}
+            {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+              {% assign variantImg = variant.featured_image %}
+              <div role='img' class='product-card__img-container product-card__variant-img js-variant-image'
+                   data-color='{{ value | handleize }}'
+                   data-variant-url='{{ variant.url }}'
+                   data-variant-id='{{ variant.id }}'
+                   aria-label='{{ variant.title }}'>
+              {%- if variant.metafields.header.alternative_featured_image[0] -%}
+                {% render 'image-metafields', image: variant.metafields.header.alternative_featured_image[0], class_name: 'product-card__image image-abs-cover' %}
+              {% else %}
+                {% render 'image', image: variant.featured_image, class_name: 'product-card__image image-abs-cover', alt: variant.title %}
+              {% endif %}
+              </div>
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  <a class='product-card__link abs fill z2 js-product-link'
+     href='{{ product.url }}'
+     title="{{ product.title }}"
+     aria-label='{{ product.title }}'></a>
+</div>

@@ -1,0 +1,90 @@
+{%- if selected_variant == nill or selected_variant.available or product_variants.size < 2 and product_variant[0].available -%}
+  {%- assign preorder_variant = selected_variant -%}
+  {%- if product_variants.size < 2 or preorder_variant == nill  -%}
+    {%- assign preorder_variant = product_variants | first -%}
+  {%- endif -%}
+
+  {%- assign now_date = 'now' | date -%}
+  {%- assign now_date_second = now_date | date: '%s' | plus: 0 -%}
+  {%- assign preorder_date = preorder_variant.metafields.pdp.available_date | date: format: 'date' -%}
+  {%- assign preorder_date_sec = preorder_date | date: '%s' | times: 1 -%}
+  {%- assign current_date = now_date -%}
+
+  {%- assign preorder_available = false -%}
+
+  {%- if preorder_date_sec >= now_date_second -%}
+    {%- assign preorder_available = true -%}
+    {%- assign different_date = preorder_date_sec | minus: now_date_second | divided_by: 24 | divided_by: 60 | divided_by: 60 -%}
+
+    {%- assign current_date = preorder_date -%}
+    {%- if different_date < 3 -%}
+      {% assign aditional_date = 5 | times: 24 | times: 60 | times: 60 %}
+      {%- assign current_date = preorder_date | date: "%s" | plus: aditional_date | date: "%Y-%m-%d" -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- assign current_time = current_date | date: "%H" | plus: 0 -%}
+  {%- assign current_time_day_of_the_week = current_date | date: "%A" -%}
+  {%- assign current_time_minutes = current_date | date: "%M" | plus: 0  -%}
+  {%- assign date = current_date | date: '%s' | plus: 0  -%}
+
+  {%- assign minutes = 60 | minus: current_time_minutes -%}
+  {%- assign different_hour_min = 1 -%}
+  {%- if current_time_minutes == 0 -%}
+    {%- assign different_hour_min = 0 -%}
+    {%- assign minutes = 0 -%}
+  {%- endif -%}
+
+  {%- if preorder_available -%}
+    {%- assign hour = 0 -%}
+    {%- assign days = 0 -%}
+    {% elsif current_time < 14 %}
+    {%- assign hour = 14 | minus: current_time | minus: different_hour_min -%}
+    {%- assign days = 5 -%}
+  {% else %}
+    {%- assign days = 6 -%}
+    {%- assign hour = 36 | minus: current_time | minus: different_hour_min -%}
+  {% endif %}
+
+  {%- assign new_day_of_the_week = 'now' | date: "%u" | plus: 0 -%}
+
+  {%- if new_day_of_the_week < 6 -%}
+    {%- assign days = days | plus: 2 -%}
+  {%- endif -%}
+
+  {%- if current_time_day_of_the_week == 'Sunday' -%}
+    {%- assign days = days | plus: 1 -%}
+    {% elsif current_time_day_of_the_week == 'Saturday' %}
+    {%- assign days = days | plus: 2 -%}
+  {%- endif -%}
+
+  {%- assign seconds = days | times: 24 | times: 60 | times: 60 -%}
+  {%- assign day_of_the_week = date | plus: seconds | date: "%A, %b %d" -%}
+
+  {%- if preorder_available -%}
+    <div class="product-preorder__message">
+      <input id="enablePreorder" type="checkbox" aria-label="Enable preorder submit" aria-checked="false">
+      <label for="enablePreorder">{{ 'products.product.preorder_info_message_html' | t: date: day_of_the_week }}</label>
+    </div>
+  {% endif %}
+
+  <div class="delivery-info" data-variant-preorder="{{ preorder_available | json }}">
+    {% render 'icon' with 'timer' %}
+    <div>
+      <p >
+        {{ 'products.product.preorder_timer_hour_html' | t: hour: hour }}
+        {% if minutes != 0 %}{{ 'products.product.preorder_timer_minutes_html' | t: minutes: minutes }}{% endif %}
+      </p>
+      <p>{{ 'products.product.preorder_message_html' | t: date: day_of_the_week }}</p>
+
+      {%- if preorder_available -%}
+        <div class="hidden" hidden>
+          <label class="hidden" for="preorder">Preorder</label>
+          <input id="preorder" form="{{ product_form_id }}" type="text"
+                 name="properties[Preorder]"
+                 value="{{ 'products.product.preorder_message_in_cart_and_email_html' | t: date: day_of_the_week }}">
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}

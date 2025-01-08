@@ -1,0 +1,78 @@
+input-autocomplete {
+  display: inline-flex;
+  position: relative;
+}
+
+input-autocomplete .result {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  max-width: 385px;
+  min-width: 250px;
+  max-height: 260px;
+  color: rgb(var(--color-text));
+  background-color: rgb(var(--color-background));
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: normal;
+  z-index: 2;
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+input-autocomplete .result.show-results {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+input-autocomplete input {
+  display: inline;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  padding: 0;
+  transition: all .2s linear;
+}
+
+input-autocomplete input::placeholder {
+  color: currentColor;
+  text-align: left;
+}
+
+input-autocomplete input:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+input-autocomplete .result ul {
+  border-radius: 0 0 3px 3px;
+  z-index: 3;
+  transition: .2s ease;
+  box-shadow: 0 3px 5px #0000001a;
+  max-height: 250px;
+  overflow: auto;
+}
+
+input-autocomplete .result li {
+  padding: 17px 24px;
+  cursor: pointer;
+  border: none;
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-medium-weight);
+}
+
+input-autocomplete .result li:hover {
+  background-color: rgb(var(--color-border));
+}
+
+input-autocomplete .fake-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: nowrap;
+  height: 0;
+}

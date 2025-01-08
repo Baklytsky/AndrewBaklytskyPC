@@ -1,0 +1,178 @@
+{%- liquid
+  assign body_font_bold = settings.type_body_font | font_modify: 'weight', '700'
+  assign body_font_semi_bold = settings.type_body_font | font_modify: 'weight', '600'
+  assign body_font_medium = settings.type_body_font | font_modify: 'weight', '500'
+  assign body_font_regular = settings.type_body_font | font_modify: 'weight', '400'
+  assign body_font_light = settings.type_body_font | font_modify: 'weight', '300' %}
+
+    {% style %}
+      {{ settings.type_body_font | font_face: font_display: 'swap' }}
+      {{ body_font_bold | font_face: font_display: 'swap' }}
+      {{ body_font_semi_bold | font_face: font_display: 'swap' }}
+      {{ body_font_medium | font_face: font_display: 'swap' }}
+      {{ body_font_regular | font_face: font_display: 'swap' }}
+      {{ body_font_light | font_face: font_display: 'swap' }}
+
+      {%- comment -%}
+        @font-face {
+          font-family: 'Montserrat';
+          font-style: normal;
+          src: url('{{ "Montserrat-Bold.otf" | asset_url }}') format("opentype");
+          font-weight: 700;
+          font-display: swap;
+        }
+
+        @font-face {
+          font-family: 'Montserrat';
+          font-style: normal;
+          src: url('{{ "Montserrat-SemiBold.otf" | asset_url }}') format("opentype");
+          font-weight: 600;
+          font-display: swap;
+        }
+
+        @font-face {
+          font-family: 'Montserrat';
+          font-style: normal;
+          src: url('{{ "Montserrat-Medium.otf" | asset_url }}') format("opentype");
+          font-weight: 500;
+          font-display: swap;
+        }
+
+        @font-face {
+          font-family: 'Montserrat';
+          font-style: normal;
+          src: url('{{ "Montserrat-Regular.otf" | asset_url }}') format("opentype");
+          font-weight: 400;
+          font-display: swap;
+        }
+
+        @font-face {
+          font-family: 'Montserrat';
+          font-style: normal;
+          src: url('{{ "Montserrat-Light.otf" | asset_url }}') format("opentype");
+          font-weight: 300;
+          font-display: swap;
+        }
+      {%- endcomment -%}
+
+      @font-face {
+        font-family: 'OldEnglishFive';
+        font-style: normal;
+        src: url('{{ "OldEnglishFive.ttf" | asset_url }}') format("truetype");
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      :root {
+      --font-body-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+      --font-body-style: normal;
+      --font-body-weight: 300;
+      --font-body-regular-weight: 400;
+      --font-body-medium-weight: 500;
+
+
+      --font-heading-family: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
+      --font-heading-style: normal;
+      --font-heading-weight: 700;
+
+      --font-size-heading-1: 120px;
+      --font-size-heading-1-mobile: 36px;
+      --font-size-heading-1-value: 120;
+      --font-size-heading-1-mobile-value: 36;
+
+      --font-size-heading-2: 60px;
+      --font-size-heading-2-mobile: 36px;
+      --font-size-heading-2-value: 60;
+      --font-size-heading-2-mobile-value: 36;
+
+      --font-size-heading-3: 48px;
+      --font-size-heading-3-mobile: 30px;
+      --font-size-heading-3-value: 48;
+      --font-size-heading-3-mobile-value: 30;
+
+      --font-size-heading-4: 36px;
+      --font-size-heading-4-mobile: 24px;
+      --font-size-heading-4-value: 36;
+      --font-size-heading-4-mobile-value: 24;
+
+      --font-size-heading-5: 24px;
+      --font-size-heading-6: 18px;
+
+      --font-size-small: 12px;
+      --font-size-base: 14px;
+      --font-size-text: 16px;
+
+      --color-base-text: {{ settings.colors_text.red }}, {{ settings.colors_text.green }}, {{ settings.colors_text.blue }};
+      --color-secondary-text: {{ settings.colors_light_text.red }}, {{ settings.colors_light_text.green }}, {{ settings.colors_light_text.blue }};
+      --color-secondary-text-light: {{ settings.colors_light_text_secondary.red }}, {{ settings.colors_light_text_secondary.green }}, {{ settings.colors_light_text_secondary.blue }};
+      --color-base-background-1: {{ settings.colors_background_1.red }}, {{ settings.colors_background_1.green }}, {{ settings.colors_background_1.blue }};
+      --color-base-background-2: {{ settings.colors_background_2.red }}, {{ settings.colors_background_2.green }}, {{ settings.colors_background_2.blue }};
+      --color-base-background-light-2: {{ settings.colors_background__light_2.red }}, {{ settings.colors_background__light_2.green }}, {{ settings.colors_background__light_2.blue }};
+      --color-button-primary-text: {{ settings.colors_button_text_primary.red }}, {{ settings.colors_button_text_primary.green }}, {{ settings.colors_button_text_primary.blue }};
+      --color-button-hover-primary-text: {{ settings.colors_button_hover_text_primary.red }}, {{ settings.colors_button_hover_text_primary.green }}, {{ settings.colors_button_hover_text_primary.blue }};
+      --color-button-secondary-text: {{ settings.colors_button_text_secondary.red }}, {{ settings.colors_button_text_secondary.green }}, {{ settings.colors_button_text_secondary.blue }};
+      --color-button-hover-secondary-text: {{ settings.colors_button_hover_text_secondary.red }}, {{ settings.colors_button_hover_text_secondary.green }}, {{ settings.colors_button_hover_text_secondary.blue }};
+      --color-button-primary-bg: {{ settings.colors_button_bg_primary.red }}, {{ settings.colors_button_bg_primary.green }}, {{ settings.colors_button_bg_primary.blue }};
+      --color-button-hover-primary-bg: {{ settings.colors_button_hover_bg_primary.red }}, {{ settings.colors_button_hover_bg_primary.green }}, {{ settings.colors_button_hover_bg_primary.blue }};
+      --color-button-secondary-bg: {{ settings.colors_button_bg_secondary.red }}, {{ settings.colors_button_bg_secondary.green }}, {{ settings.colors_button_bg_secondary.blue }};
+      --color-button-hover-secondary-bg: {{ settings.colors_button_hover_bg_secondary.red }}, {{ settings.colors_button_hover_bg_secondary.green }}, {{ settings.colors_button_hover_bg_secondary.blue }};
+      --color-border: {{ settings.border_color.red }}, {{ settings.border_color.green }}, {{ settings.border_color.blue }};
+      --color-error: {{ settings.colors_error.red }}, {{ settings.colors_error.green }}, {{ settings.colors_error.blue }};
+      --color-success: {{ settings.colors_success.red }}, {{ settings.colors_success.green }}, {{ settings.colors_success.blue }};
+
+      --page-width: {{ settings.page_width }}px;
+      --page-width-margin: 0rem;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      html {
+        box-sizing: border-box;
+        font-size: var(--font-size-text);
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        margin: 0;
+        font-size: var(--font-size-text);
+        letter-spacing: normal;
+        line-height: 1.6;
+        font-family: var(--font-body-family);
+        font-style: var(--font-body-style);
+        font-weight: var(--font-body-weight);
+      }
+
+      #shopify-section-footer {
+        margin-top: auto;
+      }
+
+      img[referrerpolicy] {
+        display: none;
+      }
+
+      @media screen and (min-width: 750px) {
+        body {
+          font-size: var(--font-size-text);
+        }
+      }
+    {% endstyle %}
+
+<script>
+  if (!(((window || {}).CSS || {}).supports && window.CSS.supports('(--a: 0)'))) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2';
+    script.onload = function () {
+      cssVars({});
+    };
+
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+</script>

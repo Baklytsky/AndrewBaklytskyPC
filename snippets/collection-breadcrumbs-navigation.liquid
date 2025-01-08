@@ -1,0 +1,96 @@
+{%- comment -%}
+{% render 'collection-breadcrumbs-navigation',
+	class_name: 'large-up-hide',
+	hide_col_nav: true
+%}
+{%- endcomment -%}
+
+{%- assign enable_menu_filter = section.settings.enable_menu_filter -%}
+{%- assign menu_filter = section.settings.menu_filter -%}
+
+{%- if enable_menu_filter and menu_filter != blank -%}
+	{%- assign mainItem = false -%}
+	{%- assign subItem = false -%}
+	{%- assign subSubItem = false -%}
+	{%- assign currentList = false -%}
+	{%- assign item_finded = false -%}
+	
+	{%- for link in menu_filter.links -%}
+		{% capture mainItem %}
+			<a href="{{ link.url }}" class="link">{{ link.title }}</a> /
+		{% endcapture %}
+		
+		{%- for subLink in link.links -%}
+			{%- assign currentList = subLink.links -%}
+			
+			{% capture subItem %}
+				<h1>{{ subLink.title }}</h1>
+			{% endcapture %}
+			
+			{%- if subLink.url == collection.url -%}
+				{%- assign item_finded = true -%}
+			{%- endif -%}
+			
+			{%- for subSubLink in subLink.links -%}
+				{%- if subSubLink.url contains collection.url and item_finded == false -%}
+					{%- assign item_finded = true -%}
+					
+					{% capture subItem %}
+						<a href="{{ subLink.url }}" class="link">{{ subLink.title }}</a> /
+					{% endcapture %}
+					
+					{% capture subSubItem %}
+						<h1>{{ subSubLink.title }}</h1>
+					{% endcapture %}
+					
+					{% break %}
+				{%- endif -%}
+			{%- endfor -%}
+			
+			{%- if item_finded -%}
+				{% break %}
+			{%- endif -%}
+		{%- endfor -%}
+		
+		{%- if item_finded -%}
+			{% break %}
+		{%- endif -%}
+	{%- endfor -%}
+	
+	{%- if item_finded -%}
+		<div class="{{ class_name }}">
+			<div class="collection__breadcrumbs">
+				<div class="collection__breadcrumbs-nav">
+					{%- if mainItem != blank -%}
+						{{ mainItem }}
+					{%- endif -%}
+					
+					{%- if subItem != blank and subItem contains '</a>' -%}
+						{{ subItem }}
+					{%- endif -%}
+				</div>
+				
+				{%- if subItem != blank and subItem contains '</h1>' -%}
+					{{ subItem }}
+				{%- endif -%}
+				
+				{%- if subSubItem != blank and subSubItem contains '</h1>' -%}
+					{{ subSubItem }}
+				{%- endif -%}
+			</div>
+
+			{%- unless hide_col_nav -%}
+				<div class="collection__nav-wrapper">
+					<ul class="collection__nav list-unstyled">
+						{%- for link in currentList -%}
+							<li class="collection__nav-item">
+								<a href="{{ link.url }}" class="link {% if link.active %}active{% endif %}">{{ link.title }}</a>
+							</li>
+						{%- endfor -%}
+					</ul>
+				</div>
+			{%- endunless -%}
+		</div>
+	{%- endif -%}
+
+{%- endif -%}

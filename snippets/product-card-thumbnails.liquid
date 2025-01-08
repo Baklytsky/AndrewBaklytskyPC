@@ -1,0 +1,158 @@
+{%- comment -%}
+{% render 'product-card-thumbnails',
+  product: product,
+  product_selected_variant: product_selected_variant,
+  product_variants: product_variants,
+  color_option_values: color_option_values
+  uniq_id: uniq_id,
+  unavailable_color_arr: unavailable_color_arr,
+  colors_to_show: colors_to_show
+%}
+{%- endcomment -%}
+
+{%- assign product_selected_variant = product_selected_variant | default: product_variants[0] -%}
+{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+{%- assign option_color_selected_position = false -%}
+
+{% for product_option in product.options_with_values %}
+  {% assign option_name = product_option.name | handleize %}
+
+  {%- if color_label contains option_name -%}
+    {%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+  {%- endif -%}
+
+  {%- if option_name == 'style' -%}
+    {%- assign has_style_option = true -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- unless product_selected_variant.metafields.accentuate.media[0] and option_color_selected_position -%}
+  {%- assign product_selected_variant_color = product_selected_variant.options[option_color_selected_position] -%}
+  {%- assign selected_variant_changed = false -%}
+
+  {%- comment -%}Find variant with same color and accentuate media files{%- endcomment -%}
+
+  {%- for _variant in product_variants -%}
+    {%- if _variant.options[option_color_selected_position] == product_selected_variant_color
+      and _variant.metafields.accentuate.media[0] != blank -%}
+      {%- assign product_selected_variant = _variant -%}
+      {%- assign selected_variant_changed = true -%}
+
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%}Find first variant with same color {%- endcomment -%}
+
+  {%- if selected_variant_changed == false -%}
+    {%- for _variant in product_variants -%}
+      {%- if _variant.options[option_color_selected_position] == product_selected_variant_color -%}
+        {%- assign product_selected_variant = _variant -%}
+        {%- assign selected_variant_changed = true -%}
+
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+  {%- endif -%}
+{%- endunless -%}
+
+{%- assign hidden_colors = blank -%}
+{%- for variant in product_variants -%}
+  {%- if variant.metafields.custom.hide_variant.value -%}
+    {%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{% for product_option in product.options_with_values %}
+  {% assign option_name = product_option.name | handleize %}
+
+  {% if color_label contains option_name %}
+    {%- capture config -%}
+      {
+      "slidesPerView": 5,
+      "slidesPerGroup": 3,
+      "spaceBetween": 9,
+      "freeMode": true,
+      "centerInsufficientSlides": false,
+      "loop": false,
+        "navigation": {
+          "nextEl": ".swiper-arrow-next.next-{{ product.id }}-{{ section.id }}-{{ uniq_id }}",
+          "prevEl": ".swiper-arrow-prev.prev-{{ product.id }}-{{ section.id }}-{{ uniq_id }}"
+        }
+      }
+    {%- endcapture -%}
+    
+    <slideshow-swiper class='thumbnails-group' data-config='{{ config }}'>
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          {% for value in color_option_values %}
+            {% for variant in product_variants %}
+
+              {%- if hidden_colors != blank and hidden_colors contains value -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+                {%- assign color_name = value | handleize -%}
+
+                {%- if colors_to_show.size > 0 -%}
+                  {%- unless colors_to_show contains color_name -%}
+                    {%- continue -%}
+                  {%- endunless -%}
+                {%- endif -%}
+
+                {%- assign selected_variant = variant -%}
+
+                {%- unless selected_variant.metafields.accentuate.media[0] -%}
+                  {%- for _variant in product_variants -%}
+                    {%- if _variant.options[option_color_selected_position] == value
+                      and _variant.metafields.accentuate.media[0] != blank -%}
+                      {%- assign selected_variant = _variant -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endunless -%}
+
+                {%- if selected_variant.image != blank -%}
+                  <div class="swiper-slide">
+                    {%- assign variant_color_group = selected_variant.metafields.my_fields.color_group | default: color_name | handleize -%}
+                    {%- assign thumbnail_url = '/products/' | append: product.handle | append: '?color=' | append: color_name -%}
+                    {%- assign media_url = '/products/' | append: selected_variant.product.handle | append: '?variant=' | append: selected_variant.id -%}
+										{%- assign quick_view_url = '/products/' | append: product.handle | append: '?variant=' | append: selected_variant.id -%}
+
+                    {%- if has_style_option -%}
+                      {%- assign thumbnail_url = '/products/' | append: product.handle | append: '?variant=' | append: selected_variant.id -%}
+                    {%- endif -%}
+
+                    <a href="{{ thumbnail_url }}"
+                       class='thumbnails-item
+                              {% if product_selected_variant.id == selected_variant.id %}active{% endif %}
+                              {% if unavailable_color_arr contains color_name %}unavailable{% endif %}'
+                       data-variant-url='{{ thumbnail_url }}'
+                       data-media-url='{{ media_url }}'
+											 data-quick-view-url='{{ quick_view_url }}'
+                       data-thumbnail-color="{{ variant_color_group }}">
+                      <span class='u-sr-only'>Image for {{ product.title }} {{ option_name }}</span>
+                      {% render 'image', image: selected_variant.image, class_name: 'image-abs-cover' %}
+                      <script type="application/json">
+                        {{ selected_variant | json }}
+                      </script>
+                    </a>
+                  </div>
+                {%- endif -%}
+  
+                {% break %}
+  
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+  
+      <button class="swiper-arrow swiper-arrow-next next-{{ product.id }}-{{ section.id }}-{{ uniq_id }}"><span class="swiper-arrow__inner">{% render 'icon-chevron-right' %}</span></button>
+      <button class="swiper-arrow swiper-arrow-prev prev-{{ product.id }}-{{ section.id }}-{{ uniq_id }}"><span class="swiper-arrow__inner">{% render 'icon-chevron-right' %}</span></button>
+      
+    </slideshow-swiper>
+  {% endif %}
+{% endfor %}

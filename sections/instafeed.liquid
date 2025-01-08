@@ -1,0 +1,89 @@
+{{ 'section-instafeed.css' | asset_url | stylesheet_tag }}
+{%- assign anchor_link = section.settings.anchor_link -%}
+<insta-feed id="{{ section.id }}"
+		 class="insta-feed"
+		 style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}">
+	<div class="page-width insta-feed__wrapper" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+
+		{%- if section.settings.heading != blank -%}
+			{%- if section.settings.heading_url != blank -%}
+				<a href="{{ section.settings.heading_url }}" class="insta-feed__heading h6">{{ section.settings.heading }}</a>
+			{%- else -%}
+				<h3 class="insta-feed__heading h6">{{ section.settings.heading }}</h3>
+			{%- endif -%}
+		{%- endif -%}
+
+		{% unless section.settings.html_area contains "feed-" %}
+			<div id="insta-feed" class="hide-scrollbar"></div>
+
+			<div class="insta-feed__progress-container large-up-hide" style="background-color: {{ section.settings.progress_bar_bg_color }};">
+				<div class="insta-feed__progress-bar" id="bar" style="background-color: {{ section.settings.progress_bar_color }};">
+					<span class="u-sr-only">Progress bar</span>
+				</div>
+			</div>
+		{% endunless  %}
+
+		{{section.settings.html_area}}
+	</div>
+</insta-feed>
+
+{%schema%}
+{
+	"name": "Instafeed App",
+	"tag": "section",
+	"settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+		{
+			"type": "color",
+			"label": "Background color",
+			"id": "bg_color",
+			"default": "#181818"
+		},
+		{
+			"type": "color",
+			"label": "Text color",
+			"id": "text_color",
+			"default": "#f9f9f9"
+		},
+		{
+			"type": "text",
+			"label": "Heading",
+			"id": "heading",
+			"default": "@instafeed"
+		},
+		{
+			"type": "url",
+			"label": "Heading url",
+			"id": "heading_url"
+		},
+		{
+			"type": "html",
+			"id": "html_area",
+			"label": "Custom Code (optional)",
+			"info": "Save to see your changes"
+		},
+		{
+			"type": "color",
+			"label": "Progress bar background",
+			"id": "progress_bar_bg_color",
+			"default": "#4a4a4a"
+		},
+		{
+			"type": "color",
+			"label": "Progress bar color",
+			"id": "progress_bar_color",
+			"default": "#f9f9f9"
+		}
+	],
+	"presets": [
+		{
+			"name": "Instafeed App",
+			"category": "Instagram Feed"
+		}
+	]
+}
+{%endschema%}

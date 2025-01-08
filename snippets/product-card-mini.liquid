@@ -1,0 +1,244 @@
+{% comment %}
+	{% render 'product-card-mini', this_product: , product_handle: , class_name: , uniq_id: , check_to_cart: , card_header_hide: ,
+		heading: , price_parent_selector: , product_price_after_variant: , apply_discount_script: , %}
+{% endcomment %}
+
+{%- assign this_product = all_products[product_handle] | default: this_product | default: empty -%}
+{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+{%- assign current_variant = this_product.selected_or_first_available_variant -%}
+{%- assign current_variant_image = this_product.first_available_variant.image | default: this_product.featured_image -%}
+{%- assign product_form_id = 'product-form-bundle--' | append: this_product.id  | append: '--' | append: uniq_id -%}
+
+{% for product_option in this_product.options_with_values %}
+	{% assign option_name = product_option.name | handleize %}
+
+	{%- if color_label contains option_name -%}
+		{%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{%- assign hidden_colors = blank -%}
+{%- for variant in this_product.variants -%}
+	{%- if variant.metafields.custom.hide_variant.value -%}
+		{%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{%- if hidden_colors != blank -%}
+	{%- for variant in this_product.variants -%}
+		{% unless hidden_colors contains variant.options[option_color_selected_position] %}
+			{%- assign current_variant = variant -%}
+			{%- assign current_variant_image = variant.image | default: this_product.featured_image -%}
+			{% break %}
+		{% endunless %}
+	{%- endfor -%}
+{%- endif -%}
+
+ {%- unless this_product == empty -%}
+	 {%- capture discount_tag -%}
+		 {%- for tag in this_product.tags -%}
+			 {%- assign downcase_tag = tag | downcase -%}
+			 {%- if downcase_tag contains 'sale_to_' -%}
+				 data-discount-tag="{{ downcase_tag | remove: 'sale_to_' }}"
+			 {%- endif -%}
+		 {%- endfor -%}
+	 {%- endcapture -%}
+
+	<div class="product-card-mini-container {{ class_name }}" {{ card_container_attr }}>
+		<product-card-mini
+			data-always-apply-discount-script="{% if apply_discount_script %}true{% else %}false{% endif %}"
+			data-price-selector="{{ price_selector | default: '.product-card-mini__prices' }}" {{ discount_tag | strip }}>
+			{%- unless card_header_hide -%}
+				<div class="product-card-mini__header">
+					<h2>
+						{%- if heading != blank -%}
+							{{ heading }}
+						{%- endif -%}
+					</h2>
+
+					{%- unless product_price_after_variant -%}
+						<div class="product-card-mini__prices">
+							<span data-compare-price="{{ current_variant.compare_at_price }}"
+							      {% unless current_variant.compare_at_price > current_variant.price %}style="display: none;"{% endunless %}>
+								{{ current_variant.compare_at_price | money_without_trailing_zeros }}
+							</span>
+
+							<span data-price="{{ current_variant.price }}">
+								{{ current_variant.price | money_without_trailing_zeros }}
+							</span>
+						</div>
+					{%- endunless -%}
+
+				</div>
+			{%- endunless -%}
+
+			<div class="product-card-mini__body">
+				<div class="product-card-mini__image">
+					{% render 'image', image: current_variant_image, class_name: , image_attr: , hide_id: true, %}
+				</div>
+				<div class="product-card-mini__content">
+					<h3 class="product-card-mini__title">
+						{{ this_product.title }}
+					</h3>
+
+					<div class="product-card-mini__form">
+						<form method="post" action="/cart/add"
+						      accept-charset="UTF-8"
+						      class="form"
+						      enctype="multipart/form-data"
+						      novalidate="novalidate"
+						      data-type="add-to-cart-form"
+									{{ form_attr }}
+						>
+							<input type="hidden" name="form_type" value="product">
+							<input type="hidden" name="utf8" value="✓">
+							<input type="hidden" name="items[1][id]" value="{{ current_variant.id }}">
+							<input type="hidden" name="items[1][quantity]" value="1">
+
+							<div class="product-card-mini__fieldsets">
+								{%- if this_product.variants.size > 1 -%}
+
+									{%- for option in this_product.options_with_values -%}
+										{% assign option_name = option.name | handleize %}
+
+										{% if color_label contains option_name %}
+											{%- assign option_color_selected_position = option.position | minus: 1 -%}
+											{%- assign option_color_selected_value = option.selected_value -%}
+
+											<fieldset class="js product-card-mini__options product-card-mini__options--colors rel">
+												<legend class="form__label u-sr-only">{{ option.name }}</legend>
+												{%- for value in option.values -%}
+													{%- assign value_downcase = value | downcase -%}
+													{%- assign show_color_variant = true -%}
+
+													{%- for variant in this_product.variants -%}
+														{%- if variant.options[option_color_selected_position] == value -%}
+
+															{%- if variant.metafields.custom.hide_variant.value -%}
+																{%- assign show_color_variant = false -%}
+															{%- endif -%}
+
+															{%- assign option_color_variant_image = variant.image -%}
+															{%- break -%}
+
+														{%- endif -%}
+													{%- endfor -%}
+
+													{%- assign color_swatch_name = value | handle | prepend: ' ' | prepend: this_product.title | handleize | append: '.png' -%}
+													{%- assign color_swatch_image_url = images[color_swatch_name] | default: option_color_variant_image | default: this_product.featured_image | img_url: '188x150' -%}
+
+													{%- if show_color_variant == false and option.selected_value == value -%}
+														{%- assign checked_next_color_value = true -%}
+													{%- endif -%}
+
+													{%- if show_color_variant -%}
+
+													<label class="product-card-mini__option">
+														<input type="radio"
+														       name="{{ option.name }}-bundle"
+														       value="{{ value | escape }}"
+																	 data-variant-option
+														       {% if option.selected_value == value or checked_next_color_value %}checked{% endif %}
+														>
+														<span style="{% if color_swatch_image_url != blank %}
+			                                    background-image: url({{ color_swatch_image_url }});
+			                                  {% else %}
+			                                    background-color: {{ value | replace: ' ', '' | downcase }};
+			                                  {% endif %}">
+			                            <span class="u-sr-only">
+			                              {{ value }}
+			                            </span>
+														</span>
+													</label>
+														{%- assign checked_next_color_value = false -%}
+													{%- endif -%}
+												{%- endfor -%}
+											</fieldset>
+										{% else %}
+											<fieldset class="js product-card-mini__options rel">
+												<legend class="form__label u-sr-only">{{ option.name }}</legend>
+												{%- for value in option.values -%}
+													<label class="product-card-mini__option">
+														<input type="radio"
+														       name="{{ option.name }}-bundle"
+														       value="{{ value | escape }}"
+																	 data-variant-option
+														       {% if option.selected_value == value %}checked{% endif %}
+														>
+														<span>
+															{{ value }}
+														</span>
+													</label>
+												{%- endfor -%}
+											</fieldset>
+										{% endif %}
+									{%- endfor -%}
+								{% endif %}
+								{%- if product_price_after_variant -%}
+									<div class="product-card-mini__prices">
+										<span data-compare-price="{{ current_variant.compare_at_price }}"
+										      {% unless current_variant.compare_at_price > current_variant.price %}style="display: none;"{% endunless %}>
+											{{ current_variant.compare_at_price | money_without_trailing_zeros }}
+										</span>
+
+										<span data-price="{{ current_variant.price }}">
+											{{ current_variant.price | money_without_trailing_zeros }}
+										</span>
+									</div>
+								{%- endif -%}
+							</div>
+							<label class="product-card-mini__submit">
+								<input {% if check_to_cart %}type="checkbox"{% else %}type="submit"{% endif %}
+								       name="bundleId"
+								       value="{{ current_variant.id }}"
+								       {% unless current_variant.available %}disabled{% endunless %}
+								>
+								<span>
+									<span class="u-sr-only">
+										add to cart
+									</span>
+									{% render 'icon-plus' %}
+
+									{% render 'icon-checkmark' %}
+								</span>
+							</label>
+
+							<div class="product-card-mini__error-message-wrapper" role="alert" hidden>
+								<svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error" viewBox="0 0 13 13">
+									<circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+									<circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+									<path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+									<path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+								</svg>
+								<span class="product-card-mini__error-message"></span>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div data-variant-images style="display: none !important;">
+				{%- assign this_attr = 'data-featured-image' -%}
+				{%- if this_product.featured_image != blank -%}
+					{% render 'image', image: this_product.featured_image, class_name: , image_attr: this_attr, hide_id: true, %}
+				{%- endif -%}
+
+				{%- unless this_product.has_only_default-variant -%}
+					{%- for variant in this_product.variants -%}
+						{%- if variant.image != blank -%}
+							{%- assign this_attr = 'data-image-for-varaint="' | append: variant.id | append: '"' -%}
+							{% render 'image', image: variant.image, class_name: , image_attr: this_attr, hide_id: true, %}
+						{%- endif -%}
+					{%- endfor -%}
+				{%- endunless -%}
+			</div>
+
+			<script type="application/json">
+			{
+				"current_variant": {{ current_variant | json }},
+				"variants": {{ this_product.variants | json }}
+			}
+	    </script>
+		</product-card-mini>
+	</div>
+{% endunless %}

@@ -1,6 +1,17 @@
+{% comment %}Unknown code start{% endcomment %}
+{%- comment -%}
+<img width="99999"
+     height="99999"
+     style="pointer-events: none; position: absolute; top: 0; left: 0; width: 96vw; height: 96vh; max-width: 99vw; max-height: 99vh;"
+     alt="Site capture"
+     src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSI5OTk5OXB4IiBoZWlnaHQ9Ijk5OTk5cHgiIHZpZXdCb3g9IjAgMCA5OTk5OSA5OTk5OSIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48ZyBzdHJva2U9Im5vbmUiIGZpbGw9Im5vbmUiIGZpbGwtb3BhY2l0eT0iMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9Ijk5OTk5IiBoZWlnaHQ9Ijk5OTk5Ij48L3JlY3Q+IDwvZz4gPC9zdmc+" />
+{%- endcomment -%}
+<script src="https://cdn.shopify.com/s/files/1/0245/4798/3420/files/custom.js?v=1649709437"></script>
+{% comment %}Unknown code end{% endcomment %}
+
 {%- liquid
   assign og_title = page_title | default: shop.name
-  assign og_url = canonical_url | default: request.origin
+  assign og_url = canonical_url | default: shop.url
   assign og_type = 'website'
   assign og_description = page_description | default: shop.description | default: shop.name
 
@@ -8,8 +19,10 @@
     assign og_type = 'product'
   elsif request.page_type == 'article'
     assign og_type = 'article'
+  elsif request.page_type == 'collection'
+    assign og_type = 'product.group'
   elsif request.page_type == 'password'
-    assign og_url = request.origin
+    assign og_url = shop.url
   endif
 %}
 
@@ -19,11 +32,13 @@
 <meta property="og:type" content="{{ og_type }}">
 <meta property="og:description" content="{{ og_description | escape }}">
 
-{%- if page_image -%}
-  <meta property="og:image" content="http:{{ page_image | image_url }}">
-  <meta property="og:image:secure_url" content="https:{{ page_image | image_url }}">
-  <meta property="og:image:width" content="{{ page_image.width }}">
-  <meta property="og:image:height" content="{{ page_image.height }}">
+{%- assign meta_image = page.metafields.custom.social_share_image | default: page_image -%}
+
+{%- if meta_image -%}
+  <meta property="og:image" content="http:{{ meta_image | img_url: 'master' }}">
+  <meta property="og:image:secure_url" content="https:{{ meta_image | img_url: 'master' }}">
+  <meta property="og:image:width" content="{{ meta_image.width }}">
+  <meta property="og:image:height" content="{{ meta_image.height }}">
 {%- endif -%}
 
 {%- if request.page_type == 'product' -%}

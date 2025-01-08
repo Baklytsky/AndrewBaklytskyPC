@@ -1,0 +1,72 @@
+{%- assign show_section = product.metafields.pdp-image-banner.show_section -%}
+{%- assign image = product.metafields.pdp-image-banner.image[0] -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+
+{%- if show_section == 'true' and image != blank -%}
+  {{ 'section-product-image-banner.css' | asset_url | stylesheet_tag }}
+
+  {%- assign image_mobile = product.metafields.pdp-image-banner.image_mobile[0] -%}
+  {%- assign heading = product.metafields.pdp-image-banner.heading -%}
+  {%- assign text_color = product.metafields.pdp-image-banner.text_color -%}
+  {%- assign text_color_mobile = product.metafields.pdp-image-banner.text_color_mobile | default: text_color -%}
+  {%- if image_mobile -%}
+
+  {%- else -%}
+  {%- endif -%}
+
+
+  <div class="page-width" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    <div class="pdp-banner rel"
+         style="--banner-padding-desktop: {{ 100 | divided_by: image.aspect_ratio }}%;
+                 --banner-padding-mobile: {% if image_mobile != blank %}{{ 100 | divided_by: image_mobile.aspect_ratio  }}%{% else %}{{ 100 | divided_by: image.aspect_ratio }}%{% endif %};">
+
+        {%- assign image_class = 'pdp-banner__image image-abs-cover' -%}
+
+        {%- if image_mobile != blank -%}
+          {%- assign image_class = image_class | append: ' large-hide' -%}
+
+          {% render 'image-metafields', image: image_mobile, class_name: 'pdp-banner__image image-abs-cover large-up-hide' %}
+        {%- endif -%}
+
+        {% render 'image-metafields', image: image, class_name: image_class %}
+
+        {%- if heading != blank -%}
+          <div class="pdp-banner__content"
+               style="
+               {% if text_color != blank %}
+                       --color: {{ text_color }};
+               {% endif %}
+             {% if text_color != blank %}
+                     --color-mobile: {{ text_color_mobile }};
+             {% endif %}
+                       ">
+            <h2 class="pdp-banner__heading">
+              {{ heading }}
+            </h2>
+          </div>
+        {%- endif -%}
+
+    </div>
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Product image banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

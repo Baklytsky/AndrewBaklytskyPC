@@ -1,0 +1,27 @@
+{%- comment -%}
+	{% include 'product-color-settings' %}
+{%- endcomment -%}
+
+{%- assign option_color_variant_image = variant.image -%}
+{%- assign first_variants_by_color = first_variants_by_color | append: ';' | append: value_downcase | append: '*' | append: variant.id  -%}
+{%- assign show_color_swatch_indicator = variant.metafields.variant_general.show_color_swatch_indicator -%}
+{%- assign color_swatch_indicator_image = variant.metafields.variant_general.color_swatch_indicator_image[0] -%}
+{%- assign color_swatch_indicator_color = variant.metafields.variant_general.color_swatch_indicator_color -%}
+
+{%- if variant.metafields.custom.hide_variant.value -%}
+	{%- assign show_color_variant = false -%}
+{%- endif -%}
+
+{%- if variant.metafields.variant_general.swatch_order != blank -%}
+	{%- assign swatch_order = variant.metafields.variant_general.swatch_order -%}
+{%- endif -%}
+
+{%- if value == selected_variant.options[option_color_selected_position] -%}
+	{%- if variant.metafields.variant_general.variant_description != blank -%}
+		{%- assign current_description = variant.metafields.variant_general.variant_description -%}
+	{%- endif -%}
+
+	{%- if variant.metafields.variant_general.variant_badge_label != blank -%}
+		{%- assign current_badge_label = variant.metafields.variant_general.variant_badge_label -%}
+	{%- endif -%}
+{%- endif -%}

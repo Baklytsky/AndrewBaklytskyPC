@@ -1,0 +1,99 @@
+{{ 'section-press-icons.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+{%- assign bg_color = section.settings.bg_color -%}
+{%- assign text_color = section.settings.text_color -%}
+{%- assign heading = section.settings.heading -%}
+
+<div id="{{ section.id }}" 
+     class="press-icons" 
+     style="background-color: {{ bg_color }}; color: {{ text_color }}">
+  <div class="press-icons__wrapper page-width" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    {%- if heading != blank -%}
+      <p class="press-icons__heading">{{ heading }}</p>
+    {%- endif -%}
+    <ul class="press-icons__list hide-scrollbar">
+      {%- for block in section.blocks -%}
+        {%- assign link = block.settings.link -%}
+        {%- assign icon = block.settings.icon -%}
+        {%- assign link_label_default = 'Press icon ' | append: forloop.index -%}
+        {%- assign link_label = icon.alt | default: link_label_default -%}
+
+        <li class="press-icons__list-item" {{ block.shopify_attributes }}>
+          <a {% if link == blank %} role="link" aria-disabled="true"{% else %}href="{{ link }}"{% endif %}
+                  aria-label="{{ link_label }}" 
+                  class="rel">
+            {% render 'image', image: icon, class_name: 'image-abs-contain' %}
+          </a>
+        </li>
+      {%- else -%}
+        {%- assign link_label_default = 'Press icon ' | append: forloop.index -%}
+        {%- for i in (1..6) -%}
+          <li class="press-icons__list-item">
+            <a href="/" aria-label="{{ link_label_default }}" class="rel">
+              Press icon {{ forloop.index }}
+            </a>
+          </li>
+        {%- endfor -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+
+
+
+{% schema %}
+{
+  "name": "Press icons",
+  "class": "section-press-icons",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#070707"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured in:"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "press_icon",
+      "name": "Icon",
+      "settings": [
+        {
+          "type": "url",
+          "id": "link",
+          "label": "url"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Press icons"
+    }
+  ]
+}
+{% endschema %}

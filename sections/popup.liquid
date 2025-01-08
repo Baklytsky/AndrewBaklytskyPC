@@ -1,0 +1,139 @@
+{%- if section.settings.show_popup -%}
+  {{ 'popup-section.css' | asset_url | stylesheet_tag }}
+
+  {%- unless section.settings.show_only_on_index and template != 'index' -%}
+    {%- unless section.settings.show_only_for_visitors and customer -%}
+      {% capture section_settings %}
+        {
+          "apparitionDelay": {{ section.settings.apparition_delay | json }},
+          "showOnlyOnce": {{ section.settings.show_only_once | json }}
+        }
+      {% endcapture %}
+
+      <aside id="NewsletterPopup" class="newsletter-popup" data-section-settings='{{ section_settings }}' aria-hidden="true">
+        <button class="newsletter-popup__close" type="button" data-action="close-popup" aria-label="Popup close button">{% render 'icon-close' %}</button>
+        {%- if section.settings.title != blank or section.settings.content != blank or section.settings.show_newsletter -%}
+          <div class="newsletter-popup__content">
+            {%- if section.settings.title != blank -%}
+              <h2 class="newsletter-popup__heading heading">{{ section.settings.title | escape }}</h2>
+            {%- endif -%}
+
+            {%- if section.settings.content != blank -%}
+              <div class="newsletter-popup__description">
+                {{ section.settings.content }}
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.show_newsletter -%}
+              <div class="newsletter-popup__icon">
+                {% render 'icon-arrow' %}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.image -%}
+          <div class="newsletter-popup__media rel">
+            {% render 'image', image: section.settings.image, class_name: 'image-abs-cover', %}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.show_newsletter -%}
+          <modal-opener class="newsletter-popup__opener" data-modal="#NewsletterModal" role="region">
+            <button aria-haspopup="dialog"
+                    aria-label="{{ section.settings.title | default: 'Newsletter modal opener' }}">
+            </button>
+          </modal-opener>
+        {%- endif -%}
+      </aside>
+    {%- endunless -%}
+  {%- endunless -%}
+{%- endif -%}
+
+<script>
+  const newsletterPopup = document.getElementById('NewsletterPopup');
+  if (newsletterPopup) {
+    const newsletterOptions = JSON.parse(newsletterPopup.getAttribute('data-section-settings')),
+        newsletterCloseBtn = newsletterPopup.querySelector('.newsletter-popup__close');
+
+    if (!newsletterOptions['showOnlyOnce'] || newsletterOptions['showOnlyOnce'] && sessionStorage.getItem('themePopup') === null) {
+      setTimeout(openPopup, newsletterOptions['apparitionDelay'] * 1000);
+    }
+
+    newsletterCloseBtn.addEventListener('click', function() {
+      newsletterPopup.setAttribute('aria-hidden', 'true');
+    })
+
+    function openPopup() {
+      newsletterPopup.setAttribute('aria-hidden', 'false');
+      sessionStorage.setItem('themePopup', 'true');
+    }
+  }
+
+</script>
+
+{% schema %}
+{
+  "name": "Popup",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_popup",
+      "label": "Enable",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_only_on_index",
+      "label": "Show only on home page",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_only_for_visitors",
+      "label": "Show only for visitors",
+      "info": "Customers who have created an account on your shop won't see it.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_only_once",
+      "label": "Show only once per customer",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Popup"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Text",
+      "default": "<p>You can use this popup to display some useful information to your customers.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show newsletter form on click",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "apparition_delay",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "sec",
+      "label": "Delay until the popup appears",
+      "default": 5
+    }
+  ]
+}
+{% endschema %}

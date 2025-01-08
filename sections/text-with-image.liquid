@@ -1,0 +1,267 @@
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+	assign text_align = section.settings.text_align
+	assign image_position = text_align
+	assign banner = section.settings.banner
+	assign banner_position = section.settings.banner_position
+	assign banner_mobile_position = section.settings.banner_mobile_position
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+	assign padding_top = section.settings.padding_top
+	assign padding_bottom = section.settings.padding_bottom
+
+	if text_align == 'left'
+		assign image_position = 'flex-start'
+	elsif text_align == 'right'
+		assign image_position = 'flex-end'
+	endif
+-%}
+
+{%- if section.blocks.size > 0 or banner != blank -%}
+	{{ 'section-text-with-image.css' | asset_url | stylesheet_tag }}
+
+	<div class="twi-v2 page-width" style="
+		--bg-color: {{ bg_color }};
+		--text-color: {{ text_color }};
+		--padding-top: {{ padding_top }}px;
+		--padding-bottom:{{ padding_bottom }}px;
+		--desktop-position:{{ banner_position }};
+		--mobile-position: {{ banner_mobile_position }};
+		--text-align: {{ text_align }};
+		--image-position: {{ image_position }};
+		--aspect-ratio: 1.0;
+		"
+			 {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+	>
+
+		{%- if banner != blank -%}
+			<div class="twi-v2__banner aspect-ratio rel">
+				{% render 'image', image: banner, class_name: 'image-abs-cover' %}
+			</div>
+		{%- endif -%}
+
+		<div class="twi-v2__content">
+			{%- for block in section.blocks -%}
+				{%- case block.type -%}
+
+					{%- when 'content' -%}
+						{% liquid
+							assign heading = block.settings.heading
+							assign description = block.settings.description
+							assign icon = block.settings.icon
+							assign icon_svg = block.settings.icon_svg
+						%}
+
+						{%- if icon != blank or icon_svg != blank -%}
+							{% if icon_svg != blank %}
+								<div class="twi-v2__icon-svg">
+									{{ icon_svg }}
+								</div>
+							{% else %}
+								<div class="twi-v2__image">
+									{% render 'image', image: icon, alt: alt %}
+								</div>
+							{% endif %}
+						{%- endif -%}
+
+						{%- if heading != blank  -%}
+							<h3 class="twi-v2__heading">{{ heading }}</h3>
+						{%- endif -%}
+
+						{%- if description != blank  -%}
+							<p class="twi-v2__description">{{ description }}</p>
+						{%- endif -%}
+
+				{%- endcase -%}
+			{%- endfor -%}
+		</div>
+	</div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Text with Image",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#F9F9F9",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#070707",
+      "label": "Text color"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Content align"
+    },
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner",
+      "label": "Banner"
+    },
+    {
+      "type": "header",
+      "content": "Banner position"
+    },
+    {
+      "type": "select",
+      "id": "banner_position",
+      "options": [
+        {
+          "value": "row",
+          "label": "Left"
+        },
+        {
+          "value": "row-reverse",
+          "label": "Right"
+        }
+      ],
+      "default": "row",
+      "label": "Desktop position"
+    },
+    {
+      "type": "select",
+      "id": "banner_mobile_position",
+      "options": [
+        {
+          "value": "column",
+          "label": "Top"
+        },
+        {
+          "value": "column-reverse",
+          "label": "Bottom"
+        }
+      ],
+      "default": "column",
+      "label": "Mobile position"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "content",
+      "name": "Content",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Icon svg"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text with Image"
+    }
+  ]
+}
+{% endschema %}
+
+{% comment %}
+"blocks": [
+{
+"type": "content",
+"name": "Content",
+"settings": [
+{
+"type": "text",
+"id": "heading",
+"label": "Heading"
+},
+{
+"type": "text",
+"id": "description",
+"label": "Description"
+},
+{
+"type": "image_picker",
+"id": "icon",
+"label": "Icon"
+},
+{
+"type": "html",
+"id": "icon_svg",
+"label": "Icon svg"
+}
+]
+}
+],
+{% endcomment %}

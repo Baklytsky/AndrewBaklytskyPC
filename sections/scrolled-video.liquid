@@ -1,0 +1,63 @@
+{%- assign video_url = section.settings.video_url -%}
+{%- assign video_url_mobile = section.settings.video_url_mobile -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+<script src="{{ 'scrolled-video.js' | asset_url }}" defer="defer"></script>
+{{ 'component-scrolled-video.css' | asset_url | stylesheet_tag }}
+<link rel="preload" href="{{ video_url_mobile }}" as="video" type="video/mp4" crossorigin />
+<link rel="preload" href="{{ video_url }}" as="video" type="video/mp4" crossorigin />
+
+{%- if video_url_mobile != blank -%}
+	<scrolled-video data-device-type="mobile" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		<div class="scrolled-video__sticky">
+			<div class="scrolled-video__inner">
+				<video class="scrolled-video__video"
+				       preload="preload"
+				       playsinline muted type="video/mp4;" src="{{ video_url_mobile }}" autoplay>
+				</video>
+			</div>
+		</div>
+	</scrolled-video>
+{%- endif -%}
+
+{%- if video_url != blank -%}
+	<scrolled-video data-device-type="desktop" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		<div class="scrolled-video__sticky">
+			<div class="scrolled-video__inner">
+				<video class="scrolled-video__video"
+				       preload="preload"
+				       playsinline muted type="video/mp4;" src="{{ video_url }}">
+				</video>
+			</div>
+		</div>
+	</scrolled-video>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Scrolled video",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "text",
+      "id": "video_url_mobile",
+      "label": "Video URL (mobile)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolled video"
+    }
+  ]
+}
+{% endschema %}

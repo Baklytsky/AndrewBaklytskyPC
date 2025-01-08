@@ -1,0 +1,94 @@
+{%- assign show_section = [template.name].metafields.section_video.show_section -%}
+
+{%- if show_section == 'true' -%}
+	{{ 'video-section.css' | asset_url | stylesheet_tag }}
+	{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+	
+	{%- assign uniq_id_by_index = 'video-section' | append: page.handle | md5 | append: index -%}
+	{%- assign color_theme = [template.name].metafields.section_video.color_schema | downcase -%}
+	{%- assign heading = [template.name].metafields.section_video.heading -%}
+	{%- assign image = [template.name].metafields.section_video.image[0] -%}
+	
+	{%- assign video_url = [template.name].metafields.section_video.video_url_youtube_or_vimeo -%}
+	{%- assign video_url_mp4 = [template.name].metafields.section_video.video_url_mp4 -%}
+	
+	{%- if video_url_mp4 != blank -%}
+		{%- assign video_type = 'mp4' -%}
+	{%- endif -%}
+	
+	{%- if video_url contains 'youtu' -%}
+		{%- assign video_type = 'youtube' -%}
+		
+		{%- if video_url contains 'v=' %}
+			{%- assign video_id_split = video_url | split: 'v=' -%}
+		{%- else %}
+			{%- assign video_id_split = video_url | split: 'youtu.be/' -%}
+		{%- endif %}
+		
+		{%- assign video_id = video_id_split[1] -%}
+		{% elsif video_url contains 'vimeo' %}
+		{%- assign video_type = 'vimeo' -%}
+		{%- assign video_id_split = video_url | split: 'vimeo.com/' -%}
+		{%- assign video_id = video_id_split[1] -%}
+	{%- endif -%}
+	
+	<div id="{{ uniq_id_by_index }}" class="video-section__wrapper {{ wrapper_class_name }} {% if color_theme == 'black' %}landing-colors{% endif %}">
+		<div>
+			{%- if heading != blank -%}
+				<h2 class="video-section__title h4">{{ heading }}</h2>
+			{%- endif -%}
+			<noscript>
+				<div class="video-section__media">
+					<a href="{{ video_url }}" class="video-section__poster media media--transparent media--landscape{% if image == blank %} video-section__placeholder{% endif %}">
+						{%- if image != blank -%}
+							{% render 'image-metafields', image: image %}
+						{%- else -%}
+							{{ 'collection-2' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+						{%- endif -%}
+					</a>
+				</div>
+			</noscript>
+			<deferred-media class="video-section__media deferred-media no-js-hidden" data-media-id="{{ video_id }}">
+				<button
+					id="Deferred-Poster-Modal-{{ video_id }}"
+					class="video-section__poster media deferred-media__poster media--landscape"
+					type="button">
+					
+					{%- if image != blank -%}
+						{% render 'image-metafields', image: image %}
+					{%- else -%}
+						{{ 'collection-2' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+					{%- endif -%}
+					<span class="deferred-media__poster-button motion-reduce">
+          {%- render 'icon-play' -%}
+        </span>
+				</button>
+				<template>
+					{%- if video_url_mp4 == blank -%}
+						
+						{%- if video_type == 'youtube' -%}
+							<iframe src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1" class="js-youtube" allow="autoplay; encrypted-media" allowfullscreen title="{{ heading | escape }}"></iframe>
+						{%- else -%}
+							<iframe src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1" class="js-vimeo" allow="autoplay; encrypted-media" allowfullscreen title="{{ heading | escape }}"></iframe>
+						{%- endif -%}
+					
+					{%- else -%}
+						<video class="deferred-media__mp4" loop playsinline controls title="{{ heading | escape }}">
+							<source src="{{ video_url_mp4 }}" type="video/mp4">
+						</video>
+					{%- endif -%}
+				
+				</template>
+			</deferred-media>
+		</div>
+		
+		{%- style -%}
+			@media screen and (max-width: 749px) {
+			#{{ uniq_id_by_index }} .video-section__media {
+			width: calc(100% + 48px);
+			margin-left: -24px;
+			}
+			}
+		{%- endstyle -%}
+	</div>
+{%- endif -%}

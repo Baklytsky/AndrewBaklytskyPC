@@ -1,0 +1,72 @@
+{%- assign merge_product_handles = product.metafields.pdp.merged_products | split: '|' -%}
+
+{%- assign selected_variant = product.selected_variant -%}
+
+{%- if product.options.size < 2 -%}
+	{%- assign selected_variant = product.selected_or_first_available_variant -%}
+{%- endif -%}
+
+{%- assign product_variants = product.variants -%}
+{%- assign product_media = product.media -%}
+{%- assign product_tags = product.tags | uniq -%}
+{%- assign used_template_variant = true -%}
+{%- assign merge_product = false -%}
+
+{%- for merge_product_handle in merge_product_handles -%}
+	{%- assign current_merge_product = all_products[merge_product_handle] -%}
+
+	{% unless current_merge_product == empty %}
+		{%- assign merge_product = true -%}
+		{%- assign product_variants = product_variants | concat: current_merge_product.variants -%}
+		{%- assign product_media = product_media | concat: current_merge_product.media -%}
+		{%- assign product_tags = product_tags | concat: current_merge_product.tags -%}
+	{% endunless %}
+{%- endfor -%}
+
+{% unless selected_variant %}
+	{%- comment -%}
+		Get query param variant id
+	{%- endcomment -%}
+
+	{%- comment -%} Capture the content for header containing the tracking data {%- endcomment -%}
+	{%- capture contentForQuerystring -%}{{ content_for_header }}{%- endcapture -%}
+
+	{% comment %} Use string splitting to pull the value from content_for_header and apply some string clean up {% endcomment %}
+	{%- assign pageUrl = contentForQuerystring | split:'"pageurl":"' | last | split:'"' | first | split:'.myshopify.com' | last |
+		replace:'\/','/' |
+		replace:'%20',' ' |
+		replace:'\u0026','&'
+	-%}
+	{%- for i in (1..1) -%}
+		{%- comment -%} If the string doesn't contain a ? then we have no querystring. Go no further {%- endcomment -%}
+		{%- unless pageUrl contains "?" -%}{% break %}{%- endunless -%}
+
+		{%- comment -%} Split the url at the ? to get all values after it {%- endcomment -%}
+		{%- assign pageQuerystring = pageUrl | split:'?' | last -%}
+
+		{%- comment -%} Split the remaining string at & to get the list of keys and values (if any) {%- endcomment -%}
+		{%- assign parts = pageQuerystring | split:'&' -%}
+
+		{%- for part in parts -%}
+			{%- assign keyAndValue = part | split:'=' -%}
+			{%- if keyAndValue.size > 1 -%}
+				{%- if keyAndValue[0] == "variant" -%}
+					{%- assign merge_product_current_variant_id = keyAndValue[1] | plus: 0 -%}
+				{% endif %}
+			{%- endif -%}
+		{%- endfor -%}
+	{%- endfor -%}
+
+	{%- for variant in product_variants -%}
+		{%- if variant.id == merge_product_current_variant_id -%}
+			{%- assign selected_variant = variant -%}
+			{%- assign used_template_variant = false -%}
+		{%- endif -%}
+	{%- endfor -%}
+{% endunless %}
+
+{% if selected_variant == nill %}
+	{%- if product.options.size > 2 or product_variants.size <= 1  -%}
+		{%- assign selected_variant = product_variants | first -%}
+	{%- endif -%}
+{% endif %}

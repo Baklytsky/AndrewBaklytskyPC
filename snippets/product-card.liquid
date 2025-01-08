@@ -1,0 +1,529 @@
+{% comment %}
+    Renders a product card
+
+    Accepts:
+    - product: {Object}
+    - check_product_data_outside: {Boolean}
+    - filtered_results: {Object of CLP/Search filters},
+    - product_variants: {Array of variants}
+    - color_option_values: {Array of colors},
+    - unavailable_color_arr: {Array of unavailable colors by selected sizes},
+    - product_selected: {Object}
+    - product_selected_variant: {Object}
+    - hide_variants: {Boolean}
+    - uniq_id: {String}
+    - colors_to_show: {Array of handleized colors},
+    - filtered_colors: {Boolean},
+    - show_product_title: {Boolean}
+    - show_product_reviews: {Boolean}
+    - show_product_description: {Boolean}
+    - show_product_description_metafield: {Boolean}
+    - show_product_price: {Boolean}
+    - show_product_price_range: {Boolean},
+    - show_product_badge: {Boolean}
+    - show_color_options_size: {Boolean}
+    - show_image_thumbnails: {Boolean}
+    - show_quick_view: {Boolean}
+    - custom_class: {String}
+
+    Usage:
+    {% render 'product-card',
+      product: product,
+      check_product_data_outside: false,
+      filtered_results: results.filters,
+      order_array: order_array
+      product_variants: product_variants,
+      color_option_values: color_option_values,
+      unavailable_color_arr: unavailable_color_arr,
+      product_selected: product,
+      product_selected_variant: variant,
+      price_by_product: false,
+      hide_variants: false,
+      uniq_id: section.id,
+      colors_to_show: colors_to_show,
+      show_product_title: show_product_title,
+      show_product_reviews: show_product_reviews,
+      show_product_description: show_product_description,
+      show_product_description_metafield: show_product_description_metafield,
+      show_product_price: show_product_price,
+      show_product_price_range: show_product_price_range,
+      show_product_badge: show_product_badge,
+      show_color_options_size: show_color_options_size,
+      show_image_thumbnails: show_image_thumbnails,
+      show_quick_view: show_quick_view
+      custom_class: 'featured-collection__product' %}
+{% endcomment %}
+
+{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+{%- assign size_label = 'size,taille,größe,tamanho,tamaño,koko,サイズ' | split: ',' -%}
+{%- assign color_order_mf = product.metafields.custom.color_order.value -%}
+{%- assign color_order_mf_first = product.metafields.custom.color_order.value[0] | handleize -%}
+{%- assign filtered_by_color = false -%}
+
+{%- if filtered_results != blank -%}
+  {%- for filter in filtered_results -%}
+    {%- if filter.param_name == 'filter.v.m.my_fields.color_group' -%}
+      {%- assign filtered_by_color = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- unless check_product_data_outside -%}
+
+  {%- assign merge_product_handles = product.metafields.pdp.merged_products | split: '|' -%}
+  {%- assign product_variants = product.variants -%}
+  {%- assign merge_product = false -%}
+  {%- assign color_option_values = blank -%}
+	{%- assign product_color_options_for_order = product.options_with_values | where: 'name', 'Color' -%}
+	{%- assign ordered_array = blank -%}
+	{%- assign ordered_str = blank -%}
+	{%- assign rest_values_str = blank -%}
+	{%- assign rest_values_array = blank -%}
+
+	{%- assign option_values = product_option.values -%}
+	{%- assign ordered_array = option_values -%}
+
+	{% if color_order_mf %}
+		{%- for color in color_order_mf -%}
+			{%- assign color-handleize = color | handleize -%}
+			{%- for value in product_color_options_for_order[0].values -%}
+				{%- assign value-handleize = value | handleize -%}
+				{% if color-handleize == value-handleize %}
+					{%- assign ordered_str = ordered_str | append: value | append: ',' -%}
+				{% else %}
+					{%- assign rest_values_str = rest_values_str | append: value | append: ',' -%}
+				{% endif %}
+			{%- endfor -%}
+		{%- endfor -%}
+	{% else %}
+		{%- for value in product_color_options_for_order[0].values -%}
+			{%- assign ordered_str = ordered_str | append: value | append: ',' -%}
+		{%- endfor -%}
+	{% endif %}
+
+  {%- comment -%}Get all product_variants{%- endcomment -%}
+
+  {%- for merge_product_handle in merge_product_handles -%}
+    {%- assign current_merge_product = all_products[merge_product_handle] -%}
+		{%- assign merge_product_color_order_mf = current_merge_product.metafields.custom.color_order.value -%}
+
+    {% unless current_merge_product == empty %}
+      {%- assign merge_product = true -%}
+      {%- assign product_variants = product_variants | concat: current_merge_product.variants -%}
+
+			{%- assign merge_product_color_options = current_merge_product.options_with_values | where: 'name', 'Color' -%}
+
+			{% if merge_product_color_order_mf %}
+				{%- for color in merge_product_color_order_mf -%}
+					{%- assign color-handleize = color | handleize -%}
+					{%- for merge_product_color in merge_product_color_options[0].values  -%}
+						{%- assign merge_product_color_handleize = merge_product_color | handleize  -%}
+						{% if color-handleize == merge_product_color_handleize %}
+							{%- assign ordered_str = ordered_str | append: merge_product_color | append: ',' -%}
+						{% else %}
+							{%- assign rest_values_str = rest_values_str | append: merge_product_color | append: ',' -%}
+						{% endif %}
+					{%- endfor -%}
+				{%- endfor -%}
+			{% else %}
+				{%- for merge_product_color in merge_product_color_options[0].values  -%}
+					{%- assign ordered_str = ordered_str | append: merge_product_color | append: ',' -%}
+				{%- endfor -%}
+			{% endif %}
+    {% endunless %}
+  {%- endfor -%}
+
+	{% if ordered_str != blank %}
+		{%- assign ordered_array = ordered_str | split: ',' -%}
+	{% endif %}
+	{% if rest_values_str != blank %}
+		{%- assign rest_values_array = rest_values_str | split: ',' -%}
+	{% endif %}
+	{% if ordered_str != blank and rest_values_str != blank  %}
+		{%- assign ordered_array = ordered_array | concat: this_option.values | uniq -%}
+	{% endif %}
+
+  {%- comment -%}Get all color_option_values and option positions {%- endcomment -%}
+
+  {%- for product_option in product.options_with_values -%}
+    {%- assign option_name = product_option.name | handleize -%}
+
+    {%- if color_label contains option_name -%}
+      {%- assign color_option_values = product_option.values -%}
+      {%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+
+      {%- if merge_product -%}
+
+        {%- for variant in product_variants -%}
+          {%- for this_option in variant.product.options_with_values -%}
+            {%- assign this_option_name = this_option.name | handleize -%}
+
+            {%- if this_option_name == option_name -%}
+              {%- assign color_option_values = color_option_values | concat: this_option.values | uniq -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if size_label contains option_name -%}
+      {%- assign option_size_selected_position = product_option.position | minus: 1 -%}
+    {%- endif -%}
+
+  {%- endfor -%}
+
+{%- endunless -%}
+
+{%- if show_image_thumbnails -%}
+  {%- assign only_one_thumbnail = true -%}
+
+  {% for product_option in product.options_with_values %}
+    {% assign option_name = product_option.name | handleize %}
+    {%- assign selected_variant_reasined = false -%}
+
+    {% if color_label contains option_name %}
+
+      {%- if color_option_values.size > 1 -%}
+        {%- assign only_one_thumbnail = false -%}
+      {%- endif -%}
+
+      {% for value in color_option_values %}
+        {%- assign value_handle = value | handleize -%}
+
+        {%- if colors_to_show.size == 1 -%}
+          {%- for color in colors_to_show -%}
+            {%- if color == value_handle -%}
+              {%- assign only_one_thumbnail = true -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if colors_to_show.size > 0 -%}
+
+          {%- for color in colors_to_show -%}
+
+            {% for variant in product_variants %}
+              {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+
+                {%- if color == color_order_mf_first -%}
+                  {%- assign product_selected_variant = variant -%}
+                  {%- assign selected_variant_reasined = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if selected_variant_reasined -%}
+              {%- break -%}
+            {%- endif -%}
+
+          {%- endfor -%}
+        {%- endif -%}
+
+      {% endfor %}
+
+      {%- break -%}
+    {% endif %}
+
+  {% endfor %}
+{%- endif -%}
+
+{% if product.options and show_color_options_size %}
+	{%- for option in product.options_with_values -%}
+		{%- assign option_name = option.name | downcase -%}
+
+		{%- if color_label contains option_name and option.values.size > 1 -%}
+			{%- assign option_color_selected_position = option.position | minus: 1 -%}
+			{%- assign global_shown_colors_count = color_option_values.size -%}
+			{%- assign hidden_colors = blank -%}
+
+			{%- for variant in product_variants -%}
+				{%- if variant.metafields.custom.hide_variant.value -%}
+					{%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+				{%- endif -%}
+			{%- endfor -%}
+
+			{%- for value in color_option_values -%}
+				{%- if hidden_colors contains value -%}
+					{%- assign global_shown_colors_count = global_shown_colors_count | minus: 1 -%}
+				{%- endif -%}
+			{%- endfor -%}
+
+		{%- endif -%}
+	{%- endfor -%}
+{% endif %}
+
+<product-card class='{{ custom_class }} {% if show_image_thumbnails and only_one_thumbnail == false and global_shown_colors_count > 0 %}product-card__with-thumbnails{% endif %}' data-size="{{ global_shown_colors_count  }}">
+	{%- assign ordered_array_for_card = ordered_array | default: color_option_values -%}
+	{%- assign first_item_of_color_array = blank -%}
+	{%- assign variants = product.variants -%}
+	{%- assign product_cart_quick_view = 'products.product.product_card_quick_view' | t -%}
+
+	{% if colors_to_show.size > 0 %}
+		{%- assign first_item_of_color_array = colors_to_show[0] | handleize -%}
+    {%- assign variants = product_variants -%}
+	{% else %}
+		{%- assign first_item_of_color_array = ordered_array_for_card[0] | handleize -%}
+	{% endif %}
+
+	{% if first_item_of_color_array != blank and filtered_by_color == false %}
+		{%- for variant in variants -%}
+			{%- assign variant_title = variant.title | handleize -%}
+			{% if variant_title contains first_item_of_color_array %}
+				{%- assign product_selected_variant = variant -%}
+				{% break %}
+			{% endif %}
+		{%- endfor -%}
+	{% endif %}
+
+  {% render 'product-card-media',
+    product: product,
+    product_variants: product_variants,
+    color_option_values: ordered_array_for_card,
+    product_selected: product_selected,
+    product_selected_variant: product_selected_variant,
+    hide_variants: false
+  %}
+  <div class="product-card__content rel">
+    {%- if show_image_thumbnails and only_one_thumbnail == false and global_shown_colors_count > 0 -%}
+      <div class="product-card__thumbnails">
+        {% render 'product-card-thumbnails',
+          product: product,
+          product_selected_variant: product_selected_variant,
+          product_variants: product_variants,
+          color_option_values: ordered_array_for_card,
+          uniq_id: uniq_id,
+          unavailable_color_arr: unavailable_color_arr,
+          colors_to_show: colors_to_show
+        %}
+
+				{% if show_quick_view %}
+					{%- assign patches = product.metafields.custom.patches.value -%}
+					{%- assign product_title_handleize = product.title | handleize -%}
+
+					{% if patches == blank %}
+						{% unless product_title_handleize contains 'iron-set' %}
+							<div class="product-card__quick-view-btn-wrapper small-hide">
+								<button class="button button--primary product-card__btn product-card__explore-btn" type="button" data-action="explore" data-product="{{ product_selected_variant.url }}">
+									<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+									<span class="loading-overlay__spinner hidden">
+										{% render 'icon' with 'spinner' %}
+									</span>
+								</button>
+							</div>
+						{% else %}
+							<div class="product-card__quick-view-btn-wrapper small-hide">
+								<a href="{{ product_selected_variant.url }}" class="button button--primary product-card__btn product-card__explore-btn">
+									<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+								</a>
+							</div>
+						{% endunless %}
+					{% else %}
+						<div class="product-card__quick-view-btn-wrapper small-hide">
+							<a href="{{ product_selected_variant.url }}" class="button button--primary product-card__btn product-card__explore-btn">
+								<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+							</a>
+						</div>
+					{% endif %}
+				{% endif %}
+      </div>
+    {%- endif -%}
+
+    {%- if show_product_title -%}
+      <h3 class="product-card__title h6 {% if product_title_size %}increace-title__wrapper{% endif %}">
+        <a href="{{ product.url | default: '#' }}" class="full-unstyled-link">
+          {{ product.title | escape }}
+        </a>
+      </h3>
+    {%- endif -%}
+  
+    {%- if show_product_reviews -%}
+      <div class="product-card__reviews">
+        {%- assign reviews_count = product.metafields.junip.rating_count | plus: 0 -%}
+        {%- if reviews_count > 0 -%}
+          {% render 'junip-product-summary', product: product %}
+          <span class="product-reviews-line__values">{{ 'products.product.reviews_count' | t: reviews_count: product.metafields.junip.rating_count }}</span>
+        {%- else -%}
+          <span class="product-reviews-line__values">{{ 'products.product.reviews_count' | t: reviews_count: 'No' }}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if show_product_description -%}
+      <div class="product-card__description">
+        {%- if show_product_description_metafield -%}
+          {{ product.metafields.collection.alternative_description | default: product.description }}
+        {%- else -%}
+          {{ product.description }}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {% if product.options and show_color_options_size %}
+      {%- for option in product.options_with_values -%}
+        {%- assign option_name = option.name | downcase -%}
+
+        {%- if color_label contains option_name and option.values.size > 1 -%}
+          {%- assign option_name_multiple = option.name | append: 's' -%}
+          {%- assign option_color_selected_position = option.position | minus: 1 -%}
+					{%- assign shown_colors_count = color_option_values.size -%}
+					{%- assign hidden_colors = blank -%}
+
+					{%- for variant in product_variants -%}
+						{%- if variant.metafields.custom.hide_variant.value -%}
+							{%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+						{%- endif -%}
+					{%- endfor -%}
+
+					{%- for value in color_option_values -%}
+						{%- if hidden_colors contains value -%}
+							{%- assign shown_colors_count = shown_colors_count | minus: 1 -%}
+						{%- endif -%}
+					{%- endfor -%}
+
+					{% if shown_colors_count > 0 %}
+						<p class="product-card__options--color">
+							{{ shown_colors_count }} {{ shown_colors_count | pluralize: option.name, option_name_multiple }}
+						</p>
+					{% endif %}
+        {%- endif -%}
+      {%- endfor -%}
+    {% endif %}
+
+    {%- if show_product_price -%}
+
+      {%- if show_product_price_range -%}
+        {% render 'price', product: product, use_variant: false, product_variants: product_variants, show_product_price_range: true %}
+      {%- else -%}
+
+        {%- if price_by_product -%}
+          {%- assign product_by_price = product -%}
+          {%- if merge_product and product.price_min > current_merge_product.price_min -%}
+            {%- assign product_by_price = current_merge_product -%}
+          {%- endif -%}
+
+          {% render 'price', product: product_by_price, %}
+          {%- elsif product_selected -%}
+          {% render 'price', product: product_selected, use_variant: true, selected_variant: product_selected_variant %}
+        {%- else -%}
+          {% render 'price', product: product, use_variant: true %}
+        {%- endif -%}
+
+      {%- endif -%}
+
+    {%- endif -%}
+
+		{% if show_quick_view %}
+			{%- assign patches = product.metafields.custom.patches.value -%}
+			{%- assign product_title_handleize = product.title | handleize -%}
+
+			{% if patches == blank %}
+				{% unless product_title_handleize contains 'iron-set' %}
+					<div class="product-card__quick-view-btn-wrapper small-up-hide">
+						<button class="button button--primary product-card__btn product-card__explore-btn" data-action="explore" data-product="{{ product_selected_variant.url }}">
+							<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+							<span class="loading-overlay__spinner hidden">
+										{% render 'icon' with 'spinner' %}
+									</span>
+						</button>
+					</div>
+				{% else %}
+					<div class="product-card__quick-view-btn-wrapper small-up-hide">
+						<a href="{{ product_selected_variant.url }}" class="button button--primary product-card__btn product-card__explore-btn">
+							<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+						</a>
+					</div>
+				{% endunless %}
+			{% else %}
+				<div class="product-card__quick-view-btn-wrapper small-up-hide">
+					<a href="{{ product_selected_variant.url }}" class="button button--primary product-card__btn product-card__explore-btn">
+						<span class="product-card__explore-btn-span">{{ product_cart_quick_view }}</span>
+					</a>
+				</div>
+			{% endif %}
+		{% endif %}
+  </div>
+
+  {%- if show_product_badge -%}
+
+    {%- if hide_variants -%}
+      {%- assign target = product -%}
+      {%- assign all_variants_discounted = true -%}
+    {%- else -%}
+      {%- assign biggest_discount = 0 -%}
+      {%- assign discounts_counter = 0 -%}
+      {%- assign discounts_steps = 0 -%}
+
+      {%- assign all_variants_discounted = false -%}
+
+      {%- for variant in product_variants -%}
+
+        {%- if variant.compare_at_price > variant.price -%}
+          {%- assign discounts_counter = discounts_counter | plus: 1 -%}
+          {%- assign discount_percentage = variant.compare_at_price | minus: variant.price | times: 100 | divided_by: variant.compare_at_price -%}
+
+          {%- if discount_percentage > biggest_discount -%}
+            {%- assign biggest_discount = discount_percentage -%}
+            {%- assign discounts_steps = discounts_steps | plus: 1 -%}
+            {%- assign target = variant -%}
+          {%- endif -%}
+        {%- endif -%}
+
+      {%- endfor -%}
+
+      {%- if discounts_counter == product_variants.size and discounts_steps == 1 -%}
+        {%- assign all_variants_discounted = true -%}
+      {%- endif -%}
+
+    {%- endif -%}
+
+    {%- if target.compare_at_price > target.price and settings.sale_badge_text != blank or settings.sale_badge_dynamic_discount -%}
+      {%- assign sale_badge_text = settings.sale_badge_text -%}
+      
+      {%- if settings.sale_badge_dynamic_discount -%}
+        {%- assign discount_percentage = target.compare_at_price | minus: target.price | times: 100 | divided_by: target.compare_at_price -%}
+        {%- if all_variants_discounted -%}
+          {%- assign sale_badge_text = 'products.product.sale_badge' | t: percentage: discount_percentage -%}
+        {%- else -%}
+          {%- assign sale_badge_text = 'products.product.sale_up_badge' | t: percentage: discount_percentage -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      <span class="product-card__badge" style="background-color: {{ settings.sale_badge_bg_color }}; color: {{ settings.sale_badge_text_color }}">
+        {{ sale_badge_text }}
+      </span>
+    {%- else -%}
+      {%- assign has_badge = false -%}
+
+      {%- assign tags = product.tags -%}
+      {%- assign product_features = product.metafields.custom.product_features_list -%}
+
+      {%- if product_selected -%}
+        {%- assign tags = product_selected.tags -%}
+        {%- assign product_features = product_selected.metafields.custom.product_features_list -%}
+      {%- endif -%}
+
+      {% for tag in tags %}
+        {%- if tag contains 'BADGE__' -%}
+          {%- assign badge_text = tag | split: 'BADGE__' | last -%}
+            {%- if badge_text != blank -%}
+              <span class="product-card__badge">{{ badge_text }}</span>
+            {%- endif -%}
+          {%- assign has_badge = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {% endfor %}
+
+      {%- if product_features != blank and has_badge == false -%}
+        {%- if product_features.value[0] != blank -%}
+          <span class="product-card__badge">{{ product_features.value[0] }}</span>
+        {%- endif -%}
+      {%- endif -%}
+
+    {%- endif -%}
+  {%- endif -%}
+
+</product-card>

@@ -1,0 +1,93 @@
+{%- comment -%}
+  {% include 'main-product-metafield-media' %}
+{%- endcomment -%}
+
+{% unless variant_ids_for_images contains variant.id %}
+{%- assign variant_ids_for_images = variant_ids_for_images | append: variant.id | append: ';' -%}
+	{%- assign variant_model = variant.metafields.custom.model -%}
+	{%- assign variant_model_preview = variant.metafields.custom.model_preview_image -%}
+
+  {%- for media in variant.metafields.accentuate.media[0] -%}
+    {%- if selected_variant_first_metafield_media == false -%}
+      {%- assign selected_variant_first_metafield_media = media -%}
+    {%- endif -%}
+
+		{% if variant_model != blank and forloop.index0 == 3 %}
+			<div class="swiper-slide">
+				<div class="product-media-modal__model" data-media-id="{{ product.id }}">
+					<product-model class="deferred-media media media--transparent global-media-settings global-media-settings--no-shadow" style="padding-top: min(calc(100vh - 12rem), 100%)">
+
+						<button id="Deferred-Poster-Modal-{{ product.id }}" class="deferred-media__poster" type="button">
+								<span class="deferred-media__poster-button motion-reduce">
+									{%- render 'icon-3d-model' -%}
+								</span>
+							<img
+								src="{{ variant_model_preview | image_url: width: auto, height: auto }}"
+								loading="lazy"
+								alt="{{ model.alt | escape }}"
+							>
+						</button>
+						<template>
+							{{ variant_model | media_tag: image_size: "2048x", toggleable: true }}
+						</template>
+
+					</product-model>
+				</div>
+			</div>
+		{% endif %}
+
+    {%- assign media_variants_flag = true -%}
+    <div class="swiper-slide">
+      {%- assign media_slides_count = media_slides_count | plus: 1 -%}
+
+      {% if media.media_type != 'image' %}
+        <div class="product__media-item"
+             style="
+                     --first-media-size: {{ first_media_size_value }};
+                     --full-width-media-size-value: {{ full_width_media_size_value }};
+                     --half_width_media_size_value: {{ half_width_media_size_value }};
+                     "
+             data-media-id="{{ media.id }}">
+          <modal-opener class="product__modal-opener no-js-hidden" data-modal="#ProductMediaZoom-{{ product.id }}">
+            <button class="product__media-toggle" type="button" aria-haspopup="dialog" data-target-media-id="{{ media.id }}">
+                            <span class="visually-hidden">
+                              {{ 'products.product.media.open_media' | t }}
+                            </span>
+            </button>
+          </modal-opener>
+
+          <video aria-label='{{ product.title }}'
+                 class="exclude-pause"
+                 loop
+                 playsinline
+                 autoplay
+                 muted>
+            <source src="{{ media.src }}"
+                    type="{{ media.mime_type }}">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      {% else %}
+        <div class="product__media-item"
+             style="
+                     --first-media-size: {{ first_media_size_value }};
+                     --full-width-media-size-value: {{ full_width_media_size_value }};
+                     --half_width_media_size_value: {{ half_width_media_size_value }};
+                     "
+             data-media-id="{{ media.id }}">
+          <modal-opener class="product__modal-opener no-js-hidden" data-modal="#ProductMediaZoom-{{ product.id }}">
+            <button class="product__media-toggle" type="button" aria-haspopup="dialog" data-target-media-id="{{ media.id }}">
+                            <span class="visually-hidden">
+                              {{ 'products.product.media.open_media' | t }}
+                            </span>
+            </button>
+          </modal-opener>
+
+          {% render 'image-metafields', image: media, hide_id: true, preload: true %}
+
+          <span class="image-loader"></span>
+        </div>
+      {% endif %}
+    </div>
+  {%- endfor -%}
+{% endunless %}

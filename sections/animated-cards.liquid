@@ -1,0 +1,241 @@
+{{ 'section-animated-cards.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'section-animated-cards.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+  assign text_color = section.settings.text_color
+  assign bg_color = section.settings.bg_color
+  assign bg_image = section.settings.bg_image
+  assign bg_image_mobile = section.settings.bg_image_mobile
+  assign logo = section.settings.logo
+  assign logo_position = section.settings.logo_position
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+  assign icon = section.settings.icon
+  assign enable_cards_animation = section.settings.enable_cards_animation
+
+  assign image_class_name = 'animated-cars__bg image-abs-cover'
+  assign logo_class_name = 'animated-cars__logo animated-cars__logo--' | append: logo_position
+-%}
+
+<div class="animated-cars rel"
+		 {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+     style="
+             --ac-color: {{ text_color }};
+             --ac-bg-color: {{ bg_color }};">
+
+  <div class="animated-cars__wrapper rel">
+
+    {%- if logo -%}
+      {% render 'image', image: logo, class_name: logo_class_name, small_size: ture %}
+    {%- endif -%}
+
+    {%- if bg_image_mobile -%}
+      {%- assign image_class_name = image_class_name | append: ' small-hide' -%}
+      {% render 'image', image: bg_image_mobile, class_name: 'animated-cars__bg image-abs-cover small-up-hide' %}
+    {%- endif -%}
+
+    {%- if bg_image -%}
+      {% render 'image', image: bg_image, class_name: image_class_name %}
+    {%- endif -%}
+
+    <div class="page-width rel">
+
+      <div class="animated-cars__content">
+        {%- if heading != blank -%}
+          <h3 class="animated-cars__heading h1">{{ heading | newline_to_br }}</h3>
+        {%- endif -%}
+
+        {%- if description != blank -%}
+          <div class="animated-cars__description">{{ description }}</div>
+        {%- endif -%}
+
+        {%- if icon != blank -%}
+          {% render 'image', image: icon, class_name: 'animated-cars__icon' %}
+        {%- endif -%}
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+
+        {%- capture viewportConfig -%}
+          {
+            "enabled": {{ enable_cards_animation }},
+            "threshold": 0.4,
+            "classToggle": "is-inViewport"
+          }
+        {%- endcapture -%}
+
+        <viewport-action class="animated-cars__list" data-config='{{ viewportConfig }}' >
+
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign image = block.settings.image
+              assign heading = block.settings.heading
+              assign description = block.settings.description
+              assign url = block.settings.url -%}
+
+            <div class="animated-cars__item">
+              {%- if heading != blank or description != blank -%}
+                <div class="animated-cars__item-img rel {% unless image %}empty-img{% endunless %}">
+                  {%- if image -%}
+                    {% render 'image', image: image, class_name: 'image-abs-cover' %}
+                  {%- else -%}
+                    {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+                  {%- endif -%}
+                  {%- if url != blank -%}
+                    <a href="{{ url }}" class="image-abs-cover">
+                      <span class="u-sr-only">{{ heading | default: image.alt }}</span>
+                    </a>
+                  {%- endif -%}
+                  <span class="animated-cars__item-img-overlay image-abs-cover"></span>
+                </div>
+
+                <div class="animated-cars__item-content">
+                  {%- if heading != blank -%}
+                    <h3 class="animated-cars__item-heading h5">
+                      {%- if url != blank -%}
+                        <a href="{{ url }}">{{ heading | newline_to_br }}</a>
+                      {%- else -%}
+                        {{ heading | newline_to_br }}
+                      {%- endif -%}
+                    </h3>
+                  {%- endif -%}
+
+                  {%- if  description != blank -%}
+                    <div class="animated-cars__item-description">{{ description }}</div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </viewport-action>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Animated cards",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#FFFFFF",
+      "label": "Text color"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#000000",
+      "label": "Background color"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image_mobile",
+      "label": "Background image (mobile)"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right",
+      "label": "Logo position"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Dead Golfer Month",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "default": "<p>Lorem ipsum dolor sit amet consectetur adipiscing elit eleifend egestas malesuada, euismod cursus placerat magna auctor sapien elementum rhoncus vitae pretium etiam, enim pellentesque consequat eget cras facilisis ut tempor commodo.<p>",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_cards_animation",
+      "label": "Enable cards animation",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "default": "Lorem ipsum<br>dolor sit amet",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "default": "<p>Lorem ipsum dolor sit amet consectetur adipiscing elit eleifend egestas malesuada</p>",
+          "label": "Description"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated cards",
+      "blocks": [
+        {
+          "type": "card"
+        },
+        {
+          "type": "card"
+        },
+        {
+          "type": "card"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

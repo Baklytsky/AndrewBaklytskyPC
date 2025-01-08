@@ -1,0 +1,285 @@
+/*-------Global form items----------*/
+.form__group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form__group .form__item {
+  width: 48%;
+}
+
+@media screen and (max-width: 749px) {
+  .form__group {
+    flex-direction: column;
+  }
+
+  .form__group .form__item {
+    width: 100%;
+  }
+}
+
+.form__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.form__select-label,
+.form__item label {
+  position: absolute;
+  top: 0;
+  transform: translateY(55%);
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: 1.88;
+  text-align: left;
+  color: rgb(124,124,124);
+  transition: transform var(--duration-short) ease;
+}
+
+.form__item input:not(:placeholder-shown) + label,
+.form__item textarea:not(:placeholder-shown) + label {
+  font-size: var(--font-size-s);
+  transform: unset;
+}
+
+.form__item input:focus + label,
+.form__item textarea:focus + label {
+  font-size: var(--font-size-s);
+  transform: unset;
+}
+
+.form__input,
+.form__textarea,
+.form__select {
+  -webkit-appearance: none;
+  display: block;
+  padding: 17px 0;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid rgb(var(--color-border));
+  width: 100%;
+  resize: none;
+  background: transparent;
+  color: currentColor;
+  line-height: 1.88;
+  font-size: var(--font-size-text);
+  font-family: var(--font-body-family);
+  font-weight: var(--font-body-weight);
+  border-radius: unset;
+}
+
+.form__input[type="password"] {
+  font-family: Verdana;
+  letter-spacing: 0.18em;
+}
+
+.form__input:focus,
+.form__textarea:focus {
+  outline: 0;
+  box-shadow: none;
+  border-bottom: 1px solid rgb(var(--color-text));
+}
+
+.form__textarea {
+  margin-bottom: 35px;
+}
+
+.form__input::placeholder,
+.form__textarea::placeholder {
+  color: transparent;
+}
+
+.form__item.is-subscribed .form__input[type="email"] {
+  border-bottom: 1px solid rgb(var(--color-button-bg-error));
+}
+
+.form__item.is-subscribed::after {
+  content: "The email already exists";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: translateY(-10px);
+  display: block;
+  font-size: 12px;
+  color: rgb(var(--color-button-bg-error));
+}
+
+.form__item--checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.form__item--checkbox .form__checkbox {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin: 3px 12px 3px 3px;
+}
+
+.form__checkbox:after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgb(var(--color-border));
+  background-color: rgb(var(--color-background));
+}
+
+.form__checkbox:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -90%) rotate(-45deg);
+  width: 9px;
+  height: 5px;
+  border-width: 0 0 1px 1px;
+  border-style: solid;
+  border-color: rgb(var(--color-background));
+  z-index: 2;
+}
+
+.form__checkbox:checked {
+  border: 1px solid rgb(var(--color-text));
+}
+
+.form__checkbox:checked:after {
+  background-color: rgb(var(--color-text));
+}
+
+.form__checkbox + label {
+  position: relative;
+}
+
+.form__checkbox:checked + label {
+  color: rgb(var(--color-text));
+}
+
+.form__select {
+  position: relative;
+  width: 100%;
+}
+
+.form__select-btn {
+  position: relative;
+  padding-right: 15px;
+}
+
+.form__select-btn:after {
+  content: "";
+  position: absolute;
+  top: 45%;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%) rotate(45deg);
+  border-bottom: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transition: 0.2s ease;
+  z-index: 2;
+}
+
+.form__select-btn {
+  color: transparent;
+}
+
+.form__select-btn:after {
+  color: rgb(var(--color-base-text));
+}
+
+.form__select.checked .form__select-btn {
+  color: currentColor;
+}
+
+.form__select.open .form__select-btn:after {
+  transform: rotate(-135deg);
+}
+
+.form__select-dropdown {
+  position: absolute;
+  top: 0;
+  right: -24px;
+  width: calc(100% + 48px);
+  border-radius: 0 0 3px 3px;
+  z-index: 1;
+  background: #fff;
+  transform: scale(1, 0);
+  opacity: 0;
+  transform-origin: top center;
+  visibility: hidden;
+  transition: 0.2s ease;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  color: currentColor;
+  max-height: 500px;
+  overflow: auto;
+}
+
+@media screen and (max-width: 1400px) {
+  .form__select-dropdown {
+    width: calc(100% + 32px);
+    right: -16px;
+    max-height: 200px;
+  }
+}
+
+.form__select.open .form__select-dropdown {
+  visibility: visible;
+  transform: scale(1,1);
+  opacity: 1;
+  transition-duration: 400ms;
+  transition-property: opacity;
+  z-index: 5;
+}
+
+.form__select.open .form__select-btn:after {
+  z-index: 6;
+}
+
+.form__select .form__select-dropdown li {
+  padding: 17px 55px 17px 24px;
+  cursor: pointer;
+  border: none;
+  font-weight: var(--font-medium-weight);
+}
+
+.form__select-dropdown li:hover {
+  background: rgb(var(--color-border));
+}
+
+.form__select-dropdown li.checked {
+  background: rgb(var(--color-border));
+}
+
+.form__select label {
+  pointer-events: none;
+}
+
+.form__select.checked label {
+  font-size: var(--font-size-s);
+  transform: unset;
+}
+
+.account__modal_block .form__message--success,
+form .form__message--success {
+  padding: 20px 0;
+  color: rgb(var(--color-message-success));
+}
+
+.account__modal_block .form__message--error {
+  padding: 20px 0;
+  color: rgb(var(--color-button-bg-error));
+}
+
+.form__select-hidden {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}

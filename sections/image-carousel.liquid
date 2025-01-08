@@ -1,0 +1,254 @@
+{{ 'section-image-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+{%- assign section_heading = section.settings.section_heading -%}
+{%- assign section_heading_color = section.settings.section_heading_color -%}
+{%- assign content_position = section.settings.content_position -%}
+{%- assign hide_slider_arrows_mobile = section.settings.hide_slider_arrows_mobile -%}
+{%- assign show_slider_pagination = section.settings.show_slider_pagination -%}
+
+{%- if section.blocks.size > 0 or section_heading != blank -%}
+
+  {% capture config %}
+    {
+      "slidesPerView": 1.15,
+      "spaceBetween": 24,
+      "watchOverflow": true,
+      "navigation": {
+        "nextEl": ".next-{{ section.id }}",
+        "prevEl": ".prev-{{ section.id }}"
+      },
+      "pagination": {
+        "el": ".swiper-pagination-{{ section.id }}",
+        "type": "progressbar"
+      },
+      "breakpoints": {
+        "1980": {
+          "slidesPerView": 2.5,
+          "spaceBetween": 36
+        },
+        "1200": {
+          "slidesPerView": 3,
+          "spaceBetween": 36
+        },
+        "900": {
+          "shortSwipes": false,
+          "slidesPerView": 1.5,
+          "spaceBetween": 24
+        }
+      }
+    }
+  {% endcapture %}
+  
+  <slideshow-swiper
+          id="image-carousel-{{ section.id }}"
+          class="image-carousel"
+          data-config='{{ config }}'
+          {% if section.settings.show_slider_arrows %}data-arrows-appear="true"{% endif %}>
+
+    {%- if section_heading != blank -%}
+    <div class="image-carousel__heading-wrapper page-width">
+      <h3 class="image-carousel__heading h5" style="color: {{ section_heading_color }}">{{ section_heading }}</h3>
+    </div>
+    {%- endif -%}
+
+    <div class="swiper page-width rel" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+      <ul class="image-carousel__list swiper-wrapper" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign card_url = block.settings.card_url
+            assign image = block.settings.image
+            assign image_overlay_opacity = block.settings.image_overlay_opacity
+            assign subheading = block.settings.subheading
+            assign heading = block.settings.heading
+            assign text_color = block.settings.text_color
+          -%}
+          {%- if image != blank or heading != blank or subheading != blank -%}
+            <li class="image-carousel__list-item swiper-slide" role="listitem">
+              {%- if card_url != blank -%}
+                <a href="{{ card_url }}" class="image-carousel__list-item-wrapper rel">
+              {%- else -%}
+                <div class="image-carousel__list-item-wrapper rel">
+              {%- endif -%}
+
+                {%- if image != blank -%}
+                  {% render 'image', image: image, class_name: 'image-abs-cover' %}
+                {%- endif -%}
+
+                {%- if content_position == 'inside' -%}
+                  {%- if subheading != blank or heading != blank -%}
+                    <div class="image-carousel__list-item-content z1" style="color: {{ text_color }}">
+                      {%- if subheading != blank -%}
+                        <p class="image-carousel__subheading">{{ subheading }}</p>
+                      {%- endif -%}
+                      {%- if heading != blank -%}
+                        <h3 class="image-carousel__heading h5">{{ heading }}</h3>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+
+                {%- if card_url != blank -%}
+                  </a>
+                {%- else -%}
+                  </div>
+                {%- endif -%}
+
+                {%- if content_position == 'below' -%}
+                  {%- if subheading != blank or heading != blank -%}
+                  <div class="image-carousel__list-item-content-below" style="color: {{ text_color }}">
+                    {%- if heading != blank -%}
+                      <h3 class="image-carousel__heading h6">
+                        {%- if card_url != blank -%}
+                          <a href="{{ card_url }}">{{ heading }}</a>
+                        {%- else -%}
+                          {{ heading }}
+                        {%- endif -%}
+                      </h3>
+                    {%- endif -%}
+                    {%- if subheading != blank -%}
+                      <p class="image-carousel__subheading">{{ subheading }}</p>
+                    {%- endif -%}
+                  </div>
+                  {%- endif -%}
+                {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+      <div class="swiper-pagination swiper-pagination-{{ section.id }} small-up-hide {% unless show_slider_pagination %}hidden{% endunless %}"></div>
+    </div>
+    {%- if section.settings.show_slider_arrows -%}
+      <div class="swiper-button-next next-{{ section.id }} {% if hide_slider_arrows_mobile %}small-hide{% endif %}"></div>
+      <div class="swiper-button-prev prev-{{ section.id }} {% if hide_slider_arrows_mobile %}small-hide{% endif %}"></div>
+    {%- endif -%}
+  </slideshow-swiper>
+{%- endif -%}
+
+<style>
+  @media screen and (min-width: 990px) {
+    #image-carousel-{{ section.id }} {
+      background-color: {{ section.settings.section_bg }};
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Image carousel",
+  "tag": "section",
+  "class": "section-image-carousel",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading"
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "Section heading color",
+      "default": "#070707"
+    },
+    {
+      "type": "color",
+      "id": "section_bg",
+      "label": "Section desktop background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Image content position",
+      "options": [
+        {
+          "value": "inside",
+          "label": "Inside"
+        },
+        {
+          "value": "below",
+          "label": "Below"
+        }
+      ],
+      "default": "inside"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_arrows",
+      "default": true,
+      "label": "Show slider arrows"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_slider_arrows_mobile",
+      "default": true,
+      "label": "Hide slider arrows (mobile)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_pagination",
+      "default": false,
+      "label": "Show slider pagination (mobile)"
+    }
+  ],
+  "blocks": [
+      {
+        "type": "image_block",
+        "name": "Image block",
+        "settings": [
+          {
+            "type": "url",
+            "id": "card_url",
+            "label": "Card link"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "image"
+          },
+          {
+            "type": "range",
+            "id": "image_overlay_opacity",
+            "min": 0,
+            "max": 100,
+            "step": 10,
+            "unit": "%",
+            "label": "Image overlay opacity",
+            "default": 0
+          },
+          {
+            "type": "text",
+            "id": "subheading",
+            "label": "Subheading"
+          },
+          {
+            "type": "text",
+            "id": "heading",
+            "label": "Heading"
+          },
+          {
+            "type": "color",
+            "id": "text_color",
+            "label": "Text color",
+            "default": "#000000"
+          }
+        ]
+      }
+    ],
+  "presets": [
+    {
+      "name": "Image carousel",
+      "blocks": [
+        {
+          "type": "image_block"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

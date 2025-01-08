@@ -1,0 +1,43 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+
+{%- form 'recover_customer_password' -%}
+
+{% assign recover_success = form.posted_successfully? %}
+  {%- if recover_success or form.errors -%}
+    <script type="text/javascript">
+      window.location.href = "{{ routes.root_url }}{% if form.errors %}?recover=false&form-message={{ form.errors.messages['form'] }}&{% elsif recover_success == true %}?recover=true{% endif %}"
+    </script>
+  {%- endif -%}
+{%- endform -%}
+
+ {%- form 'customer_login', novalidate: 'novalidate' -%}
+   <script type="text/javascript">
+     const params = new URLSearchParams(window.location.search);
+     params.set('redirect-from', 'login');
+
+     {% if form.errors %}
+       params.set('login', 'false');
+       params.set('form-message', '{{ form.errors.messages['form'] }}');
+     {% endif %}
+
+     if (params.get('checkout_url')) {
+       const checkoutParams = new URLSearchParams(params.get('checkout_url'));
+       checkoutParams.delete('preview_theme_id');
+       const checkout_string_param = checkoutParams.toString()
+
+       if (params.get('checkout_url').includes('/checkouts/')) {
+         sessionStorage.setItem('checkout_login_url', checkout_string_param)
+       }
+
+       if (params.get('form-message')) params.delete('checkout_url')
+
+       window.location.href = params.get('form-message')
+           ? `{{ routes.root_url }}?${params.toString()}`
+           : `{{ routes.root_url }}?login=true`;
+
+     } else {
+       window.location.href = `{{ routes.root_url }}?${params.toString()}`;
+     }
+   </script>
+ {%- endform -%}

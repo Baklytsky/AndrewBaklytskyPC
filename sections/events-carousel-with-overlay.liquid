@@ -1,0 +1,266 @@
+  {{ 'section-events-carousel.css' | asset_url | stylesheet_tag }}
+
+	{%- assign anchor_link = section.settings.anchor_link -%}
+
+  {%- if section.blocks.size > 0 -%}
+    {%- capture config -%}
+      {
+      "slidesPerView": 1,
+      "spaceBetween": 24,
+      "watchOverflow": true,
+      "navigation": {
+        "nextEl": ".next-{{ section.id }}",
+        "prevEl": ".prev-{{ section.id }}"
+      },
+      "pagination": {
+        "el": ".swiper-pagination-{{ section.id }}",
+        "type": "progressbar"
+      },
+      "breakpoints": {
+        "1200": {
+          "slidesPerView": {{ section.settings.carousel_size }},
+          "allowTouchMove": false,
+          "spaceBetween": 36
+          },
+        "900": {
+          "shortSwipes": false,
+          "slidesPerView": 2.5,
+          "spaceBetween": 24
+          },
+        "750": {
+          "slidesPerView": 1.5,
+          "spaceBetween": 24
+          }
+        }
+      }
+    {%- endcapture -%}
+  {%- endif -%}
+  
+  <div id="events-carousel-{{ section.id }}" class="events-carousel {% if section.settings.color_theme == 'black' %}landing-colors{% endif %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="h4 page-width events-carousel__heading-section"
+          style="color: {{ section.settings.heading_color }}; {% if section.settings.heading_alignment == 'right' %}text-align: right;{% endif %}">
+        {{ section.settings.heading }}
+      </h2>
+      <div class="page-width" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+        <span class="events-carousel__heading-separator"></span>
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <slideshow-swiper class="page-width events-carousel__wrapper rel" data-config='{{ config }}' data-arrows-appear="true">
+        <div class="swiper">
+          <ul class="swiper-wrapper">
+            {%- for block in section.blocks -%}
+              {%- assign image = block.settings.image -%}
+              {%- assign heading = block.settings.heading -%}
+              {%- assign subheading = block.settings.subheading -%}
+              {%- assign overlay_heading = block.settings.overlay_heading -%}
+              {%- assign overlay_description = block.settings.overlay_description -%}
+              {%- assign overlay_link_text = block.settings.overlay_link_text -%}
+              {%- assign overlay_link_url = block.settings.overlay_link_url -%}
+
+              <li class="events-carousel__item swiper-slide">
+
+                <div class="events-carousel__item-inner">
+                  {% if image != blank %}
+                    {% render 'image', image: image, class_name: 'image-abs-cover events-carousel__image' %}
+                  {% endif %}
+
+                  {%- if overlay_heading != blank or overlay_description != blank or overlay_link_text != blank -%}
+                    <div class="events-carousel__item-overlay">
+                      <div class="events-carousel__item-overlay-wrapper hide-scrollbar">
+                        {% if overlay_heading != blank %}
+                          <h6 class="events-carousel__item-card-heading">{{ overlay_heading }}</h6>
+                        {% endif %}
+                        {% if overlay_description != blank %}
+                          <p class="events-carousel__item-descr">{{ overlay_description | newline_to_br }}</p>
+                        {% endif %}
+                        {%- if overlay_link_text != blank and overlay_link_url != blank -%}
+                          <a href="{{ overlay_link_url }}" class="events-carousel__item-product">{{ overlay_link_text }}</a>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if overlay_description != blank or overlay_heading != blank or overlay_link_text != blank -%}
+                    <button class="events-carousel__overlay_button">{% render 'icon-plus' %}</button>
+                  {%- endif -%}
+                </div>
+
+                {% if heading != blank %}
+                  <h3 class="events-carousel__heading">{{ heading }}</h3>
+                {% endif %}
+
+                {% if subheading != blank %}
+                  <div class="events-carousel__subheading">{{ subheading }}</div>
+                {% endif %}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          <div class="swiper-pagination {% if section.settings.color_theme == 'black' %}swiper-pagination-progressbar--secondary{% endif %} swiper-pagination-{{ section.id }} small-up-hide"></div>
+        </div>
+
+        <div class="swiper-button-next {% if section.settings.color_theme == 'black' %}swiper-button-next--secondary{% endif %} next-{{ section.id }}"></div>
+        <div class="swiper-button-prev {% if section.settings.color_theme == 'black' %}swiper-button-prev--secondary{% endif %} prev-{{ section.id }}"></div>
+
+      </slideshow-swiper>
+    {%- endif -%}
+
+    {%- if section.settings.carousel_size == '2' -%}
+      <style>
+        @media screen and (min-width: 1200px) {
+          #events-carousel-{{ section.id }} .events-carousel__item-inner {
+            padding-bottom: 125%
+          }
+        }
+      </style>
+    {%- endif -%}
+
+    <script>
+      (function cardWithOverlay() {
+        const container = document.getElementById('events-carousel-{{ section.id }}')
+        const cardsBtn = container.querySelectorAll('.events-carousel__overlay_button')
+
+        cardsBtn.forEach((btn) => {
+          btn.addEventListener('click', function () {
+            const cardInner = this.closest('.events-carousel__item-inner');
+            const overlayContent = cardInner.querySelector('.events-carousel__item-overlay');
+
+            this.classList.toggle('is-open');
+            if (overlayContent) {overlayContent.classList.toggle('is-visible')}
+          });
+        });
+      })()
+    </script>
+  </div>
+
+{% schema %}
+{
+  "name": "Events carousel + overlay",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "select",
+      "id": "color_theme",
+      "label": "Color theme",
+      "options": [
+        {
+          "value": "black",
+          "label": "Black"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        }
+      ],
+      "default": "black"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "carousel_size",
+      "label": "Carousel size",
+      "options": [
+        {
+          "value": "4",
+          "label": "Small"
+        },
+        {
+          "value": "3",
+          "label": "Medium"
+        },
+        {
+          "value": "2",
+          "label": "Large"
+        }
+      ],
+      "default": "4"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "carousel-item",
+      "name": "Carousel item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "header",
+          "content": "Card content"
+        },
+        {
+          "type": "text",
+          "id": "overlay_heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "overlay_description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "overlay_link_text",
+          "label": "Link text"
+        },
+        {
+          "type": "url",
+          "id": "overlay_link_url",
+          "label": "Link url"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Events carousel + overlay"
+    }
+  ]
+}
+{% endschema %}

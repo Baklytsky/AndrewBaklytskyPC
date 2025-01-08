@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}" dir="{{ direction }}" class="{{ checkout_html_classes }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, user-scalable=0">
+    <meta name="referrer" content="origin">
+
+    <title>{{ page_title }}</title>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-MW957R2');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Begin Clarity Asynchronous Code -->
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "bjkn3bvcru");
+    </script>
+    <!-- End Clarity Asynchronous Code -->
+
+    {{ content_for_header }}
+
+    {{ checkout_stylesheets }}
+    {{ checkout_scripts }}
+
+{% include "loyaltylion" %}
+<script>lion.configure({ checkout: true })</script>
+    
+</head>
+  <body>
+    {{ skip_to_content_link }}
+
+    <header class="banner" data-header role="banner">
+      <div class="wrap">
+        {{ content_for_logo }}
+      </div>
+    </header>
+
+    {{ order_summary_toggle }}
+    <div class="content" data-content>
+      <div class="wrap">
+        <div class="main">
+          <header class="main__header" role="banner">
+            {{ content_for_logo }}
+            {{ breadcrumb }}
+            {{ alternative_payment_methods }}
+          </header>
+          <main class="main__content" role="main">
+            {{ content_for_layout }}
+          </main>
+          <footer class="main__footer" role="contentinfo">
+            {{ content_for_footer }}
+          </footer>
+        </div>
+        <aside class="sidebar" role="complementary">
+          <div class="sidebar__header">
+            {{ content_for_logo }}
+          </div>
+          <div class="sidebar__content">
+            {{ content_for_order_summary }}
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      (function($) {
+        $(document).on("page:load page:change", function() {
+          if (Shopify.Checkout.step === 'shipping_method') {
+            const estimatedDays = parseInt({{ checkout.attributes['shipping_estimate_days'] | json }});
+            if (!estimatedDays) return;
+            const shippingMethods = $('[data-shipping-methods]');
+            const defaultShippingOption = $('[data-shipping-method-label-title*="Ground Shipping"]', shippingMethods);
+            const defaultOption = defaultShippingOption.parents('.content-box__row');
+            const firstOptionText = $('[data-shipping-method-label-title]', defaultOption);
+            const indexBegin = firstOptionText.text().indexOf('(');
+            const indexEnd = firstOptionText.text().indexOf(' business day');
+            const matchedString = firstOptionText.text().slice(indexBegin + 1, indexEnd);
+            const matchedParts = matchedString.split('-');
+            // const newString = `${parseInt(matchedParts[0]) + estimatedDays}-${parseInt(matchedParts[1]) + estimatedDays}`;
+            const newString = `${estimatedDays}`;
+
+            const newTextContent = firstOptionText.text().replace(matchedString, newString);
+            firstOptionText.text(newTextContent);
+          }
+        });
+      })(Checkout.$);
+    </script>
+
+    {%- if settings.enable_shipping_note and settings.shipping_note != blank -%}
+      <style>
+        .checkout__note {
+          margin-bottom: 15px;
+          color: {{ settings.shipping_note_color }};
+        }
+
+        .checkout__note a {
+          color: {{ settings.shipping_note_color }};
+          text-decoration: underline;
+        }
+      </style>
+
+      <script>
+        document.addEventListener("page:load", () => {
+          const note = `{{ settings.shipping_note }}
+                        {% if settings.shipping_note_learn_more != blank %}
+                          {{ 'Learn more' | link_to: settings.shipping_note_learn_more }}
+                        {% endif %}`;
+          const shipping_note = document.createElement("div");
+          shipping_note.classList.add('checkout__note');
+          shipping_note.innerHTML = note;
+
+          if (Shopify.Checkout.step === 'contact_information') {
+            const order_block = document.querySelector('.order-summary__sections');
+            if (order_block) order_block.insertAdjacentElement("beforebegin", shipping_note);
+          }
+
+          if (Shopify.Checkout.step === 'shipping_method') {
+            const shipping_method_block = document.querySelector('.section--shipping-method .section__header')
+            if (shipping_method_block) shipping_method_block.insertAdjacentElement("afterend", shipping_note)
+          }
+        });
+      </script>
+    {%- endif -%}
+    
+    {{ tracking_code }}
+  </body>
+</html>

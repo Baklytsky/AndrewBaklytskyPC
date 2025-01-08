@@ -1,0 +1,103 @@
+{%- assign show_section = [template.name].metafields.pdp-feature-products.show_section -%}
+
+{%- if show_section == 'true' -%}
+  {{ 'section-featured-collection.css' | asset_url | stylesheet_tag }}
+  
+  {%- liquid
+    assign collection_handle = [template.name].metafields.pdp-feature-products.collection
+    assign collection = collections[collection_handle]
+    assign products_handles = [template.name].metafields.pdp-feature-products.products | split: '|'
+    assign show_slider_arrows = true
+    assign heading = [template.name].metafields.pdp-feature-products.heading
+  -%}
+  
+  <div class="featured-collection__wrapper featured-collection__wrapper--{{ template.name}} {{ wrapper_class_name }}">
+    {%- if heading != blank -%}
+      <h2 class="featured-collection__heading h4">{{ heading }}</h2>
+    {%- endif -%}
+  
+    <slideshow-swiper id="featured-collection-{{ uniq_id_by_index }}" class="featured-collection product-featured-collection is-inViewport" data-config='{{ config }}'>
+    
+      <div class="swiper rel">
+        <ul class="featured-collection__list swiper-wrapper" role="list">
+          {%- if collection.products != empty -%}
+            {%- for product in collection.products limit: 16 -%}
+
+              {%- if product.tags contains 'hidden' -%}
+                {% continue %}
+              {%- endif -%}
+
+              <li class="featured-collection__list-item rel swiper-slide" role="listitem">
+                {% render 'product-card',
+                  product: product,
+                  hide_variants: false,
+                  uniq_id: forloop.index,
+                  show_product_title: true,
+                  show_product_description: true,
+                  show_product_reviews: true,
+                  show_product_price: true,
+                  show_product_price_range: true,
+                  show_product_badge: true,
+                  show_color_options_size: true,
+                  show_image_thumbnails: true,
+                  show_product_description: true
+                  show_product_description_metafield: true,
+                  custom_class: 'product-card--pdp' %}
+              </li>
+            {%- endfor -%}
+            {% elsif products_handles != blank %}
+            {%- for product_handle in products_handles limit: 16 -%}
+              {%- assign product = all_products[product_handle] -%}
+
+              {%- if product.tags contains 'hidden' -%}
+                {% continue %}
+              {%- endif -%}
+            
+              {%- unless product == empty -%}
+                <li class="featured-collection__list-item rel swiper-slide" role="listitem">
+                  {% render 'product-card',
+                    product: product,
+                    hide_variants: true,
+                    uniq_id: forloop.index,
+                    show_product_title: true,
+                    show_product_reviews: true,
+                    show_product_description: true,
+                    show_product_price: true,
+                    show_product_price_range: true,
+                    show_product_badge: true,
+                    show_color_options_size: true,
+                    show_image_thumbnails: true,
+                    show_product_description: true
+                    show_product_description_metafield: true,
+                    custom_class: 'product-card--pdp' %}
+                </li>
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- endif -%}
+      
+        </ul>
+        <div class="swiper-pagination swiper-pagination-{{ uniq_id_by_index }} small-up-hide"></div>
+      </div>
+      {%- if show_slider_arrows -%}
+        <div class="swiper-button-next next-{{ uniq_id_by_index }}"></div>
+        <div class="swiper-button-prev prev-{{ uniq_id_by_index }}"></div>
+      {%- endif -%}
+    </slideshow-swiper>
+
+  </div>
+
+  {%- if show_slider_arrows -%}
+    <script>
+      (function obseverInit() {
+        const observer = new IntersectionObserver(onIntersection, {
+          root: null,
+          threshold: .5
+        });
+        function onIntersection(entries, opts){
+          entries.forEach(entry => entry.target.classList.toggle('is-inViewport', entry.isIntersecting));
+        }
+        observer.observe( document.querySelector('#featured-collection-{{ uniq_id_by_index }}') );
+      }) ();
+    </script>
+  {%- endif -%}
+{%- endif -%}

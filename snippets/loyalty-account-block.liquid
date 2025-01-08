@@ -1,0 +1,73 @@
+{%- liquid
+  assign tier_0 = settings.tier_1
+  assign tier_1 = settings.tier_2
+  assign tier_2 = settings.tier_3
+  assign tier_3 = settings.tier_4
+-%}
+
+<div class="account__inner-block" id="AccountLoyaltyInfo" hidden>
+  <h2 class="account__subheading">{{ 'customer.account.loyalty.heading' | t }}</h2>
+
+  <div class="account__order-product account__order-product--inline">
+    <div class="account__order-product-image-wrapper" id="LoyaltyTierImage" hidden>
+      <div class="account__order-product-image-inner">
+        <img class="image-abs-contain" src="" alt="{{ shop.name | escape }} - loyalty tier">
+      </div>
+    </div>
+
+    <div class="account__order-wrapper">
+      <div class="rel">
+        <apan>{{ 'customer.account.loyalty.points_heading' | t }}:</apan>
+        <span class="account__btn account__btn-edit" data-lion-points="approved"></span>
+      </div>
+
+      <div class="rel" id="LoyaltyTierName" hidden>
+        <apan>{{ 'customer.account.loyalty.tiers_heading' | t }}:</apan>
+        <span class="account__btn account__btn-edit"></span>
+      </div>
+
+      <div class="rel">
+        <apan>{{ 'customer.account.loyalty.how_to_label' | t }}:</apan>
+        <p class="account__description">
+          Rewards redeemable at checkout – click <a href="https://truelinkswear.com/pages/loyalty">here</a> to learn more.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tierNameElement = document.getElementById('LoyaltyTierName');
+    const tierImageContainer = document.getElementById('LoyaltyTierImage');
+    const tierImages = {
+      {%- for i in (0..3) -%}
+        {%- assign var_name = 'tier_' | append: i -%}
+          "{{- forloop.index0 | json }}": {{ [var_name] | json }}
+        {%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    };
+
+    if (!tierNameElement) return;
+
+    loyaltylion.on('ready', () => {
+      const accountLoyaltyInfo = document.getElementById('AccountLoyaltyInfo');
+      accountLoyaltyInfo.removeAttribute('hidden');
+
+      const customerTierId = window.loyaltylion.customer?.loyaltyTierMembership?.loyaltyTierId;
+      if (!customerTierId)  return;
+
+      const customerTier = window.loyaltylion.program?.loyaltyTiers?.find(tier => tier.id === customerTierId);
+      if (!customerTier)  return;
+
+      tierNameElement.querySelector('span:empty').innerHTML = customerTier.name;
+      tierNameElement.removeAttribute('hidden');
+
+      const tierImage = tierImages[customerTier.position];
+      if (!tierImage) return;
+
+      tierImageContainer.removeAttribute('hidden');
+      tierImageContainer.querySelector('img').setAttribute('src', tierImage);
+    })
+  })
+</script>

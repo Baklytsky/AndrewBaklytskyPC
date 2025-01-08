@@ -1,0 +1,121 @@
+{%- if section.blocks.size > 0 -%}
+	{%- assign anchor_link = section.settings.anchor_link -%}
+
+  {{ 'section-image-slideshow.css' | asset_url | stylesheet_tag }}
+  
+  <style>
+    #image-slideshow-{{ section.id }} {
+      background-color: {{ section.settings.bg_color }};
+      color: {{ section.settings.text_color }};
+    }
+  </style>
+  
+  {% capture config %}
+    {
+      "slidesPerView": 1,
+      "watchOverflow": true,
+      "grabCursor": true,
+      "navigation": {
+        "nextEl": ".next-{{ section.id }}",
+        "prevEl": ".prev-{{ section.id }}"
+      },
+      "pagination": {
+        "el": ".swiper-pagination-{{ section.id }}",
+        "type": "progressbar"
+      }
+    }
+  {% endcapture %}
+  
+  <div id="image-slideshow-{{ section.id }}" class="image-slideshow__wrapper {% if section.settings.color_theme == 'black' %}landing-colors{% endif %}">
+    <slideshow-swiper
+      class="page-width image-slideshow__slider"
+			{% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+      data-config='{{ config }}'
+      {% if section.settings.show_slider_arrows %}data-arrows-appear="true"{% endif %}>
+      <div class="swiper rel">
+        <ul class="image-slideshow__list swiper-wrapper" role="list">
+          {%- for block in section.blocks -%}
+            {%- assign image = block.settings.image -%}
+            {%- assign image_mobile = block.settings.image_mobile -%}
+          
+            {%- if image != blank -%}
+              <li class="image-slideshow__item swiper-slide" role="listitem">
+                <div class="image-slideshow__image-wrapper">
+                  {%- assign image_class = 'image-abs-cover' -%}
+  
+                  {%- if image_mobile != blank -%}
+                    {%- assign image_class = image_class | append: ' large-hide' -%}
+                    
+                    {% render 'image', image: image_mobile, class_name: 'image-abs-cover large-up-hide' %}
+                  {%- endif -%}
+  
+                  {% render 'image', image: image, class_name: image_class %}
+                </div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        <div class="swiper-pagination swiper-pagination-progressbar--secondary swiper-pagination-{{ section.id }} small-up-hide"></div>
+        {%- if section.settings.show_slider_arrows -%}
+          <div class="swiper-button-next swiper-button-next--secondary next-{{ section.id }}"></div>
+          <div class="swiper-button-prev swiper-button-prev--secondary prev-{{ section.id }}"></div>
+        {%- endif -%}
+      </div>
+    </slideshow-swiper>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Image slideshow",
+  "tag": "section",
+  "class": "section-image-slideshow",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#181818",
+      "label": "Background color"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_arrows",
+      "default": true,
+      "label": "Show slider arrows"
+    }
+  ],
+  "blocks": [
+      {
+        "type": "image_block",
+        "name": "Image block",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image"
+          },
+          {
+            "type": "image_picker",
+            "id": "image_mobile",
+            "label": "Image mobile"
+          }
+        ]
+      }
+    ],
+  "presets": [
+    {
+      "name": "Image slideshow",
+      "blocks": [
+        {
+          "type": "image_block"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

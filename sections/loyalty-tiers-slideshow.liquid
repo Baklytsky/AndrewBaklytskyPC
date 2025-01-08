@@ -1,0 +1,248 @@
+{{ 'section-iwot-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+{%- liquid
+  assign bg_color = section.settings.bg_color
+  assign cards_bg_color = section.settings.cards_bg_color
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+  assign tier_0 = settings.tier_1
+  assign tier_1 = settings.tier_2
+  assign tier_2 = settings.tier_3
+  assign tier_3 = settings.tier_4
+-%}
+
+{%- capture config -%}
+  {
+    "slidesPerView": 1,
+    "spaceBetween": 24,
+    "draggable": true,
+    "watchOverflow": true,
+    "navigation": {
+      "nextEl": ".next-{{ section.id }}",
+      "prevEl": ".prev-{{ section.id }}"
+    },
+    "pagination": {
+      "el": ".swiper-pagination-{{ section.id }}",
+      "type": "progressbar"
+    },
+    "breakpoints": {
+      "1200": {
+        "slidesPerView": 3,
+        "allowTouchMove": false,
+        "spaceBetween": 36
+      },
+      "900": {
+        "shortSwipes": false,
+        "slidesPerView": 2.5,
+        "spaceBetween": 24
+      },
+      "750": {
+        "slidesPerView": 2.2,
+        "spaceBetween": 24
+      }
+    }
+  }
+{%- endcapture -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    padding-top: {{ padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ padding_bottom | times: 0.75 | round: 0 }}px;
+    background-color: {{ bg_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ padding_top }}px;
+      padding-bottom: {{ padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<script type="application/javascript">
+  if (!customElements.get('loyalty-tiers')) {
+    class LoyaltyTiers extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        loyaltylion.on('ready', () => {
+          this.json = JSON.parse(this.querySelector('[type="application/json"]').textContent);
+          this.templateContent = document.getElementById('loyalty-lion-tiers-template').content;
+          const observer = new MutationObserver(this.sectionLoadedCallback.bind(this));
+          this.nodeElement = this.querySelector('[data-lion-tier-overview]');
+          observer.observe(this.nodeElement, { attributes: false, childList: true, subtree: false });
+        })
+      }
+
+      sectionLoadedCallback(mutationList, observer) {
+        for (const mutation of mutationList) {
+          if (mutation.type !== 'childList')  return;
+
+          const elements = Array.from(this.nodeElement.querySelectorAll('.lion-tier-box')).map((item, index) => {
+            const tierImage = this.json[index];
+
+            if (tierImage)  item.querySelector('.lion-tier-box__position').innerHTML = `<img src=${tierImage}>`;
+
+            item.classList.add('swiper-slide', 'iwot-carousel__item');
+            return item;
+          })
+
+          this.templateContent.querySelector('.swiper-wrapper').append(...elements);
+
+          this.appendChild(this.templateContent.cloneNode(true));
+
+          observer.disconnect();
+        }
+      }
+    }
+
+    customElements.define('loyalty-tiers', LoyaltyTiers);
+  }
+</script>
+
+<loyalty-tiers id="loyaltylion" style="--cards-bg: {{ cards_bg_color }}">
+  <div data-lion-tier-overview hidden></div>
+
+  <script type="application/json">
+    {
+      {%- for i in (0..3) -%}
+        {%- assign var_name = 'tier_' | append: i -%}
+          "{{- forloop.index0 | json }}": {{ [var_name] | json }}
+          {%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    }
+  </script>
+</loyalty-tiers>
+
+<template id="loyalty-lion-tiers-template">
+  <div id="iwot-carousel-{{ section.id }}" class="iwot-carousel {% if section.settings.color_theme == 'black' %}landing-colors{% endif %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="{{ section.settings.heading_type }} page-width iwot-carousel__heading-section iwt-carousel__heading center"
+          style="color: {{ section.settings.heading_color }};">
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+
+    <slideshow-swiper class="page-width iwot-carousel__wrapper rel" data-config='{{ config }}' data-arrows-appear="true" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          <div class="iwot-carousel__item swiper-slide"></div>
+        </div>
+
+        <div class="swiper-pagination {% if section.settings.color_theme == 'black' %}swiper-pagination-progressbar--secondary{% endif %} swiper-pagination-{{ section.id }} small-up-hide"></div>
+      </div>
+
+      <div class="swiper-button-next {% if section.settings.color_theme == 'black' %}swiper-button-next--secondary{% endif %} next-{{ section.id }}"></div>
+      <div class="swiper-button-prev {% if section.settings.color_theme == 'black' %}swiper-button-prev--secondary{% endif %} prev-{{ section.id }}"></div>
+
+    </slideshow-swiper>
+  </div>
+</template>
+
+{% schema %}
+	{
+		"name": "Loyalty tiers",
+		"settings": [
+      {
+        "type": "text",
+        "id": "anchor_link",
+        "label": "Anchor link"
+      },
+      {
+        "type": "select",
+        "id": "color_theme",
+        "label": "Color theme",
+        "options": [
+          {
+            "value": "black",
+            "label": "Black"
+          },
+          {
+            "value": "white",
+            "label": "White"
+          }
+        ],
+        "default": "black"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background"
+      },
+      {
+        "type": "color",
+        "id": "cards_bg_color",
+        "label": "Cards background",
+        "default": "#e5e5e5"
+      },
+      {
+        "type": "color",
+        "id": "heading_color",
+        "label": "Heading",
+        "default": "#303030"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading"
+      },
+      {
+        "type": "select",
+        "id": "heading_type",
+        "label": "Heading type",
+        "default": "h5",
+        "options": [
+          {
+            "label": "H3",
+            "value": "h3"
+          },
+          {
+            "label": "H4",
+            "value": "h4"
+          },
+          {
+            "label": "H5",
+            "value": "h5"
+          },
+          {
+            "label": "H6",
+            "value": "h6"
+          }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Section padding"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 0
+      }
+    ],
+		"blocks": [],
+		"presets": [
+      {
+        "name": "Loyalty tiers"
+      }
+    ]
+	}
+{% endschema %}

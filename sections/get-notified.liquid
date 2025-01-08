@@ -1,0 +1,186 @@
+{{ 'section-get-notified.css' | asset_url | stylesheet_tag }}
+
+{%- if section.settings.default_klaviyo_list_id != blank or section.blocks.size > 0 -%}
+  <div class="get-notified {{ section.settings.color_theme }}">
+    <div class="page-width">
+      
+      <form-klaviyo aria-label="Get notified"
+                    data-klaviyo-list-id="{{ section.settings.default_klaviyo_list_id }}" data-source="Get notified form">
+        <form action="/contact" method="post" id="get-notified">
+          <div class="form__item">
+            <input type="email" class="form__input" name="contact[email]"
+                   id="form__input-email-{{ section.id }}"
+                   data-field="email"
+                   aria-label="{{ 'templates.contact.form.email' | t }}"
+                   placeholder="{{ 'templates.contact.form.email' | t }}"
+                   {% if customer %}value="{{ customer.email }}"{% endif %}
+                   required
+                   autocomplete="on">
+            <label for="form__input-email-{{ section.id }}">{{ 'templates.contact.form.email' | t }}</label>
+          </div>
+          
+          {%- if section.settings.enable_phone_field -%}
+            <div class="form__item">
+              <input type="text"
+                     class="form__input"
+                     name="contact[phone]"
+                     data-field="phone"
+                     id="form__input-phone-{{ section.id }}"
+                     {% if customer %}value="{{ customer.phone }}"{% endif %}
+                     placeholder="{{ 'customer.addresses.phone' | t }}"
+                     aria-label="{{ 'customer.addresses.phone' | t }}">
+              
+              <label for="form__input-phone-{{ section.id }}">{{ 'customer.addresses.phone' | t }}</label>
+            </div>
+          {%- endif -%}
+          
+          {%- assign show_list_selector = false -%}
+          
+          {%- for block in section.blocks -%}
+            {%- if block.settings.klaviyo_list_id != blank and block.settings.heading != blank -%}
+              {%- assign show_list_selector = true -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          
+          {%- if show_list_selector -%}
+            <div class="form__item">
+              <custom-select class="form__select" data-list-selector>
+                <div class="form__select-btn"
+                     type="button" aria-expanded="false" aria-controls="form__input-list-selector" role="button">
+                  Keep me posted on:
+                </div>
+                
+                <ul class="form__select-dropdown" id="form__input-list-selector">
+                  {%- for block in section.blocks -%}
+                    {%- if block.settings.klaviyo_list_id != blank and block.settings.heading != blank -%}
+                      <li class="form__select-dropdown-option" data-option-value="{{ block.settings.klaviyo_list_id }}">
+                        {{ block.settings.heading }}
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+                
+                <label for="form__input-list-selector-{{ section.id }}">Keep me posted on:</label>
+                
+                <select class="form__select-hidden"
+                        id="form__input-list-selector-{{ section.id }}"
+                        data-field="list-selector"
+                        name="contact[list-selector]"
+                        title="Keep me posted on:" required>
+                  <option selected disabled value></option>
+                  {%- for block in section.blocks -%}
+                    {%- if block.settings.klaviyo_list_id != blank and block.settings.heading != blank -%}
+                      <option value="{{ block.settings.klaviyo_list_id }}">{{ block.settings.heading }}</option>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </select>
+              </custom-select>
+            </div>
+          {%- endif -%}
+          
+          {%- assign btn_style = 'button--primary' -%}
+          
+          {%- if section.settings.color_theme == 'black' -%}
+            {%- assign btn_style = 'button--secondary' -%}
+          {%- endif -%}
+          
+          <button type="submit"
+                  class="button {{ btn_style }}"
+                  data-email-btn-send>
+            {{ section.settings.btn_text }}
+          </button>
+          
+          <p class="form__message--success hidden">
+            {{ 'templates.contact.form.get_notified_success' | t }}
+          </p>
+          
+          {%- if section.settings.description != blank -%}
+            <div class="get-notified__description">
+              {{ section.settings.description }}
+            </div>
+          {%- endif -%}
+        </form>
+      </form-klaviyo>
+    
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Get notified",
+  "tag": "section",
+  "class": "section-get-notified",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_theme",
+      "label": "Color theme",
+      "options": [
+        {
+          "value": "black",
+          "label": "Black"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        }
+      ],
+      "default": "black"
+    },
+    {
+      "type": "text",
+      "id": "default_klaviyo_list_id",
+      "label": "Default klaviyo list id",
+      "info": "Used if there are no blocks in the list selector"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_phone_field",
+      "label": "Enable phone field"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Text",
+      "default": "Sign Up"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "list_selector",
+      "name": "Klaviyo list selector",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Name",
+          "info": "Field is required"
+        },
+        {
+          "type": "text",
+          "id": "klaviyo_list_id",
+          "label": "Klaviyo List ID",
+          "info": "Field is required"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Get notified"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

@@ -1,0 +1,91 @@
+{%- comment -%}
+{%- render 'video',
+  video: obj (MP4 video),
+  video_youtube_vimeo: obj (Youtube/Vimeo video obj),
+  video_url: str (video link),
+  video_from_metafield: boolean (MP4 video from metafields),
+  poster: img,
+  poster_from_metafield: boolean (image from metafields),
+  default_controls: boolean,
+  controls_position: str (left/center/right)
+  autoplay: boolean,
+  show_mute_button: boolean,
+  show_play_button: boolean,
+  controls_color: str (color),
+  disable_video_scale_on_desktop: boolean,
+  disable_video_scale_on_mobile: boolean,
+  class: str
+-%}
+{%- endcomment -%}
+
+{%- liquid
+	if default_controls
+		assign default_controls_setting = 1
+	else
+		assign default_controls_setting = 0
+	endif
+
+	if autoplay
+		assign video_autoplay = 1
+	else
+		assign video_autoplay = 0
+	endif
+
+	if video != blank
+		assign video_type = 'mp4'
+	endif
+-%}
+
+{%- capture video_options -%}
+	{
+	"videoType": {{ video_type | json }},
+	"videoId": {{ video_id | json }},
+	"autoplay": {{ video_autoplay }},
+	"controls": {{ default_controls_setting }}
+	}
+{%- endcapture -%}
+
+
+{% if video != blank %}
+	<video-component class='block media-video {{ class }}
+                  {% if video_type == 'mp4' %}normal{% endif %} controls-{{ controls_position }}'
+									 data-video-options='{{ video_options }}'>
+
+		<div class='media-video-content'>
+			<div class="js-video-wrapper {{ video_desk_classname }} {{ video_mob_classname }}">
+				{%- if show_play_button -%}
+					<button aria-label='Play Video'
+									class="js-video-play-button">
+						<span class="u-sr-only">Play video</span>
+						{% render 'icon' with 'play-btn' %}
+					</button>
+					<button aria-label='Pause Video'
+									class="js-video-pause-button">
+						<span class="u-sr-only">Pause video</span>
+						{% render 'icon' with 'pause' %}
+					</button>
+				{%- endif -%}
+
+				{%- if show_mute_button -%}
+					<button aria-label='Mute Video'
+									class="js-video-mute-button">
+						<span class="u-sr-only">Mute video</span>
+						{% render 'icon' with 'mic' %}
+					</button>
+					<button aria-label='Unmute Video'
+									class="js-video-unmute-button">
+						<span class="u-sr-only">Unmute video</span>
+						{% render 'icon' with 'mic-off' %}
+					</button>
+				{%- endif -%}
+				{% if video != blank %}
+					<video id="videos" loop muted playsinline {% if autoplay %} autoplay {% endif %} {% if default_controls %} controls {% endif %} class="image-abs-cover">
+						{%- for source in video.sources -%}
+							<source src="{{ source.url }}#t=0.001" type="{{ source.mime_type }}">
+						{%- endfor -%}
+					</video>
+				{% endif %}
+			</div>
+		</div>
+	</video-component>
+{% endif %}

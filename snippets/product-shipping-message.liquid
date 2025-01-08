@@ -1,0 +1,85 @@
+{%- comment -%}
+{%- render 'product-shipping-message', {
+  preorder_available: preorder_available,
+  preorder_variant: preorder_variant,
+  preorder_date: preorder_date,
+  product_form_id: product_form_id,
+  icon: true,
+  location_type: 'product',
+  hide_delivery_logic: hide_delivery_logic
+} -%}
+{%- endcomment -%}
+
+{%- unless hide_delivery_logic == 'true' or hide_delivery_logic == true -%}
+
+  <script src="{{ 'product-estimate.js' | asset_url }}" defer="defer"></script>
+
+  {%- liquid
+    assign shipping_wh_cutoff_time = shop.metafields.shipping_estimate.warehouse_cutoff_time
+    assign shipping_wh_time_of_day = shop.metafields.shipping_estimate.time_of_day | default: 'PM'
+    assign shipping_wh_time_zone = shop.metafields.shipping_estimate.warehouse_time_zone
+    assign shipping_table_data = shop.metafields.shipping_estimate.shipping_table_data
+    assign shipping_excluded_data = shop.metafields.shipping_estimate.shipping_excluded_data
+
+    assign hour = '<span data-hrs-left></span>'
+    assign minutes = '<span data-mins-left></span>'
+    assign delivery_date = '<span data-delivery-date></span>'
+
+    assign icon = icon | default: false, allow_false: true
+
+    assign checkout_estimate = checkout_estimate | default: true, allow_false: true
+  -%}
+
+  <product-estimate data-checkout-estimate="{{ checkout_estimate }}" {% if hide_delivery_logic == 'true' or hide_delivery_logic == true %}class="hidden"{% endif %} hidden>
+    {%- if location_type == 'cart' -%}
+      {%- liquid
+        if preorder_products_count > 0
+          assign preorder_cart_message = settings.preorder_and_default_products_first_message | replace: '{{date}}', delivery_date
+          assign preorder_cart_message_additional = settings.preorder_and_default_products_second_message | replace: '{{date}}', delivery_date
+        else
+          assign preorder_cart_message = settings.without_preorder_products_message | replace: '{{date}}', delivery_date
+        endif
+      -%}
+
+      <div class="cart-drawer__delivered">
+        <p class="delivered-timer">
+          {{ 'products.product.preorder_timer_hour_html' | t: hour: hour }}
+          {{ 'products.product.preorder_timer_minutes_html' | t: minutes: minutes }}
+        </p>
+        <p class="delivered-day">
+          {{ preorder_cart_message }}
+        </p>
+
+        {%- if preorder_cart_message_additional != blank -%}
+          <p class="delivered-day">{{ preorder_cart_message_additional }}</p>
+        {%- endif -%}
+      </div>
+    {%- elsif location_type == 'product' -%}
+      <div class="delivery-info" data-variant-preorder="{{ preorder_available | json }}">
+        {%- if icon -%}{% render 'icon' with 'timer' %}{%- endif -%}
+
+        <div>
+          <p>
+            {{ 'products.product.preorder_timer_hour_html' | t: hour: hour }}
+            {{ 'products.product.preorder_timer_minutes_html' | t: minutes: minutes }}
+          </p>
+
+          <p>{{ 'products.product.preorder_message_html' | t: date: delivery_date }}</p>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <script type="application/json">
+      {
+        "warehouse_cutoff_time": {{ shipping_wh_cutoff_time | json }},
+        "warehouse_cutoff_time_of_day": {{ shipping_wh_time_of_day | json }},
+        "warehouse_time_zone": {{ shipping_wh_time_zone | json }},
+        "excludes": {{ shipping_excluded_data | json }},
+        "estimates": {{ shipping_table_data | json }},
+        "preorder": {{ preorder_available | json }},
+        "preorder_date": {{ preorder_date | json }},
+        "preorder_property_placeholder": {{ 'products.product.preorder_message_in_cart_and_email_html' | t | json }}
+      }
+    </script>
+  </product-estimate>
+{%- endunless -%}

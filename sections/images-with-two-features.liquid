@@ -1,0 +1,104 @@
+{%- if section.blocks.size > 0 -%}
+  {{ 'section-with-two-features.css' | asset_url | stylesheet_tag }}
+  {%- assign image_counter = 0 -%}
+	{%- assign anchor_link = section.settings.anchor_link -%}
+
+  <images-with-features id="{{ section.id }}">
+    <div class="page-width iwf-wrapper" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+      <div id="features-images" class="iwf-image rel">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.image != bank -%}
+            {%- assign image_counter = image_counter | plus: 1 -%}
+            <div class="iwf-image-wrapper unselectable" {% if image_counter == 2 %}data-draggable-image{% endif %}>
+              {% render 'image', image: block.settings.image, class_name: 'image-abs-cover unselectable' %}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if image_counter == 2 -%}
+          <div id="draggable-element" class="iwf-draggable-element f aic jcc">
+            <span class="u-sr-only">Draggable Image element</span>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- for block in section.blocks -%}
+        {%- if block.settings.heading != blank or block.settings.description != blank -%}
+          <div class="iwf-content {% if forloop.first %}flip-in-hor-top{% endif %}" data-content-position="{{ forloop.index }}">
+            {%- if block.settings.heading != blank -%}
+              <h3 class="iwf-content-heading">{{ block.settings.heading }}</h3>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <p class="iwf-content-description">{{ block.settings.description }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  </images-with-features>
+
+{%- style -%}
+  #{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }};
+    color: {{ section.settings.section_text_color }};
+  }
+{%- endstyle -%}
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Images with two features",
+  "tag": "section",
+  "class": "images-with-two-features",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section background color",
+      "default": "#070707"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Section text color",
+      "default": "#F9F9F9"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "features",
+      "name": "Features",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Images with two features"
+    }
+  ]
+}
+{% endschema %}

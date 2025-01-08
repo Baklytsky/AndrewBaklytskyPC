@@ -1,0 +1,42 @@
+{% comment %}
+{% render 'image', image: , class_name: , image_attr: , hide_id: , alt: alt, small_size: boolean, preload: boolean %}
+{% endcomment %}
+
+{%- capture srcset -%}
+	{%- if small_size -%}
+		{{ image | img_url: '50x' }} 25w,
+		{{ image | img_url: '72x' }} 36w,
+		{{ image | img_url: '144x' }} 72w,
+		{{ image | img_url: '288x' }} 144w
+	{%- else -%}
+		{{ image | img_url: '480x' }} 240w,
+		{{ image | img_url: '720x' }} 360w,
+		{{ image | img_url: '1080x' }} 540w,
+		{{ image | img_url: '1296x' }} 720w,
+		{{ image | img_url: '1350x' }} 900w,
+		{{ image | img_url: '1512x' }} 1080w,
+		{{ image | img_url: '1728x' }} 1296w,
+		{{ image | img_url: '1920x' }} 1350w,
+		{{ image | img_url: '1980x' }} 1728w,
+		{{ image | img_url: '2160x' }} 1920w,
+		{{ image | img_url: '2560x' }} 2560w
+	{%- endif -%}
+{%- endcapture -%}
+
+{%- if preload -%}
+	<link rel="preload" href="{{ image | img_url: '360x' }}" as="image" imagesrcset="{{ srcset }}">
+{%- endif -%}
+
+{%- assign alt = alt | default: image.alt | escape -%}
+
+<img {% unless hide_id == 'true' or hide_id %}id="{{ image.id }}"{% endunless %}
+     data-srcset="{{ srcset }}"
+     class="lazyload {{ class_name }}"
+     data-optimumx="auto"
+     data-sizes="auto"
+     data-src="{{ image | img_url: '360x' }}"
+     data-parent-fit="contain"
+     alt="{{ alt }}"
+     width="100%"
+     height="100%"
+	{{ image_attr }}>

@@ -1,33 +1,9 @@
-@media screen and (max-width: 749px) {
-  .collection .grid__item:only-child {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
+.collection {
+  position: relative;
 }
 
-@media screen and (max-width: 989px) {
-  .collection .slider.slider--tablet {
-    margin-bottom: 1.5rem;
-  }
-}
-
-.collection .loading-overlay {
-  position: absolute;
-  z-index: 1;
-  width: 1.8rem;
-}
-
-@media screen and (max-width: 749px) {
-  .collection .loading-overlay {
-    top: 0;
-    right: 0;
-  }
-}
-
-@media screen and (min-width: 750px) {
-  .collection .loading-overlay {
-    left: 0;
-  }
+.collection-wrapper {
+  display: flex;
 }
 
 .collection .loading-overlay {
@@ -37,63 +13,128 @@
   left: 0;
   display: none;
   width: 100%;
-  padding: 0 1.5rem;
+  padding: 0;
   opacity: 0.7;
-}
-
-@media screen and (min-width: 750px) {
-  .collection .loading-overlay {
-    padding-left: 5rem;
-    padding-right: 5rem;
-  }
 }
 
 .collection.loading .loading-overlay {
   display: block;
 }
 
-.collection--empty .title-wrapper {
-  margin-top: 10rem;
-  margin-bottom: 15rem;
+.collection-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: all .2s linear;
 }
 
-@media screen and (max-width: 989px) {
-  .collection .slider--tablet.product-grid {
-    scroll-padding-left: 1.5rem;
-  }
+.collection-product-card .product-card__reviews {
+  justify-content: flex-start;
 }
 
-.collection__description > * {
-  margin: 0;
+.collection__wrapper {
+  margin: var(--clp-wrapper-mt-desktop, 90px) 0 60px;
+  width: 100%
 }
 
-.collection__title.title-wrapper {
-  margin-bottom: 2.5rem;
+.collection-wrapper--hidden-facets .collection__wrapper {
+  width: 100%;
 }
 
-.collection__title .title:not(:only-child) {
-  margin-bottom: 1rem;
+.collection__filters-header {
+  display: flex;
+  margin: 24px 0;
+}
+
+.collection__active-facets {
+  flex-grow: 1;
+  display: flex;
 }
 
 @media screen and (min-width: 990px) {
-  .collection__title--desktop-slider .title {
-    margin-bottom: 2.5rem;
+  .collection-wrapper--hidden-facets .collection__sorting-wrapper {
+    display: flex;
   }
 
-  .collection__title.title-wrapper--self-padded-tablet-down {
-    padding: 0 5rem;
+  .collection-wrapper--hidden-facets .collection__sorting-wrapper .collection__sorting {
+    flex-grow: 1;
   }
 
-  .collection slider-component:not(.page-width-desktop) {
-    padding: 0;
-  }
-
-  .collection--full-width slider-component:not(.slider-component-desktop) {
-    padding: 0 1.5rem;
-    max-width: none;
+  .collection-wrapper--hidden-facets .collection__sorting-wrapper .collection__sorting .form__item {
+    min-width: 336px;
   }
 }
 
-.collection__view-all a:not(.link) {
-  margin-top: 1rem;
+@media screen and (max-width: 1024px) {
+  .collection__wrapper {
+    margin: var(--clp-wrapper-mt-mobile, 10px) 0 40px 0;
+    width: 100%;
+  }
+  .collection__wrapper .large-up-hide{
+    padding-top: 50px;
+  }
+  .collection__active-facets {
+    padding-top: 30px;
+  }
 }
+
+.collection__sorting {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.collection__sorting-wrapper {
+  display: block;
+}
+
+.collection__sorting custom-select {
+  border-bottom: none;
+  margin: 0;
+  cursor: pointer;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.collection__sorting .form__select label {
+  right: 0;
+  padding-right: 30px;
+  color: rgb(var(--color-text));
+  font-weight: 500;
+  transform: translateY(40%);
+}
+
+.collection__sorting .form__select-btn {
+  font-weight: 500;
+}
+
+.collection__sorting .form__select.checked label {
+  right: unset;
+  color: #7c7c7c;
+  transform: translateY(-15%);
+}
+
+@media screen and (min-width: 990px) {
+  .collection__sorting .form__item {
+    max-width: 336px;
+    min-width: 200px;
+  }
+
+  .collection__sorting .form__item--results-inner {
+    flex-grow: 1;
+    max-width: unset;
+  }
+
+  /*.collection-wrapper modal-dialog.announcement-modal {*/
+  /*  position: sticky;*/
+  /*  transform: none;*/
+  /*  visibility: visible;*/
+  /*  z-index: 1;*/
+  /*  padding: 0;*/
+  /*  width: 100%;*/
+  /*  max-width: 240px;*/
+  /*  flex-shrink: 0;*/
+  /*  margin-right: 72px;*/
+  /*}*/
+}
+

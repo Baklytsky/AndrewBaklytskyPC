@@ -1,0 +1,69 @@
+{%- assign show_section = product.metafields.pdp-iwt.show_section -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+{%- if show_section == 'true' -%}
+  {{ 'section-image-with-text.css' | asset_url | stylesheet_tag }}
+  
+  {%- assign heading = product.metafields.pdp-iwt.heading -%}
+  {%- assign text = product.metafields.pdp-iwt.text -%}
+  {%- assign image = product.metafields.pdp-iwt.image[0] -%}
+  {%- assign product_handle = product.metafields.pdp-iwt.product_for_card -%}
+
+  <div class="image-with-text page-width" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    <div class="image-with-text__wrapper rel image-with-text__wrapper--reverse">
+      <div class="image-with-text__media {% if image != blank %}media{% else %}image-with-text__media--placeholder placeholder{% endif %} large-hide">
+        {%- if image != blank -%}
+          {% render 'image-metafields', image: image %}
+        {%- else -%}
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
+      <div class="image-with-text__content">
+        {%- if heading != blank -%}
+          <h2 class="image-with-text__heading h1 large-hide">
+            {{ heading | escape }}
+          </h2>
+        {%- endif -%}
+        <div class="image-with-text__content-image rel {% if image == blank %}image-with-text__media--placeholder placeholder{% endif %} large-up-hide">
+          {%- if heading != blank -%}
+            <h2 class="image-with-text__heading h1">
+              {{ heading | escape }}
+            </h2>
+          {%- endif -%}
+          {%- if image != blank -%}
+            {% render 'image-metafields', image: image %}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+        {%- if text != blank -%}
+          <div class="image-with-text__text">{{ text }}</div>
+        {%- endif -%}
+        {%- if product_handle -%}
+           {% render 'product-card-mini', product_handle: product_handle, class_name: 'product-image-with-text__card', check_to_cart: ,
+             card_header_hide: true, heading: , price_parent_selector: , product_price_after_variant: true %}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product image with text",
+  "tag": "section",
+  "class": "section-margin-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

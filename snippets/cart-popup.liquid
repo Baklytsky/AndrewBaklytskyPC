@@ -1,0 +1,24 @@
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+
+{% if template.name == 'cart' %}
+  <script>
+    function redirectFromCart() {
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.append('cart', 'open');
+
+      window.location = `/?${searchParams.toString()}`;
+    }
+
+    redirectFromCart();
+  </script>
+{% endif %}
+
+
+<div class="cart-popup focus-inset primary-bg" id="cart-popup" role="dialog">
+  <cart-popup>
+        <div id="cart-popup-inner" class="cart-popup-inner">
+          {% section 'main-cart' %}
+        </div>
+  </cart-popup>
+</div>

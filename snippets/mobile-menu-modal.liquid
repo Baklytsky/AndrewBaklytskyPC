@@ -1,0 +1,198 @@
+{% comment %}
+	{% render 'mobile-menu-modal'
+		menu: ,
+		additional-menu: ,
+		text-color: ,
+		bg-color: ,
+
+	%}
+{% endcomment %}
+
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+{{ 'component-mobile-menu-drawer.css' | asset_url | stylesheet_tag }}
+
+<modal-dialog id="MobileMenuModal" class="mobile__menu--modal primary-bg rel" style="--bg-color: {{ bg-color }}; --text-color: {{ text-color }}; --additional-color: {{ additional-color }}">
+	<modal-block class=""
+							 role="dialog"
+							 aria-label=""
+							 aria-modal="true"
+							 tabindex="-1">
+
+		{% comment %}<button id="ModalClose-{{ section.id }}"{% endcomment %}
+		{% comment %}type="button"{% endcomment %}
+		{% comment %}class="button__modal-close small-up-hide"{% endcomment %}
+		{% comment %}aria-label="{{ 'accessibility.close' | t }}">{% endcomment %}
+		{% comment %}{% endcomment %}
+		{% comment %}<svg class="icon icon-close" aria-hidden="true" focusable="false" role="presentation">{% endcomment %}
+		{% comment %}<use href="#icon-close">{% endcomment %}
+		{% comment %}</svg>{% endcomment %}
+		{% comment %}</button>{% endcomment %}
+
+		<div id="mobile-menu-drawer" class="mobile-menu-drawer motion-reduce content hide-scrollbar" tabindex="-1">
+			<div class="menu-drawer__inner-container">
+				{% comment %}{%- if logo != blank -%}{% endcomment %}
+					{% comment %}<div class="menu-drawer__logo">{% endcomment %}
+						{% comment %}<a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">{% endcomment %}
+							{% comment %}{%- assign image_size = logo-size | append: 'x' -%}{% endcomment %}
+							{% comment %}<img srcset="{{ logo | img_url: image_size }} 1x, {{ logo | img_url: image_size, scale: 2 }} 2x"{% endcomment %}
+									 {% comment %}src="{{ logo | img_url: image_size }}"{% endcomment %}
+									 {% comment %}loading="lazy"{% endcomment %}
+									 {% comment %}class="header__heading-logo header__heading-logo-static"{% endcomment %}
+									 {% comment %}alt="{{ logo.alt | default: shop.name | escape }}"{% endcomment %}
+							{% comment %}>{% endcomment %}
+						{% comment %}</a>{% endcomment %}
+					{% comment %}</div>{% endcomment %}
+				{% comment %}{%- else -%}{% endcomment %}
+					{% comment %}<span class="h2">{{ shop.name }}</span>{% endcomment %}
+				{% comment %}{%- endif -%}{% endcomment %}
+				<div class="mobile-menu__inner">
+					<div class="mobile-menu__wrapper">
+						<nav>
+							<ul class="menu-drawer__menu list-menu" role="list">
+								{%- for link in section.settings.menu-mobile.links -%}
+									{%- assign link_title_handle = link.title | handleize -%}
+
+									<li>
+										{%- if link.links != blank -%}
+											<details id="Details-menu-drawer-menu-item-{{ forloop.index }}">
+												<summary
+													class="menu-drawer__menu-item mobile-menu-drawer__menu-item list-menu__item link link--text focus-inset jcb">
+													{{ link.title | escape }}
+												</summary>
+												<div id="link-{{ link_title_handle }}" class="menu-drawer__submenu motion-reduce" tabindex="-1">
+													<div class="menu-drawer__inner-submenu">
+														<button class="menu-drawer__close-button link link--text focus-inset" aria-expanded="true">
+															<span class="menu-drawer__chevron">
+																{% render 'icon' with 'chevron-left' %}
+															</span>
+															<span>{{ link.title | escape }}</span>
+														</button>
+														{%- for childlink in link.links -%}
+															<ul class="header__submenu--list" role="list">
+																<li style="position: relative">
+																	{%- if childlink.links != blank -%}
+																		<collapse-link>
+																			<h3 class="header__menu-item link link--text list-menu__item focus-inset header__main-link">
+																				{%- if childlink.title contains '<sup>' -%}
+																					<span class="sup-wrapper">
+																					<span>{{ childlink.title | split: '<sup>' | first | strip }}</span>
+																					<span class="sup">{{ childlink.title | split: '<sup>' | last | strip }}</span>
+																				</span>
+																				{%- else -%}
+																					<span>{{ childlink.title }}</span>
+																				{%- endif -%}
+																			</h3>
+																			<div class="accordion__icons">
+																				{% render 'icon' with 'plus' %}
+																				{% render 'icon' with 'minus' %}
+																			</div>
+
+																			<ul class="header__submenu--collapse-list">
+																				{%- for grandchildlink in childlink.links -%}
+																					<li style="position: relative">
+																						<active-link remove-after-out
+																												 style="--animation-delay: 0.{{ forloop.index | plus: 1 }}s">
+																							<a href="{{ grandchildlink.url }}" data-link-view="{{ view_link }}"
+																								 class="header__submenu--collapse-item">
+																								{%- if grandchildlink.title contains '<sup>' -%}
+																									<span class="sup-wrapper">
+																										<span>{{ grandchildlink.title | split: '<sup>' | first | strip }}</span>
+																										<span class="sup">{{ grandchildlink.title | split: '<sup>' | last | strip }}</span>
+																									</span>
+																								{%- else -%}
+																									<span>{{ grandchildlink.title }}</span>
+																								{%- endif -%}
+																							</a>
+																						</active-link>
+																					</li>
+																				{%- endfor -%}
+																			</ul>
+																		</collapse-link>
+																	{%- else -%}
+																		{%- if childlink.links == blank -%}
+																			<a href="{{ childlink.url }}"
+																				 class="header__menu-item link link--text list-menu__item focus-inset header__main-link{% if childlink.current %} list-menu__item--active{% endif %}"{% if childlink.current %} aria-current="page"{% endif %}>
+																				{%- if childlink.title contains '<sup>' -%}
+																					<span class="sup-wrapper">
+																						<span>{{ childlink.title | split: '<sup>' | first | strip }}</span>
+																						<span
+																							class="sup">{{ childlink.title | split: '<sup>' | last | strip }}</span>
+																					</span>
+																				{%- else -%}
+																					<span>{{ childlink.title }}</span>
+																				{%- endif -%}
+																			</a>
+																		{%- else -%}
+																			<span
+																				class="header__menu-item link link--text list-menu__item focus-inset header__main-link">
+                                {%- if childlink.title contains '<sup>' -%}
+																	<span>
+                                    <span
+																			class="header__menu-item-underline">{{ childlink.title | split: '<sup>' | first | strip }}</span>
+                                    <sup>{{ childlink.title | split: '<sup>' | last | strip }}</sup>
+                                  </span>
+																{%- else -%}
+																	<span class="header__menu-item-underline">{{ childlink.title }}</span>
+																{%- endif -%}
+                              </span>
+																			<ul class="header__sub-menu-item header__submenu list-menu motion-reduce">
+																				{%- for grandchildlink in childlink.links -%}
+																					{%- if grandchildlink.title contains '/view link/' -%}
+																						<li>
+																							<a href="{{ grandchildlink.url }}"
+																								 class="list-menu__menu-item-title link--text focus-inset">
+																								{{ grandchildlink.title | split: '/view link/' | first }}
+																							</a>
+																						</li>
+																					{%- else -%}
+																						<li>
+																							<a href="{{ grandchildlink.url }}" data-link-view="{{ view_link }}"
+																								 class="header__menu-item list-menu__item link--text focus-inset{% if grandchildlink.current %} list-menu__item--active{% endif %}"{% if grandchildlink.current %} aria-current="page"{% endif %}>
+																								<span>{{ grandchildlink.title }}</span>
+																							</a>
+																						</li>
+																					{%- endif -%}
+																				{%- endfor -%}
+																			</ul>
+																		{%- endif -%}
+																	{%- endif -%}
+																</li>
+															</ul>
+														{%- endfor -%}
+													</div>
+												</div>
+											</details>
+										{%- else -%}
+											<a href="{{ link.url }}"
+												 class="menu-drawer__menu-item list-menu__item link link--text focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"{% if link.current %} aria-current="page"{% endif %}>
+												{%- if link.title contains '<sup>' -%}
+													<span class="sup-wrapper">
+                                <span>{{ link.title | split: '<sup>' | first | strip }}</span>
+                                <span class="sup">{{ link.title | split: '<sup>' | last | strip }}</span>
+                              </span>
+												{%- else -%}
+													<span>{{ link.title }}</span>
+												{%- endif -%}
+											</a>
+										{%- endif -%}
+									</li>
+								{%- endfor -%}
+							</ul>
+						</nav>
+					</div>
+					{% if additional-menu != blank %}
+						<div class="header__submenu--additional--wrapper">
+							<ul class="header__submenu--additional--list">
+								{%- for link in additional-menu.links -%}
+									<li class="header__submenu--additional--list--item">
+										<a href="{{ link.url }}">{{ link.title }}</a>
+									</li>
+								{%- endfor -%}
+							</ul>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</modal-block>
+</modal-dialog>

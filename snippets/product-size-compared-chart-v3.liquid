@@ -1,0 +1,103 @@
+{%- assign tables_names = shop.metafields.globals.size_guide_version_3_name -%}
+{%- assign tables_json = shop.metafields.globals.size_guide_version_3table_json -%}
+
+{%- if tables_names != blank -%}
+	
+	{%- capture config -%}
+      {
+		    "slidesPerView": "auto",
+		    "navigation": true,
+		    "freeMode": true,
+		    "centerInsufficientSlides": false,
+				"mousewheelControl": true,
+				"mousewheel": true,
+				"forceToAxis": true,
+				"followFinger": true
+		  }
+    {%- endcapture -%}
+	
+	<div class="size-compared-v3">
+		<div class="size-compared-v3__container">
+			<div class="size-compared-v3__wrapper">
+				<div class="size-compared-v3__header">
+					{%- if title != blank -%}
+						<h3 class="h5">
+							{{ title }}
+						</h3>
+					{%- endif -%}
+					
+					{%- if subtitle != blank -%}
+						<p>
+							{{ subtitle }}
+						</p>
+					{%- endif -%}
+				</div>
+				
+				<toggle-tabs class="size-compared-v3__inner">
+					
+					<div class="size-compared-v3__actions">
+						{%- for table_name in tables_names -%}
+							{%- assign id = table_name | append: forloop.index -%}
+							{%- assign hash = id | hmac_sha1: 'prosuct size' -%}
+
+							<button class="featured-collection__tab"
+							        type="button"
+							        data-action="toggle-tab"
+							        aria-controls="tab-{{ hash }}"
+							        data-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+								{{ table_name }}
+							</button>
+						{%- endfor -%}
+					</div>
+					
+					{%- for table_name in tables_names -%}
+						{%- assign id = table_name | append: forloop.index -%}
+						{%- assign hash = id | hmac_sha1: 'prosuct size' -%}
+						{%- assign sizes_json = tables_json[forloop.index0] -%}
+						{%- assign initial_part = sizes_json | first -%}
+						{%- assign parts_names_string = '' -%}
+						
+						{%- for current_part in initial_part -%}
+							{%- assign downcase_current_part = current_part | first -%}
+							
+							{%- assign parts_names_string =  parts_names_string | append: '***' | append: downcase_current_part -%}
+						{%- endfor -%}
+						
+						{%- assign parts_names_array = parts_names_string | remove_first: '***' | split: '***' -%}
+						
+						<slideshow-swiper data-config='{{ config }}'
+															id="tab-{{ hash }}"
+						                  class="size-compared-v3__slideshow"
+						                  data-tab="tab-{{ hash }}"
+						                  data-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+							<div class="swiper">
+								<div class="swiper-wrapper">
+									{%- for part_name in parts_names_array -%}
+										<div class="swiper-slide size-compared-v3__item">
+											<div class="size-compared-v3__item-column">
+											<span>
+												{{ part_name }}
+											</span>
+												
+												{%- for part in sizes_json -%}
+													{%- for value in part -%}
+														{%- if part_name == value[0] -%}
+															<span>
+															{{ value[1] }}
+														</span>
+														{%- endif -%}
+													{%- endfor -%}
+												{%- endfor -%}
+											</div>
+										</div>
+									{%- endfor -%}
+								</div>
+								<div class="swiper-scrollbar"></div>
+							</div>
+						</slideshow-swiper>
+					{%- endfor -%}
+				</toggle-tabs>
+			</div>
+		</div>
+	</div>
+{%- endif -%}

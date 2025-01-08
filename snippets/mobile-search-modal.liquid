@@ -1,0 +1,63 @@
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+{% comment %}{{ 'customer.css' | asset_url | stylesheet_tag }}{% endcomment %}
+{{ 'search-modal.css' | asset_url | stylesheet_tag }}
+
+<modal-dialog id="SearchModal" class="search__modal primary-bg rel">
+	<modal-block class=""
+							 role="dialog"
+							 aria-label=""
+							 aria-modal="true">
+
+		<button id="ModalClose-{{ section.id }}"
+						type="button"
+						class="button__modal-close small-up-hide"
+						aria-label="{{ 'accessibility.close' | t }}">
+
+			<svg class="icon icon-close" aria-hidden="true" focusable="false" role="presentation">
+				<use href="#icon-close">
+			</svg>
+		</button>
+
+		<div class="search__modal--wrapper" tabindex="-1">
+			<predictive-search class="search-modal__form" data-loading-text="{{ 'accessibility.loading' | t }}">
+				<form action="{{ routes.search_url }}" method="get" role="search" class="search search-modal__form">
+					<div class="field">
+						<input class="search__input field__input"
+									 id="Search-In-Modal-Mobile"
+									 type="search"
+									 name="q"
+									 value=""
+									 placeholder="{{ 'general.search.search' | t }}"
+									 role="combobox"
+									 aria-expanded="false"
+									 aria-owns="predictive-search-results-list"
+									 aria-controls="predictive-search-results-list"
+									 aria-haspopup="listbox"
+									 aria-autocomplete="list"
+									 autocorrect="off"
+									 autocomplete="off"
+									 autocapitalize="off"
+									 spellcheck="false"
+						>
+						<label class="search__label field__label hidden" for="Search-In-Modal-Mobile">{{ 'general.search.search' | t }}</label>
+						<input type="hidden" name="options[prefix]" value="last">
+						<input type="hidden" name="type" value="product">
+						<button class="search__button field__button" aria-label="{{ 'general.search.search' | t }}">
+							<svg class="icon icon-search" aria-hidden="true" focusable="false" role="presentation">
+								<use href="#icon-search">
+							</svg>
+						</button>
+					</div>
+					<div class="predictive-search predictive-search--header" tabindex="-1" data-predictive-search>
+						<div class="predictive-search__loading-state">
+							<svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+								<circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+							</svg>
+						</div>
+					</div>
+					<span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+				</form>
+			</predictive-search>
+		</div>
+	</modal-block>
+</modal-dialog>

@@ -1,0 +1,176 @@
+{{ 'section-image-with-content.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor_link = section.settings.anchor_link -%}
+{%- assign image = section.settings.image -%}
+{%- assign image_position_desktop = section.settings.image_position_desktop -%}
+{%- assign image_position_mobile = section.settings.image_position_mobile -%}
+{%- assign heading = section.settings.heading -%}
+{%- assign text = section.settings.text -%}
+{%- assign quote = section.settings.quote -%}
+{%- assign author = section.settings.author | newline_to_br -%}
+{%- assign btn_text = section.settings.btn_text -%}
+{%- assign btn_link = section.settings.btn_link -%}
+
+<div class="image-with-content {% if section.settings.color_theme == 'black' %}landing-colors{% endif %}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+  <div class="page-width iwc__wrapper iwc__image--{{ image_position_desktop }} iwc__image--mobile-{{ image_position_mobile }}">
+    {%- if image != blank -%}
+      <div class="iwc__image-wrapper rel">
+        {% render 'image', image: image, class_name: 'iwc__image image-abs-cover' %}
+      </div>
+    {%- endif -%}
+    
+    <div class="iwc__content">
+      {% if heading != blank %}
+        <h2 class="iwc__heading">{{ heading }}</h2>
+      {% endif %}
+      
+      {% if text != blank %}
+        <p class="iwc__text">{{ text }}</p>
+      {% endif %}
+      
+      {% if quote != blank %}
+        <p class="iwc__quote {% if image_position_mobile == 'center' %}large-hide{% endif %}">
+          {{ quote }}
+        </p>
+      {% endif %}
+      
+      {% if author != blank %}
+        <p class="iwc__author {% if image_position_mobile == 'center' %}large-hide{% endif %}">
+          {{ author }}
+        </p>
+      {% endif %}
+      
+      {%- if btn_link != blank -%}
+        <a href="{{ btn_link }}" class="button {% if section.settings.color_theme == 'black' %}button--secondary{% else %}button--primary{% endif %} iwc__button">
+          {{ btn_text }}
+        </a>
+      {%- endif -%}
+    </div>
+    
+    {%- if image_position_mobile == 'center' -%}
+      {% if quote != blank %}
+        <p class="iwc__quote large-up-hide">{{ quote }}</p>
+      {% endif %}
+      
+      {% if author != blank %}
+        <p class="iwc__author large-up-hide">{{ author }}</p>
+      {% endif %}
+    {%- endif -%}
+  </div>
+</div>
+
+
+
+{% schema %}
+{
+  "name": "Image with content",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "select",
+      "id": "color_theme",
+      "label": "Color theme",
+      "options": [
+        {
+          "value": "black",
+          "label": "Black"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        }
+      ],
+      "default": "black"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_position_desktop",
+      "label": "Image position desktop",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "image_position_mobile",
+      "label": "Image position mobile",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote"
+    },
+    {
+      "type": "textarea",
+      "id": "author",
+      "label": "Author"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button text"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with content"
+    }
+  ]
+}
+{% endschema %}

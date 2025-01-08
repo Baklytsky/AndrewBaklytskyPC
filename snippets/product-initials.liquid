@@ -1,0 +1,45 @@
+{%- comment -%}
+  {%- render 'product-initials', product_form_id: product_form_id -%}
+{%- endcomment -%}
+
+<script src="{{ 'product-initials.js' | asset_url }}" defer="defer"></script>
+<product-initials class="block">
+  {%- liquid
+    assign pdp_initials_heading = settings.pdp_initials_heading
+    assign pdp_initials_length = settings.pdp_initials_length
+    assign pdp_initials_placeholder = settings.pdp_initials_placeholder
+    assign pdp_initials_description = settings.pdp_initials_description
+    assign pdp_initials_payment_product = settings.pdp_initials_payment_product
+    assign pdp_initials_bullet_text = settings.pdp_initials_bullet_text
+    assign pdp_initials_bullet_color = settings.pdp_initials_bullet_color
+    assign pdp_initials_bullet_bg = settings.pdp_initials_bullet_bg
+  -%}
+
+  <details data-accordion-opener data-keep-open class="product-initials">
+    <summary type="button" class="product-initials__btn" aria-expanded="false" role="button">
+      {%- if pdp_initials_bullet_text != blank -%}
+        <span class="product-initials__bullet"
+              style="color: {{ pdp_initials_bullet_color }}; background-color: {{ pdp_initials_bullet_bg }}">
+          {{ pdp_initials_bullet_text }}
+        </span>
+      {%- endif -%}
+      <span class="product-initials__title">{{ pdp_initials_heading }} (+{{ pdp_initials_payment_product.price | money_without_trailing_zeros }})</span>
+      <span class="product-initials__checkbox"></span>
+    </summary>
+
+    <div class="product-initials__inner" data-accordion-content>
+      <label for="text">
+        <input id="text" type="text" class="form__input"
+               name="items[0][properties][initials]"
+               placeholder="{{ pdp_initials_placeholder }}"
+               maxlength="{{ pdp_initials_length }}"
+               form="{{ product_form_id }}"
+               style="width: 100%" data-initials-element disabled>
+        <input type="hidden" name="items[10][id]" value="{{ pdp_initials_payment_product.first_available_variant.id }}" data-initials-element disabled>
+      </label>
+      <div class="product-initials__description">
+        {{ pdp_initials_description }}
+      </div>
+    </div>
+  </details>
+</product-initials>

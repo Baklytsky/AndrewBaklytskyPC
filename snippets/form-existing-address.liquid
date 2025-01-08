@@ -1,0 +1,186 @@
+{% form 'customer_address', address, class: 'address__form', data-form: 'edit-address' %}
+  <div class="form__group">
+    {%- if request.locale.iso_code == 'ja' -%}
+      <div class="form__item">
+        <input type="text"
+               class="form__input"
+               name="address[last_name]"
+               id="form__input-update-address-last-name-{{ forloop_index }}"
+               required value="{{ form.last_name }}"
+               placeholder="{{ 'customer.addresses.last_name' | t }}"
+               aria-label="{{ 'customer.addresses.last_name' | t }}">
+
+        <label for="form__input-update-address-last-name-{{ forloop_index }}">{{ 'customer.addresses.last_name' | t }}</label>
+      </div>
+
+      <div class="form__item">
+        <input type="text"
+               class="form__input"
+               name="address[first_name]"
+               id="form__input-update-address-first-name-{{ forloop_index }}"
+               required
+               value="{{ form.first_name }}"
+               placeholder="{{ 'customer.addresses.first_name' | t }}"
+               aria-label="{{ 'customer.addresses.first_name' | t }}"
+               autofocus>
+        <label for="form__input-update-address-first-name-{{ forloop_index }}">{{ 'customer.addresses.first_name' | t }}</label>
+      </div>
+    {%- else -%}
+      <div class="form__item">
+        <input type="text"
+               class="form__input"
+               name="address[first_name]"
+               id="form__input-update-address-first-name-{{ forloop_index }}"
+               required value="{{ form.first_name }}"
+               placeholder="{{ 'customer.addresses.first_name' | t }}"
+               aria-label="{{ 'customer.addresses.first_name' | t }}"
+               autofocus>
+        <label for="form__input-update-address-first-name-{{ forloop_index }}">{{ 'customer.addresses.first_name' | t }}</label>
+      </div>
+
+      <div class="form__item">
+        <input type="text"
+               class="form__input"
+               name="address[last_name]"
+               id="form__input-update-address-last-name-{{ forloop_index }}"
+               required value="{{ form.last_name }}"
+               placeholder="{{ 'customer.addresses.last_name' | t }}"
+               aria-label="{{ 'customer.addresses.last_name' | t }}">
+        <label for="form__input-update-address-last-name-{{ forloop_index }}">{{ 'customer.addresses.last_name' | t }}</label>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="form__item">
+    <input type="text"
+           class="form__input"
+           name="address[company]"
+           id="form__input-update-address-company-{{ forloop_index }}"
+           value="{{ form.company }}"
+           placeholder="{{ 'customer.addresses.company' | t }}"
+           aria-label="{{ 'customer.addresses.company' | t }}">
+
+    <label for="form__input-update-address-company-{{ forloop_index }}">{{ 'customer.addresses.company' | t }}</label>
+  </div>
+
+  <div class="form__item">
+    <input type="text"
+           class="form__input"
+           name="address[address1]"
+           id="form__input-update-address-address1-{{ forloop_index }}"
+           required
+           value="{{ form.address1 }}"
+           placeholder="{{ 'customer.addresses.street_address' | t }}"
+           aria-label="{{ 'customer.addresses.street_address' | t }}">
+
+    <label for="form__input-update-address-address1-{{ forloop_index }}">{{ 'customer.addresses.street_address' | t }}</label>
+  </div>
+
+  <div class="form__item">
+    <input type="text"
+           class="form__input"
+           name="address[address2]"
+           id="form__input-update-address-address2-{{ forloop_index }}"
+           value="{{ form.address2 }}"
+           placeholder="{{ 'customer.addresses.address2' | t }}"
+           aria-label="{{ 'customer.addresses.address2' | t }}">
+
+    <label for="form__input-update-address-address2-{{ forloop_index }}">{{ 'customer.addresses.address2' | t }}</label>
+  </div>
+
+  <div class="form__group">
+    <div class="form__item">
+      <input type="text"
+             class="form__input"
+             name="address[city]"
+             id="form__input-update-address-city-{{ forloop_index }}"
+             required
+             value="{{ form.city }}"
+             placeholder="{{ 'customer.addresses.city' | t }}"
+             aria-label="{{ 'customer.addresses.city' | t }}">
+
+      <label for="form__input-update-address-city-{{ forloop_index }}">{{ 'customer.addresses.city' | t }}</label>
+    </div>
+
+    <div class="form__item">
+      <custom-select class="form__select form__select-address">
+        <div class="form__select-btn"
+             type="button"
+             aria-expanded="false"
+             aria-controls="dropdown-{{ forloop_index }}"
+             role="button">
+
+          {{ 'customer.addresses.country' | t }}
+        </div>
+
+        <ul class="form__select-dropdown hide-scrollbar" id="dropdown-{{ forloop_index }}">
+          {{ all_country_option_tags | replace: 'option', 'li' | replace: 'value', 'data-option-value' }}
+        </ul>
+
+        <label for="form__input-address-country-{{ forloop_index }}">{{ 'customer.addresses.country' | t }}</label>
+
+        <select class="form__select-hidden" id="form__input-address-country-{{ forloop_index }}" data-default="{{ form.country }}"
+                name="address[country]" title="{{ 'customer.addresses.country' | t }}" required>
+          {{ all_country_option_tags | replace: '">', '" data-option-value="' | replace: '</op', '"></op' }}
+        </select>
+      </custom-select>
+    </div>
+  </div>
+
+  <div class="form__item">
+    <input type="text"
+           class="form__input"
+           name="address[state]"
+           id="form__input-update-address-state-{{ forloop_index }}"
+           required
+           value="{{ form.city }}"
+           placeholder="{{ 'customer.addresses.state' | t }}"
+           aria-label="{{ 'customer.addresses.state' | t }}">
+
+    <label for="form__input-update-address-state-{{ forloop_index }}">{{ 'customer.addresses.state' | t }}</label>
+  </div>
+
+  <div class="form__group">
+    <div class="form__item">
+      <input type="text"
+             class="form__input"
+             name="address[zip]"
+             id="form__input-update-address-zip-{{ forloop_index }}"
+             required
+             value="{{ form.zip }}"
+             placeholder="{{ 'customer.addresses.zip' | t }}"
+             aria-label="{{ 'customer.addresses.zip' | t }}">
+
+      <label for="form__input-update-address-zip-{{ forloop_index }}">{{ 'customer.addresses.zip' | t }}</label>
+    </div>
+
+    <div class="form__item">
+      <input type="text"
+             class="form__input"
+             name="address[phone]"
+             id="form__input-update-address-phone-{{ forloop_index }}"
+             value="{{ form.phone }}"
+             placeholder="{{ 'customer.addresses.phone' | t }}"
+             aria-label="{{ 'customer.addresses.phone' | t }}">
+
+      <label for="form__input-update-address-phone-{{ forloop_index }}">{{ 'customer.addresses.phone' | t }}</label>
+    </div>
+  </div>
+
+  <div class="form__item form__item--checkbox">
+    <input type="checkbox"
+           class="form__checkbox"
+           id="address-{{ address.id }}[default]-{{ forloop_index }}"
+           name="address[default]"
+           {% if address.id == customer.default_address.id %}
+            value="1"
+            checked
+          {% endif %}>
+
+    <label for="address-{{ address.id }}[default]-{{ forloop_index }}">{{ 'customer.addresses.set_default' | t }}</label>
+  </div>
+
+  <button class="button button--primary form__btn-submit" data-action="edit-address">
+    {{ 'customer.addresses.update' | t }}
+  </button>
+{% endform %}

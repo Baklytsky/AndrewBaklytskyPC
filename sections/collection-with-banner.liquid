@@ -1,0 +1,316 @@
+{{ 'section-collection-with-banner.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+  assign collection = section.settings.collection
+  assign products_to_show = section.settings.products_to_show
+  assign show_product_title = section.settings.show_product_title
+  assign show_product_reviews = section.settings.show_product_reviews
+  assign show_product_description = section.settings.show_product_description
+  assign show_product_description_metafield = section.settings.show_product_description_metafield
+  assign show_product_price = section.settings.show_product_price
+  assign show_product_price_range = section.settings.show_product_price_range
+  assign show_product_badge = section.settings.show_product_badge
+  assign show_image_thumbnails = section.settings.show_image_thumbnails
+  assign show_slider_arrows = section.settings.show_slider_arrows
+  assign hide_slider_arrows_mobile = section.settings.hide_slider_arrows_mobile
+  assign show_slider_pagination = section.settings.show_slider_pagination
+  assign product_card_content_color_schema = section.settings.product_card_content_color_schema
+-%}
+
+{%- if collection != blank and collection.products_count > 0 -%}
+
+  {%- liquid
+    assign show_banner = section.settings.show_banner
+    assign banner_position = section.settings.banner_position
+    assign image = section.settings.image | default: collection.featured_image
+    assign image_alt = image.alt | default: collection.title
+    assign show_title = section.settings.show_title
+    assign title = section.settings.title | default: collection.title
+    assign show_description = section.settings.show_description
+    assign description = section.settings.description | default: collection.description
+  -%}
+
+  <div class="collection-with-banner__wrapper collection-with-banner__wrapper--{{ banner_position }}"
+       style="--image-overlay-opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};"
+			 {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+	>
+
+    {%- if show_banner and image != blank -%}
+      <div class="collection-with-banner__banner rel">
+        {% render 'image', image: image, class_name: 'image-abs-cover', alt: image_alt %}
+        {%- if show_title and title != blank -%}
+          <h3 class="collection-with-banner__banner-title h6">{{ title }}</h3>
+        {%- endif -%}
+        {%- if show_description and description != blank -%}
+          <p class="collection-with-banner__banner-description">{{ description }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- assign tablet_slides_per_view = 2 -%}
+
+    {%- unless show_banner -%}
+      {%- assign tablet_slides_per_view = 3 -%}
+    {%- endunless -%}
+
+    {% capture config %}
+      {
+        "slidesPerView": 1,
+        "spaceBetween": 24,
+        "noSwipingSelector": "label",
+        "watchOverflow": true,
+        "navigation": {
+          "nextEl": ".next-{{ section.id }}",
+          "prevEl": ".prev-{{ section.id }}"
+        },
+        "pagination": {
+          "el": ".swiper-pagination-{{ section.id }}",
+          "type": "progressbar"
+        },
+        "breakpoints": {
+          "1600": {
+            "slidesPerView": 3,
+            "spaceBetween": 36
+          },
+          "1200": {
+            "slidesPerView": {{ tablet_slides_per_view }},
+            "spaceBetween": 36
+          },
+          "900": {
+            "shortSwipes": false,
+            "slidesPerView": 1.5,
+            "spaceBetween": 24
+          }
+        }
+      }
+    {% endcapture %}
+
+    <slideshow-swiper class="collection-with-banner__slider rel {% unless show_banner %}collection-with-banner__slider--full{% endunless %}"
+                        data-config='{{ config }}'
+                        {% if show_slider_arrows %}data-arrows-appear="true"{% endif %}>
+      <div class="swiper rel">
+        <ul class="collection-with-banner__list swiper-wrapper" role="list">
+          {%- assign card_class_name = 'collection-with-banner__product product-card--' | append: product_card_content_color_schema -%}
+
+          {%- for product in collection.products limit: products_to_show -%}
+
+            {%- if product.tags contains 'hidden' -%}
+              {% continue %}
+            {%- endif -%}
+
+            <li class="collection-with-banner__list-item rel swiper-slide" role="listitem">
+              {% render 'product-card',
+                product: product,
+                hide_variants: false,
+                uniq_id: forloop.index,
+                show_product_title: show_product_title,
+                show_product_reviews: show_product_reviews,
+                show_product_description: show_product_description,
+                show_product_description_metafield: show_product_description_metafield,
+                show_product_price: show_product_price,
+                show_product_price_range: show_product_price_range,
+                show_product_badge: show_product_badge,
+                show_color_options_size: true,
+                show_image_thumbnails: show_image_thumbnails,
+                custom_class: card_class_name %}
+            </li>
+          {%- endfor -%}
+        </ul>
+        <div class="swiper-pagination swiper-pagination-{{ section.id }} small-up-hide {% unless show_slider_pagination %}hidden{% endunless %}"></div>
+      </div>
+      {%- if show_slider_arrows -%}
+        <div class="swiper-button-next next-{{ section.id }} {% if hide_slider_arrows_mobile %}small-hide{% endif %}"></div>
+        <div class="swiper-button-prev prev-{{ section.id }} {% if hide_slider_arrows_mobile %}small-hide{% endif %}"></div>
+      {%- endif -%}
+    </slideshow-swiper>
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Collection with banner",
+  "tag": "section",
+  "class": "section-collection-with-banner section-margin-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "t:sections.featured-collection.settings.collection.label",
+      "info": "Required"
+    },
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_banner",
+      "label": "Show banner",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "banner_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Banner desktop position"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Collection featured image by default"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "label": "Image overlay opacity",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "info": "Collection title by default"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "info": "Collection description by default"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "default": 10,
+      "label": "Products to show"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.featured-collection.settings.header.content"
+    },
+    {
+      "type": "select",
+      "id": "product_card_content_color_schema",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "white",
+          "label": "White"
+        }
+      ],
+      "default": "default",
+      "label": "Product card content color schema"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_title",
+      "default": true,
+      "label": "Show product title"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_reviews",
+      "default": true,
+      "label": "Show product reviews"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_description",
+      "default": true,
+      "label": "Show product description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_description_metafield",
+      "default": false,
+      "label": "Show product description from metafield"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_price",
+      "default": true,
+      "label": "Show product price"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_price_range",
+      "default": true,
+      "label": "Show product price range"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_badge",
+      "default": true,
+      "label": "Show product badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_thumbnails",
+      "default": true,
+      "label": "Show image thumbnails"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_arrows",
+      "default": true,
+      "label": "Show slider arrows"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_slider_arrows_mobile",
+      "default": false,
+      "label": "Hide slider arrows (mobile)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_pagination",
+      "default": false,
+      "label": "Show slider pagination (mobile)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection with banner"
+    }
+  ]
+}
+{% endschema %}

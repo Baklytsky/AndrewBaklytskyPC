@@ -1,0 +1,118 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+
+{%- assign image = section.settings.image -%}
+
+<section class="account">
+  <div class="account__container">
+    {%- if image != blank -%}
+      <div class="account__image-wrapper">
+        <div class="account__image-inner">
+          {% render 'image', image: image, class_name: 'account__image', %}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="account__wrapper">
+      <div class="account__inner">
+        <h1 class="account__heading heading">
+          {{ 'customer.reset_password.title' | t }}
+        </h1>
+
+        <div class="account__inner-block">
+          <p class="account__subheading">
+            {{ 'customer.reset_password.subtext' | t: email: email }}
+          </p>
+
+          {%- form 'reset_customer_password' -%}
+            {%- comment -%}
+              {%- if form.errors -%}
+                <h2 class="form__message form__message--error" tabindex="-1" autofocus>
+                  <span class="visually-hidden">{{ 'accessibility.error' | t }} </span>
+
+                  {{ 'templates.contact.form.error_heading' | t }}
+                </h2>
+                <ul class="form__message form__message--error">
+                  {%- for field in form.errors -%}
+                    <li>
+                      {%- if field == 'form' -%}
+                        {{ form.errors.messages[field] }}
+                      {%- else -%}
+                        <a href="#{{ field }}">
+                          {{ form.errors.translated_fields[field] | capitalize }}
+                          {{ form.errors.messages[field] }}
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            {%- endcomment -%}
+
+            <div class="form__item">
+              <input
+                class="form__input"
+                type="password"
+                name="customer[password]"
+                id="password"
+                autocomplete="new-password"
+                {% if form.errors contains 'password' %}
+                  aria-invalid="true"
+                  aria-describedby="password-error"
+                {% endif %}
+                placeholder="{{ 'customer.reset_password.password' | t }}">
+
+              <label for="password">{{ 'customer.reset_password.password' | t }}</label>
+            </div>
+
+            <div class="form__item">
+              <input
+                class="form__input"
+                type="password"
+                name="customer[password_confirmation]"
+                id="password_confirmation"
+                autocomplete="new-password"
+                {% if form.errors contains 'password_confirmation' %}
+                  aria-invalid="true"
+                  aria-describedby="password_confirmation-error"
+                {% endif %}
+                placeholder="{{ 'customer.reset_password.password_confirm' | t }}">
+
+              <label for="password_confirmation">{{ 'customer.reset_password.password_confirm' | t }}</label>
+            </div>
+
+
+            {%- if form.errors contains 'password_confirmation' -%}
+              <p id="password_confirmation-error" class="form__message form__message--error">
+                {{ form.errors.translated_fields['password_confirmation'] | capitalize }} {{ form.errors.messages['password_confirmation'] }}
+              </p>
+            {%- endif -%}
+
+            {%- if form.errors contains 'password' -%}
+              <small id="password-error" class="form__message form__message--error">
+                {{ form.errors.translated_fields['password'] | capitalize }} {{ form.errors.messages['password'] }}
+              </small>
+            {%- endif -%}
+
+            <button type="submit" class="button button--primary">
+              {{ 'customer.reset_password.submit' | t }}
+            </button>
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Password reset template",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    }
+  ]
+}
+{% endschema %}

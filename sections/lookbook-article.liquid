@@ -1,0 +1,20 @@
+<script src="{{ 'photoswipe-lightbox.esm.js' | asset_url }}" defer="defer"></script>
+{{ 'photoswipe.css' | asset_url | stylesheet_tag }}
+{{ 'section-image-grid.css' | asset_url | stylesheet_tag }}
+
+{%- render 'lookbook-images-metafields', section: section -%}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: '#PhotoSwipe--{{ section.id }}',
+      children: 'a',
+      zoom: false,
+      tapAction: 'close',
+      padding: {top: 25, bottom: 25, left: 0, right: 0},
+      pswpModule: () => import('https://unpkg.com/photoswipe'),
+    });
+
+    lightbox.init();
+  })
+</script>

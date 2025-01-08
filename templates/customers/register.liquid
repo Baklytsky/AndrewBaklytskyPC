@@ -1,0 +1,32 @@
+{%- form 'create_customer'  -%}
+  {%- if form.errors -%}
+    {%- assign form_message_error = '' -%}
+
+    {%- for field in form.errors -%}
+      <li>
+        {%- if field == 'form' -%}
+          {%- assign form_message_error = form_message_error | append: form.errors.messages[field] | replace: '<a href="/account/login#recover">' | replace: '</a>' -%}
+        {%- else -%}
+          {%- assign form_message_error = form_message_error | append: form.errors.translated_fields[field] | capitalize | append: ' ' | append: form.errors.messages[field] -%}
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+
+    {%- if form_message_error contains 'is too short' -%}
+      {%- assign form_message_error = 'Password must be 5 characters or more.' -%}
+    {%- endif -%}
+
+    <script type="text/javascript">
+      const params = new URLSearchParams(window.location.search);
+      params.set('form-message', {{ form_message_error | json }});
+      params.set('create', 'false');
+      params.set('checkout_url', document.referrer);
+
+      window.location.href = `{{ routes.root_url }}?${params.toString()}`;
+    </script>
+  {%- endif -%}
+
+  <script type="text/javascript">
+    window.location.href = "{{ routes.account_url }}?create=true"
+  </script>
+{%- endform -%}

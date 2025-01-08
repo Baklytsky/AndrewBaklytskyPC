@@ -1,0 +1,69 @@
+{%- assign show_section = product.metafields.two-coll-iwt.show_section -%}
+{%- assign images = product.metafields.two-coll-iwt-block.image -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+{%- if show_section == 'true' and images != blank -%}
+	{{ 'section-multicolumn.css' | asset_url | stylesheet_tag }}
+
+	<div class="multicolumn page-width" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    <ul class="multicolumn-list" role="list">
+      {%- for image_by_index in images -%}
+        {%- assign image = image_by_index[0] -%}
+        {%- assign url = product.metafields.two-coll-iwt-block.url[forloop.index0] -%}
+        {%- assign heading = product.metafields.two-coll-iwt-block.heading[forloop.index0] -%}
+        {%- assign text = product.metafields.two-coll-iwt-block.text[forloop.index0] -%}
+
+        <li class="multicolumn-list__item multicolumn-list__item--2"
+            role="listitem">
+          <div class="multicolumn-card">
+            {%- if image != blank -%}
+              {%- if url != blank -%}
+                <a href="{{ url }}" class="multicolumn-card__image-wrapper rel">
+                  {% render 'image-metafields', image: image, class_name: 'image-abs-cover', %}
+                </a>
+              {%- else -%}
+                <div class="multicolumn-card__image-wrapper rel">
+                  {% render 'image-metafields', image: image, class_name: 'image-abs-cover', %}
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+            <div class="multicolumn-card__info">
+              {%- if heading != blank -%}
+                <h5 class="multicolumn-card__info-title h5">
+                  {%- if url != blank -%}
+                    <a href="{{ url }}">{{ heading | escape }}</a>
+                  {%- else -%}
+                    {{ heading | escape }}
+                  {%- endif -%}
+                </h5>
+              {%- endif -%}
+              {%- if text != blank -%}
+                <div class="multicolumn-card__info-description">{{ text }}</div>
+              {%- endif -%}
+            </div>
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product two columns",
+  "tag": "section",
+  "class": "section-margin-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

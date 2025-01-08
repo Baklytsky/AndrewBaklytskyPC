@@ -1,0 +1,181 @@
+{%- if section.blocks.size > 0 -%}
+
+  {{ 'section-image-grid.css' | asset_url | stylesheet_tag }}
+
+  {%- liquid
+		assign anchor_link = section.settings.anchor_link
+    assign bg_color = section.settings.bg_color
+    assign use_wrapper = section.settings.use_wrapper
+    assign item_form = section.settings.item_form
+    assign desktop_grid_layout = section.settings.desktop_grid_layout
+    assign mobile_grid_layout = section.settings.mobile_grid_layout
+  -%}
+
+  <div class="image-grid {% if use_wrapper %}page-width{% endif %}"
+			 {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}
+       style="--bg-color: {{ bg_color }};">
+    <div class="image-grid__wrapper {% if desktop_grid_layout == '1' %}image-grid__wrapper-single{% endif %}"
+         style="
+                 --desktop-grid-layout: {{ desktop_grid_layout }};
+                 --mobile-grid-layout: {{ mobile_grid_layout }};
+                 "
+    >
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign image = block.settings.image
+          assign image_mobile = block.settings.image_mobile
+          assign link = block.settings.link
+        -%}
+
+        <div class="image-grid__item image-grid__item--{{ item_form }}" {{ block.shopify_attributes }}>
+          <div class="image-grid__item-wrapper rel">
+            {%- liquid
+              assign image_class = 'image-abs-cover'
+
+              if image
+                if image_mobile != blank
+                  assign image_class = image_class | append: ' large-hide'
+                  render 'image', image: image_mobile, class_name: 'image-abs-cover large-up-hide'
+                endif
+
+                render 'image', image: image, class_name: image_class
+              else
+                echo 'image' | placeholder_svg_tag: image_class
+              endif
+            -%}
+
+            {%- if link != blank -%}
+              <a href="{{ link }}" class="image-abs-cover">
+                <span class="u-sr-only">{{ 'Image link ' | append: forloop.index }}</span>
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Image grid",
+  "tag": "section",
+  "class": "section-padding-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#F9F9F9",
+      "label": "Background color"
+    },
+    {
+      "type": "select",
+      "id": "desktop_grid_layout",
+      "label": "Desktop grid layout",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        },
+        {
+          "value": "3",
+          "label": "3 columns"
+        },
+        {
+          "value": "4",
+          "label": "4 columns"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "mobile_grid_layout",
+      "label": "Mobile grid layout",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        },
+        {
+          "value": "3",
+          "label": "3 columns"
+        },
+        {
+          "value": "4",
+          "label": "4 columns"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "select",
+      "id": "item_form",
+      "label": "Item form",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rectangle",
+          "label": "Rectangle"
+        }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_wrapper",
+      "default": true,
+      "label": "Use section wrapper"
+    }
+  ],
+  "blocks": [
+      {
+        "type": "image_block",
+        "name": "Image",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image"
+          },
+          {
+            "type": "image_picker",
+            "id": "image_mobile",
+            "label": "Image mobile"
+          },
+          {
+            "type": "url",
+            "id": "link",
+            "label": "link"
+          }
+        ]
+      }
+    ],
+  "presets": [
+    {
+      "name": "Image grid",
+      "blocks": [
+        {
+          "type": "image_block"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

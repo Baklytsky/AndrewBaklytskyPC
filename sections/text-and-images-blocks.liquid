@@ -1,0 +1,170 @@
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+  assign text_align = section.settings.text_align
+  assign banner = section.settings.banner
+  assign banner_position = section.settings.banner_position
+  assign bg_color = section.settings.bg_color
+  assign text_color = section.settings.text_color
+
+  if banner != blank
+    assign twi_class = 'twi-blocks__banner--' | append: banner_position
+    assign banner_alt = banner.alt | default: 'banner image'
+  endif
+-%}
+
+{%- if section.blocks.size > 0 or banner != blank -%}
+  {{ 'section-text-with-image-blocks.css' | asset_url | stylesheet_tag }}
+
+  <div class="twi-blocks {{ twi_class }}" style="background-color: {{ bg_color }}; color: {{ text_color }}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+
+    {%- if banner != blank -%}
+      <div class="twi-blocks__banner rel">
+        {% render 'image', image: banner, class_name: 'image-abs-cover', alt: banner_alt %}
+      </div>
+    {%- endif -%}
+
+    <div class="twi-blocks__wrapper twi-blocks__wrapper--{{ text_align }} page-width">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+        {%- when 'text' -%}
+        {%- assign text = block.settings.text -%}
+          {%- if text != blank  -%}
+            <div class="twi-blocks__text" style="max-width: {{ block.settings.text_block_width }}px;">{{ text }}</div>
+          {%- endif -%}
+
+        {%- when 'image' -%}
+        {%- assign image = block.settings.image -%}
+          {%- if image != blank -%}
+            <div class="twi-blocks__image rel">
+              {% render 'image', image: image, class_name: 'image-abs-contain', alt: alt %}
+            </div>
+          {%- endif -%}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Text/Image blocks",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "default": "#F9F9F9",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#070707",
+      "label": "Text color"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        },
+        {
+          "value": "justify",
+          "label": "Justify"
+        }
+      ],
+      "default": "left",
+      "label": "Desktop text align"
+    },
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner",
+      "label": "Banner"
+    },
+    {
+      "type": "select",
+      "id": "banner_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Banner position"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "range",
+          "id": "text_block_width",
+          "min": 100,
+          "max": 1440,
+          "step": 20,
+          "unit": "px",
+          "label": "Text block max width",
+          "default": 1440
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text/Image blocks"
+    }
+  ]
+}
+{% endschema %}

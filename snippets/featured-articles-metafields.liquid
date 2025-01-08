@@ -1,0 +1,86 @@
+{%- assign show_section = [template.name].metafields.feature-articles.show_section -%}
+{%- assign articles_handles = [template.name].metafields.feature-articles.articles | split: '|' -%}
+
+{%- if show_section == 'true' and articles_handles != blank -%}
+  {{ 'section-featured-articles.css' | asset_url | stylesheet_tag }}
+  {{ 'component-article-card.css' | asset_url | stylesheet_tag }}
+  
+  {%- liquid
+    assign uniq_id_by_index = 'featured-articles' | append: page.handle | md5 | append: index
+    assign show_slider_arrows = true
+    assign heading = [template.name].metafields.feature-articles.heading
+  -%}
+
+  {% capture config %}
+  {
+    "slidesPerView": 1,
+    "spaceBetween": 24,
+    "noSwipingSelector": "label",
+    "watchOverflow": true,
+    "navigation": {
+      "nextEl": ".next-{{ uniq_id_by_index }}",
+      "prevEl": ".prev-{{ uniq_id_by_index }}"
+    },
+    "pagination": {
+      "el": ".swiper-pagination-{{ uniq_id_by_index }}",
+      "type": "progressbar"
+    },
+    "breakpoints": {
+      "1200": {
+        "slidesPerView": 2
+      },
+      "900": {
+        "shortSwipes": false,
+        "slidesPerView": 1.5
+      }
+    }
+  }
+  {% endcapture %}
+  
+  <div class="featured-articles__wrapper {{ wrapper_class_name }}">
+    {%- if heading != blank -%}
+      <h2 class="featured-articles__heading h4">{{ heading }}</h2>
+    {%- endif -%}
+  
+    <slideshow-swiper id="featured-articles-{{ uniq_id_by_index }}" class="featured-articles is-inViewport" data-config='{{ config }}'>
+    
+      <div class="swiper rel">
+        <ul class="featured-articles__list swiper-wrapper" role="list">
+          {%- for article_handle in articles_handles limit: 16 -%}
+            {%- assign article = articles[article_handle] -%}
+            
+            {%- unless article == empty -%}
+              <li class="rel swiper-slide" role="listitem">
+                {%- render 'article-card', article: article, show_date: curent_settings.show_date,
+                  show_author: curent_settings.show_author, show_link_to_article: curent_settings.show_link_to_article,
+                  link_to_article_label: curent_settings.link_to_article_label, show_description: curent_settings.show_description
+                -%}
+              </li>
+            {%- endunless -%}
+          {%- endfor -%}
+        </ul>
+        <div class="swiper-pagination swiper-pagination-{{ uniq_id_by_index }} small-up-hide"></div>
+      </div>
+      {%- if show_slider_arrows -%}
+        <div class="swiper-button-next next-{{ uniq_id_by_index }}"></div>
+        <div class="swiper-button-prev prev-{{ uniq_id_by_index }}"></div>
+      {%- endif -%}
+    </slideshow-swiper>
+
+  </div>
+
+  {%- if show_slider_arrows -%}
+    <script>
+      (function obseverInit() {
+        const observer = new IntersectionObserver(onIntersection, {
+          root: null,
+          threshold: .5
+        });
+        function onIntersection(entries, opts){
+          entries.forEach(entry => entry.target.classList.toggle('is-inViewport', entry.isIntersecting));
+        }
+        observer.observe( document.querySelector('#featured-articles-{{ uniq_id_by_index }}') );
+      }) ();
+    </script>
+  {%- endif -%}
+{%- endif -%}

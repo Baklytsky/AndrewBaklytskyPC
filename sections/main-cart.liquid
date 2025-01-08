@@ -1,0 +1,851 @@
+{%- assign delivered__discount = section.settings.delivered_discount -%}
+{%- assign show_shipping_widget = section.settings.show_shipping_widget | default: false, allow_false: true -%}
+{%- assign size_label = 'size,taille,größe,tamanho,tamaño,koko,サイズ' | split: ',' -%}
+{%- assign preorder_products_count = 0 -%}
+{%- assign only_preorder = false -%}
+{%- assign has_preorder = false -%}
+{%- assign monogram_products_count = 0 -%}
+{%- assign hide_delivery_products = 0 -%}
+{%- assign hide_delivery = section.settings.hide_delivery_logic -%}
+{%- assign cart_discount_apply = false -%}
+{%- assign remove_from_shipping_estimate_amount = 0 -%}
+{%- assign remove_from_gwp_amount = 0 -%}
+{%- assign cart_total = cart.total_price | divided_by: 100 -%}
+
+{%- comment -%} Create GWP data {%- endcomment -%}
+
+{%- assign current_gwp_block = false -%}
+{%- assign next_gwp_block = false -%}
+{%- assign clear_gwp_session_storage = false -%}
+
+{%- assign gwp_variant_ids = blank -%}
+{%- assign gwp_keys_in_cart = blank -%}
+{%- assign set_gwp_qty_to_1 = blank -%}
+
+{%- assign gwp_blocks = section.blocks | where: 'type', 'GWP' -%}
+
+{%- if gwp_blocks.size > 0 -%}
+  {%- assign sorted_threshold_values = section.blocks | map: 'settings' | map: 'threshold' | sort -%}
+  {%- assign reversed_threshold_values = section.blocks | map: 'settings' | map: 'threshold' | sort | reverse -%}
+
+  {%- comment -%}********* Get current GWP block & GWP variant ids *********{%- endcomment -%}
+
+  {%- for threshold in reversed_threshold_values -%}
+
+    {%- if threshold <= cart_total -%}
+      {%- assign current_gwp_block = section.blocks | map: 'settings' | where: 'threshold', threshold -%}
+      {%- assign current_gwp_block = current_gwp_block[0] -%}
+
+      {%- for i in (1..3) -%}
+        {%- assign gwp_product_handle = 'get_product_' | append: i -%}
+        {%- assign gwp_variant_handle = 'get_product_variant_id_' | append: i -%}
+
+        {%- assign gwp_product = current_gwp_block[gwp_product_handle] -%}
+        {%- assign gwp_variant_id = current_gwp_block[gwp_variant_handle] -%}
+        {%- assign gwp_variant = gwp_product.variants | where: 'id', gwp_variant_id | first | default: gwp_product.variants[0] -%}
+
+        {%- if gwp_variant.available -%}
+          {%- unless gwp_variant_ids contains gwp_variant.id -%}
+            {%- assign gwp_variant_ids = gwp_variant_ids | append: '|||' | append: gwp_variant.id -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- if gwp_variant_ids != blank -%}
+        {%- break -%}
+      {%- else -%}
+        {%- assign current_gwp_block = false -%}
+      {%- endif -%}
+
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%}********* Get next GWP block *********{%- endcomment -%}
+
+  {%- for threshold in sorted_threshold_values -%}
+    {%- assign stop_search = false -%}
+
+    {%- if threshold > cart_total -%}
+      {%- assign next_gwp_block = section.blocks | map: 'settings' | where: 'threshold', threshold -%}
+      {%- assign next_gwp_block = next_gwp_block[0] -%}
+
+      {%- for i in (1..3) -%}
+        {%- assign gwp_product_handle = 'get_product_' | append: i -%}
+        {%- assign gwp_variant_handle = 'get_product_variant_id_' | append: i -%}
+
+        {%- assign gwp_product = next_gwp_block[gwp_product_handle] -%}
+        {%- assign gwp_variant_id = next_gwp_block[gwp_variant_handle] -%}
+        {%- assign gwp_variant = gwp_product.variants | where: 'id', gwp_variant_id | first | default:  gwp_product.variants[0] -%}
+
+        {%- if gwp_variant.available -%}
+          {%- assign stop_search = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- if stop_search -%}
+        {%- break -%}
+      {%- else -%}
+        {%- assign next_gwp_block = false -%}
+      {%- endif -%}
+
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- assign initials_payment_product_type_label = 'Payment for initials' | handleize -%}
+
+<div class="cart-items-content" id="cart-items-content" data-id="{{ section.id }}" data-cart-empty="{% if cart.item_count == 0 %}true{% endif %}">
+  <cart-items data-section="{{ section.id }}">
+
+    <div class="cart-container" id="container-cart">
+      <div class="cart__items" id="main-cart">
+        {% if cart != empty %}
+        <form action="{{ routes.cart_url }}" class="cart__contents critical-hidden" method="post" id="cart">
+          <div class="cart-item__wrapper">
+            <div class="cart-items__header">
+
+              <p class="cart-items__header-title cart-items__header-title-bag">Bag</p>
+              <p class="cart-items__header-title cart-items__header-title-variant">Size</p>
+
+              <div class="cart-items__header-quantity-with-btn">
+                <p class="cart-items__header-title cart-items__header-title-quantity">Quantity</p>
+                <button type="button" class="btn-close-cart" id="close-cart-popup">{% render 'icon-cart-close' %}</button>
+              </div>
+
+            </div>
+
+              <div class="cart-item__box">
+                {% for item in cart.items %}
+                  {%- assign this_item_gwp = false -%}
+                  {%- assign this_payment_for_initials = false -%}
+                  {%- assign product_type_handle = item.product.type | handleize -%}
+
+                  {%- if product_type_handle == initials_payment_product_type_label -%}
+                    {%- assign this_payment_for_initials = true -%}
+                  {%- endif -%}
+
+                  {%- if item.properties['_gwp'] -%}
+                    {%- assign gwp_label = settings.gwp_label_under_product_in_cart -%}
+                    {%- assign gwp_line_item_key = item.key  -%}
+                    {%- assign line_item_property_gwp = true -%}
+                    {%- assign this_item_gwp = true -%}
+
+                    {%- assign gwp_keys_in_cart = gwp_keys_in_cart | append: '|||' | append: item.key -%}
+
+                    {%- if item.quantity > 1 -%}
+                      {%- assign set_gwp_qty_to_1 = set_gwp_qty_to_1 | append: '|||' | append: item.key -%}
+                    {%- endif -%}
+                  {%- endif -%}
+  
+                  {%- if this_item_gwp == false -%}
+                    {%- assign variants_ids_in_cart = variants_ids_in_cart | append: '|||' | append: item.id -%}
+                    {%- assign variants_qty_in_cart = variants_qty_in_cart | append: '|||' | append: item.quantity -%}
+                  {%- endif -%}
+
+                  {% unless cart_discount_apply %}
+                    {%- for product_tag in item.product.tags -%}
+                      {%- assign downcase_product_tag = product_tag | downcase -%}
+                      {%- if downcase_product_tag == 'sale_from' -%}
+                        {%- assign cart_discount_apply = true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {% endunless %}
+
+                  {%- for product_tag in item.product.tags -%}
+                    {%- assign downcase_product_tag = product_tag | downcase -%}
+                    
+                    {% unless cart_discount_apply %}
+                      {%- if downcase_product_tag == 'sale_from' -%}
+                        {%- assign cart_discount_apply = true -%}
+                      {%- endif -%}
+                    {% endunless %}
+
+                    {%- if downcase_product_tag == 'remove_from_shipping_estimate' -%}
+                      {%- assign remove_from_shipping_estimate_amount = remove_from_shipping_estimate_amount | plus: item.final_line_price -%}
+                    {%- endif -%}
+                    
+                    {%- if downcase_product_tag == 'remove_from_gwp_estimate' -%}
+                      {%- assign remove_from_gwp_amount = remove_from_gwp_amount | plus: item.final_line_price -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  <div class="cart-item" id="CartItem-{{ item.key }}">
+                    <div class="cart-item__image-with-title">
+                      <div class="cart-item__image-wrapper">
+                        {%- assign this_item_url = item.url -%}
+
+                        {%- if item.product.metafields.pdp_merged_products.main_product != blank -%}
+                          {%- assign redirect_product = all_products[item.product.metafields.pdp_merged_products.main_product] -%}
+                          {%- assign this_item_url = redirect_product.url | append: '?variant=' | append: item.variant_id -%}
+                        {%- endif -%}
+
+                        {% if item.image %}
+                          {%- unless this_item_gwp or this_payment_for_initials -%}
+                            <a href="{{ this_item_url }}" class="cart-item__image-link" aria-hidden="true" tabindex="-1"> </a>
+                          {%- endunless -%}
+
+                          {% render 'image', image: item.image, class_name: 'cart-item__image', alt: alt, small_size: true %}
+                        {% endif %}
+                      </div>
+
+                      <div class="cart-item__title-product">
+                        {%- assign size_option_value = '' -%}
+                        {%- assign another_options = '' -%}
+
+                        {%- if item.product.variants.size > 1 -%}
+                          {%- for option in item.options_with_values -%}
+                            {%- assign option_name_downcase = option.name | downcase-%}
+                            {%- if size_label contains option_name_downcase -%}
+                              {%- assign size_option_value = option.value -%}
+                            {% else %}
+                              {%- assign another_options = another_options | append: ' - ' | append: option.value -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+                        {%- endif -%}
+
+                          <h3 class="cart-item__title">
+                            {%- if this_item_gwp or this_payment_for_initials -%}
+                              {{ item.product.title | escape }}{{ another_options }}
+                            {% else %}
+                              <a href="{{ this_item_url }}">
+                                {{ item.product.title | escape }}{{ another_options }}
+                              </a>
+                            {% endif %}
+                          </h3>
+
+                        {%- if size_option_value != blank -%}
+                          <p class="cart-item__size-product mobile-show">{{ size_option_value }}</p>
+                        {%- endif -%}
+
+                        {%- assign monogram_item = false -%}
+
+                        {%- for property in item.properties -%}
+                          {%- assign first_character_in_key = property.first | truncate: 1, '' -%}
+                          {%- assign prop_first_downcase = property.first | downcase -%}
+
+                          {%- if prop_first_downcase == 'patch' and property.last != blank -%}
+                            {%- assign monogram_products_count = monogram_products_count | plus: 1 -%}
+                            {%- assign monogram_item = true -%}
+
+                            <div class="cart-item__monogram-property-wrapper">
+                              <p class="cart-item__monogram-property"><span>Patch:</span></p>
+                              <div class="cart-item__monogram-property-img rel">
+                                <img src="{{ property.last }}" class="image-abs-contain" alt="Patch"/>
+                              </div>
+                            </div>
+                            {%- continue -%}
+                          {%- endif -%}
+
+                          {%- if prop_first_downcase == 'patch name' and property.last != blank -%}
+                            {%- assign monogram_item = true -%}
+                            {%- continue -%}
+                          {%- endif -%}
+
+                          {%- if property.last == blank or first_character_in_key == '_' -%}
+
+                            {% if prop_first_downcase == '_hide_delivery' %}
+                              {%- assign hide_delivery_products = hide_delivery_products | plus: 1 -%}
+                            {% endif %}
+
+                            {%- continue -%}
+                          {%- endif -%}
+
+                          {% if prop_first_downcase == 'preorder' %}
+                            {%- assign preorder_products_count = preorder_products_count | plus: 1 -%}
+                            {%- assign has_preorder = true -%}
+                          {% endif %}
+
+                          {%- if prop_first_downcase == 'note' -%}
+                            <p class="cart-item__label uppercase">{{ property.last }}</p>
+                            {%- continue -%}
+                          {%- endif -%}
+
+                          {%- if prop_first_downcase == 'message' or prop_first_downcase == 'recipient name' -%}
+                            {%- continue -%}
+                          {%- endif -%}
+
+                          {%- case prop_first_downcase -%}
+                          {%- when 'preorder' -%}
+                            {%- assign property_class_name = 'cart-item__property-preorder' -%}
+                          {%- when 'initials' -%}
+                            {%- assign property_class_name = 'cart-item__initials' -%}
+                            {%- assign property_title = 'Initials: ' -%}
+                          {%- when 'recipient email' -%}
+                            {%- assign property_class_name = 'cart-item__property-recipient' -%}
+                            {%- assign property_title = 'Recipient email: ' -%}
+                          {%- when 'send on' -%}
+                            {%- assign property_class_name = 'cart-item__property-recipient' -%}
+                            {%- assign property_title = 'Send on: ' -%}
+                          {%- endcase -%}
+
+                          <p class="cart-item__property {{ property_class_name }}">
+                            {{- property_title -}} <span>{{- property.last -}}</span>
+                          </p>
+                        {%- endfor -%}
+
+                        {%- if this_item_gwp and gwp_label != blank -%}
+                          <p class="cart-item__property cart-item__property-gwp">
+                            {{ gwp_label }}
+                          </p>
+                        {%- endif -%}
+
+                        {%- for discount in item.discounts -%}
+                          {%- if discount.title != blank -%}
+                            <p class="cart-item__property cart-item__property-gwp">
+                              {{ discount.title }}
+                            </p>
+                          {%- endif -%}
+                        {%- endfor -%}
+
+                        {%- if monogram_item and settings.monogram_message != blank -%}
+                          <p class="cart-item__monogram-delivery-message">
+                            {{ settings.monogram_message }}
+                          </p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+
+                    <div class="cart-item__product-size">
+                      {%- if size_option_value != blank -%}
+                        <p class="cart-item__size-product">{{ size_option_value }}</p>
+                      {%- endif -%}
+                    </div>
+
+                    <div class="cart-item__quantity-with-price {{ this_payment_for_initials }}">
+                      {%- if this_item_gwp -%}
+                        <a  href="#" class="cart-item__remove" data-key="{{ item.key }}">{% render 'icon-cart-close' %}</a>
+                      {% elsif this_payment_for_initials %}
+                        <div class="cart-item__quantity">
+                          <span>{{ item.quantity }}</span>
+                        </div>
+                      {% else %}
+                        <div class="cart-item__quantity">
+                          <custom-select class="form__select checked">
+
+                            <div class="form__select-btn"
+                                 type="button" aria-expanded="false" aria-controls="dropdown" role="button">
+                              {{ item.quantity }}
+                            </div>
+
+                            {% assign same_variants_counter = 0 %}
+
+                            {%- for _item in cart.items -%}
+                              {%- if item.variant_id == _item.variant_id -%}
+                                {%- assign same_variants_counter = same_variants_counter | plus: _item.quantity -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+
+                            {%- assign item_variant_inventory_quantity = item.variant.inventory_quantity | minus: same_variants_counter | plus: item.quantity -%}
+                            {%- if item.variant.inventory_policy == 'continue' or item.variant.inventory_management == null -%}
+                              {%- assign item_variant_inventory_quantity = 1000 -%}
+                            {%- endif -%}
+                            <ul class="form__select-dropdown" id="dropdown">
+                              {%- assign qty_step = 9 -%}
+                              {%- assign min_qty_value = item.quantity | minus: qty_step -%}
+                              {%- assign max_qty_value = item.quantity | plus: qty_step -%}
+
+                              <li class="form__select-dropdown-option"
+                                  data-option-value="{{ 0 }}">{{ 0 }}</li>
+
+                              {%- for i in (min_qty_value..max_qty_value) -%}
+                                {%- if i > 0 and i <= item_variant_inventory_quantity -%}
+                                  <li class="form__select-dropdown-option{% if i == item.quantity %} checked{% endif %}"
+                                      data-option-value="{{ i }}">{{ i }}</li>
+                                {%- endif -%}
+                              {%- endfor -%}
+                            </ul>
+
+                            <label for="form__input-select-{{ section.id }}">{{ i }}</label>
+
+                            <select class="cart-item-quantity form__select-hidden"
+                                    name="updates[]"
+                                    data-key="{{ item.key }}"
+                                    data-field="reason"
+                            >
+
+                              <option>0</option>
+
+                              {%- for i in (min_qty_value..max_qty_value) -%}
+                                {%- if i > 0 and i <= item_variant_inventory_quantity  -%}
+                                  <option {% if i == item.quantity %} selected{% endif %}>{{ i }}</option>
+                                {%- endif -%}
+                              {%- endfor -%}
+                            </select>
+                          </custom-select>
+                        </div>
+                      {% endif %}
+
+                      <div class="cart-item__error" id="Line-item-error-{{ item.key }}" role="alert">
+                        <small class="cart-item__error-text"></small>
+                        <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error" viewBox="0 0 13 13">
+                          <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+                          <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+                          <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+                          <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7"/>
+                          <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7"/>
+                          <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7"/>
+                        </svg>
+                      </div>
+
+                      <div class="cart-item__price">
+                        <div class="cart-loading loading-overlay__spinner ">
+                          <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                          </svg>
+                        </div>
+
+                        {% comment %}
+                        {%- if item.line_level_discount_allocations != blank -%}
+                          <div class="cart-item__discount-list">
+                            {%- for discount_allocation in item.line_level_discount_allocations -%}
+                              <p class="cart-item__discount">
+                                {%- render 'icon-sale' -%}{{ discount_allocation.discount_application.title }}: -{{ discount_allocation.amount | money }}
+                              </p>
+                            {%- endfor -%}
+                          </div>
+                        {%- endif -%}
+                        {% endcomment %}
+
+                        {%- if item.original_price != item.final_price -%}
+                          <s class="cart-item__price-sale">
+                            {{ item.original_price | money_without_trailing_zeros }}
+                          </s>
+                          <p class="cart-item__price-final">
+                            {{ item.final_price | money_without_trailing_zeros }}
+                          </p>
+                        {%- else -%}
+                          {%- if item.final_price != item.variant.compare_at_price and item.variant.compare_at_price > 0 -%}
+                            <s class="cart-item__price-sale">
+                              {{ item.variant.compare_at_price | money_without_trailing_zeros }}
+                            </s>
+                          {%- endif -%}
+                          <p class="cart-item__price-final">
+                            {{ item.final_price | money_without_trailing_zeros }}
+                          </p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            
+            </div>
+            
+            {%- assign counter = 0 -%}
+            {%- capture gwpConditions -%}
+            {%- assign sorted_gwp_blocks = gwp_blocks | map: 'settings' | sort: 'threshold' | reverse -%}
+              
+              {%- for block in sorted_gwp_blocks -%}
+                {%- assign ids = blank -%}
+                {%- assign has_available_gwp = false -%}
+                
+                {%- for i in (1..3) -%}
+                  {%- assign gwp_product_handle = 'get_product_' | append: i -%}
+                  {%- assign gwp_variant_handle = 'get_product_variant_id_' | append: i -%}
+                  
+                  {%- assign gwp_product = block[gwp_product_handle] -%}
+                  {%- assign gwp_variant_id = block[gwp_variant_handle] -%}
+                  {%- assign gwp_variant = gwp_product.variants | where: 'id', gwp_variant_id | first | default: gwp_product.variants[0] -%}
+                  
+                  {%- if gwp_variant.available -%}
+                    {%- assign has_available_gwp = true -%}
+                    {%- assign graphql_id = "gid://shopify/ProductVariant/" | append: gwp_variant.id -%}
+                    {%- assign ids = ids | append: '|||' | append: graphql_id -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                
+                {%- if ids != blank and has_available_gwp -%}
+                  {%- if counter > 0 -%},{%- endif -%}{
+                  "threshold": {{ block.threshold | default: 0 | json }},
+                  "ids": {{ ids | remove_first: '|||' | split: '|||' | uniq | json }}
+                  }
+                  {%- assign counter = counter | plus: 1 -%}
+                {%- endif -%}
+              
+              {%- endfor -%}
+            {%- endcapture -%}
+            
+            <script type="application/json" data-gwp-conditions>
+            {"__gwp": {% if gwpConditions != blank %}[{{ gwpConditions }}]{% else %}""{% endif %}}
+          </script>
+          </form>
+        {% else %}
+          <div class="main-cart-empty">
+            {%- assign empty_cart_text = section.settings.empty_cart_text | default: "Your bag is empty" -%}
+            {%- assign clear_gwp_session_storage = true -%}
+            <h5 class="main-cart-empty__message">{{ empty_cart_text }}</h5>
+            <button type="button" class="btn-close-cart" id="close-cart-popup">{% render 'icon-cart-close' %}</button>
+          </div>
+        {% endif %}
+      </div>
+        {% if cart.items.size > 0 %}
+          <div class="main-cart-footer" id="main-cart-footer" data-id="{{ section.id }}">
+            <div class="cart__slider-with-drawer">
+              {%- assign cart_recommended_collection_handle = section.settings.cart_recommended_collection -%}
+              {%- assign cart_recommended_collection = collections[cart_recommended_collection_handle] -%}
+
+              {%- if cart_recommended_collection_handle != blank %}
+                {%- for item in cart.items -%}
+                  {%- assign cart_product_handle = cart_product_handle | append: item.product.handle | append: ', ' -%}
+                {%- endfor -%}
+
+                {%- assign slides_visible_count = 0 -%}
+
+                {% capture recommended_slides %}
+                  {% assign rec_prod_heading = 'Add & Save (optional):' %}
+                  {% assign rec_prod_class_name = 'cart-product-mini' %}
+
+                  {%- for product in cart_recommended_collection.products -%}
+
+                    {%- if product.tags contains 'hidden' -%}
+                      {% continue %}
+                    {%- endif -%}
+
+                    {%- assign tags_string = product.tags | escape -%}
+
+                    {%- unless product == empty or tags_string contains "hidden" or cart_product_handle contains product.handle -%}
+
+                      {% if product.available %}
+                        {%- assign slides_visible_count = slides_visible_count | plus: 1 -%}
+                        {% assign parent_uniq_id = 'cart-card-mini-' | append: forloop.index0 %}
+
+                        <div class="swiper-slide">
+                          {% render 'product-card-mini', this_product: product, heading: rec_prod_heading, class_name : rec_prod_class_name, uniq_id: parent_uniq_id %}
+                        </div>
+                      {% endif %}
+
+                    {% endunless %}
+
+                  {%- endfor -%}
+                {% endcapture %}
+
+                {%- if slides_visible_count > 0 -%}
+                  <div class="cart-slider">
+                    <div class="cart-slider__wrapper">
+                      {% capture config %}
+                        {
+                          "slidesPerView": 1,
+                          "shortSwipes": true,
+                          "loop": {% if slides_visible_count == 1 %}false{% else %}true{% endif %},
+                          "noSwipingSelector": "label",
+                          "effect": "fade",
+                          "fadeEffect": {
+                              "crossFade": true
+                            },
+                              "navigation": {
+                              "nextEl": ".swiper-button-next",
+                              "prevEl": ".swiper-button-prev"
+                            }
+                        }
+                      {% endcapture %}
+
+                      <slideshow-swiper data-config='{{ config }}'>
+                        <div class="swiper rel swiper-initialized swiper-horizontal">
+                          <div class="swiper-wrapper">
+                            {{ recommended_slides }}
+                          </div>
+                        </div>
+                      </slideshow-swiper>
+
+                      <div class="swiper-button-prev"></div>
+                      <div class="swiper-button-next"></div>
+                    </div>
+                  </div>
+                {%- endif -%}
+              {%- endif -%}
+
+              <div class="cart-drawer">
+                <div class="cart-drawer__wrapper">
+
+                  {%- if preorder_products_count == cart.items.size -%}
+                    {%- assign only_preorder = true -%}
+                  {%- endif -%}
+
+                  {%- if hide_delivery_products == cart.items.size or monogram_products_count > 0 -%}
+                    {%- assign hide_delivery = true -%}
+                  {%- endif -%}
+
+                  {%- if has_preorder -%}
+                    {%- assign hide_delivery = true -%}
+                  {%- endif -%}
+
+                  {%- assign cart_total_price_shipping = cart.total_price | plus: 0 | minus: remove_from_shipping_estimate_amount -%}
+                  {%- assign cart_total_price_gwp = cart.total_price | plus: 0 | minus: remove_from_gwp_amount -%}
+
+                  {%- if settings.free_shipping_threshold != blank -%}
+                    {%- assign free_shipping_amount = settings.free_shipping_threshold | plus: 0 | times: 100 -%}
+                  {%- endif -%}
+
+                  {%- if cart_total_price_shipping < free_shipping_amount -%}
+                    {%- assign free_shipping_message = settings.free_shipping_message -%}
+                  {% else %}
+                    {%- assign free_shipping_message = settings.cart_tiered_message_final -%}
+                  {%- endif -%}
+
+                  {%- assign free_shipping_difference = free_shipping_amount | minus: cart_total_price_shipping -%}
+                  {%- assign free_shipping_money = free_shipping_difference | money_without_trailing_zeros -%}
+                  {%- assign free_shipping_percent = cart_total_price_shipping | times: 100 | divided_by: free_shipping_amount -%}
+
+                  {%- if next_gwp_block -%}
+                    {%- assign gwp_amount = next_gwp_block.threshold | plus: 0 | times: 100  -%}
+                    {%- assign gwp_message = next_gwp_block.message -%}
+                    {%- assign gwp_difference = gwp_amount | minus: cart_total_price_gwp -%}
+                    {%- assign gwp_money = gwp_difference | money_without_trailing_zeros -%}
+                    {%- assign gwp_percent = cart_total_price_gwp | times: 100 | divided_by: gwp_amount -%}
+                  {%- endif -%}
+
+                  {%- if current_gwp_block.final_message != blank and next_gwp_block == false -%}
+                    {%- assign gwp_message = current_gwp_block.final_message -%}
+                  {%- endif -%}
+
+                  {%- assign percent_to_split = '|||' | append: free_shipping_percent | append: '|||' | append: gwp_percent -%}
+                  {%- assign percent_arr = percent_to_split | remove_first: '|||' | split: '|||' -%}
+                  {%- assign percent = nil -%}
+
+                  {%- for val in percent_arr -%}
+                    {%- assign num = val | plus: 0 -%}
+
+                    {%- if num <= 100 and percent == nil -%}
+                      {%- assign percent = num -%}
+                    {%- endif -%}
+
+                    {%- if percent -%}
+                      {%- if num < 100 and num >= percent -%}
+                        {%- assign percent = num -%}
+                      {%- endif -%}
+                    {%- endif -%}
+
+                  {%- endfor -%}
+
+                  <div class="progress-message">
+                    {%- if free_shipping_message != blank -%}
+                      {%- assign free_shipping_message_replaced = free_shipping_message | replace: '{{difference}}', '<span class="progress-message__text-bold">{{ difference }}</span>' | replace: '{{ difference }}', free_shipping_money -%}
+                      <p class="progress-message__text">{{ free_shipping_message_replaced }}</p>
+                    {%- endif -%}
+
+                    {%- if gwp_message != blank -%}
+                      {%- assign gwp_message_replaced = gwp_message | replace: '[[difference]]', '<span class="progress-message__text-bold">[[ difference ]]</span>' | replace: '[[ difference ]]', gwp_money -%}
+                      <p class="progress-message__text">{{ gwp_message_replaced }}</p>
+                    {%- endif -%}
+                  </div>
+
+                  <div class="cart-drawer__progress-bar">
+                    {%- if percent -%}
+                      {%- if percent < 100 -%}
+                        <div class="cart-drawer__progress-line" style="width: {{ percent }}%"></div>
+                      {%- else -%}
+                        {%- assign percent = 100 -%}
+                        <div class="cart-drawer__progress-line" style="width: {{ percent }}%"></div>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
+          
+                  {%- if show_shipping_widget -%}
+                    {%- if only_preorder -%}
+                      {%- liquid
+                        assign preorder_date = cart.items | first | map: 'properties' | map: 'Preorder' | split: ',' | last
+                        assign preorder_cart_message = settings.only_preorder_products_message | replace: '{{date}}', preorder_date
+
+                        assign preorder_placeholder_text = 'products.product.preorder_message_in_cart_and_email_html' | t | replace: '{{ date }}.', '' | rstrip | lstrip
+                        assign preorder_properties = cart.items | map: 'properties'
+                        assign biggest_value = 0
+
+                        for preorder_prop in preorder_properties
+                          assign clear_preorder_date = preorder_prop['Preorder'] | replace: preorder_placeholder_text, '' | date: '%s'
+                          assign current_date = 'now' | date: '%s'
+                          assign calculated_days = clear_preorder_date | minus: current_date | divided_by: 86400
+
+                          if calculated_days > biggest_value
+                            assign biggest_value = calculated_days
+                          endif
+                        endfor
+                      -%}
+
+                      <div class="cart-drawer__delivered">
+                        <p class="delivered-day cart-item__property-preorder">
+                          {{ preorder_cart_message }}
+                        </p>
+
+                        {%- if preorder_cart_message_additional != blank -%}
+                          <p class="delivered-day">{{ preorder_cart_message_additional }}</p>
+                        {%- endif -%}
+                      </div>
+
+                      <input type="hidden" form="cart" name="attributes[shipping_estimate_days]" value="{{ biggest_value }}">
+                    {%- else -%}
+                      {%- if monogram_products_count == cart.items.size -%}
+                        {%- assign checkout_estimate = false -%}
+                      {%- endif -%}
+
+                      {%- render 'product-shipping-message', {
+                        preorder_available: false,
+                        location_type: 'cart',
+                        preorder_products_count: preorder_products_count,
+                        hide_delivery_logic: hide_delivery,
+                        checkout_estimate: checkout_estimate
+                      } -%}
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  <div class="cart-drawer__checkout">
+                    <div class="checkout__total-price">
+                      <div class="cart-subtotal">
+                        <span class="cart-subtotal__text">Subtotal</span>
+                      </div>
+
+                      <div class="subtotal-price">
+                        <span class="cart__subtotal-price">
+                          {{ cart.total_price | money_without_trailing_zeros }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="checkout__button">
+                      <button type="submit" name="checkout" form="cart" class="button button--primary button--full-width cart-checkout">Check Out</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+    </div>
+
+    <script type="application/ld+json" data-script-discount>
+      {
+        "enable": {{ settings.enable_script_discount_by_tag | json }},
+        "tagIsApplied": {{ cart_discount_apply | json }}
+      }
+    </script>
+
+    {%- if cart.items.size > 0 -%}
+      <div class="checkout__button-mobile">
+        <button type="submit" name="checkout" form="cart" class="button button--primary button--full-width cart-checkout">
+          Check Out
+        </button>
+      </div>
+    {%- endif -%}
+
+    {%- if current_gwp_block -%}
+      {%- assign gwp_keys_in_cart_arr = gwp_keys_in_cart | remove_first: '|||' | split: '|||' -%}
+
+      {%- for key in gwp_keys_in_cart_arr -%}
+        {%- assign id_in_cart = key | split: ':' | first -%}
+
+        {%- if gwp_variant_ids contains id_in_cart -%}
+          {%- assign gwp_variant_ids = gwp_variant_ids | remove: id_in_cart -%}
+        {%- else -%}
+          {%- assign gwp_data_to_remove = gwp_data_to_remove | append: '|||' | append: key -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- assign gwp_data_to_add = gwp_variant_ids | remove_first: '|||' | split: '|||' -%}
+      {%- assign gwp_data_to_remove =  gwp_data_to_remove | remove_first: '|||' | split: '|||' -%}
+    {%- else -%}
+      {%- assign gwp_data_to_remove = gwp_keys_in_cart | remove_first: '|||' | split: '|||' -%}
+      {%- assign gwp_data_to_add = '' | split: '' -%}
+    {%- endif -%}
+
+    {%- assign set_gwp_qty_to_1 = set_gwp_qty_to_1 | remove_first: '|||' | split: '|||' -%}
+
+    <script type="application/ld+json" data-gwp>
+      {
+        "gwp_items_to_remove": {{ gwp_data_to_remove | json }},
+        "gwp_items_to_add": {{ gwp_data_to_add | json }},
+        "set_qwp_qty_to_1": {{ set_gwp_qty_to_1 | json }},
+        "clear_gwp_session_storage": {{ clear_gwp_session_storage | json }}
+      }
+    </script>
+  </cart-items>
+</div>
+
+{% schema %}
+{
+  "name": "Cart",
+  "settings": [
+    {
+      "type": "text",
+      "id": "empty_cart_text",
+      "label": "Empty cart text"
+    },
+    {
+      "type": "collection",
+      "id": "cart_recommended_collection",
+      "label": "Recommended collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shipping_widget",
+      "label": "Show shipping widget"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_delivery_logic",
+      "label": "Hide delivery logic",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "GWP",
+      "name": "GWP",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A GWP block cannot contain products with the same variants. In this case, only one variant will be added."
+        },
+        {
+          "type": "number",
+          "id": "threshold",
+          "label": "Threshold"
+        },
+        {
+          "type": "product",
+          "id": "get_product_1",
+          "label": "Get product (1)"
+        },
+        {
+          "type": "number",
+          "id": "get_product_variant_id_1",
+          "label": "Get product variant ID (1)",
+          "info": "If the variant ID field is empty or added incorrectly, the first variant ID of the product is applied."
+        },
+        {
+          "type": "product",
+          "id": "get_product_2",
+          "label": "Get product (2)"
+        },
+        {
+          "type": "number",
+          "id": "get_product_variant_id_2",
+          "label": "Get product variant ID (2)",
+          "info": "If the variant ID field is empty or added incorrectly, the first variant ID of the product is applied."
+        },
+        {
+          "type": "product",
+          "id": "get_product_3",
+          "label": "Get product (3)"
+        },
+        {
+          "type": "number",
+          "id": "get_product_variant_id_3",
+          "label": "Get product variant ID (3)",
+          "info": "If the variant ID field is empty or added incorrectly, the first variant ID of the product is applied."
+        },
+        {
+          "type": "text",
+          "id": "message",
+          "label": "Message",
+          "info": "Use [[difference]] to denote the remaining amount needed."
+        },
+        {
+          "type": "text",
+          "id": "final_message",
+          "label": "Final message",
+          "info": "The final message is displayed in the cart only for the last GWP set"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

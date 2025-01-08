@@ -1,0 +1,250 @@
+{{ 'section-finder.css' | asset_url | stylesheet_tag }}
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+
+{%- assign subheading = section.settings.subheading -%}
+
+{%- if subheading != blank or section.blocks.size > 0 -%}
+
+  <div id="{{ section.id }}" class="finder__wrapper">
+    <div class="page-width">
+
+      {%- if subheading != blank -%}
+        <h3 class="finder__subheading h6">{{ subheading }}</h3>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        {%- assign finder_url = '/collections/all' -%}
+        {%- assign filter_url_separator = '?' -%}
+
+        {%- for block in section.blocks -%}
+          {%- assign finder_title = block.settings.finder_title -%}
+          {%- assign finder_select_arr = block.settings.finder_select | split: ',' -%}
+          {%- assign finder_select_position = block.settings.finder_select_position -%}
+          {%- assign finder_filter_value = finder_select_arr[0] | replace: ' ', '+' -%}
+
+          {%- unless forloop.first -%}
+            {%- assign filter_url_separator = '&' -%}
+          {%- endunless -%}
+
+          {%- if block.type == 'features_finder' -%}
+            {%- assign finder_filter_option = filter_url_separator | append: 'filter.p.m.custom.product_features_list=' -%}
+          {%- else -%}
+            {%- assign finder_filter_option = filter_url_separator | append: 'filter.v.option.color=' -%}
+          {%- endif -%}
+
+          {%- assign finder_url = finder_url | append: finder_filter_option | append: finder_filter_value -%}
+
+          {%- if finder_title != blank or finder_select_arr != blank -%}
+            <div id="{{ block.id }}" class="finder__string {% if finder_select_position == 'start' %}finder__string--revers{% endif %}">
+              {%- if finder_title != blank -%}
+                <h2 class="finder__string-title">{{ finder_title }}</h2>
+              {%- endif -%}
+
+              <custom-select class="form__select" style="border-bottom: 2px solid {{ block.settings.select_color }}">
+                <div class="form__select-btn h2"
+                     type="button"
+                     aria-expanded="false"
+                     aria-controls="{{ finder_filter_option }}"
+                     role="button"
+                     style="color: {{ block.settings.select_color }}">
+                  {{ finder_select_arr[0] }}
+                </div>
+
+                <ul class="form__select-dropdown" id="{{ finder_filter_option }}">
+                  {%- for option in finder_select_arr -%}
+                    <li class="form__select-dropdown-option {% if forloop.first %}checked{% endif %}"
+                        data-option-value="{{ option | replace: ' ', '+' }}">{{ option }}</li>
+                  {%- endfor -%}
+                </ul>
+
+                <select class="form__select-hidden"
+                        data-field="{{ finder_filter_option }}"
+                        name="{{ finder_filter_option }}"
+                        title="{{ block.type }}">
+                  {%- for option in finder_select_arr -%}
+                    <option value="{{ option | replace: ' ', '+' }}" {% if forloop.first %}selected{% endif %}>{{ option }}</option>
+                  {%- endfor -%}
+                </select>
+              </custom-select>
+
+            </div>
+          {%- endif -%}
+
+        {%- endfor -%}
+
+        <a href="{{ finder_url }}" class="finder__button button button--{{ section.settings.button_type }}">
+          {{ section.settings.button_text }}
+        </a>
+      {%- endif -%}
+
+    </div>
+  </div>
+
+  {%- style -%}
+    #{{ section.id }} {
+      background-color: {{ section.settings.section_bg_color }};
+      color: {{ section.settings.section_text_color }};
+    }
+  {%- endstyle -%}
+
+  <script type="application/javascript" defer>
+    const finderSection = document.getElementById({{ section.id | json }}),
+          finderSelects = finderSection.querySelectorAll('.form__select-dropdown'),
+          finderButton = finderSection.querySelector('.finder__button');
+
+      finderSection.addEventListener('change', function() {
+        let finderURL = '/collections/all';
+
+        finderSelects.forEach((element) => {
+          let value = element.querySelector('.checked').getAttribute('data-option-value'),
+              filterOption = element.getAttribute('id');
+          finderURL += filterOption + value;
+        })
+
+        finderButton.setAttribute('href', finderURL)
+      });
+
+  </script>
+
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Finder",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section background color",
+      "default": "#181818"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Section text color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "True finder"
+    },
+    {
+      "type": "header",
+      "content": "Finder button settings"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Find Your Shoe"
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "options": [
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "primary",
+          "label": "Primary"
+        }
+      ],
+      "default": "secondary",
+      "label": "Button type"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "features_finder",
+      "name": "Features finder",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "finder_title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "finder_select",
+          "label": "Select list",
+          "info": "Example: Waterproof,Breathable,All-day Wear ..."
+        },
+        {
+          "type": "select",
+          "id": "finder_select_position",
+          "options": [
+            {
+              "value": "start",
+              "label": "Start position"
+            },
+            {
+              "value": "end",
+              "label": "End position"
+            }
+          ],
+          "default": "end",
+          "label": "Select position"
+        },
+        {
+          "type": "color",
+          "id": "select_color",
+          "label": "Select color",
+          "default": "#b4b5b6"
+        }
+      ]
+    },
+    {
+      "type": "color_finder",
+      "name": "Color finder",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "finder_title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "finder_select",
+          "label": "Select list",
+          "info": "Example: Black,White,Pin Hunter,Concrete ..."
+        },
+        {
+          "type": "select",
+          "id": "finder_select_position",
+          "options": [
+            {
+              "value": "start",
+              "label": "Start position"
+            },
+            {
+              "value": "end",
+              "label": "End position"
+            }
+          ],
+          "default": "end",
+          "label": "Select position"
+        },
+        {
+          "type": "color",
+          "id": "select_color",
+          "label": "Select color",
+          "default": "#b4b5b6"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Finder"
+    }
+  ]
+}
+{% endschema %}

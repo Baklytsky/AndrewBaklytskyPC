@@ -1,50 +1,119 @@
+modal-dialog.newsletter {
+  padding: 60px 0 48px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  transform: translateX(100%);
+  visibility: hidden;
+  -webkit-transition: all .2s linear;
+  -o-transition: all .2s linear;
+  transition: all .2s linear;
+  z-index: 10;
+  overflow: visible;
+}
+
+modal-dialog.newsletter[open] {
+  transform: translateX(0);
+  visibility: visible;
+}
+
 .newsletter__wrapper {
-  padding-right: calc(4rem / var(--font-body-scale));
-  padding-left: calc(4rem / var(--font-body-scale));
+  padding: 12px 0 0;
+  overflow-y: auto;
+  height: 100%;
 }
 
-@media screen and (min-width: 750px) {
-  .newsletter__wrapper {
-    padding-right: 9rem;
-    padding-left: 9rem;
-  }
+#NewsletterModal form-klaviyo {
+  overflow: visible;
 }
 
-.newsletter__wrapper > * {
-  margin-top: 0;
-  margin-bottom: 0;
+#newsletter-form,
+.newsletter__dropdown-list {
+  padding: 0 24px;
 }
 
-.newsletter__wrapper > * + * {
-  margin-top: 2rem;
+#newsletter-form button[type="submit"] {
+  margin: 6px 0;
+  font-size: var(--font-size-normal);
 }
 
-.newsletter__wrapper > * + .newsletter-form {
-  margin-top: 3rem;
+.newsletter__heading {
+  margin-bottom: 10px;
 }
 
 .newsletter__subheading {
-  max-width: 70rem;
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 26px;
 }
 
-.newsletter__wrapper .newsletter-form__field-wrapper {
-  max-width: 36rem;
+.newsletter__description {
+  margin: 18px 0 30px;
+  font-size: var(--font-size-l);
 }
 
-.newsletter-form__field-wrapper .newsletter-form__message {
-  margin-top: 1.5rem;
+.newsletter__dropdown-list .form__select-btn {
+  position: relative;
+  color: inherit;
 }
 
-.newsletter__button {
-  margin-top: 3rem;
-  width: fit-content;
+.newsletter__dropdown-item-wrapper[open] .form__select-btn:after {
+  transform: translateY(-50%) rotate(-135deg);
 }
 
-@media screen and (min-width: 750px) {
-  .newsletter__button {
-    flex-shrink: 0;
-    margin: 0 0 0 1rem;
+.newsletter__dropdown-list-item {
+  padding: 17px 0;
+  border-bottom: 1px solid rgb(var(--color-border));
+}
+
+.newsletter__dropdown-list .newsletter__dropdown-list-item:last-child {
+  border-bottom: none;
+}
+
+.newsletter__dropdown-item-heading {
+  font-weight: var(--font-medium-weight);
+}
+
+.newsletter__message--success-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgb(var(--color-background-secondary));
+  z-index: 10;
+  transition: all .3s linear;
+  visibility: visible;
+  opacity: 1;
+}
+
+.newsletter__message--success-wrapper.hidden-success {
+  transform: translateY(-100%);
+  visibility: hidden;
+  opacity: 0;
+}
+
+.newsletter__message--success-text {
+  padding-top: calc(35px + var(--announcement-bar-height));
+  padding-bottom: 35px;
+  text-align: right;
+  color: rgb(var(--color-text-light));
+}
+
+@media screen and (max-width: 749px) {
+  modal-dialog.newsletter {
+    max-width: 100%;
+    padding: 60px 0 48px;
+  }
+
+  #newsletter-form,
+  .newsletter__dropdown-list {
+    padding: 0;
+  }
+
+  .newsletter__message--success-text {
+    padding-top: calc(17px + var(--announcement-bar-height));
+    padding-bottom: 17px;
   }
 }

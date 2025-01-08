@@ -1,0 +1,42 @@
+{% comment %}
+	{% render 'clp-carousel-product-item',
+		product: {Object},
+		image: {Object}
+		badge: String,
+		description: String
+	%}
+{% endcomment %}
+
+<li class="carousel-product-item swiper-slide" role="listitem" >
+	<div class="carousel-product-item__wrapper">
+		<div class="carousel-product-item__media rel aspect-ratio" style="--aspect-ratio: {{ product.featured_image.aspect_ratio }};">
+			{% if image != blank and image.media_type != 'image' %}
+				{% render 'image-metafields', image: image[0], hide_id: true, preload: true %}
+			{%- elsif product.featured_image != blank -%}
+				{% render 'image', image: product.featured_image, class_name: 'image-abs-cover' %}
+			{%- else -%}
+				{{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+			{%- endif -%}
+		</div>
+		<div class="carousel-product-item__content">
+			<div class="carousel-product-item__content-wrapper">
+				{% if badge != blank %}
+					<div class="carousel-product-item__badge-wrapper">
+						<span class="product-card__badge">{{ badge }}</span>
+					</div>
+				{% endif %}
+				<h3 class="product-card__title h6">
+					<a href="{{ product.url }}" class="link link--text">{{ product.title }}</a>
+				</h3>
+				{%- if description != blank -%}
+					<div class="featured-products__text">
+						{{ description }}
+					</div>
+				{%- endif -%}
+				<a href="{{ product.url }}" class="button button--secondary">
+					Shop Now
+				</a>
+			</div>
+		</div>
+	</div>
+</li>

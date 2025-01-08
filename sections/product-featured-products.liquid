@@ -1,0 +1,53 @@
+{%- assign assign uniq_id_by_index = 'featured-products' | append: page.handle | md5 | append: section.id  -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+{% capture config %}
+{
+  "slidesPerView": 1,
+  "spaceBetween": 24,
+  "noSwipingSelector": "label",
+  "watchOverflow": true,
+  "navigation": {
+    "nextEl": ".next-{{ uniq_id_by_index }}",
+    "prevEl": ".prev-{{ uniq_id_by_index }}"
+  },
+  "pagination": {
+    "el": ".swiper-pagination-{{ uniq_id_by_index }}",
+    "type": "progressbar"
+  },
+  "breakpoints": {
+    "1200": {
+      "slidesPerView": 3,
+      "spaceBetween": 36
+    },
+    "900": {
+      "shortSwipes": false,
+      "slidesPerView": 1.5,
+      "spaceBetween": 24
+    }
+  }
+}
+{% endcapture %}
+
+<div {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+	{% render 'featured-products-metafields', config: config, uniq_id_by_index: uniq_id_by_index %}
+</div>
+
+{% schema %}
+{
+  "name": "Product featured products",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

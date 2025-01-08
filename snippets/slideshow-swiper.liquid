@@ -1,0 +1,59 @@
+{% comment %}
+	Example use
+
+	{% capture config %}
+	{
+		"slidesPerView": 1,
+		"spaceBetween": 24,
+		"shortSwipes": false,
+		"noSwipingSelector": "label",
+		"navigation": {
+			"nextEl": ".swiper-button-next",
+			"prevEl": ".swiper-button-prev"
+		},
+		"breakpoints": {
+			"1980": {
+				"slidesPerView": 2.5,
+				"spaceBetween": 36
+			},
+			"1200": {
+				"slidesPerView": 3.1,
+				"spaceBetween": 36
+			},
+			"900": {
+				"slidesPerView": 1.5,
+				"spaceBetween": 24
+			}
+		}
+	}
+	{% endcapture %}
+
+	{% capture slides %}
+		{%- for i in (1..10) -%}
+			<div class="swiper-slide">
+				{% render 'product-card-placeholder' %}
+			</div>
+		{%- endfor -%}
+	{% endcapture %}
+
+	{% render 'slideshow-swiper', arrows: true, scrollbar: true, config: config, slides: slides %}
+{% endcomment %}
+
+
+<slideshow-swiper data-config='{{ config }}'>
+	<div class="swiper">
+		<div class="swiper-wrapper">
+			{{ slides }}
+		</div>
+		<!-- Pagination -->
+		{%- if arrows or arrows == 'true' -%}
+			<div class="swiper-button-next"></div>
+			<div class="swiper-button-prev"></div>
+		{%- endif -%}
+
+		<!-- Scrollbar -->
+		{%- if scrollbar or scrollbar == 'true' -%}
+			<div class="swiper-scrollbar"></div>
+		{%- endif -%}
+	</div>
+</slideshow-swiper>

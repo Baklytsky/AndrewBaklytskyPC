@@ -1,0 +1,106 @@
+{{ 'section-clp-product-carousel.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+	assign anchor_link = section.settings.anchor_link
+	assign body_text = section.settings.body_text
+
+	assign product_1 = all_products[collection.metafields.product_carousel.product_1]
+	assign image_1 = collection.metafields.product_carousel.image_1
+	assign badge_1 = collection.metafields.product_carousel.badge_1
+	assign description_1 = collection.metafields.product_carousel.description_1
+
+	assign product_2 = all_products[collection.metafields.product_carousel.product_2]
+	assign image_2 = collection.metafields.product_carousel.image_2
+	assign badge_2 = collection.metafields.product_carousel.badge_2
+	assign description_2 = collection.metafields.product_carousel.description_2
+
+	assign product_3 = all_products[collection.metafields.product_carousel.product_3]
+	assign image_3 = collection.metafields.product_carousel.image_3
+	assign badge_3 = collection.metafields.product_carousel.badge_3
+	assign description_3 = collection.metafields.product_carousel.description_3
+
+	assign product_4 = all_products[collection.metafields.product_carousel.product_4]
+	assign image_4 = collection.metafields.product_carousel.image_4
+	assign badge_4 = collection.metafields.product_carousel.badge_4
+	assign description_4 = collection.metafields.product_carousel.description_4
+
+	assign product_list = product_1.title | append: ',' | append: product_2.title | append: ',' | append: product_3.title | append: ',' | append: product_4.title | split: ','
+%}
+
+{% capture config %}
+	{
+	"slidesPerView": 1,
+	"spaceBetween": 24,
+	"noSwipingSelector": "label",
+	"watchOverflow": true,
+	"navigation": {
+	"nextEl": ".next-{{ section.id }}",
+	"prevEl": ".prev-{{ section.id }}"
+	},
+	"breakpoints": {
+	"750": {
+	"shortSwipes": false,
+	"slidesPerView": 2,
+	"spaceBetween": 24
+	}
+	}
+	}
+{% endcapture %}
+
+{% if product_list.size > 0 %}
+	<div class="clp-product-carousel__wrapper page-width" style="--body-text: {{ body_text }}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		<slideshow-swiper data-config='{{ config }}'
+											data-arrows-appear="true"
+											class="clp-product-carousel__slider">
+			<div class="swiper">
+				<ul class="swiper-wrapper" role="list">
+					{% if product_1 != blank %}
+						{% render 'clp-carousel-product-item', product: product_1, image: image_1, badge: badge_1, description: description_1 %}
+					{% endif %}
+					{% if product_2 != blank %}
+						{% render 'clp-carousel-product-item', product: product_2, image: image_2, badge: badge_2, description: description_2 %}
+					{% endif %}
+					{% if product_3 != blank %}
+						{% render 'clp-carousel-product-item', product: product_3, image: image_3, badge: badge_3, description: description_3 %}
+					{% endif %}
+					{% if product_4 != blank %}
+						{% render 'clp-carousel-product-item', product: product_4, image: image_4, badge: badge_4, description: description_4 %}
+					{% endif %}
+				</ul>
+
+				{% if product_list.size > 2  %}
+					<div class="swiper-button-next next-{{ section.id }}"></div>
+					<div class="swiper-button-prev prev-{{ section.id }}"></div>
+				{% endif %}
+			</div>
+		</slideshow-swiper>
+	</div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Products carousel (MF)",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    },
+    {
+      "type": "color",
+      "id": "body_text",
+      "label": "Body text color",
+      "default": "#FFF"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Products carousel (MF)"
+    }
+  ]
+}
+{% endschema %}

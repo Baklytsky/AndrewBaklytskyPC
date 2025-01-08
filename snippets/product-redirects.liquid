@@ -1,0 +1,11 @@
+{%- assign initials_payment_product_type_label = 'Payment for initials' | handleize -%}
+  {%- assign product_type_handle = product.type | handleize -%}
+
+{%- if product.tags contains 'dev_product'
+  or product.tags contains 'test'
+  or product.tags contains 'hidden'
+  or product_type_handle == initials_payment_product_type_label -%}
+  <script type="application/javascript">
+    if (Shopify?.theme.role === 'main') window.location.href = '/';
+  </script>
+{%- endif -%}

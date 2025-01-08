@@ -1,0 +1,122 @@
+{%- assign selected_variant = product.selected_variant | default: product.variants[0] -%}
+{%- assign product_url = selected_variant.url | default: product.url -%}
+{%- assign date = 'now' | date: "%09N" -%}
+{%- assign uniq_id = 'product-card--' | append: product.id | append: '--' | append: date -%}
+
+<div data-product-card-media>
+  {% capture config_main %}
+    {
+      "slidesPerView": 1,
+      "spaceBetween": 0,
+      "enabled": true,
+      "allowTouchMove": false,
+      "pagination": {
+        "el": ".swiper-pagination--{{ uniq_id }}",
+        "type": "progressbar"
+      },
+      "navigation": {
+        "nextEl": ".next--{{ uniq_id }}",
+        "prevEl": ".prev--{{ uniq_id }}"
+      }
+    }
+  {% endcapture %}
+
+  {%- capture media_product_content -%}
+
+    {%- assign variant_alternative_image = false -%}
+
+    {%- if template contains 'index' and selected_variant.metafields.home_page.alternative_featured_image[0] -%}
+      {%- assign variant_alternative_image = selected_variant.metafields.home_page.alternative_featured_image[0] -%}
+    {%- endif -%}
+
+    {%- assign variant_image = variant_alternative_image | default: selected_variant.image | default: product.featured_image -%}
+    {%- assign variant_metafield_media = selected_variant.metafields.accentuate.media[0] -%}
+    {%- assign product_card_main_image = product.metafields.custom.product_card_main_image.value -%}
+
+    {%- if product_card_main_image -%}
+      <div class="swiper-slide product-card__img">
+				<a class='product-card__link abs fill z2 js-product-link'
+					 href='{{ product_url }}'
+					 title="{{ product.title }}"
+					 aria-label='{{ product.title }}'>
+					{% render 'image',
+						image: product_card_main_image,
+						class_name: 'product-card__image image-abs-cover product-card__main-image',
+						alt: selected_variant.title %}
+				</a>
+      </div>
+    {%- endif -%}
+
+    {%- if variant_image -%}
+      <div class="swiper-slide product-card__img">
+				<a class='product-card__link abs fill z2 js-product-link'
+					 href='{{ product_url }}'
+					 title="{{ product.title }}"
+					 aria-label='{{ product.title }}'>
+					{% render 'image',
+						image: variant_image,
+						class_name: 'product-card__image image-abs-cover product-card__main-image',
+						alt: selected_variant.title %}
+				</a>
+      </div>
+    {%- endif -%}
+
+    {%- for media in variant_metafield_media -%}
+
+      {%- if variant_image and forloop.first -%}
+        {% continue %}
+      {%- endif -%}
+
+      <div class="swiper-slide product-card__img">
+
+        {%- assign media_slides_count = media_slides_count | plus: 1 -%}
+
+        {% if media.media_type != 'image' %}
+					<a class='product-card__link abs fill z2 js-product-link'
+						 href='{{ product_url }}'
+						 title="{{ product.title }}"
+						 aria-label='{{ product.title }}'>
+						<video aria-label='{{ selected_variant.title }}'
+									 class="exclude-pause product-card__image image-abs-cover product-card__main-image"
+									 loop
+									 playsinline
+									 autoplay
+									 muted>
+							<source src="{{ media.src }}"
+											type="{{ media.mime_type }}">
+							Your browser does not support the video tag.
+						</video>
+					</a>
+        {% else %}
+					<a class='product-card__link abs fill z2 js-product-link'
+						 href='{{ product_url }}'
+						 title="{{ product.title }}"
+						 aria-label='{{ product.title }}'>
+						{% render 'image-metafields',
+							image: media,
+							class_name: 'product-card__image image-abs-cover product-card__main-image',
+							alt: selected_variant.title,
+							preload: false %}
+						<span class="image-loader"></span>
+					</a>
+        {% endif %}
+      </div>
+    {%- endfor -%}
+
+  {%- endcapture -%}
+
+  <slideshow-swiper class="product__card-media rel" data-config='{{ config_main }}'>
+    <div class="swiper">
+      <div class="swiper-wrapper">
+        {{ media_product_content }}
+      </div>
+      {%- if media_slides_count >= 1 -%}
+        <div class="swiper-pagination swiper-pagination--{{ uniq_id }}"></div>
+      {%- endif -%}
+    </div>
+    {%- if media_slides_count >= 1 -%}
+      <div class="swiper-nav-next next--{{ uniq_id }}"></div>
+      <div class="swiper-nav-prev prev--{{ uniq_id }}"></div>
+    {%- endif -%}
+  </slideshow-swiper>
+</div>

@@ -1,0 +1,275 @@
+{{ 'table-section.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+  assign heading = section.settings.heading
+
+  assign bg_color = section.settings.bg_color
+  assign heading_color = section.settings.heading_color
+  assign table_text_color = section.settings.table_content_color
+  assign table_border_color = section.settings.table_border_color
+
+  assign first_row_bg_color = section.settings.first_row_bg_color
+  assign first_row_text_color = section.settings.first_row_text_color
+  assign first_row_bold = section.settings.first_row_bold
+
+  assign first_column_bg_color = section.settings.first_column_bg_color
+  assign first_column_text_color = section.settings.first_column_text_color
+  assign first_column_bold = section.settings.first_column_bold
+
+  assign table_text_align = section.settings.table_text_align
+-%}
+
+{%- if first_row_bold -%}
+  {%- assign first_row_font_weight = 700 -%}
+{%- else -%}
+  {%- assign first_row_font_weight = 400 -%}
+{%- endif -%}
+
+{%- if first_column_bold -%}
+  {%- assign first_column_font_weight = 700 -%}
+{%- else -%}
+  {%- assign first_column_font_weight = 400 -%}
+{%- endif -%}
+
+
+{% style %}
+  #{{ section.id }} {
+  --bg-color: {{ bg_color }};
+  --heading-color: {{ heading_color }};
+  --table-th-bg-color: {{ first_row_bg_color }};
+  --table-th-text-color: {{ first_row_text_color }};
+  --table-th-font-weight: {{ first_row_font_weight }};
+  --table-first-column-bg-color: {{ first_column_bg_color }};
+  --table-first-column-text-color: {{ first_column_text_color }};
+  --table-first-column-font-weight: {{ first_column_font_weight }};
+  --table-content-color: {{ table_text_color }};
+  --table-border-color: {{ table_border_color }};
+  --table-text-align: {{ table_text_align }};
+  }
+{% endstyle %}
+
+<div id="{{section.id}}" class="table__wrapper">
+  {%- if heading != blank -%}
+    <h3 class="table__heading h4">{{ heading }}</h3>
+  {%- endif -%}
+
+  <div class="table__scroll-wrapper" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    {%- assign max_rows = 0 -%}
+
+    {%- for block in section.blocks -%}
+      {%- assign counter = 0 -%}
+
+      {% for i in (1..10) %}
+      {%- assign data_handle = 'data_' | append: i -%}
+      {%- assign data = block.settings[data_handle] -%}
+        {%- if data != blank -%}
+          {%- assign counter = forloop.index -%}
+        {%- endif -%}
+      {% endfor %}
+
+      {%- if counter >= max_rows -%}
+        {%- assign max_rows = counter -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <table>
+      {%- for block in section.blocks -%}
+        {% tablerow i in (1..max_rows) %}
+          {%- assign data_handle = 'data_' | append: i -%}
+          {%- assign data = block.settings[data_handle] -%}
+          {%- if data != blank -%}
+            {{ data }}
+          {%- endif -%}
+        {% endtablerow %}
+      {%- else -%}
+        {%- for i in (1..6) -%}
+          {% tablerow i in (1..8) %}
+            {{ i }}
+          {% endtablerow %}
+        {%- endfor -%}
+      {%- endfor -%}
+    </table>
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Table",
+  "tag": "section",
+  "class": "table-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Table"
+    },
+    {
+      "type": "header",
+      "content": "Section colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#070707"
+    },
+    {
+      "type": "header",
+      "content": "Table colors"
+    },
+    {
+      "type": "color",
+      "id": "table_content_color",
+      "label": "Table content color",
+      "default": "#070707"
+    },
+    {
+      "type": "color",
+      "id": "table_border_color",
+      "label": "Table border color",
+      "default": "#e4e4e4"
+    },
+    {
+      "type": "paragraph",
+      "content": "First row colors"
+    },
+    {
+      "type": "color",
+      "id": "first_row_bg_color",
+      "label": "Background color",
+      "default": "#070707"
+    },
+    {
+      "type": "color",
+      "id": "first_row_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "first_row_bold",
+      "label": "Bold text",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "First column colors"
+    },
+    {
+      "type": "color",
+      "id": "first_column_bg_color",
+      "label": "Background color",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "first_column_text_color",
+      "label": "Text color",
+      "default": "#070707"
+    },
+    {
+      "type": "checkbox",
+      "id": "first_column_bold",
+      "label": "Bold text",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "table_text_align",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Table text align"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tr",
+      "name": "Table row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "data_1",
+          "label": "Data (1 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_2",
+          "label": "Data (2 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_3",
+          "label": "Data (3 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_4",
+          "label": "Data (4 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_5",
+          "label": "Data (5 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_6",
+          "label": "Data (6 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_7",
+          "label": "Data (7 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_8",
+          "label": "Data (8 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_9",
+          "label": "Data (9 column)"
+        },
+        {
+          "type": "text",
+          "id": "data_10",
+          "label": "Data (10 column)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Table"
+    }
+  ]
+}
+  {% endschema %}

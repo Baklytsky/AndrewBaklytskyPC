@@ -1,0 +1,27 @@
+{%- liquid
+  assign images = [request.page_type].metafields.lookbook.image
+-%}
+
+{%- if images.size > 0 -%}
+  <div class="lookbook-images">
+    <div class="image-grid page-width">
+      <div class="image-grid__wrapper" id="PhotoSwipe--{{ section.id }}" style="--desktop-grid-layout: 4; --mobile-grid-layout: 2;">
+        {%- for image in images -%}
+          <div class="image-grid__item image-grid__item--rectangle">
+            <div class="image-grid__item-wrapper rel">
+              {%- render 'image-metafields', image: image[0], class_name: 'image-abs-cover' -%}
+
+              <a href="{{ image[0].cloudinary_src }}"
+                 data-pswp-width="{{ image[0].width }}"
+                 data-pswp-height="{{ image[0].height }}"
+                 target="_blank"
+                 class="image-abs-cover">
+                <span class="u-sr-only">{{ 'Image link ' | append: forloop.index }}</span>
+              </a>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

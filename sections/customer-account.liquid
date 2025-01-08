@@ -1,0 +1,313 @@
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+<modal-dialog id="AccountModal" class="account__modal primary-bg rel" data-modal="#AccountModal">
+  <modal-block class=""
+               role="dialog"
+               aria-label=""
+               aria-modal="true"
+               tabindex="-1">
+
+    <button id="ModalClose-{{ section.id }}"
+            type="button"
+            class="button__modal-close"
+            aria-label="{{ 'accessibility.close' | t }}">
+
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="account__modal_block-wrapper hide-scrollbar">
+      <div class="account__modal--login account__modal_block" data-btn-content
+           id="account__modal--login"
+           aria-hidden="false">
+        <h4 class="account__modal-heading h6">
+          {{ 'customer.login_page.title' | t }}
+        </h4>
+
+        <div class="form__message form__message--success" id="account__modal--recover">
+          {{ 'customer.recover_password.success' | t }}
+        </div>
+
+        <div class="form__message form__message--error" id="account__modal--login">
+          {{ 'templates.contact.form.error_heading' | t }}
+        </div>
+
+        {%- form 'customer_login', class: 'account__modal-form', novalidate: 'novalidate' -%}
+          <input type="hidden" name="checkout_url" value="{{ request.path }}">
+          <input type="hidden" name="return_to" value="{{ request.path }}">
+
+          {%- if form.errors -%}
+            <h2 class="form__message form__message--error" tabindex="-1" autofocus>
+              <span class="visually-hidden">{{ 'accessibility.error' | t }} </span>
+              {{ 'templates.contact.form.error_heading' | t }}
+            </h2>
+
+            <span>{{ form.errors | default_errors }}</span>
+          {%- endif -%}
+
+          <div class="form__item">
+            <input type="email" class="form__input" name="customer[email]"
+                   id="form__input-email-{{ section.id }}"
+                   data-field="email"
+                   aria-label="{{ 'customer.login_page.email' | t }}"
+                   placeholder="{{ 'customer.login_page.email' | t }}"
+              {% if form.errors contains 'form' %}
+                aria-invalid="true"
+              {% endif %}
+              {% if customer %}value="{{ customer.email }}"{% endif %}
+                   required
+                   aria-required="true"
+                   autocomplete="off">
+
+            <label for="form__input-email-{{ section.id }}">{{ 'customer.login_page.email' | t }}</label>
+          </div>
+
+          {%- if form.password_needed -%}
+            <div class="form__item">
+              <input
+                class="form__input"
+                type="password"
+                value=""
+                name="customer[password]"
+                id="form__input-password-{{ section.id }}"
+                autocomplete="current-password"
+                {% if form.errors contains 'form' %}
+                  aria-invalid="true"
+                {% endif %}
+                aria-label="{{ 'customer.login_page.password' | t }}"
+                placeholder="{{ 'customer.login_page.password' | t }}">
+
+              <label for="form__input-password-{{ section.id }}">{{ 'customer.login_page.password' | t }}</label>
+            </div>
+          {%- endif -%}
+
+          <button type="submit" class="button button--primary button--full-width">
+            {{ 'customer.login_page.log_in' | t }}
+          </button>
+
+          <a href="#" class="account__modal-link" data-block="#account__modal--recover" data-btn-opener>
+            {{ 'customer.login_page.forgot_password' | t }}
+          </a>
+
+          <span class="account__modal-separate">or</span>
+
+          <button type="button" class="button button--secondary-border button--full-width"
+                  data-block="#account__modal--create" data-btn-opener>
+            {{ 'customer.login_page.create_account' | t }}
+          </button>
+        {%- endform -%}
+      </div>
+
+      <div class="account__modal--recover account__modal_block hidden-block" data-btn-content
+           id="account__modal--recover"
+           aria-hidden="true">
+        <h4 class="account__modal-heading h6">
+          {{ 'customer.recover_password.title' | t }}
+        </h4>
+
+        <div class="form__message form__message--error" id="account__modal--recover">
+        </div>
+
+        {%- form 'recover_customer_password', class: 'account__modal-form' -%}
+          {% assign recover_success = form.posted_successfully? %}
+
+          <div class="form__item">
+            <input type="email"
+                   class="form__input"
+                   value=""
+                   name="email"
+                   id="form__input-password-recover-{{ section.id }}"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   autocomplete="off"
+                   required="true"
+                   aria-required="true"
+                   placeholder="{{ 'customer.recover_password.email' | t }}"
+                 {% if form.errors %}
+                   aria-invalid="true"
+                   aria-describedby="recover-email-error"
+                   autofocus
+                {% endif %}>
+
+            <label for="form__input-password-recover-{{ section.id }}">{{ 'customer.recover_password.email' | t }}</label>
+          </div>
+
+          {%- if form.errors -%}
+            <small id="recover-email-error" class="form__message form__message--error">
+              {{ form.errors.messages['form'] }}
+            </small>
+          {%- endif -%}
+
+          <button type="submit" class="button button--primary button--full-width">
+            {{ 'customer.recover_password.submit' | t }}
+          </button>
+
+          <a href="#" class="account__modal-link" data-block="#account__modal--login" data-btn-opener>
+            {{ 'customer.recover_password.back_to_sign_in' | t }}
+          </a>
+        {%- endform -%}
+      </div>
+
+      <div class="account__modal--create account__modal_block hidden-block" data-btn-content
+           id="account__modal--create"
+           aria-hidden="true">
+        <h4 class="account__modal-heading h6">
+          {{ 'customer.register.title' | t }}
+        </h4>
+
+        <p class="account__modal-description">
+          {{ 'customer.register.description' | t }}
+        </p>
+
+        <div class="form__message form__message--error" id="account__modal--create">
+        </div>
+
+        {%- form 'create_customer', class: 'account__modal-form' -%}
+          <input type="hidden" name="return_to" value="{{ request.path }}">
+
+          {%- if form.errors -%}
+            {%- assign form_message_error = '' -%}
+
+            {%- for field in form.errors -%}
+              {%- if field == 'form' -%}
+                {%- assign form_message_error = form_message_error | append: form.errors.messages[field] | replace: '<a href="/account/login#recover">' | replace: '</a>' -%}
+              {%- else -%}
+                {%- assign form_message_error = form_message_error | append: form.errors.translated_fields[field] | capitalize | append: ' ' | append: form.errors.messages[field] -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if form_message_error contains 'is too short' -%}
+              {%- assign form_message_error = 'Password must be 5 characters or more.' -%}
+            {%- endif -%}
+
+            <script type="text/javascript">
+              const params = new URLSearchParams(window.location.search);
+              params.set('form-message', {{ form_message_error | json }});
+
+              {%- if form_message_error contains 'Incorrect' -%}
+                params.set('login', 'false');
+              {% else %}
+                params.set('create', 'false');
+              {%- endif -%}
+
+              window.location.href = `{{ request.path }}?${params.toString()}`;
+            </script>
+          {%- endif -%}
+
+          {%- comment -%}
+            {%- if form.errors -%}
+              <h2 class="form__message form__message--error" tabindex="-1" autofocus>
+                {{ 'templates.contact.form.error_heading' | t }}
+              </h2>
+
+              <ul>
+                {%- for field in form.errors -%}
+                  <li>
+                    {%- if field == 'form' -%}
+                      {{ form.errors.messages[field] }}
+                    {%- else -%}
+                      <a href="#RegisterForm-{{ field }}">
+                        {{ form.errors.translated_fields[field] | capitalize }}
+                        {{ form.errors.messages[field] }}
+                      </a>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          {%- endcomment -%}
+
+          <div class="form__item">
+            <input
+              class="form__input"
+              type="text"
+              name="customer[first_name]"
+              id="form__input-first_name-create_customer-{{ section.id }}"
+              {% if form.first_name %}value="{{ form.first_name }}"{% endif %}
+              autocomplete="off"
+              required="true"
+              aria-required="true"
+              placeholder="{{ 'customer.register.first_name' | t }}">
+
+            <label for="form__input-first_name-create_customer-{{ section.id }}">{{ 'customer.register.first_name' | t }}</label>
+          </div>
+
+          <div class="form__item">
+            <input
+              class="form__input"
+              type="text"
+              name="customer[last_name]"
+              id="form__input-last_name-create_customer-{{ section.id }}"
+              {% if form.last_name %}value="{{ form.last_name }}"{% endif %}
+              autocomplete="off"
+              required="true"
+              aria-required="true"
+              placeholder="{{ 'customer.register.last_name' | t }}">
+
+            <label for="form__input-last_name-create_customer-{{ section.id }}">{{ 'customer.register.last_name' | t }}</label>
+          </div>
+
+          <div class="form__item">
+            <input
+              class="form__input"
+              type="email"
+              name="customer[email]"
+              id="form__input-email-create_customer-{{ section.id }}"
+              {% if form.email %} value="{{ form.email }}"{% endif %}
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              required="true"
+              aria-required="true"
+              {% if form.errors contains 'email' %}
+                aria-invalid="true"
+                aria-describedby="form__message-email-error"
+              {% endif %}
+              placeholder="{{ 'customer.register.email' | t }}">
+
+            <label for="form__input-email-create_customer-{{ section.id }}">{{ 'customer.register.email' | t }}</label>
+          </div>
+
+          {%- comment -%}
+            {%- if form.errors contains 'email' -%}
+              <span id="form__message-email-error" class="form__message form__message--error">
+              {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}.
+            </span>
+            {%- endif -%}
+          {%- endcomment -%}
+
+          <div class="form__item">
+            <input class="form__input dev"
+                   type="password"
+                   name="customer[password]"
+                   id="form__input-password-create_customer-{{ section.id }}"
+                   autocomplete="off"
+                   required="true"
+                   aria-required="true"
+                   {% if form.errors contains 'password' %}
+                     aria-invalid="true"
+                     aria-describedby="form__message-password-error"
+                   {% endif %}
+                   placeholder="{{ 'customer.register.password' | t }}">
+
+            <label for="form__input-password-create_customer-{{ section.id }}">{{ 'customer.register.password' | t }}</label>
+          </div>
+
+          {%- if form.errors contains 'password' -%}
+            <span id="form__message-password-error" class="form__message form__message--error">
+              {{ form.errors.translated_fields['password'] | capitalize }} {{ form.errors.messages['password'] }}.
+            </span>
+          {%- endif -%}
+
+          <button type="submit" class="button button--primary button--full-width">
+            {{ 'customer.register.submit' | t }}
+          </button>
+
+          <a href="#" class="account__modal-link" data-block="#account__modal--login" data-btn-opener>
+            {{ 'customer.register.sign_in' | t }}
+          </a>
+        {%- endform -%}
+      </div>
+    </div>
+  </modal-block>
+</modal-dialog>

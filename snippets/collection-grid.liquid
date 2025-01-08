@@ -1,0 +1,468 @@
+{%- comment -%}
+{%- render 'collection-grid',
+  results: results,
+  section: section,
+  products_per_page: products_per_page,
+  paginate: paginate -%}
+{%- endcomment -%}
+
+{%- if results.products -%}
+  {%- assign results_products = results.products -%}
+  {%- assign results_size = results_products.size -%}
+{%- endif -%}
+
+{%- if results.results -%}
+  {%- assign results_products = results.results -%}
+  {%- assign results_size = results.results_count -%}
+{%- endif -%}
+
+{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+{%- assign size_label = 'size,taille,größe,tamanho,tamaño,koko,サイズ' | split: ',' -%}
+{%- assign show_image_thumbnails = false -%}
+{%- if section.settings.swatch_type == 'thumbnails' -%}
+  {%- assign show_image_thumbnails = true -%}
+{%- endif -%}
+
+<div class="collection">
+  <div class="loading-overlay primary-bg"></div>
+
+  <ul id="product-grid"
+      data-id="{{ section.id }}"
+      class="grid grid--1-col negative-margin product-grid grid--2-col-tablet grid--one-third-max grid--2-col-desktop grid--3-col-desktop-large grid--quarter-max">
+    {%- assign enable_banners = results.metafields.accentuate.enable_banner -%}
+    {%- for banner in enable_banners -%}
+      {%- if banner == 'true' -%}
+        {%- assign banner_order = results.metafields.accentuate.banner_position[forloop.index0] | plus: 0 -%}
+        {%- assign banner_url = results.metafields.accentuate.banner_url[forloop.index0] -%}
+        {%- assign banner_text_color = results.metafields.accentuate.banner_text_color[forloop.index0] -%}
+        {%- assign banner_subheading = results.metafields.accentuate.banner_subheading[forloop.index0] -%}
+        {%- assign banner_heading = results.metafields.accentuate.banner_heading[forloop.index0] -%}
+        {%- assign banner_image = results.metafields.accentuate.banner_image[forloop.index0][0] -%}
+        {%- assign shown_products = products_per_page | plus: paginate.current_page -%}
+
+        {%- if shown_products > results_size -%}
+          {%- assign shown_products = results_size -%}
+        {%- endif -%}
+
+        {%- if results_size > 0 -%}
+          <li class="grid__item grid__item-banner {% if banner_order > shown_products %}grid__item--hidden{% endif %}"
+              style="order: {{ banner_order }}" data-order="{{ banner_order }}">
+            <div class="product-banner rel" style="color: {{ banner_text_color }}">
+              {%- if banner_image != blank -%}
+                {% render 'image-metafields', image: banner_image, class_name: 'image-abs-cover' %}
+              {%- endif -%}
+              <div class="product-banner__content">
+                <p class="product-banner__subheading">{{ banner_subheading }}</p>
+                <h3 class="product-banner__heading h5">{{ banner_heading }}</h3>
+              </div>
+              {%- if banner_url != blank -%}
+                <a href="{{ banner_url }}" class="product-banner__link" aria-label="Link to {{ banner_subheading }} {{ banner_heading }}"></a>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endif -%}
+
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- assign all_selected_colors = '' -%}
+    {%- assign all_selected_discounts = '' -%}
+    {%- assign all_selected_sizes = '' -%}
+
+    {%- for filter in results.filters -%}
+      {%- case filter.param_name -%}
+      {%- when 'filter.v.m.my_fields.color_group' -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_value_handle_name = filter_value.label | handleize -%}
+          {%- assign all_selected_colors = all_selected_colors | append: filter_value_handle_name | append: '***' -%}
+        {%- endfor -%}
+      {%- when 'filter.v.m.my_fields.discount' -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_value_handle_name = filter_value.label | handleize -%}
+          {%- assign all_selected_discounts = all_selected_discounts | append: filter_value_handle_name | append: '***' -%}
+        {%- endfor -%}
+      {%- when 'filter.v.option.size' -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_value_handle_name = filter_value.label | handleize -%}
+          {%- assign all_selected_sizes = all_selected_sizes | append: filter_value_handle_name | append: '***' -%}
+        {%- endfor -%}
+      {%- endcase -%}
+    {%- endfor -%}
+
+    {%- assign all_selected_colors_arr = all_selected_colors | split: '***' -%}
+    {%- assign all_selected_discounts_arr = all_selected_discounts | split: '***' -%}
+    {%- assign all_selected_sizes_arr = all_selected_sizes | split: '***' -%}
+    {%- assign all_products_handles = '' -%}
+
+    {%- for product in results_products -%}
+      {%- assign all_products_handles = all_products_handles | append: product.handle | append: '***' -%}
+    {%- endfor -%}
+
+    {%- assign all_products_handles_arr = all_products_handles | split: '***' -%}
+
+    {%- for product in results_products -%}
+
+      {%- if product.tags contains 'hidden' -%}
+        {% continue %}
+      {%- endif -%}
+
+      {%- assign hide_product = false -%}
+      {%- assign main_product = product.metafields.pdp_merged_products.main_product -%}
+      {%- assign merge_product_handles = product.metafields.pdp.merged_products | split: '|' -%}
+      {%- assign product_variants = product.variants -%}
+      {%- assign merge_product = false -%}
+      {%- assign current_merge_product = false -%}
+      {%- assign color_option_values = blank -%}
+      {%- assign option_color_selected_position = blank -%}
+      {%- assign option_size_selected_position = blank -%}
+      {%- assign sold_out_by_size = false -%}
+      {%- assign _product = product -%}
+			{%- assign color_order_mf = product.metafields.custom.color_order.value -%}
+			{%- assign product_color_options_for_order = product.options_with_values | where: 'name', 'Color' -%}
+			{%- assign ordered_array = blank -%}
+			{%- assign ordered_str = blank -%}
+			{%- assign rest_values_str = blank -%}
+			{%- assign rest_values_array = blank -%}
+
+			{%- assign option_values = product_option.values -%}
+			{%- assign ordered_array = option_values -%}
+
+			{% if color_order_mf %}
+				{%- for color in color_order_mf -%}
+					{%- assign color-handleize = color | handleize -%}
+					{%- for value in product_color_options_for_order[0].values -%}
+						{%- assign value-handleize = value | handleize -%}
+						{% if color-handleize == value-handleize %}
+							{%- assign ordered_str = ordered_str | append: value | append: ',' -%}
+						{% else %}
+							{%- assign rest_values_str = rest_values_str | append: value | append: ',' -%}
+						{% endif %}
+					{%- endfor -%}
+				{%- endfor -%}
+			{% else %}
+				{%- for value in product_color_options_for_order[0].values -%}
+					{%- assign ordered_str = ordered_str | append: value | append: ',' -%}
+				{%- endfor -%}
+			{% endif %}
+
+      {%- if main_product != blank -%}
+        {%- assign _product = all_products[main_product] -%}
+
+        {%- for product_handle in all_products_handles_arr -%}
+          {%- if product_handle == main_product -%}
+            {%- assign hide_product = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- comment -%}Get all product_variants{%- endcomment -%}
+
+      {%- for merge_product_handle in merge_product_handles -%}
+        {%- assign current_merge_product = all_products[merge_product_handle] -%}
+				{%- assign merge_product_color_order_mf = current_merge_product.metafields.custom.color_order.value -%}
+
+        {% unless current_merge_product == empty %}
+        {%- assign merge_product = true -%}
+        {%- assign product_variants = product_variants | concat: current_merge_product.variants -%}
+				{%- assign merge_product_color_options = current_merge_product.options_with_values | where: 'name', 'Color' -%}
+
+				{% if merge_product_color_order_mf %}
+					{%- for color in merge_product_color_order_mf -%}
+						{%- assign color-handleize = color | handleize -%}
+						{%- for merge_product_color in merge_product_color_options[0].values  -%}
+							{%- assign merge_product_color_handleize = merge_product_color | handleize  -%}
+							{% if color-handleize == merge_product_color_handleize %}
+								{%- assign ordered_str = ordered_str | append: merge_product_color | append: ',' -%}
+							{% else %}
+								{%- assign rest_values_str = rest_values_str | append: merge_product_color | append: ',' -%}
+							{% endif %}
+						{%- endfor -%}
+					{%- endfor -%}
+				{% else %}
+					{%- for merge_product_color in merge_product_color_options[0].values  -%}
+						{%- assign ordered_str = ordered_str | append: merge_product_color | append: ',' -%}
+					{%- endfor -%}
+				{% endif %}
+        {% endunless %}
+      {%- endfor -%}
+
+      {%- if _product == blank -%}
+        {% continue %}
+      {%- endif -%}
+
+			{% if ordered_str != blank %}
+				{%- assign ordered_array = ordered_str | split: ',' -%}
+			{% endif %}
+			{% if rest_values_str != blank %}
+				{%- assign rest_values_array = rest_values_str | split: ',' -%}
+			{% endif %}
+			{% if ordered_str != blank and rest_values_str != blank  %}
+				{%- assign ordered_array = ordered_array | concat: this_option.values | uniq -%}
+			{% endif %}
+
+      {%- comment -%}Get all color_option_values and option positions {%- endcomment -%}
+
+      {%- for product_option in _product.options_with_values -%}
+        {%- assign option_name = product_option.name | handleize -%}
+
+        {%- if color_label contains option_name -%}
+          {%- assign color_option_values = product_option.values -%}
+          {%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+
+          {%- if merge_product -%}
+
+            {%- for variant in product_variants -%}
+              {%- for this_option in variant.product.options_with_values -%}
+                {%- assign this_option_name = this_option.name | handleize -%}
+
+                {%- if this_option_name == option_name -%}
+                  {%- assign color_option_values = color_option_values | concat: this_option.values | uniq -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endfor -%}
+
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if size_label contains option_name -%}
+          {%- assign option_size_selected_position = product_option.position | minus: 1 -%}
+        {%- endif -%}
+
+      {%- endfor -%}
+
+			{%- assign ordered_array_for_card = ordered_array | default: color_option_values -%}
+
+      {%- comment -%} Get colors handles {%- endcomment -%}
+
+      {%- assign color_values_srt = blank -%}
+      {%- assign color_values_arr = blank -%}
+
+      {%- if color_option_values != blank -%}
+        {%- for color in color_option_values -%}
+          {%- assign color_value = color | handleize -%}
+          {%- assign color_values_srt = color_values_srt | append: '***' | append: color_value -%}
+        {%- endfor -%}
+
+        {%- assign color_values_arr = color_values_srt | remove_first: '***' | split: '***' | uniq -%}
+      {%- endif -%}
+
+      {%- comment -%} Get colors that are unavailable for selected sizes in the filtering {%- endcomment -%}
+
+      {%- assign unavailable_colors = blank -%}
+      {%- assign available_colors = blank -%}
+      {%- assign unavailable_color_arr = blank -%}
+      {%- assign available_color_arr = blank -%}
+
+      {%- if all_selected_sizes_arr.size > 0 and color_option_values.size > 0 and option_size_selected_position != blank -%}
+
+        {%- for variant in product_variants -%}
+          {%- assign color_handle = variant.options[option_color_selected_position] | handleize -%}
+          {%- assign size_handle = variant.options[option_size_selected_position] | handleize -%}
+
+          {%- if all_selected_sizes_arr contains size_handle and variant.available == false -%}
+            {%- assign unavailable_colors = unavailable_colors | append: '***' | append: color_handle -%}
+          {%- endif -%}
+
+          {%- if all_selected_sizes_arr contains size_handle and variant.available -%}
+            {%- assign available_colors = available_colors | append: '***' | append: color_handle -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if available_colors != blank -%}
+          {%- assign available_color_arr = available_colors | remove_first: '***' | split: '***' | uniq -%}
+        {%- endif -%}
+
+        {%- if unavailable_colors != blank -%}
+
+          {%- for available_color in available_color_arr -%}
+            {%- if unavailable_colors contains available_color -%}
+              {%- assign unavailable_colors = unavailable_colors | remove: available_color -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- assign unavailable_color_arr = unavailable_colors | remove_first: '***' | split: '***' | uniq -%}
+          {%- assign unavailable_colors_without_blank_values = blank -%}
+
+          {%- for item in unavailable_color_arr -%}
+            {%- if item != blank -%}
+              {%- assign unavailable_colors_without_blank_values = unavailable_colors_without_blank_values | append: '***' | append: item -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- assign unavailable_color_arr = unavailable_colors_without_blank_values | remove_first: '***' | split: '***' | uniq -%}
+
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- assign product_card_order = paginate.current_offset | plus: forloop.index -%}
+
+      {%- if unavailable_color_arr.size > 0 and unavailable_color_arr.size == color_option_values.size -%}
+        {%- assign sold_out_by_size = true -%}
+        {%- assign product_card_order = product_card_order | plus: results_size -%}
+      {%- endif -%}
+
+      {%- assign hidden_colors = blank -%}
+      {%- for variant in _product.variants -%}
+        {%- if variant.metafields.custom.hide_variant.value -%}
+          {%- assign hidden_colors = hidden_colors | append: '#separator#' | append: variant.options[option_color_selected_position] -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- if all_selected_colors_arr.size > 0 -%}
+        {%- assign colors_to_show = all_selected_colors -%}
+
+        {% for product_option in _product.options_with_values %}
+          {% assign option_name = product_option.name | handleize %}
+
+          {%- if color_label contains option_name -%}
+            {%- assign option_color_selected_position = product_option.position | minus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- for color in all_selected_colors_arr -%}
+          {%- for variant in product_variants -%}
+            {%- assign variant_color_group = variant.metafields.my_fields.color_group | handleize -%}
+
+            {%- if hidden_colors != blank and hidden_colors contains variant.options[option_color_selected_position] -%}
+              {% continue %}
+            {%- endif -%}
+
+            {%- if colors_to_show contains color and color == variant_color_group -%}
+              {%- assign colors_to_show = colors_to_show | remove: color -%}
+
+              <li class="grid__item
+                              {% if product_card_order > products_per_page %}grid__item--hidden{% endif %}
+                              {% if sold_out_by_size %}grid__item--sold_out{% endif %}"
+                  style="order: {{ product_card_order }}" data-order="{{ product_card_order }}">
+                {% render 'product-card',
+                  product: _product,
+                  check_product_data_outside: true,
+                  filtered_results: results.filters,
+									ordered_array: ordered_array_for_card,
+                  product_variants: product_variants,
+                  color_option_values: color_option_values,
+                  unavailable_color_arr: unavailable_color_arr,
+                  product_selected: product,
+                  product_selected_variant: variant,
+                  hide_variants: false,
+                  uniq_id: forloop.index,
+                  show_product_title: true,
+                  show_product_reviews: section.settings.show_product_reviews,
+                  show_product_description: section.settings.show_product_description,
+                  show_product_description_metafield: section.settings.show_product_description_metafield,
+                  show_product_price: section.settings.show_product_price,
+                  show_product_price_range: section.settings.show_product_price_range,
+                  show_product_badge: section.settings.show_product_badge,
+                  show_color_options_size: section.settings.show_color_options_size,
+                  show_image_thumbnails: show_image_thumbnails,
+                  custom_class: 'collection-product-card' %}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+        {%- elsif all_selected_discounts_arr.size > 0 -%}
+        {%- assign discounts_to_show = all_selected_discounts -%}
+        {%- assign discounted_colors_to_show = blank -%}
+
+        {%- if color_values_srt != blank -%}
+          {%- assign discounted_colors_to_show = color_values_srt -%}
+        {%- endif -%}
+
+        {%- for discount in all_selected_discounts_arr -%}
+          {%- for variant in product_variants -%}
+            {%- assign variant_discount = variant.metafields.my_fields.discount | handleize -%}
+
+            {%- if hidden_colors != blank and hidden_colors contains variant.options[option_color_selected_position] -%}
+              {% continue %}
+            {%- endif -%}
+
+            {%- if discounts_to_show contains discount and discount == variant_discount -%}
+              {%- assign discounts_to_show = discounts_to_show | remove: discount -%}
+
+              {%- if color_values_srt != blank -%}
+                {%- assign color_value = variant.options[option_color_selected_position] | handleize -%}
+
+                {%- if discounted_colors_to_show contains color_value -%}
+                  {%- assign discounted_colors_to_show = discounted_colors_to_show | remove: color_value -%}
+                {%- else -%}
+                  {% continue %}
+                {%- endif -%}
+
+              {%- endif -%}
+
+              <li class="grid__item
+                              {% if product_card_order > products_per_page %}grid__item--hidden{% endif %}
+                              {% if sold_out_by_size %}grid__item--sold_out{% endif %}"
+                  style="order: {{ product_card_order }}" data-order="{{ product_card_order }}">
+                {% render 'product-card',
+                  product: _product,
+                  check_product_data_outside: true,
+                  filtered_results: results.filters,
+									ordered_array: ordered_array_for_card,
+                  product_variants: product_variants,
+                  color_option_values: color_option_values,
+                  unavailable_color_arr: unavailable_color_arr,
+                  product_selected: product,
+                  product_selected_variant: variant,
+                  hide_variants: false,
+                  uniq_id: forloop.index,
+                  show_product_title: true,
+                  show_product_reviews: section.settings.show_product_reviews,
+                  show_product_description: section.settings.show_product_description,
+                  show_product_description_metafield: section.settings.show_product_description_metafield,
+                  show_product_price: section.settings.show_product_price,
+                  show_product_price_range: section.settings.show_product_price_range,
+                  show_product_badge: section.settings.show_product_badge,
+                  show_color_options_size: section.settings.show_color_options_size,
+                  show_image_thumbnails: show_image_thumbnails,
+                  custom_class: 'collection-product-card' %}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+      {%- else -%}
+        <li class="grid__item {% if hide_product %}hidden{% endif %}
+                        {% if product_card_order > products_per_page %}grid__item--hidden{% endif %}
+                        {% if sold_out_by_size %}grid__item--sold_out{% endif %}"
+            style="order: {{ product_card_order }}" data-order="{{ product_card_order }}">
+          {% render 'product-card',
+            product: _product,
+            check_product_data_outside: true,
+            filtered_results: results.filters,
+						ordered_array: ordered_array_for_card,
+            product_variants: product_variants,
+            color_option_values: color_option_values,
+            unavailable_color_arr: unavailable_color_arr,
+            product_selected: product,
+            product_selected_variant: variant,
+            price_by_product: true,
+            hide_variants: false,
+            uniq_id: forloop.index,
+            show_product_title: true,
+            show_product_reviews: section.settings.show_product_reviews,
+            show_product_description: section.settings.show_product_description,
+            show_product_description_metafield: section.settings.show_product_description_metafield,
+            show_product_price: section.settings.show_product_price,
+            show_product_price_range: section.settings.show_product_price_range,
+            show_product_badge: section.settings.show_product_badge,
+            show_color_options_size: section.settings.show_color_options_size,
+            show_image_thumbnails: show_image_thumbnails,
+            custom_class: 'collection-product-card' %}
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+
+  <clp-load-more data-products-per-page="{{ products_per_page }}" data-target-wrapper="#product-grid[data-id='{{ section.id }}']">
+    <div class="loading-overlay__spinner">
+      <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <title>{{ 'sections.collection_template.show_more' | t }}</title>
+        <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+      </svg>
+    </div>
+  </clp-load-more>
+
+</div>

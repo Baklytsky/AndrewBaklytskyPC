@@ -1,0 +1,117 @@
+{%- assign heading = shop.metafields.globals.size_func_main_heading -%}
+{%- assign text = shop.metafields.globals.size_func_main_text -%}
+{%- assign sizes_json = product.metafields.size_table_data.sizes_json_data -%}
+
+
+{%- if sizes_json != blank -%}
+	
+	{%- capture config -%}
+      {
+		    "slidesPerView": "auto",
+		    "navigation": true,
+		    "freeMode": true,
+		    "centerInsufficientSlides": false,
+				"mousewheelControl": true,
+				"mousewheel": true,
+				"forceToAxis": true,
+				"followFinger": true
+		  }
+    {%- endcapture -%}
+	
+	<size-compared-v2>
+		{%- assign initial_part = sizes_json | first -%}
+		{%- assign parts_names_string = '' -%}
+		
+		{%- for current_part in initial_part -%}
+			{%- assign downcase_current_part = current_part | first -%}
+			
+			{%- assign parts_names_string =  parts_names_string | append: '***' | append: downcase_current_part -%}
+		{%- endfor -%}
+		
+		{%- assign parts_names_array = parts_names_string | remove_first: '***' | split: '***' -%}
+		
+		<div class="size-compared-v2__container">
+			<div class="size-compared-v2__wrapper">
+				<div class="size-compared-v2__header">
+					{%- if title != blank -%}
+						<h3 class="h5">
+							{{ title }}
+						</h3>
+					{%- endif -%}
+					
+					{%- if subtitle != blank -%}
+						<p>
+							{{ subtitle }}
+						</p>
+					{%- endif -%}
+				</div>
+				
+				<div class="size-compared-v2__inner">
+					<div class="size-compared-v2__names">
+						{%- for name in parts_names_array offset: 1 -%}
+							<p>
+								{{ name }}
+							</p>
+						{%- endfor -%}
+					</div>
+					
+					<slideshow-swiper data-config='{{ config }}' class="size-compared-v2__slideshow">
+						<div class="swiper">
+							<div class="swiper-wrapper">
+								{%- for part in sizes_json -%}
+									<div class="swiper-slide size-compared-v2__item">
+										<button type="button" class="size-compared-v2__item-button" data-original-value="{{ part['Original'] }}">
+											{%- for value in part offset: 1 -%}
+												<span>
+												{{ value[1] }}
+											</span>
+											{%- endfor -%}
+										</button>
+									</div>
+								{%- endfor -%}
+							</div>
+							<div class="swiper-scrollbar"></div>
+						</div>
+					</slideshow-swiper>
+				</div>
+			</div>
+			
+			<div class="size-compared-v2__footer">
+				<div class="size-compared-v2__footer-before">
+					{%- if before_text != blank -%}
+						<p>
+							{{ before_text }}
+						</p>
+					{%- endif -%}
+				</div>
+				
+				<div class="size-compared-v2__footer-after">
+					{%- if after_title != blank -%}
+						<h4>
+							{{ after_title | replace: '[product_title]', product.title }}
+						</h4>
+					{%- endif -%}
+					
+					<h3 class="size-compared-v2__footer-after-value">
+						{{ show_size_v_2_after_value_prefix }} <span data-value-container></span>
+					</h3>
+					
+					<button type="button" data-select-value class="button button--primary">
+						{{ button_label | default: 'Select size' }}
+					</button>
+					
+					{%- if after_text != blank -%}
+						<p>
+							{{ after_text }}
+						</p>
+					{%- endif -%}
+				</div>
+			</div>
+		</div>
+		
+		
+		<script type="application/ld+json" data-sizes-json>
+			{{ sizes_json | json }}
+		</script>
+	</size-compared-v2>
+{%- endif -%}

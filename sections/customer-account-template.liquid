@@ -1,0 +1,389 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+{{ 'component-form.css' | asset_url | stylesheet_tag }}
+
+{%- assign image = section.settings.image -%}
+
+<section class="account">
+  <div class="account__container">
+    {%- if image != blank -%}
+      <div class="account__image-wrapper">
+        <div class="account__image-inner">
+          {% render 'image', image: image, class_name: 'account__image', %}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="account__wrapper">
+      <div class="account__inner" data-accordion-collapseble>
+        {%- assign customer_account_title = 'customer.account.title' | t -%}
+
+        {%- if customer_account_title != blank -%}
+          <h1 class="account__heading heading">{{ 'customer.account.title' | t }}</h1>
+        {%- endif -%}
+
+        {%- if customer.first_name != blank -%}
+          <h2 class="account__heading heading">{{ 'customer.account.welcome' | t: first_name: customer.first_name }}</h2>
+        {% else %}
+          <h2 class="account__heading heading">{{ 'customer.account.welcome_without_name' | t }}</h2>
+        {%- endif -%}
+
+        <a href="{{ routes.account_logout_url }}" class="account__log-out">
+          {{ 'customer.log_out' | t }}
+        </a>
+
+        <div class="account__inner-block">
+          <h4 class="account__subheading">{{ 'customer.account.subheading' | t }}</h4>
+
+          <details data-accordion-opener>
+            <summary type="button"
+                     aria-controls="link-{{ link.title }}"
+                     aria-expanded="false" role="button">
+              <span class="account__btn account__btn-edit account__btn--translate-vertical">{{ 'customer.account.update.button_edit' | t }}</span>
+              <span class="account__btn account__btn-cancel account__btn--translate-vertical">{{ 'customer.account.update.button_cancel' | t }}</span>
+            </summary>
+
+            <div class="account__form" data-accordion-content>
+              <form id="account__form-update">
+
+                <input type="hidden" name="customer[id]" value="{{ customer.id }}"/>
+
+                <div class="form__group">
+                  <div class="form__item">
+                    <input type="text"
+                           class="form__input"
+                           name="customer[first_name]"
+                           data-name="first_name"
+                           value="{{ customer.first_name }}"
+                           placeholder="{{ 'customer.account.update.first_name' | t }}"/>
+                    <label for="form__input-update-first_name">{{ 'customer.account.update.first_name' | t }}</label>
+                  </div>
+
+                  <div class="form__item">
+                    <input type="text"
+                           class="form__input"
+                           name="customer[last_name]"
+                           data-name="last_name"
+                           value="{{ customer.last_name }}"
+                           placeholder="{{ 'customer.account.update.last_name' | t }}"/>
+                    <label for="form__input-update-last_name">{{ 'customer.account.update.last_name' | t }}</label>
+                  </div>
+                </div>
+
+                <div class="form__item">
+                  <input type="email"
+                         class="form__input"
+                         name="customer[email]"
+                         data-name="email"
+                         value="{{ customer.email }}"
+                         placeholder="{{ 'customer.account.update.email' | t }}">
+                  <label for="form__input-update-email">{{ 'customer.account.update.email' | t }}</label>
+                </div>
+
+                <button type="submit" class="button button--primary form__btn-submit" id="edit_customer_info_btn">
+                  {{ 'customer.account.update.save' | t }}
+                </button>
+              </form>
+            </div>
+          </details>
+        </div>
+
+        {%- comment -%}
+          --------------------------------------------------------------------------------------------------------------------
+          LOYALTY
+          --------------------------------------------------------------------------------------------------------------------
+        {%- endcomment -%}
+        {%- include 'loyalty-account-block' -%}
+
+        {%- comment -%}
+          --------------------------------------------------------------------------------------------------------------------
+          ADDRESS
+          --------------------------------------------------------------------------------------------------------------------
+        {%- endcomment -%}
+        <div class="account__inner-block">
+          <h2 class="account__subheading">{{ 'customer.account.addresses_title' | t }}</h2>
+
+          <p class="account__description">{{ 'customer.account.addresses_content' | t }}</p>
+
+          <details data-accordion-opener>
+            <summary type="button"
+                     aria-controls="link-{{ link.title }}"
+                     aria-expanded="false"
+                     role="button">
+              <span class="account__btn account__btn-edit account__btn--translate-vertical">{{ 'customer.account.add_address' | t }}</span>
+              <span class="account__btn account__btn-cancel account__btn--translate-vertical">{{ 'customer.account.add_address_cancel' | t }}</span>
+            </summary>
+
+            <div data-accordion-content>
+              {% render 'form-new-address', customer: customer, forloop_index: forloop.index0 %}
+            </div>
+          </details>
+
+          {%- unless customer.addresses_count == 0 -%}
+            {%- for address in customer.addresses -%}
+              {%- comment -%}
+                <p class="account__description account__address--saved">
+                  {{ address.address1 }}{% if address.address2 != blank %}{{ address.address2 | prepend: ', ' }}{% endif %} {% if address == customer.default_address %}{{ 'customer.addresses.default_address_label' | t }}{% endif %}
+                  <br>
+                  {{ address.city }}, {{ address.province_code }} {{ address.zip }}
+                  <br>
+                  {{ address.country }}
+                  <br>
+                  {{ address.phone }}
+                </p>
+              {%- endcomment -%}
+
+              <details data-accordion-opener>
+                <summary type="button"
+                         aria-controls="link-{{ link.title }}"
+                         aria-expanded="false"
+                         role="button">
+                  <span class="account__btn account__btn--translate-horizontal account__btn-edit">{{ 'customer.addresses.edit_address' | t }}</span>
+                  <span class="account__btn account__btn--translate-horizontal account__btn-cancel">{{ 'customer.addresses.edit_cancel' | t }}</span>
+                  <button class="account__btn account__btn--remove accordion__event-prevent"
+                          data-form-id="{{ address.id }}"
+                          data-action="delete-address"
+                          onclick="Shopify.postLink('/account/addresses/' + {{ address.id }}, { parameters: { _method: 'delete'}});">
+                    {{ 'customer.addresses.remove' | t  | prepend: ' | ' }}
+                  </button>
+
+                  <p class="account__description account__address--saved accordion__event-prevent">
+                    {{ address.address1 }}{% if address.address2 != blank %}{{ address.address2 | prepend: ', ' }}{% endif %} {% if address == customer.default_address %}{{ 'customer.addresses.default_address_label' | t }}{% endif %}
+                    <br class="accordion__event-prevent">
+                    {{ address.city }}, {{ address.province_code }} {{ address.zip }}
+                    <br class="accordion__event-prevent">
+                    {{ address.country }}
+                    <br class="accordion__event-prevent">
+                    {{ address.phone }}
+                  </p>
+                </summary>
+
+                <div data-accordion-content>
+                  {% render 'form-existing-address', address: address, forloop_index: forloop.index0 %}
+                </div>
+              </details>
+            {%- endfor -%}
+          {%- endunless -%}
+        </div>
+
+        {%- comment -%}
+          --------------------------------------------------------------------------------------------------------------------
+          ORDER HISTORY
+          --------------------------------------------------------------------------------------------------------------------
+        {%- endcomment -%}
+        <div class="account__inner-block account__inner-block--history">
+
+          <h2 class="account__subheading">{{ 'customer.account.no_orders_title' | t }}</h2>
+
+          {%- if customer.orders.size == 0 -%}
+            <p class="account__description">{{ 'customer.account.no_orders_content' | t }}</p>
+          {% else %}
+
+            {%- paginate customer.orders by 6 -%}
+              {%- for order in customer.orders -%}
+                <p class="account__description">{{ order.created_at | date: '%B %e, %Y' }}</p>
+
+                <details class="account__order-wrapper" data-accordion-opener data-keep-open>
+                  <summary type="button"
+                           aria-controls="{{ order.order_number }}"
+                           aria-expanded="false"
+                           role="button">
+                    <apan>{{ order.name | remove: '#' }}</apan>
+                    <span class="account__btn account__btn-edit">{{ 'customer.account.order_link_label' | t }}</span>
+                    <span class="account__btn account__btn-cancel">{{ 'customer.account.order_cancel' | t }}</span>
+                  </summary>
+
+                  {%- assign placed_at = order.created_at | date: '%D' -%}
+                  <div id="{{ order.order_number }}" class="account__order-inner" data-accordion-content>
+                    <h4 class="account__order-subheading account__subheading">
+                      {{ 'customer.order.title' | t: order_number: order.name }}
+                      {%- unless order.cancelled -%}
+                        <a href="https://truelinkswear.com/apps/returns?ext_order_number=%23{{ order.order_number }}&customer_id={{ customer.id }}"
+                           class="account__order-return" target="_blank">
+                          {{ 'customer.order.return' | t }}
+                        </a>
+                      {%- endunless -%}
+                    </h4>
+
+                    <p class="account__order-description account__description">
+                      <span>{{ order.created_at | date: '%D' }}</span>
+                      <span>{{ 'customer.order.placed' | t }}</span>
+                    </p>
+
+                    {%- if order.cancelled -%}
+                      <p class="account__order-description account__description">
+                        <span>{{ order.cancelled_at | date: '%D' }}</span>
+                        <span>{{ 'customer.order.cancelled' | t }}</span>
+                      </p>
+                    {%- endif -%}
+
+                    {%- unless order.fulfillment_status == 'fulfilled' -%}
+                      <a href="{{ order.order_status_url }}" class="button button--secondary-border">
+                        {{ 'customer.order.track' | t }}
+                      </a>
+                    {%- endunless -%}
+
+                    <div class="account__order-products">
+                      {%- assign product_label = 'customer.order.product' | t -%}
+                      {%- assign products_label = 'customer.order.products' | t -%}
+                      {%- assign products_label_pluralize = order.line_items.size | pluralize: product_label, products_label -%}
+
+                      <h2 class="account__order-products-subheading account__subheading">
+                        {{ products_label_pluralize }}
+                      </h2>
+
+                      {%- for line_item in order.line_items -%}
+                        <a href="{{ line_item.url }}" class="account__order-product">
+
+                          {%- if line_item.image != blank -%}
+                            <div class="account__order-product-image-wrapper">
+                              <div class="account__order-product-image-inner">
+                                <img class="account__order-product-image" src="{{ line_item.image | img_url: '240x' }}"
+                                     alt="{{ line_item.image.alt | escape }}">
+                              </div>
+                            </div>
+                          {%- endif -%}
+
+                          <div class="account__order-product-info">
+                            <h4 class="account__subheading">
+                              <span>{{ line_item.product.title }}</span>
+                              <span>{{ line_item.original_line_price | money }}</span>
+                            </h4>
+
+                            {%- for property in line_item.properties -%}
+                              {%- assign prop_first_downcase = property.first | downcase -%}
+
+                              {%- if prop_first_downcase == 'patch' and property.last != blank -%}
+                                <div class="cart-item__customizer-property-wrapper">
+                                  <p class="cart-item__customizer-property"><span>Patch:</span></p>
+                                  <div class="cart-item__customizer-property-img rel">
+                                    <img src="{{ property.last }}" class="image-abs-contain" alt="Patch"/>
+                                  </div>
+                                </div>
+                                {%- continue -%}
+                              {%- endif -%}
+
+                              {%- if prop_first_downcase == 'patch name' and property.last != blank -%}
+                                <div class="cart-item__customizer-property-wrapper">
+                                  <p class="cart-item__customizer-property"><span>Patch name:</span></p>
+                                  <p class="cart-item__property">{{ property.last }}</p>
+                                </div>
+                                {%- continue -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+
+                            <p class="account__order-product-meta account__description">
+                              {%- unless line_item.product.has_only_default_variant -%}
+                                <span>{{ line_item.variant.title | replace: '/', '|' }}</span>
+                                <br>
+                              {%- endunless -%}
+
+                              <span>{{ 'customer.order.quantity' | t }} {{ line_item.quantity }}</span>
+                            </p>
+                          </div>
+                        </a>
+                      {%- endfor -%}
+                    </div>
+
+                    <div class="account__order-address-info">
+                      <h2 class="account__order-address-info-subheading account__subheading">{{ 'customer.order.shipping' | t }}</h2>
+                      {%- if order.shipping_address -%}
+                        <p class="account__order-address-info-description account__description">
+                          {{ order.shipping_address.first_name }} {{ order.shipping_address.last_name }}
+                          <br>
+                          {{ order.shipping_address.address1 }}{% if order.shipping_address.address2 != blank %}{{ order.shipping_address.address2 | prepend: ', ' }}{% endif %}
+                          <br>
+                          {{ order.shipping_address.city }}
+                          , {{ order.shipping_address.province_code }} {{ order.shipping_address.zip }}
+                          <br>
+                          {{ order.shipping_address.country }}
+                          <br>
+                          {{ order.shipping_address.phone }}
+                        </p>
+                      {%- else -%}
+                        <p>
+                          {{ 'customer.order.no_shipping_address' | t }}
+                        </p>
+                      {%- endif -%}
+                    </div>
+
+                    <div class="account__order-address-сonclusion account__description">
+                      <p>
+                        <span>{{ 'customer.order.subtotal' | t }}</span>
+                        <span>{{ order.line_items_subtotal_price | money }}</span>
+                      </p>
+
+                      {%- for discount_application in order.cart_level_discount_applications -%}
+                        <p>
+                          <span>{{ 'customer.order.discount' | t }} ({{ discount_application.title }})</span>
+                          <span>-{{ discount_application.total_allocated_amount | money }}</span>
+                        </p>
+                      {%- endfor -%}
+
+                      {%- for shipping_method in order.shipping_methods -%}
+                        <p>
+                          <span>{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</span>
+                          <span>{{ shipping_method.price | money }}</span>
+                        </p>
+                      {%- endfor -%}
+
+                      {%- for tax_line in order.tax_lines -%}
+                        <p>
+                          <span>{{ 'customer.order.tax' | t }} ({{ tax_line.title }} {{ tax_line.rate_percentage }}%)</span>
+                          <span>
+                              {%- if tax_line.price == 0 -%}
+                                free
+                              {% else %}
+                                {{ tax_line.price | money }}
+                              {%- endif -%}
+                            </span>
+                        </p>
+                      {%- endfor -%}
+
+                      <p>
+                        <span>{{ 'customer.order.total' | t }}</span>
+                        <span>{{ order.total_price | money }}</span>
+                      </p>
+                    </div>
+                  </div>
+                </details>
+              {%- endfor -%}
+
+            {%- render 'pagination', paginate: paginate -%}
+            {%- endpaginate -%}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="text/javascript">
+  window.customer = {
+    first_name: {{ customer.first_name | json }},
+    last_name: {{ customer.last_name | json }},
+    email: {{ customer.email | json }}
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    Accentuate(jQuery("#account__form-update"), function (data) {
+      if (data.status == 'ERROR') {
+        console.log(data.message)
+      } else if (data.status == 'OK') {
+        location.reload();
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Account template",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    }
+  ]
+}
+{% endschema %}

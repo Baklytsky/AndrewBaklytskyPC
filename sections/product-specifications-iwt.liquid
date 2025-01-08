@@ -1,0 +1,310 @@
+{%- assign iwt_show = product.metafields.specs-bgwt.background_with_text_show -%}
+{%- assign spec_show = product.metafields.specs.specifications_show -%}
+{%- assign anchor_link = section.settings.anchor_link -%}
+
+{%- if iwt_show == 'true' or spec_show == 'true' -%}
+	{{ 'section-product-specs-iwt.css' | asset_url | stylesheet_tag }}
+
+	{%- assign iwt_bg_color = product.metafields.specs-bgwt.background_with_text_backgroun -%}
+	{%- assign iwt_image = product.metafields.specs-bgwt.background_with_text_image[0] -%}
+	{%- assign iwt_preheading = product.metafields.specs-bgwt.background_with_text_preheadin -%}
+	{%- assign iwt_heading = product.metafields.specs-bgwt.background_with_text_heading -%}
+	{%- assign logo = product.metafields.specs-bgwt.background_with_text_logo[0]-%}
+	
+	{%- assign spec_bg_color = product.metafields.specs.specifications_background_colo -%}
+	{%- assign spec_image = product.metafields.specs.specifications_content_img[0] -%}
+	{%- assign spec_image_mobile = product.metafields.specs.specifications_content_imgm[0] -%}
+	{%- assign spec_preheading = product.metafields.specs.specifications_preheading -%}
+	{%- assign spec_heading = product.metafields.specs.specifications_heading -%}
+	{%- assign spec_weight_alt_label = product.metafields.specs.specifications_weight_altrenat | default: 'Weight' -%}
+	{%- assign spec_weight_alt_measurement_label = product.metafields.specs.specifications_weight_meas_alt | default: 'oz' -%}
+	{%- assign spec_weight_value = product.metafields.specs.specifications_weight_value_oz -%}
+	{%- assign spec_heal_drop_alt_label = product.metafields.specs.specifications_heal_drop_alt_l | default: 'Heel Drop' -%}
+	{%- assign spec_heal_drop_measurement_label = product.metafields.specs.specifications_heal_drop_meas | default: 'mm' -%}
+	{%- assign spec_heal_drop_value = product.metafields.specs.specifications_heal_drop_value -%}
+	
+	{%- assign spec_climate_value = product.metafields.specs.specifications_climate_value -%}
+	{%- assign spec_width_value = product.metafields.specs.specifications_width_value_2 -%}
+	{%- assign spec_stability_value = product.metafields.specs.specifications_stability_value -%}
+	{%- assign spec_fit_value = product.metafields.specs.specifications_fit_value -%}
+	{%- assign spec_stretch_value = product.metafields.specs.specifications_stretch_value -%}
+	{%- assign spec_length_value = product.metafields.specs.specifications_length_value -%}
+	{%- assign spec_season_value = product.metafields.specs.specifications_season_value -%}
+	{%- assign spec_depth_value = product.metafields.specs.specifications_depth_value -%}
+	{%- assign spec_sustainability_value = product.metafields.specs.spec_sustainability_value -%}
+
+	<div class="product-spec-iwt" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		{%- if iwt_show == 'true' and iwt_image != blank -%}
+			<section class="product-iwt" style="{% if iwt_bg_color != blank %}--sec-bg-color: {{ iwt_bg_color }};{% endif %}">
+				{%- if iwt_preheading != blank or iwt_heading != blank or logo != blank -%}
+					<div class="product-iwt__header">
+						{%- if iwt_preheading != blank -%}
+							<p>
+								{{ iwt_preheading }}
+							</p>
+						{%- endif -%}
+
+						{%- if iwt_heading != blank -%}
+							<h2>
+								{{ iwt_heading }}
+							</h2>
+						{%- endif -%}
+
+						{%- if logo != blank -%}
+							{%- assign logo_attr = 'style="--img-width:' | append:  logo.width | append: 'px;"' -%}
+							{% render 'image-metafields', image: logo, class_name: 'product-iwt__logo', image_attr: logo_attr, hide_id true, %}
+						{%- endif -%}
+					</div>
+				{%- endif -%}
+
+				{%- if iwt_image != blank -%}
+					<div class="product-iwt__image-wrap">
+						{% render 'image-metafields', image: iwt_image, class_name: 'product-iwt__image', hide_id true, %}
+					</div>
+				{%- endif -%}
+			</section>
+		{%- endif -%}
+		
+		{%- if spec_show == 'true' -%}
+			<section class="product-specs" style="{% if spec_bg_color != blank %}--sec-bg-color: {{ spec_bg_color }};{% endif %}">
+				{%- if spec_image != blank -%}
+					{%- assign image_class = 'product-specs__image' -%}
+					{%- assign spec_image_mobile_default = spec_image_mobile | default: spec_image -%}
+					
+					<div class="product-specs__image-wrapper"
+					style="--desktop-pb: {{ 1 | divided_by: spec_image.aspect_ratio | times: 100 }}%;
+					--mobile-pb:  {{ 1 | divided_by: spec_image_mobile_default.aspect_ratio | times: 100 }}%;">
+						
+						{%- if spec_image_mobile != blank -%}
+							{%- assign image_class = image_class | append: ' large-hide' -%}
+							
+							{% render 'image-metafields', image: spec_image_mobile, class_name: 'product-specs__image large-up-hide' %}
+						{%- endif -%}
+						
+						{% render 'image-metafields', image: spec_image, class_name: image_class %}
+					</div>
+				{% else %}
+					<div class="product-specs__inner">
+						{%- if spec_preheading != blank or spec_heading != blank -%}
+							<div class="product-specs__header">
+								{%- if spec_preheading != blank -%}
+									<p class="product-specs__preheading">
+										{{ spec_preheading }}
+									</p>
+								{%- endif -%}
+								
+								{%- if spec_heading != blank -%}
+									<h2 class="product-specs__heading">
+										{{ spec_heading }}
+									</h2>
+								{%- endif -%}
+							</div>
+						{%- endif -%}
+						
+						{%- if spec_weight_value != blank or spec_heal_drop_value != blank -%}
+							<div class="product-specs__values">
+								{%- if spec_weight_value != blank -%}
+									<div>
+										<h3>{{ spec_weight_alt_label }}</h3>
+										<h4>{{ spec_weight_value }}<sup>{{ spec_weight_alt_measurement_label }}</sup></h4>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_heal_drop_value != blank -%}
+									<div>
+										<h3>{{ spec_heal_drop_alt_label }}</h3>
+										<h4>{{ spec_heal_drop_value }}<sup>{{ spec_heal_drop_measurement_label }}</sup></h4>
+									</div>
+								{%- endif -%}
+							</div>
+						{%- endif -%}
+						
+						{%- if spec_climate_value != blank or spec_width_value != blank or spec_stability_value != blank
+							or spec_fit_value != blank or spec_stretch_value != blank or spec_length_value != blank
+							or spec_season_value != blank or spec_depth_value != blank or spec_sustainability_value != blank -%}
+							<div class="product-specs__selects">
+								{%- if spec_climate_value != blank -%}
+									{%- assign spec_comfort_values = 'Breathable, Weather Resistant, Waterproof' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Climate</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_comfort_values -%}
+												{%- if spec_climate_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+
+								{%- if spec_width_value != blank -%}
+									{%- assign spec_grip_values = 'Natural Toe Box & Medium Wide (D-E), Wide Toe Box & Wide (E-EE), Extra Wide Toe Box & Extra-wide (up to EEE)' | split: ', ' -%}
+
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Width</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_grip_values -%}
+												{%- assign values = value | split: ' & ' -%}
+												{%- assign title = values | first -%}
+
+												{%- if values contains spec_width_value -%}
+													<h4>{{ title }}</h4>
+												{% else %}
+													<p>{{ title }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_stability_value != blank -%}
+									{%- assign spec_conditions_values = 'Flexible, Moderate, Stable' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Stability</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_conditions_values -%}
+												{%- if spec_stability_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_fit_value != blank -%}
+									{%- assign spec_fit_values = 'Slim, Standard, Relaxed' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Fit</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_fit_values -%}
+												{%- if spec_fit_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_stretch_value != blank -%}
+									{%- assign spec_stretch_values = 'No Stretch, 2-Way Stretch, 4-Way Stretch' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Stretch</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_stretch_values -%}
+												{%- if spec_stretch_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_length_value != blank -%}
+									{%- assign spec_length_values = 'Short, Standard, Long' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Length</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_length_values -%}
+												{%- if spec_length_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_season_value != blank -%}
+									{%- assign spec_season_values = 'Cold, All-Day Wear, Warm' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Season</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_season_values -%}
+												{%- if spec_season_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_depth_value != blank -%}
+									{%- assign spec_depth_values = 'Shallow, Mid, Deep' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Depth</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_depth_values -%}
+												{%- if spec_depth_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+								
+								{%- if spec_sustainability_value != blank -%}
+									{%- assign spec_sustainability_values = 'Natural Fiber, Organic, Recycled' | split: ', ' -%}
+									
+									<div class="product-specs-select">
+										<h3 class="product-specs-select__heading">Sustainability</h3>
+										<div class="product-specs-select__content">
+											{%- for value in spec_sustainability_values -%}
+												{%- if spec_sustainability_value == value -%}
+													<h4>{{ value }}</h4>
+												{% else %}
+													<p>{{ value }}</p>
+												{%- endif -%}
+											{%- endfor -%}
+										</div>
+									</div>
+								{%- endif -%}
+							</div>
+						{%- endif -%}
+					
+					</div>
+				{%- endif -%}
+			</section>
+		{%- endif -%}
+	</div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Product specifications",
+  "tag": "div",
+  "class": "section-margin-bottom",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

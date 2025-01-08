@@ -1,0 +1,134 @@
+{%- comment -%}
+  {%- render 'collection-filters',
+    results: results,
+    section: section,
+    hide_filter_menu: hide_filter_menu -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign sort_by = results.sort_by | default: results.default_sort_by
+  assign terms = results.terms | escape
+  assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+-%}
+
+{%- if results.filters.size == 0 -%}
+  {%- assign hide_filter_opener = true -%}
+{%- endif -%}
+
+<div class="collection__filters-header">
+  <div class="collection__active-facets">
+    <modal-opener data-modal="#main-collection-filters-{{ section.id }}" role="region">
+      <button aria-haspopup="dialog"
+              aria-label="Filters Opener"
+              class="button focus-inset button-filter-opener large-hide {% if hide_filter_menu or hide_filter_opener %}hidden{% endif %}"
+              data-main-filter-btn>
+        <span>Filter</span>
+        <span>{%- render 'icon' with 'filters' -%}</span>
+      </button>
+    </modal-opener>
+    <modal-opener data-modal="#main-collection-filters-{{ section.id }}" role="region">
+      <button aria-haspopup="dialog"
+              aria-label="Filters Opener"
+              class="button focus-inset button-filter-opener large-hide {% if hide_filter_menu or hide_filter_opener %}hidden{% endif %}"
+              data-sticky-filter-btn>
+        <span>Filter</span>
+        <span>{%- render 'icon' with 'filters' -%}</span>
+      </button>
+    </modal-opener>
+    <div class="active-facets" data-active-facets>
+      {%- for filter in results.filters -%}
+        {%- for value in filter.active_values -%}
+          {%- assign label_handle = filter.label | handleize -%}
+          {%- assign label = filter.label -%}
+
+          {%- if label_handle == 'color-group' -%}
+            {%- assign label = 'Color'  -%}
+          {%- endif -%}
+
+          <facet-remove>
+                      <span class="active-facets__button-inner">
+                        {{ label }}: {{ value.label | escape }}
+                        <a href="{{ value.url_to_remove }}" class="active-facets__button">
+                          {% render 'icon-close-small' %}
+                        </a>
+                        <span class="visually-hidden">{{ 'products.facets.clear_filter' | t }}</span>
+                      </span>
+          </facet-remove>
+        {%- endfor -%}
+        {% if filter.type == 'price_range' %}
+          {%- if filter.min_value.value != null or filter.max_value.value != null -%}
+            <facet-remove>
+                      <span class="active-facets__button-inner">
+                        {%- if filter.min_value.value -%}
+                          {{ filter.min_value.value | money }}
+                        {%- else -%}
+                          {{ 0 | money }}
+                        {%- endif -%}
+                        -
+                        {%- if filter.max_value.value -%}
+                          {{ filter.max_value.value | money }}
+                        {%- else -%}
+                          {{ filter.range_max | money }}
+                        {%- endif -%}
+                        <a href="{{ filter.url_to_remove }}" class="active-facets__button">
+                          {% render 'icon-close-small' %}
+                        </a>
+                        <span class="visually-hidden">{{ 'products.facets.clear_filter' | t }}</span>
+                      </span>
+            </facet-remove>
+          {%- endif -%}
+        {% endif %}
+      {%- endfor -%}
+      <facet-remove class="active-facets__button-wrapper">
+        <a href="{{ results_url }}" class="active-facets__button-remove">
+          <span>{{ 'products.facets.clear_all' | t }}</span>
+        </a>
+      </facet-remove>
+    </div>
+  </div>
+  <collection-sorting class="collection__sorting-wrapper large-hide">
+    {%- if hide_filter_menu -%}
+      {% render 'collection-breadcrumbs-navigation', hide_col_nav: true %}
+    {%- endif -%}
+    <div class="collection__sorting {% if hide_filter_menu %}hidden{% endif %}">
+      <div class="form__item">
+        {%- assign sort_by = results.sort_by -%}
+        <custom-select class="form__select {% if sort_by != '' %}checked{% endif %}">
+          <div class="form__select-btn" type="button" aria-expanded="false" aria-controls="dropdown" role="button">
+            {% if sort_by != blank %}
+              {%- for option in results.sort_options -%}
+                {% if option.value == sort_by %}
+                  {{ option.name | escape }}
+
+                  {% break %}
+                {% endif %}
+              {%- endfor -%}
+            {% else %}
+              {{ 'products.facets.sort_button' | t }}
+            {% endif %}
+          </div>
+
+          <ul class="form__select-dropdown" id="dropdown-{{ section.id }}">
+            {%- for option in results.sort_options -%}
+              <li class="form__select-dropdown-option {% if option.value == sort_by %}checked{% endif %}"
+                  data-option-value="{{ option.value | escape }}">{{ option.name | escape }}</li>
+            {%- endfor -%}
+          </ul>
+
+          <label for="form__input-select-{{ section.id }}-filter">{{ 'products.facets.sort_button' | t }}</label>
+
+          <select id="form__input-select-{{ section.id }}-filter"
+                  name="sort_by"
+                  class="form__select-hidden"
+                  aria-describedby="a11y-refresh-page-message">
+            <option selected disabled value></option>
+
+            {%- for option in results.sort_options -%}
+              <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+            {%- endfor -%}
+          </select>
+        </custom-select>
+      </div>
+    </div>
+  </collection-sorting>
+</div>

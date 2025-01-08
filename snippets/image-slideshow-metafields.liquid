@@ -1,0 +1,62 @@
+{%- assign uniq_id_by_index = 'image-slideshow' | append: page.handle | md5 | append: index -%}
+{%- assign show_section = [template.name].metafields.img_slideshow_sectio.show_section -%}
+{%- assign show_slider_arrows = [template.name].metafields.img_slideshow_sectio.show_slideshow_arrows -%}
+{%- assign images = [template.name].metafields.img_slideshow_block.image -%}
+{%- assign images_mobile = [template.name].metafields.img_slideshow_block.image_mobile -%}
+
+{%- if images != blank and show_section == 'true' -%}
+	{{ 'section-image-slideshow.css' | asset_url | stylesheet_tag }}
+	
+	 {% capture config %}
+    {
+      "slidesPerView": 1,
+      "watchOverflow": true,
+      "grabCursor": true,
+      "navigation": {
+        "nextEl": ".next-{{ uniq_id_by_index }}",
+        "prevEl": ".prev-{{ uniq_id_by_index }}"
+      },
+      "pagination": {
+        "el": ".swiper-pagination-{{ uniq_id_by_index }}",
+        "type": "progressbar"
+      }
+    }
+  {% endcapture %}
+	
+	<div class="image-slideshow__wrapper {{ wrapper_class_name }}">
+		<slideshow-swiper
+			class="image-slideshow__slider rel"
+			data-config='{{ config }}'
+			{% if show_slider_arrows == 'true' %}data-arrows-appear="true"{% endif %}>
+			<div class="swiper">
+				<ul class="image-slideshow__list swiper-wrapper" role="list">
+					{%- for image_arr in images -%}
+						{%- assign image = image_arr[0] -%}
+						{%- assign image_mobile = images_mobile[forloop.index0][0] -%}
+
+						{%- if image != blank -%}
+						<li class="image-slideshow__item swiper-slide" role="listitem">
+							<div class="image-slideshow__image-wrapper">
+								{%- assign image_class = 'image-abs-cover' -%}
+								
+								{%- if image_mobile != blank -%}
+									{%- assign image_class = image_class | append: ' large-hide' -%}
+									
+									{% render 'image-metafields', image: image_mobile, class_name: 'image-abs-cover large-up-hide' %}
+								{%- endif -%}
+								
+								{% render 'image-metafields', image: image, class_name: image_class %}
+							</div>
+						</li>
+						{%- endif -%}
+					{%- endfor -%}
+				</ul>
+				<div class="swiper-pagination swiper-pagination-progressbar swiper-pagination-{{ uniq_id_by_index }} small-up-hide"></div>
+			</div>
+			{%- if show_slider_arrows == 'true' -%}
+				<div class="swiper-button-next swiper-button-next next-{{ uniq_id_by_index }}"></div>
+				<div class="swiper-button-prev swiper-button-prev prev-{{ uniq_id_by_index }}"></div>
+			{%- endif -%}
+		</slideshow-swiper>
+	</div>
+{%- endif -%}

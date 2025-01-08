@@ -1,0 +1,81 @@
+{%- comment -%}
+  {% include 'product-monogram' %}
+{%- endcomment -%}
+
+<script src="{{ 'product-monogram.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign monogram_heading = settings.monogram_heading
+  assign width = product.metafields.custom.patch_width | default: 15
+  assign x_position = product.metafields.custom.patch_x_position | default: 50
+  assign y_position = product.metafields.custom.patch_y_position | default: 45
+  assign x_position_mobile = product.metafields.custom.patch_x_position_mobile | default: 50
+  assign y_position_mobile = product.metafields.custom.patch_y_position_mobile | default: 45
+-%}
+
+{% style %}
+  :root {
+  --logo-width: {{ width }}%;
+  --logo-x-position: {{ x_position }}%;
+  --logo-y-position: {{ y_position }}%;
+  --logo-x-position-mobile: {{ x_position_mobile }}%;
+  --logo-y-position-mobile: {{ y_position_mobile }}%;
+  }
+{% endstyle %}
+
+<product-monogram class="product-form__customizer" data-accordion-collapseble>
+  <div class="product-form__option-header">
+    <h3 class="product-form__option-title">
+      {{ product.options.size | plus: 1 | append: '. ' }}{{ 'products.product.monogram_option_heading' | t: option: 'patch' }}
+    </h3>
+  </div>
+
+  <div class="product-form__options product-form__options--{{ variant_options_grid_item_size }}
+                                  product-form__options-border--{{ selected_color_option_border }}
+                                  product-form__options--patch fieldset">
+    <span class="form__label u-sr-only">Patches</span>
+
+    {% capture config_options_color %}
+      {
+      "slidesPerView": "auto",
+      "spaceBetween": 0,
+      "freeMode": true,
+      "mousewheel": true,
+      "breakpoints": {
+      "990": {
+      "enabled": false
+      }
+      }
+      }
+    {% endcapture %}
+
+    <slideshow-swiper data-config='{{ config_options_color }}'>
+      <div class="swiper">
+        <div class="swiper-wrapper">
+
+          {%- for patch in patches -%}
+            <div class="swiper-slide product-form__option-color">
+              <input type="radio"
+                     id="{{ section.id }}-patch-{{ forloop.index0 }}"
+                     name="items[0][properties][Patch]"
+                     value="https:{{ patch | img_url: '500x' }}"
+                     form="{{ product_form_id }}"
+                     data-patch="{{ patch.alt | capitalize | default: 'Custom patch' }}"
+                     {% if forloop.first %}checked{% endif %}>
+
+              <label for="{{ section.id }}-patch-{{ forloop.index0 }}"
+                     data-tooltip="{{ patch.alt | capitalize | default: 'Custom patch' }}"
+                     style="background-image: url({{ patch | img_url: '500x' }});">
+              </label>
+            </div>
+          {%- endfor -%}
+
+        </div>
+      </div>
+    </slideshow-swiper>
+  </div>
+  <input type="hidden"
+         name="items[0][properties][Patch name]"
+         value="{{ patches[0].alt | capitalize | default: 'Custom patch' }}"
+         form="{{ product_form_id }}" data-patch-name>
+</product-monogram>

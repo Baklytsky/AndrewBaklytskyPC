@@ -3,134 +3,140 @@
 
   Accepts:
   - product: {Object} Product Liquid object (optional)
-  - placeholder: {Boolean} Renders a placeholder price (optional)
   - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
   - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
   - price_class: {String} Adds a price class to the price element (optional)
-  - show_compare_at_price: {Boolean} Renders the compare at price if the product matches the condition (optional)
+  - show_product_price_range: {Boolean} Show product price range (from - to)
+  - product_variants: {Object} Product variants with merged product (need to show product price range)
 
   Usage:
-  {% render 'price', product: product %}
+{% render 'price', product: product %}
 {% endcomment %}
 {%- liquid
   if use_variant
-    assign target = product.selected_or_first_available_variant
-  elsif placeholder
-    assign target = null
+  assign target = selected_variant | default: product.selected_or_first_available_variant
   else
-    assign target = product
+  assign target = product
   endif
 
   assign compare_at_price = target.compare_at_price
   assign price = target.price | default: 1999
-  assign price_min = product.price_min
-  assign price_max = product.price_max
   assign available = target.available | default: false
-  assign money_price = price | money
-  assign money_price_min = price_min | money
-  assign money_price_max = price_max | money
-  if settings.currency_code_enabled
-    assign money_price = price | money_with_currency
-    assign money_price_min = price_min | money_with_currency
-    assign money_price_max = price_max | money_with_currency
-  endif
+  assign money_price = price | money_without_trailing_zeros
 
+  comment
+  hide for collection merged products
   if target == product and product.price_varies
-    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+  assign money_price = 'products.product.price.from_price_html' | t: price: money_price
   endif
--%}
+  endcomment -%}
 
-{%- unless target == null and placeholder == null -%}
-  <div
-    class="
-      price
-      {%- if price_class %} {{ price_class }}{% endif -%}
-      {%- if available == false %} price--sold-out{% endif -%}
-      {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price--on-sale{% endif -%}
-      {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing--sale-badge{% endif -%}
-      {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
-      {%- if show_badges %} price--show-badge{% endif -%}
-    "
-  >
-    <div class="price__container">
-      {%- comment -%}
-        Explanation of description list:
-          - div.price__regular: Displayed when there are no variants on sale
-          - div.price__sale: Displayed when a variant is a sale
-      {%- endcomment -%}
-      <div class="price__regular">
-        {%- if product.quantity_price_breaks_configured? -%}
-          {%- if show_compare_at_price and compare_at_price -%}
-            {%- unless product.price_varies == false and product.compare_at_price_varies %}
-              <span class="visually-hidden visually-hidden--inline">
-                {{- 'products.product.price.regular_price' | t -}}
-              </span>
-              <span>
-                <s class="price-item price-item--regular variant-item__old-price">
-                  {% if settings.currency_code_enabled %}
-                    {{ compare_at_price | money_with_currency }}
-                  {% else %}
-                    {{ compare_at_price | money }}
-                  {% endif %}
-                </s>
-              </span>
-            {%- endunless -%}
+{%- capture discount_tag -%}
+  {%- for tag in product.tags -%}
+    {%- assign downcase_tag = tag | downcase -%}
+    {%- if downcase_tag contains 'sale_to_' -%}
+      data-discount-tag="{{ downcase_tag | remove: 'sale_to_' }}"
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- capture price_capture -%}
+  {%- comment -%}
+    Explanation of description list:
+    - div.price__regular: Displayed when there are no variants on sale
+    - div.price__sale: Displayed when a variant is a sale
+  {%- endcomment -%}
+  <div class="price__regular" data-price-value="{{ target.price }}">
+    <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+    <span class="price-item price-item--regular">
+      {{ money_price }}
+    </span>
+  </div>
+  <div class="price__sale">
+    <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+    <span class="price-item price-item--sale">
+      {{ money_price }}
+    </span>
+    <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+    <span>
+        <s class="price-item price-item--regular price-item--last">
+           {{ compare_at_price | money_without_trailing_zeros }}
+        </s>
+      </span>
+  </div>
+  <small class="unit-price caption{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} hidden{% endif %}">
+    <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+    <span class="price-item price-item--last">
+        <span>{{- product.selected_or_first_available_variant.unit_price | money_without_trailing_zeros -}}</span>
+        <span aria-hidden="true">/</span>
+        <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+        <span>
+          {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
+            {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
           {%- endif -%}
+          {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
+        </span>
+      </span>
+  </small>
+  {%- if additional_label != blank and additional_label != '| ' -%}
+    <span class="price-additional-label" style="font-weight: {{ additional_label_font_weight }};">
+      &nbsp;{{ additional_label }}
+    </span>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if show_product_price_range -%}
+  {% assign smallest_price = null %}
+  {% assign biggest_price = null %}
+  {% assign has_price_range = false %}
+
+  {% for variant in product_variants %}
+    {% if smallest_price == null or variant.price < smallest_price %}
+      {% assign smallest_price = variant.price %}
+    {% endif %}
+
+    {% if biggest_price == null or variant.price > biggest_price %}
+      {% assign biggest_price = variant.price %}
+    {% endif %}
+  {% endfor %}
+
+  {%- if smallest_price < biggest_price -%}
+    {%- assign has_price_range = true -%}
+  {%- endif -%}
+{%- endif -%}
+
+<div class="price
+  {%- if price_class %} {{ price_class }}{% endif -%}
+  {%- if available == false %} price--sold-out {% endif -%}
+  {%- if compare_at_price > price %} price--on-sale {% endif -%}
+  {%- if product.price >= product.compare_at_price %} price--no-compare{% endif -%}
+  {%- if has_price_range %} price--with-range {% endif -%}" {{ discount_tag }}>
+
+    {%- if show_product_price_range -%}
+  
+      {%- if has_price_range -%}
+        <div class="price__regular price__regular--range" data-price-value="{{ target.price }}">
           <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-          <span class="price-item price-item--regular">
-            {{-
-              'products.product.volume_pricing.price_range'
-              | t: minimum: money_price_min, maximum: money_price_max
-            -}}
-          </span>
-        {%- else -%}
-          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-          <span class="price-item price-item--regular">
-            {{ money_price }}
+          <div class="price-item price-item--regular">
+            <span>{{ smallest_price | money_without_trailing_zeros }} - {{ biggest_price | money_without_trailing_zeros }}</span>
+          </div>
+        </div>
+        <div class="price__sale hidden">
+          <span class="price-item price-item--sale"></span>
+        </div>
+
+        {%- if additional_label != blank and additional_label != '| ' -%}
+          <span class="price-additional-label" style="font-weight: {{ additional_label_font_weight }};">
+            &nbsp;{{ additional_label }}
           </span>
         {%- endif -%}
-      </div>
-      <div class="price__sale">
-        {%- unless product.price_varies == false and product.compare_at_price_varies %}
-          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-          <span>
-            <s class="price-item price-item--regular">
-              {% if settings.currency_code_enabled %}
-                {{ compare_at_price | money_with_currency }}
-              {% else %}
-                {{ compare_at_price | money }}
-              {% endif %}
-            </s>
-          </span>
-        {%- endunless -%}
-        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
-        <span class="price-item price-item--sale price-item--last">
-          {{ money_price }}
-        </span>
-      </div>
-      <small class="unit-price caption{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} hidden{% endif %}">
-        <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
-        <span class="price-item price-item--last">
-          <span>{{- product.selected_or_first_available_variant.unit_price | money -}}</span>
-          <span aria-hidden="true">/</span>
-          <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
-          <span>
-            {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
-              {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
-            {%- endif -%}
-            {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
-          </span>
-        </span>
-      </small>
-    </div>
-    {%- if show_badges -%}
-      <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
-        {{ 'products.product.on_sale' | t }}
-      </span>
 
-      <span class="badge price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
-        {{ 'products.product.sold_out' | t }}
-      </span>
+      {%- else -%}
+        {{ price_capture }}
+      {%- endif -%}
+
+    {%- else -%}
+      {{ price_capture }}
     {%- endif -%}
-  </div>
-{% endunless %}
+
+</div>

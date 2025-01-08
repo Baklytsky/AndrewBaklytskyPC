@@ -1,0 +1,323 @@
+{{ 'section-shopable.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign anchor_link = section.settings.anchor_link
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+	assign title = section.settings.title
+	assign text = section.settings.text
+	assign title_mobile = section.settings.title_mobile
+	assign text_mobile = section.settings.text_mobile
+	assign image = section.settings.image
+	assign padding_top = section.settings.padding_top
+	assign padding_bottom = section.settings.padding_bottom
+	assign product_title_size = blank
+
+-%}
+
+{%- for block in section.blocks -%}
+	{% if block.settings.product.title.size > 15 %}
+		{%- assign product_title_size = true -%}
+	{% endif %}
+{%- endfor -%}
+
+{% capture config %}
+	{
+	"slidesPerView": 1.15,
+	"spaceBetween": 24,
+	"noSwipingSelector": "label",
+	"watchOverflow": true,
+	"navigation": {
+	"nextEl": ".next-{{ section.id }}",
+	"prevEl": ".prev-{{ section.id }}"
+	},
+	"breakpoints": {
+	"900": {
+	"shortSwipes": false,
+	"slidesPerView": 2,
+	"spaceBetween": 24
+	}
+	}
+	}
+{% endcapture %}
+
+
+
+{%- if section.blocks.size > 0  -%}
+	<div class="shopable page-width" style="
+		--bg-color: {{ bg_color }};
+		--text-color: {{ text_color }};
+		--padding-top: {{ padding_top }}px;
+		--padding-bottom:{{ padding_bottom }}px;
+		" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		<shopable-section class="shopable-wrapper">
+			<div class="shopoble-image__wrapper rel">
+				{% if title_mobile != blank or text_mobile != blank %}
+					<div class="shopable-slider__text-wrapper-mobile page-width">
+						{% if title_mobile != blank %}
+							<h3 class="shopable-slider__heading-mobile">{{ title_mobile }}</h3>
+						{% endif %}
+						{% if text_mobile != blank %}
+							<div class="shopable-slider__description-mobile">{{ text_mobile }}</div>
+						{% endif %}
+					</div>
+				{% endif %}
+				<div class="shopoble-image__wrapper-inner aspect-ratio" style="--aspect-ratio: {{ image.aspect_ratio }};">
+					{%- if image != blank -%}
+						{% render 'image', image: image, class_name: 'image-abs-cover' %}
+					{%- else -%}
+						{{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+					{%- endif -%}
+
+					<div class="shopoble-image__desktop-btns">
+						{%- for block in section.blocks -%}
+							{% liquid
+								assign position_x = block.settings.position_x
+								assign position_y = block.settings.position_y
+								assign product = block.settings.product
+							%}
+
+							{% if product.available == true %}
+								<button aria-label="SLide to {{ product.title }}"
+                        style="top: {{ position_x }}%; left: {{ position_y }}%"
+                        class="shopoble-image__btn  {% if forloop.first == true %}shopoble-image__btn-selected{% endif %}">
+									<span class="pointer__inner"></span>
+								</button>
+							{% endif %}
+						{%- endfor -%}
+					</div>
+
+					<div class="shopoble-image__mobile-btns">
+						{%- for block in section.blocks -%}
+							{% liquid
+								assign position_x = block.settings.mobile_position_x
+								assign position_y = block.settings.mobile_position_y
+								assign product = block.settings.product
+							%}
+
+							{% if product.available == true %}
+								<button aria-label="SLide to {{ product.title }}"
+                        style="top: {{ position_x }}%; left: {{ position_y }}%"
+                        class="shopoble-image__mobile-btn"
+                        data-product="{{ product.selected_or_first_available_variant.url }}">
+									<span class="pointer__inner"></span>
+								</button>
+							{% endif %}
+						{%- endfor -%}
+					</div>
+				</div>
+			</div>
+			<div class="shopable-slider__wrapper">
+				{% if title != blank or text != blank %}
+					<div class="shopable-slider__text-wrapper">
+						{% if title != blank %}
+							<h3 class="shopable-slider__heading">{{ title }}</h3>
+						{% endif %}
+						{% if text != blank %}
+							<div class="shopable-slider__description">{{ text }}</div>
+						{% endif %}
+					</div>
+				{% endif %}
+				<slideshow-swiper class="shopable-slider rel" data-config='{{ config }}'>
+					<div class="swiper shopable-slider__swiper rel">
+						<div class="swiper-wrapper">
+							{%- for block in section.blocks -%}
+								{% liquid
+									assign product = block.settings.product
+									assign product_title_size = product.title.size
+								%}
+								{% if product.available == true %}
+									<div class="rel swiper-slide">
+										{% render 'product-card',
+											product: product,
+											hide_variants: false,
+											uniq_id: forloop.index,
+											show_product_title: true,
+											show_product_reviews: false,
+											show_product_description: true,
+											show_product_description_metafield: false,
+											show_product_price: true,
+											show_product_price_range: false,
+											show_product_badge: true,
+											show_color_options_size: true,
+											show_image_thumbnails: true,
+											show_quick_view: true,
+											product_title_size: product_title_size,
+											custom_class: card_class_name %}
+									</div>
+								{% endif %}
+							{%- endfor -%}
+						</div>
+					</div>
+					{%- if section.blocks.size > 2 -%}
+						<div class="swiper-button-next next-{{ section.id }} shopable-main__next"></div>
+						<div class="swiper-button-prev prev-{{ section.id }} shopable-main__prev"></div>
+					{%- endif -%}
+				</slideshow-swiper>
+			</div>
+		</shopable-section>
+	</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Shopable",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading desktop",
+      "default": "Shopable"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text desktop"
+    },
+    {
+      "type": "text",
+      "id": "title_mobile",
+      "label": "Heading mobile",
+      "default": "Shopable"
+    },
+    {
+      "type": "richtext",
+      "id": "text_mobile",
+      "label": "Text mobile"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product",
+      "type": "product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "header",
+          "content": "Dot position"
+        },
+        {
+          "type":    "range",
+          "id":      "position_x",
+          "min":     1,
+          "max":     95,
+          "step":    1,
+          "label":   "Horizontal",
+          "unit":    "%",
+          "default": 50
+        },
+        {
+          "type":    "range",
+          "id":      "position_y",
+          "min":     1,
+          "max":     95,
+          "step":    1,
+          "label":   "Vertical",
+          "unit":    "%",
+          "default": 50
+        },
+        {
+          "type":    "range",
+          "id":      "mobile_position_x",
+          "min":     1,
+          "max":     95,
+          "step":    1,
+          "label":   "Mobile Horizontal",
+          "unit":    "%",
+          "default": 50
+        },
+        {
+          "type":    "range",
+          "id":      "mobile_position_y",
+          "min":     1,
+          "max":     95,
+          "step":    1,
+          "label":   "Mobile Vertical",
+          "unit":    "%",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shopable",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 31,
+            "position_y": 41
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 50,
+            "position_y": 63
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 73,
+            "position_y": 47
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

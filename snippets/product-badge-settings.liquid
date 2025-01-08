@@ -1,0 +1,19 @@
+{%- assign badge_downcase = label | downcase | strip -%}
+
+{%- for i in (1..10) -%}
+	{%- assign label_setting = 'badge_pdp_label_' | append: i -%}
+	{%- assign text_color_setting = 'badge_pdp_text_color_' | append: i -%}
+	{%- assign bg_color_setting = 'badge_pdp_bg_color_' | append: i -%}
+	{%- assign text = settings[label_setting] -%}
+	{%- assign text_downcase = settings[label_setting] | downcase | strip -%}
+
+	{%- if text != blank and badge_downcase == text_downcase -%}
+		{%- assign text_color = settings[text_color_setting] -%}
+		{%- assign bg_color = settings[bg_color_setting] -%}
+	{%- endif -%}
+{%- endfor -%}
+
+<span class="product-badge {{ badge_color_type | default: 'white' }}"
+    style="background-color: {{ bg_color }}; color: {{ text_color }};">
+	{{ label }}
+</span>

@@ -1,0 +1,212 @@
+{%- assign heading = shop.metafields.globals.size_func_main_heading -%}
+{%- assign text = shop.metafields.globals.size_func_main_text -%}
+{%- assign sizes_json = product.metafields.size_table_data.sizes_json_data -%}
+
+
+{%- if sizes_json != blank -%}
+	<size-compared-v1>
+		{%- assign initial_part = sizes_json | first -%}
+		{%- assign group_labels = shop.metafields.globals.size_funct_group_label -%}
+		{%- assign parts_names_string = '' -%}
+
+		{%- for current_part in initial_part -%}
+			{%- assign downcase_current_part = current_part | first | downcase -%}
+
+			{%- assign parts_names_string =  parts_names_string | append: '***' | append: downcase_current_part -%}
+		{%- endfor -%}
+
+		{%- assign parts_names_array = parts_names_string | remove_first: '***' | split: '***' -%}
+
+		{%- if heading != blank -%}
+			<p class="size-compared-v1__title">
+				{{ heading }}
+			</p>
+		{%- endif -%}
+
+		{%- for group_label in group_labels -%}
+			{%- assign group_names = shop.metafields.globals.size_funct_group_names[forloop.index0] -%}
+			{%- assign group_names_split = shop.metafields.globals.size_funct_group_names[forloop.index0] | split: ', ' -%}
+			{%- assign select_visible = false -%}
+
+			{%- if group_names != blank and group_names != blank -%}
+				{% capture select_inner %}
+					<div class="form__select-btn"
+					     type="button" aria-expanded="false" role="button">
+						{{ group_label }}
+					</div>
+
+					<ul class="form__select-dropdown">
+						{%- for name in group_names_split -%}
+							{%- assign select_visible = true -%}
+							{%- assign downcase_name = name | downcase -%}
+
+							{%- if parts_names_string contains downcase_name -%}
+								<li class="form__select-dropdown-option"
+								    data-option-value="{{ name }}">{{ name }}</li>
+							{%- endif -%}
+						{%- endfor -%}
+					</ul>
+
+					<label class="form__select-label">{{ group_label }}</label>
+
+					<select class="form__select-hidden">
+						<option selected disabled value></option>
+
+						{%- for name in group_names_split -%}
+							{%- assign downcase_name = name | downcase -%}
+
+							{%- if parts_names_string contains downcase_name -%}
+								<option value="{{ name }}">{{ name }}</option>
+							{%- endif -%}
+						{%- endfor -%}
+					</select>
+				{% endcapture %}
+
+				{%- if select_visible -%}
+					<custom-select class="form__select size-compared-v1__select"
+					               data-select-type="sizes-group"
+					               data-size-group-name="{{ group_label }}"
+					               data-exclude-bubbles>
+
+						{{ select_inner }}
+					</custom-select>
+				{%- endif -%}
+				{%- for part_names in parts_names_array -%}
+					{%- assign current_label = '' -%}
+					{%- assign output = false -%}
+
+					{%- for group_name_value in group_names_split -%}
+						{%- assign group_name_value_downcase = group_name_value | downcase -%}
+
+						{%- if group_name_value_downcase == part_names -%}
+							{%- assign output = true -%}
+						{%- endif -%}
+					{%- endfor -%}
+
+					{%- if output -%}
+						{% capture select_li %}
+							{%- for sizes_part in sizes_json -%}
+								{%- for size_part in sizes_part -%}
+									{%- assign size_label = size_part | first -%}
+									{%- assign size_label_downcase = size_label | downcase -%}
+									{%- assign size_value = size_part | last -%}
+
+									{%- if size_label_downcase == part_names -%}
+										{%- assign current_label = size_label -%}
+
+										<li class="form__select-dropdown-option"
+										    data-option-value="{{ size_value }}">{{ size_value }}</li>
+									{%- endif -%}
+								{%- endfor -%}
+							{%- endfor -%}
+						{% endcapture %}
+						<custom-select class="form__select size-compared-v1__select"
+						               data-select-type="sizes-group-value"
+						               data-size-group-name-value="{{ current_label }}"
+						               data-exclude-bubbles
+						               style="display: none;">
+
+							<div class="form__select-btn"
+							     type="button" aria-expanded="false" role="button">
+								{{ current_label }}
+							</div>
+
+							<ul class="form__select-dropdown">
+								{{ select_li }}
+							</ul>
+
+							<label class="form__select-label">Size</label>
+
+							<select class="form__select-hidden">
+								<option selected disabled value></option>
+
+								{%- for sizes_part in sizes_json -%}
+									{%- for size_part in sizes_part -%}
+										{%- assign size_label = size_part | first -%}
+										{%- assign size_label_downcase = size_label | downcase -%}
+										{%- assign size_value = size_part | last -%}
+
+										{%- if size_label_downcase == part_names -%}
+											<option value="{{ size_value }}">{{ size_value }}</option>
+										{%- endif -%}
+									{%- endfor -%}
+								{%- endfor -%}
+							</select>
+						</custom-select>
+					{%- endif -%}
+				{%- endfor -%}
+
+			{%- endif -%}
+		{%- endfor -%}
+
+		{%- for part_names in parts_names_array -%}
+			{%- assign current_label = '' -%}
+
+			{%- if part_names == 'original' -%}
+				{% capture select_li %}
+					{%- for sizes_part in sizes_json -%}
+						{%- for size_part in sizes_part -%}
+							{%- assign size_label = size_part | first -%}
+							{%- assign size_label_downcase = size_label | downcase -%}
+							{%- assign size_value = size_part | last -%}
+
+							{%- if size_label_downcase == part_names -%}
+								{%- assign current_label = size_label -%}
+
+								<li class="form__select-dropdown-option"
+								    data-option-value="{{ size_value }}">{{ size_value }}</li>
+							{%- endif -%}
+						{%- endfor -%}
+					{%- endfor -%}
+				{% endcapture %}
+				<custom-select class="form__select size-compared-v1__select"
+				               data-select-type="sizes-group-value"
+				               data-size-group-name-value="{{ current_label }}"
+				               data-exclude-bubbles
+				               style="display: none;">
+
+					<div class="form__select-btn"
+					     type="button" aria-expanded="false" role="button">
+						{{ current_label }}
+					</div>
+
+					<ul class="form__select-dropdown">
+						{{ select_li }}
+					</ul>
+
+					<label class="form__select-label">Size</label>
+
+					<select class="form__select-hidden">
+						<option selected disabled value></option>
+
+						{%- for sizes_part in sizes_json -%}
+							{%- for size_part in sizes_part -%}
+								{%- assign size_label = size_part | first -%}
+								{%- assign size_label_downcase = size_label | downcase -%}
+								{%- assign size_value = size_part | last -%}
+
+								{%- if size_label_downcase == part_names -%}
+									<option value="{{ size_value }}">{{ size_value }}</option>
+								{%- endif -%}
+							{%- endfor -%}
+						{%- endfor -%}
+					</select>
+				</custom-select>
+			{%- endif -%}
+		{%- endfor -%}
+
+		<div class="size-compared-v1__footer">
+			{%- if text != blank -%}
+				<p class="size-compared-v1__description">
+					Based on what you told us, we recommend:
+				</p>
+			{%- endif -%}
+
+			<button type="button" class="button button--primary button--full-width"></button>
+		</div>
+
+		<script type="application/ld+json" data-sizes-json>
+			{{ sizes_json | json }}
+		</script>
+	</size-compared-v1>
+{%- endif -%}

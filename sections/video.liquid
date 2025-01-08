@@ -1,198 +1,197 @@
 {{ 'video-section.css' | asset_url | stylesheet_tag }}
 {{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
 
-{%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-  }
+{%- assign anchor_link = section.settings.anchor_link -%}
 
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  }
-{%- endstyle -%}
+{%- if section.settings.video_mp4 != blank and section.settings.video_mp4_bg -%}
+  {%- assign video_bg_section = true -%}
+{%- endif -%}
 
-{%- liquid
-  assign video_id = section.settings.video.id | default: section.settings.video_url.id
-  assign video_alt = section.settings.video.alt | default: section.settings.description
-  assign alt = 'sections.video.load_video' | t: description: video_alt | escape
-  assign poster = section.settings.video.preview_image | default: section.settings.cover_image
-
-  if section.settings.video != null
-    assign ratio_diff = section.settings.video.aspect_ratio | minus: poster.aspect_ratio | abs
-    if ratio_diff < 0.01 and ratio_diff > 0
-      assign fix_ratio = true
-    endif
-  endif
--%}
-
-{%- capture sizes -%}
-  {% if section.settings.full_width -%}
-    100vw
-  {%- else -%}
-    (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 }}px, (min-width: 750px)
-    calc(100vw - 10rem), 100vw
-  {%- endif %}
-{%- endcapture -%}
-
-<div class="color-{{ section.settings.color_scheme }} gradient">
-  <div class="video-section isolate{% unless section.settings.full_width %} page-width{% endunless %} section-{{ section.id }}-padding">
-    <div
-      {% if section.settings.full_width %}
-        class="page-width"
-      {% endif %}
-    >
-      {%- unless section.settings.heading == blank -%}
-        <div class="title-wrapper title-wrapper--no-top-margin{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-          <h2 class="title inline-richtext {{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
-        </div>
-      {%- endunless -%}
+<div id="{{ section.id }}" class="video-section__wrapper {% if video_bg_section %}video-section-bg{% endif %} {% if section.settings.color_theme == 'black' %}landing-colors{% endif %} video-section__wrapper-{{ section.id }}">
+  <div class="{% unless section.settings.full_width %} page-width{% endunless %}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+    <div class="{% if section.settings.full_width %} page-width{% endif %}">
+      <h2 class="video-section__title">{{ section.settings.heading }}</h2>
     </div>
-    <deferred-media
-      class="video-section__media deferred-media gradient global-media-settings{% if section.settings.full_width %} global-media-settings--full-width{% endif %}{% if fix_ratio %} media-fit-cover{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-      data-media-id="{{ video_id }}"
-      {% if poster != null %}
-        style="--ratio-percent: {{ 1 | divided_by: poster.aspect_ratio | times: 100 }}%;"
-      {% endif %}
-    >
-      <button
-        id="Deferred-Poster-Modal-{{ video_id }}"
-        class="video-section__poster media deferred-media__poster media--landscape"
-        type="button"
-        aria-label="{{ alt }}"
-      >
-        {%- if poster != null -%}
-          {{
-            poster
-            | image_url: width: 3840
-            | image_tag: sizes: sizes, widths: '375, 750, 1100, 1500, 1780, 2000, 3000, 3840', alt: alt
-          }}
-        {%- else -%}
-          {{ 'hero-apparel-3' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
-        {%- endif -%}
-        <span class="deferred-media__poster-button motion-reduce">
-          <span class="svg-wrapper">
-            {{- 'icon-play.svg' | inline_asset_content -}}
-          </span>
-        </span>
-      </button>
-      <template>
-        {%- if section.settings.video == null and section.settings.video_url != null -%}
-          {%- liquid
-            assign loop = ''
-            if section.settings.enable_video_looping
-              assign loop = '&loop=1&playlist=' | append: video_id
-            endif
-          -%}
-          {%- if section.settings.video_url.type == 'youtube' -%}
-            <iframe
-              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1{{ loop }}"
-              class="js-youtube"
-              allow="autoplay; encrypted-media"
-              allowfullscreen
-              title="{{ section.settings.description | escape }}"
-            ></iframe>
+    <noscript>
+      <div class="video-section__media">
+        <a href="{{ section.settings.video_url }}" class="video-section__poster media media--transparent media--landscape{% if section.settings.cover_image == blank %} video-section__placeholder{% endif %}">
+          {%- if section.settings.cover_image != blank -%}
+            {% render 'image', image: section.settings.cover_image %}
           {%- else -%}
-            <iframe
-              src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1{{ loop }}"
-              class="js-vimeo"
-              allow="autoplay; encrypted-media"
-              allowfullscreen
-              title="{{ section.settings.description | escape }}"
-            ></iframe>
+            {{ 'collection-2' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
           {%- endif -%}
-        {%- else -%}
-          {{
-            section.settings.video
-            | video_tag:
-              image_size: '1100x',
-              autoplay: true,
-              loop: section.settings.enable_video_looping,
-              controls: true,
-              muted: false
-          }}
+        </a>
+      </div>
+    </noscript>
+    {%- if video_bg_section -%}
+      <video class="deferred-media__mp4 deferred-media__bg" loop playsinline autoplay muted title="{{ section.settings.description | escape }}">
+        <source src="{{ section.settings.video_mp4 }}" type="video/mp4">
+      </video>
+      {%- if section.settings.cover_image != blank -%}
+        {% render 'image', image: section.settings.cover_image, class_name: 'image-abs-cover'%}
+      {%- endif -%}
+    {%- else -%}
+      <deferred-media class="video-section__media deferred-media no-js-hidden" data-media-id="{{ section.settings.video_url.id }}">
+        <button
+          id="Deferred-Poster-Modal-{{ section.settings.video_url.id }}"
+          class="video-section__poster media deferred-media__poster media--landscape"
+          type="button">
+          
+          {%- if section.settings.cover_image != blank -%}
+            {% render 'image', image: section.settings.cover_image %}
+          {%- else -%}
+            {{ 'collection-2' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+          {%- endif -%}
+          <span class="deferred-media__poster-button motion-reduce">
+          {%- render 'icon-play' -%}
+        </span>
+        </button>
+        <template>
+          {%- if section.settings.video_mp4 == blank -%}
+            
+            {%- if section.settings.video_url.type == 'youtube' -%}
+              <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?enablejsapi=1&autoplay=1" class="js-youtube" allow="autoplay; encrypted-media" allowfullscreen title="{{ section.settings.description | escape }}"></iframe>
+            {%- else -%}
+              <iframe src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?autoplay=1" class="js-vimeo" allow="autoplay; encrypted-media" allowfullscreen title="{{ section.settings.description | escape }}"></iframe>
+            {%- endif -%}
+          
+          {%- else -%}
+            <video class="deferred-media__mp4" loop playsinline controls title="{{ section.settings.description | escape }}">
+              <source src="{{ section.settings.video_mp4 }}" type="video/mp4">
+            </video>
+          {%- endif -%}
+        
+        </template>
+      </deferred-media>
+    {%- endif -%}
+
+    {%- if section.settings.video_title != blank or section.settings.video_description != blank -%}
+      <div class="video-section__info {% if section.settings.full_width %}page-width{% endif %}">
+        {%- if section.settings.video_title != blank -%}
+          <h3 class="video-section__info-title h5">
+            {{ section.settings.video_title }}
+          </h3>
         {%- endif -%}
-      </template>
-    </deferred-media>
+
+        {%- if section.settings.video_description != blank -%}
+          <p class="video-section__info-description">
+            {{ section.settings.video_description }}
+          </p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- for i in (1..2) -%}
+      {%- assign text_key = 'checkbox_button_text_' | append: i -%}
+      {%- assign url_key = 'checkbox_button_url_' | append: i -%}
+      {%- assign btn_url = section.settings[url_key] -%}
+      {%- assign btn_text = section.settings[text_key] -%}
+
+      {%- if btn_url != blank and btn_text != blank -%}
+        {%- capture buttons -%}
+          {{ buttons }}
+          <button type="submit"
+                  class="button button--secondary video-form__button"
+                  data-url="{{ btn_url }}" disabled>
+            {{ btn_text }}
+          </button>
+        {%- endcapture -%}
+      {%- endif -%}
+    {%- endfor -%}
+    
+    {%- if section.settings.show_button_checkbox and buttons != blank -%}
+      <form action="{{ section.settings.checkbox_button_url }}" id="video-form-{{ section.id }}" class="video-section__form">
+        {%- if section.settings.checkbox_text != blank or section.settings.checkbox_content != blank -%}
+          <div class="video-section__form-input-wrapper
+            {% if section.settings.clickable_content %}video-section__form-input-wrapper-clickable{% endif %}">
+            
+            {%- if section.settings.checkbox_content != blank -%}
+              {{ section.settings.checkbox_content }}
+            {%- endif -%}
+  
+            {%- if section.settings.checkbox_text != blank -%}
+              <fieldset>
+                <legend class="form__label u-sr-only">{{ section.settings.checkbox_text }}</legend>
+                <input type="checkbox" id="video-checkbox-{{ section.id }}" required>
+                <label for="video-checkbox-{{ section.id }}">{{ section.settings.checkbox_text }}</label>
+              </fieldset>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if buttons -%}
+          <div class="video-section__form-buttons-wrapper">
+            {{ buttons }}
+          </div>
+        {%- endif -%}
+      </form>
+  
+      <script>
+        (function () {
+          const form = document.getElementById('video-form-{{ section.id }}');
+          const checkbox = form.querySelector('input');
+          const buttons = form.querySelectorAll('button');
+          
+          form.addEventListener('change', function () {
+            checkbox.checked
+                ? buttons.forEach(btn => btn.removeAttribute('disabled'))
+                : buttons.forEach(btn => btn.setAttribute('disabled', ''));
+          });
+
+          buttons.forEach(btn => btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            form.action = e.target.dataset.url;
+            form.submit();
+          }))
+        })();
+      </script>
+    {%- endif -%}
   </div>
+
+  {%- unless section.settings.full_width -%}
+    {%- style -%}
+      @media screen and (max-width: 749px) {
+        .video-section__wrapper-{{ section.id }} .video-section__media {
+          width: calc(100% + 48px);
+          margin-left: -24px;
+        }
+      }
+    {%- endstyle -%}
+  {%- endunless -%}
 </div>
 
 {% schema %}
 {
   "name": "t:sections.video.name",
   "tag": "section",
-  "class": "section",
-  "disabled_on": {
-    "groups": ["header", "footer"]
-  },
+  "class": "video-section",
   "settings": [
     {
-      "type": "inline_richtext",
-      "id": "heading",
-      "default": "t:sections.video.settings.heading.default",
-      "label": "t:sections.video.settings.heading.label"
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
     },
     {
       "type": "select",
-      "id": "heading_size",
+      "id": "color_theme",
+      "label": "Color theme",
       "options": [
         {
-          "value": "h2",
-          "label": "t:sections.all.heading_size.options__1.label"
+          "value": "black",
+          "label": "Black"
         },
         {
-          "value": "h1",
-          "label": "t:sections.all.heading_size.options__2.label"
-        },
-        {
-          "value": "h0",
-          "label": "t:sections.all.heading_size.options__3.label"
-        },
-        {
-          "value": "hxl",
-          "label": "t:sections.all.heading_size.options__4.label"
-        },
-        {
-          "value": "hxxl",
-          "label": "t:sections.all.heading_size.options__5.label"
+          "value": "white",
+          "label": "White"
         }
       ],
-      "default": "h1",
-      "label": "t:sections.all.heading_size.label"
+      "default": "black"
     },
     {
-      "type": "checkbox",
-      "id": "enable_video_looping",
-      "label": "t:sections.video.settings.enable_video_looping.label",
-      "default": false
-    },
-    {
-      "type": "header",
-      "content": "t:sections.video.settings.header__1.content"
-    },
-    {
-      "type": "video",
-      "id": "video",
-      "label": "t:sections.video.settings.video.label"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.video.settings.header__2.content"
-    },
-    {
-      "type": "paragraph",
-      "content": "t:sections.video.settings.paragraph.content"
-    },
-    {
-      "type": "video_url",
-      "id": "video_url",
-      "accept": ["youtube", "vimeo"],
-      "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
-      "label": "t:sections.video.settings.video_url.label",
-      "info": "t:sections.video.settings.video_url.info"
+      "type": "text",
+      "id": "heading",
+      "default": "Video",
+      "label": "t:sections.video.settings.heading.label"
     },
     {
       "type": "image_picker",
@@ -201,13 +200,32 @@
     },
     {
       "type": "text",
+      "id": "video_mp4",
+      "info": "Only .mp4 is required for it to work. You can upload videos [here](https://truelinkswear.com/admin/settings/files) to get the url",
+      "label": "Video file url .mp4"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_mp4_bg",
+      "label": "Use mp4 video as a background"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "default": "https:\/\/www.youtube.com\/watch?v=_9VUPq3SxOc",
+      "label": "t:sections.video.settings.video_url.label",
+      "placeholder": "t:sections.video.settings.video_url.placeholder",
+      "info": "Displayed if the 'Video file url .mp4' is not added. Accept Youtube or Vimeo video"
+    },
+    {
+      "type": "text",
       "id": "description",
       "label": "t:sections.video.settings.description.label",
       "info": "t:sections.video.settings.description.info"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.video.settings.header__3.content"
     },
     {
       "type": "checkbox",
@@ -216,40 +234,69 @@
       "default": false
     },
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "default": "scheme-1"
+      "type": "header",
+      "content": "Video info"
+    },
+    {
+      "type": "text",
+      "id": "video_title",
+      "label": "Title"
+    },
+    {
+      "type": "text",
+      "id": "video_description",
+      "label": "Description"
     },
     {
       "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
+      "content": "Checkbox with button"
     },
     {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 36
+      "type": "richtext",
+      "id": "checkbox_content",
+      "label": "Content"
     },
     {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "type": "checkbox",
+      "id": "clickable_content",
+      "label": "Clickable content for checkbox"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button_checkbox",
+      "label": "Show button and checkbox",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "checkbox_text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "checkbox_button_text_1",
+      "label": "Button text (1)"
+    },
+    {
+      "type": "url",
+      "id": "checkbox_button_url_1",
+      "label": "Button url (1)"
+    },
+    {
+      "type": "text",
+      "id": "checkbox_button_text_2",
+      "label": "Button text (2)"
+    },
+    {
+      "type": "url",
+      "id": "checkbox_button_url_2",
+      "label": "Button url (2)"
     }
   ],
   "presets": [
     {
-      "name": "t:sections.video.presets.name"
+      "name": "Video"
     }
   ]
 }
-{% endschema %}
+  {% endschema %}

@@ -1,0 +1,42 @@
+{% comment %}
+{% render 'image-metafields', image: , class_name: , image_attr: , hide_id , alt: alt, small_size: boolean, preload: boolean  %}
+{% endcomment %}
+
+{%- capture srcset -%}
+	{%- if small_size -%}
+		{{ image.cloudinary_src | append: 'w_50' }} 25w,
+		{{ image.cloudinary_src | append: 'w_72' }} 36w,
+		{{ image.cloudinary_src | append: 'w_144' }} 72w,
+		{{ image.cloudinary_src | append: 'w_288' }} 144w
+	{%- else -%}
+		{{ image.cloudinary_src | append: 'w_480' }} 240w,
+		{{ image.cloudinary_src | append: 'w_720' }} 360w,
+		{{ image.cloudinary_src | append: 'w_1080' }} 540w,
+		{{ image.cloudinary_src | append: 'w_1480' }} 720w,
+		{{ image.cloudinary_src | append: 'w_1350' }} 900w,
+		{{ image.cloudinary_src | append: 'w_1512' }} 1080w,
+		{{ image.cloudinary_src | append: 'w_1728' }} 1296w,
+		{{ image.cloudinary_src | append: 'w_1920' }} 1350w,
+		{{ image.cloudinary_src | append: 'w_1980' }} 1728w,
+		{{ image.cloudinary_src | append: 'w_2160' }} 1920w,
+		{{ image.cloudinary_src | append: 'w_2560' }} 2560w
+	{%- endif -%}
+{%- endcapture -%}
+
+{%- if preload -%}
+	<link rel="preload" href="{{ image.cloudinary_src | append: 'w_360' }}" as="image" imagesrcset="{{ srcset }}">
+{%- endif -%}
+
+{%- assign alt = alt | default: image.alt | escape -%}
+
+<img {% unless hide_id == 'true' or hide_id %}id="{{ image.id }}"{% endunless %}
+     data-srcset="{{ srcset }}"
+     class="lazyload {{ class_name }}"
+     data-sizes="auto"
+     data-optimumx="auto"
+     data-src="{{ image.cloudinary_src | append: 'w_360' }}"
+     data-parent-fit="contain"
+     alt="{{ alt }}"
+     width="100%"
+     height="100%"
+	{{ image_attr }}>

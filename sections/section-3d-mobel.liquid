@@ -1,0 +1,91 @@
+{{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+{%- assign anchor_link = section.settings.anchor_link -%}
+<link
+	id="ModelViewerStyle"
+	rel="stylesheet"
+	href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+	media="print"
+	onload="this.media='all'"
+>
+<link
+	id="ModelViewerOverride"
+	rel="stylesheet"
+	href="{{ 'component-model-viewer-ui.css' | asset_url }}"
+	media="print"
+	onload="this.media='all'"
+>
+
+{% liquid
+	assign product_media = product.metafields.custom.model
+	assign preview_image = product.metafields.custom.model_preview_image
+
+	assign page_media = page.metafields.custom.model
+	assign page_preview_image = page.metafields.custom.model_preview_image
+%}
+
+
+{% if template == 'product' and product_media != blank %}
+	<div class="product-media-modal__model" data-media-id="{{ product.id }}" {% if anchor_link != blank %}id="{{ anchor_link }}"{% endif %}>
+		<product-model class="deferred-media media media--transparent global-media-settings global-media-settings--no-shadow" style="padding-top: min(calc(100vh - 12rem), 100%)">
+
+			<button id="Deferred-Poster-Modal-{{ product.id }}" class="deferred-media__poster" type="button">
+      <span class="deferred-media__poster-button motion-reduce">
+				{%- render 'icon-3d-model' -%}
+      </span>
+				<img
+					src="{{ preview_image | image_url: width: auto, height: auto }}"
+					loading="lazy"
+					alt="{{ model.alt | escape }}"
+				>
+			</button>
+			<template>
+				{{ product_media | media_tag: image_size: "2048x", toggleable: true }}
+			</template>
+
+		</product-model>
+	</div>
+{% elsif template contains 'page' and page_media != blank %}
+	<div class="product-media-modal__model" data-media-id="{{ product.id }}">
+		<product-model class="deferred-media media media--transparent global-media-settings global-media-settings--no-shadow" style="padding-top: min(calc(100vh - 12rem), 100%)">
+
+			<button id="Deferred-Poster-Modal-{{ product.id }}" class="deferred-media__poster" type="button">
+      <span class="deferred-media__poster-button motion-reduce">
+				{%- render 'icon-3d-model' -%}
+      </span>
+				<img
+					src="{{ page_preview_image | image_url: width: auto, height: auto }}"
+					loading="lazy"
+					alt="{{ model.alt | escape }}"
+				>
+			</button>
+			<template>
+				{{ page_media | media_tag: image_size: "2048x", toggleable: true }}
+			</template>
+
+		</product-model>
+	</div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "3D Model",
+  "tag": "section",
+  "settings":[
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link"
+    },
+    {
+      "type": "header",
+      "content": "This section is setup via metafields."
+    }
+	],
+  "presets": [
+    {
+      "name": "3D Model"
+    }
+  ]
+}
+{% endschema %}

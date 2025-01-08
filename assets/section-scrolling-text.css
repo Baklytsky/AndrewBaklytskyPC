@@ -1,0 +1,125 @@
+.scrolling-text {
+  background-color: var(--bg-color);
+  color: var(--color);
+  position: relative;
+}
+
+.scrolling-text--large .scrolling-text__item,
+.scrolling-text--large .static-text__item{
+  padding: 36px 40px;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: unset;
+}
+
+@media screen and (max-width: 1024px) {
+  .scrolling-text--large .scrolling-text__item,
+  .scrolling-text--large .static-text__item{
+    padding: 20px 40px;
+  }
+
+  .scrolling-text--large .static-text__item {
+    font-size: 10px;
+  }
+}
+
+.scrolling-text-link {
+  z-index: 2;
+}
+
+.scrolling-text__content {
+  overflow: hidden;
+}
+
+.scrolling-text__content,
+.scrolling-text__list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all .2s linear;
+}
+
+.static-text__list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scrolling-text__list {
+  -moz-animation: move var(--animation-speed) linear infinite;
+  -webkit-animation: move var(--animation-speed) linear infinite;
+  animation: move var(--animation-speed) linear infinite;
+}
+
+.scrolling-text__item {
+  text-transform: uppercase;
+  padding: 12px 40px;
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.static-text__item {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 20px;
+  text-transform: uppercase;
+  padding: 12px 40px;
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.scrolling-text__item--default-divider:before,
+.scrolling-text__item .scrolling-text__item--svg-divider {
+   content: '';
+   display: block;
+   width: 8px;
+   height: 8px;
+   border-radius: 50%;
+   position: absolute;
+   top: 50%;
+   left: 0;
+   transform: translate(-50%, -50%);
+   background-color: var(--divider-color);
+ }
+
+.scrolling-text__item .scrolling-text__item--svg-divider,
+.scrolling-text__item .scrolling-text__item--svg-divider svg {
+  width: auto;
+  max-width: 60px;
+  height: 30px;
+  line-height: 30px;
+  background-color: transparent;
+  color: var(--divider-color);
+  stroke: var(--divider-color);
+}
+
+.static-text__item .scrolling-text__item--img-divider{
+  display: block;
+  width: auto;
+  max-width: 60px;
+  height: 30px;
+}
+
+
+.scrolling-text__item .scrolling-text__item--svg-divider svg path {
+  fill: var(--divider-color);
+}
+
+.scrolling-text__item .scrolling-text__item--img-divider {
+  display: block;
+  width: auto;
+  max-width: 60px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes move {
+  0% {transform: translate(0, 0)}
+  100% {transform: translate(-100%, 0)}
+}

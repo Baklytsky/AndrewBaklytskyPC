@@ -1,0 +1,179 @@
+{{ 'section-find-a-store.css' | asset_url | stylesheet_tag }}
+{{ 'component-autocomplite.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.section_bg_color }};
+    color: {{ section.settings.section_text_color }};
+  }
+{%- endstyle -%}
+
+{%- assign stores = ' ' | split: ' ' -%}
+
+{% for json_data in shop.metafields.globals.json_data %}
+  {%- assign json_item = shop.metafields.globals[json_data.metafield][json_data.index] -%}
+  {%- if json_item != blank -%}
+    {%- assign stores = stores | concat: json_item -%}
+  {%- endif -%}
+{% endfor %}
+
+{%- assign citys = '' -%}
+{%- assign zip_codes = '' -%}
+
+{%- for store in stores -%}
+
+  {%- if store.Zip != blank -%}
+    {%- assign store_zip = store.Zip | strip -%}
+    {%- assign zip_langth = store_zip | size -%}
+
+    {%- if zip_langth == 4 -%}
+      {%- assign store_zip = store.Zip | strip | prepend: '0' -%}
+    {%- endif -%}
+
+    {%- if store_zip contains '-' -%}
+      {%- assign store_zip = store.Zip | split: '-' | first  -%}
+    {%- endif -%}
+
+    {%- assign zip_codes = zip_codes | append: store_zip | append: ',' -%}
+  {%- endif -%}
+
+  {%- if store.City != blank -%}
+    {%- assign citys = citys | append: store.City | append: ',' -%}
+  {%- endif -%}
+
+{%- endfor -%}
+
+{%- assign uniq_citys = citys | split: ',' | uniq | sort -%}
+{%- assign uniq_zip_codes = zip_codes | split: ',' | uniq | sort -%}
+
+<script>
+  window.allStoresZipCodes = {{ uniq_zip_codes | json }};
+  window.allStoresCitys = {{ uniq_citys | json }};
+</script>
+
+{%- if stores != blank -%}
+  <find-store id="{{ section.id }}" class="page-width find-store__wrapper">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="find-store__heading small-hide">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="find-store__by-city">
+      {%- if uniq_citys != blank -%}
+        <div class="find-store__select-wrapper h2">
+          <span class="small-up-hide">{{ section.settings.heading }} By</span>
+          <span class="small-hide">By</span>
+          <input-autocomplete data-search-terms="allStoresCitys" data-find-by="city">
+            <input type="text"
+                   name="city"
+                   autocomplete="off"
+                   placeholder="City"
+                   class="form__select-btn h2"
+                   style="color: {{ section.settings.select_color }};
+                           border-bottom: 2px solid {{ section.settings.select_color }};">
+            <div class="fake-element h2"></div>
+            <div class="result"></div>
+          </input-autocomplete>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="find-store__by-zip" {% if section.settings.default_zip_code != blank %}data-first-zip-point="{{ section.settings.default_zip_code }}"{% endif %}>
+      {%- if uniq_zip_codes != blank -%}
+        <div class="find-store__select-wrapper h2">
+          <span>or</span>
+          <input-autocomplete data-search-terms="allStoresZipCodes" data-find-by="zip">
+            <input type="text"
+                   name="zip"
+                   autocomplete="off"
+                   placeholder="Zip"
+                   class="form__select-btn h2"
+                   style="color: {{ section.settings.select_color }};
+                           border-bottom: 2px solid {{ section.settings.select_color }};">
+            <div class="fake-element h2"></div>
+            <div class="result"></div>
+          </input-autocomplete>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <ul class="find-store__list">
+      {%- for store in stores -%}
+
+        {%- if store.Zip != blank -%}
+          {%- assign store_zip = store.Zip | strip -%}
+          {%- assign zip_langth = store_zip | size -%}
+
+          {%- if zip_langth == 4 -%}
+            {%- assign store_zip = store.Zip | strip | prepend: '0' -%}
+          {%- endif -%}
+
+          {%- if store_zip contains '-' -%}
+            {%- assign store_zip = store.Zip | split: '-' | first  -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        <li class="find-store__item {% if section.settings.default_zip_code == blank %}is-visible{% endif %}"
+            data-zip="{{ store_zip }}"
+            data-city="{{ store.City | handleize }}"
+            data-show-by-zip="false"
+            data-show-by-city="false">
+          {%- assign store_location_address = store.Address_1 | replace: ' ', '+' -%}
+          {%- assign store_location_city = store.City | replace: ' ', '+' -%}
+          {%- assign store_location_state = store.State | replace: ' ', '+' -%}
+          {%- assign store_location_url = 'https://www.google.com/maps/place/' | append: store_location_address | append: '+' | append: store_location_city | append: '+' | append: store_location_state | append: '+' | append: store_zip -%}
+          <a href="{{ store_location_url }}" class="find-store__item-title"
+             target="_blank">{{ store.Customer_Name | capitalize }}</a>
+          <p class="find-store__item-address">{{ store.Address_1 }}</p>
+          <p class="find-store__item-address">{{ store.City }}, {{ store_zip }}, {{ store.State  }}</p>
+          <p class="find-store__item-open-time"></p>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+  </find-store>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Find a store",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section background color",
+      "default": "#181818"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Section text color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "color",
+      "id": "select_color",
+      "label": "Select color",
+      "default": "#b4b5b6"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Find a store"
+    },
+    {
+      "type": "text",
+      "id": "default_zip_code",
+      "label": "Default zip code"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Find a store"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}
