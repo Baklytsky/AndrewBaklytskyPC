@@ -17,33 +17,22 @@
   assign show_placeholder = section.settings.show_placeholder
 
   # Rendering conditions
-  # assign image_1 = section.blocks[0].settings.image
-  # assign image_2 = section.blocks[1].settings.image
-  # assign mobile_image_1 = section.blocks[0].settings.mobile_image
-  # assign mobile_image_2 = section.blocks[1].settings.mobile_image
   assign render_section = false
-  # assign render_image_1 = true
-  # assign render_image_2 = true
-  assign render_image_overlay = false
   if section.blocks.size > 0 or show_placeholder or request.design_mode
     assign render_section = true
   endif
+  assign render_image_overlay = false
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  # if image_1 == blank and mobile_image_1 == blank and image_2 == blank and mobile_image_2 == blank and show_placeholder == false
-  #  assign render_metafield_info = true
-  #  assign render_image_1 = false
-  #  assign render_image_2 = false
-  # endif
-
-  #  capture sizes_mobile
-  #    if section_width == 'wrapper--full'
-  #      echo '100vw'
-  #    else
-  #      echo 'calc(100vw - 32px)'
-  #    endif
-  #  endcapture
+  assign hero_transparent = true
+  if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
+    assign hero_transparent = false
+  endif
+  assign show_header_backdrop = false
+  if hero_transparent and show_overlay_text
+    assign show_header_backdrop = true
+  endif
 
   capture image_sizes
     if section.blocks.size > 1
@@ -64,18 +53,6 @@
       endif
     endif
   endcapture
-
-  assign hero_transparent = true
-  if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
-    assign hero_transparent = false
-  endif
-
-  assign show_header_backdrop = false
-  if hero_transparent and show_overlay_text
-    assign show_header_backdrop = true
-  endif
-
-  assign animation_order = 1
 -%}
 
 {%- style -%}
@@ -111,6 +88,7 @@
           assign heading_seo_tag = block.settings.heading_tag
           assign animation_order = 0
 
+          # Rendering conditions
           assign is_blank = false
           assign is_image_link = false
           assign render_block_content = false
@@ -134,6 +112,7 @@
           if render_metafield_info and request.design_mode == false
             assign hide_block = true
           endif
+
           if button_style == 'btn--text' and show_arrow
             assign button_style = button_style | append: ' btn--text-no-underline'
           endif
