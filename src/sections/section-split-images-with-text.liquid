@@ -25,7 +25,6 @@
   # assign render_image_1 = true
   # assign render_image_2 = true
   assign render_image_overlay = false
-  assign render_metafield_info = false
   if section.blocks.size > 0 or show_placeholder or request.design_mode
     assign render_section = true
   endif
@@ -116,12 +115,10 @@
           assign is_image_link = false
           assign render_block_content = false
           assign render_image = true
+          assign render_metafield_info = false
+          assign hide_block = false
           if desktop_image == blank and mobile_image == blank
             assign is_blank = true
-          endif
-          if is_blank and show_placeholder == false
-            assign render_image = false
-            assign render_metafield_info = true
           endif
           if image_link != blank
             assign is_image_link = true
@@ -129,12 +126,23 @@
           if title != blank or text != blank or link_text != blank
             assign render_block_content = true
           endif
+          if is_blank and show_placeholder == false
+            assign render_image = false
+            assign render_metafield_info = true
+            assign render_block_content = false
+          endif
+          if render_metafield_info and request.design_mode == false
+            assign hide_block = true
+          endif
           if button_style == 'btn--text' and show_arrow
             assign button_style = button_style | append: ' btn--text-no-underline'
           endif
         -%}
 
-        <div class="brick__block" {{ block.shopify_attributes }}>
+        <div
+          class="brick__block{% if hide_block %} hidden{% endif %}"
+          {{ block.shopify_attributes }}
+        >
           <div class="brick__block__image frame wide-image">
             {%- if is_image_link -%}
               <a class="frame__item" href="{{ image_link }}">
