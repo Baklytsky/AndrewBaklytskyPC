@@ -704,4 +704,6 @@ class ProductForm extends HTMLElement {
   }
 }
 
-export {ProductForm};
+if (!customElements.get('product-form')) {
+  customElements.define('product-form', ProductForm);
+}

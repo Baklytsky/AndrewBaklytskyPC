@@ -131,4 +131,8 @@ class DeferredMedia extends HTMLElement {
   }
 }
 
-export {DeferredMedia};
+if (!customElements.get('deferred-media')) {
+  customElements.define('deferred-media', DeferredMedia);
+}
+
+window.theme.DeferredMedia = window.theme.DeferredMedia || DeferredMedia;

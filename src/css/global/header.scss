@@ -17,7 +17,7 @@ hover-disclosure { display: block; }
   transition: top 0.2s linear;
 }
 
-.header__desktop__upper {
+.header__desktop {
   --text: var(--COLOR-HEADER-LINK);
   --link: var(--COLOR-HEADER-LINK);
   --link-hover: var(--COLOR-HEADER-LINK-HOVER);
@@ -346,6 +346,8 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
   transition: none;
   color: var(--link);
 
+  &:hover { color: var(--link-hover); }
+
   .icon {
     --icon-size: 24px;
 
@@ -359,25 +361,18 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
   .icon-cancel { display: none; }
 }
 
-.navlink--toplevel { --link-hover: var(--COLOR-HEADER-LINK); }
-.navlink--toplevel:hover { color: var(--link-hover); }
-
 .navlink--child,
 .navlink--grandchild {
   --link: var(--text-light);
 
   transition: color 0.25s $ease-out-fast;
-
-  &:hover { color: var(--link-hover); }
 }
 
 .navlink--toplevel {
   --link-padding: 15px;
-  --link-hover: var(--link);
 
   position: relative;
   padding: 5px 9px;
-  font-weight: var(--FONT-WEIGHT-NAV-BOLD);
   z-index: 6;
 
   @include media-query($medium-up) {
@@ -519,8 +514,7 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
 
 body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):not(:has([data-prevent-transparent-header])) {
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck),
-  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop__upper,
-  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop__lower,
+  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop,
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__mobile,
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .toolbar {
     --text: var(--COLOR-MENU-TRANSPARENT);
@@ -532,7 +526,6 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) {
     .toolbar { --bg: var(--TRANSPARENT); }
-    .header__desktop__lower { border-top: 1px solid var(--TRANSPARENT); }
 
     .parent .navlink--toplevel::after { content: none; }
 
@@ -553,8 +546,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 // Fallback for browsers that don't support :has() selector
 body.has-first-section-overlay-header {
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck),
-  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop__upper,
-  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop__lower,
+  [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__desktop,
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .header__mobile,
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) .toolbar {
     --text: var(--COLOR-MENU-TRANSPARENT);
@@ -566,7 +558,6 @@ body.has-first-section-overlay-header {
 
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) {
     .toolbar { --bg: var(--TRANSPARENT); }
-    .header__desktop__lower { border-top: 1px solid var(--TRANSPARENT); }
 
     .parent .navlink--toplevel::after { content: none; }
 
