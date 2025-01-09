@@ -1,11 +1,11 @@
 {% comment %}
-    Renders the content of section-columns, section-multicolumn
+  Renders the content of section-columns, section-multicolumn
 
-    Accepts:
-    - type: {String} product (optional)
+  Accepts:
+  - type: {String} product (optional)
 
-    Usage:
-    {% render 'multicolumn', type: 'images' %}
+  Usage:
+  {% render 'multicolumn', type: 'images' %}
 {% endcomment %}
 
 {%- liquid
@@ -108,10 +108,12 @@
   }
 {%- endstyle -%}
 
-<div id="{{ unique }}"
+<div
+  id="{{ unique }}"
   class="section-columns section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="columns">
+  data-section-type="columns"
+>
   <div class="{{ section.settings.width }}">
     {%- if has_content -%}
       <div class="grid__heading-holder {{ section.settings.align_heading }}">
@@ -125,7 +127,8 @@
             endunless
           -%}
 
-          <{{ heading_tag }} class="grid__heading {{ section.settings.heading_font_size }}"
+          <{{ heading_tag }}
+            class="grid__heading {{ section.settings.heading_font_size }}"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -137,7 +140,8 @@
         {%- if description -%}
           {%- assign animation_order = animation_order | plus: 1 -%}
 
-          <div class="grid__description"
+          <div
+            class="grid__description"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -437,6 +441,7 @@
                       {%- for link in linklists[menu_linklist].links -%}
                         <div class="column__links__item {{ block.settings.heading_font_size }}">
                           <a href="{{ link.url }}">{{ link.title }}</a>
+                          {%- render 'superscript', link_collection: link -%}
                         </div>
                       {%- endfor -%}
                     </div>
@@ -473,7 +478,6 @@
       {%- else -%}
         {{ columns_content }}
       {%- endif -%}
-
     {%- endif -%}
 
     {%- if blocks_size == 0 -%}
