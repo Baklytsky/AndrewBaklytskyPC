@@ -23,7 +23,7 @@ document.addEventListener('shopify:block:select', (event) => {
 
       // Go to selected slide, pause autoplay
       if (flickityEnabled) {
-        slide.classList.add('is-selected');
+        slider.classList.add('is-selected');
         slider.dispatchEvent(
           new CustomEvent('theme:slider:select', {
             bubbles: false,
@@ -119,13 +119,12 @@ document.addEventListener('shopify:block:deselect', (event) => {
   // Resume slider on block deselect
   const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (blockSelectedIsSlide) {
-    const slide = event.target;
     const slider = event.target.closest('slider-component');
     const flickityEnabled = slider?.classList.contains('flickity-enabled');
 
     // Go to selected slide, pause autoplay
     if (flickityEnabled) {
-      slide.classList.remove('is-selected');
+      slider.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
   }
