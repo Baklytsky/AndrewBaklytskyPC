@@ -22,8 +22,6 @@
 -%}
 
 <div data-api-content>
-  <script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
-
   <product-images
     class="product-quick-add__images product__images product__images--thumbs product__images--mobile-thumbs"
     data-active-media="{{ section.id }}-{{ featured_media.id }}"
@@ -47,6 +45,7 @@
             product_api: true,
             image_width: '365',
             loading: 'eager',
+            fetchpriority: 'high',
             cover: true
           -%}
         {%- endfor -%}
@@ -66,7 +65,7 @@
         {%- endif -%}
       {%- else -%}
         <div class="product__slide">
-          <div class="product__photo{% if settings.show_gray_bg %} show-gray-bg{% endif %}">
+          <div class="product__photo{% if settings.show_image_gray_bg != 'none' %} show-gray-bg{% endif %}">
             {%- render 'image',
               image: product.featured_image,
               widths: '365, 550, 730, 1100, 1460',

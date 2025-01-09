@@ -49,25 +49,21 @@ class QuickAddProduct extends HTMLElement {
   constructor() {
     super();
 
-    this.container = this;
-    this.quickAddHolder = this.container.querySelector(selectors.quickAddHolder);
+    this.quickAddHolder = this.querySelector(selectors.quickAddHolder);
+    this.modal = null;
+    this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
+    this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
+    this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
+    this.buttonQuickAdd = this.quickAddHolder.querySelector(selectors.buttonQuickAdd);
+    this.buttonATC = this.quickAddHolder.querySelector(selectors.buttonAddToCart);
+    this.button = this.modalButton || this.buttonATC;
+    this.modalClose = this.modalClose.bind(this);
+    this.modalCloseOnProductAdded = this.modalCloseOnProductAdded.bind(this);
+    this.a11y = window.theme.a11y;
+    this.isAnimating = false;
 
-    if (this.quickAddHolder) {
-      this.modal = null;
-      this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
-      this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
-      this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
-      this.buttonQuickAdd = this.quickAddHolder.querySelector(selectors.buttonQuickAdd);
-      this.buttonATC = this.quickAddHolder.querySelector(selectors.buttonAddToCart);
-      this.button = this.modalButton || this.buttonATC;
-      this.modalClose = this.modalClose.bind(this);
-      this.modalCloseOnProductAdded = this.modalCloseOnProductAdded.bind(this);
-      this.a11y = window.theme.a11y;
-      this.isAnimating = false;
-
-      this.modalButtonClickEvent = this.modalButtonClickEvent.bind(this);
-      this.quickAddLoadingToggle = this.quickAddLoadingToggle.bind(this);
-    }
+    this.modalButtonClickEvent = this.modalButtonClickEvent.bind(this);
+    this.quickAddLoadingToggle = this.quickAddLoadingToggle.bind(this);
   }
 
   connectedCallback() {

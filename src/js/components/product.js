@@ -1,5 +1,3 @@
-import {ProductForm} from '../features/product-form';
-import {DeferredMedia} from '../features/deferred-media';
 import {ProductModel} from '../features/product-model';
 
 const selectors = {
@@ -157,14 +155,6 @@ if (!customElements.get('product-component')) {
   );
 }
 
-if (!customElements.get('product-form')) {
-  customElements.define('product-form', ProductForm);
-}
-
 if (!customElements.get('product-model')) {
   customElements.define('product-model', ProductModel);
-}
-
-if (!customElements.get('deferred-media')) {
-  customElements.define('deferred-media', DeferredMedia);
 }

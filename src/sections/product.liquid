@@ -121,9 +121,7 @@
   }
 {%- endstyle -%}
 
-<script src="{{ 'shopify-products.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
 {%- if product_sticky_enable -%}
   <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -209,7 +207,7 @@
                   {%- for media in product.media -%}
                     <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
                       <a
-                        class="product__thumb__link{% if settings.show_gray_bg %} show-gray-bg{% endif %}"
+                        class="product__thumb__link{% if settings.show_image_gray_bg != 'none' %} show-gray-bg{% endif %}"
                         href="{{ media.preview_image.src | image_url }}"
                         aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
                         data-media-id="{{ section.id }}-{{ media.id }}"
@@ -252,7 +250,7 @@
           {%- else -%}
             <div class="product__slides product__slides--{{ image_size }} product-single__photos">
               <div
-                class="product__photo product__photo--blank product__slide {% if settings.show_gray_bg %} show-gray-bg{% endif %}"
+                class="product__photo product__photo--blank product__slide {% if settings.show_image_gray_bg != 'none' %} show-gray-bg{% endif %}"
               ></div>
             </div>
           {%- endif -%}
