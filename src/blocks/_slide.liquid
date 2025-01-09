@@ -38,30 +38,29 @@
   endif
 -%}
 
-{%- style -%}
-  .slideshow__slide--{{ block.id }} {
-    --overlay-opacity: {{ overlay_opacity }};
+{%- capture slide_style -%}
+  --overlay-opacity: {{ overlay_opacity }};
 
-    {%- unless overlay_color.alpha == 0.0 or overlay_color == blank -%}
-      --overlay-bg: {{ overlay_color }};
-    {%- endunless -%}
+  {%- unless overlay_color.alpha == 0.0 or overlay_color == blank -%}
+    --overlay-bg: {{ overlay_color }};
+  {%- endunless -%}
 
-    {% if show_header_backdrop %}
-      --header-overlay-color: var(--overlay-bg);
-      --header-overlay-opacity: {{ overlay_opacity }};"
-    {% endif %}
+  {% if show_header_backdrop %}
+    --header-overlay-color: var(--overlay-bg);
+    --header-overlay-opacity: {{ overlay_opacity }};"
+  {% endif %}
 
-    {%- if bg != blank or text != blank -%}
-      {{ bg }}
-      {{ text }}
-    {%- endif -%}
-  }
-{%- endstyle -%}
+  {%- if bg != blank or text != blank -%}
+    {{ bg }}
+    {{ text }}
+  {%- endif -%}
+{%- endcapture -%}
 
 <div
-  class="slideshow__slide slideshow__slide--{{ block.id }} frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }}{% if forloop.first %} is-selected{% endif %}"
+  class="slideshow__slide frame wide-image {{ section.settings.height }} {{ section.settings.mobile_height }}{% if forloop.first %} is-selected{% endif %}"
   data-slide="{{ block.id }}"
   data-slide-text-color="{{ text_color }}"
+  style="{{ slide_style }}"
   {{ block.shopify_attributes }}
 >
   {%- if image_link != blank -%}
