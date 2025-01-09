@@ -588,8 +588,8 @@
     }
 
     &.brick--margin {
-      .brick__block { margin: 0 var(--gap) 0 0; }
-      .brick__block:last-child { margin-right: 0; }
+      .brick__block { margin-inline-end: var(--gap); }
+      .brick__block:last-child { margin-inline-end: 0; }
     }
 
     &.wrapper--full {
@@ -599,12 +599,15 @@
       .brick__block:only-child { width: 100%; }
     }
 
-    &:has(.brick__block.hidden) .brick__block {
-      width: calc(100% - var(--outer));
-    }
+    // Handle layout cases when one of the blocks should stay hidden in previews but visible in the Theme editor
+    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--outer)); }
+    &.brick--margin:has(.brick__block.hidden) .brick__block { margin-inline-end: 0; }
+    &.wrapper--full:has(.brick__block.hidden)::after { display: none; }
+    &.wrapper--full:has(.brick__block.hidden) .brick__block { width: 100%; }
 
-    &.wrapper--full:has(.brick__block.hidden) .brick__block {
-      width: 100%;
+    .brick__block:has(.image__hero__missing-metafield-image) .frame {
+      height: 100%;
+      align-content: center;
     }
   }
 }
