@@ -15,15 +15,8 @@ document.addEventListener('shopify:block:select', (event) => {
       const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider').children).indexOf(slide));
       const flickityEnabled = slider.classList.contains('flickity-enabled');
 
-      setTimeout(() => {
-        slider.scrollTo({
-          left: event.target.offsetLeft,
-        });
-      }, 200);
-
       // Go to selected slide, pause autoplay
       if (flickityEnabled) {
-        slider.classList.add('is-selected');
         slider.dispatchEvent(
           new CustomEvent('theme:slider:select', {
             bubbles: false,
@@ -87,8 +80,8 @@ document.addEventListener('shopify:block:select', (event) => {
   }
 
   // Logos - select logos slide on block select
-  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
-  if (logosBlockSelectedIsSlide) {
+  const isBlockSelectedLogoSlide = event.target.closest('logos-component') && event.target.hasAttribute('data-slide');
+  if (isBlockSelectedLogoSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     // Go to selected slide, pause autoplay
@@ -100,6 +93,8 @@ document.addEventListener('shopify:block:select', (event) => {
         },
       })
     );
+
+    setTimeout(() => document.dispatchEvent(new CustomEvent('theme:resize')), 100);
   }
 });
 
@@ -124,7 +119,6 @@ document.addEventListener('shopify:block:deselect', (event) => {
 
     // Go to selected slide, pause autoplay
     if (flickityEnabled) {
-      slider.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
   }
@@ -136,8 +130,8 @@ document.addEventListener('shopify:block:deselect', (event) => {
   }
 
   // Logos - resume logos slider on block deselect
-  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
-  if (logosBlockSelectedIsSlide) {
+  const isBlockSelectedLogoSlide = event.target.hasAttribute('data-slide');
+  if (isBlockSelectedLogoSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
