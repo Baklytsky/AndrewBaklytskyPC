@@ -11,12 +11,13 @@ document.addEventListener('shopify:block:select', (event) => {
     const slider = event.target.closest('slider-component');
 
     if (slider) {
-      const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
-      const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider').children).indexOf(slide));
       const flickityEnabled = slider.classList.contains('flickity-enabled');
 
       // Go to selected slide, pause autoplay
       if (flickityEnabled) {
+        const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
+        const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider')?.children).indexOf(slide));
+
         slider.dispatchEvent(
           new CustomEvent('theme:slider:select', {
             bubbles: false,
@@ -39,6 +40,7 @@ document.addEventListener('shopify:block:select', (event) => {
   const scrollableBlock = event.target.matches('[data-block-scroll]') ? event.target : event.target.querySelector('[data-block-scroll]') || event.target.closest('[data-block-scroll]');
   if (scrollableBlock && !scrollableBlock.classList.contains('flickity-enabled')) {
     const currentElement = event.target;
+
     if (currentElement) {
       scrollableBlock.scrollTo({
         top: 0,
@@ -130,7 +132,7 @@ document.addEventListener('shopify:block:deselect', (event) => {
   }
 
   // Logos - resume logos slider on block deselect
-  const isBlockSelectedLogoSlide = event.target.hasAttribute('data-slide');
+  const isBlockSelectedLogoSlide = event.target.closest('logos-component') && event.target.hasAttribute('data-slide');
   if (isBlockSelectedLogoSlide) {
     const logosComponent = event.target.closest('logos-component');
 
