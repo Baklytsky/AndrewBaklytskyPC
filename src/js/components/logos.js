@@ -7,12 +7,12 @@ const selectors = {
 const classes = {
   isSelected: 'is-selected',
   isInitialized: 'is-initialized',
+  isEligible: 'is-eligible',
   flickityEnabled: 'flickity-enabled',
 };
 
 const attributes = {
   slideData: 'data-slide',
-  slideIndex: 'data-slide-index',
 };
 
 if (!customElements.get('logos-component')) {
@@ -21,20 +21,23 @@ if (!customElements.get('logos-component')) {
     class LogoList extends HTMLElement {
       constructor() {
         super();
-
-        this.slideshowNav = this.querySelector(selectors.sliderLogos);
-        this.slideshowText = this.querySelector(selectors.sliderText);
-        this.setSlideshowNavStateOnResize = () => this.setSlideshowNavState();
-        this.flkty = null;
-        this.flktyNav = null;
-        this.logoSlides = this.slideshowNav.querySelectorAll(selectors.slide);
-        this.logoSlidesWidth = this.getSlidesWidth();
-        this.bindEvents();
       }
 
       connectedCallback() {
+        this.flkty = null;
+        this.flktyNav = null;
+        this.slideshowNav = this.querySelector(selectors.sliderLogos);
+        this.slideshowText = this.querySelector(selectors.sliderText);
+        this.logoSlides = this.slideshowNav.querySelectorAll(selectors.slide);
+        this.setSlideshowNavStateOnResize = () => this.setSlideshowNavState();
+
         this.initSlideshowText();
         this.initSlideshowNav();
+        this.bindEvents();
+
+        this.setSlideshowNavState();
+
+        document.addEventListener('theme:resize', this.setSlideshowNavStateOnResize);
       }
 
       getSlidesWidth() {
@@ -83,109 +86,78 @@ if (!customElements.get('logos-component')) {
       initSlideshowNav() {
         if (!this.slideshowNav) return;
 
-        if (this.logoSlides.length) {
-          this.logoSlides.forEach((logoItem) => {
-            logoItem.addEventListener('click', () => {
-              const index = parseInt(logoItem.getAttribute(attributes.slideIndex));
-              const hasSlider = this.slideshowNav.classList.contains(classes.flickityEnabled);
+        this.logoSlides?.forEach((logoItem) => {
+          logoItem.addEventListener('click', () => {
+            const hasSlider = this.slideshowNav.classList.contains(classes.flickityEnabled);
+            const slideIndex = parseInt(Array.from(logoItem.parentNode.children).indexOf(logoItem));
 
-              if (this.flkty) {
-                this.flkty.select(index);
-              }
+            if (this.flkty) {
+              this.flkty.select(slideIndex);
+            }
 
-              if (hasSlider) {
-                this.flktyNav.select(index);
-                if (!this.slideshowNav.classList.contains(classes.isSelected)) {
-                  this.flktyNav.playPlayer();
-                }
-              } else {
-                const selectedSlide = this.slideshowNav.querySelector(`.${classes.isSelected}`);
-                if (selectedSlide) {
-                  selectedSlide.classList.remove(classes.isSelected);
-                }
-                logoItem.classList.add(classes.isSelected);
-              }
-            });
+            if (hasSlider) {
+              this.flktyNav?.select(slideIndex);
+              this.flktyNav?.playPlayer();
+            } else {
+              this.slideshowNav.querySelector(`.${classes.isSelected}`)?.classList.remove(classes.isSelected);
+              logoItem.classList.add(classes.isSelected);
+            }
           });
-        }
-
-        this.setSlideshowNavState();
-
-        document.addEventListener('theme:resize', this.setSlideshowNavStateOnResize);
+        });
       }
 
       setSlideshowNavState() {
-        const sliderInitialized = this.slideshowNav.classList.contains(classes.flickityEnabled);
+        const isEligible = this.getSlidesWidth() > window.theme.getWindowWidth();
 
-        if (this.logoSlidesWidth > window.theme.getWindowWidth()) {
-          if (!sliderInitialized) {
-            this.slideshowNav.classList.add(classes.isInitialized);
+        this.slideshowNav.classList.toggle(classes.isEligible, isEligible);
+        this.slideshowNav.querySelector(`.${classes.isSelected}`)?.classList.remove(classes.isSelected);
 
-            const selectedSlide = this.slideshowNav.querySelector(`.${classes.isSelected}`);
+        this.logoSlides[0].classList.add(classes.isSelected);
 
-            if (selectedSlide) {
-              selectedSlide.classList.remove(classes.isSelected);
-            }
-            this.logoSlides[0].classList.add(classes.isSelected);
-
-            // Init slider only once and then listen for watchCSS events
-            if (!this.flktyNav) {
-              this.flktyNav = new window.theme.Flickity(this.slideshowNav, {
-                autoPlay: 4000,
-                prevNextButtons: false,
-                contain: false,
-                pageDots: false,
-                wrapAround: true,
-                watchCSS: true,
-                selectedAttraction: 0.05,
-                friction: 0.8,
-                initialIndex: 0,
-              });
-
-              this.flktyNav.on('deactivate', () => {
+        if (!this.flktyNav) {
+          this.flktyNav = new window.theme.Flickity(this.slideshowNav, {
+            autoPlay: 4000,
+            prevNextButtons: false,
+            contain: false,
+            pageDots: false,
+            wrapAround: true,
+            watchCSS: true,
+            selectedAttraction: 0.05,
+            friction: 0.8,
+            initialIndex: 0,
+            on: {
+              ready: () => {
+                this.slideshowNav.classList.add(classes.isInitialized);
+              },
+              change: (index) => this.flkty?.select(index),
+              deactivate: () => {
                 this.slideshowNav.querySelector(selectors.slide).classList.add(classes.isSelected);
-
-                if (this.flkty) {
-                  this.flkty.select(0);
-                }
-              });
-
-              if (this.flkty) {
-                this.flkty.select(0);
-                this.flktyNav.on('change', (index) => this.flkty.select(index));
-              }
-            }
-          }
-        } else if (sliderInitialized) {
-          // This will deactivate the Logos slider without actually destroying it
-          this.slideshowNav.classList.remove(classes.isInitialized);
+                this.flkty?.select(0);
+              },
+            },
+          });
         }
       }
 
       onBlockSelect(evt) {
         if (!this.slideshowNav) return;
         const slide = this.slideshowNav.querySelector(`[${attributes.slideData}="${evt.detail.blockId}"]`);
-        const slideIndex = parseInt(slide.getAttribute(attributes.slideIndex));
+        const slideIndex = parseInt(Array.from(slide.parentNode.children).indexOf(slide));
 
-        if (this.slideshowNav.classList.contains(classes.flickityEnabled)) {
+        if (this.flktyNav) {
           this.flktyNav.select(slideIndex);
           this.flktyNav.stopPlayer();
-          this.slideshowNav.classList.add(classes.isSelected);
         } else {
           slide.dispatchEvent(new Event('click'));
         }
       }
 
       onBlockDeselect() {
-        if (this.slideshowNav && this.slideshowNav.classList.contains(classes.flickityEnabled)) {
-          this.flktyNav.playPlayer();
-          this.slideshowNav.classList.remove(classes.isSelected);
-        }
+        this.flktyNav?.playPlayer();
       }
 
       bindEvents() {
         this.addEventListener('theme:slider-logos:select', (e) => this.onBlockSelect(e.detail.evt));
-
         this.addEventListener('theme:slider-logos:deselect', () => this.onBlockDeselect());
       }
 

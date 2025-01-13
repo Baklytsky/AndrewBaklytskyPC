@@ -35,7 +35,8 @@
   class="article-single section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="article"
-  style="{{ style }}">
+  style="{{ style }}"
+>
   <div class="article__hero text-center">
     <div class="wrapper">
       <h2 class="article__title h2">{{ article.title }}</h2>
@@ -56,7 +57,13 @@
 
       {%- if section.settings.show_image and article.image -%}
         <div class="article__image {{ section.settings.height }} {{ section.settings.mobile_height }}">
-          {%- render 'image-hero', image: article.image, sizes: '(min-width: 750px) 50vw, calc(100vw - 32px)', desktop_height: section.settings.height, mobile_height: section.settings.mobile_height, show_backfill: false -%}
+          {%- render 'image-hero',
+            image: article.image,
+            sizes: '(min-width: 750px) 50vw, calc(100vw - 32px)',
+            desktop_height: section.settings.height,
+            mobile_height: section.settings.mobile_height,
+            show_backfill: false
+          -%}
         </div>
       {%- endif -%}
     </div>
@@ -77,12 +84,20 @@
           <div class="article__author-bio h6">
             {%- if article.user.image != blank -%}
               <div class="article__author__image">
-                {%- render 'image' image: article.user.image, width: 160, widths: '80, 120, 160, 240', sizes: '80px' -%}
+                {%- render 'image',
+                  image: article.user.image,
+                  width: 160,
+                  widths: '80, 120, 160, 240',
+                  sizes: '80px'
+                -%}
               </div>
             {%- endif -%}
 
             <div class="article__author__text">
-              <h3>{{ article.user.first_name }} {{ article.user.last_name }}</h3>
+              <h3>
+                {{ article.user.first_name }}
+                {{ article.user.last_name }}
+              </h3>
 
               <p class="rte">{{ article.user.bio | newline_to_br }}</p>
             </div>
@@ -95,14 +110,20 @@
               {%- if forloop.index0 == 0 -%}
                 <span class="label">{{ 'blogs.article.tags' | t }}: </span>
               {%- endif -%}
-              <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" title="{{ blog.title | strip_html | escape }} tagged {{ tag | strip_html | escape }}">{{ tag }}</a>{% unless forloop.last %},{% endunless %}
+              <a
+                href="{{ blog.url }}/tagged/{{ tag | handleize }}"
+                title="{{ blog.title | strip_html | escape }} tagged {{ tag | strip_html | escape }}"
+              >
+                {{- tag -}}
+              </a>
+              {%- unless forloop.last %},{% endunless %}
             {%- endfor -%}
           </h4>
         {%- endif -%}
 
         {%- if section.settings.show_sharing -%}
           {%- assign share_url = article.url | prepend: request.origin -%}
-          {%- render 'share-button' share_url: share_url %}
+          {%- render 'share-button', share_url: share_url %}
         {%- endif -%}
 
         {%- if section.settings.arrows -%}
@@ -114,7 +135,11 @@
                 <small class="right">
                   {%- for post in blog.articles -%}
                     {%- if post.url == blog.next_article -%}
-                      <a href="{{ post.url }}" class="btn btn--text btn--text-no-underline btn--small" title="{{ post.title | strip_html | escape }}">
+                      <a
+                        href="{{ post.url }}"
+                        class="btn btn--text btn--text-no-underline btn--small"
+                        title="{{ post.title | strip_html | escape }}"
+                      >
                         <span>{{ 'blogs.article.newer_post' | t }}</span>
 
                         {%- render 'icon-arrow-right' -%}
@@ -128,7 +153,11 @@
                 <small class="left">
                   {%- for post in blog.articles -%}
                     {%- if post.url == blog.previous_article -%}
-                      <a href="{{ post.url }}" class="btn btn--text btn--text-no-underline btn--small" title="{{ post.title | strip_html | escape }}">
+                      <a
+                        href="{{ post.url }}"
+                        class="btn btn--text btn--text-no-underline btn--small"
+                        title="{{ post.title | strip_html | escape }}"
+                      >
                         {%- render 'icon-arrow-left' -%}
 
                         <span>{{ 'blogs.article.older_post' | t }}</span>
@@ -182,10 +211,7 @@
                               {%- endfor -%}
                             {%- endif -%}
 
-                            <li
-                              data-slide="{{ forloop.index0 }}"
-                              data-slide-index="{{ forloop.index0 }}"
-                            >
+                            <li data-slide="{{ forloop.index0 }}">
                               {% if current_blog_articles != '' %}
                                 <details class="widget__link" data-collapsible{% if open_submenu %} open="true"{% endif %}>
                                   <summary class="widget__accordion-title" data-collapsible-trigger>
@@ -226,22 +252,27 @@
                             <h3 class="widget__title h4">{{ block.settings.title }}</h3>
                           {%- endif -%}
 
-                            <ul class="widget__links widget__links--primary">
-                              {{ list_html }}
-                            </ul>
-                          {%- endif -%}
-                        {%- elsif blog.all_tags.size > 0 -%}
-                          {%- if block.settings.title != blank -%}
-                            <h3 class="widget__title h4">{{ block.settings.title }}</h3>
-                          {%- endif -%}
+                          <ul class="widget__links widget__links--primary">
+                            {{ list_html }}
+                          </ul>
+                        {%- endif -%}
+                    {%- elsif blog.all_tags.size > 0 -%}
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="widget__title h4">{{ block.settings.title }}</h3>
+                      {%- endif -%}
 
-                        <ul class="widget__links widget__links--primary">
-                          {%- for tag in blog.all_tags -%}
-                            <li {% if article.tags contains tag %}class="widget__links--active" {% endif %} data-slide="{{ forloop.index0 }}" data-slide-index="{{ forloop.index0 }}">
-                              <a class="widget__link" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag }}</a>
-                            </li>
-                          {%- endfor -%}
-                        </ul>
+                      <ul class="widget__links widget__links--primary">
+                        {%- for tag in blog.all_tags -%}
+                          <li
+                            {% if article.tags contains tag %}
+                              class="widget__links--active"
+                            {% endif %}
+                            data-slide="{{ forloop.index0 }}"
+                          >
+                            <a class="widget__link" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag }}</a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
                       </collapsible-elements>
                     {%- endif -%}
                   </div>
@@ -366,7 +397,11 @@
                       {%- endif -%}
 
                       <div class="widget__image">
-                        {%- render 'image' image: article.image, widths: '320, 480, 560, 640, 780, 960, 1280, 1440, 1960', sizes: '(min-width: 750px) 320px, calc(100vw - 32px)' -%}
+                        {%- render 'image',
+                          image: article.image,
+                          widths: '320, 480, 560, 640, 780, 960, 1280, 1440, 1960',
+                          sizes: '(min-width: 750px) 320px, calc(100vw - 32px)'
+                        -%}
                       </div>
                     </div>
                   {%- endif -%}
@@ -395,7 +430,9 @@
                       <div class="comment-meta">
                         {% assign comment_date = comment.created_at | date: format: 'full_date' %}
                         <span class="author">{{ comment.author }}</span>
-                        <span class="label"><time datetime="{{ comment_date }}">{{ comment_date }}</time></span>
+                        <span class="label"
+                          ><time datetime="{{ comment_date }}">{{ comment_date }}</time></span
+                        >
                       </div>
                       {{ comment.content }}
                     </div>
@@ -408,7 +445,9 @@
                       <div class="comment-meta">
                         {% assign comment_date = comment.created_at | date: format: 'full_date' %}
                         <span class="author">{{ comment.author }}</span>
-                        <span class="label"><time datetime="{{ comment_date }}">{{ comment_date }}</time></span>
+                        <span class="label"
+                          ><time datetime="{{ comment_date }}">{{ comment_date }}</time></span
+                        >
                       </div>
                       {{ comment.content }}
                     </div>
@@ -420,7 +459,7 @@
             {% if paginate.pages > 1 %}
               <div class="paginate">
                 {% if paginate.previous %}
-                    <span class="left">{{ '&larr;' | link_to: paginate.previous.url }}</span>
+                  <span class="left">{{ '&larr;' | link_to: paginate.previous.url }}</span>
                 {% endif %}
                 {% for part in paginate.parts %}
                   {% if part.is_link %}
@@ -442,28 +481,49 @@
               <div class="hr"></div>
               {% form article %}
                 {% if form.posted_successfully? %}
-                    {% if blog.moderated? %}
-                        <p class="flash"><em>{{ 'blogs.comments.success_moderated' | t }}</em></p>
-                    {% else %}
-                        <p class="flash"><em>{{ 'blogs.comments.success' | t }}</em></p>
-                    {% endif %}
+                  {% if blog.moderated? %}
+                    <p class="flash">
+                      <em>{{ 'blogs.comments.success_moderated' | t }}</em>
+                    </p>
+                  {% else %}
+                    <p class="flash">
+                      <em>{{ 'blogs.comments.success' | t }}</em>
+                    </p>
+                  {% endif %}
                 {% endif %}
                 {% if form.errors %}
-                    <p class="error">{{ 'general.forms.post_error' | t }}</p>
+                  <p class="error">{{ 'general.forms.post_error' | t }}</p>
                 {% endif %}
                 <div class="form-row">
                   <div class="form-field">
                     <label for="comment_author">{{ 'blogs.comments.name' | t }}</label>
-                    <input type="text" id="comment_author" name="comment[author]" value="{{ form.author }}" placeholder="{{ 'blogs.comments.name' | t }}">
+                    <input
+                      type="text"
+                      id="comment_author"
+                      name="comment[author]"
+                      value="{{ form.author }}"
+                      placeholder="{{ 'blogs.comments.name' | t }}"
+                    >
                   </div>
                   <div class="form-field">
                     <label for="comment_email">{{ 'blogs.comments.email' | t }}</label>
-                    <input type="text" id="comment_email" name="comment[email]" value="{{ form.email }}" placeholder="{{ 'blogs.comments.email' | t }}">
+                    <input
+                      type="text"
+                      id="comment_email"
+                      name="comment[email]"
+                      value="{{ form.email }}"
+                      placeholder="{{ 'blogs.comments.email' | t }}"
+                    >
                   </div>
                 </div>
                 <div class="form-field">
                   <label for="comment_body">{{ 'blogs.comments.comment' | t }}</label>
-                  <textarea id="comment_body" name="comment[body]" rows="5" placeholder="{{ 'blogs.comments.comment' | t }}" >{{ form.body }}</textarea>
+                  <textarea
+                    id="comment_body"
+                    name="comment[body]"
+                    rows="5"
+                    placeholder="{{ 'blogs.comments.comment' | t }}"
+                  >{{ form.body }}</textarea>
                 </div>
 
                 <div class="form-field">
@@ -471,10 +531,17 @@
                     {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
                   </div>
                   {% if blog.moderated? %}
-                    <p><em>{{ 'blogs.comments.moderated' | t }}</em></p>
+                    <p>
+                      <em>{{ 'blogs.comments.moderated' | t }}</em>
+                    </p>
                   {% endif %}
 
-                  <input type="submit" value="{{ 'blogs.comments.post' | t }}" id="comment-submit" class="btn btn--primary btn--solid">
+                  <input
+                    type="submit"
+                    value="{{ 'blogs.comments.post' | t }}"
+                    id="comment-submit"
+                    class="btn btn--primary btn--solid"
+                  >
 
                   {% if form.errors %}
                     <script>
@@ -487,12 +554,10 @@
                       window.location.hash = '#comments';
                     </script>
                   {% endif %}
-
                 </div>
               {% endform %}
             </div>
           {% endpaginate %}
-
         </div>
       </div>
       <!-- end comments -->
@@ -532,197 +597,197 @@
 </script>
 
 {% schema %}
-  {
-    "name": "Article page",
-    "class": "section-overlay-header",
-    "settings": [
-      {
-        "type": "header",
-        "content": "Content"
-      },
-      {
-        "type": "checkbox",
-        "id": "show_image",
-        "label": "Show image",
-        "default": true
-      },
-      {
-        "type": "checkbox",
-        "id": "show_date",
-        "label": "Show date",
-        "default": true
-      },
-      {
-        "type": "checkbox",
-        "id": "show_author",
-        "label": "Show author",
-        "default": true
-      },
-      {
-        "type": "checkbox",
-        "id": "tags",
-        "label": "Show article tags",
-        "default": false
-      },
-      {
-        "type": "checkbox",
-        "id": "show_sharing",
-        "label": "Show sharing button",
-        "default": true
-      },
-      {
-        "type": "checkbox",
-        "id": "arrows",
-        "label": "Show navigation arrows",
-        "default": false
-      },
-      {
-        "type": "header",
-        "content": "Desktop"
-      },
-      {
-        "type": "select",
-        "id": "height",
-        "label": "Height",
-        "default": "screen-height-one-third",
-        "options": [
-          { "value": "image-height", "label": "Image height" },
-          { "value": "screen-height-full", "label": "Full screen height"},
-          { "value": "screen-height-three-quarters", "label": "3/4 of screen"},
-          { "value": "screen-height-two-thirds", "label": "2/3 of screen"},
-          { "value": "screen-height-one-half", "label": "1/2 of screen"},
-          { "value": "screen-height-one-third", "label": "1/3 of screen"},
-          { "value": "seven-fifty-height-hero", "label": "750px" },
-          { "value": "sixty-fifty-height-hero", "label": "650px" },
-          { "value": "five-fifty-height-hero ", "label": "550px" },
-          { "value": "four-fifty-height-hero", "label": "450px" }
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Mobile"
-      },
-      {
-        "type": "select",
-        "id": "mobile_height",
-        "label": "Height",
-        "default": "screen-height-one-third--mobile",
-        "options": [
-          { "value": "image-height--mobile", "label": "Image height" },
-          { "value": "screen-height-full--mobile", "label": "Full screen height"},
-          { "value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
-          { "value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
-          { "value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
-          { "value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
-          { "value": "seven-fifty-height-hero--mobile", "label": "750px" },
-          { "value": "sixty-fifty-height-hero--mobile", "label": "650px" },
-          { "value": "five-fifty-height-hero--mobile", "label": "550px" },
-          { "value": "four-fifty-height-hero--mobile", "label": "450px" }
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Colors"
-      },
-      {
-        "type": "color_scheme",
-        "id": "color_scheme",
-        "default": "scheme_1",
-        "label": "Color scheme"
-      },
-      {
-        "type": "header",
-        "content": "Padding"
-      },
-      {
-        "type": "range",
-        "id": "padding_top",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Top",
-        "default": 0
-      },
-      {
-        "type": "range",
-        "id": "padding_bottom",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Bottom",
-        "default": 50
-      }
-    ],
-    "blocks": [
-      {
-        "type": "@app"
-      },
-      {
-        "type": "links",
-        "name": "Navigation",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading",
-            "default": "Categories"
-          },
-          {
-            "type": "link_list",
-            "id": "blog_linklist",
-            "label": "Custom navigation",
-            "info": "Overrides tag navigation"
-          }
-        ]
-      },
-      {
-        "type": "related",
-        "name": "Related products",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading",
-            "default": "Related products",
-            "info": "Products linked in the article body appear as Related products"
-          },
-          {
-            "type": "product_list",
-            "id": "product_list",
-            "label": "Products",
-            "limit": 5
-          }
-        ]
-      },
-      {
-        "type": "recent",
-        "name": "Recent articles",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading",
-            "default": "Recent articles"
-          }
-        ]
-      },
-      {
-        "type": "image",
-        "name": "Default image",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading"
-          }
-        ]
-      }
-    ]
-  }
+{
+  "name": "Article page",
+  "class": "section-overlay-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "tags",
+      "label": "Show article tags",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sharing",
+      "label": "Show sharing button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "arrows",
+      "label": "Show navigation arrows",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "default": "screen-height-one-third",
+      "options": [
+        {"value": "image-height", "label": "Image height"},
+        {"value": "screen-height-full", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero", "label": "750px"},
+        {"value": "sixty-fifty-height-hero", "label": "650px"},
+        {"value": "five-fifty-height-hero ", "label": "550px"},
+        {"value": "four-fifty-height-hero", "label": "450px"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "select",
+      "id": "mobile_height",
+      "label": "Height",
+      "default": "screen-height-one-third--mobile",
+      "options": [
+        {"value": "image-height--mobile", "label": "Image height"},
+        {"value": "screen-height-full--mobile", "label": "Full screen height"},
+        {"value": "screen-height-three-quarters--mobile", "label": "3/4 of screen"},
+        {"value": "screen-height-two-thirds--mobile", "label": "2/3 of screen"},
+        {"value": "screen-height-one-half--mobile", "label": "1/2 of screen"},
+        {"value": "screen-height-one-third--mobile", "label": "1/3 of screen"},
+        {"value": "seven-fifty-height-hero--mobile", "label": "750px"},
+        {"value": "sixty-fifty-height-hero--mobile", "label": "650px"},
+        {"value": "five-fifty-height-hero--mobile", "label": "550px"},
+        {"value": "four-fifty-height-hero--mobile", "label": "450px"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "links",
+      "name": "Navigation",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Categories"
+        },
+        {
+          "type": "link_list",
+          "id": "blog_linklist",
+          "label": "Custom navigation",
+          "info": "Overrides tag navigation"
+        }
+      ]
+    },
+    {
+      "type": "related",
+      "name": "Related products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Related products",
+          "info": "Products linked in the article body appear as Related products"
+        },
+        {
+          "type": "product_list",
+          "id": "product_list",
+          "label": "Products",
+          "limit": 5
+        }
+      ]
+    },
+    {
+      "type": "recent",
+      "name": "Recent articles",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Recent articles"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Default image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading"
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}

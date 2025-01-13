@@ -8,7 +8,6 @@ const selectors = {
 
 const classes = {
   isAnimating: 'is-animating',
-  isSelected: 'is-selected',
   isOpen: 'is-open',
 };
 
