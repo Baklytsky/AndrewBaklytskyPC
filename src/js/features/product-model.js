@@ -1,5 +1,4 @@
-import {DeferredMedia} from '../features/deferred-media';
-class ProductModel extends DeferredMedia {
+class ProductModel extends window.theme.DeferredMedia {
   constructor() {
     super();
   }

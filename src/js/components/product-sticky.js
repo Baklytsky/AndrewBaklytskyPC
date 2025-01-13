@@ -38,7 +38,6 @@ if (!customElements.get('product-sticky')) {
       }
 
       connectedCallback() {
-        // The code should execute after truncate text in product.js - 50ms
         this.stickyScrollCheck();
         document.addEventListener('theme:resize', this.resizeEvent);
 
@@ -72,8 +71,6 @@ if (!customElements.get('product-sticky')) {
         document.removeEventListener('theme:scroll', this.scrollEvent);
 
         this.formWrapper.removeEventListener('theme:form:sticky', this.stickyFormEvent);
-
-        this.initSticky();
       }
 
       stickyScrollCheck() {

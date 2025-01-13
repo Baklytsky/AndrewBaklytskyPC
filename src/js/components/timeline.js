@@ -128,6 +128,7 @@ if (!customElements.get('timeline-component')) {
 
       calculatePosition(target = null) {
         this.removeAnimationFrame();
+        this.holderTop = this.getBoundingClientRect().top + window.scrollY;
         const isDesktopView = !window.theme.isMobile();
         const elementHeight = this.holderHeight / this.rows.length;
         let elementsTop = this.holderTop;

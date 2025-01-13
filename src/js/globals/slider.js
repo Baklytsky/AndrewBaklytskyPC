@@ -14,7 +14,6 @@ const selectors = {
 
 const attributes = {
   arrowPositionMiddle: 'data-arrow-position-middle',
-  slideIndex: 'data-slide-index',
   sliderOptions: 'data-options',
   slideTextColor: 'data-slide-text-color',
 };
@@ -209,15 +208,6 @@ if (!customElements.get('slider-component')) {
         }
 
         this.style.setProperty('--text', currentSlideTextColor);
-
-        if (this.thumbs.length && this.thumbs.length === this.slides.length && currentSlide.hasAttribute(attributes.slideIndex)) {
-          const slideIndex = parseInt(currentSlide.getAttribute(attributes.slideIndex));
-          const currentThumb = this.querySelector(`${selectors.sliderThumb}.${classes.isSelected}`);
-          if (currentThumb) {
-            currentThumb.classList.remove(classes.isSelected);
-          }
-          this.thumbs[slideIndex].classList.add(classes.isSelected);
-        }
       }
 
       positionArrows() {

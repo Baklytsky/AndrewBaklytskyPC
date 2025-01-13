@@ -121,10 +121,7 @@
   }
 {%- endstyle -%}
 
-<script src="{{ 'shopify-products.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
-
 {%- if product_sticky_enable -%}
   <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -435,7 +432,6 @@
                     -%}
 
                     {%- if forloop.index0 == 0 or prev_block.type != 'features' -%}
-                      {%- assign slide_index = 0 -%}
                       <slider-component
                         class="product__block product__features block-padding"
                         {{ block_style }}
@@ -449,7 +445,6 @@
                     <div
                       class="product__feature"
                       data-slide="{{ block_id }}"
-                      data-slide-index="{{ slide_index }}"
                       {% if style != blank %}
                         style="{{ style }}"
                       {% endif %}
@@ -490,8 +485,6 @@
                     {%- if forloop.index == section.blocks.size or next_block.type != 'features' -%}
                       </slider-component>
                     {%- endif -%}
-
-                    {%- assign slide_index = slide_index | plus: 1 -%}
 
                   {%- when 'popup' -%}
                     {%- render 'product-popup', block: block -%}
