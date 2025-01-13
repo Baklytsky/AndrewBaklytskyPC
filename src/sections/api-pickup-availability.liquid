@@ -2,62 +2,62 @@
 {%- assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true -%}
 
 {%- if pick_up_availabilities.size > 0 -%}
-  <div class="pickup__preview pickup__preview--primary">
-    {%- liquid
-      assign closest_location = pick_up_availabilities.first
+  <popup-component>
+    <div class="pickup__preview pickup__preview--primary">
+      {%- liquid
+        assign closest_location = pick_up_availabilities.first
 
-      if closest_location.available
-        render 'icon-check'
-      else
-        render 'icon-cancel'
-      endif
-    -%}
+        if closest_location.available
+          render 'icon-check'
+        else
+          render 'icon-cancel'
+        endif
+      -%}
 
-    <div class="pickup__info">
-      {%- if closest_location.available -%}
-        <p class="pickup__info__text">
-          {{
-            'products.product.pickup_availability.pick_up_available_at_html'
-            | t: location_name: closest_location.location.name
-          }}
-        </p>
-        <p class="pickup__info__timing small">
-          {{ closest_location.pick_up_time }}
-        </p>
-        <button
-          id="ShowPickupAvailabilityDrawer"
-          class="pickup__button text-link small"
-          aria-haspopup="dialog"
-          data-popup-open
-        >
-          {%- if pick_up_availabilities.size == 1 -%}
-            {{ 'products.product.pickup_availability.view_store_info' | t }}
-          {%- else -%}
-            {{ 'products.product.pickup_availability.check_other_stores' | t }}
-          {%- endif -%}
-        </button>
-      {%- else -%}
-        <p class="pickup__info__text">
-          {{
-            'products.product.pickup_availability.pick_up_unavailable_at_html'
-            | t: location_name: closest_location.location.name
-          }}
-        </p>
-        {%- if pick_up_availabilities.size > 1 -%}
+      <div class="pickup__info">
+        {%- if closest_location.available -%}
+          <p class="pickup__info__text">
+            {{
+              'products.product.pickup_availability.pick_up_available_at_html'
+              | t: location_name: closest_location.location.name
+            }}
+          </p>
+          <p class="pickup__info__timing small">
+            {{ closest_location.pick_up_time }}
+          </p>
           <button
             id="ShowPickupAvailabilityDrawer"
             class="pickup__button text-link small"
             aria-haspopup="dialog"
             data-popup-open
           >
-            {{ 'products.product.pickup_availability.check_other_stores' | t }}
+            {%- if pick_up_availabilities.size == 1 -%}
+              {{ 'products.product.pickup_availability.view_store_info' | t }}
+            {%- else -%}
+              {{ 'products.product.pickup_availability.check_other_stores' | t }}
+            {%- endif -%}
           </button>
+        {%- else -%}
+          <p class="pickup__info__text">
+            {{
+              'products.product.pickup_availability.pick_up_unavailable_at_html'
+              | t: location_name: closest_location.location.name
+            }}
+          </p>
+          {%- if pick_up_availabilities.size > 1 -%}
+            <button
+              id="ShowPickupAvailabilityDrawer"
+              class="pickup__button text-link small"
+              aria-haspopup="dialog"
+              data-popup-open
+            >
+              {{ 'products.product.pickup_availability.check_other_stores' | t }}
+            </button>
+          {%- endif -%}
         {%- endif -%}
-      {%- endif -%}
+      </div>
     </div>
-  </div>
 
-  <popup-component>
     <dialog
       class="drawer"
       aria-modal="true"
