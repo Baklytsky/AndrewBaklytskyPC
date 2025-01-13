@@ -74,7 +74,12 @@
   data-overlay-header
 >
   {%- if render_section -%}
-    <div class="brick__section{% if gutters %} brick--margin{% endif %}{% if enable_slider_mobile %} brick__section--mobile-slider{% endif %} {{ section_width }}">
+    <div
+      class="brick__section{% if gutters %} brick--margin{% endif %}{% if enable_slider_mobile %} brick__section--mobile-slider{% endif %} {{ section_width }}"
+      {% if request.design_mode %}
+        data-block-scroll
+      {% endif %}
+    >
       {%- for block in section.blocks -%}
         {%- liquid
           assign desktop_image = block.settings.image
