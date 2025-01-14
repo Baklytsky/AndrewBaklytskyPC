@@ -1,3 +1,21 @@
+document.addEventListener('shopify:section:select', (event) => {
+  // Popup components
+  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  if (popupComponent) {
+    popupComponent.classList.add('popup--selected');
+    popupComponent.popupOpen();
+  }
+});
+
+document.addEventListener('shopify:section:deselect', (event) => {
+  // Popup components
+  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  if (popupComponent) {
+    popupComponent.classList.remove('popup--selected');
+    popupComponent.popupClose();
+  }
+});
+
 document.addEventListener('shopify:block:select', (event) => {
   // Open accordion on Block select
   const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
@@ -98,6 +116,13 @@ document.addEventListener('shopify:block:select', (event) => {
 
     setTimeout(() => document.dispatchEvent(new CustomEvent('theme:resize')), 100);
   }
+
+  // Popup components
+  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  if (popupComponent) {
+    popupComponent.classList.add('popup--selected');
+    popupComponent.popupOpen();
+  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -137,6 +162,13 @@ document.addEventListener('shopify:block:deselect', (event) => {
     const logosComponent = event.target.closest('logos-component');
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
+  }
+
+  // Popup components
+  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  if (popupComponent) {
+    popupComponent.classList.remove('popup--selected');
+    popupComponent.popupClose();
   }
 });
 

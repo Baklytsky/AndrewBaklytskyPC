@@ -7,6 +7,7 @@ const selectors = {
 
 const attributes = {
   closing: 'closing',
+  delay: 'data-popup-delay',
 };
 
 if (!customElements.get('popup-component')) {
@@ -26,10 +27,11 @@ if (!customElements.get('popup-component')) {
       connectedCallback() {
         if (!this.popup) return;
 
-        if (this.popup.hasAttribute('open') && this.popup.getAttribute('open') == true) {
-          this.popupOpen();
-        }
+        this.showPopupEvents();
+        this.bindListeners();
+      }
 
+      bindListeners() {
         // Open button click event
         this.buttonPopupOpen?.addEventListener('click', (e) => {
           e.preventDefault();
@@ -38,15 +40,12 @@ if (!customElements.get('popup-component')) {
         });
 
         // Close button click event
-        const closeButtons = this.popup.querySelectorAll(selectors.close);
-        if (closeButtons.length) {
-          closeButtons.forEach((closeButton) => {
-            closeButton.addEventListener('click', (e) => {
-              e.preventDefault();
-              this.popupClose();
-            });
+        this.popup.querySelectorAll(selectors.close)?.forEach((closeButton) => {
+          closeButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.popupClose();
           });
-        }
+        });
 
         // Close dialog on click outside content
         this.popup.addEventListener('click', (event) => {
@@ -101,7 +100,7 @@ if (!customElements.get('popup-component')) {
       }
 
       popupClose() {
-        if (this.isAnimating || !this.popup || this.popup.hasAttribute('inert')) {
+        if (this.isAnimating || !this.popup || this.popup.hasAttribute('inert') || this.classList.contains('popup--selected')) {
           return;
         }
 
@@ -146,6 +145,100 @@ if (!customElements.get('popup-component')) {
           this.a11y.removeTrapFocus();
           this.a11y.autoFocusLastElement();
         }
+      }
+
+      showPopupEvents() {
+        // Auto show popup if it has open attribute
+        if (this.popup.hasAttribute('open') && this.popup.getAttribute('open') == true) {
+          this.popupOpen();
+        }
+
+        this.delay = this.popup.hasAttribute(attributes.delay) ? this.popup.getAttribute(attributes.delay) : 'always';
+        this.isSubmitted = window.location.href.indexOf('accepts_marketing') !== -1 || window.location.href.indexOf('customer_posted=true') !== -1;
+        this.showOnScrollEvent = () => this.showOnScroll();
+
+        if (this.delay === 'always' || this.isSubmitted) {
+          this.showAlways();
+        }
+
+        if (this.delay && this.delay.includes('delayed') && !this.isSubmitted) {
+          const seconds = this.delay.includes('_') ? parseInt(this.delay.split('_')[1]) : 10;
+          this.showDelayed(seconds);
+        }
+
+        if (this.delay === 'bottom' && !this.isSubmitted) {
+          this.showOnBottomReached();
+        }
+
+        if (this.delay === 'idle' && !this.isSubmitted) {
+          this.showOnIdle();
+        }
+      }
+
+      showAlways() {
+        this.popupOpen();
+      }
+
+      showDelayed(seconds = 10) {
+        // Show popup after specific seconds
+        setTimeout(() => {
+          this.popupOpen();
+        }, seconds * 1000);
+      }
+
+      showOnIdle() {
+        let timer = 0;
+        let idleTime = 60000;
+        const documentEvents = ['mousemove', 'mousedown', 'click', 'touchmove', 'touchstart', 'touchend', 'keydown', 'keypress'];
+        const windowEvents = ['load', 'resize', 'scroll'];
+
+        const startTimer = () => {
+          timer = setTimeout(() => {
+            timer = 0;
+            this.popupOpen();
+          }, idleTime);
+
+          documentEvents.forEach((eventType) => {
+            document.addEventListener(eventType, resetTimer);
+          });
+
+          windowEvents.forEach((eventType) => {
+            window.addEventListener(eventType, resetTimer);
+          });
+        };
+
+        const resetTimer = () => {
+          if (timer) {
+            clearTimeout(timer);
+          }
+
+          documentEvents.forEach((eventType) => {
+            document.removeEventListener(eventType, resetTimer);
+          });
+
+          windowEvents.forEach((eventType) => {
+            window.removeEventListener(eventType, resetTimer);
+          });
+
+          startTimer();
+        };
+
+        startTimer();
+      }
+
+      showOnBottomReached() {
+        document.addEventListener('theme:scroll', this.showOnScrollEvent);
+      }
+
+      showOnScroll() {
+        if (window.scrollY + window.innerHeight >= document.body.clientHeight) {
+          this.popupOpen();
+          document.removeEventListener('theme:scroll', this.showOnScrollEvent);
+        }
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('theme:scroll', this.showOnScrollEvent);
       }
     }
   );
