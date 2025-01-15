@@ -27,8 +27,17 @@ if (!customElements.get('popup-component')) {
       connectedCallback() {
         if (!this.popup) return;
 
+        this.checkTargetReferrer();
         this.showPopupEvents();
         this.bindListeners();
+      }
+
+      checkTargetReferrer() {
+        if (!this.popup.hasAttribute(attributes.referrer)) return;
+
+        if (location.href.indexOf(this.popup.getAttribute(attributes.referrer)) === -1 && !window.Shopify.designMode) {
+          this.popup.parentNode.removeChild(this.popup);
+        }
       }
 
       bindListeners() {
