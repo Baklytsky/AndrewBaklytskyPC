@@ -8,7 +8,6 @@ const classes = {
   error: 'has-error',
   loading: 'is-loading',
   open: 'is-open',
-  overlayText: 'product-item--overlay-text',
   visible: 'is-visible',
 };
 
@@ -266,7 +265,6 @@ class QuickAddProduct extends HTMLElement {
       if (!parentProduct) return;
 
       const errorMessageHolder = holder.querySelector(selectors.messageError);
-      const hasOverlayText = parentProduct.classList.contains(classes.overlayText);
       const productInfo = parentProduct.querySelector(selectors.productInformationHolder);
       const button = holder.querySelector(selectors.buttonAddToCart);
 
@@ -279,16 +277,8 @@ class QuickAddProduct extends HTMLElement {
         errorMessageHolder.innerText = event.detail.description;
       }
 
-      if (hasOverlayText) {
-        productInfo.classList.add(classes.hidden);
-      }
-
       setTimeout(() => {
         this.resetQuickAddButtons();
-
-        if (hasOverlayText) {
-          productInfo.classList.remove(classes.hidden);
-        }
       }, settings.errorDelay);
     });
   }

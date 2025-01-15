@@ -35,11 +35,6 @@
     assign alignment_class = ' product-item--left'
   endif
 
-  assign overlay_text_class = ' product-item--outer-text'
-  if settings.overlay_text
-    assign overlay_text_class = ' product-item--overlay-text'
-  endif
-
   if settings.currency_code_enable
     assign onboarding_price = 9900 | money_with_currency
   else
@@ -51,7 +46,7 @@
 {%- assign aos_anchor = '.' | append: item_unique -%}
 
 <div
-  class="grid-item product-item{{ alignment_class }}{{ overlay_text_class }}{{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+  class="grid-item product-item{{ alignment_class }}{{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
   id="{{ item_unique }}"
   data-grid-item
   {{ attributes }}
