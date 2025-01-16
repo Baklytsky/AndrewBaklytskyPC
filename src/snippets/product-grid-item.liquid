@@ -55,11 +55,6 @@
     assign alignment_class = 'product-item--left'
   endif
 
-  assign overlay_text_class = 'product-item--outer-text'
-  if settings.overlay_text
-    assign overlay_text_class = 'product-item--overlay-text'
-  endif
-
   assign quickview_class = ''
   if settings.quickview_enable and product.first_available_variant
     assign quickview_class = 'product-item--has-quickbuy'
@@ -413,7 +408,7 @@
 
 {%- unless hidden_product -%}
   <div
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ overlay_text_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     {{ attributes }}
