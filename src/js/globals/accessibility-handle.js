@@ -74,4 +74,4 @@ class Accessibility {
 }
 
 window.theme = window.theme || {};
-window.theme.a11y = new Accessibility();
+window.theme.Accessibility = new Accessibility();
