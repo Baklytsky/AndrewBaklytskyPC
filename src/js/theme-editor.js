@@ -1,3 +1,21 @@
+document.addEventListener('shopify:section:select', (event) => {
+  // Popup components
+  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  if (popupComponent) {
+    popupComponent.classList.add('popup--selected');
+    popupComponent.popupOpen();
+  }
+});
+
+document.addEventListener('shopify:section:deselect', (event) => {
+  // Popup components
+  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  if (popupComponent) {
+    popupComponent.classList.remove('popup--selected');
+    popupComponent.popupClose();
+  }
+});
+
 document.addEventListener('shopify:block:select', (event) => {
   // Open accordion on Block select
   const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
@@ -11,12 +29,13 @@ document.addEventListener('shopify:block:select', (event) => {
     const slider = event.target.closest('slider-component');
 
     if (slider) {
-      const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
-      const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider').children).indexOf(slide));
       const flickityEnabled = slider.classList.contains('flickity-enabled');
 
       // Go to selected slide, pause autoplay
       if (flickityEnabled) {
+        const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
+        const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider')?.children).indexOf(slide));
+
         slider.dispatchEvent(
           new CustomEvent('theme:slider:select', {
             bubbles: false,
@@ -39,6 +58,7 @@ document.addEventListener('shopify:block:select', (event) => {
   const scrollableBlock = event.target.matches('[data-block-scroll]') ? event.target : event.target.querySelector('[data-block-scroll]') || event.target.closest('[data-block-scroll]');
   if (scrollableBlock && !scrollableBlock.classList.contains('flickity-enabled')) {
     const currentElement = event.target;
+
     if (currentElement) {
       scrollableBlock.scrollTo({
         top: 0,
@@ -96,6 +116,13 @@ document.addEventListener('shopify:block:select', (event) => {
 
     setTimeout(() => document.dispatchEvent(new CustomEvent('theme:resize')), 100);
   }
+
+  // Popup components
+  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  if (popupComponent) {
+    popupComponent.classList.add('popup--selected');
+    popupComponent.popupOpen();
+  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -130,11 +157,18 @@ document.addEventListener('shopify:block:deselect', (event) => {
   }
 
   // Logos - resume logos slider on block deselect
-  const isBlockSelectedLogoSlide = event.target.hasAttribute('data-slide');
+  const isBlockSelectedLogoSlide = event.target.closest('logos-component') && event.target.hasAttribute('data-slide');
   if (isBlockSelectedLogoSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
+  }
+
+  // Popup components
+  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  if (popupComponent) {
+    popupComponent.classList.remove('popup--selected');
+    popupComponent.popupClose();
   }
 });
 

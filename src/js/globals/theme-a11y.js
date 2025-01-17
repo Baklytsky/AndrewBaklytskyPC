@@ -152,9 +152,9 @@ const a11y = {
   },
 
   autoFocusLastElement() {
-    if (window.a11y.lastElement && document.body.classList.contains('is-focused')) {
+    if (window.theme.a11y.lastElement && document.body.classList.contains('is-focused')) {
       setTimeout(() => {
-        window.a11y.lastElement?.focus();
+        window.theme.a11y.lastElement?.focus();
       });
     }
   },

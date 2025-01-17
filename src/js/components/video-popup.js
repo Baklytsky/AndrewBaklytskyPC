@@ -29,7 +29,7 @@ if (!customElements.get('video-popup')) {
               };
 
               new window.theme.LoadPhotoswipe(items, options);
-              window.a11y.lastElement = button;
+              window.theme.a11y.lastElement = button;
             }
           });
         });

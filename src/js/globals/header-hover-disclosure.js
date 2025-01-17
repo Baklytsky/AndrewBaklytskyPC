@@ -132,30 +132,3 @@ if (!customElements.get('hover-disclosure')) {
     }
   );
 }
-
-// TODO:
-// const hoverDisclosure = {
-//   onLoad() {
-//     sections[this.id] = [];
-//     disclosures = this.container.querySelectorAll(selectors.disclosureWrappper);
-//     disclosures.forEach((el) => {
-//       sections[this.id].push(new HoverDisclosure(el));
-//     });
-//   },
-//   onBlockSelect(evt) {
-//     sections[this.id].forEach((el) => {
-//       if (typeof el.onBlockSelect === 'function') {
-//         el.onBlockSelect(evt);
-//       }
-//     });
-//   },
-//   onBlockDeselect(evt) {
-//     sections[this.id].forEach((el) => {
-//       if (typeof el.onBlockDeselect === 'function') {
-//         el.onBlockDeselect(evt);
-//       }
-//     });
-//   },
-// };
-
-// export default hoverDisclosure;
