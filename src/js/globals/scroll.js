@@ -1,5 +1,3 @@
-import {disablePageScroll, enablePageScroll, clearQueueScrollLocks} from 'scroll-lock';
-
 let prev = window.scrollY;
 let up = null;
 let down = null;
@@ -57,7 +55,7 @@ function lock(e) {
       clearTimeout(scrollLockTimer);
     }
 
-    disablePageScroll(e.detail, {
+    window.theme.ScrollLock.disablePageScroll(e.detail, {
       allowTouchMove: (el) => el.tagName === 'TEXTAREA',
     });
 
@@ -76,8 +74,8 @@ function unlock(e) {
 }
 
 function removeScrollLock() {
-  clearQueueScrollLocks();
-  enablePageScroll();
+  window.theme.ScrollLock.clearQueueScrollLocks();
+  window.theme.ScrollLock.enablePageScroll();
   document.documentElement.removeAttribute('data-scroll-locked');
 }
 
