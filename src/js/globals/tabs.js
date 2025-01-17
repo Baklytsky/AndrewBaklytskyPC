@@ -27,7 +27,7 @@ if (!customElements.get('tabs-component')) {
       constructor() {
         super();
 
-        this.a11y = window.a11y;
+        this.a11y = window.theme.a11y;
       }
 
       connectedCallback() {

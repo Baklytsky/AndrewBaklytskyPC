@@ -73,4 +73,5 @@ class Accessibility {
   }
 }
 
-window.a11y = new Accessibility();
+window.theme = window.theme || {};
+window.theme.a11y = new Accessibility();

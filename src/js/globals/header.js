@@ -163,7 +163,7 @@ if (!customElements.get('header-component')) {
             if (cartDrawer) {
               e.preventDefault();
               cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show'));
-              window.a11y.lastElement = button;
+              window.theme.a11y.lastElement = button;
             }
           });
         });

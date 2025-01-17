@@ -81,7 +81,7 @@ class QuickAddProduct extends HTMLElement {
       this.buttonATC.addEventListener('click', (e) => {
         e.preventDefault();
 
-        window.a11y.lastElement = this.buttonATC;
+        window.theme.a11y.lastElement = this.buttonATC;
 
         document.dispatchEvent(
           new CustomEvent('theme:cart:add', {
@@ -146,7 +146,7 @@ class QuickAddProduct extends HTMLElement {
     if (this.modalButton) {
       this.modalButton.classList.remove(classes.loading);
       this.modalButton.disabled = false;
-      window.a11y.lastElement = this.modalButton;
+      window.theme.a11y.lastElement = this.modalButton;
     }
 
     // Animate items

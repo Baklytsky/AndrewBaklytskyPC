@@ -8,6 +8,7 @@ const selectors = {
 const attributes = {
   closing: 'closing',
   delay: 'data-popup-delay',
+  scrollLock: 'data-scroll-lock-required',
 };
 
 if (!customElements.get('popup-component')) {
@@ -16,16 +17,17 @@ if (!customElements.get('popup-component')) {
     class PopupComponent extends HTMLElement {
       constructor() {
         super();
-
-        this.popup = this.querySelector(selectors.dialog);
-        this.a11y = window.theme.a11y;
-        this.isAnimating = false;
-        this.enableScrollLock = true;
-        this.buttonPopupOpen = this.querySelector(selectors.open);
       }
 
       connectedCallback() {
         if (!this.popup) return;
+
+        this.popup = this.querySelector(selectors.dialog);
+        this.a11y = window.theme.a11y;
+        this.isAnimating = false;
+        this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
+        this.buttonPopupOpen = this.querySelector(selectors.open);
+        this.cookie = new PopupCookie(this.popup.getAttribute(selectors.cookieNameAttribute), 'user_has_closed');
 
         this.checkTargetReferrer();
         this.showPopupEvents();
@@ -45,7 +47,7 @@ if (!customElements.get('popup-component')) {
         this.buttonPopupOpen?.addEventListener('click', (e) => {
           e.preventDefault();
           this.popupOpen();
-          window.a11y.lastElement = this.buttonPopupOpen;
+          window.theme.a11y.lastElement = this.buttonPopupOpen;
         });
 
         // Close button click event
@@ -251,4 +253,49 @@ if (!customElements.get('popup-component')) {
       }
     }
   );
+}
+
+class PopupCookie {
+  constructor(name, value, daysToExpire = 7) {
+    const today = new Date();
+    const expiresDate = new Date();
+    expiresDate.setTime(today.getTime() + 3600000 * 24 * daysToExpire);
+
+    this.config = {
+      expires: expiresDate.toGMTString(), // session cookie
+      path: '/',
+      domain: window.location.hostname,
+      sameSite: 'none',
+      secure: true,
+    };
+    this.name = name;
+    this.value = value;
+  }
+
+  write() {
+    const hasCookie = document.cookie.indexOf('; ') !== -1 && !document.cookie.split('; ').find((row) => row.startsWith(this.name));
+
+    if (hasCookie || document.cookie.indexOf('; ') === -1) {
+      document.cookie = `${this.name}=${this.value}; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}; sameSite=${this.config.sameSite}; secure=${this.config.secure}`;
+    }
+  }
+
+  read() {
+    if (document.cookie.indexOf('; ') !== -1 && document.cookie.split('; ').find((row) => row.startsWith(this.name))) {
+      const returnCookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(this.name))
+        .split('=')[1];
+
+      return returnCookie;
+    } else {
+      return false;
+    }
+  }
+
+  destroy() {
+    if (document.cookie.split('; ').find((row) => row.startsWith(this.name))) {
+      document.cookie = `${this.name}=null; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}`;
+    }
+  }
 }

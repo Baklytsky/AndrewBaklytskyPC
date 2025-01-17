@@ -164,7 +164,7 @@ class ProductForm extends HTMLElement {
       );
 
       if (!this.closest(selectors.quickAddModal)) {
-        window.a11y.lastElement = this.buttonATC;
+        window.theme.a11y.lastElement = this.buttonATC;
       }
     });
   }

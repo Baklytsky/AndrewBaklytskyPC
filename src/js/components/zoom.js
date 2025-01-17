@@ -41,7 +41,7 @@ class ZoomImages extends HTMLElement {
 
         this.createZoom(index);
 
-        window.a11y.lastElement = image;
+        window.theme.a11y.lastElement = image;
       });
 
       image.addEventListener('keyup', (e) => {
@@ -51,7 +51,7 @@ class ZoomImages extends HTMLElement {
 
           this.createZoom(index);
 
-          window.a11y.lastElement = image;
+          window.theme.a11y.lastElement = image;
         }
       });
     });
