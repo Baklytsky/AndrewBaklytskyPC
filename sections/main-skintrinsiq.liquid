@@ -1,0 +1,294 @@
+{{ 'main-scintrinsiq.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign subheading = section.settings.subheading | escape | newline_to_br
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign image = section.settings.image
+  assign video_url = section.settings.video_url
+  assign video = section.settings.video
+  assign show_mute_button = section.settings.show_mute_button
+  assign show_play_button = section.settings.show_play_button
+
+  assign global_skin_concern_heading_arr = shop.metafields.globals.skin_concern_heading
+  assign global_skin_concern_color_arr = shop.metafields.globals.skin_concern_color
+  assign global_skin_concern_image_arr = shop.metafields.globals.skin_concern_image
+-%}
+
+
+<div class="main-scintrinsiq">
+  <div class="page-width">
+    {%- if heading != blank or subheading != blank -%}
+      <div class="main-scintrinsiq__header small-hide">
+        {%- if heading != blank or subheading != blank -%}
+          {%- if heading != blank -%}
+            <h3 class="main-scintrinsiq__header-heading">{{ heading }}</h3>
+          {%- endif -%}
+
+          {%- if subheading != blank -%}
+            <div class="main-scintrinsiq__header-subheading body1">{{ subheading }}</div>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {% if section.blocks.size > 0 %}
+      <div class="main-scintrinsiq__content rel border-bottom">
+        <div class="main-scintrinsiq__blocks">
+          {% for block in section.blocks %}
+            {%- liquid
+              assign block_heading = block.settings.heading | escape | newline_to_br
+              assign block_description = block.settings.description | escape | newline_to_br
+              assign block_subheading = block.settings.subheading
+              assign link_label = block.settings.link_label
+              assign link_url = block.settings.link_url
+
+              for i in (1..5)
+                assign type_index = "type_" | append: i
+                assign type = block.settings[type_index]
+
+                if type != blank
+                 assign  has_type = true
+                endif
+              endfor
+            -%}
+
+            {% if block_heading != blank or block_description != blank or block_subheading != blank %}
+              <div class="main-scintrinsiq__block rel">
+                <span class="main-scintrinsiq__step-number h5 m0"></span>
+
+                {% if block_heading != blank %}
+                  <h4 class="main-scintrinsiq__block-heading">{{ block_heading }}</h4>
+                {% endif %}
+
+                {% if block_description != blank %}
+                  <p class="main-scintrinsiq__block-description body1">{{ block_description }}</p>
+                {% endif %}
+
+                {% if block_subheading != blank %}
+                  <h5 class="main-scintrinsiq__block-subheading h6">{{ block_subheading }}</h5>
+                {% endif %}
+
+                {% if has_type %}
+                  <ul class="main-scintrinsiq__block-type-list">
+                    {% for i in (1..5) %}
+                    {%- liquid
+                      assign type_index = "type_" | append: i
+                      assign type = block.settings[type_index]
+                      assign type_handle = type | handleize
+                      assign shin_concern_image = ''
+
+                      for heading in global_skin_concern_heading_arr
+                        assign heading_handle = heading | handleize
+                        assign skin_concern_color = ""
+
+                        if heading_handle == type_handle
+                          assign skin_concern_color = global_skin_concern_color_arr[forloop.index0]
+                          assign shin_concern_image = global_skin_concern_image_arr[forloop.index0][0]
+
+                          break
+                        endif
+                      endfor
+                    -%}
+
+                      {% if type != blank %}
+                        <li class="main-scintrinsiq__block-type-item">
+                          {% if skin_concern_color != blank or shin_concern_image != blank %}
+                            <div class="main-scintrinsiq__block-type-item-color rel" style="--bg-color: {{ skin_concern_color }}">
+                              <span class="u-sr-only">{{ shin_concern | append: ' - color' }}</span>
+                              {%- if shin_concern_image != blank -%}
+                                {% render 'image-metafields',
+                                  image: shin_concern_image,
+                                  class_name: 'image-abs-cover',
+                                  alt: type,
+                                  small_size: true %}
+                              {%- endif -%}
+                            </div>
+                          {% endif %}
+
+                          <p class="main-scintrinsiq__block-type-item-text body1">{{ type }}</p>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+                {% if link_label != blank and link_url != blank %}
+                  <a href="{{ link_url }}" class="main-scintrinsiq__block-type-link body3--bold">{{ link_label }}</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {%- if heading != blank or subheading != blank -%}
+          <div class="main-scintrinsiq__header small-up-hide">
+            {%- if heading != blank or subheading != blank -%}
+              {%- if heading != blank -%}
+                <h3 class="main-scintrinsiq__header-heading">{{ heading }}</h3>
+              {%- endif -%}
+
+              {%- if subheading != blank -%}
+                <div class="main-scintrinsiq__header-subheading body1">{{ subheading }}</div>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {% if video or video_url or image %}
+          <div class="main-scintrinsiq__media">
+            <div style="--aspect-ratio: {{ video.aspect_ratio | default: 0.87 }}" class="main-scintrinsiq__media-content rel  {% if video or video_url %} main-scintrinsiq__media-content--has-video {%- endif -%}">
+              {%- if video or video_url -%}
+                {%- render 'video',
+                  video: video,
+                  video_url: video_url,
+                  default_controls: false,
+                  show_mute_button: show_mute_button,
+                  show_play_button: show_play_button,
+                  autoplay: true,
+                  class: "normal no-touch"
+                -%}
+              {%- endif -%}
+
+              {% if image != blank %}
+                {% render 'image',
+                  image: image,
+                  class_name: 'image-abs-cover',
+                  alt: image.alt %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Main scintrinsiq",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "ABCs of skincare"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The ingredients to know."
+    },
+    {
+      "type": "header",
+      "content": "Media content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "If video is selected, it will be used as a video poster"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Video url",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ]
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "A Shopify-hosted video"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_play_button",
+      "label": "Show play/pause button",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mute_button",
+      "label": "Show mute/unMute button",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Text content"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "text",
+          "id": "type_1",
+          "label": "Type 1"
+        },
+        {
+          "type": "text",
+          "id": "type_2",
+          "label": "Type 2"
+        },
+        {
+          "type": "text",
+          "id": "type_3",
+          "label": "Type 3"
+        },
+        {
+          "type": "text",
+          "id": "type_4",
+          "label": "Type 4"
+        },
+        {
+          "type": "text",
+          "id": "type_5",
+          "label": "Type 5"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Shop Treatment Products"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link url"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main scintrinsiq"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

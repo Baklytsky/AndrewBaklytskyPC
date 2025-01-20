@@ -1,0 +1,16 @@
+{%- assign allow_redirect = true -%}
+
+{%- if product.tags contains 'visible' -%}
+  {%- assign allow_redirect = false -%}
+{%- endif -%}
+
+{%- if allow_redirect -%}
+  {%- if product.tags contains 'dev_product'
+    or product.tags contains 'test_product'
+    or product.tags contains 'hidden'
+    or product.tags contains 'not-allowed' -%}
+    <script type="application/javascript">
+      if (Shopify?.theme.role === 'main') window.location.href = '/';
+    </script>
+  {%- endif -%}
+{%- endif -%}

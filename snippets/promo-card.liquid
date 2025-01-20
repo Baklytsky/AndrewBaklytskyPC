@@ -1,0 +1,39 @@
+{%- comment -%}
+{%- render 'promo-card',
+  show_promo_card: ,
+  promo_card_image: ,
+  promo_card_heading: ,
+  promo_card_link_label: ,
+  promo_card_link_url:
+-%}
+{%- endcomment -%}
+
+{% if show_promo_card %}
+  <div class="promo-card">
+    {% if promo_card_image != blank %}
+      <div class="promo-card__img-wrapper rel">
+        {% render 'image', image: promo_card_image, class_name: 'promo-card__image image-abs-cover' %}
+
+        {% if promo_card_link_url != blank %}
+          <a href="{{ promo_card_link_url }}" class="image-abs-cover">
+            <span class="u-sr-only">{{ promo_card_link_label }}</span>
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if promo_card_heading != blank or promo_card_link_label != blank and promo_card_link_url != blank %}
+      <div class="promo-card__content-wrapper">
+        {% if promo_card_heading != blank %}
+          <h2 class="promo-card__heading h5">
+            {{ promo_card_heading }}
+          </h2>
+        {% endif %}
+
+        {% if promo_card_link_label != blank and promo_card_link_url != blank %}
+          <a href="{{ promo_card_link_url }}" class="promo-card__link h6">{{ promo_card_link_label }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

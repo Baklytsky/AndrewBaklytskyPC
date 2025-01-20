@@ -1,0 +1,211 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - id: {String} Unique id
+  - current_variant: {Object} Variant Liquid object
+  - block: {Object} Section block
+
+  Usage:
+{%- render 'pdp-details-form', product: product, current_variant: current_variant, id: product_form_id, block: block -%}
+{% endcomment %}
+
+{%- liquid
+  assign gwp_variant_id = product.metafields.custom.gwp | split: "/" | last | default: ""
+  assign show_sticky_bar = block.settings.show_sticky_bar
+  assign notify_me = false
+  assign force_notify_me = product.metafields.custom.force_notify_me
+
+  if current_variant.available == false or force_notify_me and block.settings.show_notify_me_form
+    assign notify_me = true
+  endif
+
+  assign gift_card_recipient_feature_active = false
+  if block.settings.show_gift_card_recipient and product.gift_card?
+    assign gift_card_recipient_feature_active = true
+  endif
+
+  assign event_class_name = 'pdp-main-add-event pdp-main-event--' | append: section.id
+-%}
+
+<product-form class="product-form"
+              data-notify-me="{{ notify_me }}"
+              data-section="{{ section.id }}"
+  {{ block.shopify_attributes }}>
+
+  {%- if show_sticky_bar -%}
+    {%- render 'pdp-sticky-bar', product: product, current_variant: current_variant, notify_me: notify_me, product_form_id: id -%}
+  {%- endif -%}
+
+  <div class="product-form__notify-wrapper notify--{{ section.id }}">
+    {%- if notify_me -%}
+      {%- render 'notify-me-form', product: product, current_variant: current_variant, enable_notify_me: notify_me, block: block -%}
+    {%- endif -%}
+  </div>
+
+  {%- form 'product', product, id: id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+
+  {%- liquid
+    assign pre_order = false
+    assign pre_order_date = current_variant.metafields.custom.pre_order_date | date: "%B %d, %Y"
+    assign pre_order_date_in_sec = current_variant.metafields.custom.pre_order_date | date: "%s" | plus: 0
+    assign now_date = 'now' | date: "%B %d, %Y"
+    assign now_date_in_sec = 'now' | date: "%s" | plus: 0
+
+    if pre_order_date != blank and pre_order_date_in_sec > now_date_in_sec
+    assign pre_order = true
+    endif
+  -%}
+
+    <input type="hidden" name="id" value="{{ current_variant.id }}" disabled>
+
+    {%- if product.gift_card? -%}
+      <input type="hidden" name="properties[_is_gift_card]" value="true">
+    {%- endif -%}
+
+    {%- if pre_order -%}
+      <input type="hidden" class="pre-order--{{ current_variant.id }}" name="properties[Pre-Order]" value="{{ pre_order_date }}">
+    {%- endif -%}
+
+    {%- if product.selling_plan_groups.size > 0 and block.settings.subscriptions_enable_selectors -%}
+      {% render 'subscription-form',
+        product: product,
+        current_variant: current_variant,
+        block: block,
+        id: section.id,
+        update_url: true,
+        update_price: true  %}
+    {%- endif -%}
+
+    {%- if gift_card_recipient_feature_active -%}
+      {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+    {%- endif -%}
+
+    {%- if block.settings.show_afterpay -%}
+      <div id="afterpay-selector"></div>
+
+      <script>
+        (function () {
+          document.addEventListener('click', (e) => {
+            if (e.target.tagName ==='AFTERPAY-PLACEMENT') {
+              dataLayer.push({
+              'event': 'see_details',
+                'click': {
+                  'see_details_type': 'Afterpay Details',
+                }
+              })
+            }
+          })
+        })()
+      </script>
+    {%- endif -%}
+
+    <div class="product-form__wrapper">
+      {%- if block.settings.show_quantity_selector -%}
+        <quantity-input class="quantity" data-quantity-value="1">
+          <button class="quantity__button quantity__button--minus no-js-hidden" name="minus" type="button">
+            <span class="visually-hidden">
+              {{ 'products.product.quantity.decrease' | t: product: product.title | escape }}
+            </span>
+            {%- render 'icon' with 'minus' -%}
+          </button>
+          <input class="quantity__input"
+                 type="number"
+                 name="quantity"
+                 value="1"
+                 min="1"
+                 aria-label="{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}">
+          <button class="quantity__button quantity__button--plus no-js-hidden" name="plus" type="button">
+                  <span class="visually-hidden">
+                    {{ 'products.product.quantity.increase' | t: product: product.title | escape }}
+                  </span>
+            {%- render 'icon' with 'plus' -%}
+          </button>
+        </quantity-input>
+      {%- endif -%}
+      <div class="product-form__buttons">
+        <button
+          type="submit"
+          name="add"
+          class="product-form__submit btn btn--full-width btn--primary-alt"
+          {% if current_variant.available == false %}disabled{% endif %}>
+              <span class="product-form__submit-text">
+                {%- if current_variant.available -%}
+                  {%- if pre_order -%}
+                    {{ 'products.product.preorder' | t }}
+                  {%- else -%}
+                    {{ 'products.product.add_to_cart' | t }}
+                  {%- endif -%}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </span>
+          <div class="loading-overlay__spinner hidden">
+            {% render 'icon' with 'spinner' %}
+          </div>
+        </button>
+
+        {% render 'physician-link', class: 'hidden btn  btn--primary-alt product-form__btn-link  btn--full-width' %}
+
+        <div class="preorder-message--{{ section.id }} body3 small-hide"
+             role="alert" {% unless pre_order %}hidden{% endunless %} data-preorder-message>
+          <span class="product-form__preorder-message">
+            {{ 'products.product.preorder_message' | t: date: pre_order_date }}
+          </span>
+        </div>
+
+        {%- if block.settings.show_premier_points and settings.enable_premier_points -%}
+          {%- liquid
+            assign current_variant_price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+            assign points_value = current_variant_price | divided_by: 100 | times: settings.points_coefficient
+          -%}
+
+          <span class="product-form__premier-points points--{{ section.id }} body3--bold small-hide">
+            + <span data-poins-value>{{ points_value }}</span> Premier Points
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="preorder-message-mobile--{{ section.id }} body3 small-up-hide"
+         role="alert" {% unless pre_order %}hidden{% endunless %} data-preorder-message>
+          <span class="product-form__preorder-message">
+            {{ 'products.product.preorder_message' | t: date: pre_order_date }}
+          </span>
+    </div>
+
+    {%- if block.settings.show_premier_points and settings.enable_premier_points -%}
+      <span class="product-form__premier-points points-mobile--{{ section.id }} body3--bold small-up-hide">
+        + <span data-poins-value>{{ points_value }}</span> Premier Points
+      </span>
+    {%- endif -%}
+
+    <style>
+      :root {
+        --dynamic-btn-bg: {{ block.settings.dynamic_btn_bg }}
+      }
+    </style>
+
+    {%- if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+
+
+    <div class="product-form__error-message-wrapper visually-hidden" role="alert" data-error-wrapper>
+      <span class="product-form__error-message" data-error-message></span>
+    </div>
+  {%- endform -%}
+
+  <script type="application/json"
+          class="current-variant-json current-variant-json--{{ section.id }}">
+    {{ current_variant | json }}
+  </script>
+  <script type="application/ld+json"
+          class="current-variant-state current-variant-state--{{ section.id }}">
+          {
+            "preorder": {{ pre_order | default: false }}
+          }
+  </script>
+
+  {%- render 'ga-product-list-event', event_type: 'add_to_cart', product: product, class_name: event_class_name -%}
+
+</product-form>

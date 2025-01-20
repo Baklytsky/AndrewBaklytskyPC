@@ -1,0 +1,214 @@
+{{ 'text-banner.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign text = section.settings.text
+  assign content_size = section.settings.content_size
+  assign section_width_content = section.settings.width_content
+  assign content_position = section.settings.content_position
+
+  assign section_bg_color = section.settings.section_bg_color
+  assign section_text_color = section.settings.section_text_color
+  assign border_bottom = section.settings.section_border_bottom
+
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign content_padding_desk = section.settings.content_padding_desk
+  assign content_padding_mob = section.settings.content_padding_mob
+-%}
+
+{%- if text != blank -%}
+  <div class="text-banner {% if border_bottom %}border-bottom{% endif %}"
+    data-aos="fade-up"
+    style="
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;
+      --content-padding-desktop: {{ content_padding_desk }}px;
+      --content-padding-mobile: {{ content_padding_mob }}px;
+      --width-content: {{ section_width_content }};
+      --bg-color: {{ section_bg_color }};
+      --color: {{ section_text_color }}"
+  >
+    <div class="page-width {{ content_size }} text-banner__content text-banner__content--{{ content_position }}">
+      {{ text }}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.rich-text.name",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Welcome Obagi</p>"
+    },
+    {
+      "type": "header",
+      "content": "Content settings"
+    },
+    {
+      "type": "select",
+      "id": "width_content",
+      "label": "Content width",
+      "options": [
+        {
+          "value": "100%",
+          "label": "Large width"
+        },
+        {
+          "value": "1120px",
+          "label": "1120px"
+        },
+        {
+          "value": "680px",
+          "label": "680px"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_desk",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop content padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mob",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile content padding",
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "content_size",
+      "label": "Content size",
+      "options": [
+        {
+          "value": "body1",
+          "label": "Type medium text"
+        },
+        {
+          "value": "body2",
+          "label": "Type text"
+        },
+        {
+          "value": "body3",
+          "label": "Type small text"
+        }
+      ],
+      "default": "body3"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.rich-text.name"
+    }
+  ]
+}
+{% endschema %}

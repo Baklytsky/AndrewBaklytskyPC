@@ -1,0 +1,183 @@
+{{ 'faq.min.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign bg_color = section.settings.bg_color
+
+  assign all_blocks = [request.page_type].metafields.faq.show_block
+  assign category_str = ''
+
+  for shown_block in all_blocks
+    if shown_block == 'true'
+      assign catagory = [request.page_type].metafields.faq.category[forloop.index0]
+
+      if catagory != blank
+        assign has_tabs = true
+        assign category_str = category_str | append: '####' | append: catagory
+      endif
+
+    endif
+  endfor
+
+  assign category_arr = category_str | split: '####' | uniq
+-%}
+
+{% if has_tabs or request.design_mode %}
+  <div class="faq faq-metafields page-width"
+       style="
+         --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+         --padding-top-desktop: {{ padding_top_desk }}px;
+         --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+         --padding-top-mobile: {{ padding_top_mob }}px;
+         --bg-color: {{ bg_color }}">
+    <tabs-component>
+      {% if heading != blank %}
+        <h3 class="faq__heading">{{ heading }}</h3>
+      {% endif %}
+
+      {%- if has_tabs -%}
+        <div class="faq__wrapper">
+          <scrolling-tabs class="faq__navigation hide-scrollbar" role="tablist" aria-labelledby="tablist-{{ section.id }}">
+            {%- liquid assign nav_counter = 0 -%}
+            {% for category_item in category_arr %}
+              {% if category_item != blank %}
+                {%- liquid assign nav_counter = nav_counter | plus: 1 -%}
+                <batton
+                  class="a body1 faq__header-tab"
+                  role="tab"
+                  type="button"
+                  tabindex="0"
+                  id="tab-{{ nav_counter }}--{{ section.id }}"
+                  aria-controls="tabpanel-{{ nav_counter }}--{{ section.id }}"
+                  aria-selected="{%- if nav_counter == 1 -%}true{%- else -%}false{%- endif -%}"
+                  {% unless counter == 1 %}tabindex="-1"{% endunless %}>
+
+                  {{ category_item }}
+                </batton>
+              {% endif %}
+            {% endfor %}
+          </scrolling-tabs>
+
+          <div class="faq__accordions-wrapper">
+            {%- liquid assign acc_counter = 0 -%}
+            {% for category_item in category_arr %}
+
+              {%- if category_item != blank -%}
+                {%- liquid assign acc_counter = acc_counter | plus: 1 -%}
+                {%- capture id -%}tabpanel-{{ acc_counter }}--{{ section.id }}{%- endcapture -%}
+
+                <div
+                  class="faq__list"
+                  id="{{ id }}"
+                  role="tabpanel"
+                  tabindex="{%- if acc_counter == 1 -%}0{%- else -%}-1{%- endif -%}"
+                  aria-selected="{%- if acc_counter == 1 -%}true{%- else -%}false{%- endif -%}"
+                  aria-labelledby="tab-{{ acc_counter }}--{{ section.id }}"
+                  {% unless acc_counter == 1 %}hidden{% endunless %}>
+
+                  {% for shown_block in all_blocks %}
+                    {%- if shown_block == 'true' -%}
+
+                      {%- liquid assign block_catagory = [request.page_type].metafields.faq.category[forloop.index0] -%}
+
+                      {% if category_item == block_catagory %}
+
+                        {%- liquid
+                          assign question = [request.page_type].metafields.faq.question[forloop.index0]
+                          assign answer = [request.page_type].metafields.faq.answer[forloop.index0]
+                        -%}
+
+                        {% if question != blank and answer != blank %}
+                          {% render 'accordion' group: id, index: acc_counter, title: question, body: answer %}
+                        {% endif %}
+                      {% endif %}
+                    {%- endif -%}
+                  {% endfor %}
+                </div>
+
+              {%- endif -%}
+            {% endfor %}
+          </div>
+        </div>
+      {%- endif -%}
+    </tabs-component>
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "FAQ (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "FAQ"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ (MF)"
+    }
+  ],
+  "templates": ["collection"]
+}
+{% endschema %}

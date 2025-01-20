@@ -1,0 +1,83 @@
+{% comment %}
+  {% render 'blog-navigation' link-list: arr %}
+{% endcomment %}
+
+ {% for link in linklists[link-list].links %}
+   {% assign blog = link.object %}
+
+  <modal-dialog id="blog-links-{{ blog.title | handle }}">
+    <div class="popup blog-links__modal" data-popup role="dialog" tabindex="-1" aria-modal="true" aria-hidden="true">
+      <button class="btn--reset" type="button" data-close-popup>
+        {%- render 'icon' with 'close' -%}
+      </button>
+
+      <div class="blog-links__container">
+          {%- if blog.all_tags.size > 0 -%}
+            <div class="blog-navigation__blog-title body1">
+              {{ blog.title }}
+            </div>
+
+            <ul class="blog-navigation__tags">
+              <li class="blog-navigation__tags-item">
+                <a href="{{ blog.url }}" class="blog-navigation__item-link body2 block">{{ 'blogs.navigation.tags_link_to_blog' | t }}</a>
+              </li>
+
+              {%- for tag in blog.all_tags -%}
+                <li class="blog-navigation__tags-item">
+                  <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-navigation__item-link body2 block">{{ tag }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+      </div>
+    </div>
+  </modal-dialog>
+ {% endfor %}
+
+<nav class="blog-navigation hide-scrollbar">
+  <ul class="blog-navigation__list">
+    {% for link in linklists[link-list].links %}
+      {% assign blog = link.object %}
+
+      <li class="blog-navigation__item">
+        {%- if blog.all_tags.size > 0 -%}
+          <modal-opener class="small-up-hide">
+            <div class="main-blogs__menu-item-link link body2"
+                 id="blog-links-open-{{ forloop.index }}"
+                 aria-controls="#blog-links-{{ blog.title | handle }}"
+                 aria-haspopup="true"
+                 aria-expanded="false">
+              {{ link.title }}
+
+              {%- render 'icon' with 'arrow-down' -%}
+            </div>
+          </modal-opener>
+
+          <div class="main-blogs__menu-item-link a body2 small-hide">
+            {{ link.title }}
+
+            {%- render 'icon' with 'arrow-down' -%}
+          </div>
+        {%- else -%}
+          <a href="{{ link.url }}" class="main-blogs__menu-item-link body2">
+            {{ link.title }}
+          </a>
+        {%- endif -%}
+
+        {%- if blog.all_tags.size > 0 -%}
+          <ul class="blog-navigation__tags">
+            <li class="blog-navigation__tags-item">
+              <a href="{{ blog.url }}" class="blog-navigation__item-link block">{{ 'blogs.navigation.tags_link_to_blog' | t }}</a>
+            </li>
+
+            {%- for tag in blog.all_tags -%}
+              <li class="blog-navigation__tags-item">
+                <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-navigation__item-link block">{{ tag }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

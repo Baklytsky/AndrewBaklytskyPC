@@ -1,0 +1,108 @@
+@import "../helpers/_mixins";
+
+.steps {
+  .steps__content-wrapper {
+    padding: var(--padding-top-desktop) 0 var(--padding-bottom-desktop);
+
+    @include mq($medium-max) {
+      padding: var(--padding-top-mobile) 0 var(--padding-bottom-mobile);
+      border-bottom: unset;
+    }
+  }
+
+  .steps__section-subheading {
+    max-width: 660px;
+    margin-bottom: 20px;
+
+    @include mq($medium-max) {
+      max-width: unset;
+    }
+  }
+
+  .steps__section-heading {
+    max-width: 660px;
+    margin-bottom: 40px;
+    text-transform: unset;
+
+    @include mq($medium-max) {
+      max-width: unset;
+    }
+  }
+
+  .steps__blocks-wrapper {
+    overflow: hidden;
+    width: 100%;
+    padding-left: calc(((100% - 1120px)/ 2));
+    counter-reset: myCounter;
+
+    @include mq($large-max) {
+      padding-left: 80px;
+      margin-left: 0;
+    }
+
+    @include mq($small-max) {
+      padding: 0 20px;
+    }
+  }
+
+  .steps__blocks-container {
+    //display: flex;
+    //overflow: auto;
+    //width: 100%;
+
+    @include mq($small-max) {
+      flex-direction: column;
+    }
+  }
+
+  .steps__block {
+    //flex: 0 0 265px;
+    padding-right: 20px;
+
+    @include mq($small-max) {
+      flex: 1;
+      display: flex;
+      padding-right: 0;
+      margin-bottom: 30px;
+    }
+  }
+
+
+  .steps__block-number {
+    position: relative;
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--color-accent-primary);
+
+    @include mq($small-max) {
+      flex: 0 0 auto;
+      margin-bottom: unset;
+      margin-right: 20px;
+    }
+
+    &:before {
+      position: absolute;
+      counter-increment: myCounter;
+      content: counter(myCounter);
+      top: 50%;
+      left: 50%;
+      transform: translate3d( -50%, -50%, 0);
+      color: var(--color-accent-primary);
+    }
+  }
+
+  .steps__block-heading {
+    margin-bottom: 20px;
+
+    @include mq($small-max) {
+      margin-bottom: 10px;
+    }
+  }
+
+  .steps__block-description {
+    margin-bottom: unset;
+  }
+}

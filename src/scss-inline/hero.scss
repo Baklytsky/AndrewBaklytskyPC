@@ -1,0 +1,253 @@
+@import "../scss/helpers/mixins";
+
+.hero {
+  width: 100%;
+  min-height: var(--desktop-section-height);
+  padding: 80px;
+  display: flex;
+  overflow: hidden;
+
+  @include mq($small-max) {
+    min-height: var(--mobile-section-height);
+    padding: 60px 20px;
+  }
+}
+
+.hero--desktop-middle-center {
+  @include mq($small-min) {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .hero__content {
+      align-items: center;
+    }
+  }
+}
+
+.hero--mobile-middle-center {
+  @include mq($small-max) {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .hero__content {
+      align-items: center;
+    }
+  }
+}
+
+.hero--desktop-middle-left {
+  @include mq($small-min) {
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+  }
+}
+
+.hero--mobile-middle-left {
+  @include mq($small-max) {
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+  }
+}
+
+.hero--desktop-middle-right {
+  @include mq($small-min) {
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+
+    .hero__content {
+      align-items: flex-end;
+    }
+  }
+}
+
+.hero--mobile-middle-right {
+  @include mq($small-max) {
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+
+    .hero__content {
+      align-items: flex-end;
+    }
+  }
+}
+
+
+.hero--desktop-bottom-center {
+  @include mq($small-min) {
+    justify-content: center;
+    align-items: flex-end;
+    text-align: center;
+
+    .hero__content {
+      align-items: center;
+    }
+  }
+}
+
+.hero--mobile-bottom-center {
+  @include mq($small-max) {
+    justify-content: center;
+    align-items: flex-end;
+    text-align: center;
+
+    .hero__content {
+      align-items: center;
+    }
+  }
+}
+
+.hero--desktop-bottom-left {
+  @include mq($small-min) {
+    justify-content: flex-start;
+    align-items: flex-end;
+    text-align: left;
+  }
+}
+
+.hero--mobile-bottom-left {
+  @include mq($small-max) {
+    justify-content: flex-start;
+    align-items: flex-end;
+    text-align: left;
+  }
+}
+
+.hero--desktop-bottom-right {
+  @include mq($small-min) {
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+
+    .hero__content {
+      align-items: flex-end;
+    }
+  }
+}
+
+.hero--mobile-bottom-right {
+  @include mq($small-max) {
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+
+    .hero__content {
+      align-items: flex-end;
+    }
+  }
+}
+
+.hero__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  opacity: var(--overlay-opacity);
+  background: var(--overlay-bg);
+
+  &:empty {
+    display: block;
+  }
+}
+
+img.hero__half-image {
+  width: 50%;
+}
+
+img[data-second-image] {
+  left: 50%;
+}
+
+.hero__content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 4;
+  max-width: var(--desktop-content-width);
+
+  @include mq($small-max) {
+    max-width: 100%;
+  }
+
+  div.hero__content-block {
+    &.hero__content-badge {
+      margin-bottom: var(--margin-bottom-desktop);
+      width: var(--badge-width);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 1;
+      }
+
+      svg {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+}
+
+.hero__content-heading {
+  color: var(--heading-color);
+  letter-spacing: 0.01em;
+}
+
+.hero__content-subheading {
+  color: var(--subheading-color);
+}
+
+.hero__content-heading,
+.hero__content-subheading,
+.hero__content-btn {
+  margin: 0 0 var(--margin-bottom-desktop);
+
+  @include mq($small-max) {
+    margin: 0 0 var(--margin-bottom-mobile);
+  }
+}
+
+.hero__content-btn-full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+.hero__content .hero__content-block:last-child {
+  margin: 0;
+}
+
+.hero--pro {
+  .hero__content-subheading {
+    font-size: var(--font-size-body-1);
+    line-height: 1.333;
+
+    @include mq($small-max) {
+      font-size: var(--font-size-body-1-mobile);
+      line-height: 1.375;
+    }
+  }
+}
+
+.hero__video {
+  .js-video-play-button,
+  .js-video-pause-button,
+  .js-video-mute-button,
+  .js-video-unmute-button {
+    bottom: 10px;
+  }
+}

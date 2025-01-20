@@ -1,0 +1,58 @@
+@import "../helpers/mixins";
+
+.main-blogs {
+  @include mq($small-min) {
+    padding: var(--padding-top-desktop) 70px var(--padding-bottom-desktop);
+  }
+
+  @include mq($small-max) {
+    padding: var(--padding-top-mobile) 16px var(--padding-bottom-mobile);
+  }
+
+  .main-blogs__wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    grid-gap: 0;
+    margin: 0 -15px;
+
+    @include mq($medium-max) {
+      margin: 0;
+      grid-template-columns: repeat(2, minmax(150px, 1fr));
+    }
+
+    @include mq($extra-small-max) {
+      grid-template-columns: repeat(1, minmax(150px, 1fr));
+    }
+
+    div.main-blogs__article-wrapper {
+      @include mq($medium-max) {
+        grid-area: auto;
+      }
+    }
+
+    div.main-blogs__article-wrapper--banner {
+      grid-area: 60 / 1 / 61 / 5;
+
+      @include mq($medium-max) {
+        grid-area: 4 / 1 / 5 / 3;
+      }
+
+      @include mq($extra-small-max) {
+        grid-area: 7 / 1 / 8 / 2;
+      }
+    }
+  }
+
+  .main-blogs__article-wrapper {
+    margin: 15px;
+    grid-area: auto;
+
+    @include mq($small-max) {
+      margin: 8px;
+    }
+
+    @include mq($extra-small-max) {
+      margin: 8px 0;
+    }
+  }
+}

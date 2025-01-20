@@ -1,0 +1,39 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - id: {String} Unique id
+  - update_url: {Boolean} Update url on variant change
+
+  Usage:
+{%- render 'variant-radios', product: product, id: id, update_url: false -%}
+{% endcomment %}
+
+{%- unless product.has_only_default_variant -%}
+{%- liquid assign update_url = update_url | default: false -%}
+
+  <variant-radios class="pdp-details__radios"
+                  data-section="{{ id }}"
+                  data-url="{{ product.url }}"
+                  data-update-url="{{ update_url }}" {{ block.shopify_attributes }}>
+
+    {%- for option in product.options_with_values -%}
+      <fieldset class="pdp-details__radios-fieldset">
+        <legend class="form__label h6">{{ option.name }}</legend>
+        {%- for value in option.values -%}
+          <input class="hidden"
+                 type="radio"
+                 id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                 name="{{ option.name }}"
+                 value="{{ value | escape }}"
+                 form="{{ product_form_id }}"
+                 {% if option.selected_value == value %}checked{% endif %}>
+          <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+            {{ value }}
+          </label>
+        {%- endfor -%}
+      </fieldset>
+    {%- endfor -%}
+
+    <script type="application/json">{{ product.variants | json }}</script>
+  </variant-radios>
+{%- endunless -%}

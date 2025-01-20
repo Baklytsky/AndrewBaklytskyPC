@@ -1,0 +1,172 @@
+{%- comment -%}
+{%- render 'physician-finder-static-collection',
+  collection_heading: collection_heading,
+  button_label: collection_button_label,
+  button_link: collection_button_link,
+  button_style: collection_button_style,
+  show_promo_card: collection_promo_card_show,
+  promo_card_image: collection_promo_card_image,
+  promo_card_heading: collection_promo_card_heading,
+  promo_card_link_label: collection_promo_card_link_label,
+  promo_card_link_url: collection_promo_card_link_url,
+  collection_promo_banner_show: collection_promo_banner_show
+  collection_promo_banner_image: collection_promo_banner_image,
+  collection_promo_banner_content_position: collection_promo_banner_content_position,
+  collection_promo_banner_content_position_mobile: collection_promo_banner_content_position_mobile,
+  collection_promo_banner_heading: collection_promo_banner_heading,
+  collection_promo_banner_link_label: collection_promo_banner_link_label,
+  collection_promo_banner_link_url: collection_promo_banner_link_url
+-%}
+{%- endcomment -%}
+
+{%- if collection != blank -%}
+  {{ 'collection.min.css' | asset_url | stylesheet_tag }}
+  {{ 'fasets.min.css' | asset_url | stylesheet_tag }}
+  {{ 'grid.min.css' | asset_url | stylesheet_tag }}
+  {{ 'collection-blocks.min.css' | asset_url | stylesheet_tag }}
+
+  <script src="{{ 'component-facets.min.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'component-show-more.min.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'component-view-more-pagination.min.js' | asset_url }}" defer="defer"></script>
+
+  {%- liquid
+    assign columns_desktop = 3
+    assign columns_mobile = 2
+    assign show_promo_banner_flag = true
+    assign show_promo_card_flag = true
+    assign heading = collection_heading | default: collection.title
+  -%}
+
+  {% if collection.filters.size < 1 %}
+    {%- assign full_width_class = 'collection__content-grid--fill-width' -%}
+  {% endif %}
+
+  <div id="finder-collection__inner" class="collection">
+    <div class="collection__head">
+      <h1 class="collection__head-heading h2">{{ heading }}</h1>
+
+      {% if collection.description != blank %}
+        <div class="collection__head-description body1">{{ collection.description }}</div>
+      {% endif %}
+    </div>
+
+    <div class="collection__content">
+      <div class="collection__content-filters" data-id="{{ section.id }}">
+        {% render 'facets', results: collection, enable_filtering: true, enable_sorting: true, filter_type: 'vertical', collections_list: false  %}
+      </div>
+
+      <div class="collection__content-grid {{ full_width_class }}" id="ProductGridContainer">
+        {%- paginate collection.products by 12 -%}
+          {%- if collection.products.size == 0 -%}
+            <div class="collection collection--empty" id="product-grid" data-id="{{ section.id }}">
+              <div class="title-wrapper center">
+                <h3 class="title title--primary">
+                  {{ 'sections.collection_template.empty' | t }}<br>
+                  {{ 'sections.collection_template.use_fewer_filters_html' | t: link: collection.url, class: " link" }}
+                </h3>
+              </div>
+            </div>
+          {%- else -%}
+            <div class="collection__content-grid-wrapper">
+              {% render 'ga-product-list-event', product_list: collection.products, list_name: collection.title, list_id: section.id  %}
+
+              <ul id="product-grid"
+                  data-id="{{ section.id }}"
+                  style="--columns-desktop: {{ columns_desktop }}; --columns-mobile: {{ columns_mobile }}"
+                  class="collection__content-grid-list product-grid-{{ section.id }} grid product-grid grid--{{ columns_mobile }}-col-tablet-down grid--{{ columns_desktop }}-col-desktop">
+                {% if show_promo_card and paginate.current_page == 1 %}
+                  {%- assign show_promo_card_flag = false -%}
+
+                  <li class="collection__content-grid-list-item grid__item grid__item-promo {% if collection.products.size < 2 %} grid__item-promo--second-position {% elsif collection.products.size == 2 %}  grid__item-promo--third-position {% endif %}">
+                    {%- render 'promo-card',
+                      show_promo_card: show_promo_card,
+                      promo_card_image: promo_card_image,
+                      promo_card_heading: promo_card_heading,
+                      promo_card_link_label: promo_card_link_label,
+                      promo_card_link_url: promo_card_link_url
+                    -%}
+                  </li>
+                {% endif %}
+
+                {% if collection_promo_banner_show and paginate.current_page == 1 %}
+                  {%- liquid
+                    assign show_promo_banner_flag = false
+                    assign column_position_desktop = collection.products.size | divided_by: columns_desktop
+                    assign column_position_desktop = column_position_desktop | plus: 1
+                    assign column_position_mobile = collection.products.size | divided_by: columns_mobile
+                    assign column_position_mobile = column_position_mobile | plus: 1
+
+                    if column_position_desktop >= 4
+                    assign column_position_desktop = 4
+                    else
+                    assign column_position_desktop = column_position_desktop | plus: 1
+                    endif
+
+                    if column_position_mobile >= 5
+                    assign column_position_mobile = 5
+                    else
+                    assign column_position_mobile = column_position_mobile | plus: 1
+                    endif
+                  -%}
+
+                  <li
+                    style="--column-position-mobile: {{ column_position_mobile }}; --column-position-desktop: {{ column_position_desktop }}"
+                    class="collection__content-grid-list-item grid__item grid__item-promo-banner rel">
+                    {%- render 'promo-banner',
+                      show_banner: collection_promo_banner_show
+                      image: collection_promo_banner_image,
+                      content_position: collection_promo_banner_content_position,
+                      content_position_mobile: collection_promo_banner_content_position_mobile,
+                      heading: collection_promo_banner_heading,
+                      link_label: collection_promo_banner_link_label,
+                      link_url: collection_promo_banner_link_url -%}
+                  </li>
+                {% endif %}
+
+                {%- for product in collection.products -%}
+                  {%- liquid
+                    if show_promo_card
+                    assign has_promo_card = 1
+                    else
+                    assign has_promo_card = 0
+                    endif
+
+                    assign real_count_items = paginate.page_size | times: paginate.current_page | plus: has_promo_card
+                    assign need_count_items =  collection.products.size
+                  -%}
+
+                  <li class="collection__content-grid-list-item grid__item{% if real_count_items != need_count_items and forloop.index == 12 and paginate.next.url != null and show_promo_card %} visually-hidden {% endif %}">
+                    {% render 'product-card' product: product, quick_add: true,  %}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {% if paginate.next.url != null %}
+                {%- assign next_url = paginate.next.url -%}
+              {% endif %}
+            </div>
+          {%- endif -%}
+        {%- endpaginate -%}
+
+        {%- if next_url != blank -%}
+          <div class="collection__content-grid-btn-wrapper">
+            <view-more class="collection__content-grid-btn btn btn--secondary"
+                       data-next-page-url="{{ next_url | append: '&section_id=' | append: section.id }}"
+                       data-target-wrapper=".product-grid-{{ section.id }}">
+              {{ 'sections.collection_template.show_more' | t }}
+            </view-more>
+          </div>
+        {%- endif -%}
+
+        {%- if button_label != blank -%}
+          <a href="{%- if button_link != blank -%}{{ button_link }}{% else %}{{ collection.url }}{% endif %}"
+            class="finder-collection__shop-btn {% unless button_style == 'link' %}btn{% endunless %} btn--{{ button_style }}">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+{%- endif -%}

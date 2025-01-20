@@ -1,0 +1,77 @@
+{{ 'professional-educator.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'educator.min.js' | asset_url }}" defer="defer"></script>
+
+<obagi-educator class="block" data-loaded="loading">
+  <div class="loading-overlay__spinner">{% render 'icon' with 'spinner' %}</div>
+  <h2 class="educator-error">{{ 'sections.professional_educator.no_results_found' | t }}</h2>
+  <tabs-component class="educator block">
+    <div class="educator__header">
+      <scrolling-tabs class="educator__navigation hide-scrollbar"
+                      role="tablist"
+                      aria-labelledby="tablist-{{ section.id }}"
+                      hidden>
+
+        <button class="a body1 educator__navigation-tab btn--reset"
+          role="tab"
+          type="button"
+          tabindex="0"
+          aria-controls="show-all-tabs"
+          aria-selected="true">
+          All
+        </button>
+
+      </scrolling-tabs>
+      <span class="educator__video-counter body3"></span>
+    </div>
+
+    {%- if section.settings.presentation_id != blank -%}
+      <div class="page-width">
+        <div class="educator__trending"
+             data-presentation-id="{{ section.settings.presentation_id }}"
+             data-tab-id="tabpanel-educator__trending"
+             role="tabpanel"
+             aria-labelledby="tab-educator__trending"
+             aria-selected="false"
+             tabindex="0">
+          {%- if section.settings.heading != blank -%}
+            <h6 class="educator__trending-title">{{ section.settings.heading }}</h6>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="educator__list-wrapper"></div>
+  </tabs-component>
+
+  {%- if settings.brainshark_login_dir != blank and settings.brainshark_username != blank and settings.brainshark_password != blank -%}
+    <script type="application/ld+json" data-brainshark>
+    {
+      "login_dir": "{{ settings.brainshark_login_dir }}",
+      "username": "{{ settings.brainshark_username }}",
+      "password": "{{ settings.brainshark_password }}"
+    }
+  </script>
+  {%- endif -%}
+
+</obagi-educator>
+
+{% schema %}
+{
+  "name": "Educator",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "presentation_id",
+      "label": "Trending presentation"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Trending"
+    }
+  ]
+}
+{% endschema %}

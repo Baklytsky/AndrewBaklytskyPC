@@ -1,0 +1,188 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - id: {String} Unique id
+  - current_variant: {Object} Variant Liquid object
+  - block: {Object} Block settings object
+  - update_url: {Boolean} Update url '?selling_plan=23423423'
+  - update_price: {Boolean} Update variant price
+
+  Usage:
+{% render 'subscription-form', product: product, current_variant: current_variant, block: block, id: section.id, update_url: false, update_price: false %}
+{% endcomment %}
+
+<script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+
+<div class="subs--{{ id }}">
+  {%- if current_variant.selling_plan_allocations.size > 0 -%}
+    <subscription-form class="pdp-details__subs-wrapper"
+                       data-section="{{ id }}"
+                       data-update-url="{{ update_url }}"
+                       data-update-price="{{ update_price }}">
+
+      <h6 class="pdp-details__subs-heading">
+        {{ 'products.product.purchase_options' | t }}
+      </h6>
+
+      <fieldset class="pdp-details__subs">
+
+        {% unless product.requires_selling_plan %}
+          <div class="pdp-details__subs-group" data-selling-group>
+            <label class="pdp-details__subs-option">
+          <span class="pdp-details__subs-radio rel">
+            <span class="u-sr-only">{{ 'products.product.one_time_purchase' | t }} - radio</span>
+          </span>
+              <input
+                type="radio"
+                name="selling-plan-group"
+                value=""
+                data-toggles-group
+                class="input-one-time-purchase"
+                {% unless product.selected_selling_plan %}checked{% endunless %}/>
+              <span class="pdp-details__subs-option-title body3">
+                {{ 'products.product.one_time_purchase' | t }}
+              </span>
+
+              <span class="pdp-details__subs-price-wrapper body3--bold">
+              {{ current_variant.price | money }}
+            </span>
+            </label>
+          </div>
+        {% endunless %}
+
+        {%- liquid
+          assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.selling_plan_allocations[0].compare_at_price
+          assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.selling_plan_allocations[0].price | default: 1999
+          assign price_percent = price | times: 100 | divided_by: compare_at_price
+          assign save_percent = 100 | minus: price_percent -%}
+
+        {% for selling_plan_group in product.selling_plan_groups %}
+          <div class="pdp-details__subs-group product__subs__group-plans" data-selling-group>
+            <label class="pdp-details__subs-option">
+              <span class="pdp-details__subs-radio rel">
+                <span class="u-sr-only">{{ selling_plan_group.name | append: ' - radio' }}</span>
+              </span>
+              <input type="radio"
+                     name="selling-plan-group"
+                     value="{{ selling_plan_group.id }}"
+                     {% if selling_plan_group.selling_plan_selected or product.requires_selling_plan %}checked{% endif %}/>
+              <span class="pdp-details__subs-option-title body3">
+                {{ selling_plan_group.name | replace: 'and Save', '' }}
+              </span>
+              <span class="pdp-details__subs-save body3 rel">
+                <span class="subs-save--{{ selling_plan_group.id }}">
+                  {{ 'Save ' | append: save_percent | append: '%' }}
+                </span>
+                {%- if block.settings.subscriptions_details != blank -%}
+                  <modal-opener>
+                    <button class="pdp-details__subs-save-btn btn--reset"
+                            type="button"
+                            id="drawer-menu-open"
+                            aria-controls="#subs-info-modal"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="{{ selling_plan_group.name | append: ' - info' }}">ⓘ</button>
+                  </modal-opener>
+                {%- endif -%}
+              </span>
+              <span class="pdp-details__subs-price-wrapper body3 sub-price--{{ selling_plan_group.id }}">
+                {{ price | money }}
+              </span>
+            </label>
+
+            <div
+              class="pdp-details__subs-plans {% unless selling_plan_group.selling_plan_selected or product.requires_selling_plan %} hide{% endunless %}"
+              data-group-toggle="{{ selling_plan_group.id }}">
+
+              <span class="pdp-details__subs-plans-title body3">{{ 'products.product.delivery_plan' | t }}</span>
+
+              <custom-select class="pdp-details__subs-plans-select body3"
+                             {% unless selling_plan_group.selling_plan_selected or product.requires_selling_plan %}disabled{% endunless %}>
+
+                {%- liquid
+                  assign selected_plan_id = selling_plan_group.selling_plans[0].id
+                  assign selected_plan_name = selling_plan_group.selling_plans[0].options[0].value
+
+                  for plan in selling_plan_group.selling_plans
+
+                    if plan.selected
+                      assign selected_plan_id = plan.id
+                      assign selected_plan_name = plan.options[0].value
+                    endif
+
+                    if selected_plan_name == 'month'
+                      assign selected_plan_name = selected_plan_name | prepend: '1 '
+                    endif
+
+                  endfor -%}
+
+                <button type="button" class="btn--reset form-select__btn a" tabindex="0" aria-expanded="false"
+                        aria-controls="dropdown-{{ selling_plan_group.id }}">
+                  <span class="form-select__btn-text-label"></span>
+                  <span class="form-select__btn-text">{{ selected_plan_name }}</span>
+                  {%- render 'icon' with 'arrow-down' -%}
+                </button>
+
+                <ul class="form-select__dropdown" id="dropdown-{{ selling_plan_group.id }}" style="display: none;">
+                  <div class="form-select__dropdown-inner">
+                  {% for plan in selling_plan_group.selling_plans %}
+
+                      {%- liquid
+                        assign plan_name = plan.options[0].value
+
+                        if plan_name == 'month'
+                          assign plan_name = plan_name | prepend: '1 '
+                          assign order = 1
+                        endif
+
+                        if plan_name contains 'months'
+                          assign order = plan_name | split: 'months' | first | strip
+                        endif
+
+                      -%}
+
+                      <li class="form-select__dropdown-option a"
+                          data-option-value="{{ plan.id }}" aria-selected="{{ plan.selected }}" style="order: {{ order }}">
+                        <button type="button" class="btn--reset form-select__dropdown-button body3 ">
+                          {{ plan_name }}
+                        </button>
+                      </li>
+
+                  {% endfor %}
+                  </div>
+                </ul>
+
+                <input name="selling_plan"
+                       aria-describedby="a11y-refresh-page-message"
+                       type="hidden"
+                       class="form__input-hidden"
+                       value="" disabled>
+              </custom-select>
+            </div>
+          </div>
+        {% endfor %}
+      </fieldset>
+    </subscription-form>
+
+    {%- if block.settings.subscriptions_details != blank -%}
+      <modal-dialog id="subs-info-modal">
+        <div class="popup subs-info__modal" data-popup role="dialog" tabindex="-1" aria-modal="true" aria-hidden="true">
+          <button class="btn--reset" type="button" data-close-popup>
+            {%- render 'icon' with 'close' -%}
+          </button>
+          <div class="hide-scrollbar">
+            <h5 class="subs-info__heading">
+              {{ 'products.product.subscription_details_heading' | t }}
+            </h5>
+            <div class="subs-info__content body3">
+              {{ block.settings.subscriptions_details }}
+            </div>
+            <button class="btn btn--secondary-alt" type="button" data-close-popup>
+              {{ 'products.product.subscription_details_back_button' | t }}
+            </button>
+          </div>
+        </div>
+      </modal-dialog>
+    {%- endif -%}
+  {%- endif -%}
+</div>

@@ -1,0 +1,168 @@
+<script>
+  window.shopUrl = '{{ request.origin }}';
+  window.routes = {
+    cart_add_url: '{{ routes.cart_add_url }}',
+    cart_change_url: '{{ routes.cart_change_url }}',
+    cart_update_url: '{{ routes.cart_update_url }}',
+    cart_clear_url: '{{ routes.cart_clear_url }}',
+    cart_url: '{{ routes.cart_url }}',
+    predictive_search_url: '{{ routes.predictive_search_url }}'
+  };
+
+  window.premierPoints = {
+    enable: {{ settings.enable_premier_points }},
+    coefficient: {{ settings.points_coefficient }}
+  }
+
+  window.cartStrings = {
+    error: `{{ 'sections.cart.cart_error' | t }}`,
+    quantityError: `{{ 'sections.cart.cart_quantity_error_html' | t: quantity: '[quantity]' }}`
+  }
+
+  window.variantStrings = {
+    addToCart: `{{ 'products.product.add_to_cart' | t }}`,
+    soldOut: `{{ 'products.product.sold_out' | t }}`,
+    preorder: `{{ 'products.product.preorder' | t }}`,
+    unavailable: `{{ 'products.product.unavailable' | t }}`,
+    subscribe: `{{ 'products.product.subscribe' | t }}`,
+  }
+
+  window.accessibilityStrings = {
+    imageAvailable: `{{ 'products.product.media.image_available' | t: index: '[index]' }}`,
+    shareSuccess: `{{ 'general.share.success_message' | t }}`,
+    pauseSlideshow: `{{ 'sections.slideshow.pause_slideshow' | t }}`,
+    playSlideshow: `{{ 'sections.slideshow.play_slideshow' | t }}`,
+  }
+
+  window.images = {
+    obagi: '{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}',
+    salesRepsPlaceholder: '{{ 'sales-reps-placeholder.png' | asset_img_url: 'master' }}'
+  }
+
+  window.physicianFinderBtn = {
+    url: '{{ settings.physician_finder_url }}',
+    label:  '{{ settings.physician_finder_label }}'
+  }
+
+  window.googleMap = {
+    apiSrc: "https://obagi-api.westus.cloudapp.azure.com",
+    scriptSrc: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDXmP0xZjh1n2Zj8P_bS-c_fzMRkGSOU54&libraries=places&libraries=geometry",
+    styles: [
+      {
+        "featureType": "landscape",
+        "stylers": [
+          {
+            "color": "#c7e597"
+          }
+        ]
+      },
+      {
+        "featureType": "poi.business",
+        "stylers": [
+          {
+            "visibility": "off"
+          }
+        ]
+      },
+      {
+        "featureType": "poi.park",
+        "elementType": "labels.text",
+        "stylers": [
+          {
+            "visibility": "off"
+          }
+        ]
+      },
+      {
+        "featureType": "road.arterial",
+        "stylers": [
+          {
+            "visibility": "simplified"
+          }
+        ]
+      },
+      {
+        "featureType": "road.highway",
+        "stylers": [
+          {
+            "visibility": "simplified"
+          }
+        ]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "labels",
+        "stylers": [
+          {
+            "visibility": "off"
+          }
+        ]
+      },
+      {
+        "featureType": "road.local",
+        "stylers": [
+          {
+            "visibility": "off"
+          }
+        ]
+      },
+      {
+        "featureType": "water",
+        "stylers": [
+          {
+            "color": "#5fb1eb"
+          }
+        ]
+      }
+    ],
+    marker: "https://cdn.shopify.com/s/files/1/0669/3175/3236/files/Location.svg?v=1677839359",
+    markerActive: "https://cdn.shopify.com/s/files/1/0669/3175/3236/files/location_active.svg?v=1677850018",
+    markerHoverActive: "https://cdn.shopify.com/s/files/1/0669/3175/3236/files/Location_active_marker.svg?v=1679053691",
+    markerNumbered: "https://cdn.shopify.com/s/files/1/0669/3175/3236/files/Ellipse_49.svg?v=1672757163",
+    linkByCoordinates: (latitude, longitude) => {
+      return `http://www.google.com/maps/place/${latitude},${longitude}`
+    }
+  }
+
+  {% if customer %}
+  window.customer = {
+    "accepts_marketing": {{ customer.accepts_marketing | json }},
+    "addresses": {{ customer.addresses | json }},
+    "addresses_count": {{ customer.addresses_count | json }},
+    "company_available_locations": {{ customer.company_available_locations | json }},
+    "current_company": {{ customer.current_company | json }},
+    "current_location": {{ customer.current_location | json }},
+    "default_address": {{ customer.default_address | json }},
+    "email": {{ customer.email | json }},
+    "first_name": {{ customer.first_name | json }},
+    "has_account": {{ customer.has_account | json }},
+    "id": {{ customer.id | json }},
+    "last_name": {{ customer.last_name | json }},
+    "last_order": {{ customer.last_order | json }},
+    "name": {{ customer.name | json }},
+    "orders": {{ customer.orders | json }},
+    "orders_count": {{ customer.orders_count | json }},
+    "phone": {{ customer.phone | json }},
+    "tags": {{ customer.tags | json }},
+    "tax_exempt": {{ customer.tax_exempt | json }},
+    "total_spent": {{ customer.total_spent | json }},
+    "sales_information": {
+      "custom_id": {{ customer.metafields.sales_rep_info.custom_id | json }},
+      "image_url": {{ customer.metafields.sales_rep_info.image_url | json }},
+      "territory_name": {{ customer.metafields.sales_rep_info.territory_name | json }},
+      "id_for_matching_with_partner": {{ customer.metafields.sales_rep_info.id_for_matching_with_partner | json }}
+    },
+    "professional_information": {
+      "custom_id": {{ customer.metafields.professional_info.custom_id | json }},
+      "sales_representative_id": {{ customer.metafields.professional_info.sales_representative_id | json }},
+      "holder": {{ customer.metafields.professional_info.holder | json }},
+      "name": {{ customer.metafields.professional_info.name | json }},
+      "description": {{ customer.metafields.professional_info.description | json }},
+      "image_url": {{ customer.metafields.professional_info.image_url | json }},
+      "website_url": {{ customer.metafields.professional_info.website_url | json }},
+      "preferred_partner": {{ customer.metafields.professional_info.preferred_partner | json }},
+      "appears_in_physician_finder": {{ customer.metafields.professional_info.appears_in_physician_finder | json }}
+    }
+  }
+  {% endif %}
+</script>

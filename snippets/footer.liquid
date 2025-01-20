@@ -1,0 +1,370 @@
+{%- comment -%}
+  {%- render 'footer', section: section, pro: true/false, customer_status: customer_status -%}
+{%- endcomment -%}
+
+{% render '_footer.min.css' %}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+-%}
+
+<div class="footer"
+     data-aos="fade-up"
+     style="
+       --footer-bg-color: {{ section_bg_color }};
+       --footer-color: {{ text_color }};
+       ">
+  <div class="page-width">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+
+      {%- when 'newsletter' -%}
+      {%- liquid
+        assign newsletter_heading = block.settings.newsletter_heading -%}
+
+        <div class="footer__newsletter footer__block" {{ block.shopify_attributes }}>
+          {%- if newsletter_heading != blank -%}
+            <h3 class="footer__newsletter-heading">
+              {{ newsletter_heading | escape | newline_to_br }}
+            </h3>
+          {%- endif -%}
+
+          {%- render 'newsletter-form', block: block -%}
+        </div>
+
+      {%- when 'social' -%}
+      {%- liquid
+        if pro
+          assign instagram_url = block.settings.instagram_url
+        else
+          assign instagram_url = settings.social_instagram_link
+        endif
+
+        assign instagram_hashtag = block.settings.instagram_hashtag
+        assign open_new_page = block.settings.open_new_page
+        assign mobile_instagram_image = block.settings.mobile_instagram_image
+        assign mobile_instagram_image_alt = mobile_instagram_image.alt | default: 'Instagram image'
+        assign mobile_instagram_image_link = block.settings.mobile_instagram_image_link -%}
+
+        {%- capture instagram_images -%}
+          {%- for i in (1..4) -%}
+            {%- liquid
+              assign image_key = 'instagram_image_' | append: i
+              assign image_link_key = 'instagram_image_link_' | append: i
+              assign ig_image = block.settings[image_key]
+              assign ig_image_link = block.settings[image_link_key] | default: instagram_url
+              assign ig_image_alt = ig_image.alt | default: 'Instagram image ' | append: i -%}
+
+            {%- if ig_image != blank -%}
+              {%- unless mobile_instagram_image -%}
+              {%- liquid assign mobile_instagram_image = ig_image -%}
+              {%- endunless -%}
+
+              {%- if mobile_instagram_image_link == blank -%}
+                {%- liquid assign mobile_instagram_image_link = ig_image_link -%}
+              {%- endif -%}
+
+              <div class="footer__social-ig-image-wrapper">
+                <a{% if ig_image_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  href="{{ ig_image_link }}"{% endif %} class="footer__social-ig-image block rel">
+                  {% render 'image',
+                    image: ig_image,
+                    class_name: 'image-abs-cover',
+                    alt: ig_image_alt %}
+                </a>
+              </div>
+            {%- endif -%}
+
+          {%- endfor -%}
+        {%- endcapture -%}
+
+        {%- capture social_icons -%}
+        {%- liquid
+          assign socials = 'Instagram Facebook Pinterest YouTube TikTok Twitter Tumblr Snapchat Vimeo' | split: ' ' -%}
+
+          {%- for social in socials -%}
+            {%- liquid
+              assign social_link_key = social | handleize | prepend: 'social_' | append: '_link'
+              assign social_link = settings[social_link_key]
+              assign icon = social | handleize -%}
+
+            {%- if social_link != blank -%}
+              <li class="footer__social-icon">
+                <a class="footer__social-icon-link block"
+                   href="{{ social_link }}"
+                   target="_blank"
+                   aria-label="{{ social | append: ' icon' }}">
+                  {%- render 'icon', icon: icon -%}
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+
+        {%- endcapture -%}
+
+        {%- if instagram_hashtag != blank or instagram_images != blank or social_icons != blank -%}
+          <div class="footer__social footer__block" {{ block.shopify_attributes }}>
+            <div class="footer__social-header">
+              {%- if instagram_hashtag != blank -%}
+                <a{% if instagram_url == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  {% if open_new_page %} target="_blank" {% endif %}
+                  href="{{ instagram_url }}"{% endif %}
+                  class="footer__social-header-link h3">
+                  {{ instagram_hashtag | escape }}
+                </a>
+              {%- endif -%}
+              {%- if social_icons != blank -%}
+                <ul class="footer__social-icons medium-hide">
+                  {{ social_icons }}
+                </ul>
+              {%- endif -%}
+            </div>
+
+            {%- if instagram_images != blank -%}
+              <div class="footer__social-ig-wrapper small-up-hide">
+                <div class="footer__social-ig-image-wrapper">
+                  <a{% if mobile_instagram_image_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                    href="{{ mobile_instagram_image_link }}"{% endif %} class="footer__social-ig-image block rel">
+                    {% render 'image',
+                      image: mobile_instagram_image,
+                      class_name: 'image-abs-cover',
+                      alt: mobile_instagram_image_alt %}
+                  </a>
+                </div>
+              </div>
+              <div class="footer__social-ig-wrapper small-hide">
+                {{ instagram_images }}
+              </div>
+            {%- endif -%}
+
+            {%- if social_icons != blank -%}
+              <ul class="footer__social-icons medium-up-hide">
+                {{ social_icons }}
+              </ul>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+      {%- when 'menu' -%}
+      {%- liquid
+        assign menu = linklists[block.settings.menu]
+        assign mobile_menu_layout = block.settings.mobile_menu_layout -%}
+
+        {%- if menu.links.size > 0 -%}
+          <nav class="footer__menu footer__block footer__block--mobile-{{ mobile_menu_layout }}" {{ block.shopify_attributes }}>
+            <ul class="footer__menu-list">
+              {%- for link in menu.links -%}
+
+                {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                <li class="footer__menu-list-item {% if forloop.last %} footer__menu-list-item-last{% endif %}">
+                  {% if link.links == blank %}
+                    <h3 class='footer__menu-list-heading body3--bold'>
+                      <a href="{{ link.url }}" class="body3">{{ link.title }}</a>
+                    </h3>
+                  {% else %}
+
+                    {%- case mobile_menu_layout -%}
+                    {%- when 'accordion' -%}
+                      <accordion-element class="accordion" data-match-media="max-width: 1023px">
+                        <div class="footer__menu-list-block accordion__item">
+                          <button type="button"
+                                  aria-expanded="false"
+                                  class="h6 btn--reset accordion__button"
+                                  aria-controls="content-{{ forloop.index }}-{{ section.id }}"
+                                  id="accordion-button-{{ forloop.index }}-{{ section.id }}">
+
+                            <span class='footer__menu-list-heading body3--bold'>{{ link.title }}</span>
+
+                            <span class="accordion__icons block">
+                            {% render 'icon' with 'plus-small' %}
+                              {% render 'icon' with 'minus-small' %}
+                          </span>
+                          </button>
+
+                          <ul id="content-{{ forloop.index }}-{{ section.id }}"
+                              aria-labelledby="accordion-button-{{ forloop.index }}-{{ section.id }}"
+                              class='footer__submenu-list'
+                              style="display: none">
+                            {% for link in link.links %}
+
+                              {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                              {%- if direct_link_access -%}
+                                {% continue %}
+                              {%- endif -%}
+
+                              <li class='footer__submenu-list-item accordion__content-inner'>
+                                {%- assign link_title_handleize = link.title | handleize -%}
+                                {% comment %}
+                                {%- if link_title_handleize == 'refer-a-friend' -%}
+                                  <span id='extole_zone_global_footer' class="small-hide"></span>
+                                  <script type="text/javascript">
+                                    (function(c,b,f,k,a){c[b]=c[b]||{};for(c[b].q=c[b].q||[];a<k.length;)f(k[a++],c[b])})(window,"extole",function (c,b){b[c]=b[c]||function (){b.q.push([c,arguments])}},["createZone"],0);
+                                    extole.createZone({
+                                      name: "global_footer",
+                                      element_id: 'extole_zone_global_footer',
+                                      data: {
+                                        "email": "{{ customer.email }}",
+                                        "first_name": "{{ customer.first_name }}",
+                                        "last_name": "{{ customer.last_name }}",
+                                        "partner_user_id": "{{ customer.metafields.professional_info.custom_id }}"
+                                      }
+                                    });
+                                  </script>
+
+                                  <span id='extole_zone_mobile_footer' class="small-up-hide"></span>
+                                  <script type="text/javascript">
+                                    (function(c,b,f,k,a){c[b]=c[b]||{};for(c[b].q=c[b].q||[];a<k.length;)f(k[a++],c[b])})(window,"extole",function (c,b){b[c]=b[c]||function (){b.q.push([c,arguments])}},["createZone"],0);
+                                    extole.createZone({
+                                      name: "mobile_footer",
+                                      element_id: 'extole_zone_mobile_footer',
+                                      data: {
+                                        "email": "{{ customer.email }}",
+                                        "first_name": "{{ customer.first_name }}",
+                                        "last_name": "{{ customer.last_name }}",
+                                        "partner_user_id": "{{ customer.metafields.professional_info.custom_id }}"
+                                      }
+                                    });
+                                  </script>
+                                {%- else -%}
+                                  <a href="{{ link.url }}" class="body3">{{ link.title }}</a>
+                                  {% if link.title contains 'Terms' %}
+                                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-direction: column;">
+                                      <a class="truevault-polaris-privacy-notice" href="https://privacy.obagi.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+                                      <a class="truevault-polaris-optout" href="https://privacy.obagi.com/opt-out" noreferrer noopener hidden>
+                                        <img src="https://polaris.truevaultcdn.com/static/assets/icons/optout-icon-blue.svg"
+                                             alt="California Consumer Privacy Act (CCPA) Opt-Out Icon"
+                                             style="vertical-align:middle" height="14px"
+                                        />
+                                        Your Privacy Choices
+                                      </a>
+                                    </div>
+                                  {% endif %}
+                                {%- endif -%}
+                                {% endcomment %}
+
+                                <a href="{{ link.url }}" class="body3">{{ link.title }}</a>
+                                {% if link.title contains 'Terms' %}
+                                  <div style="display: flex; gap: 10px; margin-top: 10px; flex-direction: column;">
+                                    <a class="truevault-polaris-privacy-notice" href="https://privacy.obagi.com/privacy-policy#california-privacy-notice" noreferrer noopener hidden>California Privacy Notice</a>
+                                    <a class="truevault-polaris-optout" href="https://privacy.obagi.com/opt-out" noreferrer noopener hidden>
+                                      <img src="https://polaris.truevaultcdn.com/static/assets/icons/optout-icon-blue.svg"
+                                           alt="California Consumer Privacy Act (CCPA) Opt-Out Icon"
+                                           style="vertical-align:middle" height="14px"
+                                      />
+                                      Your Privacy Choices
+                                    </a>
+                                  </div>
+                                {% endif %}
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      </accordion-element>
+                    {%- when 'grid' -%}
+                      <div class="footer__menu-list-block">
+                        <h4 class='footer__menu-list-heading body3--bold'>{{ link.title }}</h4>
+                        <ul class='footer__submenu-list'>
+                          {% for link in link.links %}
+
+                            {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                            {%- if direct_link_access -%}
+                              {% continue %}
+                            {%- endif -%}
+
+                            <li class='footer__submenu-list-item accordion__content-inner'>
+                              {%- assign link_title_handleize = link.title | handleize -%}
+                              <a href="{{ link.url }}" class="body3">{{ link.title }}</a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    {%- endcase -%}
+
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+
+      {%- when 'logo-and-copyright' -%}
+      {%- liquid
+        assign logo = block.settings.logo
+        assign logo_alt = logo.alt | default: shop.name | escape
+        assign logo_width = block.settings.logo_width
+        assign copyright = block.settings.copyright -%}
+
+        {%- if logo or copyright != blank -%}
+          <div class="footer__logo"
+               style="--footer-logo-width: {{ logo_width | append: 'px' }}"
+            {{ block.shopify_attributes }}>
+
+            {%- if logo -%}
+              {%- if pro -%}
+                {%- assign logo_link = settings.professional_landing_url -%}
+                {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+                  {%- assign logo_link = settings.professional_homepage_url -%}
+                {%- endif -%}
+
+                <a href="{{ logo_link | default: routes.root_url }}" class="footer__logo-link block rel" aria-label="{{ logo_alt }}">
+                  {% render 'image', image: logo, alt: logo_alt %}
+                </a>
+              {%- else -%}
+                <a href="{{ routes.root_url }}" class="footer__logo-link block rel" aria-label="{{ logo_alt }}">
+                  {% render 'image', image: logo, alt: logo_alt %}
+                </a>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if copyright != blank -%}
+              <div class="footer__logo-copyright body3">{{ copyright }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+      {%- when 'country-list' -%}
+      {%- assign new_tab_links = block.settings.new_tab_links -%}
+        <ul class="footer__country-list">
+          {%- for i in (1..40) -%}
+            {%- assign name_handle = 'country_name_' | append: i -%}
+            {%- assign url_handle = 'country_url_' | append: i -%}
+            {%- assign name = block.settings[name_handle] -%}
+            {%- assign url = block.settings[url_handle] -%}
+
+            {%- if url != blank and name != blank -%}
+              <li class="footer__country-list-item">
+                <a href="{{ url }}" {% if new_tab_links %}target="_blank"{% endif %}>{{ name }}</a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+  (function () {
+    const footerNavList = document.querySelector('.footer__menu-list');
+
+    footerNavList.addEventListener('click', (e) => {
+      if (e.target.href) {
+        window.dataLayer.push({
+          'event': 'bottom_nav_click',
+          'nav': {
+            'bottom_nav': `${e.target.textContent}`
+          }
+        });
+      }
+    })
+  })()
+</script>

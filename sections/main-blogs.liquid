@@ -1,0 +1,163 @@
+{%- liquid
+  assign menu = section.settings.menu
+  assign top_blocks_limit = 0
+  assign sec_from_1970_to_2022 = 1640995200
+  assign all_publicshed_at_str = ""
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+-%}
+
+{{ 'main-blogs.min.css' | asset_url | stylesheet_tag }}
+{{ 'blog-blocks.min.css' | asset_url | stylesheet_tag }}
+
+{%- if menu and menu.links.size > 0 -%}
+  {% render 'blog-navigation' link-list: menu %}
+
+  <div class="main-blogs page-width" style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;">
+    <div class="main-blogs__wrapper">
+      {% for link in linklists[menu].links %}
+        {% assign blog = link.object %}
+
+        {%- paginate blog.articles by 1000 -%}
+          {% for article in blog.articles %}
+            {%- liquid
+              assign time_in_s = article.published_at | date: '%s'
+              assign time_in_s_from_2022 = time_in_s | plus: 0 | minus: sec_from_1970_to_2022
+              assign all_publicshed_at_str = all_publicshed_at_str | append: ',' | append: time_in_s_from_2022
+            -%}
+
+            <div class="main-blogs__article-wrapper main-blogs__article-wrapper--{{- time_in_s_from_2022 -}}" style="order: -{{- time_in_s_from_2022 -}}">
+               {% render 'article-card' blog: blog, article: article, show_date: true %}
+            </div>
+          {% endfor %}
+        {% endpaginate %}
+      {% endfor %}
+
+      {%- if [request.page_type].metafields.promo_banner.show_section == 'true' -%}
+        <div class="main-blogs__article-wrapper main-blogs__article-wrapper--banner">
+          {% render 'blog-blocks' block_type: 'promo-banner'  %}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{%- assign all_publicshed_at_arr = all_publicshed_at_str | remove_first: ',' | split: ',' -%}
+{%- assign all_publicshed_at_arr_sort = all_publicshed_at_arr | sort -%}
+
+<style>
+  {%- for i in (1..6) -%}
+    {%- assign elem_index = all_publicshed_at_arr_sort.size | minus: i -%}
+
+  .main-blogs__wrapper .main-blogs__article-wrapper--{{ all_publicshed_at_arr_sort[elem_index]}} {
+    {%- if forloop.index == 1 -%}
+      grid-area: 1 / 1 / 31 / 3;
+    {%- elsif forloop.index == 2 -%}
+      grid-area: 1 / 3 / 24 / 4;
+    {%- elsif forloop.index == 3 -%}
+      grid-area: 1 / 4 / 24 / 5;
+    {%- elsif forloop.index == 4 -%}
+      grid-area: 31 / 1 / 60 / 2;
+    {%- elsif forloop.index == 5 -%}
+      grid-area: 31 / 2 / 60 / 3;
+    {%- elsif forloop.index == 6 -%}
+      grid-area: 24 / 3 / 60 / 5;
+    {%- endif -%}
+     }
+  {%- endfor -%}
+</style>
+
+
+
+{% schema %}
+{
+  "name": "Blogs",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Blogs list"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content paddings"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_desk",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mob",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blogs"
+    }
+  ]
+}
+{% endschema %}

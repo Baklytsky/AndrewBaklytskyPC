@@ -1,0 +1,239 @@
+<div class="account-details">
+  <h3 class="h3 account-details__heading">{{ "customer.account.details" | t }}</h3>
+
+  <div class="account-details__item account-details__name">
+    <div id="account-name-edit" class="account-details__edit hidden">
+      <form id="account-edit-name" action="/account"  data-form-name="Edit customer name">
+        <input type="hidden" name="customer[id]" value="{{ customer.id }}"/>
+
+        <div class="form-field">
+          <label for="first-name-field" class="body4 form-label">{{ "customer.edit_name.first_name" | t }}</label>
+          <input type="text"
+                 name="customer[first_name]"
+                 id="first-name-field"
+                 class="form-input"
+                 value="{{ customer.first_name }}"
+                 placeholder="Name"
+                 >
+        </div>
+
+        <div class="form-field">
+          <label for="account__lastname" class="body4 form-label">{{ "customer.edit_name.last_name" | t }}</label>
+          <input type="text"
+                 name="customer[last_name]"
+                 id="account__lastname"
+                 class="form-input"
+                 value="{{ customer.last_name }}"
+                 placeholder="Last name"
+                 >
+        </div>
+
+
+        <div class="account__edit-buttons">
+          <button type="submit" class="btn btn--primary-alt account__edit-form-submit js-edit-name-submit">{{ "customer.account.save" | t }}</button>
+          <button type="reset" class="a btn--reset body4 account__cancel-btn js-opener-block" data-element-open="account-name-summary" data-element-hide="account-name-edit">{{ "customer.account.cancel" | t }}</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="account-name-summary" class="account-details__summary">
+      <span class="body4 account-details__title">{{ "customer.account.name" | t }}</span>
+
+      <div class="account-details__summary-inner">
+        {%- if customer.first_name != blank or customer.last_name != blank -%}
+          <span class="body1">{{ customer.first_name }} {{ customer.last_name }}</span>
+        {%- else -%}
+          <span class="body1 account-details__summary-info">{{ "customer.account.add_name" | t }}</span>
+        {%- endif -%}
+        <button type="button" class="a btn--reset account__edit-btn body4 js-opener-block" data-element-open="account-name-edit" data-element-hide="account-name-summary">
+          {{ "customer.account.edit" | t }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="account-details__item account-details__email">
+    <div class="account-details__summary">
+      <span class="body4 account-details__title">{{ "customer.account.email" | t }}</span>
+      <span class="body1 account-details__element-info">{{ customer.email }}</span>
+    </div>
+  </div>
+
+  <div class="account-details__item account-details__birth">
+    <div id="account-birthday-edit" class="account-details__edit hidden">
+      <form id="account-birthday-form" action="/account#birthday-edit" novalidate="novalidate" class="account-edit-form" data-form-name="Edit customer birthday">
+        <input type="hidden" name="customer[id]" value="{{ customer.id }}"/>
+        <input type="hidden"
+               id="birthday_input"
+               class="form-input"
+               name="metafield[customer_information.birthday_date]"
+               autocomplete="given-name"
+               value="{{ customer.metafields.customer_information.birthday_date }}"
+               placeholder="
+                           {%- if customer.metafields.customer_information.birthday_date != blank -%}
+                            {{ customer.metafields.customer_information.birthday_date }}
+                           {%- else -%}
+                            07/29
+                           {%- endif -%}">
+        <span class="body4 form-label">{{ "customer.account.birthday" | t }}</span>
+
+        <div class="account-details__form-inner">
+          <label for="birthday-month" class="visually-hidden">Month</label>
+          <select name="birthday_month" id="birthday-month" required class="form__select small-up-hide">
+            <option value="" disabled selected>Month</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+
+          <custom-select class="form-select body3 form-select-alternative small-hide">
+            <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-month-{{ section.id }}">
+              <span class="form-select__btn-text">Month</span>
+              <span class="form-select__dropdown-option--label"></span>
+
+              {%- render 'icon' with 'arrow-down' -%}
+            </button>
+
+            <ul class="form-select__dropdown hide-scrollbar" id="dropdown-month-{{ section.id }}" style="display: none;">
+              <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="01">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">January</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="02">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">February</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="03">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">March</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="04">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">April</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="05">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">May</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="06">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">June</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="07">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">July</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="08">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">August</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="09">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">September</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="10">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">October</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="11">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">November</button>
+              </li>
+              <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="12">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">December</button>
+              </li>
+            </ul>
+
+            <input name="birthday_month" id="customer_birthday_month" type="hidden" class="form__input-hidden" value="">
+          </custom-select>
+
+          <label for="birthday-day" class="visually-hidden">Day</label>
+          <select name="birthday_day" required class="form__select small-up-hide">
+            <option value="" disabled selected>Day</option>
+
+            {%- for i in (1..31) -%}
+              <option value="{% if i < 10 %}0{% endif %}{{ i }}">{{ i }}</option>
+            {%- endfor -%}
+          </select>
+
+          <custom-select class="form-select body3 form-select-alternative small-hide">
+            <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-day-{{ section.id }}">
+              <span class="form-select__btn-text">Day</span>
+              <span class="form-select__dropdown-option--label"></span>
+
+              {%- render 'icon' with 'arrow-down' -%}
+            </button>
+
+            <ul class="form-select__dropdown hide-scrollbar" id="dropdown-day-{{ section.id }}" style="display: none;">
+              {%- for i in (1..31) -%}
+                <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="{% if i < 10 %}0{% endif %}{{ i }}">
+                  <button type="button" class="btn--reset form-select__dropdown-button body3">{{ i }}</button>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            <input name="birthday_day" id="customer_birthday_day" type="hidden" class="form__input-hidden" value="">
+          </custom-select>
+
+          <label for="birthday-year" class="visually-hidden">Year</label>
+          <select name="birthday_year" required class="form__select small-up-hide">
+            <option value="" disabled selected>Year</option>
+
+            {%- for i in (0..100) -%}
+              {%- assign year_now = 'now' | date: "%Y" -%}
+              {%- assign year = year_now | minus: i -%}
+              <option value="{{ year }}">{{ year }}</option>
+            {%- endfor -%}
+          </select>
+
+          <custom-select class="form-select body3 form-select-alternative small-hide">
+            <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-year-{{ section.id }}">
+              <span class="form-select__btn-text">Year</span>
+              <span class="form-select__dropdown-option--label"></span>
+
+              {%- render 'icon' with 'arrow-down' -%}
+            </button>
+
+            <ul class="form-select__dropdown hide-scrollbar" id="dropdown-year-{{ section.id }}" style="display: none;">
+              {%- for i in (0..100) -%}
+                {%- assign year_now = 'now' | date: "%Y" -%}
+                {%- assign year = year_now | minus: i -%}
+                <li class="form-select__dropdown-option a" aria-selected="false"  data-option-value="{{ year }}">
+                  <button type="button" class="btn--reset form-select__dropdown-button body3 ">{{ year }}</button>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            <input name="birthday_year" id="customer_birthday_year" type="hidden" class="form__input-hidden" value="">
+          </custom-select>
+        </div>
+
+        <div class="account__edit-buttons">
+          <button type="submit" class="btn btn--primary-alt account__edit-form-submit js-edit-birth-submit" disabled>{{ "customer.account.save" | t }}</button>
+          <button type="reset" class="a btn--reset body4 account__cancel-btn js-opener-block"  data-element-open="account-birthday-summary" data-element-hide="account-birthday-edit">
+            {{ "customer.account.cancel" | t }}
+          </button>
+        </div>
+
+        <p class="body3 form-error hidden">{{ "form_errors.birthday_error" | t }}</p>
+      </form>
+    </div>
+
+    <div id="account-birthday-summary" class="account-details__summary">
+      <span class="body4 account-details__title">{{ "customer.account.birthday" | t }}</span>
+      <div class="account-details__summary-inner">
+        <span class="body1 account-details__summary-info">
+          {% if customer.metafields.customer_information.birthday_date != blank %}
+            {{ customer.metafields.customer_information.birthday_date }}
+          {%- else -%}
+            {{ "customer.account.add_birthday" | t }}
+          {%- endif -%}
+        </span>
+        {% if customer.metafields.customer_information.birthday_date == blank %}
+          <button type="button" class="a btn--reset account__edit-btn body4 js-opener-block" data-element-open="account-birthday-edit" data-element-hide="account-birthday-summary">
+            {{ "customer.account.edit" | t }}
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>

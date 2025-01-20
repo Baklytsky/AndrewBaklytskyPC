@@ -1,0 +1,150 @@
+<customer-form class="customer-register section-{{ section.id }}-padding">
+
+  {%- form 'create_customer', data-form-name:"Customer register" -%}
+    <h1 class="h4 login-form__heading">
+      {{ 'customer.register.title' | t }}
+    </h1>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="customer[first_name]"
+        id="RegisterForm-FirstName"
+        {% if form.first_name %}value="{{ form.first_name }}"{% endif %}
+        autocomplete="given-name"
+        placeholder="{{ 'customer.register.first_name' | t }}"
+        class="form-input"
+        required
+      >
+      <label for="RegisterForm-FirstName" class="visually-hidden">
+        {{ 'customer.register.first_name' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="customer[last_name]"
+        id="RegisterForm-LastName"
+        {% if form.last_name %}value="{{ form.last_name }}"{% endif %}
+        autocomplete="family-name"
+        placeholder="{{ 'customer.register.last_name' | t }}"
+        class="form-input"
+        required
+      >
+      <label for="RegisterForm-LastName" class="visually-hidden">
+        {{ 'customer.register.last_name' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="email"
+        name="customer[email]"
+        id="RegisterForm-email"
+        {% if form.email %} value="{{ form.email }}"{% endif %}
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="email"
+        aria-required="true"
+        {% if form.errors contains 'email' %}
+          aria-invalid="true"
+          aria-describedby="RegisterForm-email-error"
+        {% endif %}
+        placeholder="{{ 'customer.register.email' | t }}"
+        class="form-input {%- if form.errors contains 'email' -%}error{% endif %}"
+        required
+      >
+      <label for="RegisterForm-email" class="visually-hidden">
+        {{ 'customer.register.email' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="password"
+        name="customer[password]"
+        id="RegisterForm-password"
+        aria-required="true"
+        {% if form.errors contains 'password' %}
+          aria-invalid="true"
+          aria-describedby="RegisterForm-password-error"
+        {% endif %}
+        placeholder="{{ 'customer.register.password' | t }}"
+        class="form-input {%- if form.errors contains 'password' -%}error{% endif %}"
+        required
+      >
+      <label for="RegisterForm-password" class="visually-hidden">
+        {{ 'customer.register.password' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="password"
+        name="customer[password_confirmation]"
+        id="RegisterForm-password-confirmation"
+        aria-required="true"
+        {% if form.errors contains 'password' %}
+          aria-invalid="true"
+          aria-describedby="RegisterForm-password-error"
+        {% endif %}
+        placeholder="{{ 'customer.register.password_confirmation' | t }}"
+        class="form-input {%- if form.errors contains 'password' -%}error{% endif %}"
+        required
+      >
+      <label for="RegisterForm-password-confirmation" class="visually-hidden">
+        {{ 'customer.register.password' | t }}
+      </label>
+    </div>
+
+    <p class="body3 recover-form__pass-text">
+      {{ 'customer.recover_password.passwords_validation_text' | t }}
+    </p>
+
+    <div class="form-field accepts-marketing">
+      <input type="hidden" name="customer[accepts_marketing]" value="false" />
+
+      <input id="accepts-marketing" type="checkbox" name="customer[accepts_marketing]" class="form__checkbox" checked />
+      <label for="accepts-marketing">{{ email_marketing_text | default: 'Subscribe to email marketing' }}</label>
+    </div>
+
+    <button type="submit" class="btn btn--primary-alt customer-register__submit">
+      {{ 'customer.register.submit' | t }}
+    </button>
+
+    <div class="customer-errors">
+      <p class="body3 form-error form-error--email hide">{{ "form_errors.email" | t }}</p>
+      <p class="body3 form-error form-error--password hide">{{ "form_errors.password_confirm" | t }}</p>
+      <p class="body3 form-error form-error--password-length hide">{{ "form_errors.password_length" | t }}</p>
+      <p class="body3 form-error form-error--password-valid hide">{{ "form_errors.password" | t }}</p>
+
+      {%- if form.errors -%}
+        <script>
+          window.dataLayer.push({
+            'event': 'form_error',
+            'form': {
+              'form_name': 'Register form',
+              'form_validation_errors': '',
+              'error_message': ''
+            }
+          });
+        </script>
+
+        {%- for field in form.errors -%}
+          <p class="body3 form-error register-form-error">
+            {%- if field == 'form' -%}
+              {{ form.errors.messages[field] }}
+            {%- else -%}
+              {{ form.errors.translated_fields[field] | capitalize }}
+              {{ form.errors.messages[field] }}
+            {%- endif -%}
+          </p>
+        {%- endfor -%}
+
+
+      {%- endif -%}
+    </div>
+
+  {% endform %}
+</customer-form>

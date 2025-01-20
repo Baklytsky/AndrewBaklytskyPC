@@ -1,0 +1,120 @@
+@import "../helpers/mixins";
+
+.our-services {
+  padding-bottom: var(--padding-bottom-desktop);
+  padding-top: var(--padding-top-desktop);
+
+  @include mq($small-max) {
+    padding-bottom: var(--padding-bottom-mobile);
+    padding-top: var(--padding-top-mobile);
+  }
+}
+
+.our-services__item {
+  display: flex;
+  justify-content: space-between;
+  min-height: calc(450px + 120px);
+  padding: 60px 0;
+
+  @include mq($small-max) {
+    flex-direction: column;
+    padding: 40px 0 0;
+    border-bottom: unset;
+  }
+
+  &.our-services__item--horizontal {
+    @include mq($small-min) {
+      flex-direction: column;
+
+      .our-services__item-image-wrapper {
+        width: 100%;
+        padding-top: 40%;
+        margin-bottom: 50px;
+      }
+
+      .our-services__item-text-wrapper {
+        width: 100%;
+        padding-bottom: 0;
+      }
+
+      .our-services__item-text-heading,
+      .our-services__item-text-description {
+        margin-bottom: 20px;
+        max-width: 550px;
+      }
+    }
+
+    &:last-child .our-services__item-text-wrapper {
+      @include mq($small-max) {
+        border-bottom: 1px solid var(--color-border);
+      }
+    }
+  }
+
+  &:last-child {
+    //border-bottom: unset;
+
+    .our-services__item-text-wrapper {
+      @include mq($small-max) {
+        border-bottom: unset;
+      }
+    }
+  }
+
+  .our-services__item-image-wrapper {
+    width: 50%;
+    position: relative;
+
+    @include mq($small-max) {
+      margin: 0 -20px;
+      padding-top: 94%;
+      width: calc(100% + 40px);
+    }
+  }
+
+  .our-services__item-image-badge {
+    position: absolute;
+    width: auto;
+    height: 75px;
+    right: 20px;
+    top: 20px;
+
+    @include mq($small-max) {
+      height: 35px;
+    }
+  }
+
+  .our-services__item-image-text, .our-services__item-image-logo {
+    position: absolute;
+    max-width: calc(100% - 40px);
+    width: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 1;
+    color: var(--color);
+    text-align: center;
+  }
+
+  .our-services__item-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    padding: 10px 20px 40px;
+    text-align: center;
+
+    @include mq($small-max) {
+      width: 100%;
+      padding: 40px 5px 40px;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+
+  .our-services__item-text-heading,
+  .our-services__item-text-description {
+    margin-bottom: 20px;
+    max-width: 360px;
+  }
+}

@@ -1,0 +1,329 @@
+@import "../helpers/mixins";
+
+
+.skincare-tabs {
+  .skincare-tabs__list.skincare-tabs__list--reverse {
+    @include mq($small-min) {
+      .skincare-step__content-wrapper {
+        &.skincare-step__content-wrapper--0 {
+          flex-direction: row;
+
+          .skincare-step__content-info-wrapper {
+            margin-right: 20px;
+            margin-left: 0;
+          }
+        }
+
+        &.skincare-step__content-wrapper--1 {
+          flex-direction: row-reverse;
+
+          .skincare-step__content-info-wrapper {
+            margin-left: 20px;
+            margin-right: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.skincare-tabs {
+  padding: 80px 0;
+
+  @include mq($small-max) {
+    text-align: center;
+    padding: 50px 0 0;
+  }
+
+  .skincare-tabs__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+
+    @include mq($small-max) {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .skincare-tabs__header-text {
+    margin-right: 20px;
+
+    @include mq($small-max) {
+      margin-right: 0;
+    }
+  }
+
+  .skincare-tabs__header-heading,
+  .skincare-tabs__header-subheading {
+    margin-bottom: 30px;
+
+    @include mq($small-max) {
+      margin-bottom: 15px;
+    }
+  }
+
+  .skincare-tabs__list {
+    counter-reset: myCounter;
+
+    .skincare-step__content-wrapper {
+      @include mq($small-min) {
+        &.skincare-step__content-wrapper--0 {
+          flex-direction: row-reverse;
+          align-items: flex-start;
+
+          .skincare-step__content-info-wrapper {
+            margin-left: 20px;
+            margin-right: 0;
+          }
+        }
+
+        &.skincare-step__content-wrapper--1 {
+          flex-direction: row;
+
+          .skincare-step__content-info-wrapper {
+            margin-right: 20px;
+            margin-left: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .skincare-tabs__header-tab-panels {
+    display: flex;
+    padding: 30px 0 40px;
+
+    @include mq($small-max) {
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    batton {
+      cursor: pointer;
+      margin-bottom: 0;
+
+      &[aria-selected="true"] {
+        color: var(--color-link-text-hover);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .skincare-tabs__header-tab:not(:first-child) {
+    margin-left: 40px;
+  }
+
+  .skincare-step {
+    counter-increment: myCounter;
+    min-height: 630px;
+    padding: 80px 0;
+    border-bottom: 1px solid var(--color-border);
+
+    @include mq($small-max) {
+      padding: 40px 0 0;
+    }
+
+    &.skincare-step--content-full-width {
+      min-height: unset;
+
+      .skincare-step__content-info-wrapper,
+      .skincare-step__content-media-wrapper {
+        width: 100%;
+      }
+    }
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: unset;
+    }
+  }
+
+  .skincare-step__content-wrapper {
+    display: flex;
+    justify-content: space-between;
+
+    @include mq($small-max) {
+      flex-direction: column-reverse;
+    }
+
+    @include mq($small-min) {
+      &.skincare-step__content-wrapper--0 {
+        flex-direction: row-reverse;
+
+        .skincare-step__content-info-wrapper {
+          margin-left: 20px;
+        }
+      }
+
+      &.skincare-step__content-wrapper--1 {
+        flex-direction: row;
+        align-items: flex-start;
+
+        .skincare-step__content-info-wrapper {
+          margin-left: 20px;
+        }
+      }
+    }
+  }
+
+  .skincare-step__content-info-wrapper {
+    width: 49%;
+
+    @include mq($small-max) {
+      width: 100%;
+      margin-right: 0;
+    }
+  }
+
+  .skincare-step__content-text {
+    padding-bottom: 30px;
+
+    @include mq($small-max) {
+      text-align: left;
+    }
+  }
+
+  .skincare-step__step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 20px;
+    border: 1px solid var(--color-btn-primary-border);
+    border-radius: 50%;
+
+    &:before {
+      content: counter(myCounter);
+    }
+  }
+
+  .skincare-step__step-heading {
+    margin-bottom: 30px;
+  }
+
+  .skincare-step__step-description {
+    margin-bottom: 30px;
+  }
+
+  .skincare-step__content-products {
+    padding-top: 30px;
+    overflow-x: hidden;
+    border-top: 1px solid var(--color-border);
+
+    @include mq($small-max) {
+      padding: 30px 0 40px;
+      overflow-x: visible;
+    }
+  }
+
+  .skincare-step__content-products-heading {
+    @include mq($small-max) {
+      text-align: left;
+    }
+  }
+
+  .skincare-step__content-products-list {
+    display: flex;
+    margin: 0 -10px;
+    overflow-x: auto;
+
+    @include mq($small-max) {
+      margin: 0 -20px 0 -5px;
+    }
+  }
+
+  .skincare-step__content-product-item {
+    width: 33.33%;
+    padding: 0 10px;
+    text-align: center;
+    min-width: 150px;
+
+    @include mq($small-max) {
+      padding: 0 5px;
+      min-width: 140px;
+    }
+  }
+
+  .skincare-step__content-product-image {
+    padding-top: 100%;
+    margin-bottom: 20px;
+
+    @include mq($small-max) {
+      padding-top: 130%;
+    }
+
+    a {
+      z-index: 1;
+    }
+  }
+
+  .skincare-step__content-product-title {
+    text-decoration: underline;
+  }
+
+  .skincare-step__content-media-wrapper {
+    width: 40%;
+    padding-top: calc(40% / var(--aspect-ratio));
+
+
+    @include mq($small-max) {
+      width: 100%;
+      padding-top: calc(100% / var(--aspect-ratio));
+
+      &.skincare-step__content-media-wrapper--only-video {
+        height: auto;
+        //padding-top: 90%;
+        margin-bottom: 30px;
+      }
+    }
+  }
+
+  .skincare-step__content-media-image {
+    width: 100%;
+    height: 630px;
+
+    @include mq($small-max) {
+      height: auto;
+      padding-top: 90%;
+      margin-bottom: 30px;
+    }
+  }
+
+  .skincare-step__content-media-video.is-loaded ~ .skincare-step__content-media-image {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .skincare-step__content-media-video {
+    height: auto;
+    padding-top: 630px;
+    overflow: hidden;
+
+    @include mq($small-max) {
+      height: auto;
+      padding-top: 90%;
+      margin-bottom: 30px;
+    }
+
+    iframe {
+      @include mq($small-min) {
+        top: 0;
+        left: -50%;
+        min-height: 630px;
+        width: calc(630px * 1.8);
+        height: 100%;
+        transform: translateX(-12%);
+      }
+    }
+  }
+}

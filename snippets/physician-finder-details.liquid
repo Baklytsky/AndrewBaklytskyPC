@@ -1,0 +1,90 @@
+{%- comment -%}
+  {%- render 'physician-finder-details' -%}
+{%- endcomment -%}
+
+<div id="finder-details__inner" class="finder-details__inner"></div>
+<script id="finder-details__source" type="text/x-handlebars-template">
+  {% raw %}
+    <div class="finder-details__wrapper">
+      <div class="finder-details rel">
+        <div class="finder-details__header" data-customer-type="{{ customerType }}">
+        {{#if business}}
+          <h3 class="finder-details__header-business">{{ business }}</h3>
+        {{/if}}
+        {{#if description}}
+          <p class="finder-details__header-description body2">{{ description }}</p>
+        {{/if}}
+        {{#if skintrinsiqProvider}}
+          {% endraw %}
+            {%- liquid assign checkmark_title = 'sections.physician_finder_details.skintrinsiq_title' | t -%}
+            {%- render 'checkmark-with-title', title: checkmark_title, className: 'finder-details__header-skintrinsiq' -%}
+          {% raw %}
+        {{/if}}
+        </div>
+        <div class="finder-details__address">
+          {{#if (and latitude longitude)}}
+          <div class="finder-details__address-map-inner">
+            <div id="map" class="finder-details__address-map"></div>
+          </div>
+          {{/if}}
+          <div class="finder-details__address-inner">
+          {{#if (or city state street zipCode)}}
+            <div class="finder-details__address-block">
+              {% endraw %}
+              <h6>{{ 'sections.physician_finder_details.address' | t }}</h6>
+              {% raw %}
+              <address>
+              {{ street }}<br>{{ city }}{{#if (or state zipCode)}}, {{ state }} {{ zipCode }}{{/if}}
+              </address>
+              {{#if (and latitude longitude)}}
+              <a href="http://www.google.com/maps/place/{{latitude}},{{longitude}}" target="_blank"
+                  class="finder-details__address-direction">
+                {% endraw %}{{ 'sections.physician_finder_details.get_directions' | t }}{% raw %}
+              </a>
+              {{/if}}
+            </div>
+          {{/if}}
+          {{#if phoneNumber }}
+            <div class="finder-details__address-block">
+              {% endraw %}
+              <h6>{{ 'sections.physician_finder_details.phone' | t }}</h6>
+              {% raw %}
+              <a href="tel:{{ phoneNumber }}" class="finder-details__address-phone block">{{ formattedPhone }}</a>
+            </div>
+          {{/if}}
+          </div>
+        </div>
+        {% endraw %}
+          <div class="finder-details__buttons">
+            <a href="#finder-collection__inner" class="btn btn--primary-alt">
+              {{ 'sections.physician_finder_details.shop_btn_title' | t }}
+            </a>
+            {% raw %}
+              {{#if websiteUrl }}
+                <a href="{{ websiteUrl }}" class="finder-details__learn-more"> {% endraw %}{{ 'sections.physician_finder_details.learn_more' | t }}{% raw %}</a>
+              {{/if}}
+            {% endraw %}
+          </div>
+        {% raw %}
+      </div>
+      {{#if (or physicianName physicianDescription)}}
+      <div class="finder-physician-spotlight">
+        {{#if physicianImageUrl }}
+        <div class="finder-physician-spotlight-img-wrapper rel">
+          <img src="{{ physicianImageUrl }}" class="image-abs-cover" alt="{{ physicianName }}">
+        </div>
+        {{/if}}
+        {% endraw %}
+        <h6>{{ 'sections.physician_finder_details.spotlight_tile' | t }}</h6>
+        {% raw %}
+        {{#if physicianName }}
+        <h5>{{ physicianName }}</h5>
+        {{/if}}
+        {{#if physicianDescription }}
+        <p>{{ physicianDescription }}</p>
+        {{/if}}
+      </div>
+      {{/if}}
+    </div>
+  {% endraw %}
+</script>

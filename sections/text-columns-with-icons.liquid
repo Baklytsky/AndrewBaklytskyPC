@@ -1,0 +1,335 @@
+{{ 'text-columns-with-icons.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign section_bg_color = section.settings.section_bg_color
+  assign section_bg_image = section.settings.section_bg_image
+  assign section_text_color = section.settings.section_text_color
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign columns_arr = section.blocks | where: 'type', 'column'
+-%}
+
+{%- if columns_arr.size > 0 -%}
+  {%- capture columns -%}
+    <div class="columns-with-icons__columns-wrapper">
+      {%- for block in columns_arr -%}
+        {%- liquid
+          assign icon = block.settings.icon
+          assign description = block.settings.description
+        -%}
+
+        {%- if description != blank or icon != blank -%}
+          <div class="columns-with-icons__columns-item">
+            {%- if icon != blank -%}
+              <div class="columns-with-icons__columns-item-icon">{{ icon }}</div>
+            {%- endif -%}
+
+            {%- if description != blank -%}
+              <p class="columns-with-icons__columns-item-description">{{ description }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endcapture -%}
+{%- endif -%}
+
+<div class="columns-with-icons"
+     data-aos="fade-up"
+     style="
+       --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+       --padding-top-desktop: {{ padding_top_desk }}px;
+       --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+       --padding-top-mobile: {{ padding_top_mob }}px;
+       --bg-color: {{ section_bg_color }};
+       --color: {{ section_text_color }}">
+
+  {%- if section_bg_image -%}
+    {% render 'image',
+      image: section_bg_image,
+      class_name: 'image-abs-cover',
+      alt: section_bg_image.alt %}
+  {%- endif -%}
+  <div class="columns-with-icons__content-wrapper page-width">
+    <div class="columns-with-icons__content{% if border_bottom %} border-bottom{% endif %}">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'heading' -%}
+            {%- liquid
+              assign heading = block.settings.heading
+              assign heading_font_size = block.settings.heading_font_size
+            -%}
+
+            {%- if heading != blank -%}
+              <h3 class="columns-with-icons__heading {{ heading_font_size }}" {{ block.shopify_attributes }}>
+                <span class="small-hide">{{ heading | newline_to_br }}</span>
+                <span class="small-up-hide">{{ heading }}</span>
+              </h3>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.type == 'subheading' -%}
+            {%- liquid
+              assign subheading = block.settings.subheading
+            -%}
+
+            {%- if subheading != blank -%}
+              <p class="columns-with-icons__subheading h6" {{ block.shopify_attributes }}>
+                <span class="small-hide">{{ subheading | escape | newline_to_br }}</span>
+                <span class="small-up-hide">{{ subheading | escape }}</span>
+              </p>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.type == 'column' -%}
+            {%- if columns != blank and columns_arr != blank -%}
+              {%- assign columns_arr = '' -%}
+
+              {{ columns }}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.type == 'button' -%}
+            {%- liquid
+              assign button_label = block.settings.button_label
+              assign button_link = block.settings.button_link
+              assign button_style = block.settings.button_style -%}
+
+            {%- if button_label != blank -%}
+              <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                href="{{ button_link }}"{% endif %}
+                class="columns-with-icons__btn btn btn--{{ button_style }}" {{ block.shopify_attributes }}>
+                {{ button_label | escape }}
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- capture icon -%}
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="19" stroke="#FFB700" stroke-width="2"></circle>
+            <path d="M15 20.8074L17.6622 24L25 17" stroke="#FFB700" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+        {%- endcapture -%}
+
+        <h3 class="columns-with-icons__heading h4">{{ 'text_columns_with_icons.empty_block_heading' | t }}</h3>
+        <a href="{{ routes.root_url }}" class="columns-with-icons__btn btn btn--secondary-alt">
+          {{ 'text_columns_with_icons.empty_block_btn' | t }}
+        </a>
+        <div class="columns-with-icons__columns-wrapper">
+          {%- for i in (1..3) -%}
+            <div class="columns-with-icons__columns-item">
+              <div class="columns-with-icons__columns-item-icon">{{ icon }}</div>
+              <p class="columns-with-icons__columns-item-description">{{ 'text_columns_with_icons.empty_block_description' | t }}</p>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Text columns with icons",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content paddings"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#383838"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "limit": 1,
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "options": [
+            {
+              "value": "h1",
+              "label": "h1"
+            },
+            {
+              "value": "h2",
+              "label": "h2"
+            },
+            {
+              "value": "h3",
+              "label": "h3"
+            },
+            {
+              "value": "h4",
+              "label": "h4"
+            },
+            {
+              "value": "h5",
+              "label": "h5"
+            },
+            {
+              "value": "h6",
+              "label": "h6"
+            }
+          ],
+          "default": "h4",
+          "label": "Font size"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "limit": 1,
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        }
+      ]
+    },
+    {
+      "type": "column",
+      "limit": 3,
+      "name": "Column",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Svg icon"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "limit": 1,
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "secondary-alt"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text columns with icons"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,41 @@
+{%- comment -%}
+{%- render 'notify-me-form', product: product, current_variant: current_variant -%}
+{%- endcomment -%}
+
+ <script src="{{ 'component-product-notify.min.js' | asset_url }}" defer="defer"></script>
+
+ {%- liquid
+   assign notify_text = product.metafields.custom.back_in_stock_label | default: block.settings.notify_text
+   assign notify_submit_text = block.settings.notify_button_label | default: 'Notify Me'
+   assign notify_success_message = 'products.product.notify_me_success' | t
+   assign notify_error_message = 'products.product.notify_me_error_message' | t
+   assign notify_error_email_message = 'products.product.notify_me_error' | t
+ -%}
+
+ <notify-me-form class="product-form__notify">
+   <form method="post" class="product-notify__form">
+     <input type="hidden" name="product" value="{{ product.id }}">
+     <input type="hidden" name="variant" value="{{ current_variant.id }}">
+
+     {%- if notify_text != blank -%}
+       <p class="body2 form-label">{{ notify_text }}</p>
+     {%- endif -%}
+
+     <div class="product-form__notify-inner form-field">
+       <input id="product-notify-input-{{ section.id }}"
+              class="form-input"
+              type="email"
+              autocomplete="email"
+              name="email"
+              tabindex="0"
+              placeholder="{{ 'products.product.notify_me_placeholder' | t }}"
+              >
+       <label for="product-notify-input-{{ section.id }}" class="form-label visually-hidden">{{ 'products.product.notify_me_placeholder' | t }}</label>
+       <button type="submit" class="product-form__submit btn btn--full-width btn--primary-alt">{{ notify_submit_text }}</button>
+     </div>
+
+     <p class="notify-message notify-message__success hide">{{ notify_success_message }}</p>
+     <p class="notify-message notify-message__error form-error hide">{{ notify_error_message }}</p>
+     <p class="notify-message notify-message__error-email form-error hide">{{ notify_error_email_message }}</p>
+   </form>
+ </notify-me-form>

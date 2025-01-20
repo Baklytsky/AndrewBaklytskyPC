@@ -1,0 +1,51 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - id: {String} Unique id
+  - current_variant: {Object} Variant Liquid object
+  - block: {Object} Section block
+
+  Usage:
+{%- render 'pdp-rx-only-details-form', product: product, id: product_form_id, block: block -%}
+{% endcomment %}
+
+{%- liquid
+  assign show_sticky_bar = block.settings.show_sticky_bar
+-%}
+
+<div class="product-form" {{ block.shopify_attributes }}>
+
+    {%- if show_sticky_bar -%}
+      {%- render 'pdp-rx-only-sticky-bar', product: product, product_form_id: id -%}
+    {%- endif -%}
+
+  <div class="product-form__wrapper">
+
+    {%- if block.settings.show_quantity_selector -%}
+      <div class="quantity" data-quantity-value="1" disabled>
+        <button class="quantity__button quantity__button--minus no-js-hidden" name="minus" type="button">
+          <span class="visually-hidden">
+            {{ 'products.product.quantity.decrease' | t: product: product.title | escape }}
+          </span>
+          {%- render 'icon' with 'minus' -%}
+        </button>
+        <input class="quantity__input"
+               type="number"
+               name="quantity"
+               value="1"
+               min="1"
+               aria-label="{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}">
+        <button class="quantity__button quantity__button--plus no-js-hidden" name="plus" type="button">
+                <span class="visually-hidden">
+                  {{ 'products.product.quantity.increase' | t: product: product.title | escape }}
+                </span>
+          {%- render 'icon' with 'plus' -%}
+        </button>
+      </div>
+    {%- endif -%}
+
+    <div class="product-form__buttons">
+      {% render 'physician-link', class: "product-form__btn-link btn btn--full-width btn--primary-alt" %}
+    </div>
+  </div>
+</div>

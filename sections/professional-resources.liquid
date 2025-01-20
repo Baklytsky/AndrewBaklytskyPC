@@ -1,0 +1,389 @@
+{{ 'professional-resources.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-resource-blocks.min.js' | asset_url }}" defer="defer"></script>
+{%- include 'customer-status-list' -%}
+
+{%- comment -%}
+  - 'customer-status-list' return {{ customer_status_list }} and {{ customer_status_list_handle_arr }} variable
+{%- endcomment -%}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign pre_heading = section.settings.pre_heading | newline_to_br
+  assign heading = section.settings.heading | newline_to_br
+  assign subheading = section.settings.subheading | newline_to_br
+  assign bg_color = section.settings.bg_color
+  assign sales_representative_id = customer.metafields.professional_info.sales_representative_id
+-%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    position: relative;
+    z-index: 5;
+  }
+</style>
+
+<resource-blocks data-aos="fade-up"
+     style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;
+    --bg-color: {{ bg_color }};"
+  class="professional-resources rel block">
+
+  {%- if sales_representative_id != blank -%}
+    <script src="{{ 'component-representative-card.min.js' | asset_url }}" defer="defer"></script>
+
+    <modal-dialog id="representative-card" class="representative-card hidden">
+      <div class="representative-card__modal popup" data-popup tabindex="0" aria-modal="true" aria-hidden="false"
+           role="dialog">
+        <modal-opener>
+          <button
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="#representative-card"
+            data-close-drawers
+            class="representative-card__close-btn btn--reset a">
+            {% render 'icon' with 'close' %}
+
+            <span class="visually-hidden">close representative card</span>
+          </button>
+        </modal-opener>
+
+        <representative-card class="block" data-sales-manager-id="{{ sales_representative_id }}"></representative-card>
+      </div>
+    </modal-dialog>
+  {%- endif -%}
+
+  <div class="page-width">
+    {%- if section.blocks.size > 0 -%}
+      {% if pre_heading != blank or heading != blank or subheading != blank %}
+        <div class="professional-resources__heading-wrapper">
+            {% if pre_heading != blank %}
+              <p class="professional-resources__pre-heading h6">{{ pre_heading }}</p>
+            {% endif %}
+
+            {% if heading != blank %}
+              <h2 class="professional-resources__heading">{{ heading }}</h2>
+            {% endif %}
+
+            {% if subheading != blank %}
+              <p class="professional-resources__subheading h5">{{ subheading }}</p>
+            {% endif %}
+        </div>
+      {% endif %}
+
+        {% for block in section.blocks %}
+          {%- liquid
+            assign show_block = false
+            assign shown_for_customers = block.settings.shown_for_customers
+            assign image_d = block.settings.image_d
+            assign image_m = block.settings.image_m | default: block.settings.image_d
+            assign text_color = block.settings.text_color
+            assign subheading = block.settings.subheading | escape | newline_to_br
+            assign heading = block.settings.heading | escape | newline_to_br
+            assign description = block.settings.description | escape | newline_to_br
+            assign button_label = block.settings.button_label
+            assign link_url = block.settings.link_url
+            assign dynamic_link_type = block.settings.dynamic_link_type
+            assign button_style = block.settings.button_style
+            assign image_alt = image.alt | default: heading
+
+            assign desktop_image_class = 'image-abs-cover'
+            assign mobile_image_class = 'image-abs-cover small-up-hide'
+
+            if image != blank or heading != blank or description != blank
+            assign has_content = true
+            endif
+
+            if shown_for_customers != blank
+              assign shown_for_customers_arr = shown_for_customers | split: ','
+
+            for status in shown_for_customers_arr
+              assign status_handle = status | handleize
+
+              for i in customer_status_list_handle_arr
+                if i == status_handle
+                  assign show_block = true
+                  break
+                endif
+              endfor
+
+              if show_block
+                break
+              endif
+            endfor
+
+            endif
+          -%}
+
+          {% if has_content and show_block %}
+            <div class="professional-resources__item"
+                 style="--color: {{ text_color }}"
+                 data-resource-block="{{ dynamic_link_type }}">
+              {% if image_d != blank or image_m != blank %}
+                <div class="professional-resources__item-image-wrapper rel">
+                  {% if image_d != blank %}
+                    {% render 'image',
+                      image: image_d,
+                      class_name: desktop_image_class,
+                      alt: image_alt %}
+                  {% endif %}
+
+                  {% if image_m != blank %}
+                    {% render 'image',
+                      image: image_m,
+                      class_name: mobile_image_class,
+                      alt: image_alt %}
+                  {% endif %}
+
+                  {% if link_url != blank %}
+                    <a href="{{ link_url }}" class="image-abs-cover">
+                      <span class="u-sr-only">{{ button_label }}</span>
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              {% if subheading != blank or heading != blank or description != blank %}
+                <div class="professional-resources__item-text-wrapper">
+                  {%- if subheading != blank -%}
+                    <p class="professional-resources__item-subheading h6">{{ subheading }}</p>
+                  {%- endif -%}
+
+                  {%- if heading != blank -%}
+                    {% if link_url != blank %}
+                      <a href="{{ link_url }}" class="professional-resources__item-heading h4">{{ heading }}</a>
+                    {% else %}
+                      <h3 href="{{ link_url }}" class="professional-resources__item-heading h4">{{ heading }}</h3>
+                    {% endif %}
+                  {%- endif -%}
+
+                  {%- if description != blank -%}
+                    <div class="professional-resources__item-description body2">{{ description }}</div>
+                  {%- endif -%}
+                </div>
+              {% endif %}
+
+              {%- if button_label != blank -%}
+                <a{% if link_url == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  href="{{ link_url }}"{% endif %}
+                  class="professional-resources__item--btn btn btn--{{ button_style }}">
+                  {{ button_label | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {%- else -%}
+        <div class="professional-resources__heading-wrapper">
+          <p class="professional-resources__pre-heading h6">The Business Center</p>
+          <h2 class="professional-resources__heading">Resources at <br> your Fingertips</h2>
+          <p class="professional-resources__heading h5">Your Obagi Professional resources, in one place.</p>
+        </div>
+
+        <div class="professional-resources__item">
+          <div class="professional-resources__item-image-wrapper rel">
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+
+            <a href="#" class="image-abs-cover">
+              <span class="u-sr-only">placeholder</span>
+            </a>
+          </div>
+
+          <div class="professional-resources__item-text-wrapper">
+            <p class="professional-resources__item-subheading h6">Obagi Order</p>
+
+            <a href="{{ link_url }}" class="professional-resources__item-heading h4">Stock up on Obagi products</a>
+
+            <div class="professional-resources__item-description body2">Place bulk orders of Obagi® products and have them shipped directly to your door.</div>
+          </div>
+
+          <a href="#" class="professional-resources__item--btn btn btn--secondary">
+            Button label
+          </a>
+        </div>
+      {%- endif -%}
+  </div>
+</resource-blocks>
+
+
+{% schema %}
+{
+  "name": "Professional resources",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "textarea",
+      "id": "pre_heading",
+      "label": "Pre-heading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#F9F9F9"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "shown_for_customers",
+          "label": "Shown for customers",
+          "info": "if empty, the block will be hidden for all customers. Example: Partner, Premier Partner"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_d",
+          "label": "Image desktop"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_m",
+          "label": "Image mobile"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link url"
+        },
+        {
+          "type": "select",
+          "id": "dynamic_link_type",
+          "options": [
+            {
+              "value": "disabled",
+              "label": "Use link url"
+            },
+            {
+              "value": "rewards",
+              "label": "Rewards"
+            }
+          ],
+          "default": "disabled",
+          "label": "Type of dynamic link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "primary"
+        }
+      ]
+      }
+    ],
+  "presets": [
+    {
+      "name": "Professional resources"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

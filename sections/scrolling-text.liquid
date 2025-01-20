@@ -1,0 +1,101 @@
+{% render '_scrolling-text.min.css' %}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+  assign divider_color = section.settings.divider_color
+  assign animation_speed = section.settings.animation_speed
+  assign min_iterations_count = 50
+-%}
+
+<div class="scrolling-text"
+     data-aos="fade-up"
+     style="
+       --bg-color: {{ section_bg_color }};
+       --color: {{ text_color }};
+       --divider-color: {{ divider_color }};
+       --animation-speed: {{ animation_speed | append: 's' }};
+       ">
+  {%- if section.blocks.size > 0 -%}
+    {%- liquid
+      assign iterations_count = min_iterations_count | divided_by: section.blocks.size | ceil
+    -%}
+    <div class="scrolling-text__content">
+      {%- for i in (1..iterations_count) -%}
+        <ul class="scrolling-text__list">
+          {%- for block in section.blocks -%}
+            <li class="scrolling-text__item body4 rel" {{ block.shopify_attributes }}>
+              {{ block.settings.title }}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endfor -%}
+    </div>
+  {%- else -%}
+    <div class="scrolling-text__content">
+      {%- for i in (1..min_iterations_count) -%}
+        <ul class="scrolling-text__list">
+          <li class="scrolling-text__item body4 rel">
+            {{ 'Scrolling text ' | append: i }}
+          </li>
+        </ul>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Scrolling text",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color",
+      "default": "#FFB700"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "unit": "sec",
+      "label": "Animation speed",
+      "default": 10
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "default": "Scrolling text",
+          "label": "Heading"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling text"
+    }
+  ]
+}
+{% endschema %}

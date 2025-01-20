@@ -1,0 +1,63 @@
+@import "../helpers/mixins";
+
+.recommended-posts {
+  background-color: var(--bg-color);
+
+  .page-width {
+    position: relative;
+    padding: var(--padding-top-desktop) 70px var(--padding-bottom-desktop);
+
+    &:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 70px;
+      right: 0;
+      width: calc(100% - 140px);
+      border-top: 1px solid var(--color-border);
+
+      @include mq($small-max) {
+        left: 16px;
+        width: calc(100% - 32px);
+      }
+    }
+
+
+    @include mq($small-max) {
+      padding: var(--padding-top-mobile) 16px var(--padding-bottom-mobile);
+    }
+  }
+
+  .recommended-posts__heading {
+    margin-bottom: 40px;
+
+    @include mq($small-max) {
+      margin-bottom: 24px;
+    }
+  }
+
+  .recommended-posts__wrapper {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    @include mq($small-max) {
+      gap: 16px;
+    }
+  }
+
+  .article-card {
+    max-width: calc(33% - 20px);
+    align-self: normal;
+    height: auto;
+
+    @include mq($medium-max) {
+      max-width: calc(50% - 15px);
+    }
+
+    @include mq($small-max) {
+      max-width: 100%;
+    }
+  }
+}

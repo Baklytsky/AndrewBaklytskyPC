@@ -1,0 +1,78 @@
+{%- include 'customer-status' -%}
+{%- comment -%}
+  - 'customer-status' return {{ customer_status }} variable
+{%- endcomment -%}
+
+<section class="main-account {% if customer_status == 'Partner' or customer_status == 'Premier Partner' %}pro-account{% endif %}">
+  {{ 'account.min.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'account.min.js' | asset_url }}" defer></script>
+  <script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+  <customer-account class="account" data-id="{{ section.id }}">
+    <div id="account" class="account__inner">
+      {%- render 'account-nav', customer_status: customer_status, section: section -%}
+
+      <div class="account__content">
+        {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+          <div id="account-overview" class="account-block">
+            <div class="account__overview">
+              <h2 class="h3 account-overview__heading">{{ 'customer.overview.title' | t }}</h2>
+              {%- render 'professional-account-overview' -%}
+            </div>
+            {%- section 'account-business-center' -%}
+          </div>
+        {%- endif -%}
+
+        <div id="account-profile"
+             class="account-block account__profile {% if customer_status == 'Partner' or customer_status == 'Premier Partner' %}hidden{% endif %}">
+          {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+            <h2 class="h6 account-profile__heading">{{ 'customer.account_nav.profile' | t }}</h2>
+            {%- render 'professional-account-profile' -%}
+          {%- else -%}
+            <h2 class="h6">{{ 'customer.account_nav.profile' | t }}</h2>
+            {%- render 'account-addresses-edit' -%}
+            {%- render 'account-addresses-new' -%}
+
+            <div id="account-profile-inner" class="account__profile-inner">
+              {%- render 'account-details' -%}
+              {%- render 'account-addresses' -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+          <div id="account-details" class="account-block account__profile hidden">
+            <h2 class="h6">{{ 'customer.account_nav.details' | t }}</h2>
+            {%- render 'account-addresses-edit' -%}
+            {%- render 'account-addresses-new' -%}
+
+            <div id="account-profile-inner" class="account__profile-inner">
+              {%- render 'account-details' -%}
+              {%- render 'account-addresses' -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div id="account-orders" class="account-block account__orders hidden">
+          <h2 class="h3 account__orders-heading">{{ 'customer.account_nav.orders' | t }}</h2>
+          {%- render 'account-orders' -%}
+        </div>
+
+        {%- comment -%}
+          {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+            <div id="account-certifications" class="account-block account__certifications hidden">
+              <h2 class="h3">{{ 'customer.certifications.title' | t }}</h2>
+            </div>
+          {%- endif -%}
+        {%- endcomment -%}
+
+        <div id="account-rewards"
+             class="account-block account__rewards hidden">
+          <h2 class="h6">{{ 'customer.account_nav.rewards' | t }}</h2>
+          {%- section 'account-rewards' -%}
+        </div>
+      </div>
+    </div>
+  </customer-account>
+</section>

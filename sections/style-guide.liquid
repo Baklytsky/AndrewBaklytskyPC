@@ -1,0 +1,506 @@
+<link rel="stylesheet" href="{{ 'style-guide.min.css' | asset_url }}" media="print" onload="this.media='all'">
+
+<section class="style-guide page-width">
+  <h1 class="h1 center" data-aos="fade-up">Style guide</h1>
+  <div class="style-guide__colors">
+    <h2 class="h3" data-aos="fade-up">Colors</h2>
+
+    <div class="style-guide__colors-grid" data-aos="fade-up">
+      <div class="style-guide__colors-item color-body-bg">
+        <p>
+          Body background <br>
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-bg-primary">
+        <p>
+          Background primary <br>
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-heading">
+        <p>
+          Text heading
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-text-primary">
+        <p>
+          Text body primary
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-text-secondary">
+        <p>
+          Text body secondary
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-text-light">
+        <p>
+          Text body light
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-link-text">
+        <p>
+          Link text
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-link-text-hover">
+        <p>
+          Link hover
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-error">
+        <p>
+          Error
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-border">
+        <p>
+          Border
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-accent-primary">
+        <p>
+          Accent 1
+        </p>
+      </div>
+
+      <div class="style-guide__colors-item color-accent-secondary">
+        <p>
+          Accent 2
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="style-guide__ctas style-guide__btns" data-aos="fade-up">
+    <h4 class="center">CTAs</h4>
+
+    <div class="style-guide__ctas-grid">
+      <div class="style-guide__ctas-item">
+        <a  href="#" class="btn btn--primary">Button primary</a>
+        <a  href="#" class="btn btn--primary-alt">Button primary alternative</a>
+        <a  href="#" class="btn btn--primary" disabled>Button primary inactive</a>
+        <a  href="#" class="btn btn--secondary">Button secondary</a>
+        <a  href="#" class="btn btn--secondary-alt">Button secondary alternative</a>
+        <a  href="#" class="btn btn--secondary" disabled>Button secondary inactive</a>
+        <a  href="#" class="btn btn--secondary btn--small">Button small</a>
+        <a  href="#" class="btn btn--secondary btn--full-width">Button full width</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="style-guide__form-wrapper">
+    <div class="style-guide__ctas custom-select" data-aos="fade-up">
+      <h4 class="center">Form Fields</h4>
+
+      <div class="style-guide__ctas-grid">
+        <h5 class="center">Input</h5>
+        <div class="style-guide__ctas-item">
+          <div class="form-field">
+            <input type="email"
+                   value=""
+                   name="email"
+                   id="RecoverEmail"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   autocomplete="email"
+                   class="form-input"
+              {% if form.errors %}
+                aria-invalid="true"
+                aria-describedby="RecoverEmail-email-error"
+                autofocus
+              {% endif %}
+                   placeholder="{{ 'customer.login_page.email' | t }}"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="style-guide__ctas-grid" data-aos="fade-up">
+        <h4 class="center">Quantity input</h4>
+        <div class="style-guide__ctas-item">
+          <div class="form-field">
+            <quantity-input class="quantity" data-quantity-value="1">
+              <button class="quantity__button quantity__button--minus no-js-hidden" name="minus" type="button">
+                <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: item.product.title | escape }}</span>
+                {%- render 'icon' with 'minus' -%}
+              </button>
+              <input class="quantity__input"
+                     type="number"
+                     name="updates[]"
+                     value="1"
+                     min="1"
+                     aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+              >
+              <button class="quantity__button quantity__button--plus no-js-hidden" name="plus" type="button">
+                <span class="visually-hidden">{{ 'products.product.quantity.increase' | t: product: item.product.title | escape }}</span>
+                {%- render 'icon' with 'plus' -%}
+              </button>
+            </quantity-input>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="style-guide__ctas accordions" data-aos="fade-up">
+      <h4 class="center">Accordions</h4>
+      <h5 class="center">Multiple opened</h5>
+      <div class="style-guide__ctas-grid">
+        <div class="style-guide__ctas-item">
+          <div class="form-field">
+            <accordion-element class="accordion">
+              <div class="accordion__item">
+                <button type="button"
+                        aria-expanded="false"
+                        class="h6 btn--reset accordion__button"
+                        aria-controls="content-1"
+                        id="accordion-button-1">
+                  <span class="accordion-title">
+                    Description
+                  </span>
+
+                  <div class="accordion__icons">
+                    {% render 'icon' with 'plus-small' %}
+                    {% render 'icon' with 'minus-small' %}
+                  </div>
+
+                </button>
+
+                <div id="content-1"
+                     role="region"
+                     aria-labelledby="accordion-button-1"
+                     class="accordion__content"
+                     style="display: none">
+                  <div class="accordion__content-inner">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+                  </div>
+                </div>
+              </div>
+            </accordion-element>
+
+            <accordion-element class="accordion">
+              <div class="accordion__item">
+                <button type="button"
+                        aria-expanded="false"
+                        class="h6 btn--reset accordion__button"
+                        aria-controls="content-2"
+                        id="accordion-button-2">
+                  <span class="accordion-title">
+                    Ingredients
+                  </span>
+
+                  <div class="accordion__icons">
+                    {% render 'icon' with 'plus-small' %}
+                    {% render 'icon' with 'minus-small' %}
+                  </div>
+                </button>
+
+                <div id="content-2"
+                     role="region"
+                     aria-labelledby="accordion-button-2"
+                     class="accordion__content"
+                     style="display: none">
+                  <div class="accordion__content-inner">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+                  </div>
+                </div>
+
+              </div>
+            </accordion-element>
+          </div>
+        </div>
+      </div>
+
+      <h5 class="center">Single opened</h5>
+      <div class="style-guide__ctas-grid">
+        <div class="style-guide__ctas-item">
+          <div class="form-field">
+            <accordion-element class="accordion" data-accordion-group="style-guide">
+              <div class="accordion__item">
+                <button type="button"
+                        aria-expanded="false"
+                        class="h6 btn--reset accordion__button"
+                        aria-controls="content-1"
+                        id="accordion-button-1">
+                  <span class="accordion-title">
+                    Description
+                  </span>
+
+                  <div class="accordion__icons">
+                    {% render 'icon' with 'plus-small' %}
+                    {% render 'icon' with 'minus-small' %}
+                  </div>
+                </button>
+
+                <div id="content-1"
+                     role="region"
+                     aria-labelledby="accordion-button-1"
+                     class="accordion__content"
+                     style="display: none">
+                  <div class="accordion__content-inner">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+                  </div>
+                </div>
+              </div>
+            </accordion-element>
+
+            <accordion-element class="accordion" data-accordion-group="style-guide">
+              <div class="accordion__item">
+                <button type="button"
+                        aria-expanded="false"
+                        class="h6 btn--reset accordion__button"
+                        aria-controls="content-2"
+                        id="accordion-button-2">
+                  <span class="accordion-title">
+                    Ingredients
+                  </span>
+
+                  <div class="accordion__icons">
+                    {% render 'icon' with 'plus-small' %}
+                    {% render 'icon' with 'minus-small' %}
+                  </div>
+                </button>
+
+                <div id="content-2"
+                     role="region"
+                     aria-labelledby="accordion-button-2"
+                     class="accordion__content"
+                     style="display: none">
+                  <div class="accordion__content-inner">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+                  </div>
+                </div>
+
+              </div>
+            </accordion-element>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="style-guide__typography" data-aos="fade-up">
+    <h4 class="center">
+      Typography
+    </h4>
+
+    <div>
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H1</span>
+          <span>Boogy Brut Poster, White</span>
+          <span>Desktop: 100px</span>
+          <span>Mobile: 60px</span>
+          <span>Tag/class name: h1, .h1</span>
+        </p>
+
+        <div>
+          <h1><span>Desktop:</span> Boogy Brut Poster</h1>
+          <h1 class="mobile"><span>Mobile:</span> Boogy Brut Poster</h1>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H2</span>
+          <span>Boogy Brut Poster, White</span>
+          <span>Desktop: 60px</span>
+          <span>Mobile: 40px</span>
+          <span>Tag/class name: h2, .h2</span>
+        </p>
+
+        <div>
+          <h2><span>Desktop:</span> Boogy Brut Poster</h2>
+          <h2 class="mobile"><span>Mobile:</span> Boogy Brut Poster</h2>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H3</span>
+          <span>Styrene B, Regular</span>
+          <span>Desktop: 32px</span>
+          <span>Mobile: 26px</span>
+          <span>Tag/class name: h3, .h3</span>
+        </p>
+
+        <div>
+          <h3><span>Desktop:</span> Styrene B</h3>
+          <h3 class="mobile"><span>Mobile:</span> Styrene B</h3>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H4</span>
+          <span>Styrene B, Light</span>
+          <span>Desktop: 32px</span>
+          <span>Mobile: 26px</span>
+          <span>Tag/class name: h4, .h4, .h4--italic</span>
+        </p>
+
+        <div>
+          <h4><span>Desktop:</span> Styrene B</h4>
+          <h4 class="mobile"><span>Mobile:</span> Styrene B</h4>
+          <h4 class="h4--italic"><span>Italic:</span> Styrene B</h4>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H5</span>
+          <span>Styrene B, Light</span>
+          <span>Desktop: 24px</span>
+          <span>Mobile: 22px</span>
+          <span>Tag/class name: h5, .h5</span>
+        </p>
+
+        <div>
+          <h5><span>Desktop:</span> Styrene B</h5>
+          <h5 class="mobile"><span>Mobile:</span> Styrene B</h5>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>H6</span>
+          <span>Styrene B, Medium</span>
+          <span>Desktop: 12px</span>
+          <span>Mobile: 12px</span>
+          <span>Tag/class name: h6, .h6</span>
+        </p>
+
+        <div>
+          <h6><span>Desktop:</span> Styrene B</h6>
+          <h6 class="mobile"><span>Mobile:</span> Styrene B</h6>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>.h7</span>
+          <span>Styrene B, Regular</span>
+          <span>Desktop: 42px</span>
+          <span>Mobile: 34px</span>
+          <span>Class name: .h7</span>
+        </p>
+
+        <div>
+          <h6 class="h7"><span>Desktop:</span> Styrene B</h6>
+          <h6 class="h7 mobile"><span>Mobile:</span> Styrene B</h6>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>Body 1</span>
+          <span>Styrene B, Regular</span>
+          <span>Desktop: 18px</span>
+          <span>Mobile: 16px</span>
+          <span>Tag/class name: .body1</span>
+        </p>
+
+        <div>
+          <p class="body1">Clinically-proven skincare</p>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>Body 2</span>
+          <span>Styrene B, Regular</span>
+          <span>Desktop: 16px</span>
+          <span>Mobile: 16px</span>
+          <span>Tag/class name: .body2</span>
+        </p>
+
+        <div>
+          <p  class="body2">Clinically-proven skincare</p>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>Body 3</span>
+          <span>Styrene B, Regular, Medium</span>
+          <span>Desktop: 14px</span>
+          <span>Mobile: 14px</span>
+          <span>Tag/class name: .body3, .body3--bold</span>
+        </p>
+
+        <div>
+          <p  class="body3">Clinically-proven skincare</p>
+          <p  class="body3--bold">Clinically-proven skincare</p>
+        </div>
+      </div>
+
+      <div class="style-guide__typography-item">
+        <p class="text-body">
+          <span>Body 4</span>
+          <span>Styrene B, Regular</span>
+          <span>Desktop: 12px</span>
+          <span>Mobile: 12px</span>
+          <span>Tag/class name: .body4</span>
+        </p>
+
+        <div>
+          <p  class="body4">Clinically-proven skincare</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="style-guide__icons">
+    <h4 class="center">
+      Base svg icons
+    </h4>
+
+    <div class="style-guide__icons-grid">
+      {% render 'icon' with 'search' %}
+      {% render 'icon' with 'account' %}
+      {% render 'icon' with 'bag' %}
+      {% render 'icon' with 'arrow-right' %}
+      {% render 'icon' with 'arrow-left' %}
+      {% render 'icon' with 'arrow-up' %}
+      {% render 'icon' with 'arrow-down' %}
+      {% render 'icon' with 'arrow-right-large' %}
+      {% render 'icon' with 'arrow-left-large' %}
+      {% render 'icon' with 'menu' %}
+      {% render 'icon' with 'close' %}
+      {% render 'icon' with 'close-small' %}
+      {% render 'icon' with 'gift' %}
+      {% render 'icon' with 'heart' %}
+      {% render 'icon' with 'filter' %}
+      {% render 'icon' with 'plus' %}
+      {% render 'icon' with 'minus' %}
+      {% render 'icon' with 'plus-small' %}
+      {% render 'icon' with 'minus-small' %}
+
+    </div>
+  </div>
+
+</section>
+
+
+{% schema %}
+{
+  "name": "Style guide",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Style guide"
+    }
+  ]
+}
+{% endschema %}

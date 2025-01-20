@@ -1,0 +1,256 @@
+{{ 'before-after-slider.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+
+	assign title = section.settings.title
+	assign description = section.settings.description
+
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign product_column_blocks = section.blocks | where: 'type', 'product_column'
+-%}
+
+{%- capture swiper_config -%}
+  {
+    "slidesPerView": 3,
+    "spaceBetween": 30,
+    "allowTouchMove": false,
+    "navigation": {
+      "nextEl": ".swiper-button-next--{{ section.id }}",
+      "prevEl": ".swiper-button-prev--{{ section.id }}"
+    },
+    "pagination": {
+      "el": ".swiper-pagination--{{ section.id }}",
+      "type": "bullets",
+      "clickable": true
+    },
+    "breakpoints": {
+    "991": {
+      "slidesPerView": 3
+    },
+    "768": {
+      "slidesPerView": 2
+    },
+    "0": {
+      "slidesPerView": 1
+      }
+    }
+  }
+{%- endcapture -%}
+
+{%- if section.blocks.size > 0  -%}
+  {{ 'compare-images.min.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'component-compare-images.min.js' | asset_url }}" defer="defer"></script>
+
+	<div class="before-after-slider"
+    data-aos="fade-up"
+    style="
+      --bg-color: {{ bg_color }};
+      --text-color: {{ text_color }};
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+  >
+    <div class="before-after-slider__wrapper page-width"
+    >
+      {% if title != blank %}
+        <h3 class="before-after-slider__heading">{{ title }}</h3>
+      {% endif %}
+
+      {% if description != blank %}
+        <p class="before-after-slider__description body1">{{ description }}</p>
+      {% endif %}
+
+      <div class="before-after-slider__products">
+        {% capture slides %}
+          {% for product_block in section.blocks %}
+            {% liquid
+              assign old_product_image = product_block.settings.old_product_image
+              assign new_product_image = product_block.settings.new_product_image
+              assign title = product_block.settings.title
+
+              assign old_label = product_block.settings.old_label
+              assign new_label = product_block.settings.new_label
+              assign label_color = product_block.settings.label_color
+            %}
+
+            {% if old_product_image != blank and new_product_image != blank %}
+              <div class="swiper-slide"
+                {{ product_block.shopify_attributes }}
+              >
+                <div class="before-after-slider__comparison"
+                  style="--text-color: {{ label_color }};"
+                >
+                  <compare-images class="comparison__images block rel">
+                    <div class="comparison__slide-image image-abs-cover">
+                      {% if new_label %}
+                        <span class="before-after-slider__label before-after-slider__label--right h6">{{ new_label }}</span>
+                      {% endif %}
+
+                      {% render 'image', image: new_product_image, class_name: 'image-abs-cover', src: true %}
+                    </div>
+
+                    <div class="comparison__slide-image image-abs-cover" data-comparison-overlay>
+                      {% if old_label %}
+                        <span class="before-after-slider__label before-after-slider__label--left h6">{{ old_label }}</span>
+                      {% endif %}
+
+                      {% render 'image', image: old_product_image, class_name: 'image-abs-cover', src: true %}
+                    </div>
+
+                    <div class="comparison__slide-divider" hidden>
+                      <span class="u-sr-only">{{ 'comparison_images.divider_title' | t }}</span>
+                      {%- render 'icon' with 'left-and-right-arrow' -%}
+                    </div>
+                  </compare-images>
+
+                  {% if title != blank %}
+                    <p>{{ title }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endcapture %}
+
+        {%- render 'slideshow-swiper',
+          config: swiper_config,
+          slides: slides,
+          show_slider_nav: true,
+          nav_id: section.id
+        -%}
+      </div>
+    </div>
+	</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Before / After slider",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product column",
+      "type": "product_column",
+      "settings": [
+        {
+          "type": "color",
+          "id": "label_color",
+          "label": "Label color",
+          "default": "#383838"
+        },
+        {
+          "type": "image_picker",
+          "id": "old_product_image",
+          "label": "Old product"
+        },
+        {
+          "type": "textarea",
+          "id": "old_label",
+          "label": "Label",
+          "default": "Old"
+        },
+        {
+          "type": "image_picker",
+          "id": "new_product_image",
+          "label": "New product"
+        },
+        {
+          "type": "textarea",
+          "id": "new_label",
+          "label": "Label",
+          "default": "New"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Before / After slider"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,92 @@
+@import "../helpers/mixins";
+
+.before-after-slider {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+  padding-top: var(--padding-top-desktop);
+  padding-bottom: var(--padding-bottom-desktop);
+
+  @include mq($small-max) {
+    padding-top: var(--padding-top-mobile);
+    padding-bottom: var(--padding-bottom-mobile);
+  }
+}
+
+.before-after-slider__wrapper {
+  display: flex;
+  flex-direction: column;
+
+  .before-after-slider__heading {
+    color: inherit;
+    margin: 0;
+    margin-bottom: 60px;
+
+    @include mq($small-max) {
+      margin-bottom: 32px;
+    }
+  }
+
+  .before-after-slider__description {
+    margin: 0 auto;
+    margin-bottom: 60px;
+    max-width: 800px;
+
+    @include mq($small-max) {
+      margin-bottom: 32px;
+    }
+  }
+
+  .before-after-slider__products {
+    @include mq($small-max) {
+      padding: 0 20px;
+      margin-bottom: 32px;
+    }
+
+    .before-after-slider__comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+
+      @include mq($small-max) {
+        gap: 24px;
+      }
+
+      .before-after-slider__label {
+        position: absolute;
+        z-index: 1;
+        left: 20px;
+        top: 20px;
+        color: var(--text-color);
+
+        &.before-after-slider__label--right {
+          right: 20px;
+          left: auto;
+        }
+      }
+
+      .comparison__slide-image img {
+        opacity: 1;
+      }
+
+      .comparison__slide-divider {
+        color: inherit;
+        border: 1px solid;
+        border-color: inherit;
+        background-color: var(--color-body-bg);
+      }
+    }
+
+    .swiper-button-prev {
+      left: calc((var(--swiper-navigation-size) + 8px) * -1);
+    }
+
+    .swiper-button-next {
+      right: calc((var(--swiper-navigation-size) + 8px) * -1);
+    }
+
+    div.swiper-pagination {
+      bottom: 0;
+    }
+  }
+}

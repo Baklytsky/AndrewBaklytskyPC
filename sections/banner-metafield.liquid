@@ -1,0 +1,147 @@
+{{ 'banner.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign enable_section = [request.page_type].metafields.hero_banner.show_section
+  assign heading = [request.page_type].metafields.hero_banner.heading | escape | newline_to_br
+  assign text_color = [request.page_type].metafields.hero_banner.text_color
+  assign image = [request.page_type].metafields.hero_banner.image_desktop[0]
+  assign image_mobile = [request.page_type].metafields.hero_banner.image_mobile[0]
+  assign content_position = [request.page_type].metafields.hero_banner.content_position | default: 'middle-center'
+  assign text_position = [request.page_type].metafields.hero_banner.text_position | default: 'center'
+
+  assign desktop_section_height = section.settings.desktop_section_height
+  assign mobile_section_height = section.settings.mobile_section_height
+  assign font_size = section.settings.font_size
+  assign desktop_image_class = 'image-abs-cover'
+  assign mobile_image_class = 'image-abs-cover small-up-hide'
+
+  if image_mobile
+    assign desktop_image_class = desktop_image_class | append: ' small-hide'
+  endif
+-%}
+
+{% if enable_section == 'true' %}
+  <div class="hero hero--desktop-{{ content_position }} rel"
+       style="
+         --text-position: {{ text_position }};
+         --desktop-section-height: {{ desktop_section_height }};
+         --mobile-section-height: {{ mobile_section_height }}">
+
+    {%- if overlay_bg != blank and overlay_opacity != 0.0 -%}
+      <div class="hero__overlay"></div>
+    {%- endif -%}
+
+    {%- if image -%}
+      {% render 'image-metafields',
+        image: image,
+        class_name: desktop_image_class,
+        alt: image.alt,
+        show_preloader_img: true %}
+    {%- endif -%}
+
+    {%- if image_mobile -%}
+    {% render 'image-metafields',
+      image: image_mobile,
+      class_name: mobile_image_class,
+      alt: image.alt,
+      show_preloader_img: true %}
+    {%- endif -%}
+
+    <div class="hero__content rel" data-aos="fade-up">
+      {% if heading != blank %}
+        <h2 class="hero__content-block hero__content-heading {{ font_size }}"
+            style="--heading-color: {{ text_color }}">
+          {{ heading }}
+        </h2>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Hero section (MF)",
+  "tag": "section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "select",
+      "id": "desktop_section_height",
+      "label": "Section height",
+      "options": [
+        {
+          "value": "350px",
+          "label": "350px"
+        },
+        {
+          "value": "600px",
+          "label": "600px"
+        },
+        {
+          "value": "700px",
+          "label": "700px"
+        },
+        {
+          "value": "100vh",
+          "label": "Full width"
+        }
+      ],
+      "default": "600px"
+    },
+    {
+      "type": "select",
+      "id": "mobile_section_height",
+      "label": "Mobile section height",
+      "options": [
+        {
+          "value": "250px",
+          "label": "250px"
+        },
+        {
+          "value": "350px",
+          "label": "350px"
+        },
+        {
+          "value": "600px",
+          "label": "600px"
+        },
+        {
+          "value": "100vh",
+          "label": "Full width"
+        }
+      ],
+      "default": "250px"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        {
+          "value": "h4",
+          "label": "h4"
+        },
+        {
+          "value": "h3",
+          "label": "h3"
+        },
+        {
+          "value": "h2",
+          "label": "h2"
+        },
+        {
+          "value": "h1",
+          "label": "h1"
+        }
+      ],
+      "default": "h1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero section (MF)"
+    }
+  ],
+  "templates": ["collection", "blog"]
+}
+{% endschema %}

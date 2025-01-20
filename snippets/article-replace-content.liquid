@@ -1,0 +1,93 @@
+{% comment %}
+    {% include 'article-replace-content' %}
+{% endcomment %}
+
+{%- if type == 'image' -%}
+  {%- assign old_content_splited = old_local_content | split: '[[image-start]]' -%}
+
+  {%- for part in old_content_splited -%}
+    {%- unless forloop.first -%}
+    {%- assign image_for_replace = part | split: '[[image-end]]' | first -%}
+    {%- assign image = image_for_replace | split: '<img' | last -%}
+    {%- assign image = image | split: '">' | first -%}
+    {%- assign part_alt = image | split: 'alt="' | last -%}
+    {%- assign alt_text = part_alt | split: '"' | first -%}
+
+      {%- if alt_text != blank -%}
+        {%- assign new_image = "<figure>"
+          | append: '<img'
+          | append: image
+          | append: '">'
+          | append: "<figcaption>"
+          | append: alt_text
+          | append: "</figcaption>"
+          | append: "</figure>"
+        -%}
+      {%- else -%}
+        {%- assign new_image = '<img' | append: image | append: '">' -%}
+      {%- endif -%}
+    {%- endunless -%}
+
+    {{ part | remove: '[[image-end]]' | replace: image_for_replace, new_image }}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- if type == 'product' -%}
+    {%- capture product_card -%}
+      <div>
+        {% render 'product-card' product: recommended_product, quick_add: true, hide_collections: false, show_description: true%}
+      </div>
+    {%- endcapture -%}
+
+    {{ old_local_content | replace: '[[product]]', product_card }}
+{%- endif -%}
+
+{%- if type == 'banners' -%}
+  {%- assign product_banners = product_banners | split: '|' -%}
+
+  {%- capture product_banners -%}
+    <div class="product-banners__wrapper hide-scrollbar">
+      {%- for product_banner_handle in product_banners -%}
+        {%- liquid
+          assign product_banner = all_products[product_banner_handle]
+          assign current_variant = product_banner.first_available_variant
+          assign current_image = current_variant.featured_image | default: product_banner.featured_image
+          assign subtitle = product_banner.metafields.accentuate.subtitle
+        -%}
+
+        {%- if product_banner != empty -%}
+          <div class="product-banners__item">
+            <div class="product-banners__item-content">
+              <div class="product-banners__item-image-wrapper">
+                <a href="{{ product_banner.url }}" class="product-banners__item-link image-abs-cover">
+                  <span class="visibility-hidden">
+                    {{ product_banner.title }}
+                  </span>
+                </a>
+                {% render 'image', image: current_image, class_name: 'image-abs-cover', alt: product.title %}
+              </div>
+
+              <h5 class="product-banners__item-title h5">
+                {{ product_banner.title }}
+              </h5>
+
+              {%- if subtitle != blank -%}
+                <p class="product-banners__item-subtitle body4">
+                  {{ subtitle }}
+                </p>
+              {%- endif -%}
+
+              <a href="{{ product_banner.url }}/" class="product-banners__item-btn link-unstyled btn btn--secondary btn--small">{{ 'blogs.article.recommended_products_banner.button_label' | t }}</a>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endcapture -%}
+
+  {{ old_local_content | replace: '[[product-banners]]', product_banners }}
+{%- endif -%}
+
+{%- if type == 'links' -%}
+  {{ old_local_content | replace: 'title="type-button"', 'title="type-button" class="replaced-btn btn btn--primary-alt btn--small" ' }}
+{%- endif -%}

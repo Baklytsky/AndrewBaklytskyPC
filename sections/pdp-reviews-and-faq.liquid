@@ -1,0 +1,261 @@
+{{ 'reviews-and-faq.min.css' | asset_url | stylesheet_tag }}
+{{ 'faq.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign all_blocks = [request.page_type].metafields.faq.show_block
+  assign category_str = ''
+
+  for shown_block in all_blocks
+    if shown_block == 'true'
+      assign has_blocks = true
+      assign catagory = [request.page_type].metafields.faq.category[forloop.index0]
+
+      if catagory != blank
+        assign has_tabs = true
+        assign category_str = category_str | append: '####' | append: catagory
+      endif
+
+    endif
+  endfor
+
+  assign category_arr = category_str | split: '####' | uniq
+-%}
+
+<tabs-component class="reviews-and-faq block faq"
+                data-aos="fade-up"
+                style="
+                  --padding-bottom-desktop: 80px;
+                  --padding-top-desktop: 80px;
+                  --padding-bottom-mobile: 40px;
+                  --padding-top-mobile: 40px;
+                  --bg-color: var(--color-bg-primary)">
+
+  <div class="page-width" role="tablist">
+    <ul class="reviews-and-faq__nav-list">
+      <li class="reviews-and-faq__nav-list-item">
+        <button class="reviews-and-faq__nav-list-item-btn h3 btn--reset"
+                aria-controls="reviews--{{ section.id }}-{{ product.id }}"
+                aria-selected="true"
+                tabindex="0"
+                data-action='toggle-tab'
+                role='tab'>
+          {{ 'reviews_and_faq.reviews_heading' | t }}
+        </button>
+      </li>
+
+      {%- if has_blocks -%}
+        <li class="reviews-and-faq__nav-list-item">
+          <button class="reviews-and-faq__nav-list-item-btn h3 btn--reset"
+                  aria-controls="faq--{{ section.id }}-{{ product.id }}"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-action='toggle-tab'
+                  role='tab'>
+            {{ 'reviews_and_faq.faq_heading' | t }}
+          </button>
+        </li>
+      {%- endif -%}
+    </ul>
+
+    <ul class="reviews-and-faq__content-list">
+      <li class="reviews-and-faq__content-list-item reviews-{{ section.id }}"
+           aria-labelledby="reviews--{{ section.id }}-{{ product.id }}"
+           role='tabpanel'
+           aria-selected="true"
+           tabindex="0"
+           data-tab
+           id="reviews--{{ section.id }}-{{ product.id }}">
+        <div data-bv-show="reviews" data-bv-product-id="{{ product.id }}"></div>
+
+        <script>
+          const reviewsSection = document.querySelector('.reviews-{{ section.id }}');
+          const checkReviewsInit = setInterval(() => {
+            const wrightReviewBtn = reviewsSection.querySelector('.bv-write-review');
+
+            if (wrightReviewBtn) {
+              wrightReviewBtn.addEventListener('click', () => {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                'event': 'form_start',
+                  'form': {
+                    'form_name': 'Write a review',
+                  },
+               });
+
+                // waiting when review popup will be opened
+                const checkSubmitReviewBtn = setInterval(() => {
+                  const submitBtn = document.querySelector('.bv-form-actions-submit');
+                  if (submitBtn) {
+                    submitBtn.addEventListener('click', () => {
+                      window.dataLayer.push({
+                        'event': 'form_complete',
+                        'form': {
+                          'form_name': 'Write a review'
+                        }
+                      });
+                    });
+                    clearInterval(checkSubmitReviewBtn)
+                  }
+                }, 1000);
+
+              })
+              clearInterval(checkReviewsInit);
+            }
+          }, 1000)
+        </script>
+      </li>
+
+      {%- if has_blocks -%}
+        <li class="reviews-and-faq__content-list-item"
+            aria-labelledby="faq--{{ section.id }}-{{ product.id }}"
+            role='tabpanel'
+            aria-selected="false"
+            tabindex="-1"
+            data-tab
+            id="faq--{{ section.id }}-{{ product.id }}">
+          <div class="reviews-and-faq__blocks">
+            {%- if has_tabs -%}
+              <tabs-component>
+                <div class="faq__wrapper faq__wrapper-{{ section.id }}">
+                  <scrolling-tabs class="faq__navigation hide-scrollbar" role="tablist" aria-labelledby="tablist-{{ section.id }}">
+                    {%- liquid assign nav_counter = 0 -%}
+                    {% for category_item in category_arr %}
+                      {% if category_item != blank %}
+                        {%- liquid assign nav_counter = nav_counter | plus: 1 -%}
+                        <batton
+                          class="a body1 faq__header-tab"
+                          role="tab"
+                          type="button"
+                          tabindex="0"
+                          id="tab-{{ nav_counter }}--{{ section.id }}"
+                          aria-controls="tabpanel-{{ nav_counter }}--{{ section.id }}"
+                          aria-selected="{%- if nav_counter == 1 -%}true{%- else -%}false{%- endif -%}"
+                          {% unless counter == 1 %}tabindex="-1"{% endunless %}>
+
+                          {{ category_item }}
+                        </batton>
+                      {% endif %}
+                    {% endfor %}
+                  </scrolling-tabs>
+
+                  <div class="faq__accordions-wrapper">
+                    {%- liquid assign acc_counter = 0 -%}
+                    {% for category_item in category_arr %}
+
+                      {%- if category_item != blank -%}
+                        {%- liquid assign acc_counter = acc_counter | plus: 1 -%}
+                        {%- capture id -%}tabpanel-{{ acc_counter }}--{{ section.id }}{%- endcapture -%}
+
+                        <div
+                          class="faq__list"
+                          id="{{ id }}"
+                          role="tabpanel"
+                          tabindex="{%- if acc_counter == 1 -%}0{%- else -%}-1{%- endif -%}"
+                          aria-selected="{%- if acc_counter == 1 -%}true{%- else -%}false{%- endif -%}"
+                          aria-labelledby="tab-{{ acc_counter }}--{{ section.id }}"
+                          {% unless acc_counter == 1 %}hidden{% endunless %}>
+
+                          {% for shown_block in all_blocks %}
+                            {%- if shown_block == 'true' -%}
+
+                              {%- liquid assign block_catagory = [request.page_type].metafields.faq.category[forloop.index0] -%}
+
+                              {% if category_item == block_catagory %}
+
+                                {%- liquid
+                                  assign question = [request.page_type].metafields.faq.question[forloop.index0]
+                                  assign answer = [request.page_type].metafields.faq.answer[forloop.index0]
+                                -%}
+
+                                {% if question != blank and answer != blank %}
+                                  {% render 'accordion' group: id, index: acc_counter, title: question, body: answer %}
+                                {% endif %}
+                              {% endif %}
+                            {%- endif -%}
+                          {% endfor %}
+                        </div>
+
+                      {%- endif -%}
+                    {% endfor %}
+                  </div>
+                </div>
+              </tabs-component>
+
+              <script defer>
+                (function () {
+                  const wrapper = document.querySelector('.faq__wrapper-{{ section.id }}');
+                  const contentWrapper = wrapper.querySelector('.faq__accordions-wrapper');
+
+                  contentWrapper.addEventListener('click', function (e) {
+                    const faqLevel1 = wrapper.querySelector('.faq__header-tab[aria-selected="true"]')?.textContent || '';
+                    const faqLevel2 = e.target.textContent || e.target.closest('.accordion__button').querySelector('.accordion-title')?.textContent || '';
+                    if (faqLevel1 || faqLevel2) {
+                      window.dataLayer.push({
+                        'event': 'faq_click',
+                        'click': {
+                          'faq_level_1': faqLevel1.trim(),
+                          'faq_level_2': faqLevel2.trim()
+                        }
+                      })
+                    }
+                  })
+                })()
+              </script>
+
+            {%- else -%}
+
+              <div class="faq__wrapper">
+                <div class="faq__list">
+                  {% for shown_block in all_blocks %}
+                    {%- if shown_block == 'true' -%}
+
+                        {%- liquid
+                          assign question = [request.page_type].metafields.faq.question[forloop.index0]
+                          assign answer = [request.page_type].metafields.faq.answer[forloop.index0]
+                        -%}
+
+                        {% if question != blank and answer != blank %}
+                          {% render 'accordion' group: id, index: acc_counter, title: question, body: answer %}
+                        {% endif %}
+
+                    {%- endif -%}
+                  {% endfor %}
+                </div>
+              </div>
+
+            {%- endif -%}
+          </div>
+        </li>
+      {%- endif -%}
+    </ul>
+  </div>
+</tabs-component>
+
+
+{% schema %}
+{
+  "name": "Reviews & FAQ (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The FAQ content is configured in metafields"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_faq",
+      "label": "Show FAQ",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reviews & FAQ (MF)"
+    }
+  ],
+  "templates": [
+    "product"
+  ]
+}
+{% endschema %}

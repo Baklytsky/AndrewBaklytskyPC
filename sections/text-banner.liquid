@@ -1,0 +1,383 @@
+{{ 'text-banner.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign section_container = section.settings.section_container
+  assign section_bottom_margin = section.settings.section_bottom_margin
+  assign section_bg_color = section.settings.section_bg_color
+  assign section_bg_image = section.settings.section_bg_image
+  assign section_text_color = section.settings.section_text_color
+  assign section_width_content = section.settings.width_content
+  assign content_position = section.settings.content_position
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign content_padding_desk = section.settings.content_padding_desk
+  assign content_padding_mob = section.settings.content_padding_mob
+-%}
+
+<div class="text-banner
+  {% if border_bottom %}border-bottom{% endif %}
+  {% if section_container %}page-width{% endif %} {% if section_bottom_margin %}margin-bottom{% endif %}"
+  data-aos="fade-up"
+  style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;
+    --content-padding-desktop: {{ content_padding_desk }}px;
+    --content-padding-mobile: {{ content_padding_mob }}px;
+    --width-content: {{ section_width_content }};
+    --bg-color: {{ section_bg_color }};
+    --color: {{ section_text_color }}"
+  >
+
+  {%- if section_bg_image -%}
+    {% render 'image',
+      image: section_bg_image,
+      class_name: 'image-abs-cover',
+      alt: section_bg_image.alt %}
+  {%- endif -%}
+
+  <div class="page-width text-banner__content text-banner__content--{{ content_position }}">
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'heading' -%}
+          {%- liquid
+            assign heading = block.settings.heading
+            assign heading_mob = block.settings.heading_mob | default: heading
+            assign heading_font_size = block.settings.heading_font_size
+          -%}
+
+          {%- if heading != blank -%}
+            <h3 class="text-banner__heading {{ heading_font_size }}" {{ block.shopify_attributes }}>
+              <span class="small-hide">{{ heading | newline_to_br }}</span>
+              <span class="small-up-hide">{{ heading_mob | newline_to_br }}</span>
+            </h3>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if block.type == 'subheading' -%}
+          {%- liquid
+            assign subheading = block.settings.subheading
+            assign subheading_type = block.settings.subheading_type
+          -%}
+
+          {%- if subheading != blank -%}
+            <p class="text-banner__subheading {{ subheading_type }}" {{ block.shopify_attributes }}>
+              <span class="small-hide">{{ subheading | escape | newline_to_br }}</span>
+              <span class="small-up-hide">{{ subheading | escape }}</span>
+            </p>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if block.type == 'button' -%}
+          {%- liquid
+            assign button_label = block.settings.button_label
+            assign button_link = block.settings.button_link
+            assign button_style = block.settings.button_style
+          -%}
+
+          {%- if button_label != blank -%}
+            <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+              href="{{ button_link }}"{% endif %}
+              class="text-banner__btn {% unless button_style == 'link' %}btn{% endunless %} btn--{{ button_style }}" {{ block.shopify_attributes }}>
+              {{ button_label | escape }}
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Text banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_container",
+      "label": "Section in container",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "section_bottom_margin",
+      "label": "Section bottom margin",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content paddings"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_desk",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mob",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content settings"
+    },
+    {
+      "type": "select",
+      "id": "width_content",
+      "label": "Content width",
+      "options": [
+        {
+          "value": "100%",
+          "label": "Full width"
+        },
+        {
+          "value": "680px",
+          "label": "680px"
+        },
+        {
+          "value": "700px",
+          "label": "700px"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#383838"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "limit": 1,
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading desktop"
+        },
+        {
+          "type": "textarea",
+          "id": "heading_mob",
+          "label": "Heading mobile"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "options": [
+            {
+              "value": "h1",
+              "label": "h1"
+            },
+            {
+              "value": "h2",
+              "label": "h2"
+            },
+            {
+              "value": "h3",
+              "label": "h3"
+            },
+            {
+              "value": "h4",
+              "label": "h4"
+            },
+            {
+              "value": "h5",
+              "label": "h5"
+            },
+            {
+              "value": "h6",
+              "label": "h6"
+            }
+          ],
+          "default": "h4",
+          "label": "Font size"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "limit": 1,
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "select",
+          "id": "subheading_type",
+          "label": "Subheading style",
+          "options": [
+            {
+              "value": "h6",
+              "label": "Type heading"
+            },
+            {
+              "value": "body1",
+              "label": "Type medium text"
+            },
+            {
+              "value": "body2",
+              "label": "Type text"
+            }
+          ],
+          "default": "h6"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "limit": 1,
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            },
+            {
+              "value": "link",
+              "label": "Link"
+            }
+          ],
+          "default": "secondary-alt"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text banner"
+    }
+  ]
+}
+{% endschema %}

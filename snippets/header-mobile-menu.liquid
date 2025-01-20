@@ -1,0 +1,155 @@
+{%- comment -%}
+  {%- render 'header-mobile-menu',
+    mobile_menu_primary: mobile_menu_primary,
+    mobile_menu_secondary: mobile_menu_secondary,
+    customer_status: customer_status -%}
+{%- endcomment -%}
+
+<div class="header-mobile-menu">
+  <modal-dialog id="mobile-menu-drawer">
+    <div class="popup drawer drawer--left menu-drawer" data-popup role="dialog" tabindex="-1" aria-modal="true" aria-hidden="true">
+      {%- if mobile_menu_primary != blank or mobile_menu_secondary != blank -%}
+        <div class="menu-drawer__inner hide-scrollbar">
+          {%- if mobile_menu_primary != blank and mobile_menu_primary.links.size > 0  -%}
+            <ul class="menu-drawer__list">
+              {%- for link in mobile_menu_primary.links -%}
+
+                {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {%- capture top_nav_event_config -%}
+                  {
+                    "nav_level_1": "{{ link.title }}",
+                    "nav_level_2": "",
+                    "nav_level_3": ""
+                  }
+                {%- endcapture -%}
+                <li>
+                  {% if link.links.size > 0 %}
+                    <modal-opener>
+                      <a href="{{ link.url }}" class="menu-drawer__link"
+                         id="sublinks-drawer-open-{{ forloop.index }}"
+                         aria-controls="#sublinks-drawer-{{ forloop.index }}"
+                         aria-haspopup="true"
+                         aria-expanded="false"
+                         aria-label="{{ 'accessibility.mobile_menu_open' | t }}"
+                         data-event-nav-link='{{ top_nav_event_config }}'>
+                        <span>{{ link.title }}</span>
+                        {%- render 'icon' with 'arrow-right' -%}
+                      </a>
+                    </modal-opener>
+                  {%- else -%}
+                    <a href="{{ link.url }}" class="menu-drawer__link"  data-event-nav-link='{{ top_nav_event_config }}'>{{ link.title }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if mobile_menu_secondary != blank or shop.customer_accounts_enabled  -%}
+            <ul class="menu-drawer__list menu-drawer__list-secondary">
+              {%- for link in mobile_menu_secondary.links -%}
+
+                {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {%- assign link_title_handelize = link.title | handleize -%}
+
+                {%- if link_title_handelize == 'for-professionals' and customer_status == 'Partner' or
+                  link_title_handelize == 'for-professionals' and customer_status == 'Premier Partner' -%}
+                  {%- assign link_url = settings.professional_homepage_url -%}
+                {%- endif -%}
+
+                {%- capture top_nav_event_config -%}
+                  {
+                  "nav_level_1": "{{ link.title }}",
+                  "nav_level_2": "",
+                  "nav_level_3": ""
+                  }
+                {%- endcapture -%}
+                <li>
+                  <a href="{{ link_url | default: link.url }}" class="menu-drawer__link body3" data-event-nav-link='{{ top_nav_event_config }}'>{{ link.title }}</a>
+                </li>
+              {%- endfor -%}
+
+              {%- if shop.customer_accounts_enabled -%}
+                <li>
+                  {%- capture top_nav_event_config -%}
+                    {
+                      "nav_level_1": "Account",
+                      "nav_level_2": "",
+                      "nav_level_3": ""
+                    }
+                  {%- endcapture -%}
+                  <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="menu-drawer__link body3"  data-event-nav-link='{{ top_nav_event_config }}'>
+                    {% render 'icon' with 'account' %}
+                    {%- liquid
+                      if customer
+                        echo 'customer.account_fallback' | t
+                      else
+                        echo 'customer.log_in' | t
+                      endif
+                    -%}
+                  </a>
+                </li>
+              {%- endif -%}
+            </ul>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </modal-dialog>
+
+  {%- if mobile_menu_primary != blank or mobile_menu_secondary != blank -%}
+    {%- for link in mobile_menu_primary.links -%}
+
+      {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+      {%- if direct_link_access -%}
+        {% continue %}
+      {%- endif -%}
+
+      {%- if link.links.size > 0 -%}
+        <modal-dialog id="sublinks-drawer-{{ forloop.index }}">
+          <div class="popup drawer drawer--left menu-drawer submenu-drawer" data-popup role="dialog" tabindex="-1" aria-modal="true" aria-hidden="true">
+            <ul class="menu-drawer__list hide-scrollbar">
+              <li>
+                <button class="btn--reset menu-drawer__link sub-drawer-close" data-close-popup>
+                  {%- render 'icon' with 'arrow-left' -%}
+                  <span>{{ link.title }}</span>
+                </button>
+              </li>
+              {%- for sublink in link.links -%}
+
+                {%- assign direct_link_access = sublink.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {%- capture top_nav_event_config -%}
+                  {
+                    "nav_level_1": "{{ link.title }}",
+                    "nav_level_2": "{{ sublink.title }}",
+                    "nav_level_3": ""
+                  }
+                {%- endcapture -%}
+
+                <li>
+                  <a href="{{ sublink.url }}" class="menu-drawer__link body3" data-event-nav-link='{{ top_nav_event_config }}'>{{ sublink.title }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </modal-dialog>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+</div>
+

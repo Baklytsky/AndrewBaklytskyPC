@@ -1,0 +1,174 @@
+{{ 'intro.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign show_border_bottom = section.settings.show_border_bottom
+  assign heading = section.settings.heading | default: page.title
+  assign text = section.settings.text | escape | newline_to_br
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign btn_padding_top_desk = section.settings.btn_padding_top_desk
+  assign btn_padding_top_mob = section.settings.btn_padding_top_mob
+  assign button_style = section.settings.button_style
+-%}
+
+
+<section class="intro page-width" style="
+  --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+  --padding-top-desktop: {{ padding_top_desk }}px;
+  --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+  --padding-top-mobile: {{ padding_top_mob }}px;
+  --btn-padding-top-desk: {{ btn_padding_top_desk }}px;
+  --btn-padding-top-mob: {{ btn_padding_top_mob }}px;
+">
+  <div class="intro__inner {% if show_border_bottom %}intro--border{% endif %}">
+    {%- if heading != blank -%}
+      <h2 class="intro__heading">{{ heading }}</h2>
+    {%- endif -%}
+
+    {%- if text != blank -%}
+      <div class="intro__text body1">{{ text }}</div>
+    {%- endif -%}
+
+    {%- if button_link != blank and button_label != blank -%}
+      <a href="{{ button_link }}" class="btn btn--{{ button_style }} intro__btn">{{ button_label }}</a>
+    {%- endif -%}
+  </div>
+</section>
+
+
+{% schema %}
+{
+  "name": "Intro section",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border_bottom",
+      "label": "Show border bottom",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Button top paddings"
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "secondary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Intro section"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

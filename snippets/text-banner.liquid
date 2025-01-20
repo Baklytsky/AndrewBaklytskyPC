@@ -1,0 +1,90 @@
+{%- comment -%}
+{%- render 'text-banner',
+  class_name: class_name,
+  border_bottom: section_border_bottom,
+  section_container: section_container,
+  section_bottom_margin: section_bottom_margin,
+  section_bg_color: section_bg_color,
+  section_bg_image: section_bg_image,
+  section_bg_image_mobile: section_bg_image_mobile,
+  section_text_color: section_text_color,
+  section_width_content: width_content,
+  content_position: content_position,
+  padding_top_desk: padding_top_desk,
+  padding_bottom_desk: padding_bottom_desk,
+  padding_top_mob: padding_top_mob,
+  padding_bottom_mob: padding_bottom_mob,
+  content_padding_desk: content_padding_desk,
+  content_padding_mob: content_padding_mob
+  heading: heading,
+  heading_mob: heading_mob | default: heading,
+  heading_font_size: heading_font_size,
+  subheading: subheading,
+  button_label: button_label,
+  button_link: button_link,
+  button_style: button_style
+  button_link_phone: button_link_phone
+-%}
+{%- endcomment -%}
+
+{{ 'text-banner.min.css' | asset_url | stylesheet_tag }}
+<div class="text-banner
+    {{ class_name }}
+    {% if border_bottom %}border-bottom{% endif %}
+    {% if section_container %}page-width{% endif %} {% if section_bottom_margin %}margin-bottom{% endif %}"
+     data-aos="fade-up"
+     style="
+       --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+       --padding-top-desktop: {{ padding_top_desk }}px;
+       --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+       --padding-top-mobile: {{ padding_top_mob }}px;
+       --content-padding-desktop: {{ content_padding_desk }}px;
+       --content-padding-mobile: {{ content_padding_mob }}px;
+       --width-content: {{ section_width_content }};
+       --bg-color: {{ section_bg_color }};
+       --color: {{ section_text_color }}">
+
+  {%- liquid
+    assign desctop_image_class = 'image-abs-cover'
+
+    if section_bg_image_mobile != blank
+      assign desctop_image_class = 'image-abs-cover small-hide'
+    endif
+  -%}
+
+  {%- if section_bg_image != blank -%}
+    {% render 'image',
+      image: section_bg_image,
+      class_name: desctop_image_class,
+      alt: section_bg_image.alt %}
+  {%- endif -%}
+
+  {%- if section_bg_image_mobile != blank -%}
+    {% render 'image',
+      image: section_bg_image_mobile,
+      class_name: 'image-abs-cover small-up-hide',
+      alt: section_bg_image_mobile.alt %}
+  {%- endif -%}
+
+  <div class="page-width text-banner__content text-banner__content--{{ content_position }}">
+    {%- if subheading != blank -%}
+      <p class="text-banner__subheading h6" {{ block.shopify_attributes }}>
+        <span class="small-hide">{{ subheading | escape | newline_to_br }}</span>
+        <span class="small-up-hide">{{ subheading | escape }}</span>
+      </p>
+    {%- endif -%}
+    {%- if heading != blank -%}
+      <h3 class="text-banner__heading {{ heading_font_size }}" {{ block.shopify_attributes }}>
+        <span class="small-hide">{{ heading | newline_to_br }}</span>
+        <span class="small-up-hide">{{ heading_mob | newline_to_br }}</span>
+      </h3>
+    {%- endif -%}
+    {%- if button_label != blank -%}
+      <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+        href="{{ button_link }}"{% endif %}
+        class="text-banner__btn {% unless button_style == 'link' %}btn{% endunless %} btn--{{ button_style }}  {% if button_link_phone %}text-banner__btn-phone{% endif %}" {{ block.shopify_attributes }}>
+        {{ button_label | escape }}
+      </a>
+    {%- endif -%}
+  </div>
+</div>

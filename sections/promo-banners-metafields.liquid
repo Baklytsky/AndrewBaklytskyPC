@@ -1,0 +1,214 @@
+{{ 'promo-banners.min.css' | asset_url | stylesheet_tag }}
+{%- liquid assign enable_section = [request.page_type].metafields.promo_banners.enable_section -%}
+
+{%- if enable_section == 'true' -%}
+
+  {%- liquid
+    assign padding_top_desk = [request.page_type].metafields.promo_banners.padding_top_desk
+    assign padding_bottom_desk = [request.page_type].metafields.promo_banners.padding_bottom_desk
+    assign padding_top_mob = [request.page_type].metafields.promo_banners.padding_top_mobile
+    assign padding_bottom_mob = [request.page_type].metafields.promo_banners.padding_bottom_mobile
+    assign section_bg_color = [request.page_type].metafields.promo_banners.background_color | default: '#FFFFFF'
+    assign section_text_color = [request.page_type].metafields.promo_banners.text_color | default: '#383838'
+    assign heading = [request.page_type].metafields.promo_banners.heading | escape | newline_to_br
+    assign subheading = [request.page_type].metafields.promo_banners.subheading
+    assign button_label = [request.page_type].metafields.promo_banners.button_label
+    assign button_link = [request.page_type].metafields.promo_banners.button_link
+    assign button_style = [request.page_type].metafields.promo_banners.button_style
+
+    case button_style
+    when 'Primary'
+      assign button_style = 'primary'
+    when 'Primary alternative'
+      assign button_style = 'primary-alt'
+    when 'Secondary'
+      assign button_style = 'secondary'
+    else
+      assign button_style = 'secondary-alt'
+    endcase
+
+    assign banners = [request.page_type].metafields.promo_banners.show_banner
+    assign banners_count = 0
+
+    for banner in banners
+      if banner == 'true'
+        assign banners_count = banners_count | plus: 1
+      endif
+    endfor
+
+    case banners_count
+    when 3
+      assign banner_width = '33.3%'
+    else
+      assign banner_width = 100 | divided_by: banners_count | append: '%'
+    endcase
+
+    if request.page_type == 'collection' or request.page_type == 'product'
+      assign class_modify = 'promo-banners--with-wrapper'
+    endif
+  -%}
+
+  <div class="promo-banners {{ class_modify }}"
+       data-aos="fade-up"
+       style="
+         --bg-color: {{ section_bg_color }};
+         --color: {{ section_text_color }};
+         --banner-width: {{ banner_width }};
+         --padding-top-desktop: {{ padding_top_desk -}}px;
+         --padding-bottom-desktop: {{ padding_bottom_desk -}}px;
+         --padding-top-mobile: {{ padding_top_mob -}}px;
+         --padding-bottom-mobile: {{ padding_bottom_mob -}}px;
+         ">
+    <div class="page-width">
+      {%- if heading != blank or subheading != blank or button_label != blank -%}
+        <div class="promo-banners__header">
+          {%- if heading != blank or subheading != blank -%}
+            <div class="promo-banners__header-text">
+              {%- if heading != blank -%}
+                <h3 class="promo-banners__header-heading m0">{{ heading }}</h3>
+              {%- endif -%}
+              {%- if subheading != blank -%}
+                <div class="promo-banners__header-subheading h4 m0">{{ subheading }}</div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+          {%- if button_label != blank -%}
+            <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+              href="{{ button_link }}"{% endif %}
+              class="promo-banners__header-btn btn btn--{{ button_style }}">
+              {{ button_label | escape }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if banners_count > 0 -%}
+        <ul class="promo-banners__list">
+          {%- for banner in banners -%}
+            {%- if banner == 'true' -%}
+
+              {%- liquid
+                assign image = [request.page_type].metafields.promo_banners.image[forloop.index0][0]
+                assign image_mobile = [request.page_type].metafields.promo_banners.image_mobile[forloop.index0][0]
+                assign video = [request.page_type].metafields.promo_banners.video[forloop.index0][0]
+                assign video_mobile = [request.page_type].metafields.promo_banners.video_mobile[forloop.index0][0]
+                assign heading = [request.page_type].metafields.promo_banners.banner_heading[forloop.index0]
+                assign image_alt = image.alt | default: image_mobile.alt | default: heading
+                assign description = [request.page_type].metafields.promo_banners.banner_description[forloop.index0] | escape | newline_to_br
+                assign text_color = [request.page_type].metafields.promo_banners.banner_text_color[forloop.index0] | default: '#FFFFFF'
+                assign button_label = [request.page_type].metafields.promo_banners.banner_button_label[forloop.index0]
+                assign button_link = [request.page_type].metafields.promo_banners.banner_button_link[forloop.index0]
+                assign button_style = [request.page_type].metafields.promo_banners.banner_button_style[forloop.index0]
+
+                case button_style
+                when 'Primary'
+                  assign button_style = 'primary'
+                when 'Primary alternative'
+                  assign button_style = 'primary-alt'
+                when 'Secondary'
+                  assign button_style = 'secondary'
+                else
+                  assign button_style = 'secondary-alt'
+                endcase
+
+                assign desktop_image_class = 'image-abs-cover z1'
+
+                if image != blank and image_mobile != blank
+                  assign desktop_image_class = desktop_image_class | append: ' medium-hide'
+                endif
+              -%}
+
+              {%- if image != blank or image_mobile != blank or heading != blank or description != blank or button_label != blank or video != blank -%}
+                <li class="promo-banners__list-item rel">
+                  <div class="promo-banners__overlay image-abs-cover z2"></div>
+
+                  {%- if video -%}
+
+                    {%- assign class_name_desk = 'block' -%}
+                    {%- if video_mobile -%}
+                      {%- assign class_name_desk = 'block medium-hide' -%}
+                    {%- endif -%}
+
+                    {%- render 'video',
+                      video: video,
+                      video_from_metafield: true,
+                      default_controls: false,
+                      autoplay: true,
+                      show_mute_button: false,
+                      show_play_button: false,
+                      disable_video_scale_on_desktop: false,
+                      disable_video_scale_on_mobile: false,
+                      class: class_name_desk
+                    -%}
+                  {%- endif -%}
+
+                  {%- if video_mobile -%}
+                    {%- render 'video',
+                      video: video_mobile,
+                      video_from_metafield: true,
+                      default_controls: false,
+                      autoplay: true,
+                      show_mute_button: false,
+                      show_play_button: false,
+                      disable_video_scale_on_desktop: false,
+                      disable_video_scale_on_mobile: false,
+                      class: 'block medium-up-hide'
+                    -%}
+                  {%- endif -%}
+
+                  {%- if image != blank -%}
+                    {% render 'image-metafields',
+                      image: image,
+                      class_name: desktop_image_class,
+                      alt: image_alt %}
+                  {%- endif -%}
+
+                  {%- if image_mobile != blank -%}
+                    {% render 'image-metafields',
+                      image: image_mobile,
+                      class_name: 'image-abs-cover medium-up-hide z1',
+                      alt: image_alt %}
+                  {%- endif -%}
+
+                  <div class="promo-banners__list-item-content z3" style="--banner-color: {{ text_color }}">
+                    <h4 class="promo-banners__list-item-heading h6">{{ heading }}</h4>
+                    <p class="promo-banners__list-item-description h4">{{ description }}</p>
+
+                    <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                      href="{{ button_link }}"{% endif %}
+                      class="promo-banners__list-item-btn btn btn--{{ button_style }} {% if button_label == blank  %}visibility-hidden{% endif %}">
+                      {{ button_label | escape }}
+                    </a>
+                  </div>
+                </li>
+              {%- endif -%}
+
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Promo banners (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo banners (MF)"
+    }
+  ],
+  "templates": [
+    "product", "collection"
+  ]
+}
+{% endschema %}

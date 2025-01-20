@@ -1,0 +1,160 @@
+{{ 'landing-header.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign heading = section.settings.heading  | default: page.title
+  assign subheading = section.settings.subheading
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+-%}
+
+<div
+  style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;"
+  class="landing-header page-width" data-aos="fade-up">
+  {% if heading != blank or subheading != blank %}
+    <div class="landing-header__content {% if border_bottom %}border-bottom{% endif %}">
+      <div class="landing-header__text">
+        {% if heading != blank %}
+          <H2 class="landing-header__heading">
+            {{ heading | escape | newline_to_br }}
+          </H2>
+        {% endif %}
+
+        {% if subheading != blank %}
+          <p class="landing-header__subheading body1">
+            {{ subheading | escape | newline_to_br }}
+          </p>
+        {% endif %}
+      </div>
+
+      {%- if button_label != blank -%}
+        <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+          href="{{ button_link }}"{% endif %}
+          class="landing-header__btn btn btn--{{ button_style }}" {{ block.shopify_attributes }}>
+          {{ button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Landing header",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "ABCs of skincare"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The ingredients to know."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Landing header"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

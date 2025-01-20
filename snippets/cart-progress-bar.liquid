@@ -1,0 +1,100 @@
+{% comment %}
+  {% render 'cart-progress-bar' blocks: array, treshold: boolean %}
+{% endcomment %}
+
+{%- liquid
+  assign tresholds_str = ""
+  assign tresholds_arr = ""
+  assign cart_enable_tiered = section.settings.progress_bar
+  assign first_price = section.settings.first_level
+  assign second_price = section.settings.second_level
+  assign progress_bar_blank_color = section.settings.progress_bar_blank_color
+  assign progress_bar_filled_color = section.settings.progress_bar_filled_color
+  assign cart_prce_without_gwp = cart.total_price
+
+  if first_price != 0 and second_price != 0
+    if  first_price > second_price
+      assign min_price_tiered = second_price | times: 100
+      assign max_price_tiered = first_price | times: 100
+    elsif first_price < second_price
+      assign min_price_tiered = first_price | times: 100
+      assign max_price_tiered = second_price | times: 100
+    endif
+  elsif first_price == 0 or second_price == 0
+    if first_price != 0
+      assign min_price_tiered = first_price | times: 100
+      assign max_price_tiered = first_price | times: 100
+    else
+      assign min_price_tiered = second_price | times: 100
+      assign max_price_tiered = second_price | times: 100
+    endif
+  endif
+
+  if cart_prce_without_gwp < min_price_tiered
+    assign divider = min_price_tiered | divided_by: 1000
+    assign tiered_percent = cart_prce_without_gwp | divided_by: divider | times: 0.1
+  else
+    assign divider = max_price_tiered | divided_by: 1000
+    assign tiered_percent = cart_prce_without_gwp | divided_by: divider | times: 0.1
+  endif
+-%}
+
+{%- if treshold -%}
+  {%- if blocks.size > 0 -%}
+    {%- for block in blocks -%}
+      {%- liquid
+        assign amount = block.settings.amount
+        assign get_product = block.settings.get_product
+      -%}
+
+      {%- if amount != blank and get_product != blank -%}
+        {%- assign tresholds_str = tresholds_str | append: "," | append: amount -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+
+  {%- if tresholds_str != blank -%}
+    {%- assign random_big_int = 1000000000 -%}
+    {%- assign next_gift_via = random_big_int -%}
+    {%- assign tresholds_arr = tresholds_str | remove_first: "," | split: ","-%}
+
+    {%- for treshold_price in tresholds_arr -%}
+      {%- assign treshold_price_cents = treshold_price | times: 100 -%}
+
+      {%- if cart_prce_without_gwp < treshold_price_cents -%}
+        {%- assign next_step = treshold_price_cents | minus: cart_prce_without_gwp -%}
+
+        {%- if next_step < next_gift_via -%}
+          {%- assign next_gift_via = next_step -%}
+        {%- endif -%}
+      {%- else  -%}
+        {%- assign cart_has_prev_gift = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
+
+
+{% if min_price_tiered != blank or max_price_tiered != blank %}
+  <div class="cart-progressbar  cart-padding" style="--progress-blank: {{ progress_bar_blank_color }}; --progress-filled: {{ progress_bar_filled_color }};">
+    <div class="cart-progressbar__progress-line-wrapper rel">
+      <div class="cart-progressbar__progress-line" style="width: {{ tiered_percent }}%"></div>
+    </div>
+
+    {%- if cart_prce_without_gwp < min_price_tiered -%}
+      {%- assign remaining_amount = min_price_tiered | minus: cart_prce_without_gwp | money -%}
+      {% render 'cart-progress-bar-messages', message_index: 1, remaining_amount: remaining_amount  %}
+    {%- elsif cart_prce_without_gwp < max_price_tiered and max_price_tiered > min_price_tiered and blocks.size == 1 and blocks[0].type == "single_threshold" and treshold -%}
+      {%- assign remaining_amount = max_price_tiered | minus: cart_prce_without_gwp | money -%}
+      {% render 'cart-progress-bar-messages', message_index: 2, remaining_amount: remaining_amount  %}
+    {%- elsif next_gift_via != random_big_int and blocks.size > 0 and treshold and cart_has_prev_gift -%}
+      {%- assign remaining_amount = next_gift_via | money -%}
+      {% render 'cart-progress-bar-messages', message_index: 4, remaining_amount: remaining_amount  %}
+    {%- elsif next_gift_via != random_big_int and blocks.size > 0 and treshold -%}
+      {%- assign remaining_amount = next_gift_via | money -%}
+      {% render 'cart-progress-bar-messages', message_index: 3, remaining_amount: remaining_amount  %}
+    {%- else -%}
+      {% render 'cart-progress-bar-messages', message_index: 5  %}
+    {%- endif -%}
+  </div>
+{% endif %}

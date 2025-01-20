@@ -1,0 +1,24 @@
+{%- comment -%}
+  {%- include 'customer-status' -%}
+  - 'customer-status' return {{ customer_status }} variable
+{%- endcomment -%}
+
+{%- liquid
+  for tag in customer.tags
+  assign tag_handleize = tag | handleize
+    case tag_handleize
+    when 'parent'
+      assign customer_status = 'Partner'
+      break
+    when 'premier-partner'
+      assign customer_status = 'Premier Partner'
+    break
+    when 'sales'
+      assign customer_status = 'Sales'
+    break
+    else
+      assign customer_status = 'Customer'
+    endcase
+  endfor
+-%}
+

@@ -1,0 +1,67 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - safety_information_show_less: {String} For RX Only product (optional)
+  - safety_information_show_more: {String} For RX Only product (optional)
+
+  Usage:
+{%- render 'pdp-safety-info', product: product, block: block, id: section.id, safety_information_show_less: , safety_information_show_more: -%}
+{% endcomment %}
+
+{%- liquid
+  assign heading = block.settings.heading
+  assign collapsed_by_default = block.settings.collapsed_by_default
+  assign info_less = product.metafields.accentuate.safety_information_show_less | default: safety_information_show_less
+  assign info_more = product.metafields.accentuate.safety_information_show_more | default: safety_information_show_more -%}
+
+{%- if info_less != blank -%}
+  <accordion-element class="pdp-details__safety_info accordion"
+                     data-accordion-group="pdp-details-{{ section.id }}">
+    <div class="accordion__item">
+      <button type="button"
+              aria-expanded="{% if collapsed_by_default %}false{% else %}true{% endif %}"
+              class="h6 btn--reset accordion__button"
+              aria-controls="content-safety-{{ section.id }}"
+              id="accordion-button-safety-{{ section.id }}"
+              data-pdp-show-more="{{ heading }}">
+
+        <span class='accordion-title'>{{ heading }}</span>
+
+        <span class="accordion__icons block">
+          {% render 'icon' with 'plus-small' %}
+          {% render 'icon' with 'minus-small' %}
+        </span>
+      </button>
+
+      <div id="content-safety-{{ section.id }}"
+           aria-labelledby="accordion-button-safety-{{ section.id }}"
+           class="accordion__content-inner"
+           style="display: {% if collapsed_by_default %}none{% else %}block{% endif %}">
+
+        <show-more class="show-more"
+                   aria-expanded="false"
+                   tabindex="-1"
+                   data-connected-target="safety-info-{{ section.id }}">
+          <div data-show-more-body>
+            {{ info_less }}
+
+            {%- if info_more != blank -%}
+              <div data-show-more-opener>
+                {{ info_more }}
+              </div>
+
+              <button type="button" data-show-more-heading class="show-more__btn btn--reset a"
+                      data-pdp-show-more="{{ heading }}">
+                <span class="show-more__btn-text show-more__btn-text--more">{{ "products.facets.show_more" | t }}</span>
+                <span class="show-more__btn-text show-more__btn-text--less">{{ "products.facets.show_less" | t }}</span>
+                <span class="show-more__btn-icons block">
+              {% render 'icon' with 'plus-small' %}{% render 'icon' with 'minus-small' %}
+            </span>
+              </button>
+            {%- endif -%}
+          </div>
+        </show-more>
+      </div>
+    </div>
+  </accordion-element>
+{%- endif -%}

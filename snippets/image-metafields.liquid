@@ -1,0 +1,81 @@
+{% comment %}
+{% render 'image-metafields',
+  image: ,
+  class_name: ,
+  image_attr: ,
+  show_id ,
+  alt: alt,
+  small_size: boolean,
+  preload: boolean,
+  no_leazy: boolean,
+  show_preloader_img: boolean  %}
+{% endcomment %}
+
+{%- liquid
+  assign image_src = image.cloudinary_src
+
+  if image_src contains '&options='
+    assign image_src = image.cloudinary_src | replace: '&options=', ''
+  endif
+
+  assign fetch_priority = 'auto'
+
+  if section.index <= 3
+    assign fetch_priority = 'high'
+    assign preload = true
+  endif
+-%}
+
+{%- capture srcset -%}
+  {%- if small_size -%}
+    {{ image_src | append: 'w_25' }} 25w,
+    {{ image_src | append: 'w_72' }} 36w,
+    {{ image_src | append: 'w_144' }} 72w,
+    {{ image_src | append: 'w_360' }} 144w,
+  {%- endif -%}
+  {{ image_src | append: 'w_480' }} 240w,
+  {{ image_src | append: 'w_720' }} 360w,
+  {{ image_src | append: 'w_1080' }} 540w,
+  {{ image_src | append: 'w_1480' }} 720w,
+  {{ image_src | append: 'w_1350' }} 900w,
+  {{ image_src | append: 'w_1512' }} 1080w,
+  {{ image_src | append: 'w_1728' }} 1296w,
+  {{ image_src | append: 'w_1980' }} 1440w,
+  {{ image_src | append: 'w_2560' }} 1920w,
+  {{ image_src | append: 'w_4096' }} 2560w
+{%- endcapture -%}
+
+{%- if preload -%}
+	<link rel="preload" href="{{ image_src | append: 'w_360' }}" as="image" imagesrcset="{{ srcset }}">
+{%- endif -%}
+
+{%- assign alt = alt | default: image.alt | escape -%}
+
+{%- if no_leazy -%}
+<img {% if show_id and image.id != blank %}id="{{ image.id }}"{% endif %}
+     src="{%- if small_size -%} {{ image_src | append: 'w_144' }} {%- else -%} {{ image_src | append: 'w_540' }} {%- endif -%}"
+     class="{{ class_name }}"
+     alt="{{ alt }}"
+     width="100%"
+     height="100%"
+     fetchpriority="{{ fetch_priority }}"
+  {{ image_attr }}>
+{%- else -%}
+<img {% if show_id and image.id != blank %}id="{{ image.id }}"{% endif %}
+     src="{{ image_src | append: 'w_1' }}"
+     data-srcset="{{ srcset }}"
+     class="lazyload {{ class_name }}"
+     data-sizes="auto"
+     data-optimumx="auto"
+     data-src="{{ image_src | append: 'w_360' }}"
+     data-parent-fit="contain"
+     alt="{{ alt }}"
+     width="100%"
+     height="100%"
+     loading="lazy"
+     fetchpriority="{{ fetch_priority }}"
+	{{ image_attr }}>
+{%- endif -%}
+{%- if show_preloader_img -%}
+  <span class="preloader {{ class_name }}" style="background: no-repeat center/cover url('{{ image_src | append: 'w_25' }}')"></span>
+{%- endif -%}

@@ -1,0 +1,203 @@
+{{ 'columns-with-icons.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+
+	assign title = section.settings.title
+	assign description = section.settings.description
+
+	assign show_separator = section.settings.show_separator
+
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign text_column_blocks = section.blocks | where: 'type', 'text_column'
+-%}
+
+{%- if section.blocks.size > 0  -%}
+
+
+	<div class="columns-with-icons {%- if show_separator %} columns-with-icons--bdb{%- endif -%}"
+    data-aos="fade-up"
+    style="
+      --bg-color: {{ bg_color }};
+      --text-color: {{ text_color }};
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+  >
+    <div class="columns-with-icons__wrapper page-width"
+    >
+      {% if title != blank %}
+        <h3 class="columns-with-icons__heading">{{ title }}</h3>
+      {% endif %}
+
+      {% if description != blank %}
+        <p class="columns-with-icons__description body1">{{ description }}</p>
+      {% endif %}
+
+      <ul class="columns-with-icons__text-blocks">
+        {% for text_column in text_column_blocks %}
+          {% liquid
+            assign title = text_column.settings.title
+            assign description = text_column.settings.description
+            assign content_alignment_mobile = text_column.settings.content_alignment_mobile
+          %}
+
+          {% if title != blank or description != blank %}
+            <li class="text-block__item text-block__item-{{ content_alignment_mobile }}"
+              {{ text_column.shopify_attributes }}
+            >
+              {%- render 'icon' with 'checkmark' -%}
+
+              {% if title != blank %}
+                <h4 class="text-block__title body1">{{ title }}</h4>
+              {% endif %}
+
+              {% if description != blank %}
+                <div class="text-block__description body3">{{ description }}</div>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+	</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Columns with icons",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Border bottom"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_separator",
+      "label": "Show border bottom",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Text column",
+      "type": "text_column",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment_mobile",
+          "label": "Content alignment mobile",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Columns with icons"
+    }
+  ]
+}
+{% endschema %}

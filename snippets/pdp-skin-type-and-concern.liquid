@@ -1,0 +1,38 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - block: {Object} Section block
+  - rx_product_skin_types: {Array} For RX Only Product
+  - rx_product_skin_concern: {Array} For RX Only Product
+  Usage:
+{%- render 'pdp-skin-type-and-concern', product: product, block: block, rx_product_skin_types: rx_product_skin_types, rx_product_skin_concern: rx_product_skin_concern -%}
+{% endcomment %}
+
+{%- liquid assign heading = block.settings.heading -%}
+
+{%- capture skin_types -%}
+  {% render 'get_skin_types', product: product, rx_product_skin_types: rx_product_skin_types %}
+{%- endcapture -%}
+
+{%- capture skin_concerns -%}
+  {% render 'get_skin_concerns', product: product, class_name_handle: 'pdp-details', rx_product_skin_concern: rx_product_skin_concern %}
+{%- endcapture -%}
+
+{%- if skin_concerns != blank or skin_types != blank -%}
+  <div class="pdp-details__skin">
+    <div class="pdp-details__skin-heading h6">{{ heading }}</div>
+    {%- if skin_concerns != blank -%}
+      <div class="pdp-details__skin_concerns pdp-details__skin-block">
+        {{ skin_concerns }}
+      </div>
+    {%- endif -%}
+    {%- if skin_types != blank -%}
+      <div class="pdp-details__skin_types pdp-details__skin-block">
+        <span class="pdp-details__skin_types-heading">
+          {{ 'products.product.skin_type_and_concern.skin_types_heading' | t | strip }}
+        </span>
+        {{ skin_types }}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}

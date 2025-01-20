@@ -1,0 +1,147 @@
+{% comment %}
+  {% render 'collection-blocks' block_type: string  %}
+{% endcomment %}
+
+{%- case block_type -%}
+{% when 'promo-banner' %}
+  {% if [request.page_type].metafields.promo_banner.show_section == 'true' %}
+    {%- liquid
+      assign image = [request.page_type].metafields.promo_banner.image[0]
+      assign video = [request.page_type].metafields.promo_banner.video[0]
+      assign video_display_format = [request.page_type].metafields.promo_banner.video_display_format
+      assign image_mobile = [request.page_type].metafields.promo_banner.image_mobile[0]
+      assign video_mobile = [request.page_type].metafields.promo_banner.video_mobile[0]
+      assign video_display_format_mobile = [request.page_type].metafields.promo_banner.video_display_format_mobile
+      assign content_position = [request.page_type].metafields.promo_banner.content_position | default: 'Right'
+      assign content_position_mobile = [request.page_type].metafields.promo_banner.content_position_mobile | default: 'Center'
+      assign subheading = [request.page_type].metafields.promo_banner.subheading
+      assign subheading_color = [request.page_type].metafields.promo_banner.subheading_color | default: '#383838'
+      assign subheading_font_size = [request.page_type].metafields.promo_banner.subheading_font_size | default: 12
+      assign subheading_position = [request.page_type].metafields.promo_banner.subheading_position | handleize | default: 'before-heading'
+      assign heading = [request.page_type].metafields.promo_banner.heading
+      assign heading_color = [request.page_type].metafields.promo_banner.heading_color | default: '#383838'
+      assign heading_font_size = [request.page_type].metafields.promo_banner.heading_font_size | default: 18
+      assign tc = [request.page_type].metafields.promo_banner.t_c
+      assign tc_link = [request.page_type].metafields.promo_banner.tc_link
+      assign tc_color = [request.page_type].metafields.promo_banner.tc_color | default: '#383838'
+      assign tc_font_size = [request.page_type].metafields.promo_banner.tc_font_size | default: 12
+      assign link_label = [request.page_type].metafields.promo_banner.link_label
+      assign link_url = [request.page_type].metafields.promo_banner.link_url
+
+      if content_position == "Left"
+        assign position = 'flex-start'
+      elsif content_position == "Center"
+        assign position = 'center'
+      elsif content_position == "Right"
+        assign position = 'flex-end'
+      endif
+
+      if content_position_mobile == "Left"
+       assign position_mobile = 'flex-start'
+      elsif content_position_mobile == "Center"
+        assign position_mobile = 'center'
+      elsif content_position_mobile == "Right"
+        assign position_mobile = 'flex-end'
+      endif
+
+      if video_display_format == 'Contain'
+        assign contain_video_on_desktop = true
+      endif
+
+      if video_display_format_mobile == 'Contain'
+        assign contain_video_on_mobile = true
+      endif
+    -%}
+
+      <div class="promo-banner" style="--position: {{ position }}; --position-mobile: {{ position_mobile }};">
+
+        {% if image != blank or video != blank %}
+          {%- assign image_class_name = 'promo-banner__image image-abs-cover' -%}
+          {%- assign video_class_name = '' -%}
+
+          {%- if image_mobile != blank or video_mobile != blank -%}
+            {%- assign image_class_name = image_class_name | append: ' small-hide' -%}
+            {%- assign video_class_name = 'small-hide' -%}
+
+            {%- if video_mobile != blank -%}
+              {%- render 'video',
+                video: video_mobile,
+                video_from_metafield: true,
+                poster: image_mobile,
+                poster_from_metafield: true,
+                default_controls: false,
+                autoplay: true,
+                disable_video_scale_on_desktop: contain_video_on_desktop,
+                disable_video_scale_on_mobile: contain_video_on_mobile,
+                class: 'small-up-hide'
+              -%}
+            {%- else -%}
+              {% render 'image-metafields', image: image_mobile, class_name: 'promo-banner__image image-abs-cover small-up-hide' %}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if video != blank -%}
+            {%- render 'video',
+              video: video,
+              video_from_metafield: true,
+              poster: image,
+              poster_from_metafield: true,
+              default_controls: false,
+              autoplay: true,
+              disable_video_scale_on_desktop: contain_video_on_desktop,
+              disable_video_scale_on_mobile: contain_video_on_mobile,
+              class: video_class_name
+            -%}
+          {%- else -%}
+            {% render 'image-metafields', image: image, class_name: image_class_name %}
+          {%- endif -%}
+        {% endif %}
+
+        {% if subheading != blank or heading != blank or tc != blank or link_label != blank %}
+          <div class="promo-banner__content-wrapper rel"
+               style="
+                  --subheading-pb-color: {{ subheading_color }};
+                  --subheading-pb-font-size: {{ subheading_font_size }}px;
+                  --heading-pb-color: {{ heading_color }};
+                  --heading-pb-font-size: {{ heading_font_size }}px;
+                  --tc-pb-color: {{ tc_color }};
+                  --tc-pb-font-size: {{ tc_font_size }}px;">
+
+            {%- capture subheading_elem -%}
+              {% if subheading != blank %}
+                <p class="promo-banner__subheading">
+                  {{ subheading }}
+                </p>
+              {% endif %}
+            {%- endcapture -%}
+
+            {%- if subheading_position == 'before-heading' -%}
+              {{ subheading_elem }}
+            {%- endif -%}
+
+            {% if heading != blank %}
+              <h2 class="promo-banner__heading h5">
+                {{ heading }}
+              </h2>
+            {% endif %}
+
+            {%- if subheading_position == 'after-heading' -%}
+              {{ subheading_elem }}
+            {%- endif -%}
+
+            {% if tc != blank %}
+              {%- if tc_link != blank -%}
+                <a href="{{ tc_link }}" class="promo-banner__tc">{{ tc }}</a>
+              {%- else -%}
+                <p class="promo-banner__tc">{{ tc }}</p>
+              {%- endif -%}
+            {% endif %}
+
+            {% if link_label != blank and link_url != blank %}
+              <a href="{{ link_url }}" class="promo-banner__link h6">{{ link_label }}</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+  {% endif %}
+{%- endcase -%}

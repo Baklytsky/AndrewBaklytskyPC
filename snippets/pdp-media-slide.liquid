@@ -1,0 +1,24 @@
+{% comment %}
+  Accepts:
+  - media: {Object} Media object
+
+  Usage:
+{%- render 'pdp-media-slide', media: media -%}
+{% endcomment %}
+
+<div class="pdp-media__image rel">
+  {%- liquid assign media_alt = media.alt | default: product.title | append: forloop.index -%}
+
+  {%- if media.media_type == 'image' -%}
+
+    {% render 'image', image: media.preview_image, class_name: 'image-abs-cover', alt: media_alt %}
+
+    {%- elsif media.media_type == 'video' -%}
+    <video class='image-abs-contain' loop muted autoplay playsinline controls
+           poster="{{ media.preview_image | img_url: "900x" }}">
+      {%- for source in media.sources -%}
+        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+      {%- endfor -%}
+    </video>
+  {%- endif -%}
+</div>

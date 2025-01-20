@@ -1,0 +1,88 @@
+@import "./src/scss/helpers/mixins";
+
+.grid {
+  display: grid;
+  grid-column-gap: 0;
+  grid-row-gap: 0;
+}
+
+.grid--1-col {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid--3-col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid--2-col {
+  grid-template-columns: repeat(2, 1fr);
+
+  @include mq($mobile-min) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@include mq($mobile-min) {
+  .grid--2-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid--4-col-tablet {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid--3-col-tablet {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid--2-col-tablet {
+    grid-template-columns: repeat(2, 1fr);
+    width: calc(100% / 2);
+  }
+}
+
+@include mq($mobile-min) {
+  .grid--4-col-desktop {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid--3-col-desktop {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid--2-col-desktop {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid--1-col-desktop {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .grid--1-col-desktop {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+
+@include mq($medium-max) {
+  .grid--1-col-tablet-down {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@include mq($small-max) {
+  .grid--2-col-tablet-down {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@include mq($small-min and $medium-max) {
+  .grid--2-col-tablet-down {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid--1-col-tablet-down.grid--peek {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+

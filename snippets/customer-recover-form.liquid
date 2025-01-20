@@ -1,0 +1,76 @@
+{%- comment -%}
+{%- render 'customer-recover-form', recover_text: recover_pass_text, image: recover_pass_image, back_btn: false -%}
+{%- endcomment -%}
+
+{%- assign recover_text_default = 'customer.recover_password.subtext' | t -%}
+
+<customer-form id="recover" class="recover-form__wrapper">
+  <div class="recover-form__content">
+    <div class="recover-form__content-inner">
+      <h2 tabindex="-1" class="h4 recover-form__heading">
+        {{ 'customer.recover_password.title' | t }}
+      </h2>
+
+      <div class="recover-form__text body2">
+        {{ recover_text | default: recover_text_default }}
+      </div>
+
+      {%- form 'recover_customer_password', data-form-name:"Recover password" -%}
+        {% assign recover_success = form.posted_successfully? %}
+        <input type="hidden" name="return_to" value="/account/login#recover">
+        <div class="form-field">
+          <input type="email"
+                 value=""
+                 name="email"
+                 id="RecoverEmail"
+                 autocorrect="off"
+                 autocapitalize="off"
+                 autocomplete="email"
+            {% if form.errors %}
+              aria-invalid="true"
+              aria-describedby="RecoverEmail-email-error"
+              autofocus
+            {% endif %}
+                 placeholder="{{ 'customer.login_page.email' | t }}"
+                 class="form-input"
+                 required
+          >
+          <label for="RecoverEmail" class="visually-hidden">
+            {{ 'customer.login_page.email' | t }}
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn--primary-alt">
+          {{ 'customer.reset_password.submit_recover' | t }}
+        </button>
+
+        <div class="customer-errors">
+          <p class="body3 form-error form-error--email hide">{{ "form_errors.email" | t }}</p>
+          {%- if form.errors -%}
+            <div id="RecoverEmail-email-error" class="body3 form-error">
+              {{ form.errors.messages['form'] }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endform -%}
+
+      {%- if recover_success == true -%}
+        <div class="body3 form-success" tabindex="-1" autofocus>
+          {{ 'customer.recover_password.success' | t }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if back_btn -%}
+      <div class="recover-form__back-btn">
+        <a href="#login">{{ 'customer.recover_password.back_to_sign_in' | t }}</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {%- if image != blank -%}
+    <div class="recover-form__image">
+      {% render 'image', image: image, class_name: '', preload: true %}
+    </div>
+  {%- endif -%}
+</customer-form>

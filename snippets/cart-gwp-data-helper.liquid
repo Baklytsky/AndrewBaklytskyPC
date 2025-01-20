@@ -1,0 +1,28 @@
+{% comment %}
+  {% include 'cart-gwp-data-helper' %}
+{% endcomment %}
+
+{%- for key_in_cart in gwp_products_keys_in_cart -%}
+  {%- assign variant_id_in_cart = key_in_cart | split: ':' | first -%}
+  {%- assign variant_id_for_check = get_product_by_variant.id -%}
+
+  {%- if variant_id_in_cart contains variant_id_for_check -%}
+    {%- assign remove_old_gwps = remove_old_gwps | remove: key_in_cart -%}
+
+    {% break %}
+    {%- elsif forloop.last -%}
+
+    {%- if get_product_by_variant.available -%}
+      {%- assign gwp_data_for_add = gwp_data_for_add | append: "," | append: get_product_by_variant.id -%}
+    {%- endif -%}
+
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} for subscription GWP {%- endcomment -%}
+{%- if gwp_products_keys_in_cart.size < 1 and subscription_gwp_arr_blocks.size > 0 and cart_has_subscription_product and block.type == "subscription_gwp" -%}
+  {%- assign variant_id_for_check = get_product_by_variant.id -%}
+
+  {%- assign gwp_data_for_add = gwp_data_for_add | append: "," | append: get_product_by_variant.id -%}
+{%- endif -%}
+

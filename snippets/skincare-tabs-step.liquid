@@ -1,0 +1,149 @@
+{% comment %}
+  {% render 'skincare-tabs-step' block: block, block_index: int  %}
+{% endcomment %}
+
+{% liquid
+  assign image = block.settings.image
+  assign video = block.settings.video
+  assign show_play_button = block.settings.show_play_button
+  assign show_mute_button = block.settings.show_mute_button
+  assign heading = block.settings.heading
+  assign description = block.settings.description
+  assign button_label = block.settings.button_label
+  assign button_link = block.settings.button_link
+  assign button_style = block.settings.button_style
+  assign products_heading = block.settings.products_heading
+  assign product_1 = block.settings.product_1
+  assign product_2 = block.settings.product_2
+  assign product_3 = block.settings.product_3
+
+  if  product_1 != blank or product_2 != blank or product_3 != blank
+    assign has_product = false
+
+    for i in (1..3)
+      assign local_product_index = 'product_' | append: i
+      assign local_product_handle = block.settings[local_product_index]
+      assign local_product = all_products[local_product_handle]
+
+      if local_product.available and local_product != blank
+        assign has_product = true
+        break
+      endif
+    endfor
+  endif
+
+  if heading == blank and description == blank and products_heading == blank
+    assign text_block = false
+  endif
+
+  if  image == blank and video == blank
+    assign media_block = false
+  endif
+%}
+
+{% if image != blank or video != blank or heading != blank or description != blank or products_heading != blank or has_product %}
+  <div class="skincare-step {% if media_block == false or text_block == false %}skincare-step--content-full-width{% endif %}">
+    <div class="skincare-step__content-wrapper skincare-step__content-wrapper--{{- block_index}}">
+      {% if heading != blank or description != blank or button_label != blank %}
+        <div class="skincare-step__content-info-wrapper">
+          <div class="skincare-step__content-text">
+            <span class="skincare-step__step-number h5"></span>
+
+            {% if heading != blank %}
+              <h4 class="skincare-step__step-heading h3"> {{ heading }}</h4>
+            {% endif %}
+
+            {% if description != blank %}
+              <p class="skincare-step__step-description body2">{{ description }}</p>
+            {% endif %}
+
+            {%- if button_label != blank -%}
+              <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                tabindex="0"
+                href="{{ button_link }}"{% endif %}
+                class="skincare-step__step-btn btn btn--{{ button_style }}">
+                {{ button_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+
+          {% if products_heading != blank and has_product %}
+            <div class="skincare-step__content-products">
+              {% if products_heading != blank %}
+                <h4 class="skincare-step__content-products-heading body3 body3--bold">{{ products_heading }}</h4>
+              {% endif %}
+
+              {% if has_product %}
+                <ul class="skincare-step__content-products-list hide-scrollbar">
+                  {% for i in (1..3) %}
+                    {% liquid
+                      assign product_index = 'product_' | append: i
+                      assign product_handle = block.settings[product_index]
+                      assign product = all_products[product_handle]
+                      assign current_variant = product.first_available_variant
+                      assign current_image = current_variant.featured_image | default: product.featured_image
+                    %}
+
+                    {% if product.available and product_handle != blank %}
+                      <li class="skincare-step__content-product-item">
+                        {% if current_image != blank %}
+                          <div class="skincare-step__content-product-image rel">
+                            <a href="{{ product.url }}" tabindex="0" class="image-abs-cover">
+                              <span class="u-sr-only">{{ image.alt }}</span>
+                            </a>
+
+                            {% render 'image',
+                              image: current_image,
+                              class_name: 'image-abs-cover',
+                              alt: image.alt %}
+                          </div>
+                        {% endif %}
+
+                        <a href="{{ product.url }}" tabindex="0" class="skincare-step__content-product-title body3 body3--bold">{{ "sections.skincare_tabs.product_link_label" | t }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if image != blank or video != blank %}
+        <div class="skincare-step__content-media-wrapper rel {% if image == blank or video != blank %}skincare-step__content-media-wrapper--only-video{% endif %}">
+          {%- if video -%}
+            {%- capture video_options -%}
+              {
+              "videoType": {{ video.type | json }},
+              "videoId": {{ video.id | json }},
+              "autoplay": 1,
+              "controls": 0
+              }
+            {%- endcapture -%}
+
+            {%- render 'video',
+              video_url: video,
+              default_controls: false,
+              show_mute_button: show_mute_button,
+              show_play_button: show_play_button,
+              autoplay: true,
+              class: "normal no-touch"
+            -%}
+          {%- endif -%}
+
+          {% if image != blank and video == blank %}
+            <div class="skincare-step__content-media-image rel">
+              {% render 'image',
+                image: image,
+                class_name: 'image-abs-cover',
+                alt: image.alt %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+

@@ -1,0 +1,62 @@
+{% comment %}
+  index - number
+  {% render 'rx-product-card' index: index %}
+{% endcomment %}
+
+{%- liquid
+  assign product_handle = shop.metafields.rx-product.handle[index] | handleize
+  assign badge = settings[shop.metafields.rx-product.badge[index]]
+  assign product_url = '/pages/' | append: product_handle
+  assign title = shop.metafields.rx-product.title[index]
+  assign featured_image = shop.metafields.rx-product.media[index][0]
+  assign hover_image = shop.metafields.rx-product.hover_image[index][0]
+  assign description = shop.metafields.rx-product.description[index]
+-%}
+
+
+<div class="product-card rel">
+  <div class="product-card__wrapper">
+    <a href="{{ product_url }}" class="product-card__img-wrapper">
+      <div class="product__badge-rx-only">{{ 'products.product.rx_only_title' | t }}</div>
+
+      {%- if featured_image != blank -%}
+        {% render 'image-metafields', image: featured_image, class_name: 'product-card__image image-abs-cover', alt: title %}
+      {%- else -%}
+        <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}" class="product-card__image image-abs-cover" alt="{{ product.title }}">
+      {%- endif -%}
+
+      {% if hover_image != blank and settings.show_hover_image_card %}
+        {% render 'image-metafields', image: hover_image, class_name: 'product-card__image--second image-abs-cover', alt: title %}
+      {% endif %}
+    </a>
+
+    <div class="product-card__content-wrapper flex__column-space">
+      <div class="product-card__main-info-wrapper flex__column-space">
+        <div class="product-card__collections">
+          {%- liquid assign product_collections = shop.metafields.rx-product.collections[index] | split: ',' -%}
+          {%- render 'product-featured-collections', product_collections: product_collections, class: 'product-card__collections-item body4' -%}
+        </div>
+
+        <a href="{{ product_url }}" class="product-card__title body3">
+          {{ title }}
+        </a>
+
+        {%- if show_description -%}
+          <div class="product-card__description center">
+            {{ description | strip_html | truncate: 200 }}
+          </div>
+        {%- endif -%}
+
+        <div class="product-card__payment-wrapper">
+          <div class="product-card__btn-wrapper">
+            <a href="{{ settings.physician_finder_url }}" class="product-card__btn btn btn--secondary btn--small"
+               title="{{- settings.physician_finder_label -}}"
+               aria-label="{{- settings.physician_finder_label -}}">
+              {{- settings.physician_finder_label -}}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

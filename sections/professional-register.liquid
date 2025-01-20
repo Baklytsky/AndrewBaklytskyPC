@@ -1,0 +1,114 @@
+{{ 'customer.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'customer-pro.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+
+
+{% liquid
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+  assign specialty = section.settings.specialty
+  assign role = section.settings.role
+  assign reason = section.settings.reason
+  assign additional_message = section.settings.additional_message
+  assign klaviyo_list_id = section.settings.klaviyo_list_id
+  assign error_message = section.settings.error_message
+%}
+
+<section id="{{ section.id }}" class="customer-register-page">
+  <div class="customer-wrapper page-width">
+    {%- if heading != blank or description != blank -%}
+      <div class="customer-pro-register customer-pro-register__content">
+        <div class="customer-pro-register__content-wrapper">
+          <h4 class="customer-pro-register__heading">{{ heading | newline_to_br }}</h4>
+          <div class="customer-pro-register__description">{{ description }}</div>
+        </div>
+      </div>
+    {%- endif -%}
+    {% render 'customer-pro-register-form',
+      specialty: specialty,
+      role: role,
+      reason: reason,
+      additional_message: additional_message,
+      klaviyo_list_id: klaviyo_list_id,
+      error_message: error_message %}
+  </div>
+</section>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+  'event': 'generate_lead_start',
+    'user': {
+    'lead': {
+      'lead_type': '',
+        'lead_driver': '',
+    }},
+  })
+</script>
+
+
+{% schema %}
+{
+  "name": "Professional register",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Register for <br> Obagi Professional</p>"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Klaviyo configuration"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_list_id",
+      "label": "Klaviyo list ID"
+    },
+    {
+      "type": "textarea",
+      "id": "error_message",
+      "label": "Error message",
+      "default": "Something went wrong. Try again later."
+    },
+    {
+      "type": "header",
+      "content": "Business Information"
+    },
+    {
+      "type": "textarea",
+      "id": "specialty",
+      "label": "Specialty",
+      "info": "Enter values separated by commas"
+    },
+    {
+      "type": "textarea",
+      "id": "role",
+      "label": "Role",
+      "info": "Enter values separated by commas"
+    },
+    {
+      "type": "header",
+      "content": "Additional Information"
+    },
+    {
+      "type": "textarea",
+      "id": "reason",
+      "label": "Reason for Registration",
+      "info": "Enter values separated by commas"
+    },
+    {
+      "type": "richtext",
+      "id": "additional_message",
+      "label": "Additional message",
+      "default": "<p>An Obagi Associate will review your application and be in touch within 24-48 hours.<br><br>Already a partner? Sign in <a href='/account/login'>here</a>.</p>"
+    }
+  ]
+}
+{% endschema %}

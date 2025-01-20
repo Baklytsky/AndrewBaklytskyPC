@@ -1,0 +1,284 @@
+{%- if [request.page_type].metafields.comparison.enable_section == 'true' -%}
+
+  {{ 'compare-images.min.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'component-compare-images.min.js' | asset_url }}" defer="defer"></script>
+
+  {%- liquid
+    assign desktop_slide_height = [request.page_type].metafields.comparison.desktop_slide_height
+    assign mobile_slide_height = [request.page_type].metafields.comparison.mobile_slide_height
+    assign section_bg_color = [request.page_type].metafields.comparison.background_color
+    assign section_text_color = [request.page_type].metafields.comparison.text_color
+    assign heading = [request.page_type].metafields.comparison.heading | escape | newline_to_br
+    assign desktop_layout = [request.page_type].metafields.comparison.desktop_layout
+
+    assign text_blocks = [request.page_type].metafields.comparison_images_text.show_block
+    assign slides = [request.page_type].metafields.comparison_images_slide.show_slide
+
+    assign slide_counter = 0
+
+  -%}
+
+  {%- case desktop_slide_height -%}
+  {%- when '16/9' -%}
+  {%- assign desktop_slide_height = '56.25%' -%}
+  {%- when '9/16' -%}
+  {%- assign desktop_slide_height = '177%' -%}
+  {%- when '4/15' -%}
+  {%- assign desktop_slide_height = '125%' -%}
+    {%- else -%}
+  {%- assign desktop_slide_height = '93.6%' -%}
+  {%- endcase -%}
+
+  {%- case mobile_slide_height -%}
+  {%- when '16/9' -%}
+  {%- assign mobile_slide_height = '56.25%' -%}
+  {%- when '9/16' -%}
+  {%- assign mobile_slide_height = '177%' -%}
+  {%- when '4/15' -%}
+  {%- assign mobile_slide_height = '125%' -%}
+    {%- else -%}
+  {%- assign mobile_slide_height = '94.6%' -%}
+  {%- endcase -%}
+
+  {% style %}
+    .comparison__wrapper--{{ section.id }} {
+    --desktop-slide-height: {{ desktop_slide_height }};
+    --mobile-slide-height: {{ mobile_slide_height }};
+    }
+  {% endstyle %}
+
+
+  {%- capture slides -%}
+    {%- for slide in slides -%}
+      {%- if slide == 'true' -%}
+
+        {%- liquid
+          assign after_image = [request.page_type].metafields.comparison_images_slide.comparison_after_image[forloop.index0][0]
+          assign after_video = [request.page_type].metafields.comparison_images_slide.after_video[forloop.index0][0]
+          assign before_image = [request.page_type].metafields.comparison_images_slide.comparison_before_image[forloop.index0][0]
+          assign before_video = [request.page_type].metafields.comparison_images_slide.before_video[forloop.index0][0]
+          assign slide_heading = [request.page_type].metafields.comparison_images_slide.heading[forloop.index0]
+          assign left_align_text = [request.page_type].metafields.comparison_images_slide.left_align_text[forloop.index0]
+          assign right_align_text = [request.page_type].metafields.comparison_images_slide.right_align_text[forloop.index0]
+          assign slide_description = [request.page_type].metafields.comparison_images_slide.description[forloop.index0]
+          assign slide_counter = slide_counter | plus: 1
+        -%}
+        {%- assign has_after_element = false -%}
+        {%- assign has_before_element = false -%}
+
+        {%- if after_image != blank or after_video != blank -%}
+          {%- assign has_after_element = true -%}
+        {%- endif -%}
+
+        {%- if before_image != blank or before_video != blank -%}
+          {%- assign has_before_element = true -%}
+        {%- endif -%}
+
+        {%- if has_after_element or has_before_element -%}
+          <div class="swiper-slide">
+            <div class="comparison__slide rel">
+              {%- if has_after_element and has_before_element -%}
+                <compare-images class="comparison__images block rel">
+                  <div class="comparison__slide-image image-abs-cover">
+                    {%- if after_video -%}
+                      {%- render 'video',
+                        video: after_video,
+                        video_from_metafield: true,
+                        poster: after_image,
+                        poster_from_metafield: true,
+                        default_controls: false,
+                        autoplay: true,
+                        disable_video_scale_on_desktop: false,
+                        disable_video_scale_on_mobile: false,
+                        class: ''
+                      -%}
+                    {%- else -%}
+                      {% render 'image-metafields', image: after_image, class_name: 'image-abs-cover', alt: after_image.alt %}
+                    {%- endif -%}
+                  </div>
+                  <div class="comparison__slide-image image-abs-cover" data-comparison-overlay>
+                    {%- if before_video -%}
+                      {%- render 'video',
+                        video: before_video,
+                        video_from_metafield: true,
+                        poster: before_image,
+                        poster_from_metafield: true,
+                        default_controls: false,
+                        autoplay: true,
+                        disable_video_scale_on_desktop: false,
+                        disable_video_scale_on_mobile: false,
+                        class: ''
+                      -%}
+                    {%- else -%}
+                      {% render 'image-metafields', image: before_image, class_name: 'image-abs-cover', alt: before_image.alt %}
+                    {%- endif -%}
+                  </div>
+                  <div class="comparison__slide-divider" hidden>
+                    <span class="u-sr-only">{{ 'comparison_images.divider_title' | t }}</span>
+                    {%- render 'icon' with 'left-and-right-arrow' -%}
+                  </div>
+                </compare-images>
+                {%- elsif has_before_element -%}
+                <div class="comparison__images block rel">
+                  <div class="comparison__slide-image">
+                    {%- if before_video -%}
+                      {%- render 'video',
+                        video: before_video,
+                        video_from_metafield: true,
+                        poster: before_image,
+                        poster_from_metafield: true,
+                        default_controls: false,
+                        autoplay: true,
+                        disable_video_scale_on_desktop: false,
+                        disable_video_scale_on_mobile: false,
+                        class: ''
+                      -%}
+                    {%- else -%}
+                      {% render 'image-metafields', image: before_image, class_name: 'image-abs-cover', alt: before_image.alt %}
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- else -%}
+                <div class="comparison__images block rel">
+                  <div class="comparison__slide-image">
+                    {%- if after_video -%}
+                      {%- render 'video',
+                        video: after_video,
+                        video_from_metafield: true,
+                        poster: after_image,
+                        poster_from_metafield: true,
+                        default_controls: false,
+                        autoplay: true,
+                        disable_video_scale_on_desktop: false,
+                        disable_video_scale_on_mobile: false,
+                        class: ''
+                      -%}
+                    {%- else -%}
+                      {% render 'image-metafields', image: after_image, class_name: 'image-abs-cover', alt: after_image.alt %}
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- if slide_heading != blank -%}
+                <h3 class="comparison__slide-heading body1">
+                  {{ slide_heading }}
+                </h3>
+              {%- endif -%}
+
+              {%- if left_align_text != blank or right_align_text != blank -%}
+                <div class="comparison__slide-compare-text">
+                  {%- if left_align_text != blank -%}
+                    <span class="body3--bold block">{{ left_align_text }}</span>
+                  {%- endif -%}
+                  {%- if right_align_text != blank -%}
+                    <span class="body3--bold right-align block">{{ right_align_text }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+
+              {%- if slide_description != blank -%}
+                <div class="comparison__slide-description body3">
+                  {{ slide_description }}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- capture content -%}
+    {%- for text_block in text_blocks -%}
+      {%- if text_block == 'true' -%}
+
+        {%- liquid
+          assign percent_value = [request.page_type].metafields.comparison_images_text.percent_value[forloop.index0]
+          assign description = [request.page_type].metafields.comparison_images_text.description[forloop.index0] -%}
+
+        <div class="comparison__content">
+          <h6 class="comparison__content-heading h7">{{ percent_value | append: '%' }}</h6>
+          {%- if description != blank -%}
+            <div class="comparison__content-description body2">
+              {{ description }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- if slides != blank -%}
+    {%- capture swiper_config -%}
+      {
+      "slidesPerView": 1,
+      "allowTouchMove": false,
+      "analyticEvent": "clinical_trial_image_interaction",
+      "navigation": {
+        "nextEl": ".swiper-button-next--{{ section.id }}",
+        "prevEl": ".swiper-button-prev--{{ section.id }}"
+      },
+      "pagination": {
+        "el": ".swiper-pagination--{{ section.id }}",
+        "type": "bullets",
+        "clickable": true
+        }
+      }
+    {%- endcapture -%}
+  {%- endif -%}
+
+  <div class="before-after"
+       data-aos="fade-up"
+       style="--bg-color: {{ section_bg_color }};
+         --color: {{ section_text_color }}">
+
+    {%- if heading != blank -%}
+      <h2 class="comparison__heading page-width">
+        {{ heading }}
+      </h2>
+    {%- endif -%}
+
+    <div class="comparison__wrapper page-width {{ desktop_layout | handleize }} comparison__wrapper--{{ section.id }}">
+      {%- if content != blank -%}
+        <div class="comparison__wrapper-content {% if slides == blank %}x{% endif %}">
+          {{ content }}
+        </div>
+      {%- endif -%}
+
+      {%- if slides != blank -%}
+        <div class="comparison__wrapper-slider {% if content == blank %}x{% endif %} {% if slide_counter == 1 %}hide-navigation{% endif %}">
+          {%- render 'slideshow-swiper',
+            class_name: 'comparison__slider rel',
+            config: swiper_config,
+            slides: slides,
+            show_slider_nav: true,
+            nav_id: section.id -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Compare images (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Compare images (MF)"
+    }
+  ],
+  "templates": [
+    "product"
+  ]
+}
+{% endschema %}

@@ -1,0 +1,53 @@
+{% comment %}
+  {% render 'cart-progress-bar-messages', message_index: int, remaining_amount: price  %}
+{% endcomment %}
+
+{%- if message_index != blank -%}
+  <p class="cart-progressbar__message body3">
+    {%- capture first_message -%}
+      {% render 'cart-progress-bar-messages-helper', message: section.settings.first_progress_message, price: remaining_amount  %}
+    {%- endcapture -%}
+
+    {%- capture second_message -%}
+      {% render 'cart-progress-bar-messages-helper', message: section.settings.second_progress_message, price: remaining_amount  %}
+    {%- endcapture -%}
+
+    {%- capture third_message -%}
+      {% render 'cart-progress-bar-messages-helper', message: section.settings.third_progress_message, price: remaining_amount  %}
+    {%- endcapture -%}
+
+    {%- capture four_message -%}
+      {% render 'cart-progress-bar-messages-helper', message: section.settings.four_progress_message, price: remaining_amount  %}
+    {%- endcapture -%}
+
+    {%- capture final_message -%}
+      {% render 'cart-progress-bar-messages-helper', message: section.settings.final_progress_message, price: remaining_amount  %}
+    {%- endcapture -%}
+
+    {%- if message_index == 1 -%}
+      {% if first_message != blank %}
+       {{ first_message }}
+      {% endif %}
+
+    {%- elsif message_index == 2 -%}
+      {% if second_message != blank %}
+       {{ second_message }}
+      {% endif %}
+
+    {%- elsif message_index == 3 -%}
+      {% if third_message != blank %}
+       {{ third_message }}
+      {% endif %}
+
+    {%- elsif message_index == 4 -%}
+      {% if four_message != blank %}
+        {{ four_message }}
+      {% endif %}
+
+    {%- else -%}
+      {% if final_message != blank %}
+       {{ final_message }}
+      {% endif %}
+    {%- endif -%}
+  </p>
+{%- endif -%}

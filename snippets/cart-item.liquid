@@ -1,0 +1,214 @@
+{% comment %}
+  {% render 'cart-item' item: item, gwp: boolean, message: text, enable_ordergroove_opt_in: enable_ordergroove_opt_in %}
+{% endcomment %}
+
+{%- assign item_property_size =  item.properties | size -%}
+{%- assign item_url =  item.url -%}
+
+{% capture product_collection %}
+  {%- for value in item.product.metafields.custom.collection.value -%}
+    {%- assign value_handleize = value | handleize -%}
+
+    {%- for heading in shop.metafields.globals.collections_heading -%}
+      {%- assign heading_handleize = heading | handleize -%}
+
+      {%- if heading_handleize == value_handleize and shop.metafields.globals.collection_picker[forloop.index0] != blank -%}
+        {%- assign collection = collections[shop.metafields.globals.collection_picker[forloop.index0]] -%}
+        <a href="{{ collection.url }}" class="cart-item__collections-item body3">{{ heading }}</a><br>
+        {%- break -%}
+      {%- endif -%}
+
+    {%- endfor -%}
+  {%- endfor -%}
+{% endcapture %}
+
+{% for tag in item.product.tags %}
+  {%- if tag contains "not-allowed" -%}
+    {%- assign item_url = '#' -%}
+
+    {% break %}
+  {%- endif -%}
+{% endfor %}
+
+<div class="cart-item border-bottom  {% if item.product.gift_card? %}cart-item__gift-card{% endif %}" id="cart-item-{{ item.key }}">
+  {%- render 'ga-product-list-event', event_type: 'remove_from_cart', line_item: item, class_name: 'cart-item-remove-event' -%}
+  <div class="cart-item__inner">
+    <div class="cart-item__image rel">
+      {% if item.variant.featured_image != blank %}
+        {% render 'image', image: item.variant.featured_image, class_name: 'cart-item_image image-abs-cover', alt: item.variant.featured_image.alt, small_size: false %}
+      {% elsif item.product.featured_image != blank %}
+        {% render 'image', image: item.product.featured_image, class_name: 'cart-item_image image-abs-cover', alt: item.product.featured_image.alt, small_size: false %}
+      {% else %}
+        <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}"
+             class="cart-item_image image-abs-cover"
+             alt="{{ product.title }}">
+      {% endif %}
+      <a href="{{ item_url }}" class="image-abs-cover">
+        <span class="u-sr-only">{{ item.product.title }}</span>
+      </a>
+    </div>
+
+    <div class="cart-item__content">
+      {% if product_collection != blank %}
+        <div class="cart-item__collections">
+          {{ product_collection }}
+        </div>
+      {% endif %}
+
+      <div class="cart-item__title-with-button-close">
+        <h4 class="cart-item__product-title body3">
+          <a href="{{ item_url }}">
+            {{ item.product.title }}
+          </a>
+        </h4>
+        <a tabindex="0" href="{{ item.url_to_remove }}" class="remove-button a {% if gwp %} remove-button--gwp {% endif %}" data-key="{{ item.key }}">
+          {% render 'icon' with 'remove-cart-button' %}
+        </a>
+      </div>
+
+      <div class="cart-item__info">
+        {%- if item.variant.title != "Default Title"-%}
+          <p class="cart-item__variant-title body3">
+            {{ item.variant.title }}
+          </p>
+        {%- endif -%}
+
+        {% if gwp and message != blank %}
+          <p class="cart-item__gwp-message body4">
+            {{ message }}
+          </p>
+        {% endif %}
+
+        {% if settings.premier_points_enabled and gwp != true %}
+          <p class="cart-item__points body4">
+            {%- assign line_item_final_price = item.final_price | money_without_currency | round -%}
+            {%- assign line_item_points = line_item_final_price | times: settings.points_coefficient -%}
+
+            {{ 'templates.cart.line_item.premier_points' | t: premier_points: line_item_points }}
+          </p>
+        {% endif %}
+
+        {% if item.selling_plan_allocation and gwp != true %}
+          <p class="cart-item__selling-plan body4">
+            {{ item.selling_plan_allocation.selling_plan.options[0].name }}
+            {{ item.selling_plan_allocation.selling_plan.options[0].value }}
+          </p>
+        {% endif %}
+
+        {% if item_property_size > 0 %}
+          {% for prop in item.properties %}
+            {%- assign property_name = prop[0] | handleize -%}
+
+            {% if property_name contains "pre-order" %}
+              <p class="cart-item__preorder-message body4">
+                {{ 'templates.cart.line_item.preorder_message' |t: date: prop[1] }}
+              </p>
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {%- if item.product.gift_card? and item_property_size > 0 -%}
+          {%- for property in item.properties -%}
+            {%- assign property_first_char = property.first | slice: 0 -%}
+            {%- if property.last != blank and property_first_char != '_' -%}
+              <p class="cart-item__selling-plan body4">
+
+                {%- assign now_year = 'now' | date: "%Y" -%}
+                {%- assign property_date = property.last  | split: '-' -%}
+
+                <span>{{ property.first }}:</span>
+                <span>
+                  {%- if now_year == property_date[0] -%}
+                    {{ property_date[1] }}-{{ property_date[2] }}-{{ property_date[0] }}
+                  {%- else %}
+                    {{ property.last }}
+                  {%- endif -%}
+                </span>
+              </p>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+
+      {% if gwp != true %}
+        <div class="cart-item__price-with-input">
+          {%- if item.product.gift_card? != true -%}
+            <div class="cart-item__quantity">
+              <div class="cart-item__quantity-wrapper">
+                <label class="visually-hidden" for="Quantity-{{ item.index | plus: 1 }}"></label>
+
+                <quantity-input class="quantity cart-item_quantity rel" data-single-stepper>
+                  <button class="quantity__button quantity__button--minus no-js-hidden"
+                          name="minus"
+                          type="button"
+                          {% if item.quantity == 1 %}disabled{% endif %}>
+                    <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}</span>
+                    {% render 'icon' with 'minus' %}
+                  </button>
+                  <input class="quantity__input body3 body3--bold"
+                         type="number"
+                         name="updates[]"
+                         data-key="{{ item.key }}"
+                         id="Quantity-{{ section.id }}"
+                         min="1"
+                         aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                    {% if item.variant.inventory_policy != 'continue' and item.variant.inventory_quantity > 0 %}
+                      max="{{ item.variant.inventory_quantity }}"
+                    {% endif %}
+                         value="{{ item.quantity }}">
+                  <button class="quantity__button quantity__button--plus no-js-hidden"
+                          {% if item.quantity >= item.variant.inventory_quantity and item.variant.inventory_quantity > 0 and item.variant.inventory_policy != 'continue' %}disabled{% endif %}
+                          name="plus"
+                          type="button"
+                    {% if item.variant.inventory_policy != 'continue' and item.variant.inventory_quantity > 0 %}
+                    data-max-quantity="{{ item.variant.inventory_quantity }}"
+                    {% endif %}>
+
+                    <span class="visually-hidden">{{ 'products.product.quantity.increase' | t: product: product.title | escape }}</span>
+
+                    {% render 'icon' with 'plus' %}
+                  </button>
+                  <div class="loading-overlay__spinner">{% render 'icon' with 'spinner' %}</div>
+                </quantity-input>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- assign item_compare_at_price = item.variant.compare_at_price -%}
+
+          {%- if item.selling_plan_allocation -%}
+            {%- assign item_compare_at_price = item.selling_plan_allocation.compare_at_price -%}
+          {%- endif -%}
+
+          {% if item.original_line_price > item.final_price and item.line_level_total_discount > 0 %}
+            <div class="cart-item__discounted-prices body3 body3--bold">
+              <s class="cart-item__old-price">
+                {{ item.original_line_price | divided_by: item.quantity | money }}
+              </s>
+              <span class="cart-item__final-price">
+              {{ item.final_price | money }}
+            </span>
+            </div>
+          {% elsif item_compare_at_price > item.final_price %}
+            <div class="cart-item__discounted-prices body3 body3--bold">
+              <s class="cart-item__old-price">
+                {{ item_compare_at_price | money }}
+              </s>
+              <span class="cart-item__final-price ">
+              {{ item.final_price | money }}
+            </span>
+            </div>
+          {%- else -%}
+            <div class="cart-item__final-price text-body-small">
+              {{ item.final_price | money }}
+            </div>
+          {%- endif -%}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {%- if item.variant.selling_plan_allocations.size > 0 and enable_ordergroove_opt_in -%}
+    <og-offer product="{{item.key}}" location="cart" cart></og-offer>
+  {%- endif -%}
+</div>

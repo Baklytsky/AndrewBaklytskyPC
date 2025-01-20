@@ -1,0 +1,119 @@
+{%- comment -%}
+{%- render 'recomended-form' product: product, id: product_form_id -%}
+{%- endcomment -%}
+
+{% if product.available %}
+
+  {%- liquid
+    assign current_variant = product.first_available_variant
+    assign pre_order = false
+    assign pre_order_date = current_variant.metafields.custom.pre_order_date | date: "%m/%d"
+    assign pre_order_date_in_sec = current_variant.metafields.custom.pre_order_date | date: "%s" | plus: 0
+    assign now_date = 'now' | date: "%m/%d"
+    assign now_date_in_sec = 'now' | date: "%s" | plus: 0
+
+    if pre_order_date != blank and pre_order_date_in_sec > now_date_in_sec
+      assign pre_order = true
+    endif
+  -%}
+
+  {% capture product_collection %}
+    {%- render 'product-featured-collections', product: product, class: 'cart-recommended__collections-item body3' -%}
+  {% endcapture %}
+
+  <product-form class="swiper-slide">
+    {%- form 'product', product, id: product_form_id, class: 'cart-recommended__product-card', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+      <input type="hidden" class="visually-hidden" name="id" value="{{ product.first_available_variant.id }}">
+
+      <div class="cart-recommended__product-card-image rel">
+        {% if product.featured_image != blank %}
+          {% render 'image', image: product.featured_image, class_name: "image-abs-cover", alt: product.featured_image.alt, small_size: true %}
+        {% else %}
+          <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}" class="image-abs-cover"
+               alt="{{ product.title }}">
+        {% endif %}
+
+        <a href="{{ product.url }}" class="image-abs-cover" data-select-item-event-trigger>
+          <span class="u-sr-only">{{ product.title }}</span>
+        </a>
+      </div>
+
+
+      <div class="cart-recommended__product-card-info">
+        {% if product_collection != blank %}
+          <div class="cart-recommended__collections">
+            {{ product_collection }}
+          </div>
+        {% endif %}
+
+        <a href="{{ product.url }}" class="cart-recommended__product-card-title body3" data-select-item-event-trigger>
+          {{ product.title }}
+        </a>
+
+        <div class="cart-recommended__product-card-price">
+          {% render 'price', product: product, only_final: false %}
+        </div>
+
+        <button type="submit"
+                class="btn btn--secondary btn--small">{{ 'templates.cart.sliders.add_to_cart' | t }}</button>
+      </div>
+    {%- endform -%}
+    {%- render 'ga-product-list-event', event_type: 'add_to_cart', product: product, class_name: 'pdp-main-add-event' -%}
+
+    <script type="application/json" class="current-variant-json">{{ current_variant | json }} </script>
+    <script type="application/ld+json"
+            class="current-variant-state">
+      {
+        "preorder": {{ pre_order | default: false }}
+      }
+    </script>
+    <script type="application/ld+json" data-select-item-event>
+      {
+        "event": "select_item",
+          "search": {
+          "search_type": "typed",
+          "search_results_total": "",
+          "search_dropdown_selected": "",
+          "search_term": "",
+          "sort_option": "",
+          "refine": {
+            "refine_by_category": "",
+            "refine_by_item": "",
+            "refine_by_action": ""
+          }
+        },
+        "ecommerce": {
+          "items": [
+            {% liquid
+              assign current_variant = product.selected_or_first_available_variant
+              assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+              assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+            %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "currency": "{{ cart.currency.iso_code }}",
+              "index": "1",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "",
+              "item_list_id": "",
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.price | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "",
+              "promotion_name": "",
+              "creative_name": "",
+              "creative_slot": "{{ heading }}"
+            }
+          ]
+        }
+      }
+    </script>
+  </product-form>
+{% endif %}

@@ -1,0 +1,44 @@
+{{ 'professional-educator.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'obagi-player.min.js' | asset_url }}" defer="defer"></script>
+<a href="/pages/educator" class="educator-back-btn">
+  {%- render 'icon' with 'arrow-left' -%}
+  {{ 'sections.professional_educator.back_btn' | t }}
+</a>
+<obagi-player class="block page-width" data-loaded="loading">
+  <div class="loading-overlay__spinner">{% render 'icon' with 'spinner' %}</div>
+  <div class="educator-player">
+    <div class="educator-player__header">
+      <h4 class="educator-player__header-heading"></h4>
+    </div>
+    <div class="educator-player__inner"></div>
+    <div class="educator-player__recommended"></div>
+  </div>
+
+  {%- if settings.brainshark_login_dir != blank and settings.brainshark_username != blank and settings.brainshark_password != blank -%}
+    <script type="application/ld+json" data-brainshark>
+    {
+      "login_dir": "{{ settings.brainshark_login_dir }}",
+      "username": "{{ settings.brainshark_username }}",
+      "password": "{{ settings.brainshark_password }}"
+    }
+  </script>
+  {%- endif -%}
+
+  {%- if customer -%}
+    <script type="application/ld+json" data-customer>
+    {
+      "firstname": "{{customer.first_name}}",
+      "lastname": "{{customer.last_name}}",
+      "email": "{{customer.email}}"
+    }
+  </script>
+  {%- endif -%}
+</obagi-player>
+
+{% schema %}
+{
+  "name": "Educator player",
+  "tag": "section",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,284 @@
+{{ 'main-our-services.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+-%}
+
+{% if section.blocks.size > 0 %}
+  <div data-aos="fade-up"
+       style="
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+    class="our-services page-width">
+    {% for block in section.blocks %}
+      {%- liquid
+        assign image = block.settings.image
+        assign badge = block.settings.badge
+        assign logo = block.settings.logo
+        assign image_text_d = block.settings.image_text_desktop | escape | newline_to_br
+        assign image_text_m = block.settings.image_text_mobile | escape | newline_to_br | default: image_text_d
+        assign text_color = block.settings.text_color
+        assign heading_d = block.settings.heading_desktop | escape | newline_to_br
+        assign heading_m = block.settings.heading_mobile | escape | newline_to_br | default: heading_d
+        assign description = block.settings.description | escape | newline_to_br
+        assign description_font_style = block.settings.description_font_style
+        assign button_label = block.settings.button_label
+        assign button_link = block.settings.button_link
+        assign button_style = block.settings.button_style
+        assign image_alt = image.alt | default: heading
+        assign block_horizontal = block.settings.block_horizontal
+        assign border_bottom = block.settings.border_bottom
+
+        if image != blank or heading_d != blank or description != blank
+          assign has_content = true
+        endif
+      -%}
+
+      {% if has_content %}
+        <div class="our-services__item {% if border_bottom %}border-bottom{% endif %} {% if block_horizontal %} our-services__item--horizontal {% endif %}">
+          {% if image != blank %}
+            <div class="our-services__item-image-wrapper">
+              {% render 'image',
+                image: image,
+                class_name: 'image-abs-cover',
+                alt: image_alt %}
+
+              {% if badge != blank %}
+                {% render 'image',
+                  image: badge,
+                  class_name: 'our-services__item-image-badge',
+                  alt: badge.alt %}
+              {% endif %}
+
+              {% if logo != blank %}
+                <div class="our-services__item-image-logo">
+                  {{ logo }}
+                </div>
+              {% elsif image_text_d != blank or image_text_m != blank %}
+                {% if image_text_d != blank %}
+                  <h3 class="our-services__item-image-text abs h2   {% if image_text_m != blank %}small-hide{% endif %}" style="--color: {{ text_color }}">{{ image_text_d }}</h3>
+                {% endif %}
+
+                {% if image_text_m != blank %}
+                  <h3 class="our-services__item-image-text abs h2 small-up-hide" style="--color: {{ text_color }}">{{ image_text_m }}</h3>
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if heading_d != blank or description != blank %}
+            <div class="our-services__item-text-wrapper">
+              {%- if heading_d != blank -%}
+                <h3 class="our-services__item-text-heading small-hide">{{ heading_d }}</h3>
+                <h3 class="our-services__item-text-heading small-up-hide">{{ heading_m }}</h3>
+              {%- endif -%}
+
+              {%- if description != blank -%}
+                <div class="our-services__item-text-description {{ description_font_style }}">{{ description }}</div>
+              {%- endif -%}
+
+              {%- if button_label != blank -%}
+                <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  href="{{ button_link }}"{% endif %}
+                  class="our-services__item--btn btn btn--{{ button_style }}">
+                  {{ button_label | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Main our services",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "block_horizontal",
+          "label": "Horizontal positioning",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "border_bottom",
+          "label": "Border bottom",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Image side"
+        },
+        {
+          "type": "image_picker",
+          "id": "badge",
+          "label": "Badge"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "html",
+          "id": "logo",
+          "label": "Logo on image",
+          "info": "Use only svg. Svg is more important than text."
+        },
+        {
+          "type": "textarea",
+          "id": "image_text_desktop",
+          "label": "Text on image desktop"
+        },
+        {
+          "type": "textarea",
+          "id": "image_text_mobile",
+          "label": "Text on image mobile"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "header",
+          "content": "Text side"
+        },
+        {
+          "type": "textarea",
+          "id": "heading_desktop",
+          "label": "Heading desktop"
+        },
+        {
+          "type": "textarea",
+          "id": "heading_mobile",
+          "label": "Heading mobile"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "select",
+          "id": "description_font_style",
+          "label": "Description font style",
+          "options": [
+            {
+              "value": "h5",
+              "label": "Heading"
+            },
+            {
+              "value": "body1",
+              "label": "Normal"
+            }
+          ],
+          "default": "body1"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "primary"
+        }
+      ]
+      }
+    ],
+  "presets": [
+    {
+      "name": "Main our services"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

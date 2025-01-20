@@ -1,0 +1,88 @@
+{%- comment -%}
+{%- render 'product-card-form',
+  product: product,
+  current_variant: current_variant,
+  product_form_id: product_form_id,
+  pre_order: pre_order,
+  pre_order_date: pre_order_date -%}
+{%- endcomment -%}
+
+{%- assign gwp_variant_id = product.metafields.custom.gwp | split: "/" | last | default: "" -%}
+{%- assign force_notify_me = product.metafields.custom.force_notify_me -%}
+
+{%- if product.variants.size == 1 and pre_order != true -%}
+  <product-form>
+    {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+      <input
+        type="hidden"
+        class="visually-hidden"
+        name="id"
+        value="{{ current_variant.id }}"
+      >
+
+      {%- if pre_order -%}
+        <input type="hidden" class="pre-order--{{ current_variant.id }}" name="properties[Pre-Order]" value="{{ pre_order_date }}">
+      {%- endif -%}
+
+      <button
+        id="{{ product_form_id }}-submit"
+        type="submit"
+        name="add"
+        class="quick-add__submit loading btn btn--secondary btn--small"
+        aria-haspopup="dialog"
+        aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ product.id }}"
+        aria-live="polite"
+        data-sold-out-message="true"
+        {% if current_variant.available != true or force_notify_me == true %}
+          disabled
+        {% endif %}
+      >
+          <span class="product-form__submit-text">
+            {%- if current_variant.available and force_notify_me != true -%}
+              {{ 'products.product.add_to_cart' | t }}
+            {%- else -%}
+              {{ 'products.product.sold_out' | t }}
+            {%- endif -%}
+          </span>
+        <div class="sold-out-message visually-hidden"> {{ 'products.product.sold_out' | t }} </div>
+        <div class="loading-overlay__spinner ">
+          {% render 'icon' with 'spinner' %}
+        </div>
+      </button>
+
+      <div class="product-card__error-message-wrapper visually-hidden" role="alert" data-error-wrapper>
+        <span class="product-card__error-message" data-error-message></span>
+      </div>
+    {%- endform -%}
+
+    {%- render 'ga-product-list-event', event_type: 'add_to_cart', product: product, class_name: 'pdp-main-add-event' -%}
+
+    <script type="application/json"
+            class="current-variant-json">
+          {{ current_variant | json }}
+
+    </script>
+    <script type="application/ld+json"
+            class="current-variant-state">
+          {
+            "preorder": {{ pre_order | default: false }}
+          }
+    </script>
+  </product-form>
+
+  {% render 'physician-link', class: 'hidden btn btn--secondary product-card__btn btn--small' %}
+{%- else -%}
+  {%- if pre_order -%}
+    <a href="{{ product.url }}" class="product-card__btn btn btn--secondary btn--small"
+       title="{{ 'products.product.preorder' | t }}"
+       aria-label="{{ 'products.product.preorder' | t }}">
+      {{ 'products.product.preorder' | t }}
+    </a>
+  {%- else -%}
+    <a href="{{ product.url }}" class="product-card__btn btn btn--secondary btn--small btn--physician-finder"
+       title="{{- 'products.card.button_label' | t -}}"
+       aria-label="{{- 'products.card.button_label' | t -}}">
+      {{- 'products.card.button_label' | t -}}
+    </a>
+  {%- endif -%}
+{% endif %}

@@ -1,0 +1,391 @@
+{{ 'featured-collections.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign selected_collection_url = routes.root_url
+  assign selected_collection_btn_title = 'featured_collection.empty_section_btn_title' | t  -%}
+
+<div class="featured-collections"
+     data-aos="fade-up"
+     style="--bg-color: {{ section_bg_color }}">
+
+  {%- capture shop_all_btn -%}
+    {%- if button_label != blank -%}
+      <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+        href="{{ button_link }}"{% endif %}
+        class="featured-collections__header-btn btn btn--{{ button_style }} btn--physician-finder">
+        {{ button_label | escape }}
+      </a>
+    {%- endif -%}
+  {%- endcapture -%}
+
+    {%- if heading != blank or subheading != bank or button_label != blank -%}
+      <div class="featured-collections__header">
+        <div class="featured-collections__header-wrapper">
+          {%- if heading != blank or subheading != bank -%}
+            {%- if heading != blank -%}
+              <h3 class="featured-collections__header-heading">{{ heading }}</h3>
+            {%- endif -%}
+            {%- if subheading != bank -%}
+              <div class="featured-collections__header-subheading h3">{{ subheading }}</div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+        {{ shop_all_btn }}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      {%- liquid
+        assign selected_collection_block_id = blank -%}
+
+      {%- capture content -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign collection = collections[block.settings.collection]
+            assign title = block.settings.title | default: collection.title
+            assign btn_title = block.settings.btn_title | default: 'Shop All ' | append: title
+            assign btn_style = block.settings.btn_style
+            assign selected = false
+            assign tabindex = '-1'
+          -%}
+
+          {%- if collection -%}
+            {%- capture swiper_config -%}
+              {
+                "slidesPerView": 2,
+                "watchOverflow": true,
+                "spaceBetween": 20,
+                "watchSlidesProgress": true,
+                "freeMode": true,
+                "mousewheel": {
+                  "forceToAxis": true
+                },
+                "navigation": {
+                  "nextEl": ".swiper-button-next--{{ block.id }}",
+                  "prevEl": ".swiper-button-prev--{{ block.id }}"
+                },
+                "scrollbar": {
+                  "el": ".swiper-scrollbar--{{ block.id }}",
+                  "hide": false,
+                  "draggable": true
+                },
+                "breakpoints": {
+                "1120": {
+                  "slidesPerView": 3
+                },
+                "768": {
+                  "slidesPerView": 2,
+                  "shortSwipes": false
+                  }
+                }
+              }
+            {%- endcapture -%}
+
+              {%- liquid
+                if selected_collection_block_id == blank
+                  assign selected_collection_block_id = block.id
+                  assign selected_collection = collection
+                  assign selected_collection_btn_title = btn_title
+                  assign selected = true
+                  assign tabindex = '0'
+                endif
+
+               -%}
+
+            <slideshow-swiper data-config='{{ swiper_config }}'
+                              class="featured-collections__slider rel"
+                              aria-labelledby="content--{{ block.id }}"
+                              role='tabpanel'
+                              aria-selected="{{ selected }}"
+                              tabindex="{{ tabindex }}"
+                              data-tab
+                              id="content--{{ block.id }}" {{ block.shopify_attributes }}>
+              <div class="swiper">
+                <div class="swiper-wrapper">
+                  {%- for product in collection.products -%}
+                    {%- if product.tags contains 'dev_product'
+                      or product.tags contains 'test_product'
+                      or product.tags contains 'hidden'
+                      or product.tags contains 'not-allowed' -%}
+                      {% continue %}
+                    {%- endif -%}
+
+                    <div class="swiper-slide">
+                      {%- render 'product-card', product: product, quick_add: true -%}
+                    </div>
+                  {%- endfor -%}
+                  <div class="swiper-slide">
+                    <div class="featured-collections__btn rel">
+                      <a href="{{ collection.url }}" class="btn btn--{{ btn_style }}">
+                        <span>{{ btn_title }}</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="featured-collections__slider-nav" >
+                {{ shop_all_btn }}
+                <div class="swiper-scrollbar swiper-scrollbar--{{ block.id }}"></div>
+                <div class="featured-collections__slider-arrows">
+                  <div class="swiper-button-prev swiper-button-prev--{{ block.id }}"></div>
+                  <div class="swiper-button-next swiper-button-next--{{ block.id }}"></div>
+                </div>
+              </div>
+              {% render 'ga-product-list-event', event_type: 'view_item_list' product_list: collection.products, list_name: heading, list_id: section.id  %}
+            </slideshow-swiper>
+          {%- endif -%}
+        {%- endfor -%}
+
+      {%- endcapture -%}
+
+      {%- if selected_collection_block_id != blank -%}
+
+        {%- capture navigation -%}
+          <scrolling-tabs class="featured-collections__nav-list hide-scrollbar">
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign collection = collections[block.settings.collection]
+                assign title = block.settings.title | default: collection.title
+                assign selected = false
+                assign tabindex = '-1'
+
+                if selected_collection_block_id == block.id
+                  assign selected = true
+                  assign tabindex = '0'
+                endif
+              -%}
+
+              <li class="featured-collections__nav-list-item" {{ block.shopify_attributes }}>
+                <button class="featured-collections__nav-list-item-btn body1 btn--reset"
+                        aria-controls="content--{{ block.id }}"
+                        aria-selected="{{ selected }}"
+                        tabindex="{{ tabindex }}"
+                        data-action="toggle-tab"
+                        data-link-url='{{ collection.url }}'
+                        data-link-title='{{ btn_title }}'
+                        role='tab'>
+                  {{ title }}
+                </button>
+              </li>
+            {%- endfor -%}
+          </scrolling-tabs>
+        {%- endcapture -%}
+
+      {%- endif -%}
+
+    {%- else -%}
+
+      {%- capture navigation -%}
+        <ul class="featured-collections__nav-list hide-scrollbar">
+          <li class="featured-collections__nav-list-item">
+            <button class="featured-collections__nav-list-item-btn body1 btn--reset"
+                    aria-controls="empty-section--{{ section.id }}"
+                    aria-selected="true"
+                    tabindex="0"
+                    data-action='toggle-tab'
+                    data-link-url='{{ routes.root_url }}'
+                    data-link-title='{{ 'featured_collection.empty_section_btn_title' | t }}'
+                    role='tab'>
+              {{ 'featured_collection.empty_section_title' | t }}
+            </button>
+          </li>
+        </ul>
+      {%- endcapture -%}
+
+      {%- capture content -%}
+
+        {%- capture swiper_config -%}
+          {
+            "slidesPerView": 1.25,
+            "watchOverflow": true,
+            "watchSlidesProgress": true,
+            "freeMode": true,
+            "mousewheel": {
+              "forceToAxis": true
+            },
+            "navigation": {
+              "nextEl": ".next-{{ section.id }}",
+              "prevEl": ".prev-{{ section.id }}"
+            },
+            "navigation": {
+              "nextEl": ".swiper-button-next--{{ section.id }}",
+              "prevEl": ".swiper-button-prev--{{ section.id }}"
+            },
+            "pagination": {
+              "el": ".swiper-pagination--{{ section.id }}",
+              "type": "progressbar"
+            },
+            "breakpoints": {
+            "1120": {
+              "slidesPerView": 3,
+              "spaceBetween": 20
+            },
+            "768": {
+              "slidesPerView": 2,
+              "spaceBetween": 20
+              }
+            }
+          }
+        {%- endcapture -%}
+
+        <slideshow-swiper data-config='{{ swiper_config }}'
+                          class="featured-collections__slider rel"
+                          aria-labelledby="empty-section--{{ section.id }}"
+                          role='tabpanel'
+                          aria-selected="true"
+                          tabindex="0"
+                          data-tab
+                          id="empty-section--{{ section.id }}">
+          <div class="swiper">
+            <div class="swiper-wrapper">
+              {%- for i in (1..10) -%}
+                <div class="swiper-slide">
+                  {%- render 'empty-product-card' -%}
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+          <div class="featured-collections__slider-nav">
+            <div class="swiper-pagination swiper-pagination--{{ section.id }}"></div>
+            <div class="featured-collections__slider-arrows">
+              <div class="swiper-button-prev swiper-button-prev--{{ section.id }}"></div>
+              <div class="swiper-button-next swiper-button-next--{{ section.id }}"></div>
+            </div>
+          </div>
+        </slideshow-swiper>
+      {%- endcapture -%}
+
+    {%- endif -%}
+
+    <toggle-tabs class="featured-collections__wrapper">
+      <nav class="featured-collections__nav">
+        {{ navigation }}
+      </nav>
+      <div class="featured-collections__content">
+        {{ content }}
+      </div>
+    </toggle-tabs>
+
+</div>
+
+{% schema %}
+{
+  "name": "Featured collections",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by concern"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>to target <i>specific</i> needs</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop All"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "info": "by default: Collection title"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "btn_title",
+          "label": "Button label",
+          "info": "by default: Shop All + Title"
+        },
+        {
+          "type": "select",
+          "id": "btn_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "secondary"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collections"
+    }
+  ]
+}
+{% endschema %}

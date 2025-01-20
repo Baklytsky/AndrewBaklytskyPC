@@ -1,0 +1,33 @@
+{% comment %}
+  {% render 'accordion' group: str, index: int, title: str, body: str  %}
+{% endcomment %}
+
+
+<accordion-element class="accordion" {% if group != blank %} data-accordion-group="{{ group }}" {% endif %}>
+  <div class="accordion__item">
+    <button type="button"
+            aria-expanded="false"
+            class="body1 btn--reset accordion__button a"
+            aria-controls="content-{{ index }}"
+            id="accordion-button-{{ index }}">
+      <span class="accordion-title">
+        {{ title }}
+      </span>
+
+      <div class="accordion__icons">
+        {% render 'icon' with 'plus-small' %}
+        {% render 'icon' with 'minus-small' %}
+      </div>
+    </button>
+
+    <div id="content-{{ index }}"
+         role="region"
+         aria-labelledby="accordion-button-{{ index }}"
+         class="accordion__content"
+         style="display: none">
+      <div class="accordion__content-inner">
+        {{ body }}
+      </div>
+    </div>
+  </div>
+</accordion-element>

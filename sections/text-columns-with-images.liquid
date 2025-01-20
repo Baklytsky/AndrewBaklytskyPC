@@ -1,0 +1,178 @@
+{{ 'text-columns-with-images.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign heading_desktop = section.settings.heading_desktop | escape | newline_to_br
+  assign heading_mobile = section.settings.heading_mobile | escape | newline_to_br | default: heading_desktop
+  assign subheading = section.settings.subheading | escape | newline_to_br
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+-%}
+
+<div class="columns-with-images {% if border_bottom %}border-bottom{% endif %}">
+  <div class="page-width">
+    {%- if heading != blank or subheading != blank or button_label != blank -%}
+      <div class="columns-with-images__header">
+        {%- if heading != blank or subheading != blank -%}
+          <div class="columns-with-images__header-text">
+            {%- if heading_desktop != blank -%}
+              <h3 class="columns-with-images__header-heading small-hide m0 h2 h2--light">{{ heading_desktop }}</h3>
+            {%- endif -%}
+
+            {%- if heading_mobile != blank -%}
+              <h3 class="columns-with-images__header-heading small-up-hide m0 h2 h2--light">{{ heading_mobile }}</h3>
+            {%- endif -%}
+
+            {%- if subheading != blank -%}
+              <div class="columns-with-images__header-subheading body2 m0">{{ subheading }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if button_label != blank -%}
+          <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+            href="{{ button_link }}"{% endif %}
+            class="columns-with-images__header-btn btn btn--{{ button_style }}">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {% if section.blocks.size > 0 %}
+      <ul class="columns-with-images__list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign image = block.settings.image
+            assign heading = block.settings.heading
+            assign description = block.settings.description | escape | newline_to_br
+            assign image_alt = image.alt | default: heading
+          -%}
+
+          {%- if image or heading != blank or description != blank -%}
+            <li class="columns-with-images__list-item">
+              {%- if heading != blank or description != blank -%}
+                <div class="promo-banners__list-item-content">
+                  {%- if image -%}
+                    <div class="columns-with-images__list-image rel">
+                      {% render 'image',
+                        image: image,
+                        class_name: 'image-abs-cover',
+                        alt: image_alt %}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if heading != blank -%}
+                    <h4 class="columns-with-images__list-item-heading h3">{{ heading }}</h4>
+                  {%- endif -%}
+
+                  {%- if description != blank -%}
+                    <p class="columns-with-images__list-item-description body2">{{ description }}</p>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Text columns with images",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "heading_desktop",
+      "label": "Heading desktop",
+      "default": "ABCs of skincare"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_mobile",
+      "label": "Heading mobile",
+      "default": "ABCs of skincare"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The ingredients to know."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text columns with images"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,37 @@
+{%- comment -%}
+    {%- render 'product-featured-collections', product: objec, product_collections: str arr, class: string -%}
+{%- endcomment -%}
+
+{%- liquid assign product_collections = product.metafields.custom.collection.value | default: product_collections -%}
+
+{%- if product_collections != blank -%}
+  {%- for value in product_collections -%}
+    {%- assign value_handleize = value | handleize | remove: '®' -%}
+
+    {%- for heading in shop.metafields.globals.collections_heading -%}
+      {%- assign heading_handleize = heading | handleize | remove: '®' -%}
+
+      {%- if heading_handleize == value_handleize and shop.metafields.globals.collection_picker[forloop.index0] != blank -%}
+        {%- assign collection = collections[shop.metafields.globals.collection_picker[forloop.index0]] -%}
+
+        {%- if collection.url != blank -%}
+          <a href="{{ collection.url }}" class="{{ class }}">{{ heading }} <span>,</span></a>
+        {%- endif -%}
+
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if collection.url == blank -%}
+      {%- assign page = pages[value_handleize] -%}
+
+      {%- if page.url != blank -%}
+        <a href="{{ page.url }}" class="{{ class }}">{{ value }} <span>,</span></a>
+
+        {%- break -%}
+      {%- endif -%}
+
+    {%- endif -%}
+
+  {%- endfor -%}
+{%- endif -%}

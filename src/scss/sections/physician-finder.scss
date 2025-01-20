@@ -1,0 +1,416 @@
+@import "../helpers/_mixins";
+
+physician-finder {
+  display: block;
+  padding: 60px 0;
+  min-height: calc(100vh - var(--header-height, 60px) - var(--announcement-bar-height, 0px));
+
+  @include mq($small-max) {
+    padding: 40px 0;
+  }
+}
+
+.physician-finder__heading {
+  margin-bottom: 40px;
+
+  @include mq($small-max) {
+    margin-bottom: 30px;
+  }
+}
+
+.physician-finder__form {
+  padding: 0 0 40px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 40px;
+
+  @include mq($medium-max) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding:  0 0 20px;
+    margin-bottom: 30px;
+  }
+
+  .form-field {
+    width: 100%;
+    max-width: 265px;
+    margin-bottom: 10px;
+  }
+
+  .form-input {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    line-height: 1;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .btn--small {
+    max-width: 170px;
+
+    @include mq($medium-max) {
+      width: calc(50% - 5px);
+    }
+  }
+}
+
+.physician-finder__form-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  @include mq($medium-max) {
+    width: calc(50% - 5px);
+
+    .form-field {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.physician-finder__form-filters {
+  display: flex;
+  margin-top: 40px;
+  width: 100%;
+
+  @include mq($medium-max) {
+    margin-top: 30px;
+    flex-direction: column;
+  }
+
+  .form-label {
+    margin-right: 20px;
+    width: auto;
+    padding-bottom: 0;
+
+    @include mq($medium-max) {
+      margin-right: 0;
+      margin-bottom: 10px;
+    }
+
+    button {
+      color: inherit;
+      margin-left: 5px;
+    }
+  }
+}
+
+.physician-finder__content {
+  display: flex;
+  justify-content: space-between;
+
+  @include mq($medium-max) {
+    flex-direction: column-reverse;
+  }
+}
+
+.physician-finder__map-wrapper {
+  width: 50%;
+
+  @include mq($medium-max) {
+    width: 100%;
+  }
+}
+
+.physician-finder__map-inner {
+  position: sticky;
+  top: calc(var(--header-height) + 1px);
+}
+
+.physician-finder__map {
+  padding-bottom: 100%;
+}
+
+.physician-finder__results {
+  padding-right: 85px;
+  width: 50%;
+
+  @include mq($medium-max) {
+    padding-right: 0;
+    width: 100%;
+  }
+}
+
+.physician-finder__results-preferred {
+  padding: 0 0 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--color-border);
+
+  @include mq($small-max) {
+    padding: 0;
+  }
+}
+
+.physician-finder__preferred-item {
+  display: flex;
+  padding: 20px;
+  background-color: var(--color-bg-primary);
+  margin-bottom: 10px;
+
+  @include mq($medium-max) {
+    margin-bottom: 20px;
+  }
+}
+
+.physician-finder__preferred-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+
+  @include mq($small-max) {
+    width: 69px;
+    height: 69px;
+  }
+}
+
+.physician-finder__preferred-label {
+  color: var(--color-accent-primary);
+  margin-bottom: 20px;
+
+  button {
+    font-size: 10px;
+  }
+
+  sup {
+    font-size: 100%;
+  }
+}
+
+.physician-finder__preferred-text {
+  margin-bottom: 20px;
+}
+
+.physician-finder__results-heading {
+  margin-bottom: 0;
+
+  @include mq($medium-max) {
+    margin-bottom: 20px;
+  }
+}
+
+.physician-finder__item {
+  padding: 30px 0;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: flex-start;
+
+  @include mq($small-max) {
+    flex-direction: column;
+
+    &:first-child {
+      padding-top: 20px;
+    }
+  }
+
+  &.active {
+    .location-icon--index {
+      background-color: var(--color-accent-primary);
+    }
+  }
+
+  .location-icon--index {
+    background-color: var(--color-text-primary);
+    color: var(--color-text-light);
+    border-radius: 50%;
+    margin-right: 18px;
+    margin-top: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding-left: 1px;
+    flex-shrink: 0;
+  }
+
+  .location-icon {
+    margin-right: 18px;
+    margin-top: 3px;
+    position: relative;
+    flex-shrink: 0;
+
+    @include mq($small-max) {
+      margin-bottom: 20px;
+      margin-top: 0;
+    }
+
+    span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+    }
+  }
+}
+
+.physician-finder__item-heading {
+  display: flex;
+  align-items: center;
+
+  @include mq($small-max) {
+    margin-bottom: 5px;
+  }
+}
+
+.physician-finder__item-label {
+  margin-bottom: 20px;
+  color: var(--color-accent-primary);
+}
+
+.physician-finder__item-address {
+  margin-bottom: 20px;
+}
+
+.physician-finder__item-provider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+
+  @include mq($small-max) {
+    margin-top: 20px;
+  }
+
+  svg {
+    margin-right: 20px;
+  }
+}
+
+.physician-finder__item-phone,
+.physician-finder__item-products,
+.physician-finder__item-link {
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.physician-finder__item-link {
+  color: var(--color-accent-primary);
+  margin-bottom: 0;
+  text-decoration: underline;
+}
+
+.physician-finder-popup {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  max-width: 455px;
+  width: calc(100% - 40px);
+  height: auto;
+  padding: 40px;
+
+  @include mq($small-max) {
+    padding: 20px;
+  }
+
+  [data-close-popup] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 20px;
+    color: inherit;
+
+    @include mq($small-max) {
+      padding:  20px 32px;
+    }
+  }
+}
+
+.physician-finder-popup__image {
+  max-width: 120px;
+  margin: 0 auto 20px;
+
+  @include mq($small-max) {
+    max-width: 75px;
+  }
+}
+
+.physician-finder-popup__heading {
+  margin-bottom: 20px;
+  color: inherit;
+}
+
+.physician-finder__preferred-heading {
+  margin-bottom: 10px;
+}
+
+.physician-finder__no-result {
+  &:not(.physician-finder__no-result--mobile) {
+    @include mq($medium-max) {
+      margin-top: 30px;
+      border-top: 1px solid var(--color-border);
+    }
+  }
+}
+
+.finder-no-result__banner {
+  min-height: 280px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+
+  @include mq($medium-max) {
+    margin-top: 30px;
+  }
+
+  img {
+    z-index: -1;
+  }
+}
+
+.finder-no-result__info {
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 30px;
+
+  @include mq($medium-max) {
+    margin-bottom: 0;
+    border: none;
+  }
+}
+
+.finder-no-result__heading {
+  margin-bottom: 30px;
+}
+
+.finder-no-result__text {
+  margin-bottom: 30px;
+}
+
+.finder-no-result__banner-content {
+  text-align: center;
+  width: 100%;
+  max-width: 265px;
+}
+
+.finder-no-result__banner-text {
+  color: var(--color-text-light);
+  margin-bottom: 20px;
+}
+
+.physician-finder__spinner {
+  color: var(--color-accent-primary);
+  width: 60px;
+  display: block;
+  margin: 0 auto;
+}
+.physician-finder-template .text-banner__heading {
+  @include mq($small-max) {
+    padding: 0 30px;
+  }
+}
+
+.physician-finder__show-more {
+  margin-top: 30px;
+}

@@ -1,0 +1,153 @@
+{{ 'obagi-events.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'obagi-events.min.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign heading = section.settings.heading | newline_to_br
+  assign text = section.settings.text
+  assign no_results_message = section.settings.no_results_message
+  assign section_type = section.settings.section_type
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign border_top = section.settings.border_top
+
+  if section_type == 'upcoming'
+    assign is_upcoming_type = true
+  endif
+%}
+
+
+<obagi-events class="obagi-events {% if is_upcoming_type %}obagi-events__upcoming{% endif %}" data-customer-email="{{ customer.email }}">
+  <div class="obagi-events__inner page-width">
+    {%- if heading != blank or subheading != bank or button_label != blank -%}
+      <div class="obagi-events__header {% if border_top %}obagi-events__header--border{% endif %}">
+        <div class="obagi-events__header-inner">
+          {%- if heading != blank -%}
+            <h1 class="{% if is_upcoming_type %}h3{% else %}h2{% endif %} obagi-events__heading">{{ heading }}</h1>
+          {%- endif -%}
+          {%- if text != bank -%}
+            <div class="{% if is_upcoming_type %}h3{% else %}body1{% endif %} obagi-events__text">{{ text }}</div>
+          {%- endif -%}
+        </div>
+        {%- if button_label != blank and button_link != blank -%}
+          <a href="{{ button_link }}" class="btn btn--{{ button_style }} obagi-events__btn">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="loading-overlay__spinner obagi-events__spinner">
+      {% render 'icon' with 'spinner' %}
+    </div>
+
+    <div class="h3 obagi-events__no-results hide">{{ no_results_message }}</div>
+
+    <div class="obagi-events__content hide">
+      <div class="obagi-events__content-featured">
+        <h2 class="h6 obagi-events__label">
+          {{ 'sections.obagi_events.featured' | t }}
+        </h2>
+
+        <ul class="obagi-events__featured-list"></ul>
+      </div>
+
+      <div class="obagi-events__content-upcoming">
+        <h2 class="h6 obagi-events__label">
+          {{ 'sections.obagi_events.upcoming' | t }}
+        </h2>
+        <ul class="obagi-events__upcoming-list"></ul>
+      </div>
+    </div>
+  </div>
+</obagi-events>
+
+
+{% schema %}
+{
+  "name": "Obagi events",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_type",
+      "label": "Type",
+      "options": [
+        {
+          "value": "upcoming",
+          "label": "Upcoming"
+        },
+        {
+          "value": "all",
+          "label": "All"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Obagi events"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "richtext",
+      "id": "no_results_message",
+      "label": "No results message",
+      "default": "<p>No results found</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "See All Events"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Border top",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Obagi events"
+    }
+  ]
+}
+{% endschema %}

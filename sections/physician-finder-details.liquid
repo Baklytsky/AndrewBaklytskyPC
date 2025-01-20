@@ -1,0 +1,682 @@
+{{ 'physician-finder-details.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'handlebars.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'physician-finder-details.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign show_banner = section.settings.show_banner
+  assign show_banner_skintrinsiq = section.settings.show_banner_skintrinsiq
+  assign border_bottom = section.settings.section_border_bottom
+  assign section_container = section.settings.section_container
+  assign section_bottom_margin = section.settings.section_bottom_margin
+  assign section_bg_color = section.settings.section_bg_color
+  assign section_bg_image = section.settings.section_bg_image
+  assign section_bg_image_skintrinsiq = section.settings.section_bg_image_skintrinsiq
+  assign section_bg_image_mobile = section.settings.section_bg_image_mobile
+  assign section_bg_image_mobile_skintrinsiq = section.settings.section_bg_image_mobile_skintrinsiq
+  assign section_text_color = section.settings.section_text_color
+  assign section_width_content = section.settings.width_content
+  assign content_position = section.settings.content_position
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign content_padding_desk = section.settings.content_padding_desk
+  assign content_padding_mob = section.settings.content_padding_mob
+  assign heading = section.settings.heading
+  assign heading_skintrinsiq = section.settings.heading_skintrinsiq
+  assign heading_mob = section.settings.heading_mob | default: heading
+  assign heading_mob_skintrinsiq = section.settings.heading_mob_skintrinsiq | default: heading_skintrinsiq
+  assign heading_font_size = section.settings.heading_font_size
+  assign subheading = section.settings.subheading
+  assign subheading_skintrinsiq = section.settings.subheading_skintrinsiq
+  assign button_label = section.settings.button_label
+  assign button_label_skintrinsiq = section.settings.button_label_skintrinsiq
+  assign button_link = section.settings.button_link
+  assign button_link_skintrinsiq = section.settings.button_link_skintrinsiq
+  assign button_style = section.settings.button_style
+  assign button_style_skintrinsiq = section.settings.button_style_skintrinsiq
+  assign button_link_phone = section.settings.button_link_phone
+  assign button_link_phone_skintrinsiq = section.settings.button_link_phone_skintrinsiq
+
+  assign show_collection = section.settings.show_collection
+  assign collection_heading = section.settings.collection_heading
+  assign collection_button_label = section.settings.collection_button_label
+  assign collection_button_link = section.settings.collection_button_link
+  assign collection_button_style = section.settings.collection_button_style
+
+  assign collection_promo_card_show = section.settings.collection_promo_card_show
+  assign collection_promo_card_image = section.settings.collection_promo_card_image
+  assign collection_promo_card_heading = section.settings.collection_promo_card_heading
+  assign collection_promo_card_link_label = section.settings.collection_promo_card_link_label
+  assign collection_promo_card_link_url = section.settings.collection_promo_card_link_url
+
+  assign collection_promo_banner_show = section.settings.collection_promo_banner_show
+  assign collection_promo_banner_image = section.settings.collection_promo_banner_image
+  assign collection_promo_banner_content_position = section.settings.collection_promo_banner_content_position | default: 'Right'
+  assign collection_promo_banner_content_position_mobile = section.settings.collection_promo_banner_content_position_mobile | default: 'Center'
+  assign collection_promo_banner_heading = section.settings.collection_promo_banner_heading
+  assign collection_promo_banner_link_label = section.settings.collection_promo_banner_link_label
+  assign collection_promo_banner_link_url = section.settings.collection_promo_banner_link_url
+-%}
+
+<physician-finder-details class="block{% unless show_collection %} block--hide-buttons{% endunless %}" data-loaded="loading" data-section-id="{{ section.id }}">
+  <a href="/pages/physician-finder" class="finder-back-btn">
+    {%- render 'icon' with 'arrow-left' -%}
+    {{ 'sections.physician_finder_details.back_btn' | t }}
+  </a>
+  <div class="page-width block">
+    <div class="loading-overlay__spinner loading-overlay__page-spinner">{% render 'icon' with 'spinner' %}</div>
+    <h2 class="finder-error">{{ 'sections.physician_finder_details.no_results_found' | t }}</h2>
+
+    {%- render 'physician-finder-details' -%}
+
+    {%- if show_banner -%}
+      {%- render 'text-banner',
+        border_bottom: section_border_bottom,
+        section_container: section_container,
+        section_bottom_margin: section_bottom_margin,
+        section_bg_color: section_bg_color,
+        section_bg_image: section_bg_image,
+        section_bg_image_mobile: section_bg_image_mobile,
+        section_text_color: section_text_color,
+        section_width_content: width_content,
+        content_position: content_position,
+        padding_top_desk: padding_top_desk,
+        padding_bottom_desk: padding_bottom_desk,
+        padding_top_mob: padding_top_mob,
+        padding_bottom_mob: padding_bottom_mob,
+        content_padding_desk: content_padding_desk,
+        content_padding_mob: content_padding_mob,
+        heading: heading,
+        heading_mob: heading_mob | default: heading,
+        heading_font_size: heading_font_size,
+        subheading: subheading,
+        button_label: button_label,
+        button_link: button_link,
+        button_style: button_style,
+        button_link_phone: button_link_phone
+        class_name: 'finder-details__banner_generic hide'
+      -%}
+    {%- endif -%}
+
+    {%- if show_banner_skintrinsiq -%}
+      {%- render 'text-banner',
+        border_bottom: section_border_bottom,
+        section_container: section_container,
+        section_bottom_margin: section_bottom_margin,
+        section_bg_color: section_bg_color,
+        section_bg_image: section_bg_image_skintrinsiq,
+        section_bg_image_mobile: section_bg_image_mobile_skintrinsiq,
+        section_text_color: section_text_color,
+        section_width_content: width_content,
+        content_position: content_position,
+        padding_top_desk: padding_top_desk,
+        padding_bottom_desk: padding_bottom_desk,
+        padding_top_mob: padding_top_mob,
+        padding_bottom_mob: padding_bottom_mob,
+        content_padding_desk: content_padding_desk,
+        content_padding_mob: content_padding_mob,
+        heading: heading_skintrinsiq,
+        heading_mob: heading_mob_skintrinsiq | default: heading_skintrinsiq,
+        heading_font_size: heading_font_size,
+        subheading: subheading_skintrinsiq,
+        button_label: button_label_skintrinsiq,
+        button_link: button_link_skintrinsiq,
+        button_style: button_style_skintrinsiq,
+        button_link_phone: button_link_phone_skintrinsiq,
+        class_name: 'finder-details__banner_skintrinsiq hide'
+      -%}
+    {%- endif -%}
+
+    {%- comment -%}
+    {%- render 'physician-finder-collection',
+      button_label: collection_button_label,
+      button_link: collection_button_link,
+      button_style: collection_button_style,
+      show_promo_card: collection_promo_card_show,
+      promo_card_image: collection_promo_card_image,
+      promo_card_heading: collection_promo_card_heading,
+      promo_card_link_label: collection_promo_card_link_label,
+      promo_card_link_url: collection_promo_card_link_url,
+      collection_promo_banner_show: collection_promo_banner_show
+      collection_promo_banner_image: collection_promo_banner_image,
+      collection_promo_banner_content_position: collection_promo_banner_content_position,
+      collection_promo_banner_content_position_mobile: collection_promo_banner_content_position_mobile,
+      collection_promo_banner_heading: collection_promo_banner_heading,
+      collection_promo_banner_link_label: collection_promo_banner_link_label,
+      collection_promo_banner_link_url: collection_promo_banner_link_url
+    -%}
+    {%- endcomment -%}
+
+    {%- if show_collection -%}
+      {%- render 'physician-finder-static-collection',
+        collection_heading: collection_heading,
+        button_label: collection_button_label,
+        button_link: collection_button_link,
+        button_style: collection_button_style,
+        show_promo_card: collection_promo_card_show,
+        promo_card_image: collection_promo_card_image,
+        promo_card_heading: collection_promo_card_heading,
+        promo_card_link_label: collection_promo_card_link_label,
+        promo_card_link_url: collection_promo_card_link_url,
+        collection_promo_banner_show: collection_promo_banner_show
+        collection_promo_banner_image: collection_promo_banner_image,
+        collection_promo_banner_content_position: collection_promo_banner_content_position,
+        collection_promo_banner_content_position_mobile: collection_promo_banner_content_position_mobile,
+        collection_promo_banner_heading: collection_promo_banner_heading,
+        collection_promo_banner_link_label: collection_promo_banner_link_label,
+        collection_promo_banner_link_url: collection_promo_banner_link_url
+      -%}
+    {%- endif -%}
+
+    <script id="globalsCollections" type="application/ld+json">
+      [
+      {%- for heading in shop.metafields.globals.collections_heading -%}
+        {%- assign heading_handleize = heading | handleize | replace: '®', '' -%}
+          {%- if heading_handleize != blank and shop.metafields.globals.collection_picker[forloop.index0] != blank -%}
+            {%- assign collection = collections[shop.metafields.globals.collection_picker[forloop.index0]] -%}
+              {
+                "heading": "{{heading}}",
+                "heading_handle": "{{heading_handleize}}",
+                "collection_url": "{{collection.url}}"
+              }{% unless forloop.last %},{% endunless %}
+          {%- endif -%}
+      {%- endfor -%}
+      ]
+    </script>
+  </div>
+</physician-finder-details>
+
+{% schema %}
+{
+  "name": "Physician finder details",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Promo banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_banner",
+      "label": "Show banner (Generic)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_banner_skintrinsiq",
+      "label": "Show banner (Skintrinsiq)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "section_container",
+      "label": "Section in container",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "section_bottom_margin",
+      "label": "Section bottom margin",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content paddings"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_desk",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mob",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile",
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "width_content",
+      "label": "Width content",
+      "options": [
+        {
+          "value": "100%",
+          "label": "Full width"
+        },
+        {
+          "value": "680px",
+          "label": "Middle container"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#383838"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image",
+      "label": "Background image (Generic)"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image_skintrinsiq",
+      "label": "Background image (Skintrinsiq)"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image_mobile",
+      "label": "Background image mobile (Generic)"
+    },
+    {
+      "type": "image_picker",
+      "id": "section_bg_image_mobile_skintrinsiq",
+      "label": "Background image mobile (Skintrinsiq)"
+    },
+    {
+      "type": "color",
+      "id": "section_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading (Generic)"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading_skintrinsiq",
+      "label": "Subheading (Skintrinsiq)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading desktop (Generic)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_skintrinsiq",
+      "label": "Heading desktop (Skintrinsiq)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_mob",
+      "label": "Heading mobile (Generic)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_mob_skintrinsiq",
+      "label": "Heading mobile (Skintrinsiq)"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "options": [
+        {
+          "value": "h1",
+          "label": "h1"
+        },
+        {
+          "value": "h2",
+          "label": "h2"
+        },
+        {
+          "value": "h3",
+          "label": "h3"
+        },
+        {
+          "value": "h4",
+          "label": "h4"
+        },
+        {
+          "value": "h5",
+          "label": "h5"
+        },
+        {
+          "value": "h6",
+          "label": "h6"
+        }
+      ],
+      "default": "h4",
+      "label": "Font size"
+    },
+    {
+      "type": "paragraph",
+      "content": "Button (Generic)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_link_phone",
+      "label": "Use link as location phone number"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "secondary-alt"
+    },
+    {
+      "type": "paragraph",
+      "content": "Button (Skintrinsiq)"
+    },
+    {
+      "type": "text",
+      "id": "button_label_skintrinsiq",
+      "label": "Button label",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "button_link_skintrinsiq",
+      "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_link_phone_skintrinsiq",
+      "label": "Use link as location phone number"
+    },
+    {
+      "type": "select",
+      "id": "button_style_skintrinsiq",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "secondary-alt"
+    },
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection",
+      "label": "Show collection",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "collection_heading",
+      "label": "Heading",
+      "info": "by default collection title"
+    },
+    {
+      "type": "text",
+      "id": "collection_button_label",
+      "label": "Button label",
+      "default": "Shop All"
+    },
+    {
+      "type": "url",
+      "id": "collection_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "collection_button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "header",
+      "content": "Collection promo card"
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_promo_card_show",
+      "label": "Show promo card",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_promo_card_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "collection_promo_card_heading",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "collection_promo_card_link_label",
+      "label": "Link label"
+    },
+    {
+      "type": "url",
+      "id": "collection_promo_card_link_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Collection promo banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_promo_banner_show",
+      "label": "Show promo banner",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_promo_banner_image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "collection_promo_banner_content_position",
+      "label": "Content position",
+      "options": [
+        {
+          "value": "Left",
+          "label": "Left"
+        },
+        {
+          "value": "Center",
+          "label": "Center"
+        },
+        {
+          "value": "Right",
+          "label": "Right"
+        }
+      ],
+      "default": "Right"
+    },
+    {
+      "type": "select",
+      "id": "collection_promo_banner_content_position_mobile",
+      "label": "Content position mobile",
+      "options": [
+        {
+          "value": "Left",
+          "label": "Left"
+        },
+        {
+          "value": "Center",
+          "label": "Center"
+        },
+        {
+          "value": "Right",
+          "label": "Right"
+        }
+      ],
+      "default": "Right"
+    },
+    {
+      "type": "text",
+      "id": "collection_promo_banner_heading",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "collection_promo_banner_link_label",
+      "label": "Link label"
+    },
+    {
+      "type": "url",
+      "id": "collection_promo_banner_link_url",
+      "label": "Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Physician finder details"
+    }
+  ]
+}
+{% endschema %}

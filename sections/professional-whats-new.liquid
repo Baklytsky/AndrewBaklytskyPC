@@ -1,0 +1,259 @@
+{{ 'professional-news.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign show_slider_nav = section.settings.show_slider_nav -%}
+
+{%- capture swiper_config -%}
+  {
+    "slidesPerView": 1.33,
+    "spaceBetween": 20,
+    "freeMode": true,
+    "centerInsufficientSlides": true,
+    "mousewheel": {
+      "forceToAxis": true
+    },
+  {% if show_slider_nav -%}
+    "navigation": {
+      "nextEl": ".swiper-button-next--{{ section.id }}",
+      "prevEl": ".swiper-button-prev--{{ section.id }}"
+    },
+    "scrollbar": {
+      "el": ".swiper-scrollbar--{{ section.id }}",
+      "hide": false,
+      "draggable": true
+    },
+  {% endif -%}
+    "breakpoints": {
+    "1200": {
+    "slidesPerView": 4,
+    "shortSwipes": false
+    },
+    "900": {
+      "slidesPerView": 3,
+      "shortSwipes": false
+      },
+    "768": {
+      "slidesPerView": 2,
+      "shortSwipes": false
+     }
+    }
+  }
+{%- endcapture -%}
+
+<div class="professional-news border-bottom"
+     data-aos="fade-up"
+     style="--bg-color: {{ section_bg_color }}">
+
+  {%- if heading != blank or subheading != bank  -%}
+    <div class="professional-news__header page-width">
+      <div class="professional-news__header-wrapper">
+        {%- if heading != blank or subheading != bank -%}
+          {%- if subheading != bank -%}
+            <div class="professional-news__header-subheading h6">{{ subheading }}</div>
+          {%- endif -%}
+
+          {%- if heading != blank -%}
+            <h3 class="professional-news__header-heading h4">{{ heading }}</h3>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+    {%- capture slides -%}
+      {%- for block in section.blocks -%}
+        {%- liquid assign collection = collections[block.settings.collection] -%}
+
+        {%- if collection -%}
+          {%- liquid
+            assign image = block.settings.image
+            assign image_alt = image.alt
+            assign heading = block.settings.heading
+            assign subheading = block.settings.subheading
+            assign link_label = block.settings.link_label
+            assign link_url = block.settings.link_url
+            assign button_style = block.settings.button_style
+          -%}
+
+          <div class="swiper-slide" {{ block.shopify_attributes }}>
+            <div class="professional-news__card">
+              <div class="professional-news__card-image block rel">
+                {%- if image -%}
+                  {% render 'image', image: image, class_name: 'image-abs-cover', alt: image_alt %}
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+                {%- endif -%}
+
+                {% if link_url != blank %}
+                  <a href="{{ link_url }}" class="image-abs-cover">
+                    <span class="u-sr-only">{{ image_alt }}</span>
+                  </a>
+                {% endif %}
+              </div>
+
+              {%- if subheading != blank -%}
+                <p class="professional-news__card-subheading block h6">{{ subheading }}</p>
+              {%- endif -%}
+
+              {%- if heading != blank -%}
+                {% if link_url != blank %}
+                  <a href="{{ link_url }}" class="professional-news__card-heading block h5">{{ heading }}</a>
+                {% else %}
+                  <h3 href="{{ link_url }}" class="professional-news__card-heading block h5">{{ heading }}</h3>
+                {% endif %}
+              {%- endif -%}
+
+              {%- if link_label != blank -%}
+                <a{% if link_url == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  href="{{ link_url }}"{% endif %}
+                  class="professional-news__card-btn btn btn--{{ button_style }}">
+                  {{ link_label | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+  {%- else -%}
+    {%- capture slides -%}
+      {%- for i in (1..4) -%}
+        <div class="swiper-slide">
+          <div class="professional-news__card">
+            <div class="professional-news__card-image rel">
+              {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+            </div>
+            <p class="professional-news__card-subheading block h6">
+              {{ 'sections.professional_news.empty_section_subheading' | t }}
+            </p>
+
+            <a href="{{ routes.root_url }}" class="professional-news__card-heading block h5">
+              {{ 'sections.professional_news.empty_section_heading' | t }}
+            </a>
+
+
+            <a href="{{ routes.root_url }}" class="professional-news__card-btn btn btn--secondary">
+              {{ 'sections.professional_news.empty_section_button' | t }}
+            </a>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endcapture -%}
+  {%- endif -%}
+
+  {%- render 'slideshow-swiper',
+    class_name: 'professional-news__slider rel page-width',
+    config: swiper_config,
+    slides: slides,
+    show_slider_nav: show_slider_nav,
+    show_scroll_bar: show_slider_nav,
+    nav_id: section.id  -%}
+
+</div>
+
+
+
+{% schema %}
+{
+  "name": "Professional what`s new",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "What’s New"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "New at Obagi Professional"
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_nav",
+      "label": "Show slider navigation",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "block",
+      "name": "Block",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link url"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "secondary"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Professional what`s new"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,178 @@
+{%- if [request.page_type].metafields.compare_products.enable_section == 'true' -%}
+  {{ 'compare-products.min.css' | asset_url | stylesheet_tag }}
+
+  {%- liquid
+    assign background_color = [request.page_type].metafields.compare_products.background_color
+    assign heading = [request.page_type].metafields.compare_products.heading
+
+    assign default_product_list_heading = 'compare_products.product_list_heading' | t
+    assign product_list_heading = [request.page_type].metafields.compare_products.product_list_heading | default: default_product_list_heading
+    assign product_list = [request.page_type].metafields.compare_products.product_list | split: '|'
+
+    assign default_description_heading = 'compare_products.product_description_heading' | t
+    assign description_heading = [request.page_type].metafields.compare_products.description_heading | default: default_description_heading
+
+    assign default_skin_concern_heading = 'compare_products.skin_concern_heading' | t
+    assign skin_concern_heading = [request.page_type].metafields.compare_products.skin_concern_heading | default: default_skin_concern_heading
+
+    assign default_skin_type_heading = 'compare_products.skin_type_heading' | t
+    assign skin_type_heading = [request.page_type].metafields.compare_products.skin_type_heading | default: default_skin_type_heading -%}
+
+  {%- if product_list.size > 0 -%}
+
+    {%- capture product_cards -%}
+    {% render 'product-card' product: product, quick_add: true %}
+
+      {%- for product_handle in product_list -%}
+        {%- liquid assign _product = all_products[product_handle] -%}
+
+        {%- if product.tags contains 'dev_product'
+          or product.tags contains 'test_product'
+          or product.tags contains 'hidden'
+          or product.tags contains 'not-allowed' -%}
+          {% continue %}
+        {%- endif -%}
+
+        {%- if _product != blank -%}
+          {% render 'product-card' product: _product, quick_add: true %}
+        {%- endif -%}
+
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- capture product_descriptions -%}
+      <div class="compare-products__description">
+        {{ product.description | strip_html | truncate: 200 }}
+      </div>
+
+      {%- for product_handle in product_list -%}
+        {%- liquid assign _product = all_products[product_handle] -%}
+
+        {%- if _product != blank -%}
+          <div class="compare-products__description">
+            {{ _product.description | strip_html | truncate: 200 }}
+          </div>
+        {%- endif -%}
+
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- capture product_skin_concerns -%}
+      <div class="compare-products__skin-concerns">
+        {% render 'get_skin_concerns', product: product, class_name_handle: 'compare-products' %}
+      </div>
+
+      {%- for product_handle in product_list -%}
+        {%- liquid assign _product = all_products[product_handle] -%}
+
+        {%- if _product != blank -%}
+          <div class="compare-products__skin-concerns">
+            {% render 'get_skin_concerns', product: _product, class_name_handle: 'compare-products' %}
+          </div>
+        {%- endif -%}
+
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- capture product_skin_types -%}
+      <div class="compare-products__skin-types">
+        {% render 'get_skin_types', product: product %}
+      </div>
+
+      {%- for product_handle in product_list -%}
+        {%- liquid assign _product = all_products[product_handle] -%}
+
+        {%- if _product != blank -%}
+          <div class="compare-products__skin-types">
+            {% render 'get_skin_types', product: _product %}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+    {%- endcapture -%}
+
+  {%- endif -%}
+
+  <div class="compare-products" data-aos="fade-up" style="--bg-color: {{ background_color }};">
+    <div class="page-width">
+      {%- if heading != blank -%}
+        <h3 class="compare-products__heading">
+          {{ heading | newline_to_br }}
+        </h3>
+      {%- endif -%}
+
+      {%- if product_list.size > 0 -%}
+        <div class="compare-products__wrapper hide-scrollbar">
+          <ul class="compare-products__list">
+
+            {%- if product_list_heading != blank -%}
+              <h4 class="compare-products__list-heading h6">
+                <span>{{ product_list_heading }}</span>
+              </h4>
+            {%- endif -%}
+
+            <li class="compare-products__list-item">
+              <div class="compare-products__list-cards">
+                {{ product_cards }}
+              </div>
+            </li>
+            {%- if product_descriptions != blank -%}
+              <li class="compare-products__list-item">
+                <h5 class="compare-products__list-item-heading h6 m0">
+                  {{ description_heading }}
+                </h5>
+                <div class="compare-products__list-descriptions">
+                  {{ product_descriptions }}
+                </div>
+              </li>
+            {%- endif -%}
+            {%- if product_skin_concerns != blank or product_skin_types != blank -%}
+              <li class="compare-products__list-item">
+                {%- if product_skin_concerns != blank -%}
+                  <h5 class="compare-products__list-item-heading--concern h6 m0">
+                    {{ skin_concern_heading }}
+                  </h5>
+                  <div class="compare-products__list-concerns">
+                    {{ product_skin_concerns }}
+                  </div>
+                {%- endif -%}
+
+                {%- if product_skin_types != blank -%}
+                  <span class="compare-products__list-item-heading--type body3--bold block m0">
+                    {{ skin_type_heading }}
+                  </span>
+                  <div class="compare-products__list-types">
+                    {{ product_skin_types }}
+                  </div>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          </ul>
+
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Compare products (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Compare products (MF)"
+    }
+  ],
+  "templates": [
+    "product"
+  ]
+}
+{% endschema %}

@@ -1,0 +1,177 @@
+{{ 'international-partners.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign partners_list_description = section.settings.partners_list_description
+  assign partners_footer_description = section.settings.partners_footer_description
+  assign tabs_str = blank
+  assign locations_str = blank
+
+  assign shown_partners = [request.page_type].metafields.international-partners.show_partner
+
+  for shown in shown_partners
+    if shown == 'true'
+      assign tab_name = [request.page_type].metafields.international-partners.tab_name[forloop.index0]
+      assign location = [request.page_type].metafields.international-partners.location[forloop.index0]
+      assign tabs_str = tabs_str | append: '####' | append: tab_name
+      assign locations_str = locations_str | append: '####' | append: location
+    endif
+  endfor
+
+  assign tabs = tabs_str | remove_first: '####' | split: '####' | uniq
+  assign locations = locations_str | remove_first: '####' | split: '####' | uniq | sort
+-%}
+
+{%- if tabs.size > 0 -%}
+  <script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+  <tabs-component class="partners block">
+
+    <scrolling-tabs class="partners__navigation hide-scrollbar" role="tablist" aria-labelledby="tablist-{{ section.id }}">
+
+      <button
+        class="a body1 partners__navigation-tab btn--reset"
+        role="tab"
+        type="button"
+        tabindex="0"
+        aria-controls="show-all-tabs"
+        aria-selected="true">
+        All
+      </button>
+
+      {% for tab in tabs %}
+        {%- liquid
+          assign tab_handle = tab | handleize
+          assign tab_is_shown = false
+        -%}
+
+        {%- for shown in shown_partners -%}
+          {% if shown == 'true' %}
+
+            {%- liquid assign tab_name_handle = [request.page_type].metafields.international-partners.tab_name[forloop.index0] | handleize -%}
+
+            {%- if tab_name_handle == tab_handle and tab_is_shown == false -%}
+              {%- liquid assign tab_is_shown = true -%}
+              <button
+                class="a body1 partners__navigation-tab btn--reset"
+                role="tab"
+                type="button"
+                id="tab-{{ tab_handle }}--{{ section.id }}"
+                aria-controls="tabpanel-{{ tab_handle }}--{{ section.id }}"
+                aria-selected="false"
+                tabindex="-1">
+                {{ tab }}
+              </button>
+            {%- endif -%}
+
+          {% endif %}
+        {%- endfor -%}
+      {% endfor %}
+    </scrolling-tabs>
+
+
+    <div class="page-width">
+      <div class="partners__list-wrapper">
+      {%- if partners_list_description != blank -%}
+        <div class="partners__list-description body3">
+          {{ partners_list_description }}
+        </div>
+      {%- endif -%}
+
+      <ul class="partners__list">
+        {% for tab in tabs %}
+          {%- liquid assign tab_handle = tab | handleize -%}
+
+          {%- for shown in shown_partners -%}
+            {% if shown == 'true' %}
+
+              {%- liquid assign tab_name_handle = [request.page_type].metafields.international-partners.tab_name[forloop.index0] | handleize -%}
+
+              {%- if tab_name_handle == tab_handle -%}
+
+                {%- liquid
+                  assign order = 0
+                  assign location = [request.page_type].metafields.international-partners.location[forloop.index0]
+                  assign location_handle = location | handleize
+                  assign heading = [request.page_type].metafields.international-partners.heading[forloop.index0]
+                  assign link = [request.page_type].metafields.international-partners.url[forloop.index0]
+                  assign address = [request.page_type].metafields.international-partners.address[forloop.index0]
+                  assign phone = [request.page_type].metafields.international-partners.phone[forloop.index0]
+
+                  for item in locations
+                    assign item_handle = item | handleize
+
+                    if item_handle == location_handle
+                      assign order = forloop.index0
+                      break
+                    endif
+
+                  endfor
+                -%}
+
+                <div class="partners__item"
+                     style="--order: {{ order }}"
+                     data-tab-id="tabpanel-{{ tab_handle }}--{{ section.id }}"
+                     role="tabpanel"
+                     aria-labelledby="tab-{{ tab_handle }}--{{ section.id }}"
+                     tabindex="0">
+
+                  {%- if location != blank -%}
+                    <p class="h6 partners__item-location">{{ location }}</p>
+                  {%- endif -%}
+
+                  <div class="partners__item-inner">
+                    {%- if link != blank -%}
+                      <a href="{{ link }}" class="h2 partners__item-heading">{{ heading }}</a>
+                    {%- else -%}
+                      <h2 class="partners__item-heading">{{ heading }}</h2>
+                    {%- endif -%}
+
+                    {%- if address != blank -%}
+                      <address class="partners__item-info">
+                        {{ address }}
+                      </address>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+
+            {% endif %}
+          {%- endfor -%}
+        {% endfor %}
+
+        {%- if partners_footer_description != blank -%}
+          <div class="partners__footer-description body3">
+            {{ partners_footer_description }}
+          </div>
+        {%- endif -%}
+      </ul>
+    </div>
+    </div>
+
+  </tabs-component>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "International partners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "partners_list_description",
+      "label": "Partners list description",
+      "default": "<p>We cannot sell Obagi in countries that aren’t included in this list.<p>"
+    },
+    {
+      "type": "richtext",
+      "id": "partners_footer_description",
+      "label": "Partners footer description",
+      "default": "<p>If you need to change your contact information, please email us or contact your sales representative.<p>"
+    },
+    {
+      "type": "header",
+      "content": "Partners list is filled in the metafields"
+    }
+  ]
+}
+{% endschema %}

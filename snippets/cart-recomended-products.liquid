@@ -1,0 +1,74 @@
+{%- comment -%}
+{%- render 'cart-recomended-products',
+  block: block
+  config: swiper_config,
+  attr: attr,
+  class_name: '',
+  -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign heading = block.settings.heading
+  assign collection = block.settings.collection
+  assign product_list = block.settings.product_list
+  assign products_limit = block.settings.products_limit
+  assign bg_color = block.settings.bg_color
+  assign product_form_id = 'quick-add-' | append: section_id | append: product.id
+  assign products_to_show = 0
+
+  if product_list != blank and product_list.count > 0
+    assign products_arr = product_list
+  elsif collection != blank and collection.products.size > 0
+    assign products_arr = collection.products
+  endif
+
+  if products_arr
+    assign cart_handles = ''
+
+     for item in cart.items
+      assign cart_handles = cart_handles | append: ',' | append: item.handle
+     endfor
+
+     assign cart_handles = cart_handles | remove_first: ',' | split: ','
+
+     for product in products_arr
+      unless cart_handles contains product.handle
+        if product.available
+          assign products_to_show = products_to_show | plus: 1
+        endif
+      endunless
+    endfor
+  endif
+-%}
+
+{% if products_to_show > 0 %}
+  <div class="cart-recommended" style="--bg-color: {{ bg_color }}">
+    {% if heading != blank %}
+      <h5 class="cart-recommended__heading h6">{{ heading }}</h5>
+    {% endif %}
+
+    <slideshow-swiper data-config='{{ config }}' class="{{ class_name }}" {{ attr }}>
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          {% for product in products_arr limit: products_limit %}
+            {% unless cart_handles contains product.handle %}
+              {%- render 'recomended-form' product: product, id: product_form_id -%}
+            {% endunless %}
+          {% endfor %}
+        </div>
+
+        {% render 'ga-product-list-event', event_type: 'view_item_list', product_list: products_arr, list_name: heading, list_id: block.id  %}
+
+      </div>
+      {%- if show_slider_nav -%}
+        <div class="swiper-navigation-wrapper">
+          <div class="swiper-pagination swiper-pagination--{{ nav_id }}"></div>
+          <div class="swiper__slider-arrows">
+            <div class="swiper-button-prev swiper-button-prev--{{ nav_id }}"></div>
+            <div class="swiper-button-next swiper-button-next--{{ nav_id }}"></div>
+          </div>
+        </div>
+      {%- endif -%}
+    </slideshow-swiper>
+  </div>
+{% endif %}

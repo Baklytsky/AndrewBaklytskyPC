@@ -1,0 +1,807 @@
+{{ 'banner-blocks.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desktop = section.settings.padding_top_desktop
+  assign padding_bottom_desktop = section.settings.padding_bottom_desktop
+  assign padding_top_mobile = section.settings.padding_top_mobile
+  assign padding_bottom_mobile = section.settings.padding_bottom_mobile
+  assign section_bg_color = section.settings.section_bg_color
+  assign large_banner_position = section.settings.large_banner_position
+  assign large_banner_blocks = section.blocks | where: 'type', 'banner-large'
+  assign small_banner_blocks = section.blocks | where: 'type', 'banner-small'
+-%}
+
+
+<div class="banner-blocks banner-grid"
+     data-aos="fade-up"
+     style="
+       --bg-color: {{ section_bg_color }};
+       --padding-top-desktop:{{ padding_top_desktop -}}px;
+       --padding-bottom-desktop:{{ padding_bottom_desktop -}}px;
+       --padding-top-mobile:{{ padding_top_mobile -}}px;
+       --padding-bottom-mobile:{{ padding_bottom_mobile -}}px;
+       ">
+  <div class="page-width">
+    <div class="banner-blocks__list banner-blocks__list--{{ large_banner_position }}">
+      {% if section.blocks.size > 0  %}
+        {%- liquid
+          assign banner_width = large_banner_blocks[0].settings.banner_width
+          assign desktop_banner_height = large_banner_blocks[0].settings.desktop_banner_height
+          assign mobile_banner_height = large_banner_blocks[0].settings.mobile_banner_height
+          assign content_position_desktop = large_banner_blocks[0].settings.content_position_desktop
+          assign content_position_mobile = large_banner_blocks[0].settings.content_position_mobile
+          assign content_align_desktop = large_banner_blocks[0].settings.content_align_desktop
+          assign content_align_mobile = large_banner_blocks[0].settings.content_align_mobile
+          assign image = large_banner_blocks[0].settings.image
+          assign image_mobile = large_banner_blocks[0].settings.image_mobile
+          assign image_alt = image.alt | default: image_mobile.alt | default: heading
+          assign heading = large_banner_blocks[0].settings.heading
+          assign subheading = large_banner_blocks[0].settings.subheading
+          assign description = large_banner_blocks[0].settings.description
+          assign text_color = large_banner_blocks[0].settings.text_color
+          assign button_label = large_banner_blocks[0].settings.button_label
+          assign button_link = large_banner_blocks[0].settings.button_link
+          assign button_style = large_banner_blocks[0].settings.button_style
+          assign banner_clickable = large_banner_blocks[0].settings.banner_clickable
+
+          assign desktop_image_class = 'image-abs-cover z1'
+
+          if image and image_mobile
+            assign desktop_image_class = desktop_image_class | append: ' medium-hide'
+          endif
+        -%}
+
+        {%- if image or image_mobile or heading != blank or description != blank or button_label != blank or subheading != blank -%}
+          <div class="banner-blocks__item banner-blocks__item--large rel"
+              style="--desktop-banner-height: {{ desktop_banner_height }};
+                --mobile-banner-height: {{ mobile_banner_height }};
+                --banner-width: {{ banner_width }};
+                --content-align-desktop: {{ content_align_desktop }};
+                --content-align-mobile: {{ content_align_mobile }};
+                --content-position-desktop: {{ content_position_desktop }};
+                --content-position-mobile: {{ content_position_mobile }};
+                --color-text: {{ text_color }}">
+            {%- if image -%}
+              {% render 'image', image: image, class_name: desktop_image_class, alt: image_alt %}
+            {%- endif -%}
+
+            {%- if image_mobile -%}
+              {% render 'image', image: image_mobile, class_name: 'image-abs-cover medium-up-hide z1', alt: image_alt %}
+            {%- endif -%}
+
+            <div class="banner-blocks__item-content" style="--color: {{ text_color }}">
+              {%- if subheading != blank -%}
+                <div class="banner-blocks__item-heading h6">{{ subheading }}</div>
+              {%- endif -%}
+
+              {%- if heading != blank -%}
+                <div class="banner-blocks__item-heading h5">{{ heading }}</div>
+              {%- endif -%}
+
+              {%- if description != blank -%}
+                <div class="banner-blocks__item-description">{{ description }}</div>
+              {%- endif -%}
+
+              {%- if banner_clickable and button_link != blank -%}
+                <a href="{{ button_link }}" class=" banner-blocks__item-btn--full"><span class="visually-hidden">{{ button_label | default: heading | escape }}</span></a>
+              {%- endif -%}
+
+              {%- if button_label != blank -%}
+                <a {% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}href="{{ button_link }}"{% endif %}
+                  class="banner-blocks__item-btn
+                      {% if button_style == 'link' %}link {% else %} btn btn--{{ button_style }}{% endif %}">
+                  {{ button_label | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if small_banner_blocks.size > 0 -%}
+          {%- capture swiper_config -%}
+            {
+              "slidesPerView": 1,
+              "watchOverflow": true,
+              "spaceBetween": 5,
+              "watchSlidesProgress": true,
+              "freeMode": true,
+              "mousewheel": {
+                "forceToAxis": true
+              },
+              "navigation": {
+                "nextEl": ".swiper-button-next--{{ section.id }}",
+                "prevEl": ".swiper-button-prev--{{ section.id }}"
+              },
+              "scrollbar": {
+                "el": ".swiper-scrollbar--{{ section.id }}",
+                "hide": false,
+                "draggable": true
+              }
+            }
+          {%- endcapture -%}
+          <slideshow-swiper data-config='{{ swiper_config }}' data-breakpoint='min-width: 1025px'>
+            <div class="swiper">
+              <ul class="swiper-wrapper banner-blocks__list-small banner-blocks__list">
+                {%- for block in small_banner_blocks -%}
+                  {%- if section.blocks.size > 0  -%}
+                    {%- liquid
+                      assign banner_width = block.settings.banner_width
+                      assign desktop_banner_height = block.settings.desktop_banner_height
+                      assign mobile_banner_height = block.settings.mobile_banner_height
+                      assign content_position_desktop = block.settings.content_position_desktop
+                      assign content_position_mobile = block.settings.content_position_mobile
+                      assign content_align_desktop = block.settings.content_align_desktop
+                      assign content_align_mobile = block.settings.content_align_mobile
+                      assign image = block.settings.image
+                      assign image_mobile = block.settings.image_mobile
+                      assign image_alt = image.alt | default: image_mobile.alt | default: heading
+                      assign heading = block.settings.heading
+                      assign subheading = block.settings.subheading
+                      assign description = block.settings.description
+                      assign text_color = block.settings.text_color
+                      assign button_label = block.settings.button_label
+                      assign button_link = block.settings.button_link
+                      assign button_style = block.settings.button_style
+                      assign banner_clickable = block.settings.banner_clickable
+
+                      assign desktop_image_class = 'image-abs-cover z1'
+
+                      if image and image_mobile
+                      assign desktop_image_class = desktop_image_class | append: ' medium-hide'
+                      endif
+                    -%}
+
+                    {%- if image or image_mobile or heading != blank or description != blank or button_label != blank or subheading != blank -%}
+                      <style>
+                        .banner-blocks__item--{{ block.id }} {
+                          --desktop-banner-height: {{ desktop_banner_height }};
+                          --mobile-banner-height: {{ mobile_banner_height }};
+                          --banner-width: {{ banner_width }};
+                          --content-align-desktop: {{ content_align_desktop }};
+                          --content-align-mobile: {{ content_align_mobile }};
+                          --content-position-desktop: {{ content_position_desktop }};
+                          --content-position-mobile: {{ content_position_mobile }};
+                          --color-text: {{ text_color }};
+                        }
+                      </style>
+                      <li class="banner-blocks__item banner-blocks__item--{{ block.id }} swiper-slide banner-blocks__item--small rel">
+                        {%- if image -%}
+                          {% render 'image', image: image, class_name: desktop_image_class, alt: image_alt %}
+                        {%- endif -%}
+
+                        {%- if image_mobile -%}
+                          {% render 'image', image: image_mobile, class_name: 'image-abs-cover medium-up-hide z1', alt: image_alt %}
+                        {%- endif -%}
+
+                        <div class="banner-blocks__item-content" style="--color: {{ text_color }}">
+                          {%- if subheading != blank -%}
+                            <div class="banner-blocks__item-heading h6">{{ subheading }}</div>
+                          {%- endif -%}
+
+                          {%- if heading != blank -%}
+                            <div class="banner-blocks__item-heading h5">{{ heading }}</div>
+                          {%- endif -%}
+
+                          {%- if description != blank -%}
+                            <div class="banner-blocks__item-description">{{ description }}</div>
+                          {%- endif -%}
+
+                          {%- if banner_clickable and button_link != blank -%}
+                            <a href="{{ button_link }}" class=" banner-blocks__item-btn--full"><span class="visually-hidden">{{ button_label | default: heading | escape }}</span></a>
+                          {%- endif -%}
+
+                          {%- if button_label != blank -%}
+                            <a {% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}href="{{ button_link }}"{% endif %}
+                              class="banner-blocks__item-btn
+                              {% if button_style == 'link' %}link {% else %} btn btn--{{ button_style }}{% endif %}">
+                              {{ button_label | escape }}
+                            </a>
+                          {%- endif -%}
+                        </div>
+                      </li>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+
+            <div class="banner-blocks__navigation medium-up-hide">
+              <div class="swiper-scrollbar swiper-scrollbar--{{ section.id }}"></div>
+              <div class="swiper__slider-arrows">
+                <div class="swiper-button-prev swiper-button-prev--{{ section.id }}"></div>
+                <div class="swiper-button-next swiper-button-next--{{ section.id }}"></div>
+              </div>
+            </div>
+          </slideshow-swiper>
+        {%- endif -%}
+      {%- else -%}
+        {%- for i in (1..2) -%}
+          <li class="banner-blocks__item rel"
+              style="--desktop-banner-height: 600px;
+                    --mobile-banner-height: 400px;
+                    --banner-width: 50%;
+                    --content-align-desktop: center;
+                    --content-align-mobile: center;
+                    --content-position-desktop: center;
+                    --content-position-mobile: center;">
+            {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+          </li>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Banner grid",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "large_banner_position",
+      "label": "Large banner position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top mobile",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "banner-large",
+      "name": "Banner large",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "desktop_banner_height",
+          "label": "Banner desktop height",
+          "options": [
+            {
+              "value": "400px",
+              "label": "400px"
+            },
+            {
+              "value": "500px",
+              "label": "500px"
+            },
+            {
+              "value": "600px",
+              "label": "600px"
+            },
+            {
+              "value": "700px",
+              "label": "700px"
+            },
+            {
+              "value": "800px",
+              "label": "800px"
+            },
+            {
+              "value": "1000px",
+              "label": "1000px"
+            },
+            {
+              "value": "100vh",
+              "label": "Full height"
+            }
+          ],
+          "default": "700px"
+        },
+        {
+          "type": "select",
+          "id": "mobile_banner_height",
+          "label": "Mobile banner height",
+          "options": [
+            {
+              "value": "400px",
+              "label": "400px"
+            },
+            {
+              "value": "500px",
+              "label": "500px"
+            },
+            {
+              "value": "600px",
+              "label": "600px"
+            },
+            {
+              "value": "700px",
+              "label": "700px"
+            },
+            {
+              "value": "80vw",
+              "label": "80vw"
+            }
+          ],
+          "default": "80vw"
+        },
+        {
+          "type": "select",
+          "id": "banner_width",
+          "label": "Banner desktop width",
+          "info": "On mobile banner will be full width.",
+          "options": [
+            {
+              "value": "33.333%",
+              "label": "1/3"
+            },
+            {
+              "value": "50%",
+              "label": "Half"
+            },
+            {
+              "value": "66.666%",
+              "label": "2/3"
+            }
+          ],
+          "default": "50%"
+        },
+        {
+          "type": "select",
+          "id": "content_position_desktop",
+          "label": "Content position desktop",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "flex-end",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_position_mobile",
+          "label": "Content position mobile",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "flex-end",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_align_desktop",
+          "label": "Content align desktop",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_align_mobile",
+          "label": "Content align mobile",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Image mobile"
+        },
+        {
+          "type": "richtext",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "richtext",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "checkbox",
+          "id": "banner_clickable",
+          "label": "Make entire banner clickable"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Now",
+          "info": "If the field is empty button won’t be shown"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "link",
+              "label": "Link"
+            },
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "link"
+        }
+      ]
+    },
+    {
+      "type": "banner-small",
+      "name": "Banner small",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "select",
+          "id": "desktop_banner_height",
+          "label": "Banner desktop height",
+          "options": [
+            {
+              "value": "200px",
+              "label": "200px"
+            },
+            {
+              "value": "250px",
+              "label": "250px"
+            },
+            {
+              "value": "300px",
+              "label": "300px"
+            },
+            {
+              "value": "350px",
+              "label": "350px"
+            },
+            {
+              "value": "400px",
+              "label": "400px"
+            },
+            {
+              "value": "500px",
+              "label": "500px"
+            },
+            {
+              "value": "50vh",
+              "label": "Half height"
+            }
+          ],
+          "default": "350px"
+        },
+        {
+          "type": "select",
+          "id": "mobile_banner_height",
+          "label": "Mobile banner height",
+          "options": [
+            {
+              "value": "400px",
+              "label": "400px"
+            },
+            {
+              "value": "500px",
+              "label": "500px"
+            },
+            {
+              "value": "600px",
+              "label": "600px"
+            },
+            {
+              "value": "700px",
+              "label": "700px"
+            },
+            {
+              "value": "80vw",
+              "label": "80vw"
+            }
+          ],
+          "default": "80vw"
+        },
+        {
+          "type": "select",
+          "id": "banner_width",
+          "label": "Banner desktop width",
+          "info": "On mobile banner will be full width.",
+          "options": [
+            {
+              "value": "33.333%",
+              "label": "1/3"
+            },
+            {
+              "value": "50%",
+              "label": "Half"
+            },
+            {
+              "value": "66.666%",
+              "label": "2/3"
+            }
+          ],
+          "default": "50%"
+        },
+        {
+          "type": "select",
+          "id": "content_position_desktop",
+          "label": "Content position desktop",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "flex-end",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_position_mobile",
+          "label": "Content position mobile",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "flex-end",
+              "label": "Bottom"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_align_desktop",
+          "label": "Content align desktop",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "content_align_mobile",
+          "label": "Content align mobile",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Image mobile"
+        },
+        {
+          "type": "richtext",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "richtext",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "checkbox",
+          "id": "banner_clickable",
+          "label": "Make entire banner clickable"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Now",
+          "info": "If the field is empty button won’t be shown"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "link",
+              "label": "Link"
+            },
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner grid"
+    }
+  ]
+}
+{% endschema %}

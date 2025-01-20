@@ -1,0 +1,24 @@
+{% comment %}
+  {% render 'cart-progress-bar-messages-helper', message: str, price: price  %}
+{% endcomment %}
+
+{%- assign message_arr = message | split: '[price]' -%}
+{%- assign new_message = "" -%}
+
+    {%- if message_arr.size > 1 -%}
+      {%- for part in message_arr -%}
+        {%- if forloop.last -%}
+          {%- assign new_message = new_message | append: part -%}
+        {%- else -%}
+          {%- assign new_message = new_message | append: part | append: price -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- elsif message_arr.size == 1 -%}
+      {%- assign new_message = message -%}
+    {%- endif -%}
+
+{%- if message != blank -%}
+  <span>{{ new_message }}</span>
+{%- endif -%}
+
+

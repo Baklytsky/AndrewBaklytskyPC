@@ -1,0 +1,77 @@
+{%- comment -%}
+{%- render 'pdp-details', product: product, section: section -%}
+{%- endcomment -%}
+
+<script src="{{ 'component-show-more.min.js' | asset_url }}" defer="defer"></script>
+{%- comment -%}
+  <script src="{{ 'component-notify-form.min.js' | asset_url }}" defer="defer"></script>
+{%- endcomment -%}
+
+{%- liquid
+  assign product_form_id = 'product-form-' | append: section.id
+  assign current_variant = product.selected_or_first_available_variant -%}
+
+<pdp-details class="pdp-details rel">
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+    {%- when 'price' -%}
+    {%- liquid assign price_class = 'pdp-details__price price--' | append: section.id -%}
+    {%- render 'price', product: product, show_badges: true, price_class: price_class -%}
+    {%- when 'subtitle' -%}
+      {%- if product.metafields.accentuate.subtitle != blank -%}
+        <h1 class="pdp-details__subtitle body2" {{ block.shopify_attributes }}>
+          {{ product.metafields.accentuate.subtitle }}
+        </h1>
+      {%- endif -%}
+    {%- when 'info_label' -%}
+    {%- liquid assign info_label = product.metafields.custom.info_label -%}
+      {%- if info_label != blank -%}
+        <div class="pdp-details__label h6" {{ block.shopify_attributes }}>
+          {{ info_label }}
+        </div>
+      {%- endif -%}
+    {%- when 'collection' -%}
+
+      <div class="pdp-details__collections">
+        {%- render 'product-featured-collections', product: product, class: 'pdp-details__collections-item body3' -%}
+      </div>
+
+    {%- when 'title' -%}
+      <h3 class="pdp-details__title" {{ block.shopify_attributes }}>
+        {{ product.title }}
+      </h3>
+    {%- when 'variant_picker' -%}
+    {%- render 'variant-radios', product: product, id: section.id, update_url: true -%}
+    {%- when 'product-form' -%}
+    {%- render 'pdp-details-form', product: product, current_variant: current_variant, id: product_form_id, block: block -%}
+    {%- when 'skin_type_and_concern' -%}
+    {%- render 'pdp-skin-type-and-concern', product: product, block: block -%}
+    {%- when 'description' -%}
+    {%- render 'pdp-description', product: product, block: block -%}
+    {%- when 'ingredients' -%}
+    {%- render 'pdp-ingredients', product: product, block: block -%}
+    {%- when 'safety_information' -%}
+    {%- render 'pdp-safety-info', product: product, block: block -%}
+    {%- when '@app' -%}
+    {% render block %}
+    {%- endcase -%}
+  {%- endfor -%}
+</pdp-details>
+
+<script>
+  (function () {
+    const showMoreBtns = document.querySelectorAll('[data-pdp-show-more]');
+
+    showMoreBtns.forEach(btn => {btn.addEventListener('click', (e) => {
+      dataLayer.push({
+      'event': 'show_more_clicks',
+        'click': {
+          'show_more_type': e.target.getAttribute('data-pdp-show-more') || e.target.closest('[data-pdp-show-more]').getAttribute('data-pdp-show-more'),
+        }
+      })
+    })})
+  })()
+</script>
+
+
+

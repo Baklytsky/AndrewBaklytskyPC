@@ -1,0 +1,32 @@
+{% comment %}
+  {% render 'page-header', description: str %}
+{% endcomment %}
+
+{%- assign default_description = [page_type].description | strip_html -%}
+{%- assign description = description | default: default_description -%}
+
+<page-header class="page__head rel">
+  <h1 class="page__head-heading h2">{{ [request.page_type].title }}</h1>
+
+  {% if description != blank %}
+    <div class="page__head-description--preview body1">{{ description }}</div>
+    <div class="page__head-description hide-description body1">{{ description }}</div>
+    <show-more class="show-more page__head-description hide-description body1"
+               data-inline
+               aria-expanded="false"
+               tabindex="-1"
+               data-connected-target="page__head-description-{{ section.id }}">
+      <div data-show-more-body>
+        <div class="rte" data-show-more-opener>
+          {{- description -}}
+        </div>
+
+        <button aria-expanded="false" type="button" data-show-more-heading class="show-more__btn btn--reset a body3">
+          <span class="show-more__btn-text show-more__btn-text--more">{{ "products.facets.show_more" | t }}</span>
+          <span class="show-more__btn-text show-more__btn-text--less">{{ "products.facets.show_less" | t }}</span>
+          <span class="show-more__btn-icons block">{% render 'icon' with 'plus-small' %}{% render 'icon' with 'minus-small' %}</span>
+        </button>
+      </div>
+    </show-more>
+  {% endif %}
+</page-header>

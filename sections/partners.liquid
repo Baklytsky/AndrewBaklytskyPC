@@ -1,0 +1,207 @@
+{{ 'partners.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+-%}
+
+{% if section.blocks.size > 0 %}
+  <div class="partners"
+    data-aos="fade-up"
+    style="
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;
+      --bg-color: {{ section_bg_color }};
+      --color: {{ text_color }};
+      "
+  >
+    <div class="page-width">
+      <div class="partners__content-wrapper">
+        {%- if heading != blank -%}
+          <h3 class="partners__heading h4">
+            {{ heading }}
+          </h3>
+        {%- endif -%}
+
+        {%- if description != blank -%}
+          <div class="partners__description body3">
+            {{ description }}
+          </div>
+        {%- endif -%}
+
+        <ul class="partners__logo-list">
+          {% for block in section.blocks %}
+            {% liquid
+              assign logo_image = block.settings.image
+              assign logo_svg = block.settings.svg
+              assign logo_width = block.settings.width
+              assign logo_width_mobile = block.settings.width_mobile
+              assign logo_url = block.settings.url
+            %}
+
+            {% if logo_image != blank or logo_svg != blank %}
+              <li class="partners__logo-item"
+                style="--logo-width: {{ logo_width }}px;
+                  --logo-width-mobile: {{ logo_width_mobile }}px;"
+              >
+                {% if logo_url != blank %}
+                  <a href="{{ logo_url }}" class="partners__logo-url"
+                    aria-hidden="true"
+                  >
+                    <span class="visually-hidden">Partners Logo</span>
+                  </a>
+                {% endif %}
+
+                {% if logo_svg != blank %}
+                  {{ logo_svg }}
+                {% else %}
+                  {% render 'image', image: logo_image %}
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Partners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Partners"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "partner_logo",
+      "limit": 10,
+      "name": "Partner logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        },
+        {
+          "type": "html",
+          "id": "svg",
+          "label": "SVG",
+          "info": "SVG has priority over the image"
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 50,
+          "max": 200,
+          "step": 2,
+          "unit": "px",
+          "label": "Logo width",
+          "default": 150
+        },
+        {
+          "type": "range",
+          "id": "width_mobile",
+          "min": 50,
+          "max": 200,
+          "step": 2,
+          "unit": "px",
+          "label": "Logo width mobile",
+          "default": 150
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Partners"
+    }
+  ]
+}
+{% endschema %}

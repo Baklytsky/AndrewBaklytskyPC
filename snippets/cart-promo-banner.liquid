@@ -1,0 +1,40 @@
+{% comment %}
+  {% render 'cart-promo-banner' heading: str, bg_color: color, image: image, text_top: text, text_top_style: class text_bottom: text, border_bottom: boolean  %}
+{% endcomment %}
+
+{%- liquid
+  assign heading = block.settings.heading
+  assign bg_color = block.settings.bg_color
+  assign image = block.settings.image
+  assign text_top = block.settings.text_top
+  assign text_top_style = block.settings.text_top_style
+  assign text_bottom = block.settings.text_bottom
+  assign border_bottom = block.settings.border_bottom -%}
+
+{%- if image != blank and text_top != blank -%}
+  <div class="cart-promo-banner__wrapper cart-padding" style="--bg-color: {{ bg_color }};">
+    <div class="cart-promo-banner {% if border_bottom %} border-bottom {% endif %}">
+      {% if heading %}
+        <h5 class="cart-promo-banner__heading body1">{{ heading }}</h5>
+      {% endif %}
+
+      <div class="cart-promo-banner__content">
+        <div class="cart-promo-banner__content-image rel">
+          {% render 'image', image: image, class_name: 'cart-promo-banner__image image-abs-cover', alt: image.alt, small_size: true %}
+        </div>
+
+        <div class="cart-promo-banner__content-text">
+          <div class="cart-promo-banner__content-text-top {{ text_top_style }}">
+            {{ text_top }}
+          </div>
+
+          {% if text_bottom != blank %}
+            <div class="cart-promo-banner__content-text-bottom">
+              {{ text_bottom }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}

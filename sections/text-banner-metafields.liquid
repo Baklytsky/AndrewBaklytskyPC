@@ -1,0 +1,186 @@
+{%- liquid
+  assign enable_sections = [request.page_type].metafields.text_banner.enable_section
+  assign this_section_id = section.settings.section_id | handleize
+-%}
+
+{%- for enable_section in enable_sections -%}
+  {%- liquid assign section_id = [request.page_type].metafields.text_banner.section_id[forloop.index0] | handleize -%}
+
+  {%- if enable_section == 'true' and section_id == this_section_id -%}
+
+    {{ 'text-banner.min.css' | asset_url | stylesheet_tag }}
+
+    {%- liquid
+      assign border_bottom = [request.page_type].metafields.text_banner.section_border_bottom[forloop.index0]
+      assign section_bg_color = [request.page_type].metafields.text_banner.background_color[forloop.index0] | default: '#FFFFFF'
+      assign section_bg_image = [request.page_type].metafields.text_banner.background_image[forloop.index0][0]
+      assign section_text_color = [request.page_type].metafields.text_banner.text_color[forloop.index0] | default: '#383838'
+      assign section_width_content = [request.page_type].metafields.text_banner.content_width[forloop.index0] | default: '100%'
+
+      if section_width_content == 'Middle container'
+        assign section_width_content = '680px'
+      endif
+
+      assign content_position = [request.page_type].metafields.text_banner.content_position[forloop.index0]
+      assign padding_top_desk = [request.page_type].metafields.text_banner.top_desktop_padding[forloop.index0] | default: 20
+      assign padding_bottom_desk = [request.page_type].metafields.text_banner.bottom_desktop_padding[forloop.index0] | default: 20
+      assign padding_top_mob = [request.page_type].metafields.text_banner.top_mobile_padding[forloop.index0] | default: 20
+      assign padding_bottom_mob = [request.page_type].metafields.text_banner.bottom_mobile_padding[forloop.index0] | default: 20
+      assign content_padding_desk = [request.page_type].metafields.text_banner.content_desktop_paddings[forloop.index0] | default: 0
+      assign content_padding_mob = [request.page_type].metafields.text_banner.content_mobile_paddings[forloop.index0] | default: 0
+
+      if  padding_top_desk == 0 or padding_top_desk == '0'
+        assign padding_top_desk = 20
+      endif
+
+      if  padding_bottom_desk == 0 or padding_bottom_desk == '0'
+        assign padding_bottom_desk = 20
+      endif
+
+      if  padding_top_mob == 0 or padding_top_mob == '0'
+        assign padding_top_mob = 20
+      endif
+
+      if  padding_bottom_mob == 0 or padding_bottom_mob == '0'
+        assign padding_bottom_mob = 20
+      endif
+
+      assign preheading = [request.page_type].metafields.text_banner.preheading[forloop.index0]
+      assign preheading_font_size = [request.page_type].metafields.text_banner.preheading_font_size[forloop.index0]
+      assign preheading_class = "text-banner__preheading " | append: preheading_font_size
+
+      assign heading = [request.page_type].metafields.text_banner.heading[forloop.index0]
+      assign heading_font_size = [request.page_type].metafields.text_banner.heading_font_size[forloop.index0] | default: 'h4'
+      assign heading_position = [request.page_type].metafields.text_banner.heading_position[forloop.index0]
+      assign heading_class = "text-banner__heading " | append: heading_font_size
+
+      case heading_position
+      when 'Center'
+        assign heading_position = 2
+      when 'Bottom'
+        assign heading_position = 3
+      else
+        assign heading_position = 1
+      endcase
+
+      assign subheading = [request.page_type].metafields.text_banner.subheading[forloop.index0]
+      assign subheading_font_size = [request.page_type].metafields.text_banner.subheading_font_size[forloop.index0] | default: 'h6'
+      assign subheading_width = [request.page_type].metafields.text_banner.subheading_width[forloop.index0]
+      assign subheading_position = [request.page_type].metafields.accentuate.subheading_position[forloop.index0]
+      assign subheading_class = "text-banner__subheading " | append: subheading_font_size
+
+      case subheading_position
+      when 'Top'
+        assign subheading_position = 1
+      when 'Bottom'
+        assign subheading_position = 3
+      else
+        assign subheading_position = 2
+      endcase
+
+      assign button_label = [request.page_type].metafields.text_banner.button_label[forloop.index0]
+      assign button_link = [request.page_type].metafields.text_banner.button_link[forloop.index0]
+      assign button_style = [request.page_type].metafields.text_banner.button_style[forloop.index0]
+
+      case button_style
+      when 'Primary'
+        assign button_style = 'primary'
+      when 'Primary alternative'
+        assign button_style = 'primary-alt'
+      when 'Secondary'
+        assign button_style = 'secondary'
+      else
+        assign button_style = 'secondary-alt'
+      endcase
+
+      assign button_position = [request.page_type].metafields.text_banner.button_position[forloop.index0]
+
+      case button_position
+      when 'Top'
+        assign button_position = 1
+      when 'Center'
+        assign button_position = 2
+      else
+        assign button_position = 3
+      endcase
+
+      if heading != blank and subheading != blank and preheading != blank
+        assign ignore_position = true
+      endif
+    -%}
+
+    <div class="text-banner {% if border_bottom == 'true' %}border-bottom{% endif %}"
+         data-aos="fade-up"
+         style="
+           --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+           --padding-top-desktop: {{ padding_top_desk }}px;
+           --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+           --padding-top-mobile: {{ padding_top_mob }}px;
+           --content-padding-desktop: {{ content_padding_desk }}px;
+           --content-padding-mobile: {{ content_padding_mob }}px;
+           --width-content: {{ section_width_content }};
+           --bg-color: {{ section_bg_color }};
+           --color: {{ section_text_color }};
+           --subheading-width: {{ subheading_width }}px;">
+
+      {%- if section_bg_image != blank -%}
+        {% render 'image-metafields',
+          image: section_bg_image,
+          class_name: 'image-abs-cover',
+          alt: section_bg_image.alt %}
+      {%- endif -%}
+
+      <div class="page-width text-banner__content text-banner__content--{{ content_position | handleize }}">
+        {% render 'text-banner-metafields-fragment' text: preheading, class: preheading_class %}
+
+        {%- if ignore_position -%}
+          {% render 'text-banner-metafields-fragment' text: heading, class: heading_class %}
+          {% render 'text-banner-metafields-fragment' text: subheading, class: subheading_class %}
+          {% render 'text-banner-metafields-fragment' text: button_label, class: button_style, type: "btn", link: button_link %}
+        {%- else -%}
+          {%- for i in (1..3) -%}
+            {%- if heading_position == i -%}
+              {% render 'text-banner-metafields-fragment' text: heading, class: heading_class %}
+            {%- endif -%}
+
+            {%- if subheading_position == i -%}
+              {% render 'text-banner-metafields-fragment' text: subheading, class: subheading_class %}
+            {%- endif -%}
+
+            {%- if button_position == i -%}
+              {% render 'text-banner-metafields-fragment' text: button_label, class: button_style, type: "btn", link: button_link %}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+{%- endfor -%}
+
+{% schema %}
+{
+  "name": "Text banner (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    },
+    {
+      "type": "text",
+      "id": "section_id",
+      "label": "Section id",
+      "info": "This id must equal id in the metafields."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text banner (MF)"
+    }
+  ],
+  "templates": [
+    "product"
+  ]
+}
+{% endschema %}

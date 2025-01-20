@@ -1,0 +1,143 @@
+{%- comment -%}
+{%- render 'account-nav', customer_status: {String} -%}
+{%- endcomment -%}
+
+<nav class="account-nav" id="account-nav--{{ section.id }}">
+  <h4 class="h4 account__heading">Hello{%- if customer.first_name != blank %},
+    <span>{{ customer.first_name }}</span>{%- endif -%}</h4>
+  <ul class="account-nav__list body3 small-hide">
+    {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+      <li class="account-nav__item">
+        <button type="button" class="btn--reset a account-nav__item-button js-nav-button" aria-expanded="true"
+                aria-controls="account-overview">
+          {{ 'customer.account_nav.overview' | t }}
+        </button>
+      </li>
+    {%- endif -%}
+    <li class="account-nav__item">
+      <button type="button" class="btn--reset a account-nav__item-button js-nav-button"
+              aria-expanded="{% if customer_status == 'Customer' or customer_status == 'Sales' %}true{% else %}false{% endif %}"
+              aria-controls="account-profile">
+        {{ 'customer.account_nav.profile' | t }}
+      </button>
+    </li>
+    {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+    <li class="account-nav__item">
+      <button type="button" class="btn--reset a account-nav__item-button js-nav-button" aria-expanded="false"
+              aria-controls="account-details">
+        {{ 'customer.account_nav.details' | t }}
+      </button>
+    </li>
+    {%- endif -%}
+    <li class="account-nav__item">
+      <button type="button" class="btn--reset a account-nav__item-button js-nav-button"
+              aria-expanded="false"
+              aria-controls="account-orders">
+        {{ 'customer.account_nav.orders' | t }}
+      </button>
+    </li>
+    <li class="account-nav__item">
+      {%- render 'ordergroove_subscription_interface_link' -%}
+    </li>
+    {%- comment -%}
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        <li class="account-nav__item">
+          <button type="button" class="btn--reset a account-nav__item-button js-nav-button" aria-expanded="false"
+                  aria-controls="account-certifications">
+            {{ 'customer.account_nav.certifications' | t }}
+          </button>
+        </li>
+      {%- endif -%}
+    {%- endcomment -%}
+    <li class="account-nav__item">
+      <button type="button" class="btn--reset a account-nav__item-button js-nav-button" aria-expanded="false"
+              aria-controls="account-rewards">
+        {{ 'customer.account_nav.rewards' | t }}
+      </button>
+    </li>
+    <li class="account-nav__item" {{ block.shopify_attributes }}>
+      <a href="{{ routes.account_logout_url }}" class="account-nav__item-button">
+        {{ 'customer.log_out' | t }}
+      </a>
+    </li>
+  </ul>
+
+  <custom-select class="form-select body3 form-select-alternative small-up-hide">
+    <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false"
+            aria-controls="dropdown-{{ customer.id }}">
+      {%- liquid
+        assign first_selected_block = section.blocks | first -%}
+
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        {%- assign selected_nav =  'customer.account_nav.overview' | t -%}
+      {%- else -%}
+        {%- assign selected_nav =  'customer.account_nav.profile' | t -%}
+      {%- endif -%}
+
+      <span class="form-select__btn-text">{{ selected_nav }}</span>
+      <span class="form-select__dropdown-option--label"></span>
+
+      {%- render 'icon' with 'arrow-down' -%}
+    </button>
+
+    <ul class="form-select__dropdown hide-scrollbar" id="dropdown-{{ customer.id }}" style="display: none;">
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        <li class="form-select__dropdown-option a" aria-selected="true" data-option-value="overview">
+          <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                  aria-expanded="true" aria-controls="account-overview">
+            {{ 'customer.account_nav.overview' | t }}
+          </button>
+        </li>
+      {%- endif -%}
+      <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="profile">
+        <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                aria-expanded="{% if customer_status == 'Customer' or customer_status == 'Sales' %}true{% else %}false{% endif %}"
+                aria-controls="account-profile">
+          {{ 'customer.account_nav.profile' | t }}
+        </button>
+      </li>
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="details">
+          <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                  aria-expanded="false" aria-controls="account-details">
+            {{ 'customer.account_nav.details' | t }}
+          </button>
+        </li>
+      {%- endif -%}
+      <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="orders">
+        <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                aria-expanded="false" aria-controls="account-orders">
+          {{ 'customer.account_nav.orders' | t }}
+        </button>
+      </li>
+      <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="subscription">
+        {%- render 'ordergroove_subscription_interface_link' -%}
+      </li>
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="certifications">
+          <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                  aria-expanded="false" aria-controls="account-certifications">
+            {{ 'customer.account_nav.certifications' | t }}
+          </button>
+        </li>
+      {%- endif -%}
+      <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="rewards">
+        <button type="button" class="btn--reset a form-select__dropdown-button account-nav__item-button js-nav-button"
+                aria-expanded="false" aria-controls="account-rewards">
+          {{ 'customer.account_nav.rewards' | t }}
+        </button>
+      </li>
+      <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="sign-out">
+        <a href="{{ routes.account_logout_url }}" class="form-select__dropdown-button">
+          {{ 'customer.log_out' | t }}
+        </a>
+      </li>
+    </ul>
+
+    <input type="hidden" class="form__input-hidden" value="">
+  </custom-select>
+</nav>
+
+<script>
+  document.documentElement.style.setProperty('--account-nav-width', document.querySelector('#account-nav--{{ section.id }}').getBoundingClientRect().width + 'px');
+</script>

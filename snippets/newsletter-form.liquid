@@ -1,0 +1,130 @@
+{%- comment -%}
+  {%- render 'newsletter-form', block: block  -%}
+{%- endcomment -%}
+
+<script src="{{ 'component-newsletter.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+    assign marketing_text = block.settings.newsletter_description
+    assign marketing_enable = block.settings.marketing_enable
+-%}
+<newsletter-footer class="footer-newsletter__form" data-klaviyo-list-id="{{ block.settings.klaviyo_list_id }}">
+  <form method="post" action="/contact#contact_form" id="contact_form" accept-charset="UTF-8" class="newsletter-form" data-form-name="Newsletter">
+    {%- if form.posted_successfully? -%}
+      {% style %}
+        .form-input.form-input--{{ section.id }}::placeholder {
+          color: {{ settings.color_accent_primary }};
+        }
+      {% endstyle %}
+
+      <script>
+        window.dataLayer.push({
+          'event': 'generate_lead',
+          'customer': {
+            'b2b_specialty': '',
+            'b2b_role': '',
+            'b2b_city': '',
+            'b2b_state': '',
+            'b2b_registration_reason': ''
+          },
+          'user': {
+            'lead': {
+              'lead_type': 'D2C',
+              'lead_driver': 'Contact Us'
+            }
+          }
+        });
+
+        window.dataLayer.push({
+          'event': 'form_complete',
+          'form': {
+            'form_name': 'Newsletter',
+          }
+        })
+      </script>
+    {%- endif -%}
+
+    <input type="hidden" name="contact[tags]" value="newsletter">
+    <div class="newsletter-form__wrapper rel">
+      <input
+        id="NewsletterForm--{{ section.id }}"
+        type="email"
+        name="contact[email]"
+        class="form-input form-input--{{ section.id }}"
+        value="{{ form.email }}"
+        aria-required="true"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="email"
+        {% if form.errors %}
+          autofocus
+          aria-invalid="true"
+          aria-describedby="Newsletter-error--{{ section.id }}"
+          {% elsif form.posted_successfully? %}
+          aria-describedby="Newsletter-success--{{ section.id }}"
+        {% endif %}
+        placeholder="{% if form.posted_successfully? %}{{ 'newsletter.success' | t }}{%- else -%}{{ 'newsletter.label' | t }}{% endif %}"
+        required
+      >
+      <label class="u-sr-only" for="NewsletterForm--{{ section.id }}">{{ 'newsletter.label' | t }}</label>
+      <button type="submit"
+              class="newsletter-form__submit-btn form-arrow-submit"
+              name="subscribe" id="subscribe"
+              aria-label="{{ 'newsletter.button_label' | t }}">
+        {% render 'icon' with 'arrow-right-large' %}
+      </button>
+
+      {% if block.settings.success_message != blank %}
+        <div class="footer-newsletter__message footer-newsletter__success hide">
+          {{ block.settings.success_message }}
+        </div>
+      {% endif %}
+      {% if block.settings.is_subscribed != blank %}
+        <div class="footer-newsletter__message footer-newsletter__is-subscribed hide">
+          {{ block.settings.is_subscribed }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.error_message != blank %}
+      <div class="footer-newsletter__message footer-newsletter__error hide">
+        {{ block.settings.error_message }}
+      </div>
+    {% endif %}
+
+    <div class="footer-newsletter__message footer-newsletter__error-email hide">
+      {{ "form_errors.email" | t }}
+    </div>
+
+    {%- if form.errors -%}
+      <div id="Newsletter-error--{{ section.id }}" class="form-error">
+        {{ 'newsletter.email_error_message' | t }}
+      </div>
+    {%- endif -%}
+  {%- if form.errors -%}
+    <div id="Newsletter-error--{{ section.id }}" class="form-error">
+      {{ 'newsletter.email_error_message' | t }}
+    </div>
+
+    <script>
+      window.dataLayer.push({
+        'event': 'form_error',
+        'form': {
+          'form_name': 'Newsletter',
+          'form_validation_errors': '',
+          'error_message': '',
+        },
+      });
+    </script>
+  {%- endif -%}
+
+    {%- if marketing_enable and marketing_text != blank -%}
+      <input type="checkbox" name="newsletterMarketing" id="newsletter-marketing" checked class="form__checkbox">
+      <label for="newsletter-marketing" class="footer__newsletter-description body3">{{ marketing_text }}</label>
+    {%- elsif marketing_text != blank -%}
+      <div class="footer__newsletter-description body3">
+        {{ marketing_text }}
+      </div>
+    {%- endif -%}
+  </form>
+</newsletter-footer>

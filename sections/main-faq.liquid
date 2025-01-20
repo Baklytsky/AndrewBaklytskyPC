@@ -1,0 +1,205 @@
+{{ 'faq.min.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'links-select.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign list_pages = section.settings.list_pages
+  assign heading = page.title
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign show_accordions = page.metafields.faq.show_accordion
+  assign meta_categories = page.metafields.faq.category
+  assign meta_categories_uniq = meta_categories | uniq
+  assign meta_questions = page.metafields.faq.question
+  assign meta_answers = page.metafields.faq.answer
+
+  if page.metafields.faq.show_button == 'true'
+    assign button_label = page.metafields.faq.button_label
+    assign button_url = page.metafields.faq.button_url
+    assign button_style = page.metafields.faq.button_style
+  endif
+
+  if meta_categories_uniq == blank
+    assign meta_categories_uniq = " " | split: ''
+  endif
+-%}
+
+
+{%- if meta_questions.size > 0 or meta_questions.size > 0 or list_pages != blank -%}
+  <div class="faq-main faq page-width faq-main-{{ section.id }}" style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;" data-aos="fade-up">
+    {%- if list_pages != blank -%}
+      <div class="faq__select-wrapper  medium-up-hide">
+        <label class="faq__select-label visually-hidden" for="mobile-links-select">{{ 'sections.main_faq.mobile_select_label' | t }}</label>
+        <select class="faq__select form__select"
+                id="mobile-links-select"
+                name="specialty">
+          {%- for link in list_pages.links -%}
+            {%- liquid
+              assign link_title = link.title | handleize
+              assign heading_handleize = heading | handleize
+            -%}
+
+            <option value="{{ link.url }}" {% if link_title contains heading_handleize %} selected {%- endif -%}>{{ link.title }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endif -%}
+
+    <div class="faq__wrapper">
+      {%- if list_pages != blank -%}
+        <ul class="faq__navigation medium-hide">
+          {%- for link in list_pages.links -%}
+            {%- liquid
+              assign link_title = link.title | handleize
+              assign heading_handleize = heading | handleize
+            -%}
+
+            <li class="faq__navigation">
+              <a class="faq__header-tab"
+                 href="{{ link.url }}"
+                 aria-selected="{% if link_title contains heading_handleize %}true{%- else -%}false{%- endif -%}">
+                {{ link.title }}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <div class="faq__accordions-wrapper">
+        {%- if heading != blank -%}
+          <h3 class="faq__heading">{{ heading }}</h3>
+        {%- endif -%}
+
+        {%- if button_label != blank and button_url != blank -%}
+          <a href="{{ button_url }}" class="faq__btn btn btn--{{ button_style }}">
+            {{ button_label }}
+          </a>
+        {%- endif -%}
+
+        {%- for group_category in meta_categories_uniq -%}
+          <div class="faq__accordions-group">
+            {%- if group_category != blank -%}
+              <h4 class="faq__heading-group h5">{{ group_category }}</h4>
+            {%- endif -%}
+
+            {%- for question in meta_questions -%}
+              {%- liquid
+                assign answer = meta_answers[forloop.index0]
+                assign category = meta_categories[forloop.index0]
+                assign show_accordion = show_accordions[forloop.index0]
+              -%}
+
+              {%- if category == group_category or group_category == blank -%}
+                {%- if category != blank and category != group_category -%}
+                  {%- continue -%}
+                {%- endif -%}
+
+                {% if question != blank and answer != blank and show_accordion == 'true' %}
+                  {% render 'accordion' group: section.id, index: forloop.index, title: question, body: answer %}
+                {% endif %}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const wrapper = document.querySelector('.faq-main-{{ section.id }}');
+      const contentWrapper = wrapper.querySelector('.faq__accordions-wrapper');
+
+      contentWrapper.addEventListener('click', function (e) {
+        const faqLevel1 = wrapper.querySelector('.faq__header-tab[aria-selected="true"]')?.textContent || '';
+        const faqLevel2 = e.target.textContent || e.target.closest('.accordion__button').querySelector('.accordion-title')?.textContent || '';
+        if (faqLevel1 || faqLevel2) {
+          window.dataLayer.push({
+          'event': 'faq_click',
+            'click': {
+            'faq_level_1': faqLevel1.trim(),
+            'faq_level_2': faqLevel2.trim()
+            }
+          })
+        }
+      })
+    })()
+  </script>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "FAQ page (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "link_list",
+      "id": "list_pages",
+      "label": "List pages"
+    },
+    {
+      "type": "header",
+      "content": "Other content is configured in metafields"
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ page (MF)"
+    }
+  ],
+  "templates": [
+    "page"
+  ]
+}
+{% endschema %}

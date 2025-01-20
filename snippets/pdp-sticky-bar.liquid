@@ -1,0 +1,75 @@
+{%- comment -%}
+{%- render 'pdp-sticky-bar',
+  product: product,
+  current_variant: current_variant,
+  notify_me: notify_me -%}
+{%- endcomment -%}
+
+{{ 'pdp-sticky-bar.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-pdp-sticky-bar.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign current_variant_image = current_variant.featured_image | default: product.featured_image
+  assign current_variant_image_alt = current_variant_image.alt | default: current_variant.title -%}
+
+<pdp-sticky-bar class="pdp-sticky-bar" aria-hidden="true" tabindex="0" data-notify-me="{{ notify_me }}">
+  <div class="pdp-sticky-bar__wrapper page-width">
+    <div class="pdp-sticky-bar__details">
+      {%- if current_variant_image -%}
+        <div class="pdp-sticky-bar__details-image rel sticky-bar-image--{{ section.id }}">
+          {% render 'image',
+            image: current_variant_image,
+            class_name: 'image-abs-cover', alt: current_variant_image_alt, small_size: true %}
+        </div>
+      {%- endif -%}
+      <div class="pdp-sticky-bar__details-info">
+        {%- liquid
+          assign main_collection = product.metafields.custom.collection_picker.value
+          assign product_collections = product.metafields.custom.collection -%}
+
+        {%- if product_collections != blank -%}
+          <a href="{{ main_collection.url }}" class="pdp-sticky-bar__details__collection body3">
+            {{ product_collections.value[0] }}
+          </a>
+        {%- endif -%}
+
+        <h3 class="pdp-sticky-bar__title">{{ product.title }}</h3>
+      </div>
+    </div>
+    <button type="button" class="product-form__submit btn btn--primary-alt" data-notify-button>
+      {{ 'products.product.notify_me' | t }}
+    </button>
+    <form class="pdp-sticky-bar__button">
+      {%- liquid
+        assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price | default: 1999
+      -%}
+
+      <button
+        type="submit"
+        name="add"
+        class="product-form__submit btn btn--primary-alt"
+        form="{{ product_form_id }}"
+        {% if current_variant.available == false %}disabled{% endif %}>
+        <span class="product-form__submit-text">
+          {%- if current_variant.available -%}
+            {{ 'products.product.add_to_cart' | t }}
+          {%- else -%}
+            {{ 'products.product.sold_out' | t }}
+          {%- endif -%}
+        </span>
+        <div class="product-form__submit-price">
+          {{ price | money_with_currency }}
+        </div>
+        <div class="loading-overlay__spinner hidden">
+          {% render 'icon' with 'spinner' %}
+        </div>
+      </button>
+
+      {% render 'physician-link', class: 'hidden btn  btn--primary-alt product-form__btn-link' %}
+
+      <div class="product-form__error-message-wrapper visually-hidden" role="alert" data-error-wrapper>
+        <span class="product-form__error-message" data-error-message></span>
+      </div>
+    </form>
+  </div>
+</pdp-sticky-bar>

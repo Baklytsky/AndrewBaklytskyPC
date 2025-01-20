@@ -1,0 +1,62 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - ingredients_show_less: {String} For RX Only product (optional)
+  - ingredients_show_more: {String} For RX Only product (optional)
+  Usage:
+{%- render 'pdp-ingredients', product: product, block: block, ingredients_show_less: , ingredients_show_more:  -%}
+{% endcomment %}
+
+{%- liquid
+  assign heading = block.settings.heading
+  assign collapsed_by_default = block.settings.collapsed_by_default
+  assign ingredients_less = product.metafields.accentuate.ingredients_show_less | default: ingredients_show_less
+  assign ingredients_more = product.metafields.accentuate.ingredients_show_more | default: ingredients_show_more -%}
+
+{%- if ingredients_less != blank -%}
+  <accordion-element class="pdp-details__ingredients accordion"
+                     data-accordion-group="pdp-details-{{ section.id }}">
+    <div class="accordion__item">
+      <button type="button"
+              aria-expanded="{% if collapsed_by_default %}false{% else %}true{% endif %}"
+              class="h6 btn--reset accordion__button"
+              aria-controls="content-ingredients-{{ section.id }}"
+              id="accordion-button-ingredients-{{ section.id }}"
+              data-pdp-show-more="{{ heading }}">
+
+        <span class='accordion-title'>{{ heading }}</span>
+
+        <span class="accordion__icons block">
+          {% render 'icon' with 'plus-small' %}
+          {% render 'icon' with 'minus-small' %}
+        </span>
+      </button>
+
+      <div id="content-ingredients-{{ section.id }}"
+           aria-labelledby="accordion-button-ingredients-{{ section.id }}"
+           class="accordion__content-inner"
+           style="display: {% if collapsed_by_default %}none{% else %}block{% endif %}">
+        <show-more class="show-more"
+                   aria-expanded="false"
+                   tabindex="-1"
+                   data-connected-target="ingredients-{{ section.id }}">
+          <div data-show-more-body>
+            {{ ingredients_less }}
+
+            {%- if ingredients_more != blank -%}
+              <div data-show-more-opener>
+                {{ ingredients_more }}
+              </div>
+
+              <button aria-expanded="false" type="button" data-show-more-heading class="show-more__btn btn--reset a">
+              <span class="show-more__btn-text show-more__btn-text--more">{{ "products.facets.show_more" | t }}</span>
+              <span class="show-more__btn-text show-more__btn-text--less">{{ "products.facets.show_less" | t }}</span>
+              <span class="show-more__btn-icons block">{% render 'icon' with 'plus-small' %}{% render 'icon' with 'minus-small' %}</span>
+              </button>
+            {%- endif -%}
+          </div>
+        </show-more>
+      </div>
+    </div>
+  </accordion-element>
+{%- endif -%}

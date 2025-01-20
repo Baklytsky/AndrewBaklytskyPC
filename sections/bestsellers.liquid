@@ -1,0 +1,179 @@
+{%- liquid
+  assign enable_section = [request.page_type].metafields.bestsellers.enable_section.value
+-%}
+
+{%- unless enable_section == false -%}
+{% render '_bestsellers.min.css' %}
+
+  {%- liquid
+    assign section_bg_color = section.settings.section_bg_color
+    assign heading = [request.page_type].metafields.bestsellers.heading.value | default: section.settings.heading
+    assign subheading = [request.page_type].metafields.bestsellers.subheading.value | default: section.settings.subheading
+    assign button_label = [request.page_type].metafields.bestsellers.button_label.value | default: section.settings.button_label
+    assign button_link = [request.page_type].metafields.bestsellers.button_link.value | default: section.settings.button_link
+    assign button_style = section.settings.button_style
+    assign product_list = [request.page_type].metafields.bestsellers.products.value | default: section.settings.product_list -%}
+
+  {%- capture swiper_config -%}
+    {
+      "slidesPerView": 1.25,
+      "spaceBetween": 20,
+      "watchSlidesProgress": true,
+      "freeMode": true,
+      "mousewheel": {
+        "forceToAxis": true
+      },
+      "navigation": {
+        "nextEl": ".swiper-button-next--{{ section.id }}",
+        "prevEl": ".swiper-button-prev--{{ section.id }}"
+      },
+      "scrollbar": {
+        "el": ".swiper-scrollbar--{{ section.id }}",
+        "hide": false,
+        "draggable": true
+      },
+      "breakpoints": {
+        "768": {
+          "slidesPerView": 3,
+          "shortSwipes": false
+        }
+      }
+    }
+  {%- endcapture -%}
+
+
+  <div class="bestsellers"
+       data-aos="fade-up"
+       style="--bg-color: {{ section_bg_color }}">
+    {%- if heading != blank or subheading != bank or button_label != blank -%}
+      <div class="bestsellers__header page-width">
+        <div class="bestsellers__header-wrapper">
+          {%- if heading != blank or subheading != bank -%}
+            {%- if heading != blank -%}
+              <h3 class="bestsellers__header-heading">{{ heading }}</h3>
+            {%- endif -%}
+            {%- if subheading != bank -%}
+              <div class="bestsellers__header-subheading h3">{{ subheading }}</div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+        {%- if button_label != blank -%}
+          <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+            href="{{ button_link }}"{% endif %}
+            class="bestsellers__header-btn btn btn--{{ button_style }} btn--physician-finder">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if product_list != blank -%}
+      {%- capture slides -%}
+        {%- for product in product_list -%}
+
+          {%- if product.tags contains 'dev_product'
+            or product.tags contains 'test_product'
+            or product.tags contains 'hidden'
+            or product.tags contains 'not-allowed' -%}
+            {% continue %}
+          {%- endif -%}
+
+          <div class="swiper-slide" {{ block.shopify_attributes }}>
+            {%- render 'product-card', product: product, quick_add: true -%}
+          </div>
+        {%- endfor -%}
+      {%- endcapture -%}
+    {%- else -%}
+      {%- capture slides -%}
+        {%- for i in (1..10) -%}
+          <div class="swiper-slide">
+            {%- render 'empty-product-card' -%}
+          </div>
+        {%- endfor -%}
+      {%- endcapture -%}
+    {%- endif -%}
+
+    {%- render 'slideshow-swiper',
+      class_name: 'bestsellers__slider rel page-width',
+      config: swiper_config,
+      slides: slides,
+      show_slider_nav: true,
+      show_scroll_bar: true,
+      nav_id: section.id -%}
+  </div>
+
+  {% render 'ga-product-list-event', event_type: 'view_item_list', product_list: product_list, list_name: heading, list_id: section.id %}
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Bestsellers",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Bestsellers"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>with <i>unparalleled</i> results</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop All"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products",
+      "limit": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bestsellers"
+    }
+  ]
+}
+{% endschema %}

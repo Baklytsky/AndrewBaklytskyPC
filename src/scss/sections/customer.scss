@@ -1,0 +1,261 @@
+@import "../helpers/mixins";
+
+.customer-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 95px 75px 80px;
+
+  @include mq($small-max) {
+    flex-direction: column;
+    padding: 40px 20px;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.customer-register-wrapper {
+  .customer-register {
+    border: none;
+  }
+}
+
+.customer-login,
+.customer-register,
+.customer-pro-register {
+  width: 50%;
+  padding: 0 20px;
+
+  @include mq($small-max) {
+    width: 100%;
+    padding: 0;
+  }
+
+  form,
+  .customer-pro-register__content-wrapper {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}
+
+.customer-login {
+  @include mq($small-max) {
+    margin-bottom: 40px;
+  }
+}
+
+.customer-register {
+  border-left: 1px solid var(--color-text-primary);
+
+  @include mq($small-max) {
+    border-left: none;
+
+    form {
+      border-top: 1px solid var(--color-text-primary);
+      padding-top: 40px;
+    }
+  }
+}
+
+.login-form__heading,
+.login-form__subheading {
+  margin-bottom: 20px;
+  text-transform: unset;
+}
+
+.login-form__recover-link {
+  display: inline-block;
+  margin: 20px 0;
+}
+
+#recover {
+  display: none;
+
+  &:target {
+    display: flex;
+
+    & + .customer-wrapper {
+      display: none;
+    }
+  }
+}
+
+.recover-form__wrapper {
+
+  @include mq($small-max) {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    min-height: calc(100vh - var(--header-height, 60px) - var(--announcement-bar-height, 0px));
+  }
+
+  &.reset-form__wrapper {
+    display: flex;
+  }
+}
+
+.recover-form__content {
+  width: 50%;
+  padding: 80px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+
+  @include mq($medium-max) {
+    padding: 40px 80px;
+  }
+
+  @include mq($small-max) {
+    width: 100%;
+    padding: 40px 20px;
+  }
+}
+
+.recover-form__pass-text {
+  margin: 20px 0;
+}
+
+.recover-form__image {
+  width: 50%;
+
+  @include mq($small-max) {
+    width: 100%;
+  }
+
+  img {
+    @include mq($small-max) {
+      height: 53.5vw;
+      object-fit: cover;
+    }
+  }
+}
+
+.recover-form__content-inner {
+  width: 100%;
+  max-width: 445px;
+  margin: 0 35px 0 auto;
+
+  @include mq($medium-max) {
+    margin: 0;
+  }
+
+  p {
+    margin-bottom: 10px;
+  }
+}
+
+.recover-form__heading {
+  margin-bottom: 20px;
+}
+
+.recover-form__text {
+  margin-bottom: 20px;
+}
+
+.recover-form__back-btn {
+  width: 100%;
+  margin: 20px 0 0;
+  text-decoration: underline;
+}
+
+.customer-register-page .login-form-error,
+.customer-login-page .register-form-error {
+  display: none;
+}
+
+.customer__edit-buttons {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .customer__cancel-btn {
+    margin-left: 10px;
+  }
+}
+
+.customer-pro-register {
+  border: none;
+
+  @include mq($small-max) {
+    form {
+      border-top: unset;
+    }
+  }
+
+  &.customer-pro-register__content {
+    border-right: 1px solid var(--color-text-primary);
+
+    @include mq($small-max) {
+      border-right: unset;
+      border-bottom: 1px solid var(--color-text-primary);
+      padding: 0 0 40px;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+  }
+
+  .customer-pro-register__heading {
+    margin: 0 0 40px;
+
+    @include mq($small-max) {
+      margin: 0 0 20px;
+    }
+  }
+
+  &.submitted {
+    button[type=submit],
+    button[type=submit]:hover {
+      background: transparent;
+      color: var(--color-link-text-hover);
+      border: 1px solid var(--color-link-text-hover);
+    }
+  }
+
+  .form-input,
+  .form-select {
+    padding: 10px 20px;
+    border: none;
+  }
+
+  custom-select {
+    &.form-select-alternative .form-select__dropdown {
+      margin: 0 0 10px;
+      padding: 0 20px 10px;
+      position: absolute;
+      top: 92%;
+      left: 0;
+      right: 0;
+      max-height: 250px;
+      z-index: 5;
+    }
+
+    &.error {
+      border: 1px solid var(--color-error);
+      border-radius: 5px;
+    }
+
+    .form-select__btn:hover svg {
+      color: var(--color-link-text-hover);
+    }
+
+    &.form-select--open {
+      box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.1);
+
+      .form-select__dropdown {
+        box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  .login-form__prof-text {
+    margin: 20px 0 0;
+
+    @include mq($small-max) {
+      max-width: 260px;
+    }
+  }
+}

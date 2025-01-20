@@ -1,0 +1,145 @@
+@import "../helpers/mixins";
+
+video-component {
+  z-index: -1;
+  opacity: 0;
+  transition: all .3s linear;
+}
+
+video-component.is-playing,
+video-component.is-loaded {
+  z-index: 2;
+  opacity: 1;
+}
+
+video-component.normal {
+  .js-video-wrapper iframe, .js-video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: unset;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  &.no-touch {
+    .js-video-wrapper iframe, .js-video-wrapper video {
+      pointer-events: none;
+    }
+  }
+}
+
+video-component {
+  .js-video-wrapper.contain-desk iframe,
+  .js-video-wrapper.contain-mobile iframe {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  @include mq($small-min) {
+    .js-video-wrapper.contain-desk iframe, .js-video-wrapper.contain-desk video {
+      object-fit: contain;
+    }
+  }
+
+  @include mq($small-max) {
+    .js-video-wrapper.contain-mobile iframe, .js-video-wrapper.contain-mobile video {
+      object-fit: contain;
+    }
+  }
+}
+
+.js-video-wrapper iframe, .js-video-wrapper video {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 105%;
+  height: 300%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  z-index: 1;
+
+  @include mq($xlarge-max) {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2133px;
+    height: 1200px;
+  }
+}
+
+.js-video-play-button,
+.js-video-pause-button,
+.js-video-mute-button,
+.js-video-unmute-button {
+  position: absolute;
+  bottom: 25px;
+  right: 100px;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: var(--controls-color, #FFF);
+  z-index: 2;
+  cursor: pointer;
+}
+
+.js-video-mute-button,
+.js-video-unmute-button {
+  right: 25px;
+}
+
+.controls-center {
+  .js-video-play-button,
+  .js-video-pause-button,
+  .js-video-mute-button,
+  .js-video-unmute-button {
+    right: calc(50% + 50px);
+    transform: translateX(50%);
+  }
+
+  .js-video-mute-button,
+  .js-video-unmute-button {
+    right: calc(50% - 50px);
+    transform: translateX(50%);
+  }
+}
+
+.controls-left {
+  .js-video-play-button,
+  .js-video-pause-button,
+  .js-video-mute-button,
+  .js-video-unmute-button {
+    right: unset;
+    left: 100px;
+  }
+
+  .js-video-mute-button,
+  .js-video-unmute-button {
+    right: unset;
+    left: 25px;
+  }
+}
+
+video-component.is-playing .js-video-play-button,
+.js-video-pause-button,
+video-component.is-muted .js-video-mute-button,
+.js-video-unmute-button {
+  display: none;
+}
+
+video-component.is-playing .js-video-pause-button,
+.js-video-play-button,
+video-component.is-muted .js-video-unmute-button,
+.js-video-mute-button {
+  display: flex;
+}

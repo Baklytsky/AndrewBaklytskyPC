@@ -1,0 +1,30 @@
+{%- comment -%}
+  {%- include 'customer-status-list' -%}
+  - Return {{ customer_status_list }} and {{ customer_status_list_handle_arr }} variable
+{%- endcomment -%}
+
+{%- liquid
+  assign customer_status_list = 'Customer'
+  assign customer_status_list_handle = 'customer'
+  for tag in customer.tags
+    assign tag_handleize = tag | handleize
+    case tag_handleize
+      when 'parent'
+        assign customer_status = 'Partner'
+        assign customer_status_handle = customer_status | handleize
+        assign customer_status_list = customer_status_list | append: ',' | append: customer_status
+        assign customer_status_list_handle = customer_status_list_handle | append: ',' | append: customer_status_handle
+      when 'premier-partner'
+        assign customer_status = 'Premier Partner'
+        assign customer_status_handle = customer_status | handleize
+        assign customer_status_list = customer_status_list | append: ',' | append: customer_status
+        assign customer_status_list_handle = customer_status_list_handle | append: ',' | append: customer_status_handle
+      when 'sales'
+        assign customer_status = 'Sales'
+        assign customer_status_handle = customer_status | handleize
+        assign customer_status_list = customer_status_list | append: ',' | append: customer_status
+        assign customer_status_list_handle = customer_status_list_handle | append: ',' | append: customer_status_handle
+    endcase
+  endfor
+  assign customer_status_list_handle_arr = customer_status_list_handle | split: ','
+-%}

@@ -1,0 +1,261 @@
+{{ 'collections-banners.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign show_slider_nav = section.settings.show_slider_nav -%}
+
+{%- capture swiper_config -%}
+  {
+    "slidesPerView": 1.33,
+    "spaceBetween": 20,
+    "watchSlidesProgress": true,
+    "freeMode": true,
+    "mousewheel": {
+      "forceToAxis": true
+    },
+  {% if show_slider_nav -%}
+    "navigation": {
+      "nextEl": ".swiper-button-next--{{ section.id }}",
+      "prevEl": ".swiper-button-prev--{{ section.id }}"
+    },
+    "scrollbar": {
+      "el": ".swiper-scrollbar--{{ section.id }}",
+      "hide": false,
+      "draggable": true
+    },
+  {% endif -%}
+    "breakpoints": {
+    "768": {
+      "slidesPerView": 3,
+      "shortSwipes": false
+      }
+    }
+  }
+{%- endcapture -%}
+
+<div class="collections-banners"
+     data-aos="fade-up"
+     style="--bg-color: {{ section_bg_color }}">
+
+  {%- if heading != blank or subheading != bank or button_label != blank -%}
+    <div class="collections-banners__header page-width">
+      <div class="collections-banners__header-wrapper">
+        {%- if heading != blank or subheading != bank -%}
+          {%- if heading != blank -%}
+            <h3 class="collections-banners__header-heading">{{ heading }}</h3>
+          {%- endif -%}
+          {%- if subheading != bank -%}
+            <div class="collections-banners__header-subheading h3">{{ subheading }}</div>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+      {%- if button_label != blank -%}
+        <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+          href="{{ button_link }}"{% endif %}
+          class="collections-banners__header-btn btn btn--{{ button_style }}">
+          {{ button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+
+    {%- capture slides -%}
+      {%- for block in section.blocks -%}
+        {%- liquid assign collection = collections[block.settings.collection] -%}
+
+        {%- if collection -%}
+          {%- liquid
+            assign image = block.settings.image | default: collection.featured_image
+            assign image_alt = image.alt | default: collection.title
+            assign title = block.settings.title | default: collection.title
+            assign description = block.settings.description | default: collection.description
+            assign link_label = block.settings.link_label
+            assign link_url = block.settings.link_url | default: collection.url
+
+          -%}
+
+          <div class="swiper-slide" {{ block.shopify_attributes }}>
+            <div class="collections-banners__card">
+              <div class="collections-banners__card-image block rel">
+                {%- if image -%}
+                  {% render 'image', image: image, class_name: 'image-abs-cover', alt: image_alt %}
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+                {%- endif -%}
+
+                <a href="{{ collection.url }}" class="image-abs-cover">
+                  <span class="u-sr-only">{{ title }}</span>
+                </a>
+              </div>
+
+              <a href="{{ collection.url }}" class="collections-banners__card-title body1">{{ title }}</a>
+              {%- if description != blank -%}
+                <p class="collections-banners__card-description body3">{{ description }}</p>
+              {%- endif -%}
+
+              {% if link_label != blank %}
+                <a href="{{ link_url }}" class="collections-banners__card-link body3--bold underline">{{ link_label }}</a>
+              {% endif %}
+            </div>
+          </div>
+        {%- endif -%}
+
+      {%- endfor -%}
+    {%- endcapture -%}
+
+  {%- else -%}
+    {%- capture slides -%}
+      {%- for i in (1..10) -%}
+        <div class="swiper-slide">
+          <div class="collections-banners__card">
+            <div class="collections-banners__card-image rel">
+              {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+            </div>
+            <a href="{{ routes.root_url }}" class="collections-banners__card-title body1">
+              {{ 'collections_banners.empty_section_title' | t }}
+            </a>
+            <p class="collections-banners__card-description body3">
+              {{ 'collections_banners.empty_section_description' | t }}
+            </p>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endcapture -%}
+  {%- endif -%}
+
+  {%- render 'slideshow-swiper',
+    class_name: 'collections-banners__slider rel page-width',
+    config: swiper_config,
+    slides: slides,
+    show_slider_nav: show_slider_nav,
+    show_scroll_bar: show_slider_nav,
+    nav_id: section.id  -%}
+
+</div>
+
+
+
+{% schema %}
+{
+  "name": "Collections banners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>for specific <i>concerns</i></p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_nav",
+      "label": "Show slider navigation",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "info": "by default: Collection title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "info": "by default: Collection description"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link url"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "by default: Collection image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collections banners"
+    }
+  ]
+}
+{% endschema %}

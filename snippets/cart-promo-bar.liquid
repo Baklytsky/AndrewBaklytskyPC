@@ -1,0 +1,39 @@
+{% comment %}
+  {% render 'cart-promo-bar' %}
+{% endcomment %}
+
+{% assign promo_bar_show = section.settings.promo_bar_show %}
+{% assign promo_bar_bg_color = section.settings.promo_bar_bg_color %}
+{% assign promo_bar_image = section.settings.promo_bar_image %}
+{% assign promo_bar_image_position = section.settings.promo_bar_image_position %}
+{% assign promo_bar_heading = section.settings.promo_bar_heading %}
+{% assign promo_bar_color_heading = section.settings.promo_bar_color_heading %}
+{% assign promo_bar_text = section.settings.promo_bar_text %}
+{% assign promo_bar_color_text = section.settings.promo_bar_color_text %}
+
+{% if promo_bar_show %}
+  <div class="cart-promo">
+    <div class="cart-promo__wrapper image__{{ promo_bar_image_position }}" style="background-color: {{ promo_bar_bg_color }}">
+      {% if promo_bar_image != blank %}
+        <div class="cart-promo__image">
+          {% render 'image', image: promo_bar_image, small_size: true %}
+        </div>
+      {% endif %}
+
+      {% if promo_bar_heading != blank or promo_bar_text != blank %}
+        <div class="cart-promo__content">
+          {% if promo_bar_heading != blank %}
+            <h4 class="cart-promo__heading" style="color: {{ promo_bar_color_heading }}">
+              {{ promo_bar_heading }}
+            </h4>
+          {% endif %}
+          {% if promo_bar_text != blank %}
+            <div class="cart-promo__text text-body-small" style="color: {{ promo_bar_color_text }}">
+              {{ promo_bar_text }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

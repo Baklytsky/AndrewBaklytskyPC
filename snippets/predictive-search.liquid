@@ -1,0 +1,92 @@
+<script src="{{ 'component-predictive-search.min.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign trending = settings.search_trending
+  assign popular_products = settings.search_popular_products
+%}
+
+<modal-dialog id="search-modal-drawer">
+  <div class="search-modal hide-scrollbar" data-popup role="dialog" tabindex="-1" aria-modal="true" aria-hidden="true" aria-label="{{ 'general.search.search' | t }}">
+    <div class="search-modal__content">
+
+      <predictive-search class="search-modal__form" data-loading-text="{{ 'accessibility.loading' | t }}">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search search-modal__form">
+          <input type="hidden" name="type" value="product">
+
+          <div class="form-field form-field__search">
+            <button type="submit" class="btn--reset small-up-hide submit">
+              {%- render 'icon' with 'search' -%}
+            </button>
+            <input class="form-input search__input"
+                   id="Search-In-Modal-1"
+                   type="search"
+                   name="q"
+                   value=""
+                   placeholder="{{ 'general.search.search' | t }}"
+                   role="combobox" aria-expanded="false"
+                   aria-owns="predictive-search-results-list"
+                   aria-controls="predictive-search-results-list"
+                   aria-haspopup="listbox"
+                   aria-autocomplete="list"
+                   autocorrect="off"
+                   autocomplete="off"
+                   autocapitalize="off"
+                   spellcheck="false"
+                   autofocus
+            >
+            <label class="field__label visually-hidden" for="Search-In-Modal-1" >{{ 'general.search.search' | t }}</label>
+            <input type="hidden" name="options[prefix]" value="last">
+
+            <button type="button" class="a btn--reset search-modal__close small-hide" aria-label="{{ 'accessibility.close' | t }}" data-close-search>
+              {%- render 'icon' with 'close' -%}
+            </button>
+          </div>
+
+          <div class="predictive-search__result predictive-search--header" tabindex="-1" data-predictive-search>
+            <div class="predictive-search__loading-state">
+              {% render 'icon' with 'spinner' %}
+            </div>
+          </div>
+
+          <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+
+        </form>
+      </predictive-search>
+
+      {%- if trending != blank or popular_products != blank -%}
+        <div class="search-modal__initial search-modal__initial-{{ section.id }}" aria-hidden="false">
+          {%- if trending != blank -%}
+            <div class="body3 search-modal__trending">
+              <p class="body3--bold">{{ 'general.search.trending' | t }}</p>
+              {{ trending }}
+            </div>
+          {%- endif -%}
+          {%- if popular_products != blank -%}
+            <div class="search-modal__popular">
+              <p class="body3--bold">{{ 'general.search.popular_products' | t }}</p>
+
+              <div class="search-modal__popular-products">
+                {%- for product in popular_products -%}
+                  {% for tag in product.tags %}
+                    {%- if tag contains "not-allowed" -%}
+                      {%- assign local_product = true -%}
+
+                      {% break %}
+                    {%- endif -%}
+                  {% endfor %}
+                  {%- if local_product -%}
+                    {% continue %}
+                  {%- endif -%}
+
+                  {%- if product != blank -%}
+                    {%- render 'product-card' product: product,  -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</modal-dialog>

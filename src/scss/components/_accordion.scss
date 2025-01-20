@@ -1,0 +1,92 @@
+@import "../helpers/mixins";
+
+accordion-element {
+  display: block;
+  width: 100%;
+}
+
+.accordion__item {
+  border-bottom: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.accordion__item:first-child {
+  border-top: 1px solid var(--color-border);
+}
+
+.accordion__icons {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  flex-shrink: 0;
+
+  svg {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    transition: all var(--duration-default) linear;
+  }
+
+  .icon--minus-small {
+    opacity: 0;
+    transition-delay: var(--duration-default);
+  }
+
+  &:hover {
+    @include mq($small-min) {
+      color: var(--color-accent-primary);
+    }
+  }
+}
+
+.accordion__button {
+  padding: 30px 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+
+  @include mq($small-max) {
+    padding: 20px 0;
+  }
+}
+
+.accordion__button[data-inactive] {
+  cursor: text;
+}
+
+.accordion__button[aria-expanded="true"] {
+  .icon--minus-small {
+    opacity: 1;
+  }
+
+  .icon--plus-small {
+    opacity: 0;
+    transform: rotate(180deg);
+  }
+}
+
+.accordion__content {
+  display: none;
+}
+
+.accordion__content-inner {
+  padding: 5px 20px 24px 0;
+}
+
+.accordion__content p,
+.accordion__content ul,
+.accordion__content img {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.accordion__content ul li {
+  margin-top: 0;
+  margin-bottom: 5px;
+}

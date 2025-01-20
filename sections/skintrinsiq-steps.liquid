@@ -1,0 +1,210 @@
+{{ 'skintrinsiq-steps.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign section_heading = section.settings.heading
+  assign section_subheading = section.settings.subheading | escape | newline_to_br
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+-%}
+
+ {%- capture swiper_config -%}
+   {
+     "slidesPerView": 4.5,
+     "watchSlidesProgress": true,
+     "freeMode": true,
+     "mousewheel": {
+      "forceToAxis": true
+     },
+     "breakpoints": {
+       "1120": {
+         "slidesPerView": 4.5
+       }
+     }
+   }
+ {%- endcapture -%}
+
+{% if section.blocks.size > 0 or section_heading != blank %}
+  <div data-aos="fade-up" class="steps">
+    <div
+      style="
+        --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+        --padding-top-desktop: {{ padding_top_desk }}px;
+        --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+        --padding-top-mobile: {{ padding_top_mob }}px;"
+      class="steps__content-wrapper {% if border_bottom %}border-bottom{% endif %}">
+
+      {%- if section_subheading != blank or section_heading != blank -%}
+        <div class="steps__section-heading-wrapper page-width">
+          {% if section_subheading != blank %}
+            <p class="steps__section-subheading h6">
+              {{ section_subheading }}
+            </p>
+          {% endif %}
+
+          {% if section_heading != blank %}
+            <h2 class="steps__section-heading h4">
+              <span class="small-hide">{{ section_heading | newline_to_br }}</span>
+              <span class="small-up-hide">{{ section_heading }}</span>
+            </h2>
+          {% endif %}
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+
+      <slideshow-swiper data-config='{{ swiper_config }}' class="" data-breakpoint='max-width: 768px'>
+
+        <div class="steps__blocks-wrapper swiper">
+          <div class="steps__blocks-container hide-scrollbar swiper-wrapper">
+            {% for block in section.blocks %}
+              {%- liquid
+                assign heading = block.settings.heading | escape | newline_to_br
+                assign description = block.settings.description | escape | newline_to_br
+              -%}
+
+              {%- if heading != blank or description != blank -%}
+                <div class="steps__block swiper-slide">
+                  <span class="steps__block-number"></span>
+
+                  <div class="steps__block-wrapper">
+                    {%- if heading != blank-%}
+                      <h4 class="steps__block-heading h5">{{ heading }}</h4>
+                    {%- endif -%}
+
+                    {%- if description != blank -%}
+                      <p class="steps__block-description body1">{{ description }}</p>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            {% endfor %}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{% else %}
+  <div data-aos="fade-up" class="steps page-width">
+    <div
+      style="
+        --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+        --padding-top-desktop: {{ padding_top_desk }}px;
+        --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+        --padding-top-mobile: {{ padding_top_mob }}px;"
+      class="steps__content-wrapper border-bottom">
+      <p class="steps__section-subheading h6">{{ "image_with_text.empty_subheading" | t }}</p>
+      <h2 class="steps__section-heading h4">{{ "image_with_text.empty_heading" | t }}</h2>
+
+      <div class="steps__content-blocks steps__content-blocks--show-plus">
+        <div class="steps__image-wrapper rel">
+          {{ 'image' | placeholder_svg_tag }}
+
+          <p class="steps__text-on-image h4" style="--color: {{ text_color }}">{{ "image_with_text.empty_subheading_text_on_image" | t }}</p>
+        </div>
+
+        <ul class="steps__text-wrapper">
+          {%- for i in (1..3) -%}
+            <li class="steps__text-item h5 border-bottom">
+              {{ "image_with_text.empty_text_block" | t }}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Steps",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom desktop",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Steps"
+    }
+  ]
+}
+{% endschema %}

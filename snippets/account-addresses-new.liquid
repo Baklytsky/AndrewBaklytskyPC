@@ -1,0 +1,99 @@
+<div id="account-add-address" class="account-new-addresses hidden">
+  <h4 class="h3 account-new-addresses__heading">{{ 'customer.addresses.add_new' | t }}</h4>
+  {%- form 'customer_address', customer.new_address, aria-labelledBy: 'AddressNewHeading', class: 'address-update-form', data-form-name: 'Add address' -%}
+    <div class="account-addresses__fields">
+      <div class="form-field">
+        <label class="body4 form-label" for="address-first-name-new">{{ 'customer.addresses.first_name' | t }}</label>
+        <input type="text" id="address-first-name-new" class="form-input" name="address[first_name]" value="{{ form.first_name }}"
+               autocomplete="given-name" placeholder="{{ 'customer.addresses.first_name_placeholder' | t }}">
+      </div>
+      <div class="form-field">
+        <label class="body4 form-label" for="address-last-name-new">{{ 'customer.addresses.last_name' | t }}</label>
+        <input type="text" id="address-last-name-new" class="form-input" name="address[last_name]" value="{{ form.last_name }}"
+               autocomplete="family-name" placeholder="{{ 'customer.addresses.last_name_placeholder' | t }}">
+      </div>
+      <div class="form-field">
+        <label class="body4 form-label" for="address-address-1-new">{{ 'customer.addresses.address1' | t }}</label>
+        <input type="text" id="address-address-1-new" class="form-input" name="address[address1]" value="{{ form.address1 }}"
+               autocomplete="address-line1" placeholder="{{ 'customer.addresses.address1_placeholder' | t }}" required>
+      </div>
+      <div class="form-field">
+        <label class="body4 form-label" for="address-address-2-new">{{ 'customer.addresses.address2' | t }}</label>
+        <input type="text" id="address-address-2-new" class="form-input" name="address[address2]" value="{{ form.address2 }}"
+               autocomplete="address-line2" placeholder="{{ 'customer.addresses.address2_placeholder' | t }}">
+      </div>
+      <div class="form-field">
+        <label class="body4 form-label" for="address-city-new">{{ 'customer.addresses.city' | t }}</label>
+        <input type="text" id="address-city-new" class="form-input" name="address[city]" value="{{ form.city }}"
+               autocomplete="address-level2" placeholder="{{ 'customer.addresses.city_placeholder' | t }}" required>
+      </div>
+
+      <div class="form-field small-up-hide" id="address-province-container-new">
+        <label class="body4 form-label" for="address-province-new">{{ 'customer.addresses.province' | t }}</label>
+        <select class="account__addresses-select province form__select" data-original-select id="address-province-new" name="address[province]" data-default="{{ form.province }}" autocomplete="address-level1">
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label class="body4 form-label" for="address-zip-new">{{ 'customer.addresses.zip' | t }}</label>
+        <input type="text" id="address-zip-new" class="form-input" name="address[zip]" value="{{ form.zip }}"
+               autocapitalize="characters" autocomplete="postal-code"
+               placeholder="{{ 'customer.addresses.zip_placeholder' | t }}">
+      </div>
+
+      <div class="form-field small-up-hide">
+        <label class="body4 form-label" for="address-country-new">{{ 'customer.addresses.country' | t }}</label>
+        <select id="address-country-new" data-original-select class="country form__select" name="address[country]" data-default="United States" autocomplete="country">
+          {{ all_country_option_tags | remove: '<option value="---" data-provinces="[]">---</option>' }}
+        </select>
+      </div>
+
+      <div class="form-field small-hide">
+        <label class="body4 form-label" for="address-country-new-custom">{{ 'customer.addresses.country' | t }}</label>
+
+        <custom-select class="form-select body3 form-select-alternative address-custom-select small-hide">
+          <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-selected="true" aria-controls="dropdown-country-{{ section.id }}">
+            <span class="form-select__btn-text">United States</span>
+            <span class="form-select__dropdown-option--label"></span>
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+          <ul class="form-select__dropdown hide-scrollbar" id="dropdown-country-{{ section.id }}" style="display: none;">
+            {{ all_country_option_tags | remove: '<option value="---" data-provinces="[]">---</option>' | replace: '<option', '<li class="form-select__dropdown-option a" aria-selected="false">
+                  <button type="button" class="btn--reset form-select__dropdown-button body3"' | replace: 'value', 'data-option-value' | replace: '</option>', '</button></li>' }}
+          </ul>
+          <input name="address[country]" data-custom-select-input id="address-country-custom-new" type="hidden" class="form__input-hidden address-form__hidden-input address-form__country-input" data-select-province="#address-form-custom-province-new" value="United States" data-default="United States">
+
+        </custom-select>
+      </div>
+
+      <div class="form-field small-hide hidden" id="address-form-custom-province-new">
+        <label class="body4 form-label" for="address-province-new-custom">{{ 'customer.addresses.province' | t }}</label>
+
+        <custom-select class="form-select body3 form-select-alternative small-hide">
+          <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-province-{{ section.id }}">
+            <span class="form-select__btn-text">State</span>
+            <span class="form-select__dropdown-option--label"></span>
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+          <ul class="form-select__dropdown hide-scrollbar" id="dropdown-province-{{ section.id }}" style="display: none;">
+
+          </ul>
+          <input name="address[province]" data-custom-select-input id="address-province-custom-new" type="hidden" class="address-form__hidden-input form__input-hidden" value="{{ form.province }}" data-default="">
+
+        </custom-select>
+      </div>
+    </div>
+
+    <p class="account__set-default-address">
+      {{ form.set_as_default_checkbox | replace: '<input', '<input class="form__checkbox"' }}
+      <label for="address_default_address_new" class="inline">{{ 'customer.addresses.set_default' | t }}</label>
+    </p>
+
+    <div class="account__edit-buttons">
+      <button type="submit" class="account__addresses-save btn btn--primary-alt" data-add-address>{{ 'customer.addresses.save' | t }}</button>
+      <button type="reset" class="account__addresses-edit-cancel a btn--reset body4 account__cancel-btn js-opener-block" data-element-open="account-profile-inner" data-element-hide="account-add-address">
+        {{ 'customer.addresses.cancel' | t }}
+      </button>
+    </div>
+  {%- endform -%}
+</div>

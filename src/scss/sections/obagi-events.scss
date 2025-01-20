@@ -1,0 +1,316 @@
+@import "../helpers/mixins";
+
+.obagi-events {
+  display: block;
+  padding: 40px 0 0;
+
+  &:not(.obagi-events__upcoming):not(.obagi-events__account) {
+    min-height: calc(100vh - var(--header-height) - var(--announcement-bar-height, 0px));
+  }
+}
+
+.obagi-events__heading {
+  margin-bottom: 20px;
+
+  @include mq($small-max) {
+    margin-bottom: 20px;
+  }
+}
+
+.obagi-events__text {
+  margin: 0;
+
+  @include mq($small-max) {
+    margin-bottom: 20px;
+  }
+}
+
+.obagi-events__content-featured {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.obagi-events__content-featured,
+.obagi-events__content-upcoming {
+  padding: 80px 0;
+
+  @include mq($small-max) {
+    padding: 40px 0;
+  }
+}
+
+.obagi-events__content-upcoming {
+  .obagi-events__label {
+    margin-bottom: 30px;
+  }
+}
+
+.obagi-events__label {
+  margin-bottom: 20px;
+}
+
+.obagi-events__spinner {
+  color: var(--color-accent-primary);
+  width: 60px;
+  display: block;
+  margin: 40px auto;
+}
+
+.obagi-events__item {
+  display: flex;
+  min-height: 286px;
+  margin-bottom: 30px;
+  background-color: var(--color-bg-primary);
+  color: var(--color);
+
+  @include mq($medium-max) {
+    flex-direction: column;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.obagi-events__item-image-wrapper {
+  flex: 0 1 32%;
+  padding-bottom: 25.5%;
+  margin-right: 10.2%;
+
+  .placeholder-svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @include mq($medium-max) {
+    padding-bottom: 60%;
+    flex: 1;
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+.obagi-events__item-image-text-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--color, white);
+
+  p {
+    display: block;
+    color: inherit;
+
+    &:first-child {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.obagi-events__item-text-wrapper {
+  max-width: 455px;
+  padding: 20px 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @include mq($medium-max) {
+    max-width: unset;
+    padding: 20px;
+  }
+}
+
+.obagi-events__item-subheading {
+  margin-bottom: 15px;
+  color: inherit;
+
+  &.color-primary {
+    color: var(--color-accent-primary)
+  }
+}
+
+.obagi-events__item-heading {
+  display: block;
+  margin-bottom: 15px;
+  color: inherit;
+  text-transform: unset;
+}
+
+.obagi-events__item-description {
+  margin-bottom: 15px;
+  color: inherit;
+}
+
+.obagi-events__item--btn {
+  margin-top: 15px;
+}
+
+.obagi-events__item-featured {
+  margin-bottom: 0;
+  background-color: transparent;
+
+  .obagi-events__item-image-wrapper {
+    flex: 0 0 58%;
+    padding-bottom: 32.5%;
+
+    @include mq($small-max) {
+      padding-bottom: 56.6%;
+    }
+  }
+
+  .obagi-events__item-text-wrapper {
+    padding: 20px 0;
+
+    @include mq($small-max) {
+      padding: 20px 0 0;
+    }
+  }
+
+  .obagi-events__item-subheading {
+    margin-bottom: 20px;
+  }
+
+  .obagi-events__item-heading {
+    margin-bottom: 20px;
+  }
+
+  .obagi-events__item-description {
+    margin-bottom: 5px;
+  }
+}
+
+.obagi-events__header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+
+  @include mq($medium-max) {
+    flex-direction: column;
+  }
+
+  @include mq($small-max) {
+    padding: 0;
+  }
+}
+
+.obagi-events__header-wrapper {
+  flex-grow: 1;
+  margin: 0 auto 0 0;
+}
+
+.obagi-events__btn {
+  align-self: baseline;
+
+  @include mq($medium-max) {
+    margin: 30px 0 0;
+  }
+}
+
+.obagi-events__header--border {
+  padding-top: 60px;
+  border-top: 1px solid var(--color-border);
+}
+
+.obagi-events__no-results {
+  margin-top: 40px;
+}
+
+// Account overview styles
+.obagi-events__account {
+  padding: 0;
+
+  .obagi-events__item-image-text-wrapper {
+    display: none;
+  }
+
+  .obagi-events__label {
+    margin-bottom: 20px;
+  }
+
+  .obagi-events__item-image-wrapper {
+    flex: 0 1 33.5%;
+    padding-bottom: 31.5%;
+    margin-right: 8.8%;
+  }
+
+  .obagi-events__content-upcoming {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .obagi-events__item {
+    min-height: auto;
+    align-items: unset;
+
+    @include mq($medium-max) {
+      padding: 40px;
+    }
+  }
+
+  .obagi-events__item-image-wrapper {
+    @include mq($medium-max) {
+      padding-bottom: 68.5%;
+      margin-right: 0;
+    }
+  }
+  .obagi-events__item-text-wrapper {
+    @include mq($medium-max) {
+      padding: 20px 0 0;
+      text-align: center;
+      align-items: center;
+    }
+  }
+
+  .obagi-events__item-subheading {
+    @include mq($medium-max) {
+      margin-bottom: 20px;
+    }
+  }
+
+  .obagi-events__item-heading {
+    @include mq($medium-max) {
+      margin-bottom: 20px;
+    }
+  }
+}
+
+// Upcoming section type styles
+
+.obagi-events__upcoming {
+  padding-bottom: 60px;
+
+  @include mq($small-max) {
+    padding-bottom: 40px;
+  }
+
+  .obagi-events__header {
+    margin-bottom: 30px;
+  }
+
+  .obagi-events__heading {
+    margin-bottom: 0;
+  }
+
+  .obagi-events__text {
+    text-transform: unset;
+    font-weight: 300;
+
+    @include mq($small-max) {
+      margin-bottom: 0;
+    }
+  }
+
+  .obagi-events__label,
+  .obagi-events__content-featured {
+    display: none;
+  }
+
+  .obagi-events__content-upcoming {
+    padding: 0;
+  }
+}

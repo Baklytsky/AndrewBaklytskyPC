@@ -1,0 +1,239 @@
+{% comment %}
+  quick_add expects boolean if
+    true - add to cart/show more
+    blank - not button
+
+  hide_product_collections - boolean
+  show_product_description - boolean
+  {% render 'product-card' product: product_obj, quick_add: boolean, hide_collections: , show_description: , collection_filters: arr %}
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.first_available_variant
+  assign current_image = current_variant.featured_image | default: product.featured_image
+  assign second_image = product.images[1]
+  assign second_image_meta = product.metafields.product_card.second_image
+  assign product_form_id = 'quick-add-' | append: section_id | append: product.id
+  assign info_label = product.metafields.custom.info_label
+
+  assign pre_order = false
+  assign pre_order_date = current_variant.metafields.custom.pre_order_date | date: "%B %d, %Y"
+  assign pre_order_date_in_sec = current_variant.metafields.custom.pre_order_date | date: "%s" | plus: 0
+  assign now_date = 'now' | date: "%B %d, %Y"
+  assign now_date_in_sec = 'now' | date: "%s" | plus: 0
+
+  if pre_order_date != blank and pre_order_date_in_sec > now_date_in_sec
+  assign pre_order = true
+  endif
+
+  if hide_collections != blank
+  assign hide_collections = hide_collections
+  else
+  assign hide_collections = false
+  endif
+
+  assign rx_only = false
+
+  for tag in product.tags
+  assign tag_handle = tag | handleize
+  if tag == "rx-only" or product.template_suffix == 'rx-only'
+  assign rx_only = true
+  break
+  endif
+  endfor
+-%}
+
+{% for tag in product.tags %}
+  {%- if tag contains "badge" -%}
+    {%- assign badge = settings[tag] -%}
+
+    {% break %}
+  {%- endif -%}
+{% endfor %}
+
+{% for tag in product.tags %}
+  {%- if tag contains "not-allowed" -%}
+    {%- assign quick_add = '' -%}
+    {%- assign hide_collections = true -%}
+
+    {% break %}
+  {%- endif -%}
+{% endfor %}
+
+{% capture product-btn %}
+  {% if quick_add == true %}
+
+    {%- if rx_only -%}
+      {% render 'physician-link', class: "product-card__btn btn btn--secondary btn--small" %}
+    {%- else -%}
+      {%- render 'product-card-form',
+        product: product,
+        current_variant: current_variant,
+        product_form_id: product_form_id,
+        pre_order: pre_order,
+        pre_order_date: pre_order_date -%}
+    {% endif %}
+
+  {%- endif -%}
+{% endcapture %}
+
+
+<product-card class="product-card rel">
+  <div class="product-card__wrapper">
+    <a href="{{ product.url }}" class="product-card__img-wrapper">
+      {%- if rx_only -%}
+        <div class="product__badge-rx-only">{{ 'products.product.rx_only_title' | t }}</div>
+      {%- else -%}
+        {%- if badge != blank -%}
+          <div class="product__badge-wrapper">
+            {% render 'image', image: badge, class_name: , image_attr: , show_id: , alt: badge.alt, small_size: true, preload: boolean %}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+
+
+      {%- if current_image != blank -%}
+        {% render 'image', image: current_image, class_name: 'product-card__image image-abs-cover', alt: product.title %}
+      {%- else -%}
+        <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}" class="product-card__image image-abs-cover" alt="{{ product.title }}">
+      {%- endif -%}
+
+
+      {% if second_image_meta != blank and settings.show_hover_image_card %}
+        {% render 'image-metafields', image: second_image_meta[0], class_name: 'product-card__image--second image-abs-cover', alt: product.title %}
+      {% elsif second_image != blank and settings.show_hover_image_card %}
+        {% render 'image', image: second_image, class_name: 'product-card__image--second image-abs-cover', alt: product.title %}
+      {% endif %}
+    </a>
+
+    <div class="product-card__content-wrapper flex__column-space">
+      <div class="product-card__info_label body4">
+        {% if info_label != blank %}
+          {{ info_label }}
+        {% endif %}
+      </div>
+
+      <div class="product-card__reviews">
+        <div class="{% if rx_only %}visibility-hidden{% endif %}"
+             data-bv-show="inline_rating"
+             data-bv-product-id="{{product.id}}"
+             data-bv-redirect-url="{{ product.url }}"
+             data-bv-seo="false"> </div>
+      </div>
+
+      <div class="product-card__main-info-wrapper flex__column-space">
+        {% if hide_collections == false %}
+          <div class="product-card__collections">
+            {%- render 'product-featured-collections', product: product, class: 'product-card__collections-item body4' -%}
+          </div>
+        {% endif %}
+
+        <a href="{{ product.url }}" class="product-card__title body3">
+          {{ product.title }}
+        </a>
+
+        {%- if show_description -%}
+          <div class="product-card__description center">
+            {{ product.description | strip_html | truncate: 200 }}
+          </div>
+        {%- endif -%}
+
+        <div class="product-card__payment-wrapper {% if quick_add != blank %} flex__column-space {% endif %}">
+          {%- assign price_class = 'product-card__price' -%}
+
+          {%- comment -%}
+            {%- if rx_only -%}
+              {%- assign price_class = 'product-card__price visibility-hidden' -%}
+            {%- endif -%}
+          {%- endcomment -%}
+
+          {%- render 'price', product: product, show_badges: true, price_class: price_class, interval: true -%}
+
+          {% if product-btn != blank %}
+            <div class="product-card__btn-wrapper">
+              {{ product-btn }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% unless product == empty %}
+    <script type="application/json">
+      {{ product | json }}
+    </script>
+
+
+    {%- liquid
+      if collection_filters
+        assign refine_by_collection = ''
+        assign refine_by_category_collection = ''
+        for filter in collection_filters
+          if filter.active_values.size > 0
+            assign refine_by_category_collection = refine_by_category_collection | append: ', ' | append: filter.label
+            for value in filter.active_values
+              assign refine_by_collection = refine_by_collection | append: ', ' | append: value.label
+            endfor
+          endif
+        endfor
+      endif
+    -%}
+
+    {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+    {%- assign feature_option = collection.sort_options | where: 'value', sort_by -%}
+
+    {% if feature_option[0].name == blank %}
+      {%- assign feature_option = collection.sort_options | where: 'value', Featured  -%}
+    {% endif %}
+
+    <script type="application/ld+json" data-select-item-event {{ feature_option[0].name }}>
+      {
+        "event": "select_item",
+          "search": {
+          "search_type": "{% if predictive_search.terms != blank or search.terms != blank %}typed{% endif %}",
+          "search_results_total": "{{ predictive_search.resources.products.size | default: search.results_count }}",
+          "search_dropdown_selected": "",
+          "search_term": "{{ predictive_search.terms | default: search.terms }}",
+          "sort_option": "{{ feature_option[0].name | escape | replace: 'Best selling', 'Featured' | replace: 'Price, low to high', 'Price: Low to High' | replace: 'Price, high to low', 'Price: High to Low' | replace: 'Date, new to old', 'Newest' }}",
+          "refine": {
+            "refine_by_category": "{{ refine_by_category_collection | remove_first: ', ' }}",
+            "refine_by_item": "{{ refine_by_collection | remove_first: ', ' }}",
+            "refine_by_action": ""
+          }
+        },
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "items": [
+            {% liquid
+            assign current_variant = product.selected_or_first_available_variant
+            assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+            assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+          %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "index": "1",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "",
+              "item_list_id": "",
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.price | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "",
+              "promotion_name": "",
+              "creative_name": "",
+              "creative_slot": ""
+            }
+          ]
+        }
+      }
+    </script>
+  {% endunless %}
+  </div>
+</product-card>

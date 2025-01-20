@@ -1,0 +1,296 @@
+{% comment %}
+{%- render 'mega-menu', main_link: , block: , index:  -%}
+{% endcomment %}
+
+<mega-menu class="header-submenu__wrapper">
+  {%- capture top_nav_event_config -%}
+    {
+      "nav_level_1": "{{ main_link.title }}",
+      "nav_level_2": "",
+      "nav_level_3": ""
+    }
+  {%- endcapture -%}
+  <a href="{{ main_link.url }}" class="header-menu__link" data-event-nav-link='{{ top_nav_event_config }}' data-nav-link-level="1" data-menu-opener aria-controls="mega-menu-{{ block.id }}-{{ index }}" aria-expanded="false">
+    {{ main_link.title }}
+  </a>
+
+  <div id="mega-menu-{{ block.id }}-{{ index }}" class="header-submenu" aria-hidden="true" {{ block.shopify_attributes }}>
+    <div class="header-submenu__inner hide-scrollbar  {% if main_link.links.size == 0 %}header-submenu--without-links{% endif %}">
+      {%- if main_link.links.size > 0 -%}
+        <ul class="header-submenu__list list--unstyled">
+          {%- for childlink in main_link.links -%}
+
+            {%- assign direct_link_access = childlink.object.metafields.custom.direct_link_access | default: false -%}
+
+            {%- if direct_link_access -%}
+              {% continue %}
+            {%- endif -%}
+
+            {%- assign start_index = 0 -%}
+
+            {%- if childlink.title contains '(located below the previous)' -%}
+              {% continue %}
+            {%- endif -%}
+
+            {%- assign next_index = forloop.index0 | plus: 1 -%}
+
+            {%- capture top_nav_event_config -%}
+              {
+                "nav_level_1": "{{ main_link.title }}",
+                "nav_level_2": "{{ childlink_title.title }}",
+                "nav_level_3": "{{ grandchildlink.title }}"
+              }
+            {%- endcapture -%}
+
+            {%- if main_link.links[next_index].title contains '(located below the previous)' -%}
+              {%- assign start_index = next_index -%}
+            {%- endif -%}
+
+            <li class="header-submenu__item">
+              <a {% if childlink.url == '#' %} role="link" aria-disabled="true" disabled{% else %}
+                href="{{ childlink.url }}"{% endif %}
+                class="body3 header-submenu__link"
+                data-event-nav-link='{{ top_nav_event_config }}'>
+                {{ childlink.title }}
+              </a>
+
+              {%- if childlink.links.size > 0 -%}
+                <ul class="header-subsubmenu header-subsubmenu--grandchildlink list--unstyled">
+                  {%- for grandchildlink in childlink.links -%}
+
+                    {%- assign direct_link_access = grandchildlink.object.metafields.custom.direct_link_access | default: false -%}
+
+                    {%- if direct_link_access -%}
+                      {% continue %}
+                    {%- endif -%}
+
+                    {%- capture top_nav_event_config -%}
+                      {
+                        "nav_level_1": "{{ main_link.title }}",
+                        "nav_level_2": "{{ childlink.title }}",
+                        "nav_level_3": "{{ grandchildlink.title }}"
+                      }
+                    {%- endcapture -%}
+                    <li class="header-subsubmenu__item">
+                      <a href="{{ grandchildlink.url }}" class="body3 header-subsubmenu__link" data-event-nav-link='{{ top_nav_event_config }}'>{{ grandchildlink.title }}</a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+              {%- if start_index > 0 -%}
+                {%- for childlink in main_link.links -%}
+
+                  {%- assign direct_link_access = childlink.object.metafields.custom.direct_link_access | default: false -%}
+
+                  {%- if direct_link_access -%}
+                    {% continue %}
+                  {%- endif -%}
+
+                  {%- if forloop.index0 < start_index -%}
+                    {% continue %}
+                  {%- endif -%}
+
+                  {%- assign childlink_title = childlink.title -%}
+
+                  {%- if childlink.title contains '(located below the previous)' -%}
+                    {%- assign childlink_title = childlink.title | remove: '(located below the previous)' -%}
+
+                    <ul class="header-submenu__item">
+                      <a {% if childlink.url == '#' %} role="link" aria-disabled="true" disabled{% else %}
+                        href="{{ childlink.url }}"{% endif %}
+                        class="body3 header-submenu__link"
+                        data-event-nav-link='{{ top_nav_event_config }}'>
+                        {{ childlink_title }}
+                      </a>
+
+                        {%- if childlink.links.size > 0 -%}
+                          <ul class="header-subsubmenu header-subsubmenu--grandchildlink list--unstyled">
+                            {%- for grandchildlink in childlink.links -%}
+                              {%- capture top_nav_event_config -%}
+                                {
+                                "nav_level_1": "{{ main_link.title }}",
+                                "nav_level_2": "{{ childlink.title }}",
+                                "nav_level_3": "{{ grandchildlink.title }}"
+                                }
+                              {%- endcapture -%}
+                              <li class="header-subsubmenu__item">
+                                <a href="{{ grandchildlink.url }}" class="body3 header-subsubmenu__link"
+                                   data-event-nav-link='{{ top_nav_event_config }}'>{{ grandchildlink.title }}</a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+
+                    </ul>
+                  {%- else -%}
+                    {%- break -%}
+                  {%- endif -%}
+
+                {%- endfor -%}
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if block != blank and block.type == 'products' -%}
+        <ul class="header-product-banners list--unstyled">
+          {% for i in (1..4) %}
+            {%- liquid
+              assign product_name = 'product_' | append: i
+              assign image_name = 'image_' | append: i
+              assign link_label_name = 'link_label_' | append: i
+              assign link_url_name = 'link_url_' | append: i
+
+              assign product_highlight = block.settings[product_name]
+              assign image = block.settings[image_name] | default: product_highlight.featured_image
+              assign link_label = block.settings[link_label_name]
+              assign link_url = block.settings[link_url_name]
+              assign alt = image.alt | default: product_highlight.title
+
+              for tag in product_highlight.tags
+              if tag contains 'label__'
+              assign label = tag | split: 'label__' | last | replace: '-', ' '
+              break
+              endif
+              endfor
+              assign list_id = label | default: link_label | handleize
+              assign analytic_promotion_products = block.settings.analytic_promotion_products
+            -%}
+
+            {%- if product_highlight != blank -%}
+              <li class="header-banner__item">
+                {%- if image != blank -%}
+                  <a href="{{ product_highlight.url }}" class="image-abs-wrapper header-banner__image" {% if analytic_promotion_products %}data-promotion-click-event="{{ list_id }}"{% endif %}>
+                    {% render 'image', image: image, class_name: 'image-abs-cover', alt: alt, preload: true %}
+                  </a>
+                {%- endif -%}
+                <div class="header-banner__content">
+                  {%- if label != blank -%}
+                    <span class="header-banner__label h6">{{ label }}</span>
+                  {%- endif -%}
+
+                  <div class="header-banner__rating">
+                    <div data-bv-show="inline_rating" data-bv-product-id="{{product_highlight.id}}" data-bv-redirect-url="{{ product_highlight.url }}" data-bv-seo="false"> </div>
+                  </div>
+
+                  <div>
+                    {%- render 'product-featured-collections', product: product_highlight, class: 'header-banner__collections body4' -%}
+                  </div>
+
+                  <a href="{{ product_highlight.url }}" class="header-banner__title body3">{{ product_highlight.title }}</a>
+
+                  {%- if link_label != blank and link_url != blank -%}
+                    <div><a href="{{ link_url }}" class="body3--bold header-banner__link" {% if analytic_promotion_products %}data-promotion-click-event="{{ list_id }}"{% endif %}>{{ link_label }}</a></div>
+                  {%- endif -%}
+                </div>
+
+                {%- if block.settings.analytic_promotion_products != blank and block.settings.analytic_promotion_name != blank -%}
+                  {%- assign creative_slot = main_link.title | append: ' Dropdown Card' -%}
+                  {% render 'ga-product-list-event',
+                    event_type: 'view_promotion',
+                    product_list: block.settings.analytic_promotion_products,
+                    list_name: label,
+                    list_id: list_id,
+                    creative_slot: creative_slot,
+                    class_name: 'hide',
+                    promotion_id: block.settings.analytic_promotion_id,
+                    promotion_name: block.settings.analytic_promotion_name %}
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+      {%- elsif block != blank and block.type == 'banners' -%}
+        <ul class="header-product-banners list--unstyled">
+          {% for i in (1..4) %}
+            {%- liquid
+              assign image_name = 'image_' | append: i
+              assign heading_name = 'heading_' | append: i
+              assign heading_color_name = 'heading_color_' | append: i
+              assign heading_size_name = 'heading_size_' | append: i
+              assign subheading_name = 'subheading_' | append: i
+              assign subheading_color_name = 'subheading_color_' | append: i
+              assign subheading_size_name = 'subheading_size_' | append: i
+              assign link_name = 'link_' | append: i
+              assign link_text_name = 'link_text_' | append: i
+              assign link_style_name = 'link_style_' | append: i
+
+              assign image = block.settings[image_name]
+              assign heading = block.settings[heading_name]
+              assign heading_color = block.settings[heading_color_name]
+              assign heading_size = block.settings[heading_size_name]
+              assign subheading = block.settings[subheading_name]
+              assign subheading_color = block.settings[subheading_color_name]
+              assign subheading_size = block.settings[subheading_size_name]
+              assign link = block.settings[link_name]
+              assign link_text = block.settings[link_text_name]
+              assign link_style = block.settings[link_style_name]
+              assign alt = image.alt | default: heading
+            -%}
+
+            {%- capture top_nav_event_config -%}
+              {
+                "nav_level_1": "{{ main_link.title }}",
+                "nav_level_2": "{{ heading }}",
+                "nav_level_3": ""
+              }
+            {%- endcapture -%}
+
+            {%- if image != blank -%}
+              <li class="header-banner__item header-image-banner__item">
+                {%- if image != blank -%}
+                  <div  class="image-abs-wrapper header-banner__image">
+                    {% render 'image', image: image, class_name: 'image-abs-cover', alt: alt, preload: true %}
+                    {%- if link != blank -%}
+                      <a href="{{ link }}" class="image-abs-cover" data-event-nav-link='{{ top_nav_event_config }}'><span class="visually-hidden">{{ heading | default: alt }}</span></a>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+                <div class="header-banner__content">
+                  {%- if heading != blank -%}
+                    {%- capture style -%}
+                      --header-label-color: {{ heading_color }};
+                      --header-label-size: {{ heading_size }}px;
+                    {%- endcapture -%}
+                    {%- if link != blank -%}
+                      <a href="{{ link }}"
+                         class="header-banner__label body1"
+                         style="{{ style }}"
+                         data-event-nav-link='{{ top_nav_event_config }}'>
+                        {{ heading }}
+                      </a>
+                    {% else %}
+                      <div class="header-banner__label body1">{{ heading }}</div>
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- if subheading != blank -%}
+                  {%- capture style -%}
+                      --header-label-color: {{ subheading_color }};
+                      --header-label-size: {{ subheading_size }}px;
+                  {%- endcapture -%}
+                    <div class="header-banner__label"
+                         style="{{ style }}">
+                      {{ subheading }}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if link_text != blank -%}
+                    <a{% if link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                      href="{{ link }}"{% endif %}
+                      class="header-banner__btn btn btn--{{ link_style }}">
+                      {{ link_text | escape }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</mega-menu>

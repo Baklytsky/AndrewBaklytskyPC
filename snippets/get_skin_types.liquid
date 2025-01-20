@@ -1,0 +1,34 @@
+{% comment %}
+Accepts:
+- product: {Object} Product Liquid object (optional)
+- rx_product_skin_types: {Array} For RX Only Product (optional)
+
+Usage:
+{% render 'get_skin_types', product: product,rx_product_skin_types: rx_product_skin_types  %}
+{% endcomment %}
+
+{%- liquid
+    assign skin_types = product.metafields.custom.skin_type.value | default: rx_product_skin_types
+-%}
+
+{%- for value in skin_types -%}
+  {%- liquid assign value_handleize = value | handleize -%}
+
+  {%- for shin_type in shop.metafields.globals.shin_type_heading -%}
+    {%- liquid assign shin_type_handleize = shin_type | handleize -%}
+    {%- if shin_type_handleize == value_handleize -%}
+
+      {%- liquid assign shin_type_url = shop.metafields.globals.skin_type_url[forloop.index0] -%}
+
+      {%- if shin_type_url != blank -%}
+        <a href="{{ shin_type_url }}">{{ shin_type }}</a>
+      {%- else -%}
+        <span>{{ shin_type }}</span>
+      {%- endif -%}
+
+      {%- break -%}
+
+    {%- endif -%}
+  {%- endfor -%}
+
+{%- endfor -%}

@@ -1,0 +1,40 @@
+<div class="account-addresses">
+  <h3 class="h3 account-details__heading">{{ "customer.addresses.title" | t }}</h3>
+
+  <ul class="account-addresses__list">
+    {% for address in customer.addresses %}
+      {%- if address.address1 != blank or address.address2 != blank or address.city != blank -%}
+        <li class="account-addresses__item account-details__item body1">
+          <div class="account-addresses__elem">
+            {{ address.first_name }} {{ address.last_name }}
+
+            <button class="a btn--reset account-addresses__delete account__edit-btn clickable-icon js-delete-address" data-target="{{ address.url }}" data-confirm_message="{{ 'customer.addresses.delete_confirm' | t }}">
+              {% render 'icon' with 'close-small' %}
+            </button>
+          </div>
+
+          <div class="account-addresses__elem">{{ address.address1 }}</div>
+          <div class="account-addresses__elem">{{ address.address2 }}</div>
+          <div class="account-addresses__elem">
+          <span class="account__addresses-elem-city text-body-large">
+          {{ address.city }}, {{ address.province_code }} {{ address.zip }}
+          </span>
+
+            <button data-address-id="{{ address.id }}"
+                    class="a btn--reset body4 account__edit-btn account-addresses__edit-btn js-opener-block js-edit-address"
+                    data-edit-address="{{ address.id }}"
+                    data-element-open="account-edit-address"
+                    data-element-hide="account-profile-inner">
+              {{ 'customer.addresses.edit' | t }}
+            </button>
+          </div>
+        </li>
+      {%- endif -%}
+    {% endfor %}
+  </ul>
+
+  <button type="button" class="account-addresses__add btn btn--secondary js-opener-block" data-element-open="account-add-address" data-element-hide="account-profile-inner">
+    {{ 'customer.addresses.add' | t }}
+  </button>
+</div>
+

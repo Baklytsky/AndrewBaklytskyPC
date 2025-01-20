@@ -1,0 +1,69 @@
+$grid-extra-small: 450px;
+$grid-mobile: 640px;
+$grid-small: 768px;
+$grid-medium: 1024px;
+$grid-large: 1280px;
+$grid-xxl: 1440px;
+
+$extra-small-max: 'extra-mobile-max';
+$extra-small-min: 'extra-mobile-min';
+$mobile-max: 'mobile-max';
+$mobile-min: 'mobile-min';
+$small-max: 'small-max';
+$small-min: 'small-min';
+$medium-min: 'medium-min';
+$medium-max: 'medium-max';
+$large-min: 'large-min';
+$large-max: 'large-max';
+$xlarge-min: 'xlarge-min';
+$xlarge-max: 'xlarge-max';
+
+
+// You can use these in the media-query mixin.
+$breakpoints: (
+  $extra-small-max '(max-width: #{$grid-extra-small - 1})',
+  $extra-small-min '(min-width: #{$grid-extra-small})',
+	$mobile-max '(max-width: #{$grid-mobile - 1})',
+	$mobile-min '(min-width: #{$grid-mobile})',
+	$small-max '(max-width: #{$grid-small - 1})',
+	$small-min '(min-width: #{$grid-small})',
+	$medium-min '(min-width: #{$grid-medium})',
+	$medium-max '(max-width: #{$grid-medium - 1})',
+	$large-min '(min-width: #{$grid-large})',
+	$large-max '(max-width: #{$grid-large - 1})',
+	$xlarge-min '(min-width: #{$grid-xxl})',
+	$xlarge-max '(max-width: #{$grid-xxl - 1})'
+);
+
+
+@mixin mq($media-query) {
+	$breakpoint-found: false;
+
+	@each $breakpoint in $breakpoints {
+		$name: nth($breakpoint, 1);
+		$declaration: nth($breakpoint, 2);
+
+		@if $media-query == $name and $declaration {
+			$breakpoint-found: true;
+
+			@media only screen and #{$declaration} {
+				@content;
+			}
+		}
+	}
+
+	@if $breakpoint-found == false {
+		@warn 'Breakpoint "#{$media-query}" does not exist';
+	}
+}
+
+/*Arrows*/
+
+$right-arrow: var(--right-arrow-url);
+$left-arrow: var(--left-arrow-url);
+$right-arrow-action: var(--right-arrow-action-url);
+$left-arrow-action: var(--left-arrow-action-url);
+$search-icon: var(--search-icon-url);
+$filter-icon: var(--filter-icon-url);
+$partner-icon: var(--partner-icon-url);
+$checkmark-icon: var(--checkmark-icon-url);

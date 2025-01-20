@@ -1,0 +1,673 @@
+{% render '_header.min.css' %}
+<script src="{{ 'header.min.js' | asset_url }}" defer="defer"></script>
+
+
+{%- liquid
+  assign enable_sticky_header = section.settings.enable_sticky_header
+  assign bg_color = section.settings.bg_color
+  assign text_color = section.settings.text_color
+  assign logo = section.settings.logo
+  assign logo_svg = section.settings.logo_svg
+  assign logo_professional = section.settings.logo_professional
+  assign logo_professional_transparent = section.settings.logo_professional_transparent
+  assign logo_width = section.settings.logo_width | append: 'px'
+  assign transparent_text_color = section.settings.transparent_text_color
+  assign transparent_logo = section.settings.transparent_logo
+  assign menu_primary = linklists[section.settings.menu_primary]
+  assign menu_secondary = linklists[section.settings.menu_secondary]
+  assign mobile_menu_primary = linklists[section.settings.mobile_menu_primary] | default: menu_primary
+  assign mobile_menu_secondary = linklists[section.settings.mobile_menu_secondary]
+  assign transparent_header = false
+  assign landing_professional = false
+  assign search_trending = section.settings.search_trending
+  assign search_popular_products = section.settings.search_popular_products
+  assign result_btn_text = section.settings.result_btn_text
+  assign result_btn_link = section.settings.result_btn_link | default: 'Shop All'
+  assign enable_animation_cart_icon = section.settings.enable_animation_cart_icon
+
+  if template contains 'hp-professional' or template == 'page.professional' and section.settings.transparent_header_homepage
+    assign transparent_header = true
+  endif
+
+  if template == 'page.professional'
+    assign landing_professional = true
+  endif
+-%}
+
+{%- include 'customer-status' -%}
+{%- comment -%}
+  - 'customer-status' return {{ customer_status }} variable
+{%- endcomment -%}
+
+<{% if enable_sticky_header %}sticky-header{% else %}div{% endif %} class="header-wrapper">
+
+  {%- render 'header-mobile-menu', mobile_menu_primary: mobile_menu_primary, mobile_menu_secondary: mobile_menu_secondary, is_professional: true  -%}
+
+  <header class="header {% if transparent_header %}header--transparent{% endif %} header__hp-professional {% if landing_professional %}header__landing-professional{% endif %}" style="--bg-color: {{ bg_color }}; --text-color: {{ text_color }}; --transparent-text-color: {{ transparent_text_color }}; --logo-width: {{ logo_width }}">
+    {%- render 'predictive-search' -%}
+
+    <div class="header__container">
+      {%- if menu_secondary != blank and menu_secondary.links.size > 0 and landing_professional -%}
+        <nav class="header-menu">
+          <ul class="header-menu__list list--unstyled medium-up-hide">
+            {%- for link in menu_secondary.links -%}
+
+              {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+              {%- if direct_link_access -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% if section.blocks.size > 0 %}
+                {%- assign menu_block = blank -%}
+
+                {% for block in section.blocks %}
+                  {%- assign link_handleize = link.title | handleize -%}
+                  {%- assign chain_handle = block.settings.heading | handleize -%}
+
+                  {% if link_handleize == chain_handle %}
+                    {%- assign menu_block = block -%}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              <li class="header-menu__item body3">
+                {% if link.links.size > 0 or menu_block != blank %}
+                  {%- render 'mega-menu', main_link: link, block: menu_block, index: forloop.index -%}
+                {%- else -%}
+                  <a href="{{ link.url }}" class="header-menu__link" data-menu-opener>{{ link.title }}</a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+      {% unless landing_professional %}
+        <nav class="header-menu">
+
+          <!---------- Desktop navigation -------->
+          <modal-opener class="link mobile-menu-opener">
+            <button class="btn--reset hamburger-icon header-mobile-menu__opener medium-up-hide close-all-drawers"
+                    id="drawer-menu-open"
+                    aria-controls="#mobile-menu-drawer"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    data-close-drawers
+                    aria-label="{{ 'accessibility.mobile_menu_open' | t }}">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </modal-opener>
+
+          <button class="btn--reset hamburger-icon hidden search-modal__close medium-up-hide"
+                  data-close-search
+                  aria-label="{{ 'accessibility.close_search' | t }}"
+                  aria-expanded="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          {%- if menu_primary != blank and  menu_primary.links.size > 0  -%}
+            <ul class="header-menu__list list--unstyled medium-hide header-menu__list-professional">
+              {%- for link in menu_primary.links -%}
+
+                {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {% if section.blocks.size > 0 %}
+                  {%- assign menu_block = blank -%}
+
+                  {% for block in section.blocks %}
+                    {%- assign link_handleize = link.title | handleize -%}
+                    {%- assign chain_handle = block.settings.heading | handleize -%}
+
+                    {% if link_handleize == chain_handle %}
+                      {%- assign menu_block = block -%}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+
+                <li class="header-menu__item body3">
+                  {% if link.links.size > 0 or menu_block != blank %}
+                    {%- render 'mega-menu', main_link: link, block: menu_block, index: forloop.index -%}
+                  {%- else -%}
+                    {%- liquid assign link_title_handleize = link.title | handleize -%}
+                    {%- capture top_nav_event_config -%}
+                      {
+                        "nav_level_1": "{{ link.title }}",
+                        "nav_level_2": "",
+                        "nav_level_3": ""
+                      }
+                    {%- endcapture -%}
+
+                    <a href="{{ link.url }}" class="header-menu__link" aria-expanded="false" data-menu-opener data-event-nav-link='{{ top_nav_event_config }}'>{{ link.title }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </nav>
+      {% endunless %}
+
+      <!--------- Logo --------->
+      {%- assign logo_link = settings.professional_landing_url -%}
+      {%- if customer_status == 'Partner' or customer_status == 'Premier Partner' -%}
+        {%- assign logo_link = settings.professional_homepage_url -%}
+      {%- endif -%}
+
+      {%- if logo != blank -%}
+        <a href="{{ logo_link | default: routes.root_url }}" class="header__logo">
+          {%- assign logo_alt = logo.alt | default: shop.name | escape -%}
+
+          {%- if transparent_header and transparent_logo and logo_svg == blank -%}
+            {% render 'image', image: transparent_logo, class_name: 'header__logo-img--transparent', small_size: true, alt: logo_alt, preload: true %}
+          {%- endif -%}
+
+          {%- if logo_svg != blank -%}
+            {{ logo_svg }}
+          {%- else -%}
+            {%- render 'image', image: logo, class_name: 'header__logo-img', small_size: true,  alt: logo_alt, preload: true -%}
+          {%- endif -%}
+        </a>
+      {%- else -%}
+        {%- if request.page_type == 'index' -%}
+          <h1 class="header__heading h3">
+            {{ shop.name }}
+          </h1>
+        {%- endif -%}
+      {%- endif -%}
+
+      <!--------- Right menu & icons ---------->
+      <div class="header-right-menu">
+        {%- if menu_secondary != blank and menu_secondary.links.size > 0 -%}
+          <nav class="header-menu medium-hide">
+            <ul class="header-menu__list list--unstyled medium-hide">
+              {%- for link in menu_secondary.links -%}
+
+                {%- assign direct_link_access = link.object.metafields.custom.direct_link_access | default: false -%}
+
+                {%- if direct_link_access -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {% if section.blocks.size > 0 %}
+                  {%- assign menu_block = blank -%}
+
+                  {% for block in section.blocks %}
+                    {%- assign link_handleize = link.title | handleize -%}
+                    {%- assign chain_handle = block.settings.heading | handleize -%}
+
+                    {% if link_handleize == chain_handle %}
+                      {%- assign menu_block = block -%}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+
+                <li class="header-menu__item body3">
+                  {% if link.links.size > 0 or menu_block != blank %}
+                    {%- render 'mega-menu', main_link: link, block: menu_block, index: forloop.index -%}
+                  {%- else -%}
+                    {%- capture top_nav_event_config -%}
+                      {
+                      "nav_level_1": "{{ link.title }}",
+                      "nav_level_2": "",
+                      "nav_level_3": ""
+                      }
+                    {%- endcapture -%}
+                    <a href="{{ link_url | default: link.url }}" class="header-menu__link" data-menu-opener data-event-nav-link='{{ top_nav_event_config }}' data-nav-link-level="1">{{ link.title }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+
+        <ul class="header-icons list--unstyled">
+          <li class="header-icons__item hidden">
+            {%- capture top_nav_event_config -%}
+              {
+                "nav_level_1": "Search",
+                "nav_level_2": "",
+                "nav_level_3": ""
+              }
+            {%- endcapture -%}
+
+            <modal-opener>
+              <button class="btn--reset header__icon header__icon--search"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                      aria-controls="#search-modal-drawer"
+                      data-open-modal
+                      style="display: block"
+                      data-event-nav-link='{{ top_nav_event_config }}'>
+                {% render 'icon' with 'search' %}
+                <span class="visually-hidden">{{ 'general.search.search' | t }}</span>
+              </button>
+            </modal-opener>
+          </li>
+
+          {%- if shop.customer_accounts_enabled -%}
+            <li class="header-icons__item">
+              {%- capture top_nav_event_config -%}
+                {
+                "nav_level_1": "Account",
+                "nav_level_2": "",
+                "nav_level_3": ""
+                }
+              {%- endcapture -%}
+              <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="header__icon header__icon--account" data-event-nav-link='{{ top_nav_event_config }}'>
+                {% render 'icon' with 'account' %}
+                <span class="visually-hidden">
+                  {%- liquid
+                    if customer
+                    echo 'customer.account_fallback' | t
+                    else
+                    echo 'customer.log_in' | t
+                    endif
+                  -%}
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+
+          <li class="header-icons__item header-icons__cart rel">
+            {%- capture top_nav_event_config -%}
+              {
+              "nav_level_1": "Cart",
+              "nav_level_2": "",
+              "nav_level_3": ""
+              }
+            {%- endcapture -%}
+            <modal-opener>
+              <button
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="#cart-drawer"
+                data-open-modal
+                style="display: block"
+                class="btn--reset header__icon header__icon--cart a rel"
+                data-event-nav-link='{{ top_nav_event_config }}'>
+                {% render 'icon' with 'bag' %}
+
+                <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+              </button>
+
+              <div
+                class="cart-count-bubble
+                {% if cart == empty %}visually-hidden{% endif %}
+                {% if enable_animation_cart_icon %}cart-count-bubble--anim{% endif %}">
+                <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+              </div>
+            </modal-opener>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <div class="header-overlay" aria-hidden="true"><span class="visually-hidden">{{ 'accessibility.header_overlay' | t }}</span></div>
+
+</{%- if enable_sticky_header -%}sticky-header{%- else -%}div{%-endif-%}>
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if section.settings.logo %}
+  {% assign image_size = section.settings.logo.width | append: 'x' %}
+      "logo": {{ section.settings.logo | img_url: image_size | prepend: "https:" | json }},
+    {% endif %}
+    "sameAs": [
+      {{ settings.social_twitter_link | json }},
+      {{ settings.social_facebook_link | json }},
+      {{ settings.social_pinterest_link | json }},
+      {{ settings.social_instagram_link | json }},
+      {{ settings.social_tiktok_link | json }},
+      {{ settings.social_tumblr_link | json }},
+      {{ settings.social_snapchat_link | json }},
+      {{ settings.social_youtube_link | json }},
+      {{ settings.social_vimeo_link | json }}
+    ],
+    "url": {{ shop.url | append: page.url | json }}
+  }
+</script>
+
+{%- if request.page_type == 'index' -%}
+  {% assign potential_action_target = shop.url | append: routes.search_url | append: "?q={search_term_string}" %}
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {{ potential_action_target | json }},
+        "query-input": "required name=search_term_string"
+      },
+      "url": {{ shop.url | append: page.url | json }}
+    }
+  </script>
+{%- endif -%}
+
+<script>
+  function setHeaderHeightVar() {
+    document.documentElement.style.setProperty('--header-height', document.querySelector('.header').getBoundingClientRect().height + 'px');
+    document.documentElement.style.setProperty('--header-bottom', document.querySelector('.header').getBoundingClientRect().bottom + 'px');
+  }
+  setHeaderHeightVar();
+  window.addEventListener('resize', setHeaderHeightVar);
+  // Waiting when lazyload load logo and update header height
+  setTimeout(setHeaderHeightVar, 1000)
+</script>
+
+
+{% schema %}
+{
+  "name": "Header Pro",
+  "class": "header-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_header",
+      "default": true,
+      "label": "Enable sticky header",
+      "info": "Header shows on the screen as customers scroll up."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "html",
+      "id": "logo_svg",
+      "label": "Logo svg"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 250,
+      "step": 10,
+      "default": 110,
+      "unit": "px",
+      "label": "Logo width"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation_cart_icon",
+      "label": "Enable animation cart icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Menu"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_primary",
+      "default": "main-menu",
+      "label": "Desktop menu primary"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_secondary",
+      "label": "Desktop menu secondary"
+    },
+    {
+      "type": "link_list",
+      "id": "mobile_menu_primary",
+      "label": "Mobile menu primary"
+    },
+    {
+      "type": "link_list",
+      "id": "mobile_menu_secondary",
+      "label": "Mobile menu secondary"
+    },
+    {
+      "type": "header",
+      "content": "Transparent"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_header_homepage",
+      "label": "Enable transparent header on homepage",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "transparent_text_color",
+      "label": "Transparent text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "image_picker",
+      "id": "transparent_logo",
+      "label": "Transparent logo"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product highlight",
+      "type": "products",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Chaining handle",
+          "info": "Chaining a block by link name"
+        },
+        {
+          "type": "header",
+          "content": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image",
+          "info": "By default product image will be displayed"
+        },
+        {
+          "type": "text",
+          "id": "link_label_1",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url_1",
+          "label": "Link URL"
+        },
+        {
+          "type": "header",
+          "content": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image",
+          "info": "By default product image will be displayed"
+        },
+        {
+          "type": "text",
+          "id": "link_label_2",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url_2",
+          "label": "Link URL"
+        },
+        {
+          "type": "header",
+          "content": "Product 3"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Image",
+          "info": "By default product image will be displayed"
+        },
+        {
+          "type": "text",
+          "id": "link_label_3",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url_3",
+          "label": "Link URL"
+        },
+        {
+          "type": "header",
+          "content": "Product 4"
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "Product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_4",
+          "label": "Image",
+          "info": "By default product image will be displayed"
+        },
+        {
+          "type": "text",
+          "id": "link_label_4",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link_url_4",
+          "label": "Link URL"
+        }
+      ]
+    },
+    {
+      "name": "Image with text",
+      "type": "banners",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Chaining handle",
+          "info": "Chaining a block by link name"
+        },
+        {
+          "type": "header",
+          "content": "Banner 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading_1",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_1",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Banner 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading_2",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_2",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Banner 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_3",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading_3",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_3",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Banner 4"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_4",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading_4",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link_4",
+          "label": "Link"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

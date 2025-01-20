@@ -1,0 +1,293 @@
+{{ 'skincare-tabs.min.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign subheading = section.settings.subheading | escape | newline_to_br
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign blocks_type_str = ''
+
+  if section.blocks.size > 0
+    assign blocks_type_arr = section.blocks | map: 'settings' | map: 'category' | uniq
+  endif
+
+ for block_type in blocks_type_arr
+  for block in section.blocks
+    if block.settings.category == block_type
+      assign position = block.settings.position_first_block
+      assign position_first_blocks = position_first_blocks | append: position | append: ','
+      break
+    endif
+  endfor
+  endfor
+
+  assign position_first_blocks_arr = position_first_blocks | split: ','
+-%}
+
+
+<div class="skincare-tabs">
+  <div class="page-width">
+    {%- if heading != blank or subheading != blank or button_label != blank -%}
+      <div class="skincare-tabs__header">
+        {%- if heading != blank or subheading != blank -%}
+          <div class="skincare-tabs__header-text">
+            {%- if heading != blank -%}
+              <h3 class="skincare-tabs__header-heading m0 h2 h2--light">{{ heading }}</h3>
+            {%- endif -%}
+
+            {%- if subheading != blank -%}
+              <div class="skincare-tabs__header-subheading body2 m0">{{ subheading }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if button_label != blank -%}
+          <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+            tabindex="0"
+            href="{{ button_link }}"{% endif %}
+            class="skincare-tabs__header-btn btn btn--{{ button_style }}">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <tabs-component>
+     {% if blocks_type_arr.size > 0 %}
+      <div class="skincare-tabs__header-tab-panels" role="tablist" aria-labelledby="tablist-{{ section.id }}">
+        {% for block_type in blocks_type_arr %}
+          {% if block_type != blank %}
+            <batton
+              class="a h3 skincare-tabs__header-tab"
+              role="tab"
+              type="button"
+              tabindex="0"
+              id="tab-{{ forloop.index }}--{{ section.id }}"
+              aria-controls="tabpanel-{{ forloop.index }}--{{ section.id }}"
+              aria-selected="{%- if forloop.first -%}true{%- else -%}false{%- endif -%}"
+              {% unless forloop.first %}tabindex="-1"{% endunless %}>
+
+              {{ block_type }}
+            </batton>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+     {% if section.blocks.size > 0 %}
+       {% for block_type in blocks_type_arr %}
+         {%- assign blocks_counter = 0 -%}
+
+        <div
+          class="skincare-tabs__list {% if position_first_blocks_arr[forloop.index0] == 'true' %}skincare-tabs__list--reverse{% endif %}"
+          id="tabpanel-{{  forloop.index }}--{{ section.id }}"
+          role="tabpanel"
+          tabindex="{%- if forloop.first -%}0{%- else -%}-1{%- endif -%}"
+          aria-labelledby="tab-{{ forloop.index }}--{{ section.id }}"
+          {% unless forloop.first %}hidden{% endunless %}>
+
+          {% for block in section.blocks %}
+            {% if block.settings.category == block_type %}
+              {%- assign blocks_counter = blocks_counter | plus: 1 -%}
+              {%- assign block_index = blocks_counter | modulo: 2 -%}
+
+              {% render 'skincare-tabs-step' block: block, block_index: block_index  %}
+            {% endif %}
+          {% endfor %}
+
+        </div>
+        {% endfor %}
+      {% endif %}
+    </tabs-component>
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Skincare tabs",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "ABCs of skincare"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The ingredients to know."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "position_first_block",
+          "label": "Image first",
+          "info": "Setup content position. Works only for first block.",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category",
+          "info": "AM,PM and others."
+        },
+        {
+          "type": "header",
+          "content": "Media content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "If video is selected, it will be used as a video poster"
+        },
+        {
+          "type": "video_url",
+          "id": "video",
+          "label": "Video",
+          "accept": [
+            "youtube",
+            "vimeo"
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "show_play_button",
+          "label": "Show play/pause button",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_mute_button",
+          "label": "Show mute/unMute button",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Text content"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "header",
+          "content": "Products content"
+        },
+        {
+          "type": "textarea",
+          "id": "products_heading",
+          "label": "Products heading"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Skincare tabs"
+    }
+  ]
+}
+{% endschema %}

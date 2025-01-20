@@ -1,0 +1,347 @@
+{{ 'pdp-main.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-show-more.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign index = false
+
+  for handle in shop.metafields.rx-product.handle
+    assign product_handle = handle | handleize
+    if product_handle == page.handle
+        assign index = forloop.index0
+      break
+    endif
+  endfor
+
+  assign show_breadcrumbs = section.settings.show_breadcrumbs
+  assign arrows_layout = section.settings.arrows_layout
+  assign dots_layout = section.settings.dots_layout
+
+  assign product_media = shop.metafields.rx-product.media[index]
+-%}
+
+{%- if index -%}
+
+  {%- if show_breadcrumbs -%}
+    {% render 'breadcrumbs' %}
+  {%- endif -%}
+
+  <div class="pdp-main">
+
+    {%- liquid
+      assign thumbnailsElement = '.pdp-media__thumbs-slider--' | append: section.id
+      assign thumbnailsSliderClass = 'pdp-media__thumbs-slider pdp-media__thumbs-slider--' | append: section.id
+      assign badge = settings[shop.metafields.rx-product.badge[index]]
+    -%}
+
+    {%- capture swiper_thumbnail_config -%}
+      {
+      "direction": "vertical",
+      "slidesPerView": "auto",
+      "slidesPerGroupAuto": true,
+      "slideToClickedSlide": true,
+      "grabCursor": true
+      }
+    {%- endcapture -%}
+
+    {%- capture swiper_config -%}
+      {
+      "slidesPerView:": 1,
+      "thumbnailsElement": {{ thumbnailsElement | json }},
+      "pagination": {
+      "el": ".swiper-pagination--{{ section.id }}",
+      "type": "bullets",
+      "clickable": true
+      },
+      "navigation": {
+        "nextEl": ".swiper-button-next--{{ section.id }}",
+        "prevEl": ".swiper-button-prev--{{ section.id }}"
+      }
+      }
+    {%- endcapture -%}
+
+    {%- capture slides -%}
+      {%- for media in product_media limit: 6 -%}
+        <div class="swiper-slide">
+          <div class="pdp-media__image rel">
+            {%- liquid assign media_alt = media.alt | default: product.title | append: ' - media_' | append: forloop.index -%}
+
+            {%- if media.media_type == 'image' -%}
+              {% render 'image-metafields', image: media, class_name: 'image-abs-cover', alt: media_alt %}
+            {%- elsif media.media_type == 'video' -%}
+              <video class='image-abs-contain' loop muted autoplay playsinline controls>
+                <source src="{{ media.original_src }}" type="{{ media.mime_type }}">
+              </video>
+            {%- endif -%}
+          </div>
+        </div>
+      {% else %}
+        <div class="pdp-media__image rel">
+          <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}" class="image-abs-cover" alt="{{ product.title }}">
+        </div>
+      {% endfor %}
+    {%- endcapture -%}
+
+    <div class="pdp-media rel arrows--{{ arrows_layout }} dots--{{ dots_layout }} media--{{ section.id }}">
+      {%- if badge != blank -%}
+        <div class="pdp-media__badge">
+          {% render 'image', image: badge, alt: badge.alt %}
+        </div>
+      {%- endif -%}
+      {%- render 'slideshow-swiper', class_name: 'pdp-media__slider', config: swiper_config, slides: slides, show_slider_nav: true, nav_id: section.id -%}
+      {%- render 'slideshow-swiper', class_name: thumbnailsSliderClass, config: swiper_thumbnail_config, slides: slides -%}
+    </div>
+
+    {%- liquid
+      assign rx_badge_title = 'templates.physical_finder.badge_title' | t
+      assign rx_safety_info_title = 'templates.physical_finder.safety_info_title' | t
+    -%}
+
+    <div class="pdp-details rel">
+      {%- if rx_badge_title != blank or rx_safety_info_title != blank -%}
+        <div class="pdp-details__rx-badge-wrapper">
+          {%- if rx_badge_title != blank -%}
+            <span class="pdp-details__rx-badge h6">{{ rx_badge_title }}</span>
+          {%- endif -%}
+          {%- if rx_safety_info_title != blank -%}
+            <a href="#{{ section.id }}--safety_info" class="pdp-details__rx-badge-link">
+              {{ rx_safety_info_title }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+        {%- when 'subtitle' -%}
+          {%- if shop.metafields.rx-product.subtitle[index] != blank -%}
+            <div class="pdp-details__subtitle body2" {{ block.shopify_attributes }}>
+              {{ shop.metafields.rx-product.subtitle[index] }}
+            </div>
+          {%- endif -%}
+        {%- when 'collection' -%}
+          <div class="pdp-details__collections">
+            {%- liquid assign product_collections = shop.metafields.rx-product.collections[index] | split: ',' -%}
+            {%- render 'product-featured-collections', product_collections: product_collections, class: 'pdp-details__collections-item body3' -%}
+          </div>
+        {%- when 'title' -%}
+          <h3 class="pdp-details__title" {{ block.shopify_attributes }}>
+            {{ shop.metafields.rx-product.title[index] | default: page.title }}
+          </h3>
+        {%- when 'button' -%}
+          {%- liquid
+              assign button_label = block.settings.button_label
+              assign button_link = block.settings.button_link
+          -%}
+
+          {%- if button_link != blank -%}
+            <div class="product-form product-rx-form" {{ block.shopify_attributes }}>
+              <div class="product-form__wrapper">
+                <div class="product-form__buttons">
+                  <a href="{{ button_link }}" class="product-form__btn-link btn btn--full-width btn--primary-alt"
+                     title="{{- button_label -}}"
+                     aria-label="{{- button_label -}}">
+                    {{- button_label -}}
+                  </a>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- when 'skin_type_and_concern' -%}
+          {%- liquid
+            assign rx_product_skin_types = shop.metafields.rx-product.skin_type[index] | split: ','
+            assign rx_product_skin_concern = shop.metafields.rx-product.skin_concern[index] | split: ','
+          -%}
+
+          {%- render 'pdp-skin-type-and-concern', product: product, block: block, rx_product_skin_types: rx_product_skin_types, rx_product_skin_concern: rx_product_skin_concern -%}
+        {%- when 'description' -%}
+          {%- liquid
+              assign description = shop.metafields.rx-product.description[index]
+              assign description_additional = shop.metafields.rx-product.description_additional[index]
+              assign summary_description = description | append: description_additional
+          -%}
+
+          {%- render 'pdp-description', description: summary_description, block: block -%}
+        {%- when 'ingredients' -%}
+          {%- liquid
+            assign ingredients_show_less = shop.metafields.rx-product.ingredients_show_less[index]
+            assign ingredients_show_more = shop.metafields.rx-product.ingredients_show_more[index]
+          -%}
+          {%- render 'pdp-ingredients', ingredients_show_less: ingredients_show_less, ingredients_show_more: ingredients_show_more, block: block -%}
+
+        {%- when 'safety_information' -%}
+          {%- liquid
+            assign safety_information_show_less = shop.metafields.rx-product.safety_information_show_less[index]
+            assign safety_information_show_more = shop.metafields.rx-product.safety_information_show_more[index]
+          -%}
+          {%- render 'pdp-safety-info', block: block, id: section.id, safety_information_show_less: safety_information_show_less, safety_information_show_more: safety_information_show_more -%}
+        {%- when '@app' -%}
+          {% render block %}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product details (rx-only)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "arrows_layout",
+      "label": "Arrows layout",
+      "options": [
+        {
+          "value": "show-on-mobile",
+          "label": "Show only on mobile"
+        },
+        {
+          "value": "show-on-desktop",
+          "label": "Show only on desktop"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "select",
+      "id": "dots_layout",
+      "label": "Dots layout",
+      "options": [
+        {
+          "value": "show-on-mobile",
+          "label": "Show only on mobile"
+        },
+        {
+          "value": "show-on-desktop",
+          "label": "Show only on desktop"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "show-on-mobile"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1
+    },
+    {
+      "type": "collection",
+      "name": "Collection",
+      "limit": 1
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Find a Physician"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Description",
+          "label": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "subtitle",
+      "name": "Subtitle",
+      "limit": 1
+    },
+    {
+      "type": "skin_type_and_concern",
+      "name": "Skin type and concern",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Best for",
+          "label": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "ingredients",
+      "name": "Ingredients",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Ingredients",
+          "label": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "safety_information",
+      "name": "Safety information",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Safety information",
+          "label": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product details (rx-only)"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

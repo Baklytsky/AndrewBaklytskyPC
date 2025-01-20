@@ -1,0 +1,328 @@
+{{ 'pdp-main.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign show_breadcrumbs = section.settings.show_breadcrumbs
+  assign arrows_layout = section.settings.arrows_layout
+  assign dots_layout = section.settings.dots_layout
+
+  if product.selected_or_first_available_variant.featured_media
+  assign seo_media = product.selected_or_first_available_variant.featured_media
+  else
+  assign seo_media = product.featured_media
+  endif
+-%}
+
+{%- if show_breadcrumbs -%}
+  {% render 'breadcrumbs' %}
+{%- endif -%}
+
+{%- render 'ga-product-list-event', event_type: 'view_item', product: product -%}
+
+<div class="pdp-main">
+  {%- render 'pdp-media', product: product, arrows_layout: arrows_layout, dots_layout: dots_layout -%}
+  {%- render 'pdp-details', product: product, section: section -%}
+</div>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org/",
+    "@type": "Product",
+    "@id" : "{{shop.url}}{{ product.url }}",
+    "name": {{ product.title | json }},
+    "url": {{ shop.url | append: product.url | json }},
+    {% if seo_media -%}
+  {%- assign media_size = seo_media.preview_image.width | append: 'x' -%}
+      "image": [
+        {{ seo_media | img_url: media_size | prepend: "https:" | json }}
+      ],
+    {%- endif %}
+    "description": {{ product.description | strip_html | json }},
+    {% if product.selected_or_first_available_variant.sku != blank -%}
+      "sku": {{ product.selected_or_first_available_variant.sku | json }},
+    {%- endif %}
+    "brand": {
+      "@type": "Thing",
+      "name": {{ product.vendor | json }}
+    },
+    "offers": [
+      {%- for variant in product.variants -%}
+        {
+          "@type" : "Offer",
+          {%- if variant.sku != blank -%}
+            "sku": {{ variant.sku | json }},
+          {%- endif -%}
+          "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+          "price" : {{ variant.price | divided_by: 100.00 | json }},
+          "priceCurrency" : {{ cart.currency.iso_code | json }},
+          "url" : {{ shop.url | append: variant.url | json }}
+        }{% unless forloop.last %},{% endunless %}
+  {%- endfor -%}
+    ]
+  }
+</script>
+
+<script>
+  let json_product = {{ product | json }};
+</script>
+
+{% schema %}
+{
+  "name": "Product details",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "arrows_layout",
+      "label": "Arrows layout",
+      "options": [
+        {
+          "value": "show-on-mobile",
+          "label": "Show only on mobile"
+        },
+        {
+          "value": "show-on-desktop",
+          "label": "Show only on desktop"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "select",
+      "id": "dots_layout",
+      "label": "Dots layout",
+      "options": [
+        {
+          "value": "show-on-mobile",
+          "label": "Show only on mobile"
+        },
+        {
+          "value": "show-on-desktop",
+          "label": "Show only on desktop"
+        },
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "show-on-mobile"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1
+    },
+    {
+      "type": "collection",
+      "name": "Collection",
+      "limit": 1
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Description",
+          "label": "Heading"
+        },
+        {
+          "type": "checkbox",
+          "id": "collapsed_by_default",
+          "default": true,
+          "label": "Collapsed by default"
+        }
+      ]
+    },
+    {
+      "type": "subtitle",
+      "name": "Subtitle",
+      "limit": 1
+    },
+    {
+      "type": "info_label",
+      "name": "Info label",
+      "limit": 1
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1
+    },
+    {
+      "type": "product-form",
+      "name": "Product form",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_sticky_bar",
+          "label": "Show sticky bar",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "subscriptions_enable_selectors",
+          "label": "Enable subscription selectors",
+          "info": "Shown on products with subscription options",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "subscriptions_details",
+          "label": "Subscription details",
+          "info": "Shown on subscription details modal"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_afterpay",
+          "label": "Show afterpay"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_quantity_selector",
+          "default": true,
+          "label": "Show quantity selector"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_premier_points",
+          "default": false,
+          "label": "Show premier points"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "default": false,
+          "label": "Show dynamic checkout buttons",
+          "info": "Using the payment methods available on your store, customers see their preferred option, like PayPal or Apple Pay. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)"
+        },
+        {
+          "type": "color",
+          "id": "dynamic_btn_bg",
+          "label": "Dynamic button background",
+          "default": "#008FE0"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_gift_card_recipient",
+          "default": false,
+          "label": "Show recipient information form for gift cards",
+          "info": "Allows buyers to send gift cards on a scheduled date along with a personal message. [Learn more](https://help.shopify.com/manual/online-store/themes/customizing-themes/add-gift-card-recipient-fields)"
+        },
+        {
+          "type": "header",
+          "content": "Notify me"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_notify_me_form",
+          "label": "Show notify form when out of stock",
+          "default": true
+        },
+        {
+          "type": "textarea",
+          "id": "notify_text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "notify_button_label",
+          "label": "Button label",
+          "default": "Notify Me"
+        }
+      ]
+    },
+    {
+      "type": "skin_type_and_concern",
+      "name": "Skin type and concern",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Best for",
+          "label": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "ingredients",
+      "name": "Ingredients",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Ingredients",
+          "label": "Heading"
+        },
+        {
+          "type": "checkbox",
+          "id": "collapsed_by_default",
+          "default": true,
+          "label": "Collapsed by default"
+        }
+      ]
+    },
+    {
+      "type": "safety_information",
+      "name": "Safety information",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Safety information",
+          "label": "Heading"
+        },
+        {
+          "type": "checkbox",
+          "id": "collapsed_by_default",
+          "default": true,
+          "label": "Collapsed by default"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product details"
+    }
+  ],
+  "templates": ["product"]
+}
+{% endschema %}

@@ -1,0 +1,44 @@
+{% comment %}
+  Accepts:
+  - product: {Object} Product Liquid object
+  - block: {Object} Section block
+  - description: {String} Description (optional)
+
+  Usage:
+{%- render 'pdp-description', product: product, description: description, block: block -%}
+{% endcomment %}
+
+{%- liquid
+  assign heading = block.settings.heading
+  assign collapsed_by_default = block.settings.collapsed_by_default
+  assign description = product.description | default: description
+-%}
+
+{%- if description != blank -%}
+  <accordion-element class="pdp-details__description accordion"
+                     data-accordion-group="pdp-details-{{ section.id }}">
+    <div class="accordion__item">
+      <button type="button"
+              aria-expanded="{% if collapsed_by_default %}false{% else %}true{% endif %}"
+              class="h6 btn--reset accordion__button"
+              aria-controls="content-description-{{ section.id }}"
+              id="accordion-button-description-{{ section.id }}"
+              data-pdp-show-more="{{ heading }}">
+
+        <span class='accordion-title'>{{ heading }}</span>
+
+        <span class="accordion__icons block">
+          {% render 'icon' with 'plus-small' %}
+          {% render 'icon' with 'minus-small' %}
+        </span>
+      </button>
+
+      <div id="content-description-{{ section.id }}"
+           aria-labelledby="accordion-button-description-{{ section.id }}"
+           class="accordion__content-inner"
+           style="display: {% if collapsed_by_default %}none{% else %}block{% endif %}">
+        {{ description }}
+      </div>
+    </div>
+  </accordion-element>
+{%- endif -%}

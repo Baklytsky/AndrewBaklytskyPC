@@ -1,0 +1,332 @@
+{%- comment -%}
+  {%- render 'professional-account-profile' -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign custom_id = customer.metafields.professional_info.custom_id
+  assign sales_representative_id = customer.metafields.professional_info.sales_representative_id
+  assign name = customer.metafields.professional_info.name
+  assign holder = customer.metafields.professional_info.holder
+  assign description = customer.metafields.professional_info.description
+  assign image_url = customer.metafields.professional_info.image_url
+  assign website_url = customer.metafields.professional_info.website_url
+  assign premier_partner = customer.metafields.professional_info.premier_partner
+  assign preferred_partner = customer.metafields.professional_info.preferred_partner
+-%}
+
+<div class="pro-account-profile">
+  <div class="pro-account-profile__account rel">
+    <h3 class="h3 pro-account-profile__heading">
+      {{ 'customer.profile.account_details_heading' | t }}
+    </h3>
+
+    <div class="pro-account-profile__info">
+      <div class="pro-account-profile__info-column">
+        {%- if premier_partner -%}
+          <div class="pro-account-profile__info-item">
+            {%- liquid assign checkmark_title = 'customer.account.premier_partner_title' | t -%}
+            {%- render 'checkmark-with-title', title: checkmark_title, className: 'pro-account-premier-checkmark' -%}
+          </div>
+        {%- endif -%}
+
+        {%- liquid assign location_counter = 0 -%}
+
+        {%- for i in (1..5) -%}
+          {%- liquid
+            assign location_index = 'location_' | append: i
+            assign location_number = customer.metafields[location_index].location_number
+            assign location_name = customer.metafields[location_index].name
+          -%}
+
+          {%- if location_number != blank or location_name != blank  -%}
+            {%- liquid assign location_counter = location_counter | plus: 1 -%}
+            {%- if location_counter == 1 -%}
+              <div class="pro-account-profile__info-item">
+                <div class="heading body4">{{ 'customer.profile.primary_account_number' | t }}</div>
+                <div class="description body1">{{ location_name }}</div>
+                <div class="description body1">{{ location_number }}</div>
+              </div>
+            {%- endif -%}
+
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- liquid assign secondary_location_counter = 0 -%}
+
+        {%- if location_counter > 1 -%}
+          <div class="pro-account-profile__info-item">
+            {%- for i in (1..5) -%}
+              {%- liquid
+                assign location_index = 'location_' | append: i
+                assign location_number = customer.metafields[location_index].location_number
+                assign location_name = customer.metafields[location_index].name
+              -%}
+
+              {%- if location_number != blank or location_name != blank  -%}
+                {%- liquid
+                  assign secondary_location_counter = secondary_location_counter | plus: 1
+                -%}
+
+                {%- if secondary_location_counter == 2 -%}
+                  <div class="heading body4">{{ 'customer.profile.secondary_account_number' | t }}</div>
+                {%- endif -%}
+
+                {%- unless secondary_location_counter == 1 -%}
+                  <div class="description body1 secondary_location">{{ location_name }}</div>
+                  <div class="description body1 secondary_location">{{ location_number }}</div>
+                {%- endunless -%}
+
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+      <div class="pro-account-profile__info-column">
+
+        {%- if holder != blank -%}
+          <div class="pro-account-profile__info-item">
+            <div class="heading body4">{{ 'customer.profile.primary_account_holder' | t }}</div>
+            <div class="description body1">{{ holder }}</div>
+          </div>
+        {%- endif -%}
+
+        <div class="pro-account-profile__info-item">
+          <div class="heading body4">{{ 'customer.account.email' | t }}</div>
+          <div class="description body1">{{ customer.email }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <tabs-component class="pro-account-profile__by-location rel">
+    {%- for i in (1..5) -%}
+      {%- liquid
+        assign location_index = 'location_' | append: i
+        assign location_name = customer.metafields[location_index].name
+
+        if location_name != blank
+          assign selected_value = location_name
+          assign selected_id = location_name | handleize | append: '-' | append: forloop.index
+          break
+        endif
+      -%}
+    {%- endfor -%}
+
+    {%- if selected_value != blank and location_counter > 1 -%}
+      <div role="tablist">
+        <custom-select class="form-select body3 form-select-alternative block small-hide"
+                       aria-labelledby="profile__by-location-tablist-{{ section.id }}">
+          <button type="button" class="btn--reset form-select__btn"
+                  tabindex="0" aria-expanded="false"
+                  aria-controls="pro-account-profile--{{ section.id }}" aria-selected="true">
+
+            <span class="form-select__btn-text">{{ selected_value }}</span>
+            <span class="form-select__dropdown-option--label"></span>
+
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+
+          <ul class="form-select__dropdown hide-scrollbar" id="pro-account-profile--{{ section.id }}"
+              style="display: none;">
+
+            {%- for i in (1..5) -%}
+              {%- liquid
+                assign location_index = 'location_' | append: i
+                assign location_name = customer.metafields[location_index].name -%}
+
+              {%- if location_name != blank -%}
+                {%- capture id -%}{{ location_name | handleize }}-{{ forloop.index }}{%- endcapture -%}
+                <li class="form-select__dropdown-option a"
+                    data-option-value="{{ id }}" aria-selected="false">
+                  <button class="btn--reset a form-select__dropdown-button"
+                          role="tab"
+                          tabindex="{%- if id == selected_id -%}0{%- else -%}-1{%- endif -%}"
+                          id="tab-{{ id }}"
+                          aria-controls="tabpanel-{{ id }}"
+                          aria-selected="{%- if id == selected_id -%}true{%- else -%}false{%- endif -%}">
+                    {{ location_name }}
+                  </button>
+                </li>
+              {%- endif -%}
+
+            {%- endfor -%}
+          </ul>
+
+          <input type="hidden" class="form__input-hidden" value="">
+        </custom-select>
+
+        <div class="form-field form-select small-up-hide">
+          <label class="form-label visually-hidden"
+                 for="RegisterForm-Role--origin">{{ 'customer.register_pro.role' | t }}</label>
+          <select class="form__select" name="location">
+            {%- for i in (1..5) -%}
+              {%- liquid
+                assign location_index = 'location_' | append: i
+                assign location_name = customer.metafields[location_index].name -%}
+
+              {%- if location_name != blank -%}
+                {%- capture id -%}{{ location_name | handleize }}-{{ forloop.index }}{%- endcapture -%}
+                <option value="tabpanel-{{ id }}" {%- if id == selected_id -%}selected{%- endif -%}>{{ location_name }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- for i in (1..5) -%}
+
+      {%- liquid
+        assign location_index = 'location_' | append: i
+        assign location_business = customer.metafields[location_index].business
+        assign location_name = customer.metafields[location_index].name
+        assign location_description = customer.metafields[location_index].description
+        assign location_image_url = customer.metafields[location_index].image_url
+        assign location_website_url = customer.metafields[location_index].website_url
+        assign location_state = customer.metafields[location_index].state
+        assign location_zip_code = customer.metafields[location_index].zip_code
+        assign location_city = customer.metafields[location_index].city
+        assign location_street = customer.metafields[location_index].street
+        assign location_phone_number = customer.metafields[location_index].phone_number
+        assign location_number = customer.metafields[location_index].location_number
+        assign location_skintrinsiq_provider = customer.metafields[location_index].skintrinsiq_provider
+        assign location_physician_name = customer.metafields[location_index].physician_name
+        assign location_physician_description = customer.metafields[location_index].physician_description
+        assign location_physician_image_url = customer.metafields[location_index].physician_image_url
+      -%}
+
+      {%- if location_name != blank -%}
+        {%- capture id -%}{{ location_name | handleize }}-{{ forloop.index }}{%- endcapture -%}
+
+        <div class="pro-account-profile__by-location-wrapper"
+             id="tabpanel-{{ id }}"
+             role="tabpanel"
+             tabindex="{%- if id == selected_id -%}0{%- else -%}-1{%- endif -%}"
+             aria-labelledby="tab-{{ id }}"
+             {% unless id == selected_id %}hidden{% endunless %}>
+
+          {%- if location_name != blank -%}
+            <div class="pro-account-profile__by-location-details">
+              <h3 class="h3 pro-account-profile__heading">
+                {{ 'customer.profile.details.heading' | t }}
+              </h3>
+
+              <div class="pro-account-profile__info">
+                <div class="pro-account-profile__info-column">
+                  {%- if location_image_url != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.image_title' | t }}</div>
+                      <div class="image">
+                        <img src="{{ location_image_url }}" class="image-abs-cover" alt="{{ location_name }} - image">
+                      </div>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if location_business != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.business_title' | t }}</div>
+                      <div class="description body1">{{ location_business }}</div>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if location_description != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.description_title' | t }}</div>
+                      <div class="description body1">{{ location_description }}</div>
+                    </div>
+                  {%- endif -%}
+                </div>
+                <div class="pro-account-profile__info-column">
+                  {%- if location_state != blank
+                    or location_zip_code != blank
+                    or location_city != blank
+                    or location_street != blank  -%}
+
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.address_title' | t }}</div>
+                      <div class="description body1">
+                        {{ location_street }}<br/>{{ location_city }}, {{ location_state }} {{ location_zip_code }}
+                      </div>
+                    </div>
+
+                  {%- endif -%}
+
+                  {%- if location_phone_number != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.phone_title' | t }}</div>
+                      <div class="description body1">{{ location_phone_number }}</div>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if location_website_url != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.details.website_title' | t }}</div>
+                      <a href="{{ location_website_url }}" class="description body1 link">{{ location_website_url }}</a>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if location_skintrinsiq_provider -%}
+                    <div class="pro-account-profile__info-item">
+                      {%- liquid assign checkmark_title = 'customer.profile.details.checkmark_title' | t -%}
+                      {%- render 'checkmark-with-title', title: checkmark_title, className: 'pro-account-profile-checkmark' -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+
+            </div>
+          {%- endif -%}
+
+          {%- if location_physician_name != blank -%}
+            <div class="pro-account-profile__by-location-details">
+              <h3 class="h3 pro-account-profile__heading">
+                {{ 'customer.profile.physician.heading' | t }}
+              </h3>
+
+              <div class="pro-account-profile__info">
+                <div class="pro-account-profile__info-column">
+                  {%- if location_physician_image_url != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.physician.image_title' | t }}</div>
+                      <div class="image">
+                        <img src="{{ location_physician_image_url }}"
+                             class="image-abs-cover"
+                             alt="{{ location_physician_name }} - image">
+                      </div>
+                    </div>
+                  {%- endif -%}
+
+                  <div class="pro-account-profile__info-item">
+                    <div class="heading body4">{{ 'customer.profile.physician.physician_title' | t }}</div>
+                    <div class="description body1">{{ location_physician_name }}</div>
+                  </div>
+
+                  {%- if location_physician_description != blank -%}
+                    <div class="pro-account-profile__info-item">
+                      <div class="heading body4">{{ 'customer.profile.physician.description_title' | t }}</div>
+                      <div class="description body1">{{ location_physician_description }}</div>
+                    </div>
+                  {%- endif -%}
+                </div>
+                <div class="pro-account-profile__info-column"></div>
+              </div>
+
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    {%- endfor -%}
+  </tabs-component>
+
+  <div class="pro-account-profile__update">
+    <h5 class="pro-account-profile__update-heading">
+      {{ 'customer.profile.update_profile_title' | t }}
+    </h5>
+    <a href="mailto:{{ 'customer.profile.update_profile_btn_email' | t }}"
+       class="pro-account-profile__update-btn btn btn--secondary">
+      {{ 'customer.profile.update_profile_btn_title' | t }}
+    </a>
+  </div>
+
+</div>

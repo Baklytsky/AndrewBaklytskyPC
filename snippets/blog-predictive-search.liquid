@@ -1,0 +1,45 @@
+<script src="{{ 'component-blog-predictive-search.min.js' | asset_url }}" defer="defer"></script>
+
+<blog-predictive-search class="search-modal__form search-modal__form--blog" data-loading-text="{{ 'accessibility.loading' | t }}">
+  <form action="{{ routes.search_url }}" method="get" role="search" class="search search-modal__form">
+    <input type="hidden" name="type" value="article">
+
+    <div class="form-field form-field__search">
+      <button type="submit" class="btn--reset small-up-hide submit">
+        {%- render 'icon' with 'search' -%}
+      </button>
+      <input class="form-input search__input"
+             id="Blog-Search-1"
+             type="search"
+             name="q"
+             value=""
+             placeholder="{{ 'blogs.search.placeholder' | t }}"
+             role="combobox" aria-expanded="false"
+             aria-owns="predictive-search-results-list"
+             aria-controls="predictive-search-results-list"
+             aria-haspopup="listbox"
+             aria-autocomplete="list"
+             autocorrect="off"
+             autocomplete="off"
+             autocapitalize="off"
+             spellcheck="false"
+             autofocus
+      >
+      <label class="field__label visually-hidden" for="Blog-Search-1" >{{ 'general.search.search' | t }}</label>
+      <input type="hidden" name="options[prefix]" value="last">
+
+      <button type="submit" class="a btn--reset search-modal__icon-search">
+        {% render 'icon' with 'search' %}
+        <span class="visually-hidden">{{ 'general.search.search' | t }}</span>
+      </button>
+    </div>
+
+    <div class="predictive-search__result" tabindex="-1" data-predictive-search>
+      <div class="predictive-search__loading-state">
+        {% render 'icon' with 'spinner' %}
+      </div>
+    </div>
+
+    <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+  </form>
+</blog-predictive-search>

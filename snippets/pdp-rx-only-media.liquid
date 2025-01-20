@@ -1,0 +1,68 @@
+{%- comment -%}
+{%- render 'pdp-rx-only-media', product: product, arrows_layout: arrows_layout, dots_layout: dots_layout -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign current_variant_media = current_variant.metafields.custom.media.value
+  assign thumbnailsElement = '.pdp-media__thumbs-slider--' | append: section.id
+  assign thumbnailsSliderClass = 'pdp-media__thumbs-slider pdp-media__thumbs-slider--' | append: section.id
+
+  for tag in product.tags
+    if tag contains "badge"
+     assign badge = settings[tag]
+      break
+    endif
+  endfor
+-%}
+
+{%- capture swiper_thumbnail_config -%}
+  {
+  "direction": "vertical",
+  "slidesPerView": "auto",
+  "slidesPerGroupAuto": true,
+  "slideToClickedSlide": true,
+  "grabCursor": true,
+  "shortSwipes": false
+  }
+{%- endcapture -%}
+
+{%- capture swiper_config -%}
+  {
+  "slidesPerView:": 1,
+  "thumbnailsElement": {{ thumbnailsElement | json }},
+  "pagination": {
+    "el": ".swiper-pagination--{{ section.id }}",
+    "type": "bullets",
+    "clickable": true
+    },
+  "navigation": {
+    "nextEl": ".swiper-button-next--{{ section.id }}",
+    "prevEl": ".swiper-button-prev--{{ section.id }}"
+    }
+  }
+{%- endcapture -%}
+
+{%- capture slides -%}
+  {%- for media in product.media limit: 6 -%}
+    <div class="swiper-slide">
+      {%- render 'pdp-media-slide', media: media -%}
+    </div>
+  {% else %}
+    <div class="pdp-media__image rel">
+      <img src="{{ 'obagi_image_placeholder.jpg' | asset_img_url: 'master' }}" class="image-abs-cover" alt="{{ product.title }}">
+    </div>
+  {% endfor %}
+{%- endcapture -%}
+
+<div class="pdp-media rel arrows--{{ arrows_layout }} dots--{{ dots_layout }} media--{{ section.id }}">
+  {%- if badge != blank -%}
+    <div class="pdp-media__badge">
+      {% render 'image', image: badge, alt: badge.alt %}
+    </div>
+  {%- endif -%}
+  {%- render 'slideshow-swiper', class_name: 'pdp-media__slider', config: swiper_config, slides: slides, show_slider_nav: true, nav_id: section.id -%}
+  {%- render 'slideshow-swiper', class_name: thumbnailsSliderClass, config: swiper_thumbnail_config, slides: slides -%}
+</div>
+
+

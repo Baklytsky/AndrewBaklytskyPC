@@ -1,0 +1,368 @@
+{{ 'promo-banners.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desktop = section.settings.padding_top_desktop
+  assign padding_bottom_desktop = section.settings.padding_bottom_desktop
+  assign padding_top_mobile = section.settings.padding_top_mobile
+  assign padding_bottom_mobile = section.settings.padding_bottom_mobile
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+
+ case section.blocks.size
+  when 3
+    assign banner_width = '33.3%'
+  else
+    assign banner_width = 100 | divided_by: section.blocks.size | append: '%'
+  endcase
+
+  if template.name contains 'collection'
+  assign class_modify = 'promo-banners--collection'
+  endif
+-%}
+
+
+<div class="promo-banners {{ class_modify }}"
+     data-aos="fade-up"
+     style="
+       --bg-color: {{ section_bg_color }};
+       --color: {{ text_color }};
+       --banner-width: {{ banner_width }};
+       --padding-top-desktop:{{ padding_top_desktop -}}px;
+       --padding-bottom-desktop:{{ padding_bottom_desktop -}}px;
+       --padding-top-mobile:{{ padding_top_mobile -}}px;
+       --padding-bottom-mobile:{{ padding_bottom_mobile -}}px;
+       ">
+  <div class="page-width">
+    {%- if heading != blank or subheading != blank or button_label != blank -%}
+      <div class="promo-banners__header">
+        {%- if heading != blank or subheading != blank -%}
+          <div class="promo-banners__header-text">
+            {%- if heading != blank -%}
+              <h3 class="promo-banners__header-heading m0">{{ heading }}</h3>
+            {%- endif -%}
+            {%- if subheading != blank -%}
+              <div class="promo-banners__header-subheading h4 m0">{{ subheading }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+        {%- if button_label != blank -%}
+          <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+            href="{{ button_link }}"{% endif %}
+            class="promo-banners__header-btn btn btn--{{ button_style }}">
+            {{ button_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <ul class="promo-banners__list">
+      {%- for block in section.blocks -%}
+
+        {%- liquid
+          assign image = block.settings.image
+          assign image_mobile = block.settings.image_mobile
+          assign video_mp4 = block.settings.video_mp4
+          assign video_mp4_mobile = block.settings.video_mp4_mobile
+          assign image_alt = image.alt | default: image_mobile.alt | default: heading
+          assign heading = block.settings.heading
+          assign description = block.settings.description | escape | newline_to_br
+          assign text_color = block.settings.text_color
+          assign button_label = block.settings.button_label
+          assign button_link = block.settings.button_link
+          assign button_style = block.settings.button_style
+
+          assign desktop_image_class = 'image-abs-cover z1'
+
+          if image and image_mobile
+            assign desktop_image_class = desktop_image_class | append: ' medium-hide'
+          endif
+        -%}
+
+        {%- if image or image_mobile or heading != blank or description != blank or button_label != blank or video_mp4 != blank -%}
+          <li class="promo-banners__list-item rel">
+            <div class="promo-banners__overlay image-abs-cover z2"></div>
+
+            {%- if video_mp4 -%}
+
+              {%- assign class_name_desk = 'block' -%}
+              {%- if video_mp4_mobile -%}
+                {%- assign class_name_desk = 'block medium-hide' -%}
+              {%- endif -%}
+
+              {%- render 'video',
+                video: video_mp4,
+                video_youtube_vimeo: false,
+                video_url: false,
+                autoplay: true,
+                default_controls: false,
+                controls_position: controls_position,
+                show_play_button: false,
+                show_mute_button: false,
+                poster: false,
+                poster_from_metafield: false,
+                video_from_metafield: false,
+                disable_video_scale_on_desktop: false,
+                disable_video_scale_on_mobile: false,
+                class: class_name_desk
+              -%}
+            {%- endif -%}
+
+            {%- if video_mp4_mobile -%}
+              {%- render 'video',
+                video: video_mp4_mobile,
+                video_youtube_vimeo: false,
+                video_url: false,
+                autoplay: true,
+                default_controls: false,
+                controls_position: controls_position,
+                show_play_button: false,
+                show_mute_button: false,
+                poster: false,
+                poster_from_metafield: false,
+                video_from_metafield: false,
+                disable_video_scale_on_desktop: false,
+                disable_video_scale_on_mobile: false,
+                class: 'block medium-up-hide'
+              -%}
+            {%- endif -%}
+
+            {%- if image -%}
+              {% render 'image',
+                image: image,
+                class_name: desktop_image_class,
+                alt: image_alt %}
+            {%- endif -%}
+
+            {%- if image_mobile -%}
+              {% render 'image',
+                image: image_mobile,
+                class_name: 'image-abs-cover medium-up-hide z1',
+                alt: image_alt %}
+            {%- endif -%}
+
+            <div class="promo-banners__list-item-content z3" style="--banner-color: {{ text_color }}">
+              <h4 class="promo-banners__list-item-heading h6">{{ heading }}</h4>
+              <p class="promo-banners__list-item-description h4">{{ description }}</p>
+
+              <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                href="{{ button_link }}"{% endif %}
+                class="promo-banners__list-item-btn btn btn--{{ button_style }} {% if button_label == blank  %}visibility-hidden{% endif %}">
+                {{ button_label | escape }}
+              </a>
+            </div>
+          </li>
+        {%- endif -%}
+      {%- else -%}
+        {%- for i in (1..3) -%}
+          <li class="promo-banners__list-item rel">
+            {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+            <a role="link" aria-disabled="true" disabled class="promo-banners__header-btn btn btn--secondary">
+              {{ 'Learn more' }}
+            </a>
+          </li>
+        {%- endfor -%}
+      {%- endfor -%}
+    </ul>
+
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Promo banners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top mobile",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Promo banners"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>subheading</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Banner",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Image mobile"
+        },
+        {
+          "type": "video",
+          "id": "video_mp4",
+          "label": "A Shopify-hosted video",
+          "info": "Has priority over the image"
+        },
+        {
+          "type": "video",
+          "id": "video_mp4_mobile",
+          "label": "A Shopify-hosted video (mobile)",
+          "info": "Has priority over the image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "primary"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo banners"
+    }
+  ]
+}
+{% endschema %}

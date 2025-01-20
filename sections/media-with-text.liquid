@@ -1,0 +1,536 @@
+{{ 'media-with-text.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign section_heading = section.settings.heading
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+-%}
+
+{% if section.blocks.size > 0 or section_heading != blank %}
+  <div data-aos="fade-up" class="media-with-text page-width">
+    <div
+      style="
+        --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+        --padding-top-desktop: {{ padding_top_desk }}px;
+        --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+        --padding-top-mobile: {{ padding_top_mob }}px;"
+      class="media-with-text__content-wrapper {% if border_bottom %}border-bottom{% endif %}">
+
+      {% if section_heading != blank %}
+        <h2 class="media-with-text__section-heading h3">
+          {{ section_heading }}
+        </h2>
+      {% endif %}
+
+      <div class="media-with-text__content-blocks{% if section.blocks.size == 1 %} media-with-text__content-blocks--one-block{% endif %}">
+        {% for block in section.blocks %}
+          {% assign block_type = block.type %}
+
+          {% case block_type %}
+          {% when 'media' %}
+          {%- liquid
+            assign width_content = block.settings.width_content
+            assign height_content_desk = block.settings.height_content_desk
+            assign height_content_mob = block.settings.height_content_mob
+            assign image = block.settings.image
+            assign small_circle_image = block.settings.small_circle_image
+            assign video_display_format = block.settings.video_display_format
+            assign video = block.settings.video_url
+            assign local_video = block.settings.video
+            assign autoplay = block.settings.autoplay
+            assign show_default_controls = block.settings.show_default_controls
+            assign controls_position = block.settings.controls_position
+            assign controls_color = block.settings.controls_color
+            assign show_play_button = block.settings.show_play_button
+            assign show_mute_button = block.settings.show_mute_button
+
+            assign contain_video_on_desktop = false
+            assign contain_video_on_mobile = false
+
+            if video_display_format == 'contain'
+              assign contain_video_on_desktop = true
+              assign contain_video_on_mobile = true
+            endif
+
+            if section.blocks.size > 1 and height_content_desk == '50%'
+              assign height_content_desk = '56%'
+            endif
+          -%}
+
+            {% if image != blank or video != blank or local_video %}
+              <div
+                style="--width-content: {{ width_content }};
+                  --height-content-desk: {{ height_content_desk }};
+                  --height-content-mob: {{ height_content_mob }}"
+                class="media-with-text__media-content rel controls-{{ controls_position }}
+                {% if video != blank or local_video != blank %}media-with-text__media-content--video{% endif %}">
+
+                {%- if video or local_video -%}
+                  {%- render 'video',
+                    video: local_video,
+                    video_youtube_vimeo: video,
+                    default_controls: show_default_controls,
+                    show_play_button: show_play_button,
+                    show_mute_button: show_mute_button,
+                    autoplay: autoplay,
+                    poster:  image,
+                    class: 'normal',
+                    controls_color: controls_color,
+                    disable_video_scale_on_desktop: contain_video_on_desktop,
+                    disable_video_scale_on_mobile: contain_video_on_mobile
+                  -%}
+                {%- endif -%}
+
+                {% if image != blank %}
+                  <div class="media-with-text__media-image rel {% if small_circle_image %}media-with-text__media-image--circle{% endif %}">
+                    {% render 'image',
+                      image: image,
+                      class_name: 'image-abs-cover',
+                      alt: image.alt %}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% when 'text' %}
+          {%- liquid
+            assign subheading = block.settings.subheading | escape | newline_to_br
+            assign heading = block.settings.heading
+            assign heading_size = block.settings.heading_size
+            assign heading_uppercase = block.settings.heading_uppercase
+            assign heading = block.settings.heading
+            assign description = block.settings.description
+            assign width_content = block.settings.width_content
+            assign content_position = block.settings.content_position
+            assign text_align_desktop = block.settings.text_align_desktop
+            assign text_align_mobile = block.settings.text_align_mobile
+          -%}
+
+            {% if subheading != blank or heading != blank or description != blank %}
+              <div
+                style="
+                --width-content: {{ width_content }};
+                --text-align-desktop: {{ text_align_desktop }};
+                --text-align-mobile: {{ text_align_mobile }};
+                  "
+                class="media-with-text__text-content  media-with-text__text-content--{{- content_position -}}">
+                {% if subheading != blank %}
+                  <h6 class="media-with-text__text-subheading">
+                    {{ subheading }}
+                  </h6>
+                {% endif %}
+
+                {% if heading != blank %}
+                  <h3 class="media-with-text__text-heading {{ heading_size }} {% unless heading_uppercase %} media-with-text__text-heading--no-transform {% endunless %}">
+                    {{ heading }}
+                  </h3>
+                {% endif %}
+
+                {% if description != blank %}
+                  <div class="media-with-text__text-description body1">
+                    {{ description }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Media with text",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "media",
+      "limit": 1,
+      "name": "Media",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width_content",
+          "label": "Width content",
+          "options": [
+            {
+              "value": "100%",
+              "label": "Full width"
+            },
+            {
+              "value": "51%",
+              "label": "Large width"
+            },
+            {
+              "value": "49%",
+              "label": "Half width"
+            },
+            {
+              "value": "43%",
+              "label": "Middle container"
+            }
+          ],
+          "default": "49%"
+        },
+        {
+          "type": "select",
+          "id": "height_content_desk",
+          "label": "Height content desktop",
+          "options": [
+            {
+              "value": "87%",
+              "label": "Large"
+            },
+            {
+              "value": "50%",
+              "label": "Default"
+            },
+            {
+              "value": "56.25%",
+              "label": "16/9"
+            },
+            {
+              "value": "177%",
+              "label": "9/16"
+            },
+            {
+              "value": "125%",
+              "label": "4/5"
+            },
+            {
+              "value": "133%",
+              "label": "3/4"
+            }
+          ],
+          "default": "50%"
+        },
+        {
+          "type": "select",
+          "id": "height_content_mob",
+          "label": "Height content mobile",
+          "options": [
+            {
+              "value": "90%",
+              "label": "Large"
+            },
+            {
+              "value": "60%",
+              "label": "Default"
+            },
+            {
+              "value": "56.25%",
+              "label": "16/9"
+            },
+            {
+              "value": "177%",
+              "label": "9/16"
+            },
+            {
+              "value": "125%",
+              "label": "4/5"
+            },
+            {
+              "value": "133%",
+              "label": "3/4"
+            }
+          ],
+          "default": "60%"
+        },
+        {
+          "type": "checkbox",
+          "id": "small_circle_image",
+          "label": "Small circle image",
+          "info": "Only without video."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "If video is selected, it will be used as a video poster"
+        },
+        {
+          "type": "header",
+          "content": "Video settings"
+        },
+        {
+          "type": "select",
+          "id": "video_display_format",
+          "label": "Video display format",
+          "options": [
+            {
+              "value": "contain",
+              "label": "Contain"
+            },
+            {
+              "value": "cover",
+              "label": "Cover"
+            }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "A Shopify-hosted video"
+        },
+        {
+          "type": "video_url",
+          "id": "video_url",
+          "label": "Video",
+          "accept": [
+            "youtube",
+            "vimeo"
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "show_default_controls",
+          "label": "Show default controls",
+          "default": true,
+          "info": "Setting work only with youtube/vimeo premium and mp4"
+        },
+        {
+          "type": "select",
+          "id": "controls_position",
+          "label": "Controls position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "right",
+          "info": "Only for custom controls"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoplay",
+          "label": "Autoplay",
+          "default": false
+        },
+        {
+          "type": "color",
+          "id": "controls_color",
+          "label": "Controls color"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_play_button",
+          "label": "Show play/pause button",
+          "default": false,
+          "info": "if the default controls are disabled"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_mute_button",
+          "label": "Show mute/unMute button",
+          "default": false,
+          "info": "if the default controls are disabled"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "limit": 1,
+      "name": "Text",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "h3"
+            },
+            {
+              "value": "h4",
+              "label": "h4"
+            }
+          ],
+          "default": "h3"
+        },
+        {
+          "type": "checkbox",
+          "id": "heading_uppercase",
+          "label": "Heading uppercase",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "select",
+          "id": "width_content",
+          "label": "Width content",
+          "options": [
+            {
+              "value": "100%",
+              "label": "Full width"
+            },
+            {
+              "value": "50%",
+              "label": "Half width"
+            },
+            {
+              "value": "450px",
+              "label": "Middle container"
+            },
+            {
+              "value": "360px",
+              "label": "Small container"
+            }
+          ],
+          "default": "50%"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select",
+          "id": "text_align_desktop",
+          "label": "Text align desktop",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select",
+          "id": "text_align_mobile",
+          "label": "Text align mobile",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Media with text"
+    }
+  ]
+}
+{% endschema %}

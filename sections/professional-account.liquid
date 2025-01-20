@@ -1,0 +1,222 @@
+{{ 'account.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'account.min.js' | asset_url }}" defer></script>
+<script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+<customer-account class="account" data-id="{{ section.id }}">
+  <div id="account" class="account__inner">
+    {%- render 'professional-account-nav', section_blocks: section.blocks -%}
+
+    <div class="account__content">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+        {%- when 'overview' -%}
+          <div id="account-overview" class="account-block account__overview {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h3 account-overview__heading">{{ 'customer.overview.title' | t }}</h2>
+            {%- render 'professional-account-overview', section_blocks: section.blocks -%}
+          </div>
+
+        {%- when 'profile' -%}
+          <div id="account-profile" class="account-block account__profile {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h6 account-profile__heading">{{ 'customer.account_nav.profile' | t }}</h2>
+            {%- render 'professional-account-profile' -%}
+          </div>
+
+        {%- when 'details' -%}
+          <div id="account-details" class="account-block account__profile {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h6">{{ 'customer.account_nav.details' | t }}</h2>
+            {%- render 'account-addresses-edit' -%}
+            {%- render 'account-addresses-new' -%}
+
+            <div id="account-profile-inner" class="account__profile-inner">
+              {%- render 'account-details' -%}
+              {%- render 'account-addresses' -%}
+            </div>
+          </div>
+
+        {%- when 'orders' -%}
+          <div id="account-orders" class="account-block account__orders {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h3 account__orders-heading">{{ 'customer.account_nav.orders' | t }}</h2>
+            {%- render 'account-orders' -%}
+          </div>
+
+        {%- when 'certifications' -%}
+          <div id="account-certifications" class="account-block account__certifications {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h3">{{ 'customer.certifications.title' | t }}</h2>
+          </div>
+
+        {%- when 'favorites' -%}
+          <div id="account-favorites" class="account-block account__favorites {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h3">{{ 'customer.account_nav.favorites' | t }}</h2>
+            {%- render 'favorites-list', empty_message: block.settings.empty_message, button_label: block.settings.button_label, button_link: block.settings.button_link -%}
+          </div>
+
+        {%- when 'rewards' -%}
+          <div id="account-rewards" class="account-block account__rewards {% unless forloop.first %}hidden{% endunless %}" {{ block.shopify_attributes }}>
+            <h2 class="h6">{{ 'customer.account_nav.rewards' | t }}</h2>
+            {%- render 'account-rewards', block: block -%}
+          </div>
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</customer-account>
+
+
+{% schema %}
+{
+  "name": "Professional account",
+  "class": "main-account pro-account",
+  "settings": [
+
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "name": "Overview",
+      "type": "overview",
+      "limit": 1
+    },
+    {
+      "name": "Profile",
+      "type": "profile",
+      "limit": 1
+    },
+    {
+      "name": "Details",
+      "type": "details",
+      "limit": 1
+    },
+    {
+      "name": "Orders",
+      "type": "orders",
+      "limit": 1
+    },
+    {
+      "name": "Subscription",
+      "type": "subscription",
+      "limit": 1
+    },
+    {
+      "name": "Certifications",
+      "type": "certifications",
+      "limit": 1
+    },
+    {
+      "name": "Favorites",
+      "type": "favorites",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "empty_message",
+          "label": "Empty message"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop All"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "name": "Rewards",
+      "limit": 1,
+      "type": "rewards",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "textarea",
+          "id": "bottom_text",
+          "label": "Bottom text"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Content step 1"
+        },
+        {
+          "type": "text",
+          "id": "step_heading_1",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "step_text_1",
+          "label": "Text"
+        },
+        {
+          "type": "html",
+          "id": "step_cta_image_1_1",
+          "label": "CTA SVG 1"
+        },
+        {
+          "type": "url",
+          "id": "step_cta_url_1_1",
+          "label": "CTA URL 1"
+        },
+        {
+          "type": "html",
+          "id": "step_cta_image_2_1",
+          "label": "CTA SVG 2"
+        },
+        {
+          "type": "url",
+          "id": "step_cta_url_2_1",
+          "label": "CTA URL 2"
+        },
+        {
+          "type": "header",
+          "content": "Content step 2"
+        },
+        {
+          "type": "text",
+          "id": "step_heading_2",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "step_text_2",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Content step 3"
+        },
+        {
+          "type": "text",
+          "id": "step_heading_3",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "step_text_3",
+          "label": "Text"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

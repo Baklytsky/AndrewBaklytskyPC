@@ -1,0 +1,144 @@
+{{ 'main-authorized-retail.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign description = section.settings.description | newline_to_br
+
+  if heading != blank or description != blank
+    assign has_content = true
+  endif
+-%}
+
+{% if section.blocks.size > 0 or has_content %}
+  <div data-aos="fade-up"
+       style="
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+    class="authorized-retail page-width">
+
+    {%- if has_content -%}
+      <div class="authorized-retail__heading-wrapper">
+        {%- if heading != blank -%}
+          <h3 class="authorized-retail__heading h5">
+            {{ heading }}
+          </h3>
+        {%- endif -%}
+
+        {%- if description != blank -%}
+          <div class="authorized-retail__description">
+            {{ description }}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="authorized-retail__body">
+        {% for block in section.blocks %}
+          {%- liquid
+            assign text = block.settings.text
+          -%}
+
+          {% if text != blank %}
+            {{ text }}
+          {% endif %}
+        {% endfor %}
+      </div>
+    {%- endif -%}
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Main authorized retail",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "info": "Use only the list to display the list correctly"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main authorized retail"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

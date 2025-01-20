@@ -1,0 +1,137 @@
+<script src="{{ 'pdp-dynamic-recommendations.min.js' | asset_url }}" defer="defer"></script>
+{{ 'pdp-related-products.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading = section.settings.heading
+  assign bg_color = section.settings.bg_color
+  assign product_limit = section.settings.product_limit
+  assign show_navigation = section.settings.show_navigation
+
+  if product_limit == 3
+    assign show_navigation = false
+  endif
+-%}
+
+<dynamic-recommendations
+  class="related-products block x"
+  data-aos="fade-up"
+  data-product-id="{{ product.id }}"
+  data-product-limit="{{ product_limit }}"
+  data-section-id="{{ section.id }}"
+  style="--bg-color: {{ bg_color }}">
+
+  <div class="related-products__wrapper page-width" data-product-row>
+    {% if recommendations.products_count > 0 %}
+      {%- capture swiper_config -%}
+        {
+        "slidesPerView": 1.33,
+        "watchOverflow": true,
+        "watchSlidesProgress": true,
+        "spaceBetween": 20,
+        "freeMode": true,
+        "mousewheel": {
+          "forceToAxis": true
+        },
+        "navigation": {
+          "nextEl": ".swiper-button-next--{{ section.id }}",
+          "prevEl": ".swiper-button-prev--{{ section.id }}"
+        },
+        "scrollbar": {
+          "el": ".swiper-scrollbar--{{ section.id }}",
+          "hide": false,
+          "draggable": true
+        },
+        "breakpoints": {
+          "768": {
+            "slidesPerView": 3,
+            "shortSwipes": false
+            }
+          }
+        }
+      {%- endcapture -%}
+
+      <h3 class="related-products__heading">{{ heading }}</h3>
+
+        {%- capture slides -%}
+          {% for product in recommendations.products limit: product_limit %}
+            {%- assign product_type_handleize = product.type | handleize -%}
+
+            {%- if product.tags contains 'dev_product'
+              or product.tags contains 'test_product'
+              or product.tags contains 'hidden'
+              or product.tags contains 'not-allowed' -%}
+              {% continue %}
+            {%- endif -%}
+
+            {%- unless product_type_handleize == 'gift-product' -%}
+              <div class="swiper-slide" {{ block.shopify_attributes }}>
+                {% render 'product-card'
+                  product: product,
+                  quick_add: true,
+                  hide_collections: false,
+                  show_description: true %}
+              </div>
+            {%- endunless -%}
+          {% endfor %}
+        {%- endcapture -%}
+
+        {%- render 'slideshow-swiper',
+          class_name: 'related-products__slider rel',
+          config: swiper_config,
+          slides: slides,
+          show_slider_nav: show_navigation,
+          show_scroll_bar: show_navigation,
+          nav_id: section.id -%}
+
+      {% render 'ga-product-list-event',  event_type: 'view_item_list', product_list: recommendations.products, list_name: 'PDP Related products', list_id: section.id %}
+    {% endif %}
+  </div>
+</dynamic-recommendations>
+
+{% schema %}
+{
+  "name": "Related products",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The section content is generated dynamically"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Complete Your Routine"
+    },
+    {
+      "type": "range",
+      "id": "product_limit",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "label": "Product limit",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show slider navigation",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Related products"
+    }
+  ],
+  "templates": [
+    "product"
+  ]
+}
+{% endschema %}

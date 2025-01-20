@@ -1,0 +1,23 @@
+{%- comment -%}
+{%- render 'slideshow-swiper', class_name: '', config: swiper_config, slides: swiper_slides, attr: attr, show_slider_nav: false, show_scroll_bar: false, nav_id: id  -%}
+{%- endcomment -%}
+
+<slideshow-swiper data-config='{{ config }}' class="{{ class_name }}" {{ attr }} data-slideshow-swiper>
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      {{ slides }}
+    </div>
+  </div>
+  {%- if show_scroll_bar -%}
+    <div class="swiper-scrollbar swiper-scrollbar--{{ nav_id }}"></div>
+  {%- endif -%}
+  {%- if show_slider_nav -%}
+    <div class="swiper-navigation-wrapper">
+      <div class="swiper-pagination swiper-pagination--{{ nav_id }}"></div>
+      <div class="swiper__slider-arrows">
+        <div class="swiper-button-prev swiper-button-prev--{{ nav_id }}"></div>
+        <div class="swiper-button-next swiper-button-next--{{ nav_id }}"></div>
+      </div>
+    </div>
+  {%- endif -%}
+</slideshow-swiper>

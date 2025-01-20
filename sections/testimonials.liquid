@@ -1,0 +1,440 @@
+{{ 'testimonials.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign border_bottom = section.settings.section_border_bottom
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign section_bg_color = section.settings.section_bg_color
+  assign text_color = section.settings.text_color
+  assign heading = section.settings.heading
+  assign heading_padding_bottom_desk = section.settings.heading_padding_bottom_desktop
+  assign heading_padding_bottom_mob = section.settings.heading_padding_bottom_mobile
+  assign animation_delay = section.settings.animation_delay | times: 1000
+  assign desktop_layout = section.settings.desktop_layout
+  assign thumbnailsElement = false
+  assign autoplay = section.settings.autoplay
+-%}
+
+{%- if desktop_layout == 'show_all_authors' and section.blocks.size > 0 -%}
+  {% capture swiper_thumbs_config %}
+    {
+      "slidesPerView": "auto",
+      "slidesPerGroupAuto": true,
+      "slideToClickedSlide": true,
+      "centerInsufficientSlides": true,
+      "grabCursor": true
+    }
+  {% endcapture %}
+
+  {%- assign slider_class = 'testimonials__slider--with-thumbs' -%}
+  {%- assign thumbnailsElement = '.testimonials__thumbs-slider--' | append: section.id -%}
+
+{%- endif -%}
+
+{% capture swiper_config %}
+  {
+    "slidesPerView": "1",
+    "simulateTouch": true,
+    "grabCursor": true,
+    "thumbnailsElement": {{ thumbnailsElement | json }},
+    {% if section.blocks.size > 1 %}
+      "loop": true,
+    {% endif %}
+    "pagination": {
+      "el": ".swiper-pagination--{{ section.id }}",
+      "type": "bullets",
+      "clickable": true
+    }
+  {% if autoplay %}
+    ,
+    "autoplay": {
+    "delay": {{ animation_delay }},
+    "disableOnInteraction": false
+    }
+  {% endif %}
+  }
+{% endcapture %}
+
+<div class="testimonials"
+     data-aos="fade-up"
+     style="
+       --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+       --padding-top-desktop: {{ padding_top_desk }}px;
+       --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+       --padding-top-mobile: {{ padding_top_mob }}px;
+       --bg-color: {{ section_bg_color }};
+       --color: {{ text_color }};
+       ">
+
+  <div class="page-width">
+    <div class="testimonials__content-wrapper {% if border_bottom %}border-bottom{% endif %}">
+      {%- if heading != blank -%}
+        <h3
+          style="
+            --padding-bottom-desktop: {{ heading_padding_bottom_desk }}px;
+            --padding-bottom-mobile: {{ heading_padding_bottom_mob }}px;
+            "
+
+          class="testimonials__heading h6">{{ heading }}</h3>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <slideshow-swiper data-config='{{ swiper_config }}' class="{{ slider_class }}">
+          <div class="swiper testimonials__slider">
+            <div class="swiper-wrapper">
+              {%- for block in section.blocks -%}
+                {% render 'testimonials-slide' block: block, main_slider: true %}
+              {%- endfor -%}
+            </div>
+          </div>
+          {% if section.blocks.size > 1 %}
+            <div class="testimonials__slider-pagination swiper-pagination--{{ section.id }}"></div>
+          {% endif %}
+        </slideshow-swiper>
+
+        {%- if desktop_layout == 'show_all_authors' -%}
+          <slideshow-swiper data-config='{{ swiper_thumbs_config }}' class="testimonials__thumbs-slider--{{ section.id }} medium-hide">
+            <div class="swiper testimonials__thumbs-slider">
+              <div class="swiper-wrapper">
+                {%- for block in section.blocks -%}
+                  {% render 'testimonials-slide' block: block, main_slider: false %}
+                {%- endfor -%}
+              </div>
+            </div>
+          </slideshow-swiper>
+        {%- endif -%}
+
+      {%- else -%}
+        <slideshow-swiper data-config='{{ swiper_config }}'>
+          <div class="swiper testimonials__slider">
+            <div class="swiper-wrapper">
+              {%- for i in (1..3) -%}
+                <div class="swiper-slide">
+                  <p class="testimonials__slider-text h4">"{{ 'Your favorite testimonial #' | append: i  }}"</p>
+                  <p class="testimonials__slider-author body3--bold">{{ 'Author name #' | append: i  }}</p>
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+          <div class="testimonials__slider-pagination swiper-pagination--{{ section.id }}"></div>
+        </slideshow-swiper>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "section_border_bottom",
+      "label": "Section border bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Testimonials"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Heading padding bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Heading padding bottom mobile",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "animation_delay",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "sec",
+      "label": "Animation delay",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "Desktop layout",
+      "options": [
+        {
+          "value": "show_all_authors",
+          "label": "Show all authors"
+        },
+        {
+          "value": "show_single_author_with_dots",
+          "label": "Show single author with dots"
+        }
+      ],
+      "default": "show_all_authors"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "limit": 3,
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Testimonial text settings"
+        },
+        {
+          "type": "textarea",
+          "id": "testimonial",
+          "label": "Testimonial"
+        },
+        {
+          "type": "select",
+          "id": "testimonial_max_width",
+          "label": "Max width",
+          "options": [
+            {
+              "value": "455px",
+              "label": "extra-small"
+            },
+            {
+              "value": "550px",
+              "label": "small"
+            },
+            {
+              "value": "720px",
+              "label": "medium"
+            },
+            {
+              "value": "1000px",
+              "label": "large"
+            }
+          ],
+          "default": "1000px"
+        },
+        {
+          "type": "select",
+          "id": "testimonial_font_size",
+          "label": "Font size",
+          "options": [
+            {
+              "value": "body1",
+              "label": "Normal"
+            },
+            {
+              "value": "h5",
+              "label": "h5"
+            },
+            {
+              "value": "h4",
+              "label": "h4"
+            },
+            {
+              "value": "h3",
+              "label": "h3"
+            },
+            {
+              "value": "h2",
+              "label": "h2"
+            },
+            {
+              "value": "h1",
+              "label": "h1"
+            }
+          ],
+          "default": "h4"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom_desktop",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "px",
+          "label": "Padding bottom desktop",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom_mobile",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "px",
+          "label": "Padding bottom mobile",
+          "default": 40
+        },
+        {
+          "type": "header",
+          "content": "Others settings"
+        },
+        {
+          "type": "html",
+          "id": "svg_image",
+          "label": "SVG Image",
+          "info": "Paste your SVG"
+        },
+        {
+          "type": "range",
+          "id": "svg_size",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "SVG size",
+          "default": 40
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "position_author_info",
+          "label": "Position author info",
+          "options": [
+            {
+              "value": "column",
+              "label": "Column"
+            },
+            {
+              "value": "row",
+              "label": "Row"
+            }
+          ],
+          "default": "row"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Author name",
+          "default": "Author name"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Author title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Author description"
+        },
+        {
+          "type": "header",
+          "content": "Video settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_video",
+          "label": "Show video"
+        },
+        {
+          "type": "image_picker",
+          "id": "poster",
+          "label": "Poster"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "A Shopify-hosted video"
+        },
+        {
+          "type": "video_url",
+          "id": "video_url",
+          "label": "Video",
+          "accept": [
+            "youtube",
+            "vimeo"
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials"
+    }
+  ]
+}
+{% endschema %}

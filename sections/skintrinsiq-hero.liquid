@@ -1,0 +1,300 @@
+{{ 'skintrinsiq-hero.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign desktop_section_height = section.settings.desktop_section_height
+  assign mobile_section_height = section.settings.mobile_section_height
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign image = section.settings.image
+  assign badge = section.settings.badge
+  assign text_color = section.settings.text_color
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign description = section.settings.description | escape | newline_to_br
+  assign description_font_style = section.settings.description_font_style
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign button_open_popup = section.settings.button_open_popup
+  assign image_alt = image.alt | default: heading
+  assign border_bottom = section.settings.border_bottom
+
+  if image != blank or heading != blank or description != blank
+  assign has_content = true
+  endif
+-%}
+
+
+{% if has_content %}
+  <div data-aos="fade-up"
+       style="
+      --desktop-section-height: {{ desktop_section_height }};
+      --mobile-section-height: {{ mobile_section_height }};
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+    class="skintrinsiq-hero">
+    {% if has_content %}
+      <div class="skintrinsiq-hero__wrapper">
+        {% if image != blank %}
+          <div class="skintrinsiq-hero__image-wrapper">
+            {% render 'image',
+              image: image,
+              class_name: 'image-abs-cover',
+              alt: image_alt %}
+
+            {% if badge != blank %}
+              {% render 'image',
+                image: badge,
+                class_name: 'skintrinsiq-hero__image-badge',
+                alt: badge.alt %}
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if heading != blank or description != blank %}
+          <div class="skintrinsiq-hero__text-wrapper {% if border_bottom %}border-bottom{% endif %}">
+            {%- if heading != blank -%}
+              <h2 class="skintrinsiq-hero__text-heading">{{ heading }}</h2>
+            {%- endif -%}
+
+            {%- if description != blank -%}
+              <div class="skintrinsiq-hero__text-description {{ description_font_style }}">{{ description }}</div>
+            {%- endif -%}
+
+            {%- if button_label != blank -%}
+              {%- if button_open_popup -%}
+                <modal-opener>
+                  <button
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="#contact-form-popup"
+                    class="skintrinsiq-hero__btn btn btn--{{ button_style }}">
+                    {{ button_label | escape }}
+                  </button>
+                </modal-opener>
+              {% else %}
+                <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                  href="{{ button_link }}"{% endif %}
+                  class="skintrinsiq-hero__btn btn btn--{{ button_style }}">
+                  {{ button_label | escape }}
+                </a>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Skintrinsiq hero",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "desktop_section_height",
+      "label": "Section height",
+      "options": [
+        {
+          "value": "350px",
+          "label": "350px"
+        },
+        {
+          "value": "500px",
+          "label": "500px"
+        },
+        {
+          "value": "600px",
+          "label": "600px"
+        },
+        {
+          "value": "700px",
+          "label": "700px"
+        },
+        {
+          "value": "100vh",
+          "label": "Full width"
+        }
+      ],
+      "default": "350px"
+    },
+    {
+      "type": "select",
+      "id": "mobile_section_height",
+      "label": "Mobile section height",
+      "options": [
+        {
+          "value": "250px",
+          "label": "250px"
+        },
+        {
+          "value": "320px",
+          "label": "320px"
+        },
+        {
+          "value": "600px",
+          "label": "600px"
+        },
+        {
+          "value": "100vh",
+          "label": "Full width"
+        }
+      ],
+      "default": "320px"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Border bottom",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Image side"
+    },
+    {
+      "type": "image_picker",
+      "id": "badge",
+      "label": "Badge"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Text side"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "description_font_style",
+      "label": "Description font style",
+      "options": [
+        {
+          "value": "h5",
+          "label": "Heading"
+        },
+        {
+          "value": "body1",
+          "label": "Normal"
+        }
+      ],
+      "default": "body1"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_open_popup",
+      "label": "Use the button to open a modal contact form",
+      "info": "Make sure that the \"contact form popup\" section is added to the page."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Skintrinsiq hero"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

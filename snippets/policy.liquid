@@ -1,0 +1,60 @@
+{%- comment -%}
+{%- render 'policy', content: content_for_layout -%}
+{%- endcomment -%}
+
+{{ 'intro.min.css' | asset_url | stylesheet_tag }}
+{{ 'policy.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'links-select.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid assign menu = linklists[settings.policies_linklist] -%}
+
+<section class="intro policy-intro page-width">
+  <div class="intro__inner intro--border">
+    {%- if settings.policies_heading != blank -%}
+      <h2 class="intro__heading">{{ settings.policies_heading }}</h2>
+    {%- endif -%}
+
+    {%- if settings.policies_description != blank -%}
+      <div class="intro__text body1">{{ settings.policies_description }}</div>
+    {%- endif -%}
+
+    {%- if menu.size > 0 -%}
+      <div class="policy-intro__select-wrapper">
+        <label class="faq__select-label visually-hidden" for="mobile-links-select">{{ settings.policies_heading }}</label>
+        <select class="form-select form__select medium-up-hide"
+                id="mobile-links-select"
+                name="specialty"
+                >
+          {%- for link in menu.links -%}
+            {%- liquid assign path_handleize = request.path | handleize -%}
+
+            <option value="{{ link.url }}" {% if link.url == request.path %} selected {%- endif -%}>{{ link.title }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="policy__wrapper">
+    {%- if menu.size > 0 -%}
+      <ul class="policy__menu medium-hide">
+        {%- for link in menu.links -%}
+          <li class="policy__menu-item a" aria-selected="{%- if link.url == request.path -%}true{%- else -%}false{%- endif -%}">
+            <a href="{{ link.url }}" class="btn--reset">
+              {{ link.title }}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    <div class="policy__content">
+      {%- if request.path contains '/policies/' -%}
+        {{ content }}
+      {%- else -%}
+        <div class="rte shopify-policy__container">
+          {{ page.content }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>

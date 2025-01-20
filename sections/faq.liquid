@@ -1,0 +1,264 @@
+{{ 'faq.min.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'component-tabs.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign heading = section.settings.heading | escape | newline_to_br
+  assign subheading = section.settings.subheading | escape | newline_to_br
+  assign bg_color = section.settings.bg_color
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign block_category_str = ''
+
+  if section.blocks.size > 0
+    assign block_category_arr = section.blocks | map: 'settings' | map: 'category' | uniq
+
+    for local_block in block_category_arr
+      if local_block != blank
+        assign has_tabs = true
+
+        break
+      endif
+    endfor
+  endif
+-%}
+
+{% if section.blocks.size > 0 %}
+  <div class="faq page-width"
+       style="
+         --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+         --padding-top-desktop: {{ padding_top_desk }}px;
+         --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+         --padding-top-mobile: {{ padding_top_mob }}px;
+         --bg-color: {{ bg_color }}">
+    {% if has_tabs %}
+      <tabs-component>
+        {% if heading != blank %}
+          <h3 class="faq__heading">{{ heading }}</h3>
+        {% endif %}
+
+        <div class="faq__wrapper">
+          <scrolling-tabs class="faq__navigation hide-scrollbar" role="tablist" aria-labelledby="tablist-{{ section.id }}">
+            {% for block_category in block_category_arr %}
+              {% if block_category != blank %}
+                <batton
+                  class="a body1 faq__header-tab"
+                  role="tab"
+                  type="button"
+                  tabindex="0"
+                  id="tab-{{ forloop.index }}--{{ section.id }}"
+                  aria-controls="tabpanel-{{ forloop.index }}--{{ section.id }}"
+                  aria-selected="{%- if forloop.first -%}true{%- else -%}false{%- endif -%}"
+                  {% unless forloop.first %}tabindex="-1"{% endunless %}>
+
+                  {{ block_category }}
+                </batton>
+              {% endif %}
+            {% endfor %}
+          </scrolling-tabs>
+
+          <div class="faq__accordions-wrapper">
+            {% for block_category in block_category_arr %}
+              {%- capture id -%}tabpanel-{{  forloop.index }}--{{ section.id }}{%- endcapture -%}
+
+              <div
+                class="faq__list"
+                id={{ id }}
+                role="tabpanel"
+                tabindex="{%- if forloop.first -%}0{%- else -%}-1{%- endif -%}"
+                aria-labelledby="tab-{{ forloop.index }}--{{ section.id }}"
+                {% unless forloop.first %}hidden{% endunless %}>
+
+                {% for block in section.blocks %}
+                  {% if block.settings.category == block_category %}
+                    {%- assign question = block.settings.question -%}
+                    {%- assign answer = block.settings.answer -%}
+
+                    {% if question != blank and answer != blank %}
+                      {% render 'accordion' group: id, index: forloop.index, title: question, body: answer  %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+      </tabs-component>
+    {% else %}
+      <div class="faq__wrapper">
+        <div class="faq__heading-wrapper">
+          {% if heading != blank  %}
+            <h3 class="faq__heading">{{ heading }}</h3>
+          {% endif %}
+
+          {% if subheading != blank  %}
+            <p class="faq__subheading">{{ subheading }}</p>
+          {% endif %}
+        </div>
+        <div class="faq__list">
+          {% for block in section.blocks %}
+            {%- assign question = block.settings.question -%}
+            {%- assign answer = block.settings.answer -%}
+
+            {% if question != blank and answer != blank %}
+              {% render 'accordion' group: section.id, index: forloop.index, title: question, body: answer  %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      {%- if button_label != blank -%}
+        <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+          href="{{ button_link }}"{% endif %}
+          class="faq__btn btn btn--{{ button_style }}" {{ block.shopify_attributes }}>
+          {{ button_label | escape }}
+        </a>
+      {%- endif -%}
+    {% endif %}
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "FAQ"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Questions? We’ve got answers."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "accordion",
+      "name": "Accordion",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category",
+          "info": "Product, Application, Adverse Effects and other."
+        },
+        {
+          "type": "textarea",
+          "id": "question",
+          "label": "Question"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ"
+    }
+  ]
+}
+{% endschema %}

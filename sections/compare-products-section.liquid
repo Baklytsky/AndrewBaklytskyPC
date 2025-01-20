@@ -1,0 +1,303 @@
+{{ 'compare-products-section.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-custom-select.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'compare-products-select.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+
+	assign title = section.settings.title
+	assign subheading = section.settings.subheading
+
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign old_product_names = ''
+  assign new_product_names = ''
+  assign product_photos = nil
+  assign actual_blocks_count = 0
+-%}
+
+
+{% if section.blocks.size > 0 %}
+  {% for product_block in section.blocks %}
+    {% liquid
+      assign old_product_image = product_block.settings.old_product_image
+      assign old_product_title = product_block.settings.title
+
+      assign new_product_image = product_block.settings.new_product_image
+      assign new_product_title = product_block.settings.new_product_title
+
+      assign block_bg_color = product_block.settings.bg_color
+    %}
+
+    {% if old_product_image != blank and new_product_image != blank and old_product_title != blank and new_product_title != blank  %}
+      {% liquid
+        assign old_product_names = old_product_names | append: '|||' | append: old_product_title
+        assign new_product_names = new_product_names | append: '|||' | append: new_product_title
+        assign actual_blocks_count = actual_blocks_count | plus: 1
+      %}
+
+      {% capture product_photo %}
+        <div class="compare-products-section__image-item"
+          style="--bg-color: {{ block_bg_color }};"
+          {% if actual_blocks_count == 1 %}
+            aria-hidden="false"
+          {% else %}
+            aria-hidden="true"
+          {% endif %}
+          {{ product_block.shopify_attributes }}
+        >
+          <div class="compare-products-section__image-wrapper">
+            {% render 'image', image: old_product_image, class_name: 'image-abs-cover', src: true, src_size: '50x50' %}
+            <span class="compare-products-section__label h6">Old</span>
+          </div>
+
+          <div class="compare-products-section__image-wrapper">
+            {% render 'image', image: new_product_image, class_name: 'image-abs-cover', src: true, src_size: '50x50' %}
+            <span class="compare-products-section__label h6">New</span>
+          </div>
+        </div>
+      {% endcapture %}
+
+      {% assign product_photos = product_photos | append: product_photo %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{%- if product_photos -%}
+	<div class="compare-products-section"
+    data-aos="fade-up"
+    style="
+      --bg-color: {{ bg_color }};
+      --text-color: {{ text_color }};
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+  >
+    <div class="compare-products-section__wrapper page-width">
+      {% if title != blank %}
+        <h3 class="compare-products-section__heading h2">{{ title }}</h3>
+      {% endif %}
+
+      {% if subheading != blank %}
+        <p class="compare-products-section__subheading body1">{{ subheading }}</p>
+      {% endif %}
+
+      <compare-products-select class="compare-products-select__container">
+        {% liquid
+          assign old_product_names_array = old_product_names | remove_first: '|||' | split: '|||'
+          assign new_product_names_array = new_product_names | remove_first: '|||' | split: '|||'
+          assign actual_blocks_count = actual_blocks_count | plus: 1
+
+          assign section_id_cut = section.id | sha256 | truncate: 11, ''
+        %}
+
+        <div class="compare-products-section__header">
+          <div class="compare-products-section__old-names-wrapper form-field">
+            <label class="visually-hidden"
+              for="CompareProducts-{{ section_id_cut }}--custom"
+            >
+              {{ title }}
+            </label>
+
+            <custom-select class="form-select body2 form-select-alternative">
+              <button type="button"
+                class="btn--reset form-select__btn"
+                tabindex="0"
+                aria-expanded="false"
+                aria-controls="dropdown-{{ section_id_cut }}"
+              >
+                <span class="form-select__btn-text">{{ old_product_names_array[0] }}</span>
+                <span class="form-select__dropdown-option--label"></span>
+                {%- render 'icon' with 'arrow-down' -%}
+              </button>
+
+              <ul class="form-select__dropdown hide-scrollbar"
+                id="dropdown-{{ section_id_cut }}"
+                style="display: none;"
+              >
+                {%- for item in old_product_names_array -%}
+                  <li class="form-select__dropdown-option"
+                    {% if forloop.first %}
+                      aria-selected="true"
+                    {% else %}
+                      aria-selected="false"
+                    {% endif %}
+                    data-option-value="{{ item | strip }}"
+                  >
+                    <button type="button"
+                      class="btn--reset form-select__dropdown-button body3"
+                    >
+                      {{ item | strip }}
+                    </button>
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              <input
+                name="compare-{{ section_id_cut }}"
+                id="CompareProducts-{{ section_id_cut }}--custom"
+                type="hidden"
+                class="form__input-hidden"
+                value=""
+                data-custom-select-input
+                required
+              >
+            </custom-select>
+          </div>
+
+          <div class="compare-products-section__svg">
+            {% render 'icon', icon: 'arrow-right-large' %}
+          </div>
+
+          <div class="compare-products-section__new-names-wrapper">
+            {% for label in new_product_names_array %}
+              <div class="compare-products-section__new-name body2"
+                {% if forloop.first %}
+                  aria-hidden="false"
+                {% else %}
+                  aria-hidden="true"
+                {% endif %}
+              >
+                {{ label }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="compare-products-section__images">
+          {{ product_photos }}
+        </div>
+      </compare-products-select>
+    </div>
+	</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compare products section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product compare block",
+      "type": "product_compare_block",
+      "settings": [
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background",
+          "default": "#F4F4F4"
+        },
+        {
+          "type": "header",
+          "content": "Old product"
+        },
+        {
+          "type": "image_picker",
+          "id": "old_product_image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "header",
+          "content": "New product"
+        },
+        {
+          "type": "image_picker",
+          "id": "new_product_image",
+          "label": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "new_product_title",
+          "label": "Title"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Compare products section"
+    }
+  ]
+}
+{% endschema %}

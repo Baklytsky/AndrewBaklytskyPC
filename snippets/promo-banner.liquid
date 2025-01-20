@@ -1,0 +1,51 @@
+{%- comment -%}
+{%- render 'promo-banner',
+  show_banner: show_banner
+  image: image,
+  content_position: content_position,
+  content_position_mobile: content_position_mobile,
+  heading: heading,
+  link_label: link_label,
+  link_url: link_url
+-%}
+{%- endcomment -%}
+
+{% if show_banner %}
+  {%- liquid
+    if content_position == "Left"
+    assign position = 'flex-start'
+    elsif content_position == "Center"
+    assign position = 'center'
+    elsif content_position == "Right"
+    assign position = 'flex-end'
+    endif
+
+    if content_position_mobile == "Left"
+    assign position_mobile = 'flex-start'
+    elsif content_position_mobile == "Center"
+    assign position_mobile = 'center'
+    elsif content_position_mobile == "Right"
+    assign position_mobile = 'flex-end'
+    endif
+  -%}
+
+  <div class="collection-promo-banner" style="--position: {{ position }}; --position-mobile: {{ position-mobile }};">
+    {% if image != blank %}
+      {% render 'image', image: image, class_name: 'collection-promo-banner__image image-abs-cover' %}
+    {% endif %}
+
+    {% if heading != blank or link_label != blank and link_url != blank %}
+      <div class="collection-promo-banner__content-wrapper rel" >
+        {% if heading != blank %}
+          <h2 class="collection-promo-banner__heading h5">
+            {{ heading }}
+          </h2>
+        {% endif %}
+
+        {% if link_label != blank and link_url != blank %}
+          <a href="{{ link_url }}" class="collection-promo-banner__link h6">{{ link_label }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

@@ -1,0 +1,137 @@
+{{ 'seo-footer.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_bottom_desktop = section.settings.padding_bottom_desktop
+  assign padding_top_desktop = section.settings.padding_top_desktop
+  assign padding_bottom_mobile = section.settings.padding_bottom_mobile
+  assign padding_top_mobile = section.settings.padding_top_mobile
+  assign background_color = section.settings.background_color
+  assign heading_color = section.settings.heading_color
+  assign text_color = section.settings.text_color
+  assign heading = section.settings.heading | default: page_title
+  assign description = section.settings.description | default: page_description
+-%}
+
+{%- comment -%}
+  {%- if request.page_type == 'index' -%}
+    {%- assign heading = section.settings.heading | default: shop.name -%}
+  {%- endif -%}
+{%- endcomment -%}
+
+<style>
+  #shopify-section-seo-footer {
+    background-color: {{ background_color }};
+  }
+</style>
+
+{% if heading != blank and description != blank %}
+  <div class="seo-footer"
+       data-aos="fade-up"
+           style="
+             --padding-top-desktop: {{ padding_top_desktop }}px;
+             --padding-bottom-desktop: {{ padding_bottom_desktop }}px;
+             --padding-top-mobile: {{  padding_top_mobile }}px;
+             --padding-bottom-mobile: {{ padding_bottom_mobile }}px;
+             --background-color: {{ background_color }};
+             --text-color: {{ text_color }};
+             --heading-color: {{ heading_color }};
+             ">
+    <div class="page-width">
+      {%- if heading != blank -%}
+        <h2 class="seo-footer__heading">{{ heading }}</h2>
+      {%- endif -%}
+
+      {%- if description != blank -%}
+        <div class="seo-footer__description">{{ description }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+{% endif %}
+
+
+
+{% schema %}
+{
+  "name": "SEO footer",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Padding top (desktop)",
+      "min": 0,
+      "max": 350,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom (desktop)",
+      "min": 0,
+      "max": 350,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "min": 0,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "min": 0,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SEO footer"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,339 @@
+{% comment %}
+  {% render 'ga-product-list-event',
+    event_type: string,
+    product_list: array of products || array of handles,
+    product: object,
+    line_item: object,
+    promotion_product: object,
+    list_name: string,
+    list_id: string,
+    class_name: string,
+    creative_slot: string,
+    creative_name: string
+    promotion_id: string
+    promotion_name: string
+    is_collection: boolean %}
+{% endcomment %}
+
+{%- liquid
+  if collection
+    assign refine_by_collection = ''
+    assign refine_by_category_collection = ''
+    for filter in collection.filters
+      if filter.active_values.size > 0
+        assign refine_by_category_collection = refine_by_category_collection | append: ', ' | append: filter.label
+        for value in filter.active_values
+          assign refine_by_collection = refine_by_collection | append: ', ' | append: value.label
+        endfor
+      endif
+    endfor
+  endif
+
+  assign event_location = template.name
+
+  case template.name
+  when 'index'
+    assign event_location = 'Homepage'
+  when 'product'
+    assign event_location = 'PDP'
+  when 'collection'
+    assign event_location = 'PLP'
+  endcase
+-%}
+
+{%- case event_type -%}
+
+{% when 'view_item_list' %}
+  <ga-product-list-event class="{{ class_name }}">
+    <script type="application/ld+json">
+      {
+        "event": "view_item_list",
+        {% if is_collection %} "is_collection": true,{% endif %}
+        "search": {
+          "search_type": "{% if search.performed or predictive_search.performed %}Typed{% endif %}",
+          "search_results_total": "{{ predictive_search.resources.products.size | default: search.results_count }}",
+          "search_dropdown_selected": "",
+          "search_term": "{{ predictive_search.terms | default: search.terms }}",
+          "sort_option": "{{ collection.sort_by }}",
+          "refine": {
+            "refine_by_category": "{{ refine_by_category_collection | remove_first: ', ' }}",
+            "refine_by_item": "{{ refine_by_collection | remove_first: ', ' }}",
+            "refine_by_action": ""
+          }
+         },
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "items": [
+            {% for product in product_list %}
+            {% liquid
+              assign current_variant = product.selected_or_first_available_variant
+              assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+              assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+            %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "index": "{{ forloop.index }}",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "{{ list_name }}",
+              "item_list_id": "{{ list_name | handleize | replace: '-', '_' }}",
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.price | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "",
+              "promotion_name": "",
+              "creative_name": "{{ creative_name }}",
+              "creative_slot": "{{ creative_slot }}"
+            }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+         ]
+        }
+      }
+    </script>
+  </ga-product-list-event>
+{%- when 'view_promotion' -%}
+  <ga-product-list-event class="{{ class_name }}">
+    <script type="application/ld+json" data-event-id="{{ list_id }}">
+      {
+        "event": "view_promotion",
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "items": [
+            {% for product_item in product_list %}
+              {% if product_item.title %}
+                {% assign product = product_item %}
+              {% else %}
+                {% assign product = all_products[product_item] %}
+              {% endif %}
+
+              {% liquid
+                assign current_variant = product.selected_or_first_available_variant
+                assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+                assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+              %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "index": "{{ forloop.index }}",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "{{ list_name }}",
+              "item_list_id": "{{ list_name | handleize | replace: '-', '_' }}",
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.price | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "{{ promotion_id }}",
+              "promotion_name": "{{ promotion_name }}",
+              "creative_name": "{{ creative_name }}",
+              "creative_slot": "{{ creative_slot }}"
+            }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+         ]
+        }
+      }
+    </script>
+  </ga-product-list-event>
+{%- when 'view_cart' -%}
+  <ga-product-list-event class="{{ class_name }}">
+    <script type="application/ld+json">
+      {
+        "event": "view_cart",
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "value": "{{ cart.total_price | money_without_currency }}",
+          "items": [
+            {% for line_item in cart.items %}
+              {%- assign promotion_prop_arr = line_item.properties['_promotion'] | split: ' | ' -%}
+              {%- assign promotion_name = promotion_prop_arr[0]-%}
+              {%- assign promotion_id = promotion_prop_arr[1]-%}
+              {
+                "item_id": "{{ line_item.id }}",
+                "item_name": "{{ line_item.title }}",
+                "coupon": "{{ line_item.line_level_discount_allocations[0].discount_application.title }}",
+                "discount": "{{ line_item.line_level_total_discount | money_without_currency }}",
+                "index": "{{ forloop.index }}",
+                "item_brand": "{{ line_item.product.vendor }}",
+                {% for collecton in line_item.product.collections limit: 5 %}
+                "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+                {% endfor %}
+                "item_list_name": "Cart line items list",
+                "item_list_id": "cart-line-items",
+                "item_variant": "{{ line_item.variant.title }}",
+                "price": "{{ line_item.variant.price | money_without_currency }}",
+                "quantity": "{{ line_item.quantity }}",
+                "product_type": "{{ line_item.product.type }}",
+                "promotion_id": "{{ promotion_id }}",
+                "promotion_name": "{{ promotion_name }}",
+                "creative_name": "",
+                "creative_slot": ""
+              }{% unless forloop.last %},{% endunless %}
+            {% endfor %}
+         ]
+        }
+      }
+    </script>
+  </ga-product-list-event>
+{%- when 'view_item' -%}
+  <ga-product-list-event class="{{ class_name }}">
+    <script type="application/ld+json">
+      {
+        "event": "view_item",
+        "search": {
+          "search_type": "typed",
+          "search_results_total": "",
+          "search_dropdown_selected": "{{ product.title }}",
+          "search_term": "",
+          "sort_option": "",
+          "refine": {
+            "refine_by_category": "",
+            "refine_by_item": "",
+            "refine_by_action": ""
+          }
+        },
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "value": "{{ product.selected_or_first_available_variant.price | money_without_currency }}",
+          "items": [
+            {% liquid
+              assign current_variant = product.selected_or_first_available_variant
+              assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+              assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+            %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "index": "1",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "",
+              "item_list_id": "",
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.price | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "",
+              "promotion_name": "",
+              "creative_name": "",
+              "creative_slot": ""
+            }
+          ]
+        }
+      }
+    </script>
+  </ga-product-list-event>
+{%- when 'add_to_cart' -%}
+  <span class="{{ class_name }}">
+    <script type="application/ld+json">
+      {
+        "event": "add_to_cart",
+        "ecommerce": {
+          "value": "{{ product.selected_or_first_available_variant.price | money_without_currency }}",
+          "currency": "{{ cart.currency.iso_code }}",
+          "items": [
+            {% liquid
+              assign current_variant = product.selected_or_first_available_variant
+              assign compare_at_price = current_variant.selected_selling_plan_allocation.compare_at_price | default: current_variant.compare_at_price
+              assign price = current_variant.selected_selling_plan_allocation.price | default: current_variant.price
+              assign puchase_type = 'Standard'
+              if product.selected_selling_plan
+                assign puchase_type = 'Subscription'
+              endif
+            %}
+            {
+              "item_id": "{{ product.id }}",
+              "item_name": "{{ product.title }}",
+              "coupon": "",
+              "discount": "",
+              "index": "1",
+              "item_brand": "{{ product.vendor }}",
+              {% for collecton in product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_variant": "{{ current_variant.title }}",
+              "price": "{{ current_variant.selected_selling_plan_allocation.price | default: current_variant.price  | money_without_currency }}",
+              "quantity": "1",
+              "product_type": "{{ product.type }}",
+              "promotion_id": "",
+              "promotion_name": "",
+              "creative_name": "",
+              "creative_slot": "",
+              "purchase_option": "Add to Bag",
+              "add_to_bag_location": "{{ event_location }}",
+              "add_to_bag_type": "{{ puchase_type }}",
+              "subscription_frequency": "{{ product.selected_selling_plan.name }}"
+            }
+          ]
+        }
+      }
+    </script>
+  </span>
+{%- when 'remove_from_cart' -%}
+  <span class="{{ class_name }}">
+    {%- assign promotion_prop_arr = line_item.properties['_promotion'] | split: ' | ' -%}
+    {%- assign promotion_name = promotion_prop_arr[0]-%}
+    {%- assign promotion_id = promotion_prop_arr[1]-%}
+    <script type="application/ld+json">
+      {
+        "event": "remove_from_cart",
+        "ecommerce": {
+          "currency": "{{ cart.currency.iso_code }}",
+          "value": "{{ line_item.final_line_price | money_without_currency }}",
+          "items": [
+            {
+              "item_id": "{{ line_item.product.id }}",
+              "item_name": "{{ line_item.product.title }}",
+              "coupon": "{{ line_item.line_level_discount_allocations[0].discount_application.title }}",
+              "discount": "{{ line_item.line_level_total_discount | money_without_currency }}",
+              "index": "1",
+              "item_brand": "{{ line_item.vendor }}",
+              {% for collecton in line_item.product.collections limit: 5 %}
+              "item_category{% unless forloop.first %}{{- forloop.index }}{% endunless %}": "{{ collecton.title | strip_html  | remove: '"'}}",
+              {% endfor %}
+              "item_list_name": "Cart line items list",
+              "item_list_id": "cart-line-items",
+              "item_variant": "{{ line_item.variant.title }}",
+              "price": "{{ line_item.final_price  | money_without_currency }}",
+              "quantity": "{{ line_item.quantity }}",
+              "product_type": "{{ line_item.product.type }}",
+              "promotion_id": "{{ promotion_id }}",
+              "promotion_name": "{{ promotion_name }}",
+              "creative_name": "",
+              "creative_slot": ""
+            }
+          ]
+        }
+      }
+    </script>
+  </span>
+
+{%- when 'search' -%}
+  <ga-product-list-event class="{{ class_name }}">
+    <script type="application/ld+json">
+      {
+        "event": "search",
+        "search": {
+          "search_type": "Typed",
+          "search_results_total" : "{{ results_count }}",
+          "search_dropdown_selected": "",
+          "search_term": "{{ search.terms }}"
+        }
+      }
+    </script>
+  </ga-product-list-event>
+{%- endcase -%}
+

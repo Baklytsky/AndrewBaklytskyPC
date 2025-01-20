@@ -1,0 +1,45 @@
+@import "../helpers/mixins";
+
+.page__head {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+
+  @include mq($medium-max) {
+    margin-bottom: 15px;
+  }
+
+  .page__head-heading {
+    margin-bottom: 20px;
+  }
+
+  .page__head-description--preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hide-description {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    width: fit-content;
+  }
+
+  .show-more {
+    transition: display 0.5s ease-out;
+
+    div[data-show-more-opener] {
+      display: block;
+      max-height: 2.7em;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+
+    .show-more__btn {
+      margin-top: 10px;
+      padding: 0;
+    }
+  }
+}

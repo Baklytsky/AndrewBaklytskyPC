@@ -1,0 +1,141 @@
+{{ 'collection.min.css' | asset_url | stylesheet_tag }}
+{{ 'grid.min.css' | asset_url | stylesheet_tag }}
+{{ 'collection-blocks.min.css' | asset_url | stylesheet_tag }}
+{{ 'page-header.min.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'component-show-more.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'component-page-header.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign product_handles = section.settings.products_handles | split: ','
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+  assign title = section.settings.title
+  assign description = section.settings.description
+-%}
+
+{%- capture products_grid -%}
+  {%- for handle in product_handles -%}
+    {%- assign product_handle = handle | handleize -%}
+
+    {%- for metafield_handle in shop.metafields.rx-product.handle -%}
+      {%- assign product_metafield_handle = metafield_handle | handleize -%}
+      {%- if product_metafield_handle == product_handle -%}
+        <li class="collection__content-grid-list-item grid__item">
+          {% render 'rx-product-card' index: forloop.index0 %}
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+<div class="collection page-width">
+  {% render 'page-header', description: description %}
+
+  <div class="collection__content {% if title == blank and description == blank %}collection__content--no-border{% endif %}">
+    <div class="collection__content-grid collection__content-grid--fill-width" id="ProductGridContainer">
+      {%- if shop.metafields.rx-product.handle.size == 0 -%}
+        <div class="collection collection--empty" id="product-grid" data-id="{{ section.id }}">
+          <div class="title-wrapper center">
+            <h3 class="title title--primary">
+              {{ 'sections.collection_template.empty' | t }}<br>
+              {{ 'sections.collection_template.use_fewer_filters_html' | t: link: collection.url, class: " link" }}
+            </h3>
+          </div>
+        </div>
+      {%- else -%}
+        <div class="collection__content-grid-wrapper">
+          <ul id="product-grid"
+              data-id="{{ section.id }}"
+              style="--columns-desktop: {{ columns_desktop }}; --columns-mobile: {{ columns_mobile }}"
+              class="collection__content-grid-list product-grid-{{ section.id }} grid product-grid grid--{{ columns_mobile }}-col-tablet-down grid--{{ columns_desktop }}-col-desktop">
+
+            {%- if products_grid != blank -%}
+              {{ products_grid }}
+            {%- else -%}
+              {%- for handle in shop.metafields.rx-product.handle -%}
+                <li class="collection__content-grid-list-item grid__item">
+                  {% render 'rx-product-card' index: forloop.index0 %}
+                </li>
+              {%- endfor -%}
+            {%- endif -%}
+
+
+          </ul>
+        </div>
+
+        <div id="collection-rx-safety-information">
+          {% render 'collection-blocks' block_type: 'safety' %}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product grid (rx-only)",
+  "tag": "section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "products_handles",
+      "label": "Products",
+      "info": "Enter product handles separated by commas. If the field is empty all rx products will be displayed. Example: 0-1-cream, clear, c-therapy-night-cream"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "default": "3",
+      "label": "t:sections.main-collection-product-grid.settings.columns_desktop.label",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.main-collection-product-grid.settings.columns_desktop.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.main-collection-product-grid.settings.columns_desktop.options__2.label"
+        },
+        {
+          "value": "3",
+          "label": "t:sections.main-collection-product-grid.settings.columns_desktop.options__3.label"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "default": "2",
+      "label": "t:sections.main-collection-product-grid.settings.columns_mobile.label",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.main-collection-product-grid.settings.columns_mobile.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.main-collection-product-grid.settings.columns_mobile.options__2.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product grid (rx-only)"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

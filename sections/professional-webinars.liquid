@@ -1,0 +1,393 @@
+{{ 'professional-webinars.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+  assign heading = section.settings.heading | newline_to_br
+  assign subheading = section.settings.subheading | newline_to_br
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign bg_color = section.settings.bg_color
+  assign border_top = section.settings.border_top
+-%}
+
+<div data-aos="fade-up"
+     style="
+    --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+    --padding-top-desktop: {{ padding_top_desk }}px;
+    --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+    --padding-top-mobile: {{ padding_top_mob }}px;
+    --bg-color: {{ bg_color }};"
+  class="professional-webinars {% if border_top %} professional-webinars--border {% endif %} rel">
+  <div class="page-width">
+    <div class="professional-webinars__content">
+      {%- if section.blocks.size > 0 -%}
+        {%- if heading != blank or subheading != bank or button_label != blank -%}
+          <div class="professional-webinars__header">
+            <div class="professional-webinars__header-wrapper">
+              {%- if heading != blank or subheading != bank -%}
+                {%- if heading != blank -%}
+                  <h3 class="professional-webinars__header-heading">{{ heading }}</h3>
+                {%- endif -%}
+                {%- if subheading != bank -%}
+                  <div class="professional-webinars__header-subheading h3">{{ subheading }}</div>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+            {%- if button_label != blank -%}
+              <a{% if button_link == blank %} role="link" aria-disabled="true" disabled{% else %}
+                href="{{ button_link }}"{% endif %}
+                class="professional-webinars__header-btn btn btn--{{ button_style }}">
+                {{ button_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {% for block in section.blocks %}
+          {%- liquid
+            assign image = block.settings.image
+            assign text_on_image_top = block.settings.text_on_image_top
+            assign text_on_image_bottom = block.settings.text_on_image_bottom
+            assign text_color_on_image = block.settings.text_color_on_image
+            assign text_color = block.settings.text_color
+            assign subheading = block.settings.subheading | escape | newline_to_br
+            assign heading = block.settings.heading | escape | newline_to_br
+            assign description = block.settings.description | escape | newline_to_br
+            assign button_label = block.settings.button_label
+            assign link_url = block.settings.link_url
+            assign button_style = block.settings.button_style
+            assign image_alt = image.alt | default: heading
+
+            if image != blank or heading != blank or description != blank
+            assign has_content = true
+            endif
+          -%}
+
+          {% if has_content %}
+            <div class="professional-webinars__item" style="--color: {{ text_color }}">
+              {% if image != blank %}
+                <div class="professional-webinars__item-image-wrapper rel">
+                  {% if image != blank %}
+                    {% render 'image',
+                      image: image,
+                      class_name: "image-abs-cover",
+                      alt: image_alt %}
+                  {%- else -%}
+                    {{ 'collection-1' | placeholder_svg_tag: 'image-abs-cover' }}
+                  {%- endif -%}
+
+                  {% if link_url != blank %}
+                    <a href="{{ link_url }}" class="image-abs-cover">
+                      <span class="u-sr-only">{{ button_label }}</span>
+                    </a>
+                  {% endif %}
+
+                  {% if text_on_image_top != blank or text_on_image_bottom != blank %}
+                    <div class="professional-webinars__item-image-text-wrapper" style="--color: {{ text_color_on_image }}">
+                      {% if text_on_image_top != blank %}
+                        <p class="professional-webinars__item-image-text h6">
+                          {{ text_on_image_top }}
+                        </p>
+                      {% endif %}
+
+                      {% if text_on_image_bottom != blank %}
+                        <p class="professional-webinars__item-image-text h7">
+                          {{ text_on_image_bottom }}
+                        </p>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              {% if subheading != blank or heading != blank or description != blank %}
+                <div class="professional-webinars__item-text-wrapper">
+                  {%- if subheading != blank -%}
+                    <p class="professional-webinars__item-subheading h6">{{ subheading }}</p>
+                  {%- endif -%}
+
+                  {%- if heading != blank -%}
+                    {% if link_url != blank %}
+                      <a href="{{ link_url }}" class="professional-webinars__item-heading h5">{{ heading }}</a>
+                    {% else %}
+                      <h3 href="{{ link_url }}" class="professional-webinars__item-heading h5">{{ heading }}</h3>
+                    {% endif %}
+                  {%- endif -%}
+
+                  {%- if description != blank -%}
+                    <div class="professional-webinars__item-description">{{ description }}</div>
+                  {%- endif -%}
+
+                  {%- if button_label != blank -%}
+                    <a{% if link_url == blank %} role="link" aria-disabled="true" disabled{% else %}
+                      href="{{ button_link }}"{% endif %}
+                      class="professional-webinars__item--btn btn btn--{{ button_style }}">
+                      {{ button_label | escape }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {%- else -%}
+        <div class="professional-webinars__heading-wrapper">
+          <div class="professional-webinars__header">
+            <div class="professional-webinars__header-wrapper">
+              <h3 class="professional-webinars__header-heading">events</h3>
+              <div class="professional-webinars__header-subheading h4">upcoming this month</div>
+            </div>
+            {%- if button_label != blank -%}
+              <a href="{{ button_link }}" class="professional-webinars__header-btn btn btn--secondary">
+                See All Events
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="professional-webinars__item">
+          <div class="professional-webinars__item-image-wrapper rel">
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+
+            <a href="#" class="image-abs-cover">
+              <span class="u-sr-only">placeholder</span>
+            </a>
+
+            <div class="professional-webinars__item-image-text-wrapper">
+              <p class="professional-webinars__item-image-text h6">
+                January
+              </p>
+
+              <p class="professional-webinars__item-image-text h7">
+                2
+              </p>
+            </div>
+          </div>
+
+          <div class="professional-webinars__item-text-wrapper">
+            <p class="professional-webinars__item-subheading h6">January 2, 2023 @ 5:00 EST</p>
+
+            <a href="{{ link_url }}" class="professional-webinars__item-heading h4">Stock up on Obagi products</a>
+
+            <div class="professional-webinars__item-description">Place bulk orders of Obagi® products and have them shipped directly to your door.</div>
+
+            <a href="#" class="professional-webinars__item--btn btn btn--secondary">
+              Button label
+            </a>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Professional webinars",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>for specific <i>concerns</i></p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "primary-alt",
+          "label": "Primary alternative"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "secondary-alt",
+          "label": "Secondary alternative"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Border top",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image side"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "text_on_image_top",
+          "label": "Text on image top"
+        },
+        {
+          "type": "text",
+          "id": "text_on_image_bottom",
+          "label": "Text on image bottom"
+        },
+        {
+          "type": "color",
+          "id": "text_color_on_image",
+          "label": "Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "header",
+          "content": "Text side"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#383838"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Register Now"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link url"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "primary-alt",
+              "label": "Primary alternative"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "secondary-alt",
+              "label": "Secondary alternative"
+            }
+          ],
+          "default": "primary"
+        }
+      ]
+      }
+    ]
+}
+{% endschema %}

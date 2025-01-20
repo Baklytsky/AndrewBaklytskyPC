@@ -1,0 +1,17 @@
+{%- comment -%}
+    {% render 'favorites-list', empty_message: string, button_label: string, button_link: string %}
+{%- endcomment -%}
+
+{{ 'favorites-list.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-favorites-list.min.js' | asset_url }}" defer></script>
+
+
+<favorites-list>
+  <div class="h4 account-favorites__empty-message hidden">
+    <div>{{ empty_message | default: 'Your list is empty.' }}</div>
+    {%- if button_label != blank and button_link != blank -%}
+      <a href="{{ button_link }}" class="btn btn--secondary">{{ button_label }}</a>
+    {%- endif -%}
+  </div>
+  <div class="account-favorites__inner"></div>
+</favorites-list>

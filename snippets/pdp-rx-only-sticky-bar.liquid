@@ -1,0 +1,44 @@
+{%- comment -%}
+{%- render 'pdp-sticky-bar',
+  product: product,
+  current_variant: current_variant,
+  notify_me: notify_me -%}
+{%- endcomment -%}
+
+{{ 'pdp-sticky-bar.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-pdp-sticky-bar.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign current_variant_image = product.featured_image
+  assign current_variant_image_alt = product.title -%}
+
+<pdp-sticky-bar class="pdp-sticky-bar" aria-hidden="true" tabindex="0" data-notify-me="{{ notify_me }}">
+  <div class="pdp-sticky-bar__wrapper page-width">
+    <div class="pdp-sticky-bar__details">
+      {%- if current_variant_image -%}
+        <div class="pdp-sticky-bar__details-image rel sticky-bar-image--{{ section.id }}">
+          {% render 'image',
+            image: current_variant_image,
+            class_name: 'image-abs-cover', alt: current_variant_image_alt, small_size: true %}
+        </div>
+      {%- endif -%}
+      <div class="pdp-sticky-bar__details-info">
+        {%- liquid
+          assign main_collection = product.metafields.custom.collection_picker.value
+          assign product_collections = product.metafields.custom.collection -%}
+
+        {%- if product_collections != blank -%}
+          <a href="{{ main_collection.url }}" class="pdp-sticky-bar__details__collection body3">
+            {{ product_collections.value[0] }}
+          </a>
+        {%- endif -%}
+
+        <h3 class="pdp-sticky-bar__title">{{ product.title }}</h3>
+      </div>
+    </div>
+
+    <div class="pdp-sticky-bar__button">
+      {% render 'physician-link', class: "product-form__btn-link btn btn--primary-alt" %}
+    </div>
+  </div>
+</pdp-sticky-bar>

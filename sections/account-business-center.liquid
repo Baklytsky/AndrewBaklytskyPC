@@ -1,0 +1,260 @@
+{{ 'account-business-center.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'component-resource-blocks.min.js' | asset_url }}" defer="defer"></script>
+{%- include 'customer-status-list' -%}
+
+{%- comment -%}
+  - 'customer-status-list' return {{ customer_status_list }} and {{ customer_status_list_handle_arr }} variable
+{%- endcomment -%}
+
+{%- liquid
+  assign section_bg_color = section.settings.section_bg_color
+  assign heading = section.settings.heading
+  assign show_slider_nav = section.settings.show_slider_nav
+  assign show_section = false
+
+  for block in section.blocks
+    assign shown_for_customers = block.settings.shown_for_customers
+
+    if shown_for_customers != blank
+      assign shown_for_customers_arr = shown_for_customers | split: ','
+
+        for status in shown_for_customers_arr
+          assign status_handle = status | handleize
+
+            for i in customer_status_list_handle_arr
+              if i == status_handle
+                assign show_section = true
+                break
+              endif
+            endfor
+
+          if i == status_handle
+            break
+          endif
+        endfor
+
+    endif
+
+    if status_handle
+      break
+    endif
+
+  endfor
+-%}
+
+{%- if show_section -%}
+
+{%- capture swiper_config -%}
+  {
+  "slidesPerView": 1.33,
+  "spaceBetween": 20,
+  "watchSlidesProgress": true,
+  "freeMode": true,
+  "mousewheel": {
+  "forceToAxis": true
+  },
+  {% if show_slider_nav -%}
+    "navigation": {
+    "nextEl": ".swiper-button-next--{{ section.id }}",
+    "prevEl": ".swiper-button-prev--{{ section.id }}"
+    },
+    "scrollbar": {
+    "el": ".swiper-scrollbar--{{ section.id }}",
+    "hide": false,
+    "draggable": true
+    },
+  {% endif -%}
+  "breakpoints": {
+  "1200": {
+  "slidesPerView": 2.3,
+  "shortSwipes": false
+  }
+  }
+  }
+{%- endcapture -%}
+
+<resource-blocks class="business-banners block"
+     style="--bg-color: {{ section_bg_color }}">
+
+  {%- if heading != blank -%}
+    <div class="page-width">
+      {%- if heading != blank -%}
+        <h6 class="business-banners__header-heading">{{ heading }}</h6>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+
+    {%- capture slides -%}
+      {%- for block in section.blocks -%}
+
+        {%- liquid
+          assign show_block = false
+          assign has_content = false
+          assign shown_for_customers = block.settings.shown_for_customers
+          assign image = block.settings.image
+          assign heading = block.settings.heading
+          assign description = block.settings.description
+          assign url = block.settings.url
+          assign dynamic_link_type = block.settings.dynamic_link_type
+          assign image_alt = image.alt | default: heading
+
+          if  image != blank or heading != blank or description != blank
+            assign has_content = true
+          endif
+
+          if shown_for_customers != blank
+            assign shown_for_customers_arr = shown_for_customers | split: ','
+
+            for status in shown_for_customers_arr
+              assign status_handle = status | handleize
+
+              for i in customer_status_list_handle_arr
+                if i == status_handle
+                  assign show_block = true
+                  break
+                endif
+              endfor
+
+              if show_block
+                break
+              endif
+            endfor
+          endif
+        -%}
+
+        {%- if has_content and show_block -%}
+          <div class="swiper-slide"
+               data-resource-block="{{ dynamic_link_type }}"
+            {{ block.shopify_attributes }}>
+            <div class="business-banners__card">
+              <div class="business-banners__card-image block rel">
+                {%- if image -%}
+                  {% render 'image', image: image, class_name: 'image-abs-cover', alt: image_alt %}
+
+                  {%- if url != blank -%}
+                    <a href="{{ url }}" class="image-abs-cover">
+                      <span class="u-sr-only">{{ image_alt }}</span>
+                    </a>
+                  {%- endif -%}
+                {%- endif -%}
+              </div>
+
+              {%- if heading != blank -%}
+                <h6 class="business-banners__card-title">{{ heading }}</h6>
+              {%- endif -%}
+
+              {%- if description != blank -%}
+                <h5 class="business-banners__card-description">
+                  {%- if url != blank -%}
+                    <a href="{{ url }}">{{ description }}</a>
+                  {%- else -%}
+                    {{ description }}
+                  {%- endif -%}
+                </h5>
+              {%- endif -%}
+
+              {% if url != blank %}
+                <a href="{{ url }}" class="business-banners__card-link">
+                  {% render 'icon' with 'arrow-right-large' %}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        {%- endif -%}
+
+      {%- endfor -%}
+    {%- endcapture -%}
+  {%- endif -%}
+
+  {%- render 'slideshow-swiper',
+    class_name: 'business-banners__slider rel page-width',
+    config: swiper_config,
+    slides: slides,
+    show_slider_nav: show_slider_nav,
+    show_scroll_bar: show_slider_nav,
+    nav_id: section.id  -%}
+</resource-blocks>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Business banners",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slider_nav",
+      "label": "Show slider navigation",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "shown_for_customers",
+          "label": "Shown for customers",
+          "info": "if empty, the slide will be hidden for all customers. Example: Partner, Premier Partner"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "dynamic_link_type",
+          "options": [
+            {
+              "value": "disabled",
+              "label": "Use link url"
+            },
+            {
+              "value": "rewards",
+              "label": "Rewards"
+            }
+          ],
+          "default": "disabled",
+          "label": "Type of dynamic link"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

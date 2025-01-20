@@ -1,0 +1,251 @@
+{{ 'physician-finder.min.css' | asset_url | stylesheet_tag }}
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+<script src="{{ 'physician-finder.min.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign heading = section.settings.heading | newline_to_br
+  assign error_message = section.settings.error_message | default: 'Something went wrong, please try again.'
+  assign popup_image = section.settings.popup_image
+  assign popup_heading = section.settings.popup_heading
+  assign popup_text = section.settings.popup_text
+  assign popup_bg_color = section.settings.popup_bg_color
+  assign popup_text_color = section.settings.popup_text_color
+  assign no_results_message = section.settings.no_results_message | newline_to_br
+  assign no_results_banner_image = section.settings.no_results_banner_image
+  assign no_results_banner_text = section.settings.no_results_banner_text | newline_to_br
+  assign no_results_banner_cta_label = section.settings.no_results_banner_cta_label
+  assign no_results_banner_cta_url = section.settings.no_results_banner_cta_url
+%}
+
+<physician-finder>
+  <div class="physician-finder__inner page-width">
+    <h1 class="h2 physician-finder__heading">{{ heading | default: page.title }}</h1>
+
+    <form class="physician-finder__form" data-form-name="Physician finder">
+      <div class="physician-finder__form-inner">
+        <div class="form-field">
+          <label for="physician-finder-search" class="body3 form-label">{{ 'templates.physician_finder.filter_by' | t }}</label>
+          <input type="number" id="physician-finder-search" class="form-input" required placeholder="{{ 'templates.physician_finder.search_placeholder' | t }}">
+        </div>
+      </div>
+      <button type="submit" class="btn btn--small btn--primary-alt">{{ 'templates.physician_finder.submit' | t }}</button>
+
+      <div class="physician-finder__form-filters">
+        <span class="body3 form-label">{{ 'templates.physician_finder.filter_label' | t }}</span>
+        <div>
+          <input type="checkbox" name="premierPartner" id="premier-partners-checkbox" value="premierPartner" class="form__checkbox-alt" data-name="Obagi Premier Partners">
+          <label for="premier-partners-checkbox" class="body3 form-label">
+            {{ 'templates.physician_finder.premier_partners_label' | t }}
+            <modal-opener>
+              <button class="btn--reset"
+                      type="button"
+                      aria-controls="#premier-partners-popup"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                      aria-label="Obagi Premier Partner Info"><sup>ⓘ</sup></button>
+            </modal-opener>
+          </label>
+        </div>
+
+        <div>
+          <input type="checkbox" name="skintrinsiqProvider" id="provider-checkbox" value="skintrinsiqProvider" class="form__checkbox-alt" data-name="SKINTRINSIQ Provider">
+          <label for="provider-checkbox" class="body3 form-label">{{ 'templates.physician_finder.providers_label' | t }}</label>
+        </div>
+      </div>
+    </form>
+
+    <div class="loading-overlay__spinner physician-finder__spinner">
+      {% render 'icon' with 'spinner' %}
+    </div>
+
+    <div class="physician-finder__content hidden">
+
+      <div class="physician-finder__results">
+        <div class="physician-finder__results-block physician-finder__results-preferred medium-hide hide">
+          <h3 class="h6 physician-finder__preferred-heading">{{ 'templates.physician_finder.preferred_partners' | t }}</h3>
+          <ul class="physician-finder__preferred-list"></ul>
+        </div>
+        <div class="physician-finder__results-block physician-finder__results-main">
+          <div class="h6 physician-finder__results-heading medium-hide">
+            <span class="physician-finder__results-count"></span>
+            {{ 'templates.physician_finder.results_found' | t }}
+          </div>
+          <ul class="physician-finder__main-list"></ul>
+        </div>
+        <button type="button" class="btn btn--secondary physician-finder__show-more" data-paginate-by="20">Show More +</button>
+
+        <div class="physician-finder__no-result finder-no-result hidden">
+          <div class="finder-no-result__info medium-hide">
+            <div class="h6 finder-no-result__heading">{{ 'templates.physician_finder.no_results_found' | t }} <span></span></div>
+            <p class="h5 finder-no-result__text">{{ no_results_message | default: 'Enter a new ZIP Code to display results.' }}</p>
+          </div>
+
+          {%- if no_results_banner_image != blank or no_results_banner_text != blank or no_results_banner_text != blank -%}
+            <div class="finder-no-result__banner">
+              {%- if no_results_banner_image != blank -%}
+                {% render 'image', image: no_results_banner_image, class_name: 'image-abs-cover', preload: boolean %}
+              {%- endif -%}
+
+              <div class="finder-no-result__banner-content">
+                {%- if no_results_banner_text != blank -%}
+                  <p class="h5 finder-no-result__banner-text">{{ no_results_banner_text }}</p>
+                {%- endif -%}
+                {%- if no_results_banner_cta_label != blank and no_results_banner_cta_url != blank -%}
+                  <a href="{{ no_results_banner_cta_url }}" class="btn btn--secondary-alt">{{ no_results_banner_cta_label }}</a>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+      <div class="physician-finder__map-wrapper">
+        <div class="physician-finder__no-result physician-finder__no-result--mobile finder-no-result medium-up-hide hidden">
+          <div class="finder-no-result__info medium-up-hide">
+            <div class="h6 finder-no-result__heading">{{ 'templates.physician_finder.no_results_found' | t }} <span></span></div>
+            <p class="h5 finder-no-result__text">{{ no_results_message | default: 'Enter a new ZIP Code to display results.' }}</p>
+          </div>
+        </div>
+        <div class="physician-finder__results-preferred physician-finder__results-preferred--mobile medium-up-hide hide">
+          <h3 class="h6 physician-finder__preferred-heading">{{ 'templates.physician_finder.preferred_partners' | t }}</h3>
+          <ul class="physician-finder__preferred-list"></ul>
+        </div>
+        <div class="h6 physician-finder__results-heading physician-finder__results-heading--mob medium-up-hide">
+          <span class="physician-finder__results-count"></span>
+          {{ 'templates.physician_finder.results_found' | t }}
+        </div>
+        <div class="physician-finder__map-inner">
+          <div id="map" class="physician-finder__map"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="h4 physician-finder__error hidden">{{ error_message }}</p>
+  </div>
+
+  {%- if popup_heading != blank or popup_text != blank -%}
+    <modal-dialog id="premier-partners-popup">
+      <div class="popup physician-finder-popup"
+           data-popup role="dialog"
+           tabindex="-1"
+           aria-modal="true"
+           aria-hidden="true"
+           style="--bg-color: {{ popup_bg_color }};--text-color: {{ popup_text_color }};">
+        <button class="a btn--reset" type="button" data-close-popup>
+          {%- render 'icon' with 'close' -%}
+        </button>
+        <div class="hide-scrollbar">
+          {%- if popup_image != blank -%}
+            {%- render 'image', image: popup_image, class_name: 'physician-finder-popup__image', small_size: true -%}
+          {%- endif -%}
+
+          {%- if popup_heading != blank -%}
+            <h5 class="physician-finder-popup__heading">
+              {{ popup_heading }}
+            </h5>
+          {%- endif -%}
+
+          {%- if popup_text != blank -%}
+            <div class="body 3 physician-finder-popup__text">
+              {{ popup_text }}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </modal-dialog>
+  {%- endif -%}
+
+</physician-finder>
+
+<script>
+  dataLayer.push({
+    'event': 'find_a_physician_start',
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Physician finder",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "error_message",
+      "label": "Error message",
+      "default": "Something went wrong, please try again."
+    },
+    {
+      "type": "header",
+      "content": "No results"
+    },
+    {
+      "type": "textarea",
+      "id": "no_results_message",
+      "label": "Message",
+      "default": "Enter a ZIP Code to display results."
+    },
+    {
+      "type": "image_picker",
+      "id": "no_results_banner_image",
+      "label": "Banner image"
+    },
+    {
+      "type": "textarea",
+      "id": "no_results_banner_text",
+      "label": "Banner text"
+    },
+    {
+      "type": "text",
+      "id": "no_results_banner_cta_label",
+      "label": "Banner CTA label"
+    },
+    {
+      "type": "url",
+      "id": "no_results_banner_cta_url",
+      "label": "Banner CTA URL"
+    },
+    {
+      "type": "header",
+      "content": "Popup"
+    },
+    {
+      "type": "color",
+      "id": "popup_bg_color",
+      "label": "Background color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "popup_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "image_picker",
+      "id": "popup_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "popup_heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "popup_text",
+      "label": "Text"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Physician finder"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

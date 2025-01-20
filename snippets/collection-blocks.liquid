@@ -1,0 +1,335 @@
+{% comment %}
+  {% render 'collection-blocks' block_type: string  %}
+{% endcomment %}
+
+{%- case block_type -%}
+{% when 'promo-card' %}
+  {% if collection.metafields.promo_card.show_section == 'true' %}
+    {%- liquid
+      assign image = collection.metafields.promo_card.image[0]
+      assign video = collection.metafields.promo_card.video[0]
+      assign video_display_format = collection.metafields.promo_card.video_display_format
+      assign image_mobile = collection.metafields.promo_card.image_mobile[0]
+      assign video_mobile = collection.metafields.promo_card.video_mobile[0]
+      assign video_display_format_mobile = collection.metafields.promo_card.video_display_format_mobile
+      assign subheading = collection.metafields.promo_card.subheading
+      assign subheading_color = collection.metafields.promo_card.subheading_color | default: '#383838'
+      assign subheading_font_size = collection.metafields.promo_card.subheading_font_size | default: 12
+      assign heading = collection.metafields.promo_card.heading
+      assign heading_color = collection.metafields.promo_card.heading_color | default: '#383838'
+      assign heading_font_size = collection.metafields.promo_card.heading_font_size | default: 18
+      assign tc = collection.metafields.promo_card.t_c
+      assign tc_link = collection.metafields.promo_card.tc_link
+      assign tc_color = collection.metafields.promo_card.tc_color | default: '#383838'
+      assign tc_font_size = collection.metafields.promo_card.tc_font_size | default: 12
+      assign link_label = collection.metafields.promo_card.link_label
+      assign link_url = collection.metafields.promo_card.link_url
+      assign promotion_analytic_products = collection.metafields.promo_card.product_list_analytics | split: '|'
+      assign promotion_analytic_collection = collections[collection.metafields.promo_card.promotion_collection_analytics].products | default: promotion_analytic_products
+      assign list_id = link_label | handleize
+      assign promotion_id = collection.metafields.promo_card.promotion_id_analytics
+      assign promotion_name = collection.metafields.promo_card.promotion_name_analytics
+
+      if video_display_format == 'Contain'
+        assign contain_video_on_desktop = true
+      endif
+
+      if video_display_format_mobile == 'Contain'
+        assign contain_video_on_mobile = true
+      endif
+    -%}
+
+    <div class="promo-card">
+      {% if image != blank or video != blank %}
+        {%- assign image_class_name = 'promo-card__image image-abs-cover' -%}
+        {%- assign video_class_name = '' -%}
+
+        <div class="promo-card__img-wrapper rel">
+
+          {%- if image_mobile != blank or video_mobile != blank -%}
+            {%- assign image_class_name = image_class_name | append: ' small-hide' -%}
+            {%- assign video_class_name = 'small-hide' -%}
+
+            {%- if video_mobile != blank -%}
+              {%- render 'video',
+                video: video_mobile,
+                video_from_metafield: true,
+                poster: image_mobile,
+                poster_from_metafield: true,
+                default_controls: false,
+                autoplay: true,
+                disable_video_scale_on_desktop: contain_video_on_desktop,
+                disable_video_scale_on_mobile: contain_video_on_mobile,
+                class: 'small-up-hide'
+              -%}
+            {%- else -%}
+              {% render 'image-metafields', image: image_mobile, class_name: 'promo-card__image image-abs-cover small-up-hide' %}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if video != blank -%}
+            {%- render 'video',
+              video: video,
+              video_from_metafield: true,
+              poster: image,
+              poster_from_metafield: true,
+              default_controls: false,
+              autoplay: true,
+              disable_video_scale_on_desktop: contain_video_on_desktop,
+              disable_video_scale_on_mobile: contain_video_on_mobile,
+              class: video_class_name
+            -%}
+          {%- else -%}
+            {% render 'image-metafields', image: image, class_name: image_class_name %}
+          {%- endif -%}
+
+          {% if link_url != blank %}
+            <a href="{{ link_url }}" class="image-abs-cover" {% if promotion_analytic_collection != blank %}data-promotion-click-event="{{ list_id }}"{% endif %}>
+              <span class="u-sr-only">{{ link_label }}</span>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if subheading != blank or heading != blank or tc != blank or link_label != blank %}
+        <div class="promo-card__content-wrapper"
+             style="
+               --subheading-pc-color: {{ subheading_color }};
+               --subheading-pc-font-size: {{ subheading_font_size }}px;
+               --heading-pc-color: {{ heading_color }};
+               --heading-pc-font-size: {{ heading_font_size }}px;
+               --tc-pc-color: {{ tc_color }};
+               --tc-pc-font-size: {{ tc_font_size }}px;">
+
+          {% if subheading != blank %}
+            <p class="promo-card__subheading">
+              {{ subheading }}
+            </p>
+          {% endif %}
+
+          {% if heading != blank %}
+            <h2 class="promo-card__heading h5">
+              {{ heading }}
+            </h2>
+          {% endif %}
+
+          {% if tc != blank %}
+            {%- if tc_link != blank -%}
+              <a href="{{ tc_link }}" class="promo-card__tc">{{ tc }}</a>
+            {%- else -%}
+              <p class="promo-card__tc">{{ tc }}</p>
+            {%- endif -%}
+          {% endif %}
+
+          {% if link_label != blank and link_url != blank %}
+            <a href="{{ link_url }}" class="promo-card__link h6" {% if promotion_analytic_collection != blank %}data-promotion-click-event="{{ list_id }}"{% endif %}>{{ link_label }}</a>
+          {% endif %}
+        </div>
+      {% endif %}
+      {%- assign creative_name = heading | strip_html -%}
+
+      {% render 'ga-product-list-event',
+        event_type: 'view_promotion',
+        product_list: promotion_analytic_collection,
+        list_name: link_label,
+        list_id: list_id,
+        creative_slot: 'PLP Promo Card',
+        creative_name: creative_name,
+        promotion_name: promotion_name,
+        promotion_id: promotion_id %}
+    </div>
+  {% endif %}
+{% when 'promo-banner' %}
+  {% if collection.metafields.promo_banner.show_section == 'true' %}
+    {%- liquid
+      assign image = collection.metafields.promo_banner.image[0]
+      assign video = collection.metafields.promo_banner.video[0]
+      assign video_display_format = collection.metafields.promo_banner.video_display_format
+      assign image_mobile = collection.metafields.promo_banner.image_mobile[0]
+      assign video_mobile = collection.metafields.promo_banner.video_mobile[0]
+      assign video_display_format_mobile = collection.metafields.promo_banner.video_display_format_mobile
+      assign content_position = collection.metafields.promo_banner.content_position | default: 'Right'
+      assign content_position_mobile = collection.metafields.promo_banner.content_position_mobile | default: 'Center'
+      assign subheading = collection.metafields.promo_banner.subheading
+      assign subheading_color = collection.metafields.promo_banner.subheading_color | default: '#383838'
+      assign subheading_font_size = collection.metafields.promo_banner.subheading_font_size | default: 12
+      assign heading = collection.metafields.promo_banner.heading
+      assign heading_color = collection.metafields.promo_banner.heading_color | default: '#383838'
+      assign heading_font_size = collection.metafields.promo_banner.heading_font_size | default: 18
+      assign tc = collection.metafields.promo_banner.t_c
+      assign tc_link = collection.metafields.promo_banner.tc_link
+      assign tc_color = collection.metafields.promo_banner.tc_color | default: '#383838'
+      assign tc_font_size = collection.metafields.promo_banner.tc_font_size | default: 12
+      assign link_label = collection.metafields.promo_banner.link_label
+      assign link_url = collection.metafields.promo_banner.link_url
+
+      if content_position == "Left"
+        assign position = 'flex-start'
+      elsif content_position == "Center"
+        assign position = 'center'
+      elsif content_position == "Right"
+        assign position = 'flex-end'
+      endif
+
+      if content_position_mobile == "Left"
+       assign position_mobile = 'flex-start'
+      elsif content_position_mobile == "Center"
+        assign position_mobile = 'center'
+      elsif content_position_mobile == "Right"
+        assign position_mobile = 'flex-end'
+      endif
+
+      if video_display_format == 'Contain'
+        assign contain_video_on_desktop = true
+      endif
+
+      if video_display_format_mobile == 'Contain'
+        assign contain_video_on_mobile = true
+      endif
+    -%}
+
+      <div class="collection-promo-banner" style="--position: {{ position }}; --position-mobile: {{ position_mobile }};">
+
+        {% if image != blank or video != blank %}
+          {%- assign image_class_name = 'collection-promo-banner__image image-abs-cover' -%}
+          {%- assign video_class_name = '' -%}
+
+          {%- if image_mobile != blank or video_mobile != blank -%}
+            {%- assign image_class_name = image_class_name | append: ' small-hide' -%}
+            {%- assign video_class_name = 'small-hide' -%}
+
+            {%- if video_mobile != blank -%}
+              {%- render 'video',
+                video: video_mobile,
+                video_from_metafield: true,
+                poster: image_mobile,
+                poster_from_metafield: true,
+                default_controls: false,
+                autoplay: true,
+                disable_video_scale_on_desktop: contain_video_on_desktop,
+                disable_video_scale_on_mobile: contain_video_on_mobile,
+                class: 'small-up-hide'
+              -%}
+            {%- else -%}
+              {% render 'image-metafields', image: image_mobile, class_name: 'collection-promo-banner__image image-abs-cover small-up-hide' %}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if video != blank -%}
+            {%- render 'video',
+              video: video,
+              video_from_metafield: true,
+              poster: image,
+              poster_from_metafield: true,
+              default_controls: false,
+              autoplay: true,
+              disable_video_scale_on_desktop: contain_video_on_desktop,
+              disable_video_scale_on_mobile: contain_video_on_mobile,
+              class: video_class_name
+            -%}
+          {%- else -%}
+            {% render 'image-metafields', image: image, class_name: image_class_name %}
+          {%- endif -%}
+        {% endif %}
+
+        {% if subheading != blank or heading != blank or tc != blank or link_label != blank %}
+          <div class="collection-promo-banner__content-wrapper rel"
+               style="
+                  --subheading-pb-color: {{ subheading_color }};
+                  --subheading-pb-font-size: {{ subheading_font_size }}px;
+                  --heading-pb-color: {{ heading_color }};
+                  --heading-pb-font-size: {{ heading_font_size }}px;
+                  --tc-pb-color: {{ tc_color }};
+                  --tc-pb-font-size: {{ tc_font_size }}px;">
+
+            {% if subheading != blank %}
+              <p class="collection-promo-banner__subheading">
+                {{ subheading }}
+              </p>
+            {% endif %}
+
+            {% if heading != blank %}
+              <h2 class="collection-promo-banner__heading h5">
+                {{ heading }}
+              </h2>
+            {% endif %}
+
+            {% if tc != blank %}
+              {%- if tc_link != blank -%}
+                <a href="{{ tc_link }}" class="collection-promo-banner__tc">{{ tc }}</a>
+              {%- else -%}
+                <p class="collection-promo-banner__tc">{{ tc }}</p>
+              {%- endif -%}
+            {% endif %}
+
+            {% if link_label != blank and link_url != blank %}
+              <a href="{{ link_url }}" class="collection-promo-banner__link h6">{{ link_label }}</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+  {% endif %}
+{% when 'safety' %}
+  {%- liquid
+    assign show_safety_checkbox = [request.page_type].metafields.safety.show_section
+    assign safety_heading = [request.page_type].metafields.safety.heading
+    assign safety_info = [request.page_type].metafields.safety.info
+    assign safety_collapsed_info = [request.page_type].metafields.safety.collapsed_info
+    assign safety_bg_color = [request.page_type].metafields.safety.background_color
+
+    if show_safety_checkbox == "true" and safety_info != blank and safety_collapsed_info != blank
+    assign show_safety = true
+    endif
+  -%}
+
+  {% if show_safety %}
+    {% capture opener %}
+      <button
+        aria-controls="show-more-safety"
+        aria-expanded="false"
+        type="button"
+        data-show-more-heading
+        class="show-more__btn btn--reset a body3 body3--bold">
+        <span class="show-more__btn-text show-more__btn-text--more"> {{ "products.collection_blocks.show_more" | t }}</span>
+
+        <span class="show-more__btn-text show-more__btn-text--less">{{ "products.collection_blocks.show_less" | t }}</span>
+
+        <span class="show-more__btn-icons block"> {% render 'icon' with 'plus-small' %} {% render 'icon' with 'minus-small' %}</span>
+      </button>
+    {% endcapture %}
+
+    <div
+      style="--safety-bg-color: {{ safety_bg_color }}"
+      class="show-more-safety__wrapper">
+      <show-more class="show-more show-more-safety no-js-hidden"
+                 role="list"
+                 aria-expanded="false"
+                 data-connected-target="{{ section.id }}-safety">
+        <div data-show-more-body class="show-more__wrapper">
+          {% if safety_heading != blank %}
+            <div class="show-more-safety__heading-wrapper">
+              <h5 class="show-more-safety__heading" >{{ safety_heading }}</h5>
+
+             {{ opener }}
+            </div>
+          {% endif %}
+
+          <div class="show-more__info body3">
+            {{ safety_info }}
+          </div>
+
+          <div
+            id="show-more-safety"
+            data-show-more-opener
+            class="show-more__collapsible-wrapper body3">
+            {{ safety_collapsed_info }}
+
+            {{ opener }}
+          </div>
+
+          {{ opener }}
+        </div>
+      </show-more>
+    </div>
+  {% endif %}
+{%- endcase -%}

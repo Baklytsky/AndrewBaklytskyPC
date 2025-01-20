@@ -1,0 +1,96 @@
+{% comment %}
+  {% render 'testimonials-slide' block: block, main_slider: boolean %}
+{% endcomment %}
+
+ {%- liquid
+   assign svg_image = block.settings.svg_image
+   assign image = block.settings.image
+   assign svg_size = block.settings.svg_size | append: '%'
+   assign heading = block.settings.heading
+   assign title = block.settings.title
+   assign description = block.settings.description
+   assign testimonial = block.settings.testimonial
+   assign testimonial_font_size = block.settings.testimonial_font_size
+   assign testimonial_max_width = block.settings.testimonial_max_width
+   assign padding_bottom_desktop = block.settings.padding_bottom_desktop
+   assign padding_bottom_mobile = block.settings.padding_bottom_mobile
+   assign position_author_info = block.settings.position_author_info
+   assign show_video = block.settings.show_video
+   assign local_video = block.settings.video
+   assign video = block.settings.video_url
+   assign poster = block.settings.poster
+
+   if show_video and main_slider and testimonial != blank
+    assign show_video = true
+   else
+    assign show_video = false
+   endif
+ -%}
+
+<div class="swiper-slide{% if show_video %} swiper-slide--with-video{% endif %}"
+     style="
+       --padding-bottom-desktop: {{ padding_bottom_desktop }}px;
+       --padding-bottom-mobile: {{ padding_bottom_mobile }}px;">
+  {%- if show_video -%}
+    <div class="testimonials__slider-main-content-wrapper">
+  {%- endif -%}
+
+    {%- if show_video -%}
+      {%- if video or local_video -%}
+        <div class="testimonials__slider-video-wrapper">
+          {%- render 'video',
+            video: local_video,
+            video_url: video,
+            default_controls: 1,
+            autoplay: false,
+            poster:  poster,
+            poster_from_metafield: false,
+            class: 'normal', -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if testimonial != blank and main_slider -%}
+      <p
+        style="
+        --max-width: {{ testimonial_max_width }}"
+        class="testimonials__slider-testimonial {{ testimonial_font_size }}">
+        {{ testimonial | escape }}
+      </p>
+    {%- endif -%}
+
+      {%- if show_video -%}
+    </div>
+  {%- endif -%}
+
+
+  {%- if image != blank or svg_image != blank or heading != blank or title != blank or description != blank -%}
+    <div style="--position-author: {{ position_author_info }}" class="testimonials__slider-details testimonials__slider-details--{{ position_author_info }}{% if image != blank or svg_image != blank%} testimonials__slider-details--with-image{% endif %}">
+      {%- if image -%}
+        <div class="testimonials__slider-details-image rel">
+          {% render 'image',
+            image: image,
+            class_name: 'image-abs-contain' %}
+        </div>
+        {%- elsif svg_image != blank and show_video != true -%}
+        <div class="testimonials__slider-details-svg" style="--svg-size: {{ svg_size }}">
+          {{ svg_image }}
+        </div>
+      {%- endif -%}
+
+      {%- if heading != blank or title != blank or description != blank -%}
+        <div class="testimonials__slider-details-content">
+          {%- if heading != blank -%}
+            <span class="testimonials__slider-details-author body3--bold">{{ heading | escape }}</span>
+          {%- endif -%}
+          {%- if title != blank -%}
+            <span class="testimonials__slider-details-title body3">{{ title | escape }}</span>
+          {%- endif -%}
+          {%- if description != blank -%}
+            <span class="testimonials__slider-details-description body3">{{ description | escape | newline_to_br }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>

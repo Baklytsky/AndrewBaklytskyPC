@@ -1,0 +1,122 @@
+@import "../helpers/mixins";
+
+#onetrust-consent-sdk {
+  #onetrust-banner-sdk {
+    transform: unset;
+    top: auto;
+    display: flex;
+    padding: 20px;
+
+    #onetrust-policy-text {
+      font-size: var(--font-size-body-3);
+      line-height: 1.42;
+
+      @include mq($small-max) {
+        font-size: var(--font-size-body-3-mobile);
+        line-height: 1.42;
+      }
+    }
+
+    #onetrust-policy {
+      margin: 0;
+    }
+
+    .ot-sdk-container {
+      @include mq($small-max) {
+        padding: 0 10px 0 0;
+      }
+    }
+
+    #onetrust-close-btn-container {
+      position: relative;
+      top: unset;
+      right: unset;
+      transform: unset;
+      margin: 0;
+
+      .onetrust-close-btn-handler {
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        background-image: url("data:image/svg+xml,%3Csvg class='%7B%7B icon_class %7D%7D' width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_35_188)'%3E%3Cpath d='M1 1L19 19Z' fill='currentColor'/%3E%3Cpath d='M1 1L19 19' stroke='currentColor' stroke-width='2'/%3E%3Cpath d='M1 19L19 1Z' fill='currentColor'/%3E%3Cpath d='M1 19L19 1' stroke='currentColor' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 100%;
+
+        &:hover {
+          background-image: url("data:image/svg+xml,%3Csvg class='%7B%7B icon_class %7D%7D' width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_35_188)'%3E%3Cpath d='M1 1L19 19Z' fill='%23008FE0'/%3E%3Cpath d='M1 1L19 19' stroke='%23008FE0' stroke-width='2'/%3E%3Cpath d='M1 19L19 1Z' fill='currentColor'/%3E%3Cpath d='M1 19L19 1' stroke='%23008FE0' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
+        }
+      }
+    }
+
+    #onetrust-button-group-parent {
+      position: relative;
+      margin: 0 20px;
+      width: 40%;
+      top: 0;
+      left: 0;
+      transform: unset;
+
+      @include mq($small-max) {
+        width: 100%;
+        margin: 0 auto;
+      }
+    }
+
+    #onetrust-button-group {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0;
+      gap: 20px;
+
+      @include mq($small-max) {
+       flex-direction: column-reverse;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .cookie-setting-link {
+        margin: 0;
+        color: var(--color-link-text);
+
+        @include mq($small-max) {
+          padding: 0;
+        }
+
+        &:hover {
+          color: var(--color-link-text-hover);
+        }
+      }
+
+      #onetrust-accept-btn-handler {
+        display: block;
+        padding: 8px 20px 10px;
+        margin: 0;
+        font-family: var(--font-primary);
+        font-weight: 400;
+        font-size: var(--button-font-size);
+        line-height: 1.429;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all var(--duration-short, 0.3s) ease-in-out;
+        width: 100%;
+        max-width: 265px;
+        background: var(--color-btn-primary-alt-bg);
+        color: var(--color-btn-primary-alt-text);
+        border: 1px solid var(--color-btn-primary-alt-border);
+
+        &:hover {
+          background: var(--color-btn-primary-alt-bg-hover);
+          color: var(--color-btn-primary-alt-text-hover);
+          border-color: var(--color-btn-primary-alt-border-hover);
+        }
+      }
+    }
+
+    [role="alertdialog"][aria-describedby="onetrust-policy-text"] {
+      display: flex;
+    }
+  }
+}
+

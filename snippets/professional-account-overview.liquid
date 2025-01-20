@@ -1,0 +1,66 @@
+{%- comment -%}
+  {%- render 'professional-account-overview' -%}
+{%- endcomment -%}
+{{ 'obagi-events.min.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'obagi-events.min.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign custom_id = customer.metafields.professional_info.custom_id
+  assign sales_representative_id = customer.metafields.professional_info.sales_representative_id
+  assign name = customer.metafields.professional_info.name
+  assign description = customer.metafields.professional_info.description
+  assign image_url = customer.metafields.professional_info.image_url
+  assign website_url = customer.metafields.professional_info.website_url
+  assign premier_partner = customer.metafields.professional_info.premier_partner
+  assign preferred_partner = customer.metafields.professional_info.preferred_partner
+-%}
+
+{%- if name != blank or premier_partner or sales_representative_id != blank -%}
+<div class="pro-account-overview">
+  <div class="pro-account-overview__info-wrapper">
+    {%- if name != blank or premier_partner -%}
+      <div class="pro-account-overview__info">
+        {%- if name != blank -%}
+          <h6 class="pro-account-overview__info-title">{{ 'customer.overview.business_title' | t }}</h6>
+          <h2 class="pro-account-overview__info-name">{{ name }}</h2>
+        {%- endif -%}
+
+        {%- if premier_partner -%}
+          {%- liquid assign checkmark_title = 'customer.account.premier_partner_title' | t -%}
+          {%- render 'checkmark-with-title', title: checkmark_title, className: 'pro-account-premier-checkmark' -%}
+        {%- endif -%}
+
+        <button type="button"
+                class="btn btn--secondary account-nav__item-button js-nav-button"
+                aria-controls="account-profile"
+                aria-expanded="false">
+          {{ 'customer.profile.view_profile_btn' | t }}
+        </button>
+      </div>
+    {%- endif -%}
+
+    {%- if sales_representative_id != blank -%}
+      <script src="{{ 'component-representative-card.min.js' | asset_url }}" defer="defer"></script>
+      <representative-card class="block" data-sales-manager-id="{{ sales_representative_id }}"></representative-card>
+    {%- endif -%}
+  </div>
+</div>
+{%- endif -%}
+
+
+<obagi-events class="obagi-events obagi-events__account" data-customer-email="{{ customer.email }}">
+  <div class="obagi-events__inner">
+    <div class="loading-overlay__spinner obagi-events__spinner">
+      {% render 'icon' with 'spinner' %}
+    </div>
+
+    <div class="obagi-events__content hide">
+      <div class="obagi-events__content-upcoming">
+        <h2 class="h6 obagi-events__label">
+          {{ 'sections.obagi_events.upcoming' | t }}
+        </h2>
+        <ul class="obagi-events__upcoming-list"></ul>
+      </div>
+    </div>
+  </div>
+</obagi-events>

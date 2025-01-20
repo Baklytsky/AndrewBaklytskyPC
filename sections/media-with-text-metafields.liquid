@@ -1,0 +1,227 @@
+{{ 'media-with-text.min.css' | asset_url | stylesheet_tag }}
+
+{%- if [request.page_type].metafields.media_with_text.enable_section == 'true' -%}
+  {%- liquid
+    assign border_bottom = [request.page_type].metafields.media_with_text.section_border_bottom
+    assign section_heading = [request.page_type].metafields.media_with_text.section_heading
+    assign padding_top_desk = [request.page_type].metafields.media_with_text.top_desktop_padding
+    assign padding_bottom_desk = [request.page_type].metafields.media_with_text.bottom_desktop_padding
+    assign padding_top_mob = [request.page_type].metafields.media_with_text.top_mobile_padding
+    assign padding_bottom_mob = [request.page_type].metafields.media_with_text.bottom_mobile_padding
+    assign media_content_width = [request.page_type].metafields.media_with_text.media_content_width
+    assign media_content_height_desktop = [request.page_type].metafields.media_with_text.media_content_height_desktop
+    assign media_content_height_mobile = [request.page_type].metafields.media_with_text.media_content_height_mobile
+
+    case media_content_width
+    when 'Full width'
+      assign media_content_width = '100%'
+    when 'Middle container'
+      assign media_content_width = '43%'
+    else
+      assign media_content_width = '49%'
+    endcase
+
+    case media_content_height_desktop
+      when 'Large'
+    assign media_content_height_desktop = '87%'
+      when '16/9'
+    assign media_content_height_desktop = '56.25%'
+      when '9/16'
+    assign media_content_height_desktop = '177%'
+      when '4/5'
+    assign media_content_height_desktop = '125%'
+      when '3/4'
+    assign media_content_height_desktop = '133%'
+      else
+    assign media_content_height_desktop = '50%'
+    endcase
+
+    case media_content_height_mobile
+      when 'Large'
+    assign media_content_height_mobile = '87%'
+      when '16/9'
+    assign media_content_height_mobile = '56.25%'
+      when '9/16'
+    assign media_content_height_mobile = '177%'
+      when '4/5'
+    assign media_content_height_mobile = '125%'
+      when '3/4'
+    assign media_content_height_mobile = '133%'
+    else
+      assign media_content_height_mobile = '50%'
+    endcase
+
+    assign small_circle_image = [request.page_type].metafields.media_with_text.small_circle_image | default: 'false'
+    assign image = [request.page_type].metafields.media_with_text.image[0]
+    assign local_video = [request.page_type].metafields.media_with_text.mp4_video[0]
+    assign video_url = [request.page_type].metafields.media_with_text.video_url
+    assign video_display_format = [request.page_type].metafields.media_with_text.video_display_format
+    assign show_default_controls = [request.page_type].metafields.media_with_text.show_default_controls
+    assign controls_position = [request.page_type].metafields.media_with_text.controls_position | default: 'right'
+    assign autoplay = [request.page_type].metafields.media_with_text.autoplay
+    assign show_play_button = [request.page_type].metafields.media_with_text.show_play_button
+    assign show_mute_button = [request.page_type].metafields.media_with_text.show_mute_button
+    assign controls_color = [request.page_type].metafields.media_with_text.controls_color
+
+    if autoplay == 'true'
+      assign autoplay = true
+    else
+      assign autoplay = false
+    endif
+
+    if show_default_controls == 'true'
+      assign show_default_controls = true
+    else
+      assign show_default_controls = false
+    endif
+
+    if show_play_button == 'true'
+      assign show_play_button = true
+    else
+      assign show_play_button = false
+    endif
+
+    if show_mute_button == 'true'
+      assign show_mute_button = true
+    else
+      assign show_mute_button = false
+    endif
+
+    assign contain_video_on_desktop = false
+    assign contain_video_on_mobile = false
+
+    if video_display_format == 'Contain'
+      assign contain_video_on_desktop = true
+      assign contain_video_on_mobile = true
+    endif
+
+    assign subheading = [request.page_type].metafields.media_with_text.subheading
+    assign heading = [request.page_type].metafields.media_with_text.heading_block
+    assign description = [request.page_type].metafields.media_with_text.description
+    assign text_content_width = [request.page_type].metafields.media_with_text.text_content_width
+
+    case text_content_width
+    when 'Full width'
+      assign text_content_width = '100%'
+    when 'Middle container'
+      assign text_content_width = '450px'
+    when 'Small container'
+      assign text_content_width = '360px'
+    else
+      assign text_content_width = '50%'
+    endcase
+
+    assign content_position = [request.page_type].metafields.media_with_text.content_position | default: 'left'
+    assign content_vertical_alignment = [request.page_type].metafields.media_with_text.content_vertical_alignment | default: 'center'
+    assign text_align_desktop = [request.page_type].metafields.media_with_text.text_align_desktop | default: 'left'
+    assign text_align_mobile = [request.page_type].metafields.media_with_text.text_align_mobile | default: 'left' -%}
+
+  {% if subheading != blank or heading != blank or description != blank %}
+    {%- if text_content_width == '50%' -%}
+      {%- assign text_content_width = '56%' -%}
+    {%- endif -%}
+  {%- endif -%}
+
+
+  <div data-aos="fade-up" class="media-with-text page-width">
+    <div
+      style="
+        --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+        --padding-top-desktop: {{ padding_top_desk }}px;
+        --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+        --padding-top-mobile: {{ padding_top_mob }}px;"
+      class="media-with-text__content-wrapper {% if border_bottom == 'true' %}border-bottom{% endif %}">
+
+      {% if section_heading != blank %}
+        <h2 class="media-with-text__section-heading h3">
+          {{ section_heading }}
+        </h2>
+      {% endif %}
+
+      <div class="media-with-text__content-blocks {{ content_vertical_alignment | handleize }}">
+
+        {% if image != blank or video_url != blank or local_video != blank %}
+          <div
+            style="--width-content: {{ media_content_width }}; --height-content-desk: {{ media_content_height_desktop }}; --height-content-mob: {{ media_content_height_mobile }}"
+            class="media-with-text__media-content rel controls-{{ controls_position }}
+            {% if video_url != blank or local_video != blank %}media-with-text__media-content--video{% endif %}">
+            {%- if video_url != blank or local_video != blank -%}
+              {%- render 'video',
+                video: local_video,
+                video_url: video_url,
+                default_controls: show_default_controls,
+                show_play_button: show_play_button,
+                show_mute_button: show_mute_button,
+                autoplay: autoplay,
+                autoplay: autoplay,
+                poster:  image,
+                poster_from_metafield: true,
+                video_from_metafield: true,
+                class: 'normal',
+                controls_color: controls_color,
+                disable_video_scale_on_desktop: contain_video_on_desktop,
+                disable_video_scale_on_mobile: contain_video_on_mobile
+              -%}
+            {%- endif -%}
+
+            {% if image != blank %}
+              <div class="media-with-text__media-image rel {% if small_circle_image == 'true' %}media-with-text__media-image--circle{% endif %}">
+                {% render 'image-metafields',
+                  image: image,
+                  class_name: 'image-abs-cover',
+                  alt: image.alt %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if subheading != blank or heading != blank or description != blank %}
+          <div style="
+              --width-content: {{ text_content_width }};
+              --text-align-desktop: {{ text_align_desktop | handleize }};
+              --text-align-mobile: {{ text_align_mobile | handleize }};
+              "
+            class="media-with-text__text-content media-with-text__text-content--{{- content_position | handleize -}}">
+            {% if subheading != blank %}
+              <h6 class="media-with-text__text-subheading">
+                {{ subheading }}
+              </h6>
+            {% endif %}
+
+            {% if heading != blank %}
+              <h3 class="media-with-text__text-heading">
+                {{ heading }}
+              </h3>
+            {% endif %}
+
+            {% if description != blank %}
+              <div class="media-with-text__text-description body1">
+                {{ description }}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Media with text (MF)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "The content is configured in metafields"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Media with text (MF)"
+    }
+  ],
+  "templates": ["product", "page"]
+}
+{% endschema %}

@@ -1,0 +1,40 @@
+{{ 'link-list.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign link_list = section.settings.link_list
+  assign current_url = [request.page_type].url
+-%}
+
+{% if link_list.size > 0 %}
+  <div class="page-width">
+    <scrolling-tabs class="link-list hide-scrollbar block">
+      <ul class="link-list__content">
+        {% for link in link_list.links %}
+          <li class="link-list__item body1 {% if current_url == link.url %} active {% endif %}">
+            <a tabindex="0" href="{{ link.url }}" role="tab">{{ link.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </scrolling-tabs>
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Link list",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "link_list",
+      "label": "List"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Link list"
+    }
+  ]
+}
+{% endschema %}

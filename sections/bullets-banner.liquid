@@ -1,0 +1,354 @@
+{{ 'bullets-banner.min.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+	assign bg_color = section.settings.bg_color
+	assign text_color = section.settings.text_color
+	assign bullets_color = section.settings.bullets_color
+
+	assign title = section.settings.title
+	assign description = section.settings.description
+	assign image = section.settings.image
+	assign image_mobile = section.settings.image_mobile
+
+  assign aspect_ratio = image.aspect_ratio
+  assign aspect_ratio_mobile = image_mobile.aspect_ratio | default: aspect_ratio
+
+  assign padding_top_desk = section.settings.padding_top_desk
+  assign padding_bottom_desk = section.settings.padding_bottom_desk
+  assign padding_top_mob = section.settings.padding_top_mob
+  assign padding_bottom_mob = section.settings.padding_bottom_mob
+
+  assign actual_bullets_count = 0
+-%}
+
+{%- if section.blocks.size > 0  -%}
+	<div class="bullets-banner"
+    data-aos="fade-up"
+    style="
+      --bg-color: {{ bg_color }};
+      --text-color: {{ text_color }};
+      --bullets-color: {{ bullets_color }};
+      --padding-bottom-desktop: {{ padding_bottom_desk }}px;
+      --padding-top-desktop: {{ padding_top_desk }}px;
+      --padding-bottom-mobile: {{ padding_bottom_mob }}px;
+      --padding-top-mobile: {{ padding_top_mob }}px;"
+  >
+    <div class="bullets-banner__wrapper page-width">
+      {% if title != blank %}
+        <h3 class="bullets-banner__heading h2">{{ title }}</h3>
+      {% endif %}
+
+      {% if description != blank %}
+        <p class="bullets-banner__description body1">{{ description }}</p>
+      {% endif %}
+
+      <div class="bullets-banner__inner">
+        <div class="bullets-banner__image
+          {%- if image == blank %} bullets-banner__placeholder{%- endif -%}"
+          style="--focal-point: {{ image.presentation.focal_point }};
+              --aspect-ratio: {{ aspect_ratio }};
+              --aspect-ratio-mobile: {{ aspect_ratio_mobile }};
+            {% if image_mobile != blank %}
+              --focal-point-mobile: {{ image_mobile.presentation.focal_point }};
+            {% endif %}
+          "
+        >
+          {%- if image != blank -%}
+            {% if image_mobile != blank %}
+              {% render 'image', image: image_mobile, class_name: 'image-abs-cover small-up-hide', src: true %}
+            {% endif %}
+
+            {% render 'image', image: image, class_name: 'image-abs-cover', src: true %}
+          {%- else -%}
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+
+        <fieldset class="bullets-banner__buttons">
+          <legend class="visually-hidden">
+            Highlighted spots on the image
+          </legend>
+
+          {%- for block in section.blocks -%}
+            {% liquid
+              assign position_x = block.settings.position_x
+              assign position_y = block.settings.position_y
+              assign mobile_position_x = block.settings.mobile_position_x
+              assign mobile_position_y = block.settings.mobile_position_y
+              assign description = block.settings.title
+              assign text_position = block.settings.text_position
+              assign text_position_mobile = block.settings.text_position_mobile
+            %}
+
+            {% if description != blank %}
+              {% assign actual_bullets_count = actual_bullets_count | plus: 1 %}
+
+              <div class="bullets-banner__btn bullets-banner__btn-pos-{{ text_position }} bullets-banner__btn-pos-mob-{{ text_position_mobile }}"
+                style="
+                  --top: {{ position_y }}%;
+                  --left: {{ position_x }}%;
+                  --top-mobile: {{ mobile_position_y }}%;
+                  --left-mobile: {{ mobile_position_x }}%;"
+                {{ block.shopify_attributes }}
+              >
+                <input type="radio"
+                  id="{{ section.id }}{{ forloop.index }}"
+                  name="{{ 'Spot on the image' | append: section.id | sha1 }}"
+                  value="{{ description }}"
+                  {% if actual_bullets_count == 1 %}
+                    checked
+                  {% endif %}
+                >
+
+                <label for="{{ section.id }}{{ forloop.index }}">
+                  <span>
+                    {{ description }}
+                  </span>
+                </label>
+              </div>
+            {% endif %}
+          {%- endfor -%}
+        </fieldset>
+      </div>
+    </div>
+	</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Banner with bullets",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section settings"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "bullets_color",
+      "label": "Bullets color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Image mobile"
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desk",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top mobile",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mob",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Bullet",
+      "type": "bullet",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Description"
+        },
+        {
+          "type": "header",
+          "content": "Dot position"
+        },
+        {
+          "type": "range",
+          "id": "position_x",
+          "min": 1,
+          "max": 95,
+          "step": 1,
+          "label": "Horizontal",
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "position_y",
+          "min": 1,
+          "max": 95,
+          "step": 1,
+          "label": "Vertical",
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "mobile_position_x",
+          "min": 1,
+          "max": 95,
+          "step": 1,
+          "label": "Mobile Horizontal",
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "mobile_position_y",
+          "min": 1,
+          "max": 95,
+          "step": 1,
+          "label": "Mobile Vertical",
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Text position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "right"
+        },
+        {
+          "type": "select",
+          "id": "text_position_mobile",
+          "label": "Text position mobile",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner with bullets",
+      "category": "Image",
+      "settings": {
+        "title": "See The Difference"
+      },
+      "blocks": [
+        {
+          "type": "bullet",
+          "settings": {
+            "title": "Product benefit 1",
+            "position_x": 19,
+            "position_y": 62,
+            "mobile_position_x": 27,
+            "mobile_position_y": 61,
+            "text_position": "left",
+            "text_position_mobile": "bottom"
+          }
+        },
+        {
+          "type": "bullet",
+          "settings": {
+            "title": "Bullet text 2",
+            "position_x": 75,
+            "position_y": 46,
+            "mobile_position_x": 48,
+            "mobile_position_y": 16,
+            "text_position": "left",
+            "text_position_mobile": "left"
+          }
+        },
+        {
+          "type": "bullet",
+          "settings": {
+            "title": "Description 3",
+            "position_x": 59,
+            "position_y": 70,
+            "mobile_position_x": 67,
+            "mobile_position_y": 79,
+            "text_position": "left",
+            "text_position_mobile": "right"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

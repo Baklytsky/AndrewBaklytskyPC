@@ -1,0 +1,76 @@
+{% comment %}
+{% render 'image',
+  image: ,
+  class_name: ,
+  image_attr: ,
+  show_id: ,
+  alt: alt,
+  small_size: boolean,
+  preload: boolean,
+  no_leazy: boolean,
+  show_preloader_img:  %}
+{% endcomment %}
+
+{%- assign fetch_priority = 'auto' -%}
+
+{%- if section.index <= 3 -%}
+  {%- assign fetch_priority = 'high' -%}
+  {%- assign preload = true -%}
+{%- endif -%}
+
+{%- capture srcset -%}
+  {%- if small_size -%}
+    {{ image | img_url: '50x' }} 25w,
+    {{ image | img_url: '72x' }} 36w,
+    {{ image | img_url: '144x' }} 72w,
+    {{ image | img_url: '288x' }} 144w,
+  {%- endif -%}
+  {{ image | img_url: '480x' }} 240w,
+  {{ image | img_url: '720x' }} 360w,
+  {{ image | img_url: '1080x' }} 540w,
+  {{ image | img_url: '1296x' }} 720w,
+  {{ image | img_url: '1350x' }} 900w,
+  {{ image | img_url: '1512x' }} 1080w,
+  {{ image | img_url: '1728x' }} 1296w,
+  {{ image | img_url: '1980x' }} 1440w,
+  {{ image | img_url: '2560x' }} 1920w,
+  {{ image | img_url: '4096x' }} 2560w
+{%- endcapture -%}
+
+{%- if preload -%}
+	<link rel="preload" href="{{ image | img_url: '1x' }}" as="image" imagesrcset="{{ srcset }}">
+{%- endif -%}
+
+{%- assign alt = alt | default: image.alt | escape -%}
+
+{%- if no_leazy -%}
+  <img {% if show_id and image.id != blank %}id="{{ image.id }}"{% endif %}
+       src="{%- if small_size -%}{{ image | img_url: '144x' }} {%- else -%} {{ image | img_url: '540x' }} 540w {%- endif -%}"
+       class="{{ class_name }}"
+       alt="{{ alt }}"
+       width="100%"
+       height="100%"
+       fetchpriority="{{ fetch_priority }}"
+      {{ image_attr }}
+      {% if image.presentation.focal_point -%}style="--object-position: {{ image.presentation.focal_point }}"{% endif %}>
+{%- else -%}
+  <img {% if show_id and image.id != blank %}id="{{ image.id }}"{% endif %}
+       src="{{ image | img_url: '1x' }}"
+       data-srcset="{{ srcset }}"
+       class="lazyload {{ class_name }}"
+       data-optimumx="auto"
+       data-sizes="auto"
+       data-src="{{ image | img_url: '1x' }}"
+       data-parent-fit="contain"
+       alt="{{ alt }}"
+       width="100%"
+       height="100%"
+       loading="lazy"
+       fetchpriority="{{ fetch_priority }}"
+      {{ image_attr }}
+      {% if image.presentation.focal_point -%}style="--object-position: {{ image.presentation.focal_point }}"{% endif %}>
+{%- endif -%}
+{%- if show_preloader_img -%}
+  <span class="preloader {{ class_name }}" style="background: no-repeat center/cover url('{{ image | img_url: '25x' }}')"></span>
+{%- endif -%}
+

@@ -1,0 +1,371 @@
+{%- comment -%}
+{% render 'customer-pro-register-form', specialty: specialty, role: role, reason: reason, klaviyo_list_id: klaviyo_list_id %}
+{%- endcomment -%}
+
+{%- liquid
+  assign specialty_arr = specialty | split: ',' | uniq
+  assign role_arr = role | split: ',' | uniq
+  assign reason_arr = reason | split: ',' | uniq
+-%}
+
+
+<customer-pro class="customer-register customer-pro-register section-{{ section.id }}-padding" data-klaviyo-list-id="{{ klaviyo_list_id }}">
+
+  <form action="/" data-form-name="Professional customer register">
+    <h3 class="login-form__subheading body1">
+      {{ 'customer.register_pro.personal_info' | t }}
+    </h3>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="first_name"
+        id="RegisterForm-FirstName"
+        {% if customer.first_name %}value="{{ customer.first_name }}"{% endif %}
+        autocomplete="given-name"
+        placeholder="{{ 'customer.register_pro.first_name' | t }}"
+        class="form-input"
+        required>
+      <label for="RegisterForm-FirstName" class="visually-hidden">
+        {{ 'customer.register_pro.first_name' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="last_name"
+        id="RegisterForm-LastName"
+        {% if customer.last_name %}value="{{ customer.last_name }}"{% endif %}
+        autocomplete="family-name"
+        placeholder="{{ 'customer.register_pro.last_name' | t }}"
+        class="form-input"
+        required>
+      <label for="RegisterForm-LastName" class="visually-hidden">
+        {{ 'customer.register_pro.last_name' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="email"
+        name="email"
+        id="RegisterForm-email"
+        {% if customer.email %} value="{{ customer.email }}"{% endif %}
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="email"
+        aria-required="true"
+        placeholder="{{ 'customer.register_pro.email' | t }}"
+        class="form-input"
+        required>
+      <label for="RegisterForm-email" class="visually-hidden">
+        {{ 'customer.register_pro.email' | t }}
+      </label>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="tel"
+        name="phone"
+        title="999-999-9999"
+        pattern="(?:\d[\s\-\.()xX]*){9,15}"
+        id="RegisterForm-email"
+        {% if customer.phone %} value="{{ customer.phone }}"{% endif %}
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="phone"
+        aria-required="true"
+        placeholder="{{ 'customer.register_pro.phone_number' | t }}"
+        class="form-input"
+        required>
+      <label for="RegisterForm-email" class="visually-hidden">
+        {{ 'customer.register_pro.phone_number' | t }}
+      </label>
+    </div>
+
+    <h3 class="login-form__subheading body1">
+      {{ 'customer.register_pro.business_info' | t }}
+    </h3>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="business_name"
+        id="RegisterForm-BusinessName"
+        placeholder="{{ 'customer.register_pro.business_name' | t }}"
+        class="form-input"
+        required
+      >
+      <label for="RegisterForm-BusinessName" class="visually-hidden">
+        {{ 'customer.register_pro.business_name' | t }}
+      </label>
+    </div>
+
+    {%- if specialty_arr.size > 0 -%}
+      <div class="form-field small-up-hide">
+        <label class="form-label visually-hidden" for="RegisterForm-Specialty--origin">{{ 'customer.register_pro.specialty' | t }}</label>
+        <select class="form__select"
+                id="RegisterForm-Specialty--origin"
+                name="specialty"
+                data-original-select
+                required>
+          <option value="" disabled selected>{{ 'customer.register_pro.specialty' | t }}</option>
+          {%- for item in specialty_arr -%}
+            <option value="{{ item | strip }}">{{ item | strip }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      <div class="form-field small-hide">
+        <label for="RegisterForm-Specialty" class="visually-hidden">{{ 'customer.register_pro.specialty' | t }}</label>
+
+        <custom-select class="form-select body3 form-select-alternative">
+          <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-specialty-{{ section.id }}">
+            <span class="form-select__btn-text">{{ 'customer.register_pro.specialty' | t }}</span>
+            <span class="form-select__dropdown-option--label"></span>
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+          <ul class="form-select__dropdown hide-scrollbar" id="dropdown-specialty-{{ section.id }}" style="display: none;">
+            {%- for item in specialty_arr -%}
+              <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="{{ item | strip }}">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">{{ item | strip }}</button>
+              </li>
+            {%- endfor -%}
+          </ul>
+          <input name="specialty"
+                 id="RegisterForm-Specialty"
+                 type="hidden"
+                 class="form__input-hidden"
+                 value=""
+                 data-custom-select-input
+                 required>
+        </custom-select>
+      </div>
+    {%- endif -%}
+
+    {%- if role_arr.size > 0 -%}
+      <div class="form-field small-up-hide">
+        <label class="form-label visually-hidden" for="RegisterForm-Role--origin">{{ 'customer.register_pro.role' | t }}</label>
+        <select class="form__select"
+                id="RegisterForm-Role--origin"
+                name="role"
+                data-original-select
+                required>
+          <option value="" disabled selected>{{ 'customer.register_pro.role' | t }}</option>
+          {%- for item in role_arr -%}
+            <option value="{{ item | strip }}">{{ item | strip }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      <div class="form-field small-hide">
+        <label for="RegisterForm-Role" class="visually-hidden">{{ 'customer.register_pro.role' | t }}</label>
+
+        <custom-select class="form-select body3 form-select-alternative">
+          <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-role-{{ section.id }}">
+            <span class="form-select__btn-text">{{ 'customer.register_pro.role' | t }}</span>
+            <span class="form-select__dropdown-option--label"></span>
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+          <ul class="form-select__dropdown hide-scrollbar" id="dropdown-role-{{ section.id }}" style="display: none;">
+            {%- for item in role_arr -%}
+              <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="{{ item | strip }}">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">{{ item | strip }}</button>
+              </li>
+            {%- endfor -%}
+          </ul>
+          <input name="role"
+                 id="RegisterForm-Role"
+                 type="hidden"
+                 class="form__input-hidden"
+                 value=""
+                 data-custom-select-input
+                 required>
+        </custom-select>
+
+      </div>
+    {%- endif -%}
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="city"
+        id="RegisterForm-City"
+        placeholder="{{ 'customer.register_pro.city' | t }}"
+        class="form-input"
+        autocomplete="home city"
+        required>
+      <label for="RegisterForm-City" class="visually-hidden">
+        {{ 'customer.register_pro.city' | t }}
+      </label>
+    </div>
+
+    <div class="form-field small-up-hide" id="address-province-container-new">
+      <label class="form-label visually-hidden" for="address-province-new">{{ 'customer.register_pro.state' | t }}</label>
+      <select class="account__addresses-select province form__select"
+              id="address-province-new"
+              name="state"
+              data-original-select
+              data-default=""
+              autocomplete="address-level1"
+              required>
+      </select>
+    </div>
+
+    <div class="form-field small-hide hidden" id="address-form-custom-province-new">
+      <label class="body4 form-label visually-hidden" for="address-province-new-custom">{{ 'customer.register_pro.state' | t }}</label>
+
+      <custom-select class="form-select body3 form-select-alternative small-hide">
+        <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-province-{{ section.id }}">
+          <span class="form-select__btn-text">{{ 'customer.register_pro.state' | t }}</span>
+          <span class="form-select__dropdown-option--label"></span>
+          {%- render 'icon' with 'arrow-down' -%}
+        </button>
+        <ul class="form-select__dropdown hide-scrollbar" id="dropdown-province-{{ section.id }}" style="display: none;">
+
+        </ul>
+        <input name="state"
+               id="address-province-custom-new"
+               type="hidden"
+               class="address-form__hidden-input form__input-hidden"
+               value=""
+               data-default=""
+               data-custom-select-input>
+      </custom-select>
+    </div>
+
+    <div class="form-field">
+      <input
+        type="text"
+        name="zip"
+        id="RegisterForm-Zip"
+        placeholder="{{ 'customer.register_pro.zip_code' | t }}"
+        class="form-input"
+        autocomplete="postal-code"
+        required>
+      <label for="RegisterForm-Zip" class="visually-hidden">
+        {{ 'customer.register_pro.zip_code' | t }}
+      </label>
+    </div>
+
+    <div class="form-field small-up-hide">
+      <label class="form-label visually-hidden" for="address-country-new">{{ 'customer.register_pro.country' | t }}</label>
+      <select id="address-country-new"
+              class="country form__select"
+              name="country"
+              data-original-select
+              data-address-country-select
+              data-default=""
+              data-form-id="{{ section.id }}"
+              autocomplete="country">
+        {{ all_country_option_tags | remove: '<option value="---" data-provinces="[]">---</option>' }}
+      </select>
+    </div>
+
+    <div class="form-field small-hide">
+      <label for="RegisterForm-Country" class="visually-hidden">{{ 'customer.register_pro.country' | t }}</label>
+
+      <custom-select class="form-select body3 form-select-alternative address-custom-select">
+        <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-selected="true" aria-controls="dropdown-country-{{ section.id }}">
+          <span class="form-select__btn-text">United States</span>
+          <span class="form-select__dropdown-option--label"></span>
+          {%- render 'icon' with 'arrow-down' -%}
+        </button>
+        <ul class="form-select__dropdown hide-scrollbar" id="dropdown-country-{{ section.id }}" style="display: none;">
+          {{ all_country_option_tags | remove: '<option value="---" data-provinces="[]">---</option>' | replace: '<option', '<li class="form-select__dropdown-option a" aria-selected="false">
+                  <button type="button" class="btn--reset form-select__dropdown-button body3"' | replace: 'value', 'data-option-value' | replace: '</option>', '</button></li>' }}
+        </ul>
+        <input name="country"
+               id="RegisterForm-Country"
+               type="hidden"
+               class="form__input-hidden address-form__country-input"
+               data-select-province="#address-form-custom-province-new"
+               value="United States"
+               data-default="United States"
+               data-custom-select-input
+               required>
+      </custom-select>
+    </div>
+
+    <h3 class="login-form__subheading body1">
+      {{ 'customer.register_pro.additional_info' | t }}
+    </h3>
+
+    {%- if reason_arr.size > 0 -%}
+      <div class="form-field small-up-hide">
+        <label class="form-label visually-hidden" for="RegisterForm-Reason--origin">{{ 'customer.register_pro.reason' | t }}</label>
+        <select class="form__select"
+                id="RegisterForm-Reason--origin"
+                name="reason"
+                data-original-select
+                required>
+          <option value="" disabled selected>{{ 'customer.register_pro.reason' | t }}</option>
+          {%- for item in reason_arr -%}
+            <option value="{{ item | strip }}">{{ item | strip }}</option>
+          {%- endfor -%}
+        </select>
+      </div>
+
+      <div class="form-field small-hide">
+        <label for="RegisterForm-Reason" class="visually-hidden">{{ 'customer.register_pro.reason' | t }}</label>
+
+        <custom-select class="form-select body3 form-select-alternative">
+          <button type="button" class="btn--reset form-select__btn" tabindex="0" aria-expanded="false" aria-controls="dropdown-reason-{{ section.id }}">
+            <span class="form-select__btn-text">{{ 'customer.register_pro.reason' | t }}</span>
+            <span class="form-select__dropdown-option--label"></span>
+            {%- render 'icon' with 'arrow-down' -%}
+          </button>
+          <ul class="form-select__dropdown hide-scrollbar" id="dropdown-reason-{{ section.id }}" style="display: none;">
+            {%- for item in reason_arr -%}
+              <li class="form-select__dropdown-option a" aria-selected="false" data-option-value="{{ item | strip }}">
+                <button type="button" class="btn--reset form-select__dropdown-button body3 ">{{ item | strip }}</button>
+              </li>
+            {%- endfor -%}
+          </ul>
+          <input name="reason"
+                 id="RegisterForm-Reason"
+                 type="hidden"
+                 class="form__input-hidden"
+                 value=""
+                 data-custom-select-input
+                 required >
+        </custom-select>
+      </div>
+    {%- endif -%}
+
+    <div class="form-field">
+      <textarea
+        name="message"
+        id="RegisterForm-Message"
+        placeholder="{{ 'customer.register_pro.message' | t }}"
+        class="form-input"
+        rows="4"></textarea>
+      <label for="RegisterForm-Message" class="visually-hidden">
+        {{ 'customer.register_pro.message' | t }}
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn--primary-alt">
+      {{ 'customer.register_pro.submit' | t }}
+    </button>
+
+    <div class="customer-errors">
+      <p class="body3 form-error form-error--email hide">{{ "form_errors.email" | t }}</p>
+      <p class="body3 form-error form-error--empty-field hide">{{ "form_errors.required_fields" | t }}</p>
+      <p class="body3 form-error register-form-error hide"></p>
+    </div>
+
+    {% if error_message != blank %}
+      <div class="body3 form-error form-error-klaviyo--email hide">
+        {{ error_message }}
+      </div>
+    {% endif %}
+
+    {%- if additional_message != blank -%}
+      <div class="login-form__prof-text">
+        {{ additional_message }}
+      </div>
+    {%- endif -%}
+  </form>
+</customer-pro>

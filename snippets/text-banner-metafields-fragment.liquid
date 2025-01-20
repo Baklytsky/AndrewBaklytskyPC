@@ -1,0 +1,22 @@
+{% comment %}
+  {% render 'text-banner-metafields-fragment' text: string, class: string, type: string, link: string  %}
+{% endcomment %}
+
+{%- if type == "btn" -%}
+  {%- if text != blank -%}
+    <a{% if link == blank %} role="link" aria-disabled="true" disabled{% else %}
+      href="{{ link }}"{% endif %}
+      class="text-banner__btn btn btn--{{- class -}}">
+      {{ text | escape }}
+    </a>
+  {%- endif -%}
+{%- else -%}
+  {%- if text != blank -%}
+    <div class="{{ class }}">
+      <span class="small-hide">{{ text | newline_to_br }}</span>
+      <span class="small-up-hide">{{ text }}</span>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+

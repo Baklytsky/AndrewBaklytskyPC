@@ -1,0 +1,51 @@
+{% comment %}
+Accepts:
+- product: {Object} Product Liquid object (optional)
+- class_name_handle: {String} Adds class name handle to the element (optional)
+- rx_product_skin_concern: {Array} For RX Only Product (optional)
+
+Usage:
+{% render 'get_skin_concerns', product: product, class_name_handle: class_name_handle, rx_product_skin_concern: rx_product_skin_concern %}
+{% endcomment %}
+
+{%- liquid
+  assign skin_concerns = product.metafields.custom.skin_concern.value | default: rx_product_skin_concern
+-%}
+
+{%- for value in skin_concerns -%}
+  {%- liquid assign value_handleize = value | handleize -%}
+
+  {%- for shin_concern in shop.metafields.globals.skin_concern_heading -%}
+    {%- liquid assign shin_concern_handleize = shin_concern | handleize -%}
+    {%- if shin_concern_handleize == value_handleize -%}
+
+      {%- liquid
+        assign shin_concern_color = shop.metafields.globals.skin_concern_color[forloop.index0]
+        assign shin_concern_image = shop.metafields.globals.skin_concern_image[forloop.index0][0]
+        assign shin_concern_url = shop.metafields.globals.skin_concern_url[forloop.index0]
+      -%}
+
+      <div class="{{ class_name_handle }}__skin-concern" style="--concern-color: {{ shin_concern_color }}">
+        <div class="{{ class_name_handle }}__skin-concern-color rel">
+          <span class="u-sr-only">{{ shin_concern | append: ' - color' }}</span>
+          {%- if shin_concern_image != blank -%}
+            {% render 'image-metafields',
+              image: shin_concern_image,
+              class_name: 'image-abs-cover',
+              alt: shin_concern,
+              small_size: true %}
+          {%- endif -%}
+        </div>
+        {%- if shin_concern_url != blank -%}
+          <a href="{{ shin_concern_url }}">{{ shin_concern }}</a>
+        {%- else -%}
+          <span>{{ shin_concern }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- break -%}
+
+    {%- endif -%}
+  {%- endfor -%}
+
+{%- endfor -%}
