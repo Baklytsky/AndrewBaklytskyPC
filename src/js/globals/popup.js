@@ -1,3 +1,5 @@
+import {PopupCookie} from './popup-cookie';
+
 const selectors = {
   open: '[data-popup-open]',
   close: '[data-popup-close]',
@@ -9,6 +11,7 @@ const attributes = {
   closing: 'closing',
   delay: 'data-popup-delay',
   scrollLock: 'data-scroll-lock-required',
+  cookieValue: 'data-cookie-value',
 };
 
 if (!customElements.get('popup-component')) {
