@@ -137,7 +137,6 @@
               {%- liquid
                 assign option_name_handle_separator = filter.label | handle | prepend: ',' | append: ','
                 assign is_swatch_option = false
-                assign is_native_swatch_option = false
 
                 if settings.swatches_type == 'theme'
                   assign swatch_translation = 'general.swatches.color' | t
@@ -146,15 +145,6 @@
                   if translation_string contains option_name_handle_separator
                     assign is_swatch_option = true
                   endif
-                endif
-
-                if settings.swatches_type == 'native'
-                  for value in option.values
-                    if value.swatch
-                      assign is_native_swatch_option = true
-                      break
-                    endif
-                  endfor
                 endif
               -%}
 
