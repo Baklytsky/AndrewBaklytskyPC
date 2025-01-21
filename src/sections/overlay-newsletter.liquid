@@ -78,8 +78,8 @@
       {% endif %}
       id="Popup--{{ block.id }}"
       data-popup-delay="{{ block.settings.trigger }}"
+      data-cookie-name="popup-{{ block.id }}"
       {{ target_referrer_attribute }}
-
     {%- endcapture -%}
 
     {%- if show_popup -%}
@@ -91,6 +91,7 @@
               data-scroll-lock-required
               aria-modal="true"
               aria-labelledby="PopupNewsletter"
+              data-cookie-value="user_has_closed"
               {{ block_attributes }}
             >
               <form method="dialog">
@@ -153,6 +154,7 @@
                 class="small-newsletter {{ block.settings.position }}"
                 aria-modal="true"
                 aria-labelledby="PopupNewsletter"
+                data-cookie-value="newsletter_is_closed"
                 {{ popup_attributes }}
               >
                 <form method="dialog">

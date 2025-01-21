@@ -30,10 +30,11 @@ if (!customElements.get('popup-component')) {
         this.isAnimating = false;
         this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
         this.buttonPopupOpen = this.querySelector(selectors.open);
-        this.cookie = new PopupCookie(this.popup.getAttribute(selectors.cookieNameAttribute), 'user_has_closed');
+        this.cookie = new PopupCookie(this.popup.getAttribute(selectors.cookieNameAttribute), this.popup.getAttribute(selectors.cookieValue));
 
         this.checkTargetReferrer();
-        this.showPopupEvents();
+        this.checkCookie();
+
         this.bindListeners();
       }
 
@@ -42,6 +43,20 @@ if (!customElements.get('popup-component')) {
 
         if (location.href.indexOf(this.popup.getAttribute(attributes.referrer)) === -1 && !window.Shopify.designMode) {
           this.popup.parentNode.removeChild(this.popup);
+        }
+      }
+
+      checkCookie() {
+        const cookieExists = this.cookie.read() !== false;
+
+        if (!cookieExists || window.Shopify.designMode) {
+          if (!window.Shopify.designMode) {
+            this.showAlways();
+          } else {
+            this.showPopupEvents();
+          }
+
+          this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
         }
       }
 
@@ -114,7 +129,7 @@ if (!customElements.get('popup-component')) {
       }
 
       popupClose() {
-        if (this.isAnimating || !this.popup || this.popup.hasAttribute('inert') || this.classList.contains('popup--selected')) {
+        if (this.isAnimating || !this.popup || this.popup.hasAttribute('inert')) {
           return;
         }
 
@@ -256,49 +271,4 @@ if (!customElements.get('popup-component')) {
       }
     }
   );
-}
-
-class PopupCookie {
-  constructor(name, value, daysToExpire = 7) {
-    const today = new Date();
-    const expiresDate = new Date();
-    expiresDate.setTime(today.getTime() + 3600000 * 24 * daysToExpire);
-
-    this.config = {
-      expires: expiresDate.toGMTString(), // session cookie
-      path: '/',
-      domain: window.location.hostname,
-      sameSite: 'none',
-      secure: true,
-    };
-    this.name = name;
-    this.value = value;
-  }
-
-  write() {
-    const hasCookie = document.cookie.indexOf('; ') !== -1 && !document.cookie.split('; ').find((row) => row.startsWith(this.name));
-
-    if (hasCookie || document.cookie.indexOf('; ') === -1) {
-      document.cookie = `${this.name}=${this.value}; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}; sameSite=${this.config.sameSite}; secure=${this.config.secure}`;
-    }
-  }
-
-  read() {
-    if (document.cookie.indexOf('; ') !== -1 && document.cookie.split('; ').find((row) => row.startsWith(this.name))) {
-      const returnCookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith(this.name))
-        .split('=')[1];
-
-      return returnCookie;
-    } else {
-      return false;
-    }
-  }
-
-  destroy() {
-    if (document.cookie.split('; ').find((row) => row.startsWith(this.name))) {
-      document.cookie = `${this.name}=null; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}`;
-    }
-  }
 }
