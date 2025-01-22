@@ -20,16 +20,16 @@ if (!customElements.get('popup-component')) {
     class PopupComponent extends HTMLElement {
       constructor() {
         super();
+
+        this.popup = this.querySelector(selectors.dialog);
+        this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
+        this.buttonPopupOpen = this.querySelector(selectors.open);
       }
 
       connectedCallback() {
-        if (!this.popup) return;
-
-        this.popup = this.querySelector(selectors.dialog);
         this.a11y = window.theme.a11y;
         this.isAnimating = false;
-        this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
-        this.buttonPopupOpen = this.querySelector(selectors.open);
+
         this.cookie = new PopupCookie(this.popup.getAttribute(selectors.cookieNameAttribute), this.popup.getAttribute(selectors.cookieValue));
 
         this.checkTargetReferrer();
@@ -51,7 +51,7 @@ if (!customElements.get('popup-component')) {
 
         if (!cookieExists || window.Shopify.designMode) {
           if (!window.Shopify.designMode) {
-            this.showAlways();
+            this.popupOpen();
           } else {
             this.showPopupEvents();
           }
@@ -95,8 +95,6 @@ if (!customElements.get('popup-component')) {
       }
 
       popupOpen() {
-        if (!this.popup) return;
-
         this.isAnimating = true;
 
         // Check if browser supports Dialog tags
@@ -129,7 +127,7 @@ if (!customElements.get('popup-component')) {
       }
 
       popupClose() {
-        if (this.isAnimating || !this.popup || this.popup.hasAttribute('inert')) {
+        if (this.isAnimating || this.popup.hasAttribute('inert')) {
           return;
         }
 
@@ -187,7 +185,7 @@ if (!customElements.get('popup-component')) {
         this.showOnScrollEvent = () => this.showOnScroll();
 
         if (this.delay === 'always' || this.isSubmitted) {
-          this.showAlways();
+          this.popupOpen();
         }
 
         if (this.delay && this.delay.includes('delayed') && !this.isSubmitted) {
@@ -202,10 +200,6 @@ if (!customElements.get('popup-component')) {
         if (this.delay === 'idle' && !this.isSubmitted) {
           this.showOnIdle();
         }
-      }
-
-      showAlways() {
-        this.popupOpen();
       }
 
       showDelayed(seconds = 10) {

@@ -2,13 +2,15 @@ document.addEventListener('shopify:section:select', (event) => {
   // Popup components
   const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
   if (popupComponent) {
+    popupComponent.classList.add('popup--selected');
+
     const dialog = popupComponent.querySelector('dialog');
     if (!dialog.hasAttribute('open')) {
       popupComponent.classList.add('popup--force-open');
       popupComponent.popupOpen();
     }
 
-    setTimeout(() => hideOtherPopups(popupComponent), 100);
+    setTimeout(() => hideOtherPopups(popupComponent), 300);
   }
 });
 
@@ -38,9 +40,12 @@ function restorePopups() {
     popup.popupOpen();
   });
 
-  document.querySelectorAll('popup-component.popup--force-open')?.forEach((popup) => {
-    popup.classList.remove('popup--force-open');
-    popup.popupClose();
+  document.querySelectorAll('popup-component.popup--selected')?.forEach((popup) => {
+    popup.classList.remove('popup--selected');
+    if (popup.classList.contains('popup--force-open')) {
+      popup.popupClose();
+      popup.classList.remove('popup--force-open');
+    }
   });
 }
 
@@ -149,7 +154,7 @@ document.addEventListener('shopify:block:select', (event) => {
   const popupComponent = event.target.matches('popup-component') ? event.target : null;
   if (popupComponent) {
     popupComponent.popupOpen();
-    setTimeout(() => hideOtherPopups(popupComponent), 100);
+    setTimeout(() => hideOtherPopups(popupComponent), 500);
   }
 });
 
