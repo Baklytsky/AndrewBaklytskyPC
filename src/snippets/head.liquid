@@ -575,7 +575,7 @@
   }
 
   /* === Gray background on Product grid items ===*/
-  {% if settings.show_image_gray_bg == 'front' or settings.show_image_gray_bg == 'behind' %}
+  {% if settings.show_image_bg == 'front' or settings.show_image_bg == 'behind' %}
     .show-gray-bg::before,
     .pswp__img::before {
       content: '';
@@ -584,9 +584,10 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, .025);
+      background: {{ settings.show_image_bg_color }};
+      opacity: 0.025;
       pointer-events: none;
-      {% if settings.show_image_gray_bg == 'front' %}
+      {% if settings.show_image_bg == 'front' %}
         z-index: 5;
       {% endif %}
     }
