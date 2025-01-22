@@ -4,7 +4,7 @@ class PopupCookie {
     const expiresDate = new Date();
     expiresDate.setTime(today.getTime() + 3600000 * 24 * daysToExpire);
 
-    this.configuration = {
+    this.config = {
       expires: expiresDate.toGMTString(), // session cookie
       path: '/',
       domain: window.location.hostname,
@@ -19,7 +19,7 @@ class PopupCookie {
     const hasCookie = document.cookie.indexOf('; ') !== -1 && !document.cookie.split('; ').find((row) => row.startsWith(this.name));
 
     if (hasCookie || document.cookie.indexOf('; ') === -1) {
-      document.cookie = `${this.name}=${this.value}; expires=${this.configuration.expires}; path=${this.configuration.path}; domain=${this.configuration.domain}; sameSite=${this.configuration.sameSite}; secure=${this.configuration.secure}`;
+      document.cookie = `${this.name}=${this.value}; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}; sameSite=${this.config.sameSite}; secure=${this.config.secure}`;
     }
   }
 
@@ -38,7 +38,7 @@ class PopupCookie {
 
   destroy() {
     if (document.cookie.split('; ').find((row) => row.startsWith(this.name))) {
-      document.cookie = `${this.name}=null; expires=${this.configuration.expires}; path=${this.configuration.path}; domain=${this.configuration.domain}`;
+      document.cookie = `${this.name}=null; expires=${this.config.expires}; path=${this.config.path}; domain=${this.config.domain}`;
     }
   }
 }

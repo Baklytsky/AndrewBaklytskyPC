@@ -85,13 +85,14 @@
     {%- if show_popup -%}
       {%- case block.type -%}
         {%- when 'large-newsletter' -%}
-          <popup-component {{ block.shopify_attributes }}>
+          <popup-newsletter {{ block.shopify_attributes }}>
             <dialog
               class="modal__overlay modal__overlay--default modal__overlay--newsletter{% unless block.settings.newsletter_enable %} is-visible{% endunless %}"
               data-scroll-lock-required
               aria-modal="true"
               aria-labelledby="PopupNewsletter"
               data-cookie-value="user_has_closed"
+              {{ popup_attributes }}
               {{ block_attributes }}
             >
               <form method="dialog">
@@ -145,10 +146,10 @@
                 </button>
               </div>
             </dialog>
-          </popup-component>
+          </popup-newsletter>
 
         {%- when 'small-newsletter' -%}
-          <popup-component {{ block.shopify_attributes }}>
+          <popup-newsletter {{ block.shopify_attributes }}>
             <div class="newsletter__outer">
               <dialog
                 class="small-newsletter {{ block.settings.position }}"
@@ -184,7 +185,7 @@
                 {%- endif -%}
               </dialog>
             </div>
-          </popup-component>
+          </popup-newsletter>
       {%- endcase -%}
     {%- endif -%}
   {%- endfor -%}
