@@ -3,7 +3,14 @@ document.addEventListener('shopify:section:select', (event) => {
   const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
   if (popupComponent) {
     popupComponent.classList.add('popup--selected');
-    popupComponent.popupOpen();
+
+    const dialog = popupComponent.querySelector('dialog');
+    if (!dialog.hasAttribute('open')) {
+      popupComponent.classList.add('popup--force-open');
+      popupComponent.popupOpen();
+    }
+
+    setTimeout(() => hideOtherPopups(popupComponent), 300);
   }
 });
 
@@ -11,10 +18,36 @@ document.addEventListener('shopify:section:deselect', (event) => {
   // Popup components
   const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
   if (popupComponent) {
-    popupComponent.classList.remove('popup--selected');
-    popupComponent.popupClose();
+    restorePopups();
   }
 });
+
+function hideOtherPopups(selectedPopup) {
+  document.querySelectorAll('popup-component')?.forEach((popup) => {
+    if (popup !== selectedPopup) {
+      const dialog = popup.querySelector('dialog');
+      if (dialog.hasAttribute('open')) {
+        popup.classList.add('popup--hidden');
+        popup.popupClose();
+      }
+    }
+  });
+}
+
+function restorePopups() {
+  document.querySelectorAll('popup-component.popup--hidden')?.forEach((popup) => {
+    popup.classList.remove('popup--hidden');
+    popup.popupOpen();
+  });
+
+  document.querySelectorAll('popup-component.popup--selected')?.forEach((popup) => {
+    popup.classList.remove('popup--selected');
+    if (popup.classList.contains('popup--force-open')) {
+      popup.popupClose();
+      popup.classList.remove('popup--force-open');
+    }
+  });
+}
 
 document.addEventListener('shopify:block:select', (event) => {
   // Open accordion on Block select
@@ -120,8 +153,8 @@ document.addEventListener('shopify:block:select', (event) => {
   // Popup components
   const popupComponent = event.target.matches('popup-component') ? event.target : null;
   if (popupComponent) {
-    popupComponent.classList.add('popup--selected');
     popupComponent.popupOpen();
+    setTimeout(() => hideOtherPopups(popupComponent), 500);
   }
 });
 
@@ -167,8 +200,7 @@ document.addEventListener('shopify:block:deselect', (event) => {
   // Popup components
   const popupComponent = event.target.matches('popup-component') ? event.target : null;
   if (popupComponent) {
-    popupComponent.classList.remove('popup--selected');
-    popupComponent.popupClose();
+    restorePopups();
   }
 });
 
