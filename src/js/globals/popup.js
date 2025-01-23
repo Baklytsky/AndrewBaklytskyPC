@@ -186,7 +186,7 @@ class PopupComponent extends HTMLElement {
       this.popupOpen();
     }
 
-    this.delay = this.popup.hasAttribute(attributes.delay) ? this.popup.getAttribute(attributes.delay) : 'always';
+    this.delay = this.popup.hasAttribute(attributes.delay) ? this.popup.getAttribute(attributes.delay) : null;
     this.isSubmitted = window.location.href.indexOf('accepts_marketing') !== -1 || window.location.href.indexOf('customer_posted=true') !== -1;
     this.showOnScrollEvent = () => this.showOnScroll();
 
