@@ -40,30 +40,32 @@
   {%- if show_quantity -%}
     <script src="{{ 'quantity-counter.js' | asset_url }}" defer="defer"></script>
 
-    <popout-select class="select-popout">
-      <button type="button"
-        class="select-popout__toggle"
-        aria-expanded="false"
-        aria-controls="{{ unique }}-select-quantity"
-        aria-labelledby="{{ unique }}-select-quantity-label"
-        data-popout-toggle>
-        <span data-popout-toggle-text>1</span>
-        {%- render 'icon-nav-arrow-down' -%}
-      </button>
+    <quantity-counter>
+      <popout-select class="select-popout">
+        <button type="button"
+          class="select-popout__toggle"
+          aria-expanded="false"
+          aria-controls="{{ unique }}-select-quantity"
+          aria-labelledby="{{ unique }}-select-quantity-label"
+          data-popout-toggle>
+          <span data-popout-toggle-text>1</span>
+          {%- render 'icon-nav-arrow-down' -%}
+        </button>
 
-      <ul id="{{ unique }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable>
-        {%- for idx in (1..10) -%}
-          <li class="select-popout__item{% if forloop.index == 1 %} is-active{% endif %}">
-            <a class="select-popout__option" href="#" {% if forloop.index == 1 %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
-              <span>
-                {{ forloop.index }} {% if forloop.last %}+{% endif %}
-              </span>
-            </a>
-          </li>
-        {%- endfor -%}
-      </ul>
+        <ul id="{{ unique }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable>
+          {%- for idx in (1..10) -%}
+            <li class="select-popout__item{% if forloop.index == 1 %} is-active{% endif %}">
+              <a class="select-popout__option" href="#" {% if forloop.index == 1 %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                <span>
+                  {{ forloop.index }} {% if forloop.last %}+{% endif %}
+                </span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </popout-select>
 
-      <quantity-counter class="quantity-selector">
+      <div class="quantity-selector">
         <label for="product-quantity-buttons-{{ unique }}" class="label-hidden">{{ 'products.product.quantity' | t }}</label>
 
         <button
@@ -94,8 +96,8 @@
           title="{{ 'cart.general.increase_quantity_label' | t }} - {{ product.title | strip_html }}">
           {%- render 'icon-plus' -%}
         </button>
-      </quantity-counter>
-    </popout-select>
+      </div>
+    </quantity-counter>
   {%- else -%}
     <input type="hidden" name="quantity" value="1">
   {%- endif -%}

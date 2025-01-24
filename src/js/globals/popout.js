@@ -36,10 +36,11 @@ if (!customElements.get('popout-select')) {
         this.popoutList = this.querySelector(selectors.popoutList);
         this.popoutToggle = this.querySelector(selectors.popoutToggle);
         this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
-        this.popoutInput = this.querySelector(selectors.popoutInput);
+        this.popoutInput = this.querySelector(selectors.popoutInput) || this.parentNode.querySelector(selectors.popoutInput);
         this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
         this.productGridItem = this.popoutList.closest(selectors.productGridItem);
         this.fireSubmitEvent = this.hasAttribute(attributes.submit);
+        this.overflowContainer = this._findParentWithOverflow(this);
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -95,8 +96,9 @@ if (!customElements.get('popout-select')) {
       toggleListPosition() {
         const button = this.querySelector(selectors.popoutToggle);
         const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
-        const windowHeight = window.innerHeight;
-        const popoutTop = this.getBoundingClientRect().top;
+        const containerHeight = this.overflowContainer.clientHeight;
+        const containerTop = this.overflowContainer.getBoundingClientRect().top;
+        const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
 
         const removeTopClass = () => {
           this.popoutList.classList.remove(classes.popoutListTop);
@@ -104,7 +106,7 @@ if (!customElements.get('popout-select')) {
         };
 
         if (ariaExpanded) {
-          if (windowHeight / 2 > popoutTop) {
+          if ((containerHeight + containerTop) / 2 < popoutTop) {
             this.popoutList.classList.add(classes.popoutListTop);
           }
         } else {
@@ -118,17 +120,20 @@ if (!customElements.get('popout-select')) {
 
         requestAnimationFrame(() => {
           this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
-          this.popoutList.style.setProperty('--max-height', `${parseInt(window.innerHeight - this.popoutList.getBoundingClientRect().top)}px`);
+          this.popoutList.style.setProperty(
+            '--max-height',
+            `${parseInt(this.overflowContainer.clientHeight + this.overflowContainer.getBoundingClientRect().top - this.popoutList.getBoundingClientRect().top)}px`
+          );
         });
       }
 
       popupOptionsClick(evt) {
         const link = evt.target.closest(selectors.popoutOptions);
+
         if (link.attributes.href.value === '#') {
           evt.preventDefault();
 
           const attrValue = evt.currentTarget.hasAttribute(attributes.dataValue) ? evt.currentTarget.getAttribute(attributes.dataValue) : '';
-
           this.popoutInput.value = attrValue;
 
           if (this.popoutInput.disabled) {
@@ -218,6 +223,23 @@ if (!customElements.get('popout-select')) {
         this.popoutToggle.setAttribute(attributes.ariaExpanded, false);
         this.toggleListPosition();
         document.body.removeEventListener('click', this.bodyClickEvent);
+      }
+
+      _findParentWithOverflow(element) {
+        while (element) {
+          // Get the computed style of the current element
+          const style = window.getComputedStyle(element);
+
+          // Check if the overflow or overflowX/overflowY property is set
+          if (style.overflow !== 'visible' || style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return element; // Return the element if it has an overflow style
+          }
+
+          element = element.parentElement;
+        }
+
+        // Return window element if no parent with overflow style is found
+        return window;
       }
     }
   );

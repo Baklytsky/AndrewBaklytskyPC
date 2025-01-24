@@ -1,18 +1,22 @@
 .select-popout {
   --border: var(--BTN-PRIMARY-BORDER);
+
   position: relative;
   text-align: left;
   align-self: flex-start;
 
-  & > .quantity-selector { display: none; }
-  & > .quantity-selector input { border-color: var(--accent); }
+  & + .quantity-selector,
+  & + .cart__quantity-counter .cart__quantity { display: none; }
 
   &.is-active {
-    & > *:not(.quantity-selector) { display: none; }
-    & > .quantity-selector { display: block; }
+    display: none;
+
+    & + .quantity-selector,
+    & + .cart__quantity-counter .cart__quantity { display: block; }
   }
 }
 
+.no-js .select-popout .cart__quantity,
 .no-js .select-popout > .quantity-selector { display: block; }
 
 .select-popout__toggle {
@@ -34,6 +38,7 @@
 
 .select-popout__toggle .icon-nav-arrow-down {
   --icon-size: 18px;
+
   position: absolute;
   top: 0;
   right: 10px;
@@ -55,20 +60,28 @@
   min-height: calc(var(--form-top) * 2 + var(--font-body-small) * 1.2); // Padding top/bottom + font size x font-adjust x line-height
   width: 100%;
   border: 1px solid var(--border);
-  border-top-width: 0px;
+  border-top-width: 0;
   margin: -1px 0 0;
-  background: var(--bg);
+  background: var(--COLOR-BG);
   list-style: none outside none;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 0.2s ease, visibility 0.2s;
-}
-.select-popout__list.popout-list--visible {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition: opacity 0.4s, visibility 0.4s;
+
+  &.popout-list--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.4s, visibility 0.4s;
+  }
+
+  &.popout-list--top {
+    border-width: 1px 1px 0;
+    bottom: 100%;
+    top: auto;
+    margin: 0 0 -1px;
+  }
 }
 
 .select-popout__item {
