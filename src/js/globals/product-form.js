@@ -405,11 +405,13 @@ class ProductForm extends HTMLElement {
   }
 
   updateSaleText(formState) {
+    if (!this.priceOffWrap) return;
+
     if (this.productState.planSale) {
       this.updateSaleTextSubscription(formState);
     } else if (this.productState.onSale) {
       this.updateSaleTextStandard(formState);
-    } else if (this.priceOffWrap) {
+    } else {
       this.priceOffWrap.classList.add(classes.hidden);
     }
   }
@@ -443,7 +445,7 @@ class ProductForm extends HTMLElement {
     }
 
     // If priceOffBadge or priceOffAmount are missing, hide priceOffBadge and exit early
-    if (!priceOffBadge || !this.priceOffAmount || !comparePrice || !salePrice || comparePrice <= salePrice) {
+    if (!priceOffBadge || !this.priceOffAmount || !comparePrice || comparePrice <= salePrice) {
       priceOffBadge?.classList.add(classes.hidden);
     } else {
       // Calculate and display discount percentage
