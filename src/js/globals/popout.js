@@ -94,15 +94,17 @@ if (!customElements.get('popout-select')) {
 
       toggleListPosition() {
         const button = this.querySelector(selectors.popoutToggle);
-        const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
 
         const removeTopClass = () => {
-          this.popoutList.classList.remove(classes.popoutListTop);
+          if (button.getAttribute(attributes.ariaExpanded) !== 'true') {
+            this.popoutList.classList.remove(classes.popoutListTop);
+          }
+
           this.popoutList.removeEventListener('transitionend', removeTopClass);
         };
 
-        if (ariaExpanded) {
+        if (button.getAttribute(attributes.ariaExpanded) === 'true') {
           if (window.innerHeight / 2 < popoutTop) {
             this.popoutList.classList.add(classes.popoutListTop);
           }
@@ -117,7 +119,7 @@ if (!customElements.get('popout-select')) {
 
         requestAnimationFrame(() => {
           this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
-          this.popoutList.style.setProperty('--max-height', `${parseInt(window.innerHeight / 2 - this.popoutList.getBoundingClientRect().top)}px`);
+          this.popoutList.style.setProperty('--max-height', `${parseInt(document.body.clientHeight - this.popoutList.getBoundingClientRect().top)}px`);
         });
       }
 

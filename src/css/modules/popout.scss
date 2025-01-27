@@ -86,28 +86,27 @@ popout-select { display: block; }
 .popout-list {
   --border: var(--border-hairline);
 
+  background-color: var(--COLOR-BG);
   position: absolute;
   top: 100%;
   bottom: auto;
   right: auto;
   left: 0;
-  border: 1px solid var(--border);
-  background-color: var(--COLOR-BG);
   opacity: 0;
   visibility: hidden;
   margin: 0;
-  padding: 10px 0;
+  padding: 0;
   width: auto;
   min-width: 100%;
   max-width: 0;
-  min-height: 30px;
+  min-height: 0;
   max-height: 0;
+  border: 1px solid var(--border);
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
   list-style-type: none;
   pointer-events: none;
-  transition: max-width 0s 0.2s, max-height 0s 0.2s, opacity 0.2s ease, visibility 0.2s;
 
   .page-header & {
     right: 0;
@@ -118,10 +117,12 @@ popout-select { display: block; }
 .popout-list--visible {
   max-width: var(--max-width, 90vw);
   max-height: min(var(--max-height, 300px), 300px);
+  min-height: 30px;
+  padding: 10px 0;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition: max-width 0s, max-height 0s, opacity 0.4s ease, visibility 0.4s;
+  transition: opacity 0.4s ease, visibility 0.4s;
 }
 
 .popout-list--top {
