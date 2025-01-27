@@ -184,7 +184,6 @@ class ProductForm extends HTMLElement {
 
   onOptionChange(evt) {
     this.pushState(evt.dataset);
-    this.updateProductImage(evt);
   }
 
   onPlanChange(evt) {
@@ -198,6 +197,7 @@ class ProductForm extends HTMLElement {
     this.updateAddToCartState(formState);
     this.updateNotificationForm(formState);
     this.updateProductPrices(formState);
+    this.updateProductImage(formState);
     this.updateSaleText(formState);
     this.updateSku(formState);
     this.updateSubscriptionText(formState);
@@ -639,7 +639,7 @@ class ProductForm extends HTMLElement {
   }
 
   updateProductImage(evt) {
-    const variant = evt.dataset.variant;
+    const variant = evt.dataset?.variant || evt.variant;
 
     if (variant) {
       // Update variant image, if one is set
