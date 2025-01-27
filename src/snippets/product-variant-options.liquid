@@ -198,19 +198,9 @@
             comment
               Determine if current option matches swatch handle translations
             endcomment
-            assign is_swatch_option = false
             assign is_native_swatch_option = false
 
-            if settings.swatches_type == 'theme'
-              assign swatch_translation = 'general.swatches.color' | t
-              assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
-
-              if translation_string contains option_name_handle_separator
-                assign is_swatch_option = true
-              endif
-            endif
-
-            if settings.swatches_type == 'native'
+            if settings.enable_color_swatches
               for value in option.values
                 if value.swatch
                   assign is_native_swatch_option = true
@@ -230,21 +220,21 @@
               assign variant_option_image_translation = 'products.product.variant_option_image' | t
               assign translation_string_variant_option_image = variant_option_image_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
 
-              if translation_string_variant_option_image contains option_name_handle_separator and is_swatch_option == false
+              if translation_string_variant_option_image contains option_name_handle_separator
                 assign has_variant_option_image = true
               endif
             endif
           -%}
 
-          <div class="selector-wrapper{% if settings.variant_lines and is_size_option %} selector-wrapper--size{% elsif settings.variant_lines or is_swatch_option %} selector-wrapper--fullwidth{% endif %}"
+          <div class="selector-wrapper{% if settings.variant_lines and is_size_option %} selector-wrapper--size{% elsif settings.variant_lines %} selector-wrapper--fullwidth{% endif %}"
             data-option-position="{{ option.position }}">
-            {%- if settings.variant_lines or is_swatch_option or is_native_swatch_option -%}
+            {%- if settings.variant_lines or is_native_swatch_option -%}
               {%- liquid
                 assign current_value = current_variant.options[forloop.index0]
                 capture radio_fieldset_class
                   echo 'radio__fieldset'
 
-                  if is_swatch_option or is_native_swatch_option
+                  if is_native_swatch_option
                     echo ' radio__fieldset--swatches'
                   endif
 
@@ -279,7 +269,7 @@
                   <div class="radio__buttons" data-variant-buttons>
                     {%- for value in option.values -%}
                       {%- capture input_id -%}{{ uniq_id }}-{{ option.name | handle }}-{{ value | strip_html | escape | handle }}-{{ forloop.index }}{%- endcapture -%}
-                      {%- if is_swatch_option or is_native_swatch_option -%}
+                      {%- if is_native_swatch_option -%}
                         {%- liquid
                           if is_native_swatch_option
                             if value.swatch.image
@@ -301,7 +291,6 @@
                         <tooltip-component
                           data-tooltip="{{ value | escape | capitalize }}"
                           class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
-                          {% if is_swatch_option %}style="--swatch: var(--{{ value | handle }});"{% endif %}
                           {% if is_native_swatch_option %}style="--swatch: {{ swatch_value }};"{% endif %}
                         >
 
