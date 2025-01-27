@@ -1,3 +1,12 @@
+{%- liquid
+  assign button_style = block.settings.style
+  assign show_arrow = block.settings.show_arrow
+
+  if button_style == 'btn--text' and show_arrow
+    assign button_style = button_style | append: ' btn--text-no-underline'
+  endif
+-%}
+
 <div
   class="hero__button"
   data-aos="hero"
@@ -6,7 +15,7 @@
   {{ block.shopify_attributes }}
 >
   <a
-    class="btn {{ block.settings.size }} {{ block.settings.style }} {{ block.settings.type }}"
+    class="btn {{ block.settings.size }} {{ button_style }} {{ block.settings.type }}"
     href="{{ block.settings.link }}"
   >
     <span>{{ block.settings.text | escape }}</span>
