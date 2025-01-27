@@ -40,7 +40,6 @@ if (!customElements.get('popout-select')) {
         this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
         this.productGridItem = this.popoutList.closest(selectors.productGridItem);
         this.fireSubmitEvent = this.hasAttribute(attributes.submit);
-        this.overflowContainer = this._findParentWithOverflow(this);
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -96,8 +95,6 @@ if (!customElements.get('popout-select')) {
       toggleListPosition() {
         const button = this.querySelector(selectors.popoutToggle);
         const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
-        const containerHeight = this.overflowContainer.clientHeight;
-        const containerTop = this.overflowContainer.getBoundingClientRect().top;
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
 
         const removeTopClass = () => {
@@ -106,7 +103,7 @@ if (!customElements.get('popout-select')) {
         };
 
         if (ariaExpanded) {
-          if ((containerHeight + containerTop) / 2 < popoutTop) {
+          if (window.innerHeight / 2 < popoutTop) {
             this.popoutList.classList.add(classes.popoutListTop);
           }
         } else {
@@ -120,10 +117,7 @@ if (!customElements.get('popout-select')) {
 
         requestAnimationFrame(() => {
           this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
-          this.popoutList.style.setProperty(
-            '--max-height',
-            `${parseInt(this.overflowContainer.clientHeight + this.overflowContainer.getBoundingClientRect().top - this.popoutList.getBoundingClientRect().top)}px`
-          );
+          this.popoutList.style.setProperty('--max-height', `${parseInt(window.innerHeight / 2 - this.popoutList.getBoundingClientRect().top)}px`);
         });
       }
 
@@ -223,23 +217,6 @@ if (!customElements.get('popout-select')) {
         this.popoutToggle.setAttribute(attributes.ariaExpanded, false);
         this.toggleListPosition();
         document.body.removeEventListener('click', this.bodyClickEvent);
-      }
-
-      _findParentWithOverflow(element) {
-        while (element) {
-          // Get the computed style of the current element
-          const style = window.getComputedStyle(element);
-
-          // Check if the overflow or overflowX/overflowY property is set
-          if (style.overflow !== 'visible' || style.overflowX !== 'visible' || style.overflowY !== 'visible') {
-            return element; // Return the element if it has an overflow style
-          }
-
-          element = element.parentElement;
-        }
-
-        // Return window element if no parent with overflow style is found
-        return window;
       }
     }
   );
