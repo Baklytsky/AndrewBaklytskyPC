@@ -24,31 +24,6 @@ if (!customElements.get('announcement-bar')) {
           this.initSliders();
         }
 
-        this.addEventListener('theme:countdown:hide', (e) => {
-          if (window.Shopify.designMode) return;
-
-          const isMarquee = e.target.closest(selectors.marquee);
-
-          if (this.slidesCount === 1) {
-            const tickerBar = this.querySelector(selectors.ticker);
-            tickerBar.style.display = 'none';
-          }
-
-          if (isMarquee) {
-            const tickerText = e.target.closest(selectors.tickerSlide);
-            this.removeTickerText(tickerText);
-          } else {
-            const slide = e.target.closest(selectors.slide);
-            this.removeSlide(slide);
-          }
-        });
-
-        this.addEventListener('theme:countdown:expire', () => {
-          this.querySelectorAll(selectors.ticker)?.forEach((ticker) => {
-            ticker.dispatchEvent(new CustomEvent('theme:ticker:refresh'));
-          });
-        });
-
         document.dispatchEvent(new CustomEvent('theme:announcement:init', {bubbles: true}));
       }
 
