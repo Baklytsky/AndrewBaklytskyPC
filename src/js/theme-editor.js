@@ -22,33 +22,6 @@ document.addEventListener('shopify:section:deselect', (event) => {
   }
 });
 
-function hideOtherPopups(selectedPopup) {
-  document.querySelectorAll('popup-component')?.forEach((popup) => {
-    if (popup !== selectedPopup) {
-      const dialog = popup.querySelector('dialog');
-      if (dialog.hasAttribute('open')) {
-        popup.classList.add('popup--hidden');
-        popup.popupClose();
-      }
-    }
-  });
-}
-
-function restorePopups() {
-  document.querySelectorAll('popup-component.popup--hidden')?.forEach((popup) => {
-    popup.classList.remove('popup--hidden');
-    popup.popupOpen();
-  });
-
-  document.querySelectorAll('popup-component.popup--selected')?.forEach((popup) => {
-    popup.classList.remove('popup--selected');
-    if (popup.classList.contains('popup--force-open')) {
-      popup.popupClose();
-      popup.classList.remove('popup--force-open');
-    }
-  });
-}
-
 document.addEventListener('shopify:block:select', (event) => {
   // Open accordion on Block select
   const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
@@ -69,6 +42,7 @@ document.addEventListener('shopify:block:select', (event) => {
         const slide = event.target.hasAttribute('data-slide') ? event.target : event.target.closest('[data-slide]');
         const slideIndex = parseInt(Array.from(slider.querySelector('.flickity-slider')?.children).indexOf(slide));
 
+        slide.classList.add('is-selected');
         slider.dispatchEvent(
           new CustomEvent('theme:slider:select', {
             bubbles: false,
@@ -133,8 +107,8 @@ document.addEventListener('shopify:block:select', (event) => {
   }
 
   // Logos - select logos slide on block select
-  const isBlockSelectedLogoSlide = event.target.closest('logos-component') && event.target.hasAttribute('data-slide');
-  if (isBlockSelectedLogoSlide) {
+  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
+  if (logosBlockSelectedIsSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     // Go to selected slide, pause autoplay
@@ -146,12 +120,11 @@ document.addEventListener('shopify:block:select', (event) => {
         },
       })
     );
-
-    setTimeout(() => document.dispatchEvent(new CustomEvent('theme:resize')), 100);
   }
 
   // Popup components
-  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  const popupComponent = event.target.matches('popup-component') || event.target.matches('popup-newsletter') ? event.target : null;
+
   if (popupComponent) {
     popupComponent.popupOpen();
     setTimeout(() => hideOtherPopups(popupComponent), 500);
@@ -174,11 +147,13 @@ document.addEventListener('shopify:block:deselect', (event) => {
   // Resume slider on block deselect
   const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (blockSelectedIsSlide) {
+    const slide = event.target;
     const slider = event.target.closest('slider-component');
     const flickityEnabled = slider?.classList.contains('flickity-enabled');
 
     // Go to selected slide, pause autoplay
     if (flickityEnabled) {
+      slide.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
   }
@@ -190,19 +165,69 @@ document.addEventListener('shopify:block:deselect', (event) => {
   }
 
   // Logos - resume logos slider on block deselect
-  const isBlockSelectedLogoSlide = event.target.closest('logos-component') && event.target.hasAttribute('data-slide');
-  if (isBlockSelectedLogoSlide) {
+  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
+  if (logosBlockSelectedIsSlide) {
     const logosComponent = event.target.closest('logos-component');
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
   }
 
   // Popup components
-  const popupComponent = event.target.matches('popup-component') ? event.target : null;
+  const popupComponent = event.target.matches('popup-component') || event.target.matches('popup-newsletter') ? event.target : null;
   if (popupComponent) {
     restorePopups();
   }
 });
+
+function hideOtherPopups(selectedPopup) {
+  document.querySelectorAll('popup-component')?.forEach((popup) => {
+    if (popup !== selectedPopup) {
+      const dialog = popup.querySelector('dialog');
+      if (dialog.hasAttribute('open')) {
+        popup.classList.add('popup--hidden');
+
+        // Check if browser supports Dialog tags
+        if (typeof dialog.close === 'function') {
+          dialog.close();
+        } else {
+          dialog.removeAttribute('open');
+          dialog.setAttribute('aria-hidden', true);
+        }
+      }
+    }
+  });
+  document.querySelectorAll('popup-newsletter')?.forEach((popup) => {
+    if (popup !== selectedPopup) {
+      const dialog = popup.querySelector('dialog');
+      if (dialog.hasAttribute('open')) {
+        popup.classList.add('popup--hidden');
+
+        // Check if browser supports Dialog tags
+        if (typeof dialog.close === 'function') {
+          dialog.close();
+        } else {
+          dialog.removeAttribute('open');
+          dialog.setAttribute('aria-hidden', true);
+        }
+      }
+    }
+  });
+}
+
+function restorePopups() {
+  document.querySelectorAll('popup-component.popup--hidden, popup-newsletter.popup--hidden')?.forEach((popup) => {
+    popup.classList.remove('popup--hidden');
+    popup.popupOpen();
+  });
+
+  document.querySelectorAll('popup-component.popup--selected, popup-newsletter.popup--selected')?.forEach((popup) => {
+    popup.classList.remove('popup--selected');
+    if (popup.classList.contains('popup--force-open')) {
+      popup.popupClose();
+      popup.classList.remove('popup--force-open');
+    }
+  });
+}
 
 // Mobile menu - Theme Editor events
 if (!customElements.get('mobile-menu')) {

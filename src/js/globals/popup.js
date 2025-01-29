@@ -5,6 +5,9 @@ const selectors = {
   close: '[data-popup-close]',
   dialog: 'dialog',
   focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
+  newsletterForm: '[data-newsletter-form]',
+  newsletterHeading: '[data-newsletter-heading]',
+  newsletterField: '[data-newsletter-field]',
 };
 
 const attributes = {
@@ -277,6 +280,8 @@ class PopupNewsletter extends PopupComponent {
     super();
 
     this.form = this.popup.querySelector(selectors.newsletterForm);
+    this.heading = this.popup.querySelector(selectors.newsletterHeading);
+    this.newsletterField = this.popup.querySelector(selectors.newsletterField);
   }
 
   connectedCallback() {
@@ -310,7 +315,7 @@ class PopupNewsletter extends PopupComponent {
         this.cookie.write();
       }
 
-      super.addEventListener('theme:popup:onclose', () => this.cookie.write());
+      this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
     }
 
     if (submissionSuccess) {
@@ -343,7 +348,7 @@ class PopupNewsletter extends PopupComponent {
     this.showForm();
     this.inputField();
 
-    this.addEventListener('theme:popup:onclose', () => this.cookie.write());
+    this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
   }
 
   observeCartBar() {
@@ -370,7 +375,7 @@ class PopupNewsletter extends PopupComponent {
   }
 
   showForm() {
-    this.heading.addEventListener('click', (event) => {
+    this.heading?.addEventListener('click', (event) => {
       event.preventDefault();
 
       this.heading.classList.add(classes.hidden);
@@ -378,7 +383,7 @@ class PopupNewsletter extends PopupComponent {
       this.newsletterField.focus();
     });
 
-    this.heading.addEventListener('keyup', (event) => {
+    this.heading?.addEventListener('keyup', (event) => {
       if (event.code === 'Enter') {
         this.heading.dispatchEvent(new Event('click'));
       }
@@ -393,7 +398,7 @@ class PopupNewsletter extends PopupComponent {
       }
 
       if (this.newsletterField.value !== '') {
-        this.holder.classList.add(classes.hasValue);
+        this.popup.classList.add(classes.hasValue);
       }
     };
 
@@ -405,7 +410,7 @@ class PopupNewsletter extends PopupComponent {
 
       // Reset class
       this.resetClassTimer = setTimeout(() => {
-        this.holder.classList.remove(classes.hasValue);
+        this.popup.classList.remove(classes.hasValue);
       }, 2000);
     };
 
