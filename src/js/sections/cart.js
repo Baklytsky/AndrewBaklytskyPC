@@ -62,9 +62,10 @@ if (!customElements.get('cart-popup')) {
         const removedGWPs = JSON.parse(sessionStorage.getItem('gwpRemove')) || [];
         if (removedGWPs.length) {
           const removedGWPIds = removedGWPs.map(item => item.split(':')[0]);
-          conditions.__gwp = [...conditions.__gwp].filter(condition =>
+          conditions.__gwp['conditions'] = [...conditions.__gwp['conditions']].filter(condition =>
             !removedGWPIds.some(id => condition.id.includes(id))
           );
+          conditions.__gwp['gwpToIgnore'] = removedGWPIds;
         }
       } catch (e) {
         console.log(e)

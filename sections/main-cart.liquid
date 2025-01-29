@@ -73,7 +73,10 @@
   {%- endif -%}
 
   {%- if gwp_enable -%}   {%- comment -%} for subscription GWP {%- endcomment -%}
-    {%- liquid assign subscription_gwp_arr_blocks = section.blocks | where: 'type', 'subscription_gwp' -%}
+    {%- liquid
+      assign subscription_gwp_arr_blocks = section.blocks | where: 'type', 'subscription_gwp'
+      assign subscription_gwp_ignore = false
+    -%}
   {%- endif -%}
 
   {%- if gwp_type == "threshold" -%}
@@ -91,15 +94,29 @@
   {%- endif -%}
 
   {%- assign total_premier_points = 0 -%}
+  {%- assign buy_x_get_y_counter = 0 -%}
+
   {%- if cart.item_count -%}
     {%- for item in cart.items -%}
+      {%- assign is_gwp_item = false -%}
       {%- assign item_property_size = item.properties | size -%}
+
+      {% if item_property_size > 0 %}
+        {% for prop in item.properties %}
+          {%- assign property_name = prop.first | handleize -%}
+
+          {% if property_name == "_free-gift" %}
+            {% assign is_gwp_item = true %}
+          {% endif %}
+
+        {% endfor %}
+      {% endif %}
 
       {%- if item.selling_plan_allocation and cart_has_subscription_product != true -%}  {%- comment -%} for subscription GWP {%- endcomment -%}
         {%- assign cart_has_subscription_product = true -%}
       {%- endif -%}
 
-      {%- if gwp_type == "buy_x_get_y" and item.product.metafields.custom.gwp != blank -%}
+      {%- if gwp_type == "buy_x_get_y" and item.product.metafields.custom.gwp != blank and is_gwp_item == false -%}
         {%- assign gwp_variant = item.product.metafields.custom.gwp.value -%}
 
         {%- if gwp_variant.available -%}
@@ -116,21 +133,24 @@
             {%- endif -%}
           {%- endif -%}
 
+          {%- assign buy_x_get_y_counter = buy_x_get_y_counter | plus: 1 -%}
+
+          {%- capture buy_x_get_y_conditions -%}
+            {{ buy_x_get_y_conditions }}
+              {%- if buy_x_get_y_counter > 1 -%},{%- endif -%}{
+                "id": "gid://shopify/ProductVariant/{{ gwp_variant.id }}",
+                "x_id": "gid://shopify/ProductVariant/{{ item.variant_id }}",
+                "type": "buy_x_get_y"
+              }
+          {%- endcapture -%}
+
           {%- assign gwp_data_for_add = gwp_data_for_add | append: ","  | append: gwp_variant.id -%}
           {% continue %}
         {%- endif -%}
       {%- endif -%}
 
-      {%- if item_property_size > 0 -%}
-        {%- for prop in item.properties -%}
-          {%- assign property_name = prop.first | handleize -%}
-
-          {%- if property_name contains "free-gift" -%}
-            {%- assign gwp_products_keys_in_cart = gwp_products_keys_in_cart | append: ","  | append: item.key -%}
-
-            {% break %}
-          {%- endif -%}
-        {%- endfor -%}
+      {%- if is_gwp_item -%}
+        {%- assign gwp_products_keys_in_cart = gwp_products_keys_in_cart | append: ","  | append: item.key -%}
       {%- endif -%}
 
       {% if settings.premier_points_enabled %}
@@ -388,7 +408,7 @@
                   </form>
 
                   {%- assign counter = 0 -%}
-                  {%- capture gwpConditions -%}
+                  {%- capture threshold_conditions -%}
                     {%- for block in threshold_arr_blocks -%}
                       {%- liquid
                         assign amount = block.settings.amount
@@ -396,18 +416,50 @@
                         assign get_product_variant_id = block.settings.get_product_variant_id
                         assign get_product_by_variant = get_product.variants | where: 'id', get_product_variant_id | first | default: get_product.variants[0] -%}
 
+                      {%- if block.type == "subscription_gwp" and subscription_gwp_ignore == false -%}
+                        {%- capture subscription_conditions -%}
+                          {
+                            "id": "gid://shopify/ProductVariant/{{ get_product_by_variant.id }}",
+                            "type": "{{ block.type }}"
+                          }
+                        {%- endcapture -%}
+                      {%- endif -%}
+
                       {%- if get_product_by_variant.available and amount != blank -%}
                         {%- assign counter = counter | plus: 1 -%}
                         {%- if counter > 1 -%},{%- endif -%}{
                           "id": "gid://shopify/ProductVariant/{{ get_product_by_variant.id }}",
-                          "threshold": "{{ amount }}"
+                          "threshold": "{{ amount }}",
+                          "type": "threshold"
                         }
                       {%- endif -%}
                     {%- endfor -%}
                   {%- endcapture -%}
 
+                  {%- capture gwp_conditions -%}
+                    {%- if threshold_conditions != blank -%}{{- threshold_conditions -}}{%- if subscription_conditions != blank or buy_x_get_y_conditions != blank -%},{%- endif -%}{%- endif -%}
+                    {%- if subscription_conditions != blank -%}{{- subscription_conditions -}}{%- if buy_x_get_y_conditions != blank -%},{%- endif -%}{%- endif -%}
+                    {{- buy_x_get_y_conditions -}}
+                  {%- endcapture -%}
+
                   <script type="application/json" data-gwp-conditions>
-                    {"__gwp": [{{- gwpConditions -}}]}
+                    {
+                      "__gwp": {
+                        "conditions":[{{- gwp_conditions -}}],
+                        "type": {{- gwp_type | json -}},
+                        "gwpToIgnore": []
+                      }
+                    }
+                  </script>
+
+                  <script>
+                    console.log({
+                      "__gwp": {
+                        "conditions":[{{- gwp_conditions -}}],
+                        "type": {{- gwp_type | json -}},
+                        "gwpToIgnore": []
+                      }
+                    })
                   </script>
                 </div>
 
