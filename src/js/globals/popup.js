@@ -24,8 +24,6 @@ const classes = {
   cartBarVisible: 'cart-bar-visible',
   isVisible: 'is-visible',
   success: 'has-success',
-  selected: 'selected',
-  hasBlockSelected: 'has-block-selected',
   mobile: 'mobile',
   desktop: 'desktop',
   bottom: 'bottom',
