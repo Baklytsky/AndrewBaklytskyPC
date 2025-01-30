@@ -1,6 +1,6 @@
 document.addEventListener('shopify:section:select', (event) => {
   // Popup components
-  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component:not([data-shopify-editor-block])') : null;
   if (popupComponent) {
     popupComponent.classList.add('popup--selected');
 
@@ -16,7 +16,7 @@ document.addEventListener('shopify:section:select', (event) => {
 
 document.addEventListener('shopify:section:deselect', (event) => {
   // Popup components
-  const popupComponent = event.target.querySelector('popup-component:not([data-shopify-editor-block])');
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component:not([data-shopify-editor-block])') : null;
   if (popupComponent) {
     restorePopups();
   }

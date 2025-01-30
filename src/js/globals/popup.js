@@ -16,6 +16,7 @@ const attributes = {
   scrollLock: 'data-scroll-lock-required',
   cookieName: 'data-cookie-name',
   cookieValue: 'data-cookie-value',
+  preventTopLayer: 'data-prevent-top-layer',
 };
 
 const classes = {
@@ -34,6 +35,7 @@ class PopupComponent extends HTMLElement {
     super();
 
     this.popup = this.querySelector(selectors.dialog);
+    this.preventTopLayer = this.popup.hasAttribute(attributes.preventTopLayer);
     this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
     this.buttonPopupOpen = this.querySelector(selectors.open);
     this.a11y = window.theme.a11y;
@@ -56,12 +58,8 @@ class PopupComponent extends HTMLElement {
   checkCookie() {
     const cookieExists = this.cookie && this.cookie.read() !== false;
 
-    if (!cookieExists || window.Shopify.designMode) {
-      if (!window.Shopify.designMode) {
-        this.popupOpen();
-      } else {
-        this.showPopupEvents();
-      }
+    if (!cookieExists) {
+      this.showPopupEvents();
 
       this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
     }
@@ -105,7 +103,7 @@ class PopupComponent extends HTMLElement {
     this.isAnimating = true;
 
     // Check if browser supports Dialog tags
-    if (typeof this.popup.showModal === 'function') {
+    if (typeof this.popup.showModal === 'function' && !this.preventTopLayer) {
       this.popup.showModal();
     } else if (typeof this.popup.show === 'function') {
       this.popup.show();
