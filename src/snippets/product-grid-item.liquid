@@ -110,7 +110,7 @@
   endif
 -%}
 
-{%- if settings.swatches_type != 'disabled' and settings.show_grid_swatches -%}
+{%- if settings.enable_color_swatches and settings.show_grid_swatches -%}
   {%- assign has_colors = false -%}
   {%- assign swatch_translation = 'general.swatches.color' | t -%}
   {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
@@ -119,16 +119,26 @@
     {%- for label in swatch_labels -%}
       {%- assign sanitized_label = label | lstrip | rstrip -%}
 
-      {%- if product.options_by_name[sanitized_label].values.size > 0 -%}
-        {%- assign has_colors = true -%}
+      {%- capture swatch_values -%}
+        {%- for value in product.options_by_name[sanitized_label].values -%}
+          {%- if value.swatch -%}
+            {%- assign has_colors = value -%}
+          {%- endif -%}
 
-        {%- capture swatch_values -%}
-          {%- for value in product.options_by_name[sanitized_label].values -%}
-            {{- value -}}: {{- value | handle -}}
-            {%- unless forloop.last -%}, {%- endunless -%}
-          {%- endfor -%}
-        {%- endcapture -%}
-      {%- endif -%}
+          {%- liquid
+            if value.swatch.image
+              assign image_url = value.swatch.image | image_url: width: 48
+              assign swatch_value = 'url(' | append: image_url | append: ')'
+            elsif value.swatch.color
+              assign swatch_value = value.swatch.color
+            else
+              assign swatch_value = nil
+            endif
+          -%}
+          {{- value -}}: {{- swatch_value -}}
+          {%- unless forloop.last -%}, {%- endunless -%}
+        {%- endfor -%}
+      {%- endcapture -%}
 
       {%- if has_colors -%}
         <form class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-grid-swatch-form data-fieldset>
@@ -426,7 +436,7 @@
 
             {{ featured_image }}
 
-            {%- if settings.swatches_type != 'disabled' and current_variant -%}
+            {%- if settings.enable_color_swatches and current_variant -%}
               {%- assign image_inner_empty = true -%}
               {%- assign variant_images = '' -%}
               {%- for variant in product.variants -%}

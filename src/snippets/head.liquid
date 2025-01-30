@@ -181,7 +181,7 @@
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-    {% if forloop.index == 1 -%}
+    {% if scheme == settings.color_scheme -%}
       :root,
     {%- endif %}
     .color-{{ scheme.id }} {
@@ -537,9 +537,9 @@
     --BTN-FONT-WEIGHT: {{ btn_font.weight }};
     --BTN-FONT-STYLE: {{ btn_font.style }};
     --BTN-FONT-SIZE: {{ settings.btn_size }}px;
-    --BTN-MEDIUM-SIZE: {{ settings.button_medium_size }}px;
-    --BTN-LARGE-SIZE: {{ settings.button_large_size }}px;
-    --BTN-SMALL-SIZE: {{ settings.button_small_size }}px;
+    --BTN-MEDIUM-SIZE: {{ settings.button_medium }}px;
+    --BTN-LARGE-SIZE: {{ settings.button_large }}px;
+    --BTN-SMALL-SIZE: {{ settings.button_small }}px;
 
     {%- assign font_size_base_decimal = settings.base_font_size | append: '.0' -%}
     --BTN-FONT-SIZE-BODY: {{ settings.btn_size | divided_by: font_size_base_decimal }}rem;
@@ -609,9 +609,6 @@
   body {
     position: relative;
     min-width: 320px;
-    font-size: var(--FONT-SIZE-BASE);
-    text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
   }
 {% endstyle %}
 
@@ -633,9 +630,8 @@
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-{%- if settings.swatches_type != 'disabled' -%}
+{%- if settings.enable_color_swatches -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
-  {%- render 'swatch-color-list' -%}
 {%- endif %}
 
 {%- if request.design_mode -%}
@@ -727,7 +723,6 @@
         enableAnimations: {{ settings.animations_enable | json }},
         variantOnSale: {{ settings.variant_on_sale | json }},
         collectionSwatchStyle: {{ settings.collection_swatch_style | json }},
-        swatchesType: {{ settings.swatches_type | json }},
         mobileMenuType: {{ settings.mobile_menu_type | json }},
       },
       sliderArrows: {
