@@ -30,7 +30,7 @@
   assign product_form_id = 'ProductFormUpsell--' | append: unique
 
   assign is_product_list = is_product_list | default: false
-  assign show_avaialable_upsell_only = show_avaialable_upsell_only | default: false
+  assign show_available_upsell_only = show_available_upsell_only | default: false
 
   assign all_variants_soldout = true
   for variant in upsell_product.variants
@@ -44,7 +44,7 @@
     assign upsell_quick_add_hide = true
   endif
 
-  if request.design_mode == false and upsell_variant.available == false and show_avaialable_upsell_only and is_product_block
+  if request.design_mode == false and upsell_variant.available == false and show_available_upsell_only and is_product_block
     assign show_upsell = false
   endif
 
@@ -165,7 +165,7 @@
               </p>
             </a>
 
-            {%- if upsell_product.variants.size == 1 and upsell_variant.available == false or all_variants_soldout -%}
+            {%- if all_variants_soldout -%}
               <span class="product-upsell__out-of-stock">{{ 'products.general.upsell_out_of_stock' | t }}</span>
             {%- endif -%}
 
