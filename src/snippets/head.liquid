@@ -630,9 +630,8 @@
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-{%- if settings.swatches_type != 'disabled' -%}
+{%- if settings.enable_color_swatches -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
-  {%- render 'swatch-color-list' -%}
 {%- endif %}
 
 {%- if request.design_mode -%}
@@ -724,7 +723,6 @@
         enableAnimations: {{ settings.animations_enable | json }},
         variantOnSale: {{ settings.variant_on_sale | json }},
         collectionSwatchStyle: {{ settings.collection_swatch_style | json }},
-        swatchesType: {{ settings.swatches_type | json }},
         mobileMenuType: {{ settings.mobile_menu_type | json }},
       },
       sliderArrows: {
