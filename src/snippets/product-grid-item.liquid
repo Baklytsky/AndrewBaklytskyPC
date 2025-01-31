@@ -52,7 +52,13 @@
   if settings.product_grid_center
     assign alignment_class = 'product-item--centered'
   else
-    assign alignment_class = 'product-item--left'
+    assign no_padding_class = ''
+
+    if settings.grid_override and settings.grid_gap_horizontal > 0
+      assign no_padding_class = ' product-item--no-padding'
+    endif
+
+    assign alignment_class = 'product-item--left' | append: no_padding_class
   endif
 
   assign quickview_class = ''
