@@ -4,7 +4,7 @@
 
 .grid {
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-vertical) var(--gap);
   grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
 
   @include media-query($large-up) {
@@ -31,12 +31,16 @@
 .grid--1 {
   --columns: 1;
 }
+
 .grid--2 {
   --columns: 2;
 }
+
 .grid--3 {
   --columns: 3;
+
   @include media-query($small) { --columns: 1; }
+
   @include media-query($mobile) { --columns: 1; }
 }
 
@@ -50,6 +54,7 @@
     --outer-offset: 0px;
     --gutter: 0px;
     --gap: 0px;
+    --gap-vertical: 0px;
   }
 
   .collection-list & {
