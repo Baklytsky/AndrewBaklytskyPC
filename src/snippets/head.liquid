@@ -495,6 +495,13 @@
         --LAYOUT-GUTTER-MEDIUM: 22px;
         --LAYOUT-OUTER-SMALL: 16px;
         --LAYOUT-GUTTER-SMALL: 16px;
+      {%- elsif settings.grid_style == 'tight' -%}
+        --LAYOUT-OUTER: 16px;
+        --LAYOUT-GUTTER: 16px;
+        --LAYOUT-OUTER-MEDIUM: 16px;
+        --LAYOUT-GUTTER-MEDIUM: 12px;
+        --LAYOUT-OUTER-SMALL: 16px;
+        --LAYOUT-GUTTER-SMALL: 8px;
       {%- else -%}
         --LAYOUT-OUTER: 80px;
         --LAYOUT-GUTTER: 80px;
@@ -507,10 +514,13 @@
       --PAGE-WIDTH: {{ settings.page_width }}px;
       --LAYOUT-OUTER: 50px;
       --LAYOUT-GUTTER: {{ settings.grid_gap_horizontal }}px;
+      --LAYOUT-GUTTER-VERTICAL: {{ settings.grid_gap_vertical }}px;
       --LAYOUT-OUTER-MEDIUM: 30px;
-      --LAYOUT-GUTTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 }}px;
+      --LAYOUT-GUTTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 | round }}px;
+      --LAYOUT-GUTTER-VERTICAL-MEDIUM: {{ settings.grid_gap_vertical | times: 0.6 | round }}px;
       --LAYOUT-OUTER-SMALL: 16px;
-      --LAYOUT-GUTTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 }}px;
+      --LAYOUT-GUTTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 | round }}px;
+      --LAYOUT-GUTTER-VERTICAL-SMALL: {{ settings.grid_gap_vertical | times: 0.32 | round }}px;
     {%- endunless -%}
 
     {%- comment -%} Custom variables {%- endcomment -%}
