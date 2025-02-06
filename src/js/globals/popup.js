@@ -303,7 +303,7 @@ class PopupNewsletter extends PopupComponent {
 
     if (!cookieExists || window.Shopify.designMode) {
       if (!window.Shopify.designMode && !window.location.pathname.endsWith('/challenge')) {
-        super.showDelayed();
+        super.showPopupEvents();
       }
 
       if (this.form && this.form.classList.contains(classes.success)) {
@@ -335,7 +335,7 @@ class PopupNewsletter extends PopupComponent {
   show() {
     if (!window.location.pathname.endsWith('/challenge')) {
       if (!window.Shopify.designMode) {
-        super.showDelayed();
+        super.showPopupEvents();
       } else {
         super.popupOpen();
       }
