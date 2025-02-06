@@ -1,94 +1,36 @@
-<!-- /sections/product.liquid -->
-
-{%- render 'product' -%}
-
-{% comment %} Google wants to know when to check your price again {% endcomment %}
-
 {%- liquid
-  assign days_price_is_valid = 1
-  assign seconds_in_a_day = 86400
-  assign seconds_price_valid = days_price_is_valid | times: seconds_in_a_day
+  assign product = all_products[section.settings.product]
+  assign onboarding = false
 
-  if product.selected_or_first_available_variant.featured_media
-    assign seo_media = product.selected_or_first_available_variant.featured_media
-  else
-    assign seo_media = product.featured_media
+  if product.empty?
+    assign onboarding = true
   endif
 -%}
 
-<script type="application/ld+json">
-  {
-    "@context": "http://schema.org/",
-    "@type": "Product",
-    "name": {{ product.title | json }},
-    "url": {{ request.origin | append: product.url | json }},
-    {% if seo_media -%}
-      "image": [
-        {{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}
-      ],
-    {%- endif %}
-    "description": {{ product.description | strip_html | json }},
-    {%- if current_variant.sku != blank -%}
-      "sku": {{ current_variant.sku | json }},
-    {%- endif -%}
-    "brand": {
-      "@type": "Organization",
-      "name": {{ product.vendor | json }}
-    },
-    "offers": [
-      {%- for variant in product.variants -%}
-        {
-          "@type" : "Offer",
-          {%- if variant.sku != blank -%}
-            "sku": {{ variant.sku | json }},
-          {%- endif -%}
-          {%- if variant.barcode.size == 12 -%}
-            "gtin12": {{ variant.barcode }},
-          {%- endif -%}
-          {%- if variant.barcode.size == 13 -%}
-            "gtin13": {{ variant.barcode }},
-          {%- endif -%}
-          {%- if variant.barcode.size == 14 -%}
-            "gtin14": {{ variant.barcode }},
-          {%- endif -%}
-          "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
-          "price" : {{ variant.price | divided_by: 100.00 | json }},
-          "priceCurrency" : {{ cart.currency.iso_code | json }},
-          "priceValidUntil": "{{ 'now' | date: '%s' | plus: seconds_price_valid | date: '%Y-%m-%d' }}",
-          "url" : {{ request.origin | append: variant.url | json }}
-        }{% unless forloop.last %},{% endunless %}
-      {%- endfor -%}
-    ]
-  }
-</script>
+{%- render 'product', product: product, onboarding: onboarding -%}
 
 {% schema %}
 {
-  "name": "Product pages",
-  "class": "section-overlay-header",
+  "name": "Featured product",
   "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
     {
       "type": "header",
       "content": "Layout"
     },
     {
       "type": "checkbox",
-      "id": "product_sticky_enable",
-      "label": "Enable sticky form",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "variant_image_scroll",
-      "label": "Enable product image variant scroll",
-      "info": "Clicking a variant scrolls user to assigned image",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_cart_bar",
-      "label": "Enable cart bar",
-      "default": true
+      "id": "reverse_layout",
+      "label": "Reverse layout",
+      "default": false
     },
     {
       "type": "header",
@@ -115,13 +57,10 @@
       "type": "select",
       "id": "image_layout",
       "label": "Product gallery",
-      "default": "stacked",
+      "default": "thumbnails",
       "options": [
         {"value": "thumbnails", "label": "Thumbnails - Bottom"},
-        {"value": "thumbnails-left", "label": "Thumbnails - Left"},
-        {"value": "stacked", "label": "Stacked"},
-        {"value": "grid-1", "label": "Mosaic"},
-        {"value": "grid-2", "label": "Grid"}
+        {"value": "thumbnails-left", "label": "Thumbnails - Left"}
       ],
       "info": "Desktop only"
     },
@@ -1416,6 +1355,58 @@
         }
       ]
     }
-  ]
+  ],
+  "presets": [
+    {
+      "name": "Featured product",
+      "category": "Product",
+      "blocks": [
+        {
+          "type": "title",
+          "settings": {
+            "subheading_option": "breadcrumb"
+          }
+        },
+        {
+          "type": "price"
+        },
+        {
+          "type": "variants"
+        },
+        {
+          "type": "buttons"
+        },
+        {
+          "type": "pickup"
+        },
+        {
+          "type": "tab_richtext"
+        },
+        {
+          "type": "divider",
+          "settings": {
+            "padding_bottom": 16
+          }
+        },
+        {
+          "type": "icon",
+          "settings": {
+            "icon_name": "icon-email",
+            "text": "<p>Free 30 Days Returns<\/p>"
+          }
+        },
+        {
+          "type": "icon",
+          "settings": {
+            "icon_name": "icon-truck",
+            "text": "<p>Free shipping on orders over $100<\/p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
 }
 {% endschema %}
