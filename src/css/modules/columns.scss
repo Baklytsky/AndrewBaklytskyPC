@@ -7,15 +7,13 @@
 
 .multicolumn {
   @include media-query ($medium-up) {
-    --gap-offset: calc(var(--gap) / -2);
-
     display: flex;
     flex-flow: row wrap;
     gap: 0;
-    margin: 0 var(--gap-offset);
+    margin: 0 calc(var(--gap-offset) / 2);
 
     .grid-item {
-      padding: var(--gap) calc(var(--gap) / 2);
+      padding: var(--inner) calc(var(--gap) / 2);
       flex: 0 0 var(--desktop-width);
     }
   }
@@ -90,4 +88,8 @@
   &:hover { border-radius: var(--radius-blob-hover); }
 }
 
-.grid--compact .column__content { padding-inline: var(--inner); }
+.column__icon {
+  padding-inline-end: var(--grid-inner);
+
+  .text-center & { padding-inline: var(--grid-inner); }
+}
