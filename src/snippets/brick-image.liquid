@@ -1,18 +1,18 @@
 {% comment %}
-    Renders image block for custom content or newsletter sections
+  Renders image block for custom content or newsletter sections
 
-    Accepts:
-    - block: {Object} Block object
-    - animation_anchor: {String} ID of the element that will trigger animations
+  Accepts:
+  - block: {Object} Block object
+  - animation_anchor: {String} ID of the element that will trigger animations
 
-    Usage:
-    {% render 'brick-image', block: block, animation_anchor: animation_anchor %}
+  Usage:
+  {% render 'brick-image', block: block, animation_anchor: animation_anchor %}
 {% endcomment %}
 
 {%- liquid
   assign title = block.settings.title
   assign text = block.settings.text
-  assign link =  block.settings.link
+  assign link = block.settings.link
   assign link_text = block.settings.link_text
 
   assign selected_color_scheme = section.settings.color_scheme | strip
@@ -62,42 +62,47 @@
   {%- endunless -%}
 {%- endcapture -%}
 
-<div class="brick__block"{% if style != blank %} style="{{ style }}"{% endif %} {{ block.shopify_attributes }}>
-  <div class="brick__block__image frame wide-image">
-
+<div
+  class="brick__block"
+  {% if style != blank %}
+    style="{{ style }}"
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  <div class="brick__block__image frame">
     {%- if link != blank and link_text == blank -%}
       <a class="frame__item" href="{{ link }}">
     {%- else -%}
       <div class="frame__item">
     {%- endif -%}
 
-      {%- unless show_overlay_text or overlay_opacity == 0.0-%}
-        <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
-      {%- endunless -%}
+    {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
+      <div class="image-overlay" style="--overlay-opacity: {{ overlay_opacity }};"></div>
+    {%- endunless -%}
 
-      {%- liquid
-        capture image_sizes
-          if section.blocks.size > 1
-            if wrapper_width == 'wrapper--full'
-              echo '(min-width: 750px) 50vw, 100vw'
-            elsif wrapper_width == 'wrapper--full-padded'
-              echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
-            else
-              echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
-            endif
+    {%- liquid
+      capture image_sizes
+        if section.blocks.size > 1
+          if wrapper_width == 'wrapper--full'
+            echo '(min-width: 750px) 50vw, 100vw'
+          elsif wrapper_width == 'wrapper--full-padded'
+            echo '(min-width: 990px) calc((100vw - 100px) / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
           else
-            if wrapper_width == 'wrapper--full'
-              echo '100vw'
-            elsif wrapper_width == 'wrapper--full-padded'
-              echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
-            else
-              echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
-            endif
+            echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
           endif
-        endcapture
+        else
+          if wrapper_width == 'wrapper--full'
+            echo '100vw'
+          elsif wrapper_width == 'wrapper--full-padded'
+            echo '(min-width: 990px) calc(100vw - 100px), (min-width: 750px) calc(100vw - 60px), calc(100vw - 32px)'
+          else
+            echo '(min-width: 990px) calc(1100px / 2), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
+          endif
+        endif
+      endcapture
 
-        render 'image-hero', image: block.settings.image, desktop_height: desktop_height, mobile_height: mobile_height, sizes: image_sizes
-      -%}
+      render 'image-hero', image: block.settings.image, desktop_height: desktop_height, mobile_height: mobile_height, sizes: image_sizes
+    -%}
 
     {%- if link != blank and link_text == blank -%}
       </a>
@@ -106,8 +111,18 @@
     {%- endif -%}
 
     {%- if title != blank or text != blank or link_text != blank -%}
-      <div class="hero__content__wrapper frame__item {{ block.settings.flex_align }}{% if show_header_backdrop %} backdrop--linear{% endif %}"{% if show_header_backdrop %} style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"{% endif %}>
-        <div class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}" {% if overlay_opacity != 0.0 %} style="--overlay-opacity: {{ overlay_opacity }};"{% endif %}>
+      <div
+        class="hero__content__wrapper frame__item {{ block.settings.flex_align }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
+        {% if show_header_backdrop %}
+          style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
+        {% endif %}
+      >
+        <div
+          class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+          {% if overlay_opacity != 0.0 %}
+            style="--overlay-opacity: {{ overlay_opacity }};"
+          {% endif %}
+        >
           {%- if title != blank -%}
             {%- liquid
               assign animation_order = animation_order | plus: 1
@@ -118,29 +133,40 @@
               endunless
             -%}
 
-            <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }}"
+            <{{ heading_tag }}
+              class="hero__title {{ block.settings.heading_font_size }}"
               data-aos="hero"
               data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}">{{ title | escape }}</{{ heading_tag }}>
+              data-aos-order="{{ animation_order }}"
+            >
+              {{- title | escape -}}
+            </{{ heading_tag }}>
           {%- endif -%}
 
           {%- if text != blank -%}
             {%- assign animation_order = animation_order | plus: 1 -%}
-            <div class="hero__description {{ block.settings.text_font_size }}"
+            <div
+              class="hero__description {{ block.settings.text_font_size }}"
               data-aos="hero"
               data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}">
+              data-aos-order="{{ animation_order }}"
+            >
               {{ text }}
             </div>
           {%- endif -%}
 
           {%- if link_text != blank -%}
             {%- assign animation_order = animation_order | plus: 1 -%}
-            <div class="hero__button"
+            <div
+              class="hero__button"
               data-aos="hero"
               data-aos-anchor="{{ animation_anchor }}"
-              data-aos-order="{{ animation_order }}">
-              <a class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}" href="{{ link | default: '#!' }}">
+              data-aos-order="{{ animation_order }}"
+            >
+              <a
+                class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
+                href="{{ link | default: '#!' }}"
+              >
                 <span>{{ link_text | escape }}</span>
 
                 {%- if block.settings.show_arrow -%}
