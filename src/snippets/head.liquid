@@ -469,7 +469,6 @@
 
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
 
-    /* === Parallax ===*/
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
     --PARALLAX-STRENGTH-MAX: {{ settings.parallax_strength | plus: 110.0 | append: '%' }};
 
@@ -495,6 +494,11 @@
     {%- endif -%}
 
     {%- unless settings.grid_override -%}
+      --WIDTH-FULL-PADDED: none;
+      --WIDTH-NORMAL: 1100px;
+      --WIDTH-NORMAL-WIDE: 80vw;
+      --WIDTH-NARROW: 670px;
+
       {%- if settings.grid_style == 'compact' -%}
         --LAYOUT-OUTER: 32px;
         --LAYOUT-OUTER-MEDIUM: 22px;
@@ -570,9 +574,10 @@
       {%- endif -%}
     {%- else -%}
       --PAGE-WIDTH: {{ settings.page_width }}px;
+      --PAGE-WIDTH-WIDE: {{ settings.page_width }}px;
       --WIDTH-FULL-PADDED: {{ settings.section_width_padded }}%;
-      --WIDTH-NORMAL: {{ settings.section_width_normal }}%;
-      --WIDTH-NARROW: {{ settings.section_width_narrow }}%;
+      --WIDTH-NORMAL: {{ settings.page_width | times: settings.section_width_normal | divided_by: 100 }}px;
+      --WIDTH-NARROW: {{ settings.page_width | times: settings.section_width_narrow | divided_by: 100 }}px;
 
       --LAYOUT-OUTER: 50px;
       --LAYOUT-OUTER-MEDIUM: 30px;
