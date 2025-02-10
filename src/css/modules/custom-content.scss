@@ -102,9 +102,9 @@
 
 .brick__block__collection.has-padding .look__slider {
   @include media-query($small) {
-    margin-left: var(--outer-offset);
-    margin-right: var(--outer-offset);
-    padding-left: var(--outer);
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
+    padding-left: var(--grid-outer);
   }
 }
 
@@ -500,9 +500,9 @@
     overflow-y: hidden;
     scroll-behavior: auto;
     scroll-snap-type: x mandatory;
-    scroll-padding: var(--outer);
+    scroll-padding: var(--grid-outer);
     -webkit-overflow-scrolling: touch;
-    padding: 0 0 var(--outer) var(--outer);
+    padding: 0 0 var(--grid-outer) var(--grid-outer);
     margin: 0;
 
     @include hide-scrollbar;
@@ -512,7 +512,7 @@
       min-height: 1px;
       display: block;
       position: relative;
-      padding-right: var(--outer);
+      padding-right: var(--grid-outer);
     }
 
     .product-item {
@@ -529,14 +529,14 @@
   @include media-query($small) {
     width: calc(100% - 50px);
     max-width: 80vh; // Prevent huge images on a landscape mobile view
-    margin-right: var(--gap);
+    margin-right: var(--grid-gap);
     scroll-snap-align: start;
 
     &:last-child { margin-right: 0; }
 
     &:only-child {
       max-width: 100%;
-      width: calc(100% - var(--gap));
+      width: calc(100% - var(--grid-gap));
     }
   }
 }
@@ -544,7 +544,7 @@
 .brick__section--mobile-slider {
   @include media-query ($small) {
     padding-block: 0;
-    padding-inline: var(--outer) 0;
+    padding-inline: var(--grid-outer) 0;
     width: auto;
     display: flex;
     flex-wrap: nowrap;
@@ -554,7 +554,7 @@
     overflow-y: hidden;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scroll-padding: var(--outer);
+    scroll-padding: var(--grid-outer);
 
     @include hide-scrollbar;
 
@@ -563,7 +563,7 @@
       min-height: 1px;
       display: block;
       position: relative;
-      padding-right: var(--outer);
+      padding-right: var(--grid-outer);
     }
 
     .brick__block {
@@ -573,7 +573,7 @@
       width: calc(100% - 50px);
       scroll-snap-align: start;
 
-      &:only-child { width: calc(100% - var(--outer)); }
+      &:only-child { width: calc(100% - var(--grid-outer)); }
     }
 
     &.has-gap {
@@ -589,7 +589,7 @@
     }
 
     // Handle layout cases when one of the blocks should stay hidden in previews but visible in the Theme editor
-    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--outer)); }
+    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--grid-outer)); }
     &.has-gap:has(.brick__block.hidden) .brick__block { margin-inline-end: 0; }
     &.wrapper--full:has(.brick__block.hidden)::after { display: none; }
     &.wrapper--full:has(.brick__block.hidden) .brick__block { width: 100%; }

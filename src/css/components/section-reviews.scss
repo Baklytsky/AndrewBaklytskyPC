@@ -39,15 +39,21 @@
   }
 }
 
+.reviews--no-images {
+  @include media-query($small) {
+    .reviews__grid-item { margin-right: var(--gap); }
+  }
+}
+
 .reviews__grid {
   @include media-query($medium-up) {
     &.flickity-enabled { overflow: visible; }
   }
 
   @include media-query($small) {
-    padding-left: var(--outer);
-    margin-left: var(--outer-offset);
-    margin-right: var(--outer-offset);
+    padding-left: var(--grid-outer);
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
     gap: 0;
     max-width: none;
     display: flex;
@@ -58,7 +64,7 @@
     overflow-y: hidden;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scroll-padding: var(--outer);
+    scroll-padding: var(--grid-outer);
 
     @include hide-scrollbar;
 
@@ -67,7 +73,7 @@
       display: block;
       position: relative;
       min-height: 1px;
-      padding-right: var(--outer);
+      padding-right: var(--grid-outer);
     }
   }
 }
@@ -99,7 +105,7 @@
   flex: 0 0 auto;
   display: flex;
   width: calc(100% / var(--columns) - var(--gap) * (var(--columns) - 1) / var(--columns));
-  margin-right: var(--gap);
+  margin-right: var(--grid-gap);
 
   @include media-query($medium) {
     --columns: var(--COLUMNS-MEDIUM);
