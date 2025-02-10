@@ -13,7 +13,7 @@
 
   @include scrollbar-on-hover;
 
-  .no-results { padding: var(--gutter) / 2 0; }
+  .no-results { padding: var(--gap) / 2 0; }
 }
 
 .collection__sidebar--has-buttons .collection__sidebar__slider::after { content: none; }
@@ -81,14 +81,9 @@
 
 .collection__sidebar__slider .collection__sidebar {
   @include media-query ($medium-up) {
-    --sidebar-padding-right: var(--gutter);
-    padding: var(--inner) var(--sidebar-padding-right) var(--inner) var(--outer);
+    padding: var(--inner) var(--grid-gap) var(--inner) var(--outer);
     transform: translateX(-100%);
     transition: transform var(--duration) $ease-out-fast, mask-position var(--duration), -webkit-mask-position var(--duration);
-
-    body.grid-compact & {
-      --sidebar-padding-right: var(--outer);
-    }
   }
 }
 
@@ -106,14 +101,9 @@
 
 .collection__sidebar__slider.expanded {
   @include media-query($medium-up) {
-    --offset-margin-right: var(--outer);
     transform: translateZ(0);
     min-width: var(--sidebar-width);
-    margin-right: calc((var(--offset-margin-right) - var(--gutter)) * -1);
-
-    body.grid-compact & {
-      --offset-margin-right: 0;
-    }
+    margin-right: calc((var(--grid-outer) - var(--grid-gap)) * -1);
   }
 
   @include media-query($small) { transform: translateZ(0); }
@@ -150,13 +140,7 @@
 }
 
 .collection__sidebar__slider .collection__filters {
-  @include media-query ($medium-up) {
-    --padding: calc(max(var(--gutter), var(--scrollbar-width)) + var(--outer));
-
-    body.grid-compact & {
-      --padding: calc(var(--outer) + var(--outer));
-    }
-  }
+  @include media-query ($medium-up) { --padding: calc(var(--gap) + var(--outer)); }
 }
 
 .collection__sidebar__slide-out .collection__filters {

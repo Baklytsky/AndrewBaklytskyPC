@@ -4,7 +4,7 @@
 
 .grid {
   display: grid;
-  gap: var(--gap-vertical) var(--gap);
+  gap: var(--grid-gap-vertical) var(--grid-gap);
   grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
 
   @include media-query($large-up) {
@@ -47,15 +47,7 @@
 .grid-outer {
   position: relative;
   flex-grow: 1;
-  padding: 0 var(--outer);
-
-  body.grid-compact & {
-    --outer: 0px;
-    --outer-offset: 0px;
-    --gutter: 0px;
-    --gap: 0px;
-    --gap-vertical: 0px;
-  }
+  padding: 0 var(--grid-outer);
 
   .collection-list & {
     padding-top: var(--outer);
@@ -86,6 +78,8 @@
     --columns: 1;
   }
 }
+
+.grid-item__content { padding-inline: var(--grid-inner); }
 
 .grid__loader {
   position: absolute;

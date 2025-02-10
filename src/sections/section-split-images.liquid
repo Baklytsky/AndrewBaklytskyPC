@@ -3,7 +3,7 @@
   assign image_1 = section.settings.image_1
   assign image_2 = section.settings.image_2
   assign banner_link = section.settings.link
-  assign gutters = section.settings.gutters
+  assign show_gutters = section.settings.gutters
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
   assign flex_align_desktop = section.settings.flex_align_desktop
@@ -85,11 +85,11 @@
   data-overlay-header
 >
   {%- if render_section -%}
-    <div class="hero__wrapper frame{% if gutters %} frame--gutters{% endif %} {{ section_width }}">
+    <div class="hero__wrapper frame {{ section_width }}">
       {%- if banner_link != blank -%}
-        <a class="hero__images frame__item" href="{{ banner_link }}">
+        <a class="hero__images frame__item{% if show_gutters %} has-gap{% endif %}" href="{{ banner_link }}">
       {%- else -%}
-        <div class="hero__images frame__item">
+        <div class="hero__images frame__item{% if show_gutters %} has-gap{% endif %}">
       {%- endif -%}
 
       {%- if render_image_1 -%}

@@ -55,8 +55,6 @@
   .flex-column & { flex-grow: 0; }
 }
 
-.brick--margin { gap: var(--gap); }
-
 .brick--border .brick__block { border: 1px solid var(--border); }
 
 .brick__section--reversed .brick__block:nth-child(2):last-child {
@@ -104,9 +102,9 @@
 
 .brick__block__collection.has-padding .look__slider {
   @include media-query($small) {
-    margin-left: var(--outer-offset);
-    margin-right: var(--outer-offset);
-    padding-left: var(--outer);
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
+    padding-left: var(--grid-outer);
   }
 }
 
@@ -127,7 +125,7 @@
 .wrapper--full .brick__block__text.has-padding { padding-left: var(--outer); }
 
 @include media-query($medium-up) {
-  .brick--border:not(.brick--margin) .brick__block:last-of-type:not(:only-child) { border-left: none; }
+  .brick--border:not(.has-gap) .brick__block:last-of-type:not(:only-child) { border-left: none; }
 
   .brick__block__video .image-height,
   .brick__block__image .image-height {
@@ -143,7 +141,7 @@
 
 // handle swaparo mobile cases
 @include media-query($small) {
-  .brick--border:not(.brick--margin) .brick__block:last-of-type:not(:only-child) { border-top: none; }
+  .brick--border:not(.has-gap) .brick__block:last-of-type:not(:only-child) { border-top: none; }
 
   .brick__block__video .image-height--mobile,
   .brick__block__image .image-height--mobile { min-height: 100%; }
@@ -173,7 +171,7 @@
 }
 
 .brick__product__subheading {
-  padding-bottom: var(--gutter);
+  padding-bottom: var(--gap);
   margin: 0;
 }
 
@@ -428,8 +426,8 @@
 
 .brick__block--products {
   @include media-query($medium-up) {
-    &:first-child { padding-right: var(--gutter); }
-    &:last-child { padding-left: var(--gutter); }
+    &:first-child { padding-right: var(--gap); }
+    &:last-child { padding-left: var(--gap); }
   }
 
   @include media-query($small) {
@@ -502,9 +500,9 @@
     overflow-y: hidden;
     scroll-behavior: auto;
     scroll-snap-type: x mandatory;
-    scroll-padding: var(--outer);
+    scroll-padding: var(--grid-outer);
     -webkit-overflow-scrolling: touch;
-    padding: 0 0 var(--outer) var(--outer);
+    padding: 0 0 var(--grid-outer) var(--grid-outer);
     margin: 0;
 
     @include hide-scrollbar;
@@ -514,10 +512,8 @@
       min-height: 1px;
       display: block;
       position: relative;
-      padding-right: var(--outer);
+      padding-right: var(--grid-outer);
     }
-
-    body.grid-compact.has-line-design & { padding-top: 1px; }
 
     .product-item {
       width: 100%;
@@ -533,14 +529,14 @@
   @include media-query($small) {
     width: calc(100% - 50px);
     max-width: 80vh; // Prevent huge images on a landscape mobile view
-    margin-right: var(--gutter);
+    margin-right: var(--grid-gap);
     scroll-snap-align: start;
 
     &:last-child { margin-right: 0; }
 
     &:only-child {
       max-width: 100%;
-      width: calc(100% - var(--gutter));
+      width: calc(100% - var(--grid-gap));
     }
   }
 }
@@ -548,7 +544,7 @@
 .brick__section--mobile-slider {
   @include media-query ($small) {
     padding-block: 0;
-    padding-inline: var(--outer) 0;
+    padding-inline: var(--grid-outer) 0;
     width: auto;
     display: flex;
     flex-wrap: nowrap;
@@ -558,7 +554,7 @@
     overflow-y: hidden;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scroll-padding: var(--outer);
+    scroll-padding: var(--grid-outer);
 
     @include hide-scrollbar;
 
@@ -567,7 +563,7 @@
       min-height: 1px;
       display: block;
       position: relative;
-      padding-right: var(--outer);
+      padding-right: var(--grid-outer);
     }
 
     .brick__block {
@@ -577,10 +573,10 @@
       width: calc(100% - 50px);
       scroll-snap-align: start;
 
-      &:only-child { width: calc(100% - var(--outer)); }
+      &:only-child { width: calc(100% - var(--grid-outer)); }
     }
 
-    &.brick--margin {
+    &.has-gap {
       .brick__block { margin-inline-end: var(--gap); }
       .brick__block:last-child { margin-inline-end: 0; }
     }
@@ -593,8 +589,8 @@
     }
 
     // Handle layout cases when one of the blocks should stay hidden in previews but visible in the Theme editor
-    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--outer)); }
-    &.brick--margin:has(.brick__block.hidden) .brick__block { margin-inline-end: 0; }
+    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--grid-outer)); }
+    &.has-gap:has(.brick__block.hidden) .brick__block { margin-inline-end: 0; }
     &.wrapper--full:has(.brick__block.hidden)::after { display: none; }
     &.wrapper--full:has(.brick__block.hidden) .brick__block { width: 100%; }
 

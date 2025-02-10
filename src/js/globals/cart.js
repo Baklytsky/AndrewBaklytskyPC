@@ -161,8 +161,6 @@ class CartItems extends HTMLElement {
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
     document.addEventListener('theme:cart:refresh', this.getCart.bind(this));
-
-    document.dispatchEvent(new CustomEvent('theme:cart:load', {bubbles: true}));
   }
 
   disconnectedCallback() {
@@ -171,8 +169,6 @@ class CartItems extends HTMLElement {
     document.removeEventListener('theme:announcement:init', this.updateProgress);
     document.removeEventListener('theme:product:add', this.productAddCallback);
     document.removeEventListener('theme:product:add-error', this.productAddCallback);
-
-    document.dispatchEvent(new CustomEvent('theme:cart:unload', {bubbles: true}));
 
     if (document.documentElement.hasAttribute(attributes.scrollLocked)) {
       document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));

@@ -17,37 +17,45 @@
 
 <div class="grid-item {{ alignment_class }}" id="{{ unique }}" data-grid-item>
   <div class="search-results-item__image" data-product-image role="option" aria-selected="false">
-    <a class="item-link" href="{{ item.url }}" aria-label="{{ item.title | strip_html | escape }}"{% unless tabindex %} tabindex="-1"{% endunless %}>
+    <a
+      class="item-link"
+      href="{{ item.url }}"
+      aria-label="{{ item.title | strip_html | escape }}"
+      {% unless tabindex %}
+        tabindex="-1"
+      {% endunless %}
+    >
       {%- if item.image -%}
-        <div class="search-results-item__bg"
+        <div
+          class="search-results-item__bg"
           data-aos="img-in"
           data-aos-delay="{{ animation_delay }}"
           data-aos-duration="{{ animation_duration }}"
           data-aos-anchor="{{ animation_anchor }}"
-          data-aos-easing="ease-out-quart">
+          data-aos-easing="ease-out-quart"
+        >
           {%- liquid
-            if settings.grid_style == 'compact'
-              assign image_sizes = '(min-width: 1400px) 25vw, (min-width: 750px) 33vw, (min-width: 480px) 50vw, 100vw'
-            else
-              assign image_sizes = '(min-width: 1400px) calc(25vw - 16px), (min-width: 750px) calc(33vw - 16px), (min-width: 480px) calc(50vw - 16px), calc(100vw - 32px)'
-            endif
+            assign image_sizes = '(min-width: 1400px) 25vw, (min-width: 750px) 33vw, (min-width: 480px) 50vw, 100vw'
 
-            render 'image' image: item.image, sizes: image_sizes, cover: true
+            render 'image', image: item.image, sizes: image_sizes, cover: true
           -%}
         </div>
       {%- elsif item.object_type == 'article' or item.object_type == 'page' -%}
-        <div class="search-results-item__bg image--empty"
+        <div
+          class="search-results-item__bg image--empty"
           data-aos="img-in"
           data-aos-delay="{{ animation_delay }}"
           data-aos-duration="{{ animation_duration }}"
-          data-aos-anchor="{{ animation_anchor }}">
-        </div>
+          data-aos-anchor="{{ animation_anchor }}"
+        ></div>
 
-        <span class="badge-box"
+        <span
+          class="badge-box"
           data-aos="fade"
           data-aos-delay="{{ animation_delay }}"
           data-aos-duration="{{ animation_duration }}"
-          data-aos-anchor="{{ animation_anchor }}">
+          data-aos-anchor="{{ animation_anchor }}"
+        >
           {%- liquid
             if item.object_type == 'article'
               echo 'layout.search_page.singular_article' | t
@@ -60,12 +68,20 @@
     </a>
   </div>
 
-  <div class="item-information{% if settings.product_grid_center %} text-center{% endif %}"
+  <div
+    class="item-information{% if settings.product_grid_center %} text-center{% endif %}"
     data-aos="fade"
     data-aos-delay="{{ animation_delay }}"
     data-aos-duration="{{ animation_duration }}"
-    data-aos-anchor="{{ animation_anchor }}">
-    <a class="item-link" href="{{ item.url }}"{% unless tabindex %} tabindex="-1"{% endunless %}>
+    data-aos-anchor="{{ animation_anchor }}"
+  >
+    <a
+      class="item-link"
+      href="{{ item.url }}"
+      {% unless tabindex %}
+        tabindex="-1"
+      {% endunless %}
+    >
       {{ item.title | strip_html | escape }}
     </a>
   </div>

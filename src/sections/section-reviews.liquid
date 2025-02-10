@@ -34,6 +34,14 @@
     endif
   endcapture
 
+  capture wrapper_classes
+    if show_featured_image
+      echo 'wrapper--full'
+    else
+      echo 'wrapper--full-padded'
+    endif
+  endcapture
+
   capture sizes
     if settings.block.size == 1
       echo '(min-width: 750px) 50vw, calc(100vw - 82px)'
@@ -66,7 +74,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="reviews"
 >
-  <div class="wrapper--full-padded">
+  <div class="{{ wrapper_classes }}">
     {%- if section.blocks.size > 0 -%}
       <grid-slider>
         <div
