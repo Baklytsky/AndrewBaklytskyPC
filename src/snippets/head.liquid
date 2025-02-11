@@ -472,6 +472,13 @@
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
     --PARALLAX-STRENGTH-MAX: {{ settings.parallax_strength | plus: 110.0 | append: '%' }};
 
+    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
+    --SIDEBAR-WIDTH: 288px;
+    --SIDEBAR-WIDTH-MEDIUM: 258px;
+
+    {%- comment -%} Drawers {%- endcomment -%}
+    --DRAWER-WIDTH: 380px;
+
     {%- comment -%} Grid Variables {%- endcomment -%}
 
     --COLUMNS: 4;
@@ -486,6 +493,10 @@
     --GRID-INNER: 0px;
     --GRID-INNER-MEDIUM: 0px;
     --GRID-INNER-SMALL: 0px;
+
+    --LAYOUT-INNER: 20px;
+    --LAYOUT-INNER-MEDIUM: 18px;
+    --LAYOUT-INNER-SMALL: 16px;
 
     {%- unless settings.grid_override -%}
       --WIDTH-FULL-PADDED: none;
@@ -538,6 +549,10 @@
         --LAYOUT-OUTER-MEDIUM: 16px;
         --LAYOUT-OUTER-SMALL: 16px;
 
+        --LAYOUT-INNER: 16px;
+        --LAYOUT-INNER-MEDIUM: 16px;
+        --LAYOUT-INNER-SMALL: 16px;
+
         --LAYOUT-GAP: 16px;
         --LAYOUT-GAP-MEDIUM: 12px;
         --LAYOUT-GAP-SMALL: 8px;
@@ -549,7 +564,7 @@
         --GRID-GAP: 16px;
         --GRID-GAP-MEDIUM: 12px;
         --GRID-GAP-SMALL: 8px;
-      {%- else -%}
+      {%- elsif settings.grid_style == 'wide' -%}
         --LAYOUT-OUTER: 80px;
         --LAYOUT-OUTER-MEDIUM: 60px;
         --LAYOUT-OUTER-SMALL: 30px;
@@ -558,9 +573,16 @@
         --LAYOUT-GAP-MEDIUM: 60px;
         --LAYOUT-GAP-SMALL: 30px;
 
+        --GRID-OUTER: 80px;
+        --GRID-OUTER-MEDIUM: 60px;
+        --GRID-OUTER-SMALL: 30px;
+
         --GRID-GAP: 80px;
         --GRID-GAP-MEDIUM: 40px;
         --GRID-GAP-SMALL: 30px;
+
+        --SIDEBAR-WIDTH: 317px;
+        --SIDEBAR-WIDTH-MEDIUM: 287px;
       {%- endif -%}
     {%- else -%}
       --WIDTH-FULL-PADDED: {{ settings.section_width_padded }}%;
@@ -609,13 +631,6 @@
     {%- comment -%} Custom variables {%- endcomment -%}
     --base-animation-delay: 0ms;
     --line-height-normal: 1.375; /* Equals to line-height: normal; */
-
-    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
-    --SIDEBAR-WIDTH: 288px;
-    --SIDEBAR-WIDTH-MEDIUM: 258px;
-
-    {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 380px;
 
     {%- comment -%} Icon Variables {%- endcomment -%}
     --ICON-STROKE-WIDTH: {{ settings.icon_style }}px;
