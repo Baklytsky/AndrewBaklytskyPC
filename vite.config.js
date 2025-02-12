@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import shopify from 'vite-plugin-shopify'
+import cleanup from '@by-association-only/vite-plugin-shopify-clean'
 import pageReload from 'vite-plugin-page-reload'
 
 export default defineConfig({
@@ -22,6 +23,13 @@ export default defineConfig({
     }),
     pageReload('/tmp/theme.update')
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      },
+    },
+  },
   build: {
     emptyOutDir: false,
     rollupOptions: {
@@ -31,5 +39,10 @@ export default defineConfig({
         assetFileNames: '[name].min.[ext]',
       },
     },
-  }
+  },
+  server: {
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+  },
 })
