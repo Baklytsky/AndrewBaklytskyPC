@@ -310,14 +310,14 @@
                         {%- liquid
                           if block.settings.product_list.count > 0
                             for product in block.settings.product_list
-                              render 'upsell-product', upsell_product: product
+                              render 'upsell-product', upsell_product: product, is_compact: true
                             endfor
                           elsif handles_arr.size > 0
                             for handle in handles_arr limit: 20
                               assign product = all_products[handle]
 
                               if product.id != ''
-                                render 'upsell-product', upsell_product: product
+                                render 'upsell-product', upsell_product: product, is_compact: true
                               endif
                             endfor
                           endif

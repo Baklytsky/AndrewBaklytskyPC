@@ -1,11 +1,11 @@
 {% comment %}
-    Renders order product list or upsell products on Cart page and Cart drawer
+  Renders order product list or upsell products on Cart page and Cart drawer
 
-    Accepts:
-    - block: {Object} Block object (required)
+  Accepts:
+  - block: {Object} Block object (required)
 
-    Usage:
-    {% render 'cart-block-upsell', block: block %}
+  Usage:
+  {% render 'cart-block-upsell', block: block %}
 {% endcomment %}
 
 {%- liquid
@@ -13,7 +13,7 @@
 
   capture product_list
     for product in block.settings.product_list
-      render 'upsell-product' upsell_product: product, is_product_list: true, is_cart: true
+      render 'upsell-product', upsell_product: product, is_compact: true
     endfor
   endcapture
 -%}
@@ -24,7 +24,8 @@
     {% if upsell_auto_open and product_list != blank %}
       open="true"
     {% endif %}
-    data-collapsible>
+    data-collapsible
+  >
     <summary class="cart__widget__title" data-collapsible-trigger>
       {{ block.settings.title }}
 
@@ -32,7 +33,13 @@
       {%- render 'icon-minus' -%}
     </summary>
 
-    <div class="cart__widget__content"{% if upsell_auto_open and product_list != blank %} style="height: auto;"{% endif %} data-collapsible-body>
+    <div
+      class="cart__widget__content"
+      {% if upsell_auto_open and product_list != blank %}
+        style="height: auto;"
+      {% endif %}
+      data-collapsible-body
+    >
       <div class="cart__widget__content__inner" data-collapsible-content>
         <div class="cart__widget__products">
           {{ product_list }}

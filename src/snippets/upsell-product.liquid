@@ -9,7 +9,7 @@
   - upsell_modifier: {String} Modifier class
   - upsell_button_text: {String} Button text
   - is_product_block: {Boolean} Is product block
-  - is_cart: {Boolean} Is cart page
+  - is_compact: {Boolean} Is compact - used on Cart/Cart drawer and Article Sidebar
   - show_available_upsell_only: {Boolean} Show available upsell only
   - onboarding: {Boolean} Onboarding mode
 
@@ -22,7 +22,7 @@
     upsell_modifier: 'product-upsell--modifier',
     upsell_button_text: 'Add to cart',
     is_product_block: true,
-    is_cart: false,
+    is_compact: false,
     show_available_upsell_only: false,
     onboarding: false
   %}
@@ -59,7 +59,6 @@
   assign unique = section.id | append: '-' | append: upsell_product.id
   assign product_form_id = 'ProductFormUpsell--' | append: unique
 
-  assign is_product_list = is_product_list | default: false
   assign show_available_upsell_only = show_available_upsell_only | default: false
 
   assign all_variants_soldout = true
@@ -92,7 +91,7 @@
 {%- if show_upsell -%}
   <quick-add-product>
     <div
-      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_cart %} product-upsell__holder--cart{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}"
+      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}"
       data-quick-add-holder="{{ upsell_product.id }}"
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
@@ -197,14 +196,6 @@
 
             {%- if all_variants_soldout -%}
               <span class="product-upsell__out-of-stock">{{ 'products.general.upsell_out_of_stock' | t }}</span>
-            {%- endif -%}
-
-            {%- if is_cart and is_product_list == false -%}
-              <button type="button" class="product-upsell__skip" title="{{ 'cart.general.remove' | t }}">
-                {%- render 'icon-cancel' -%}
-
-                {{- 'cart.general.remove' | t -}}
-              </button>
             {%- endif -%}
 
             {%- if upsell_description != '' -%}
