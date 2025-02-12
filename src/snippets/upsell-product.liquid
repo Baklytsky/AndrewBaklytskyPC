@@ -8,7 +8,6 @@
   - upsell_description_font_size: {String} Font size for description
   - upsell_modifier: {String} Modifier class
   - upsell_button_text: {String} Button text
-  - is_product_block: {Boolean} Is product block
   - is_compact: {Boolean} Is compact - used on Cart/Cart drawer and Article Sidebar
   - show_available_upsell_only: {Boolean} Show available upsell only
   - onboarding: {Boolean} Onboarding mode
@@ -21,7 +20,6 @@
     upsell_description_font_size: 'h5',
     upsell_modifier: 'product-upsell--modifier',
     upsell_button_text: 'Add to cart',
-    is_product_block: true,
     is_compact: false,
     show_available_upsell_only: false,
     onboarding: false
@@ -34,7 +32,7 @@
   assign upsell_quick_add_hide = upsell_quick_add_hide | default: false
   assign upsell_description = upsell_description | default: ''
   assign upsell_description_font_size = upsell_description_font_size | default: ''
-  assign is_product_block = is_product_block | default: false
+  assign is_compact = is_compact | default: false
 
   if upsell_product == blank
     assign show_upsell = false
@@ -71,10 +69,6 @@
 
   if all_variants_soldout
     assign upsell_quick_add_hide = true
-  endif
-
-  if request.design_mode == false and upsell_variant.available == false and show_available_upsell_only and is_product_block
-    assign show_upsell = false
   endif
 
   assign product_title = 'products.general.upsell_error_title' | t
