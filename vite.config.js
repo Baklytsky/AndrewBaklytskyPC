@@ -2,9 +2,12 @@ import { defineConfig } from 'vite'
 import shopify from 'vite-plugin-shopify'
 import cleanup from '@by-association-only/vite-plugin-shopify-clean'
 import pageReload from 'vite-plugin-page-reload'
+import tailwindcss from '@tailwindcss/vite'
+import autoprefixer from 'autoprefixer'
 
 export default defineConfig({
   plugins: [
+    cleanup(),
     shopify({
       // Root path to your Shopify theme directory (location of snippets, sections, templates, etc.)
       themeRoot: './',
@@ -13,7 +16,10 @@ export default defineConfig({
       // Front-end entry points directory
       entrypointsDir: 'src/entrypoints',
       // Additional files to use as entry points (accepts an array of file paths or glob patterns)
-      additionalEntrypoints: [],
+      additionalEntrypoints: [
+          'src/scss/sections/*.scss',
+          'src/js/sections/*.scss',
+      ],
       // Specifies the file name of the snippet that loads your assets
       snippetFile: 'vite-tag.liquid',
       // Specifies whether to append version numbers to your production-ready asset URLs in `snippetFile`
@@ -21,28 +27,30 @@ export default defineConfig({
       // Enables the creation of Cloudflare tunnels during dev, allowing previews from any device
       tunnel: false
     }),
-    pageReload('/tmp/theme.update')
+    pageReload('/tmp/theme.update', {
+      delay: 2000
+    })
   ],
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern-compiler',
+        api: 'modern-compiler'
       },
+      plugins: [
+        tailwindcss(),
+        autoprefixer(),
+      ]
     },
   },
   build: {
+    sourcemap: true,
     emptyOutDir: false,
     rollupOptions: {
       output: {
-        entryFileNames: '[name].min.js',
-        chunkFileNames: '[name].min.[ext]',
-        assetFileNames: '[name].min.[ext]',
+        entryFileNames: '[name].[hash].min.js',
+        chunkFileNames: '[name].[hash].min.js',
+        assetFileNames: '[name].[hash].min.[ext]',
       },
-    },
-  },
-  server: {
-    headers: {
-      'Cache-Control': 'no-store',
     },
   },
 })
