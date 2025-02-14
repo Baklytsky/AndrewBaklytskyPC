@@ -1,23 +1,26 @@
 <!-- /snippets/countdown-timer.liquid -->
 
 {% comment %}
-    Renders a countdown timer used on Countdown timer section
+  Renders a countdown timer used on Countdown timer section
 
-    Accepts:
-    - end_date: {Datetime} Expiration date (required)
-    - end_time: {Datetime} Expiration time (required)
-    - period: {String} AM/PM (required)
-    - digits_font_size: {String} Text size for digits (optional)
-    - text_font_size: {String} Text size for texts (optional)
-    - boxed: {Boolean} Add a box around the digits (optional)
-    - end_message: {String} End of timer message (Optional)
-    - hide_on_complete: {Boolean} Otherwise the end of timer message appears in place of the countdown timer. (Default: false)
-    - animation_order: {Integer} Animation order
-    - animation_anchor: {String} ID of the current section
+  Accepts:
+  - end_date: {Datetime} Expiration date (required)
+  - end_time: {Datetime} Expiration time (required)
+  - period: {String} AM/PM (required)
+  - digits_font_size: {String} Text size for digits (optional)
+  - text_font_size: {String} Text size for texts (optional)
+  - boxed: {Boolean} Add a box around the digits (optional)
+  - end_message: {String} End of timer message (Optional)
+  - hide_on_complete: {Boolean} Otherwise the end of timer message appears in place of the countdown timer. (Default: false)
+  - animation_order: {Integer} Animation order
+  - animation_anchor: {String} ID of the current section
 
-    Usage:
-    {% render 'countdown-timer', end_date: end_date, end_time: end_time, period: period %}
+  Usage:
+  {% render 'countdown-timer', end_date: end_date, end_time: end_time, period: period %}
 {% endcomment %}
+
+{{ 'section-countdown.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign digits_font_size = digits_font_size | default: 'heading-x-large'
@@ -31,7 +34,7 @@
     case period
       when 'am'
         case end_time_hour
-          when 0 or 12
+          when 0, 12
             echo '00' | append: ':' | append: end_time_minute
           else
             echo end_time
@@ -40,7 +43,7 @@
       when 'pm'
         capture hour
           case end_time_hour
-            when 0 or 12
+            when 0, 12
               echo '12'
             else
               if end_time_hour < 12
@@ -54,7 +57,6 @@
         echo hour | append: ':' | append: end_time_minute
     endcase
   endcapture
-
 
   assign expiration_date = expiration_date | default: 'now' | date: '%s'
   assign end_message = end_message | default: ''
@@ -103,21 +105,24 @@
   endif
 
   if section.location == 'header'
-    assign font_style = "font-body"
+    assign font_style = 'font-body'
   else
-    assign font_style = "font-heading"
+    assign font_style = 'font-heading'
   endif
 -%}
 
 <countdown-timer
   data-expiration-behavior="{{ expiration_behaviour }}"
-  style="--digit-font-size: var(--font-{{ digits_font_size }});
-         --text-font-size: var(--font-{{ text_font_size }});"
+  style="
+    --digit-font-size: var(--font-{{ digits_font_size }});
+    --text-font-size: var(--font-{{ text_font_size }});
+  "
 >
   <div class="countdown__timer">
     <time class="countdown__datetime" datetime="{{ expiration_date | date: '%Y-%m-%dT%H:%M:%S.%3N%z' }}">
       {%- assign animation_order = animation_order | plus: 1 -%}
-      <div class="{{ timer_class }}"
+      <div
+        class="{{ timer_class }}"
         {% if show_animations %}
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
@@ -129,8 +134,9 @@
       </div>
 
       {%- assign animation_order = animation_order | plus: 1 -%}
-      <div class="{{ timer_class }}"
-        {% if show_animations  %}
+      <div
+        class="{{ timer_class }}"
+        {% if show_animations %}
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -141,8 +147,9 @@
       </div>
 
       {%- assign animation_order = animation_order | plus: 1 -%}
-      <div class="timer__digit {{ timer_class }}"
-        {% if show_animations  %}
+      <div
+        class="timer__digit {{ timer_class }}"
+        {% if show_animations %}
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -153,8 +160,9 @@
       </div>
 
       {%- assign animation_order = animation_order | plus: 1 -%}
-      <div class="{{ timer_class }}"
-        {% if show_animations  %}
+      <div
+        class="{{ timer_class }}"
+        {% if show_animations %}
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
@@ -170,7 +178,7 @@
     {%- assign animation_order = message_animation_order -%}
     <div class="countdown__message">
       <div
-        {% if show_animations  %}
+        {% if show_animations %}
           data-aos="hero"
           data-aos-anchor="{{ animation_anchor }}"
           data-aos-order="{{ animation_order }}"
