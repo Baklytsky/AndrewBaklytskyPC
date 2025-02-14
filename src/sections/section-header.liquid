@@ -1,10 +1,10 @@
 {%- liquid
+  assign header_style = 'logo_beside'
+
   assign animation_name = 'drawer-items-fade'
   assign animation_duration = 500
   assign animation_delay = 0
   assign animation_delay_increment = 50
-
-  assign header_style = 'logo_beside'
 
   assign toolbar_block = section.blocks | where: 'type', 'toolbar'
   assign toolbar_block = toolbar_block[0]
@@ -84,14 +84,6 @@
     assign header_height_medium = menu_height_medium_default | plus: padding_top_medium | plus: padding_bottom_medium
     assign header_height_mobile = menu_height_mobile_default | plus: padding_top_mobile | plus: padding_bottom_mobile
     assign logo_width = 'auto'
-  endif
-
-  if header_style contains 'logo_above'
-    assign header_upper_height = logo_height | at_least: header_icons_height
-    assign header_upper_height_mobile = logo_height_mobile | at_least: menu_height_mobile_default
-    assign header_height = header_upper_height | plus: menu_height_default | plus: padding_top | plus: padding_bottom
-    assign header_height_medium = header_upper_height | plus: padding_top_medium | plus: padding_bottom_medium
-    assign header_height_mobile = header_upper_height_mobile | plus: padding_top_mobile | plus: padding_bottom_mobile
   endif
 
   if tertiary_menu_linklist != blank and linklists[tertiary_menu_linklist].links.size > 0
@@ -393,14 +385,12 @@
 
 {%- capture buttons -%}
   <div class="header__desktop__buttons{% if show_icons == false %} header__desktop__buttons--text{% else %} header__desktop__buttons--icons{% endif %}{% if settings.type_nav_caps %} caps{% endif %}">
-    {%- if header_style != 'logo_above' -%}
-      {{ cta }}
+    {{ cta }}
 
-      {%- if show_socials  -%}
-        <div class="header__desktop__button">
-          {%- render 'social-icons' -%}
-        </div>
-      {%- endif -%}
+    {%- if show_socials  -%}
+      <div class="header__desktop__button">
+        {%- render 'social-icons' -%}
+      </div>
     {%- endif -%}
 
     {%- if header_popouts -%}
@@ -599,43 +589,13 @@
       </div>
 
       <div class="header__desktop" data-header-desktop>
-        {%- case header_style -%}
-          {%- when 'logo_beside' -%}
-            <div class="header__desktop__upper" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
+        <div class="header__desktop__upper" data-takes-space-wrapper>
+          <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
+          <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
-            </div>
-          {%- when 'logo_center_menu_left' -%}
-            <div class="header__desktop__upper header__desktop__upper--reverse" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
-
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
-
-              <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
-            </div>
-          {%- when 'drawer' -%}
-            {%- comment -%} Do nothing for drawer {%- endcomment -%}
-          {%- else -%}
-            {%- comment -%} 'logo_above' is default case, this covers migrated settings {%- endcomment -%}
-            <div class="header__desktop__upper" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__l">
-                {{ cta }}
-
-                {%- if show_socials -%}
-                  {%- render 'social-icons' -%}
-                {%- endif -%}
-              </div>
-              <div data-child-takes-space class="header__desktop__bar__c">{{ logos }}</div>
-
-              <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
-            </div>
-            <div class="header__desktop__lower" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
-            </div>
-        {%- endcase -%}
+          <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
+        </div>
       </div>
     </div>
   </header>
