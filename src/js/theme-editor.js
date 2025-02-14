@@ -1,6 +1,6 @@
 document.addEventListener('shopify:section:select', (event) => {
   // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component:not([data-shopify-editor-block])') : null;
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') || event.target.querySelector('popup-newsletter') : null;
   if (popupComponent) {
     popupComponent.classList.add('popup--selected');
 
@@ -16,7 +16,7 @@ document.addEventListener('shopify:section:select', (event) => {
 
 document.addEventListener('shopify:section:deselect', (event) => {
   // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component:not([data-shopify-editor-block])') : null;
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') || event.target.querySelector('popup-newsletter') : null;
   if (popupComponent) {
     restorePopups();
   }
@@ -121,14 +121,6 @@ document.addEventListener('shopify:block:select', (event) => {
       })
     );
   }
-
-  // Popup components
-  const popupComponent = event.target.matches('popup-component') || event.target.matches('popup-newsletter') ? event.target : null;
-
-  if (popupComponent) {
-    popupComponent.popupOpen();
-    setTimeout(() => hideOtherPopups(popupComponent), 500);
-  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -171,32 +163,10 @@ document.addEventListener('shopify:block:deselect', (event) => {
 
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
   }
-
-  // Popup components
-  const popupComponent = event.target.matches('popup-component') || event.target.matches('popup-newsletter') ? event.target : null;
-  if (popupComponent) {
-    restorePopups();
-  }
 });
 
 function hideOtherPopups(selectedPopup) {
-  document.querySelectorAll('popup-component')?.forEach((popup) => {
-    if (popup !== selectedPopup) {
-      const dialog = popup.querySelector('dialog');
-      if (dialog.hasAttribute('open')) {
-        popup.classList.add('popup--hidden');
-
-        // Check if browser supports Dialog tags
-        if (typeof dialog.close === 'function') {
-          dialog.close();
-        } else {
-          dialog.removeAttribute('open');
-          dialog.setAttribute('aria-hidden', true);
-        }
-      }
-    }
-  });
-  document.querySelectorAll('popup-newsletter')?.forEach((popup) => {
+  document.querySelectorAll('popup-component, popup-newsletter')?.forEach((popup) => {
     if (popup !== selectedPopup) {
       const dialog = popup.querySelector('dialog');
       if (dialog.hasAttribute('open')) {
