@@ -15,6 +15,8 @@
 
 {%- liquid
   assign unique = block.id | default: section.id
+  assign text_color = block.settings.color | default: section.settings.color
+  assign show_terms = block.settings.terms | default: section.settings.terms
   assign form_class = 'newsletter-form'
   if small_newsletter
     assign form_class = form_class | append: ' hidden'
@@ -32,20 +34,21 @@
   assign placeholder_field = placeholder | default: placeholder_default
 
   assign input_group = true
-  assign show_name = block.settings.show_name
+  assign show_name = block.settings.show_name | default: section.settings.show_name
   if show_name
     assign input_group = false
   endif
   assign form_id = 'Newsletter--' | append: unique
   assign field_id = 'email-input-' | append: unique
   assign button_id = 'subscribe-button-' | append: unique
-  assign button_type = block.settings.button_type
-  assign button_size = block.settings.button_size
-  assign button_style = block.settings.button_style
+  assign button_type = block.settings.button_type | default: section.settings.button_type
+  assign button_size = block.settings.button_size | default: section.settings.button_size
+  assign button_style = block.settings.button_style | default: section.settings.button_style
   assign button_text_default = 'general.newsletter_form.submit' | t
-  assign button_text = block.settings.button_text | default: button_text_default
+  assign button_text = block.settings.button_text | default: section.settings.button_text | default: button_text_default
+  assign button_show_arrow = block.settings.show_arrow | default: section.settings.show_arrow
 
-  if button_style == 'btn--text' and block.settings.show_arrow
+  if button_style == 'btn--text' and button_show_arrow
     assign button_style = button_style | append: ' btn--text-no-underline'
   endif
 
@@ -68,24 +71,20 @@
   endcapture
 -%}
 
-{%- if block -%}
-  {%- unless block.settings.color.alpha == 0.0 or block.settings.color == blank -%}
-    {%- assign text_color = block.settings.color -%}
-
-    {%- capture style -%}
-      --text: {{ text_color }};
-      --text-dark: {{ text_color | color_saturate: 10 | color_darken: 15 }};
-      --text-a35: {{ text_color | color_modify: 'alpha', 0.35 }};
-      --text-a80: {{ text_color | color_modify: 'alpha', 0.80 }};
-    {%- endcapture -%}
-  {%- endunless -%}
-{%- endif -%}
+{%- unless text_color.alpha == 0.0 or text_color == blank -%}
+  {%- capture style -%}
+    --text: {{ text_color }};
+    --text-dark: {{ text_color | color_saturate: 10 | color_darken: 15 }};
+    --text-a35: {{ text_color | color_modify: 'alpha', 0.35 }};
+    --text-a80: {{ text_color | color_modify: 'alpha', 0.80 }};
+  {%- endcapture -%}
+{%- endunless -%}
 
 {%- capture submit_button -%}
   <button type="submit" class="{{ button_class }}" name="commit" id="{{ button_id }}">
     <span>{{ button_text }}</span>
 
-    {%- if block.settings.show_arrow or small_newsletter -%}
+    {%- if button_show_arrow or small_newsletter -%}
       {%- render 'icon-arrow-right' -%}
     {%- endif -%}
   </button>
@@ -173,7 +172,7 @@
     {%- else -%}
     {%- endunless -%}
 
-    {%- if block.settings.terms -%}
+    {%- if show_terms -%}
       <div class="form__legal">
         {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
       </div>
