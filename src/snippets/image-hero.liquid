@@ -9,6 +9,8 @@
   *  image_mobile {object} - The Image object for mobile (Optional)
   *  desktop_height {Int} - A specific height of the image on desktop (Optional)
   *  mobile_height {Int} - A specific height of the image on mobile (Optional)
+  *  aspect_ratio: {Int} Image aspect ratio (Optional)
+  *  aspect_ratio_mobile: {Int} Image aspect ratio for mobile (Optional)
   *  sizes {String} - A set of media conditions (Optional)
   *  widths {Array} - An array of the image widths for srcset (Optional)
   *  width {Int} - The default image width (Optional)
@@ -28,7 +30,7 @@
   assign image_desktop = image_desktop | default: image
   assign image_mobile = image_mobile | default: null
   assign aspect_ratio = aspect_ratio | default: image_desktop.aspect_ratio | default: 2.63
-  assign aspect_ratio_mobile = image_mobile.aspect_ratio | default: aspect_ratio
+  assign aspect_ratio_mobile = aspect_ratio_mobile | default: image_mobile.aspect_ratio | default: aspect_ratio
   assign image_width = image.width | at_most: 5760 | default: 5760
   assign width = width | default: image_width
   assign sizes = sizes | default: '100vw'
