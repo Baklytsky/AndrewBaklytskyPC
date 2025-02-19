@@ -79,6 +79,26 @@
   assign nav_font = settings.type_nav_font
   assign btn_font = settings.type_btn_font
 
+  if settings.type_heading_font_custom and settings.type_heading_font_list == 'custom'
+    assign heading_font_custom = settings.type_heading_font_custom
+  endif
+
+  if settings.type_subheading_font_custom and settings.type_subheading_font_list == 'custom'
+    assign subheading_font_custom = settings.type_subheading_font_custom
+  endif
+
+  if settings.type_base_font_custom and settings.type_base_font_list == 'custom'
+    assign base_font_custom = settings.type_base_font_custom
+  endif
+
+  if settings.type_nav_font_custom and settings.type_nav_font_list == 'custom'
+    assign nav_font_custom = settings.type_nav_font_custom
+  endif
+
+  if settings.type_btn_font_custom and settings.type_btn_font_list == 'custom'
+    assign btn_font_custom = settings.type_btn_font_custom
+  endif
+
   assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
   assign base_font_100 = base_font | font_modify: 'weight', '+100'
   assign base_font_200 = base_font | font_modify: 'weight', '+200'
@@ -138,8 +158,27 @@
   assign black = '#000000'
 -%}
 
+<script>
+  console.log('heading font custom', {{ heading_font_custom | json }})
+  console.log('subheading font custom', {{ subheading_font_custom | json }})
+  console.log('base font custom', {{ base_font_custom | json }})
+  console.log('nav font custom', {{ nav_font_custom | json }})
+  console.log('btn font custom', {{ btn_font_custom | json }})
+</script>
+
 <!-- CSS ================================================================== -->
 {% style %}
+  {% if heading_font_custom != blank %}
+    @font-face {
+      font-family: "ITC Novarese";
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url("{{ heading_font_custom | asset_url }}") format("woff2"),
+          url("{{ heading_font_custom | asset_url }}") format("woff");
+    }
+  {% endif %}
+
   {{ heading_font | font_face: font_display: 'swap' }}
   {{ base_font | font_face: font_display: 'swap' }}
   {{ nav_font | font_face: font_display: 'swap' }}
