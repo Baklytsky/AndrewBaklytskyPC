@@ -33,12 +33,12 @@ button {
   border: 1px solid var(--btn-border);
   border-radius: var(--btn-radius);
   background-color: var(--btn-bg);
-  font-family: var(--BTN-FONT-STACK);
+  font-family: var(--FONT-STACK-BTN);
   font-size: var(--BTN-FONT-SIZE);
   line-height: var(--line-height-normal);
   color: var(--btn-text);
-  font-style: var(--BTN-FONT-STYLE);
-  font-weight: var(--BTN-FONT-WEIGHT);
+  font-style: var(--FONT-STYLE-BTN);
+  font-weight: var(--FONT-WEIGHT-BTN);
   letter-spacing: var(--BTN-LETTER-SPACING);
   text-decoration: none;
   text-align: center;
@@ -66,7 +66,7 @@ button {
     cursor: default;
     opacity: 0.5;
 
-    &:after { content: none; }
+    &::after { content: none; }
   }
 
   --icons: var(--btn-text);
@@ -107,6 +107,7 @@ button {
   span.btn__text,
   .icon-arrow-left,
   .icon-arrow-right { height: calc(var(--BTN-FONT-SIZE) * 2 + 10px); }
+
   .icon-arrow-left,
   .icon-arrow-right {
     margin-top: 0;
@@ -230,6 +231,7 @@ button {
 
   span {
     @include animate-underline-from-center;
+
     line-height: 2;
     padding: 5px 0;
   }
@@ -244,8 +246,8 @@ button {
   z-index: 1;
 }
 
-.btn--outline:after,
-.btn--solid:after {
+.btn--outline::after,
+.btn--solid::after {
   content: '';
   position: absolute;
   top: 0;
@@ -253,20 +255,20 @@ button {
   z-index: -1;
   width: calc(100% + 120px);
   height: 100%;
-  background-color: currentColor;
+  background-color: currentcolor;
   opacity: 0.1;
   transform: translate3d(-100%,0,0) skew(30deg);
   transition: transform 0.5s cubic-bezier(0.33,0,0,1);
 }
 
-.btn--solid:after {
+.btn--solid::after {
   background-color: var(--btn-bg-hover);
   opacity: 1;
 }
 
 @media (hover: hover) {
-  .btn--outline:hover:after,
-  .btn--solid:hover:after { transform: translateZ(0); }
+  .btn--outline:hover::after,
+  .btn--solid:hover::after { transform: translateZ(0); }
 }
 
 .btn--half {
@@ -288,6 +290,7 @@ button {
 .btn--scroll-top {
   --icon-size: 28px;
   --btn-size: 40px;
+
   position: fixed;
   right: var(--outer);
   bottom: var(--outer);
@@ -308,7 +311,7 @@ button {
   transform: translateY(100%);
   transition: opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
 
-  &:after {
+  &::after {
     left: -30%;
   }
 
@@ -330,7 +333,7 @@ button {
   list-style-type: none;
   text-align: center;
   padding: 0;
-  margin: 30px 0 30px 0;
+  margin: 30px 0;
 
   li {
     display: inline-block;
@@ -347,7 +350,7 @@ button {
     position: relative;
   }
 
-  li a:after {
+  li a::after {
     content: "";
     margin: auto;
     width: 10%;
@@ -361,13 +364,14 @@ button {
     transition-property: color, background, border;
   }
 
-  li.inline-nav--active a:after,
-  li a:hover:after {
+  li.inline-nav--active a::after,
+  li a:hover::after {
     color: var(--link);
     opacity: 1;
     width: 100%;
   }
 }
+
 .blog__title + .inline-nav {
   margin-top: 0;
 }
@@ -379,8 +383,10 @@ button {
 }
 
 .btn__added { @include btn-added; }
+
 .btn__added,
 .btn__loader { opacity: 0; }
+
 .btn__error {
   position: absolute;
   left: 0;
@@ -399,6 +405,7 @@ button {
 
 .btn__plus {
   --icon-size: 24px;
+
   position: absolute;
   top: 0;
   left: 0;
@@ -407,7 +414,7 @@ button {
   width: var(--icon-size);
   height: var(--icon-size);
   margin: auto;
-  background: currentColor;
+  background: currentcolor;
   mask-image: var(--icon-add-cart);
   mask-size: cover;
   mask-repeat: no-repeat;
@@ -430,6 +437,7 @@ button {
   --btn-bg: transparent;
   --btn-bg-hover: transparent;
 }
+
 .is-loading > .btn__text,
 .is-loading > .btn__plus,
 .is-loading > .btn__added { opacity: 0; }
@@ -451,15 +459,17 @@ button {
   --btn-border-hover: var(--accent);
   --btn-bg: transparent;
   --btn-bg-hover: transparent;
+
   opacity: 1;
   background: transparent !important;
-  &:after { content: none; }
+  &::after { content: none; }
 }
 .is-added > .btn__added { opacity: 1; }
+
 .is-added > .btn__plus,
 .is-added > .btn__text,
 .is-added > .btn__loader { opacity: 0; }
-.is-added.btn:after { content: none; }
+.is-added.btn::after { content: none; }
 
 .has-error .btn__loader,
 .has-error .btn__text,
@@ -467,7 +477,7 @@ button {
   opacity: 0;
   visibility: hidden;
 }
-.has-error.btn:after { content: none; }
+.has-error.btn::after { content: none; }
 
 .has-error .btn__error {
   opacity: 1;

@@ -79,24 +79,34 @@
   assign nav_font = settings.type_nav_font
   assign btn_font = settings.type_btn_font
 
-  if settings.type_heading_font_custom and settings.type_heading_font_list == 'custom'
-    assign heading_font_custom = settings.type_heading_font_custom
+  if settings.type_header_font_custom and settings.header_font_list == 'custom'
+    assign heading_font_custom = settings.type_header_font_custom
+    assign heading_font_custom_name = heading_font_custom | split: '.' | first
+    assign heading_font_custom_ext = heading_font_custom | split: '.' | last | strip
   endif
 
-  if settings.type_subheading_font_custom and settings.type_subheading_font_list == 'custom'
+  if settings.type_subheading_font_custom and settings.subheading_font_list == 'custom'
     assign subheading_font_custom = settings.type_subheading_font_custom
+    assign subheading_font_custom_name = subheading_font_custom | split: '.' | first
+    assign subheading_font_custom_ext = subheading_font_custom | split: '.' | last | strip
   endif
 
-  if settings.type_base_font_custom and settings.type_base_font_list == 'custom'
+  if settings.type_base_font_custom and settings.base_font_list == 'custom'
     assign base_font_custom = settings.type_base_font_custom
+    assign base_font_custom_name = base_font_custom | split: '.' | first
+    assign base_font_custom_ext = base_font_custom | split: '.' | last | strip
   endif
 
-  if settings.type_nav_font_custom and settings.type_nav_font_list == 'custom'
+  if settings.type_nav_font_custom and settings.nav_font_list == 'custom'
     assign nav_font_custom = settings.type_nav_font_custom
+    assign nav_font_custom_name = nav_font_custom | split: '.' | first
+    assign nav_font_custom_ext = nav_font_custom | split: '.' | last | strip
   endif
 
-  if settings.type_btn_font_custom and settings.type_btn_font_list == 'custom'
+  if settings.type_btn_font_custom and settings.btn_font_list == 'custom'
     assign btn_font_custom = settings.type_btn_font_custom
+    assign btn_font_custom_name = btn_font_custom | split: '.' | first
+    assign btn_font_custom_ext = btn_font_custom | split: '.' | last | strip
   endif
 
   assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
@@ -158,32 +168,68 @@
   assign black = '#000000'
 -%}
 
-<script>
-  console.log('heading font custom', {{ heading_font_custom | json }})
-  console.log('subheading font custom', {{ subheading_font_custom | json }})
-  console.log('base font custom', {{ base_font_custom | json }})
-  console.log('nav font custom', {{ nav_font_custom | json }})
-  console.log('btn font custom', {{ btn_font_custom | json }})
-</script>
-
 <!-- CSS ================================================================== -->
 {% style %}
-  {% if heading_font_custom != blank %}
+  {% if base_font_custom != blank %}
     @font-face {
-      font-family: "ITC Novarese";
+      font-family: "{{ base_font_custom_name }}";
       font-weight: 400;
       font-style: normal;
       font-display: swap;
-      src: url("{{ heading_font_custom | asset_url }}") format("woff2"),
-          url("{{ heading_font_custom | asset_url }}") format("woff");
+      src: url("{{ base_font_custom | asset_url }}") format("{{ base_font_custom_ext }}");
     }
+  {% else %}
+    {{ base_font | font_face: font_display: 'swap' }}
   {% endif %}
 
-  {{ heading_font | font_face: font_display: 'swap' }}
-  {{ base_font | font_face: font_display: 'swap' }}
-  {{ nav_font | font_face: font_display: 'swap' }}
-  {{ btn_font | font_face: font_display: 'swap' }}
-  {{ subheading_font | font_face: font_display: 'swap' }}
+  {% if heading_font_custom != blank %}
+    @font-face {
+      font-family: "{{ heading_font_custom_name }}";
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url("{{ heading_font_custom | asset_url }}") format("{{ heading_font_custom_ext }}");
+    }
+  {% else %}
+    {{ heading_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if subheading_font_custom != blank %}
+    @font-face {
+      font-family: "{{ subheading_font_custom_name }}";
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url("{{ subheading_font_custom | asset_url }}") format("{{ subheading_font_custom_ext }}");
+    }
+  {% else %}
+    {{ subheading_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if nav_font_custom != blank %}
+    @font-face {
+      font-family: "{{ nav_font_custom_name }}";
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url("{{ nav_font_custom | asset_url }}") format("{{ nav_font_custom_ext }}");
+    }
+  {% else %}
+    {{ nav_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if btn_font_custom != blank %}
+    @font-face {
+      font-family: "{{ btn_font_custom_name }}";
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+      src: url("{{ btn_font_custom | asset_url }}") format("{{ btn_font_custom_ext }}");
+    }
+  {% else %}
+    {{ btn_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
 
   {% if base_font_bold %}
     {{ base_font_bold | font_face: font_display: 'swap' }}
@@ -448,6 +494,9 @@
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /* === Typography ===*/
+    --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
+    --FONT-SIZE-NAV: {{ settings.nav_font_size | append: 'px' }};
+
     --FONT-BODY-X-SMALL: {{ settings.body_x_small | append: 'px' }};
     --FONT-BODY-SMALL: {{ settings.body_small | append: 'px' }};
     --FONT-BODY-MEDIUM: {{ settings.body_medium | append: 'px' }};
@@ -474,39 +523,67 @@
     --FONT-HEADING-LARGE-MOBILE: {{ settings.heading_large_mobile | append: 'px' }};
     --FONT-HEADING-X-LARGE-MOBILE: {{ settings.heading_x_large_mobile | append: 'px' }};
 
-    --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
-    --FONT-STYLE-BODY: {{ base_font.style }};
-    --FONT-WEIGHT-BODY: {{ base_font.weight }};
-    --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
-
-    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
-    --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
-    --FONT-STYLE-HEADING: {{ heading_font.style }};
-
-    --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
-    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
-    --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
-    --FONT-STYLE-SUBHEADING: {{ subheading_font.style }};
     --FONT-SIZE-SUBHEADING-DESKTOP: {{ settings.subheading_size_desktop | append: 'px' }};
     --FONT-SIZE-SUBHEADING-MOBILE: {{ settings.subheading_size_mobile | append: 'px' }};
 
-    --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
+    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
     --LETTER-SPACING-SUBHEADING: {{ settings.sub_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-NAV: {{ nav_font.family }}, {{ nav_font.fallback_families }};
-    --FONT-WEIGHT-NAV: {{ nav_font.weight }};
-    --FONT-WEIGHT-NAV-BOLD: {{ nav_font_bold.weight | default: 700 }};
-    --FONT-STYLE-NAV: {{ nav_font.style }};
-    --FONT-SIZE-NAV: {{ settings.nav_font_size | append: 'px' }};
-
-
     --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
 
-    --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
+
+    --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
+    --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
+
+    {% if heading_font_custom != blank %}
+      --FONT-STACK-HEADING: {{ heading_font_custom_name }};
+      --FONT-WEIGHT-HEADING: normal;
+      --FONT-STYLE-HEADING: normal;
+    {% else %}
+      --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+      --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
+      --FONT-STYLE-HEADING: {{ heading_font.style }};
+    {% endif %}
+
+    {% if subheading_font_custom != blank %}
+      --FONT-STACK-SUBHEADING: {{ subheading_font_custom_name }};
+      --FONT-WEIGHT-SUBHEADING: normal;
+      --FONT-STYLE-SUBHEADING: normal;
+    {% else %}
+      --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
+      --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
+      --FONT-STYLE-SUBHEADING: {{ subheading_font.style }};
+    {% endif %}
+
+    {% if base_font_custom != blank %}
+      --FONT-STACK-BODY: {{ base_font_custom_name }};
+      --FONT-WEIGHT-BODY: normal;
+      --FONT-STYLE-BODY: normal;
+    {% else %}
+      --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
+      --FONT-STYLE-BODY: {{ base_font.style }};
+      --FONT-WEIGHT-BODY: {{ base_font.weight }};
+      --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
+    {% endif %}
+
+    {% if btn_font_custom != blank %}
+      --FONT-STACK-BTN: {{ btn_font_custom_name }};
+      --FONT-STYLE-BTN: normal;
+      --FONT-WEIGHT-BTN: normal;
+    {% else %}
+      --FONT-STACK-BTN: {{ btn_font.family }}, {{ btn_font.fallback_families }};
+      --FONT-WEIGHT-BTN: {{ btn_font.weight }};
+      --FONT-STYLE-BTN: {{ btn_font.style }};
+    {% endif %}
+
+    {% if nav_font_custom != blank %}
+      --FONT-STACK-NAV: {{ nav_font_custom_name }};
+    {% else %}
+      --FONT-STACK-NAV: {{ nav_font.family }}, {{ nav_font.fallback_families }};
+      --FONT-WEIGHT-NAV: {{ nav_font.weight }};
+      --FONT-WEIGHT-NAV-BOLD: {{ nav_font_bold.weight | default: 700 }};
+      --FONT-STYLE-NAV: {{ nav_font.style }};
+    {% endif %}
 
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
     --PARALLAX-STRENGTH-MAX: {{ settings.parallax_strength | plus: 110.0 | append: '%' }};
@@ -678,9 +755,6 @@
     --ICON-STROKE-WIDTH: {{ settings.icon_style }}px;
 
     /* === Button General ===*/
-    --BTN-FONT-STACK: {{ btn_font.family }}, {{ btn_font.fallback_families }};
-    --BTN-FONT-WEIGHT: {{ btn_font.weight }};
-    --BTN-FONT-STYLE: {{ btn_font.style }};
     --BTN-FONT-SIZE: {{ settings.btn_size }}px;
     --BTN-MEDIUM-SIZE: {{ settings.button_medium }}px;
     --BTN-LARGE-SIZE: {{ settings.button_large }}px;
