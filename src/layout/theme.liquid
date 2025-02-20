@@ -8,7 +8,7 @@
 
   <body
     id="{{ page_title | handle }}"
-    class="template-{{ template.name | handle }} grid-{{ settings.grid_style }}{% if customer %} customer-logged-in{% endif %}{% if settings.animations_enable %} aos-initialized{% endif %}"
+    class="template-{{ template.name | handle }}{% if customer %} customer-logged-in{% endif %}{% if settings.animations_enable %} aos-initialized{% endif %}"
     data-animations="{{ settings.animations_enable }}"
   >
     {%- render 'loading' -%}
@@ -36,7 +36,7 @@
       {% sections 'group-footer' %}
     </footer>
 
-    {%- if settings.swatches_type != 'disabled' -%}
+    {%- if settings.enable_color_swatches -%}
       {% render 'template-swatch' %}
     {%- endif -%}
 

@@ -75,13 +75,15 @@
   {%- endif -%}
 {%- endcapture -%}
 
+{{ 'tab-collections.css' | asset_url | stylesheet_tag }}
+
 {%- style -%}
   #TabCollections--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
 
     {%- if has_content -%}
-      --PT-MOBILE: max({{ section.settings.padding_top }}px, calc(var(--gutter) * 2));
+      --PT-MOBILE: max({{ section.settings.padding_top }}px, calc(var(--gap) * 2));
     {%- endif -%}
 
     --COLUMNS: {{ columns_desktop }};

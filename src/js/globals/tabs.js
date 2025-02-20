@@ -70,7 +70,7 @@ if (!customElements.get('tabs-component')) {
           tab.classList.add(classes.hidden);
         }
 
-        this.a11y.a11y.removeTrapFocus();
+        this.a11y.removeTrapFocus();
 
         this.dispatchEvent(new CustomEvent('theme:tab:change', {bubbles: true}));
 

@@ -1,22 +1,20 @@
 {% comment %}
-Header block content, used in both mobile header and desktop header.
+  Header block content, used in both mobile header and desktop header.
 
-Accepts a block, returns the content to render for that block.
+  Accepts a block, returns the content to render for that block.
 
-Required params:
-* block: (Object) the block that should be rednered.
-* image_count: (Int) the number of images per menu item
-* link_columns: (Int) the number of columns with links. Max: 3
-* only_images: (Boolean) whether we have images only or images with links
-* is_mobile: (Boolean) if the block is called from the mobile nav. Default: false
-* link_level_next: (Int) the index of the next link level
+  Required params:
+  * block: (Object) the block that should be rednered.
+  * image_count: (Int) the number of images per menu item
+  * link_columns: (Int) the number of columns with links. Max: 3
+  * only_images: (Boolean) whether we have images only or images with links
+  * is_mobile: (Boolean) if the block is called from the mobile nav. Default: false
+  * link_level_next: (Int) the index of the next link level
 
-{% render 'header-block', block: block, image_count: image_count, only_images: only_images, link_columns: link_columns, link_level_next: link_level_next %}
-
+  {% render 'header-block', block: block, image_count: image_count, only_images: only_images, link_columns: link_columns, link_level_next: link_level_next %}
 {% endcomment %}
 
 {%- liquid
-  assign grid_style = settings.grid_style
   assign animation_name = 'drawer-items-fade'
   assign animation_duration = 500
   assign text_color = block.settings.text_color
@@ -34,57 +32,59 @@ Required params:
   assign link = block.settings.link
   assign image = block.settings.image
 
-  assign full_width = '100vw'
-  if grid_style == 'classic'
-    assign full_width = '(100vw - 100px)'
-  endif
-
   if only_images
     assign columns = image_count
   else
     assign columns = image_count | plus: link_columns
   endif
 
-  assign sizes = '(min-width: 990px) calc(' | append: full_width | append: ' / ' | append: columns | append: '), (min-width: 380px) 350px, calc(100vw - 30px)'
+  assign sizes = '(min-width: 990px) calc(100vw / ' | append: columns | append: '), (min-width: 380px) 350px, calc(100vw - 30px)'
 
   if is_mobile
     assign sizes = '(min-width: 380px) 350px, calc(100vw - 30px)'
   endif
 -%}
 
-<div class="menu__block {{ width_class }}" {{ block.shopify_attributes }}
+<div
+  class="menu__block {{ width_class }}"
+  {{ block.shopify_attributes }}
   {% if link_level_next %}
     data-animates="{{ link_level_next }}"
     data-animation="{{ animation_name }}"
     data-animation-delay="{{ animation_delay }}"
     data-animation-duration="{{ animation_duration }}"
-  {% endif %}>
-  <div class="header__dropdown__image palette--contrast--dark"
-    {% unless text_color == 'rgba(0,0,0,0)' or text_color == blank %}style="--text: {{ text_color }};"{% endunless %}
-    data-stagger-first>
+  {% endif %}
+>
+  <div
+    class="header__dropdown__image palette--contrast--dark"
+    {% unless text_color == 'rgba(0,0,0,0)' or text_color == blank %}
+      style="--text: {{ text_color }};"
+    {% endunless %}
+    data-stagger-first
+  >
     {%- if link != blank -%}
       <a href="{{ link }}" class="link-over-image">
     {%- else -%}
       <div class="link-over-image">
     {%- endif -%}
 
-      <div class="hero__content__wrapper align--bottom-left">
-        <div class="hero__content hero__content--transparent backdrop--radial">
-          {%- if title != blank -%}
-            <h2 class="hero__title h3">
-              {{ title | escape }}
+    <div class="hero__content__wrapper align--bottom-left">
+      <div class="hero__content hero__content--transparent backdrop--radial">
+        {%- if title != blank -%}
+          <h2 class="hero__title h3">
+            {{ title | escape }}
 
-              {%- render 'superscript', link_collection: link -%}
-            </h2>
-          {%- endif -%}
+            {%- render 'superscript', link_collection: link -%}
+          </h2>
+        {%- endif -%}
 
-          {%- if text != blank -%}
-            <p class="hero__description">
-              {{ text | escape }}
-            </p>
-          {%- endif -%}
-        </div>
+        {%- if text != blank -%}
+          <p class="hero__description">
+            {{ text | escape }}
+          </p>
+        {%- endif -%}
       </div>
+    </div>
 
     {%- if link != blank -%}
       </a>
@@ -92,8 +92,17 @@ Required params:
       </div>
     {%- endif -%}
 
-    <div class="image-overlay" style="--overlay-bg: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"></div>
+    <div
+      class="image-overlay"
+      style="--overlay-bg: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"
+    ></div>
 
-    {%- render 'image', image: image, aspect_ratio: aspect_ratio, sizes: sizes, loading: 'lazy', fetchpriority: 'high' -%}
+    {%- render 'image',
+      image: image,
+      aspect_ratio: aspect_ratio,
+      sizes: sizes,
+      loading: 'lazy',
+      fetchpriority: 'high'
+    -%}
   </div>
 </div>

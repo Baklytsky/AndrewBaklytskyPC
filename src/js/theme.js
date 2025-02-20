@@ -4,6 +4,7 @@ import './globals/media-query';
 import './globals/currency';
 import './globals/debounce';
 import './globals/height';
+import './globals/scroll-to';
 import './globals/theme-a11y';
 import './globals/throttle';
 
@@ -33,7 +34,6 @@ import './globals/product-form';
 import './globals/product-grid';
 import './globals/product-images';
 import './globals/shopify-products';
-import './globals/scroll-to';
 import './globals/slider';
 import './globals/tabs';
 import './globals/toggle-ellipsis';

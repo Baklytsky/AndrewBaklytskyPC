@@ -181,7 +181,7 @@
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-    {% if forloop.index == 1 -%}
+    {% if scheme == settings.color_scheme -%}
       :root,
     {%- endif %}
     .color-{{ scheme.id }} {
@@ -469,9 +469,15 @@
 
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
 
-    /* === Parallax ===*/
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
     --PARALLAX-STRENGTH-MAX: {{ settings.parallax_strength | plus: 110.0 | append: '%' }};
+
+    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
+    --SIDEBAR-WIDTH: 288px;
+    --SIDEBAR-WIDTH-MEDIUM: 258px;
+
+    {%- comment -%} Drawers {%- endcomment -%}
+    --DRAWER-WIDTH: 380px;
 
     {%- comment -%} Grid Variables {%- endcomment -%}
 
@@ -480,54 +486,154 @@
     --COLUMNS-SMALL: 2;
     --COLUMNS-MOBILE: 1;
 
+    {%- comment -%} Used for text padding inline when:
+     - Grid style is set to compact
+     - Grid override is enabled and grid gap is set to 0
+    {%- endcomment -%}
+    --GRID-INNER: 0px;
+    --GRID-INNER-MEDIUM: 0px;
+    --GRID-INNER-SMALL: 0px;
+
+    --LAYOUT-INNER: 20px;
+    --LAYOUT-INNER-MEDIUM: 18px;
+    --LAYOUT-INNER-SMALL: 16px;
+
     {%- unless settings.grid_override -%}
+      --WIDTH-FULL-PADDED: none;
+      --WIDTH-NORMAL: 1100px;
+      --WIDTH-NORMAL-WIDE: 80vw;
+      --WIDTH-NARROW: 670px;
+
       {%- if settings.grid_style == 'compact' -%}
         --LAYOUT-OUTER: 32px;
-        --LAYOUT-GUTTER: 32px;
         --LAYOUT-OUTER-MEDIUM: 22px;
-        --LAYOUT-GUTTER-MEDIUM: 22px;
         --LAYOUT-OUTER-SMALL: 16px;
-        --LAYOUT-GUTTER-SMALL: 16px;
+
+        --LAYOUT-GAP: 32px;
+        --LAYOUT-GAP-MEDIUM: 22px;
+        --LAYOUT-GAP-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+
+        --GRID-INNER: 20px;
+        --GRID-INNER-MEDIUM: 18px;
+        --GRID-INNER-SMALL: 16px;
+
+        --GRID-GAP: 0px;
+        --GRID-GAP-MEDIUM: 0px;
+        --GRID-GAP-SMALL: 0px;
+
+        --GRID-GAP-VERTICAL: 0px;
+        --GRID-GAP-VERTICAL-MEDIUM: 0px;
+        --GRID-GAP-VERTICAL-SMALL: 0px;
       {%- elsif settings.grid_style == 'classic' -%}
         --LAYOUT-OUTER: 50px;
-        --LAYOUT-GUTTER: 32px;
         --LAYOUT-OUTER-MEDIUM: 30px;
-        --LAYOUT-GUTTER-MEDIUM: 22px;
         --LAYOUT-OUTER-SMALL: 16px;
-        --LAYOUT-GUTTER-SMALL: 16px;
-      {%- else -%}
+
+        --LAYOUT-GAP: 32px;
+        --LAYOUT-GAP-MEDIUM: 22px;
+        --LAYOUT-GAP-SMALL: 16px;
+
+        --GRID-OUTER: 50px;
+        --GRID-OUTER-MEDIUM: 30px;
+        --GRID-OUTER-SMALL: 16px;
+
+        --GRID-GAP: 32px;
+        --GRID-GAP-MEDIUM: 22px;
+        --GRID-GAP-SMALL: 16px;
+      {%- elsif settings.grid_style == 'tight' -%}
+        --LAYOUT-OUTER: 16px;
+        --LAYOUT-OUTER-MEDIUM: 16px;
+        --LAYOUT-OUTER-SMALL: 16px;
+
+        --LAYOUT-INNER: 16px;
+        --LAYOUT-INNER-MEDIUM: 16px;
+        --LAYOUT-INNER-SMALL: 16px;
+
+        --LAYOUT-GAP: 16px;
+        --LAYOUT-GAP-MEDIUM: 12px;
+        --LAYOUT-GAP-SMALL: 8px;
+
+        --GRID-OUTER: 16px;
+        --GRID-OUTER-MEDIUM: 16px;
+        --GRID-OUTER-SMALL: 16px;
+
+        --GRID-GAP: 16px;
+        --GRID-GAP-MEDIUM: 12px;
+        --GRID-GAP-SMALL: 8px;
+      {%- elsif settings.grid_style == 'wide' -%}
         --LAYOUT-OUTER: 80px;
-        --LAYOUT-GUTTER: 80px;
         --LAYOUT-OUTER-MEDIUM: 60px;
-        --LAYOUT-GUTTER-MEDIUM: 40px;
         --LAYOUT-OUTER-SMALL: 30px;
-        --LAYOUT-GUTTER-SMALL: 30px;
+
+        --LAYOUT-GAP: 80px;
+        --LAYOUT-GAP-MEDIUM: 60px;
+        --LAYOUT-GAP-SMALL: 30px;
+
+        --GRID-OUTER: 80px;
+        --GRID-OUTER-MEDIUM: 60px;
+        --GRID-OUTER-SMALL: 30px;
+
+        --GRID-GAP: 80px;
+        --GRID-GAP-MEDIUM: 40px;
+        --GRID-GAP-SMALL: 30px;
+
+        --SIDEBAR-WIDTH: 317px;
+        --SIDEBAR-WIDTH-MEDIUM: 287px;
       {%- endif -%}
     {%- else -%}
-      --PAGE-WIDTH: {{ settings.page_width }}px;
+      --WIDTH-FULL-PADDED: {{ settings.section_width_padded }}%;
+      --WIDTH-NORMAL: {{ settings.page_width | times: settings.section_width_normal | divided_by: 100 }}px;
+      --WIDTH-NARROW: {{ settings.page_width | times: settings.section_width_narrow | divided_by: 100 }}px;
+      --WIDTH-FULL-PADDED-MOBILE: {{ settings.section_width_padded_mobile }}%;
+      --WIDTH-NORMAL-MOBILE: {{ settings.section_width_normal_mobile }}%;
+      --WIDTH-NARROW-MOBILE: {{ settings.section_width_narrow_mobile }}%;
+
       --LAYOUT-OUTER: 50px;
-      --LAYOUT-GUTTER: {{ settings.grid_gap_horizontal }}px;
       --LAYOUT-OUTER-MEDIUM: 30px;
-      --LAYOUT-GUTTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 }}px;
       --LAYOUT-OUTER-SMALL: 16px;
-      --LAYOUT-GUTTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 }}px;
+
+      --LAYOUT-GAP: 32px;
+      --LAYOUT-GAP-MEDIUM: 22px;
+      --LAYOUT-GAP-SMALL: 16px;
+
+      --GRID-OUTER: 50px;
+      --GRID-OUTER-MEDIUM: 30px;
+      --GRID-OUTER-SMALL: 16px;
+
+      --GRID-GAP: {{ settings.grid_gap_horizontal }}px;
+      --GRID-GAP-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 | round }}px;
+      --GRID-GAP-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 | round }}px;
+
+      --GRID-GAP-VERTICAL: {{ settings.grid_gap_vertical }}px;
+      --GRID-GAP-VERTICAL-MEDIUM: {{ settings.grid_gap_vertical | times: 0.6 | round }}px;
+      --GRID-GAP-VERTICAL-SMALL: {{ settings.grid_gap_vertical | times: 0.32 | round }}px;
+
+      {%- if settings.grid_gap_horizontal == 0 -%}
+        --LAYOUT-OUTER: 32px;
+        --LAYOUT-OUTER-MEDIUM: 22px;
+        --LAYOUT-OUTER-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+
+        --GRID-INNER: 20px;
+        --GRID-INNER-MEDIUM: 18px;
+        --GRID-INNER-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+      {%- endif -%}
     {%- endunless -%}
 
     {%- comment -%} Custom variables {%- endcomment -%}
     --base-animation-delay: 0ms;
     --line-height-normal: 1.375; /* Equals to line-height: normal; */
-
-    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
-    {%- if settings.grid_style == 'compact' -%}
-      --SIDEBAR-WIDTH: 270px;
-      --SIDEBAR-WIDTH-MEDIUM: 258px;
-    {%- else -%}
-      --SIDEBAR-WIDTH: 288px;
-      --SIDEBAR-WIDTH-MEDIUM: 258px;
-    {%- endif -%}
-
-    {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 380px;
 
     {%- comment -%} Icon Variables {%- endcomment -%}
     --ICON-STROKE-WIDTH: {{ settings.icon_style }}px;
@@ -537,9 +643,9 @@
     --BTN-FONT-WEIGHT: {{ btn_font.weight }};
     --BTN-FONT-STYLE: {{ btn_font.style }};
     --BTN-FONT-SIZE: {{ settings.btn_size }}px;
-    --BTN-MEDIUM-SIZE: {{ settings.button_medium_size }}px;
-    --BTN-LARGE-SIZE: {{ settings.button_large_size }}px;
-    --BTN-SMALL-SIZE: {{ settings.button_small_size }}px;
+    --BTN-MEDIUM-SIZE: {{ settings.button_medium }}px;
+    --BTN-LARGE-SIZE: {{ settings.button_large }}px;
+    --BTN-SMALL-SIZE: {{ settings.button_small }}px;
 
     {%- assign font_size_base_decimal = settings.base_font_size | append: '.0' -%}
     --BTN-FONT-SIZE-BODY: {{ settings.btn_size | divided_by: font_size_base_decimal }}rem;
@@ -582,7 +688,7 @@
       right: 0;
       bottom: 0;
       background: {{ settings.show_image_bg_color }};
-      opacity: 0.025;
+      opacity: {{ settings.show_image_bg_opacity | times: 0.01 }};
       pointer-events: none;
       {% if settings.show_image_bg == 'front' %}
         z-index: 5;
@@ -609,9 +715,6 @@
   body {
     position: relative;
     min-width: 320px;
-    font-size: var(--FONT-SIZE-BASE);
-    text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
   }
 {% endstyle %}
 
@@ -633,9 +736,8 @@
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-{%- if settings.swatches_type != 'disabled' -%}
+{%- if settings.enable_color_swatches -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
-  {%- render 'swatch-color-list' -%}
 {%- endif %}
 
 {%- if request.design_mode -%}
@@ -727,8 +829,10 @@
         enableAnimations: {{ settings.animations_enable | json }},
         variantOnSale: {{ settings.variant_on_sale | json }},
         collectionSwatchStyle: {{ settings.collection_swatch_style | json }},
-        swatchesType: {{ settings.swatches_type | json }},
         mobileMenuType: {{ settings.mobile_menu_type | json }},
+      },
+      variables: {
+        productPageSticky: false,
       },
       sliderArrows: {
         prev: '<button type="button" class="slider__button slider__button--prev" data-button-arrow data-button-prev>' + {{ 'general.pagination.prev' | t | json }} + '</button>',

@@ -79,9 +79,9 @@
   endif
 
   assign item_sizes_images_mobile = 'calc(100vw / ' | append: item_placeholder | append: ')'
-  assign item_sizes_images_tablet = '(min-width: 750px) calc(((' | append: item_sizes_width | append: ' * 90 / 100) - ' | append: item_sizes_padding_tablet | append: ') / ' | append: item_per_row_medium | append: ')'
-  assign item_sizes_images_desktop = '(min-width: 990px) calc(((' | append: item_sizes_width | append: ' * 84 / 100) - ' | append: item_sizes_padding_desktop | append: ') / ' | append: item_per_row_medium | append: ')'
-  assign item_sizes_images_widescreen = '(min-width: 1400px) calc(((' | append: item_sizes_width | append: ' * 76 / 100) - ' | append: item_sizes_padding_desktop | append: ') / ' | append: item_placeholder | append: ')'
+  assign item_sizes_images_tablet = '(min-width: 750px) calc(((' | append: item_sizes_width | append: ' * 90 / 100) - 60px) / ' | append: item_per_row_medium | append: ')'
+  assign item_sizes_images_desktop = '(min-width: 990px) calc(((' | append: item_sizes_width | append: ' * 84 / 100) - 44px) / ' | append: item_per_row_medium | append: ')'
+  assign item_sizes_images_widescreen = '(min-width: 1400px) calc(((' | append: item_sizes_width | append: ' * 76 / 100) - 64px) / ' | append: item_placeholder | append: ')'
   capture item_sizes_images
     echo item_sizes_images_widescreen | append: ', ' | append: item_sizes_images_desktop | append: ', ' | append: item_sizes_images_tablet | append: ', ' | append: item_sizes_images_mobile
   endcapture
@@ -105,7 +105,7 @@
 
 {%- capture section_images -%}
   {%- if image_1 != blank -%}
-    <div class="brick__block__image wide-image"
+    <div class="brick__block__image"
       {% unless enable_slider %}
         data-slide="1"
       {% endunless %}
@@ -115,7 +115,7 @@
   {%- endif -%}
 
   {%- if image_2 != blank -%}
-    <div class="brick__block__image wide-image"
+    <div class="brick__block__image"
       {% unless enable_slider %}
         data-slide="2"
       {% endunless %}
@@ -125,7 +125,7 @@
   {%- endif -%}
 
   {%- if image_1 == blank and image_2 == blank -%}
-    <div class="brick__block__image wide-image">
+    <div class="brick__block__image">
       {%- render 'image-hero' sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
     </div>
   {%- endif -%}
@@ -162,7 +162,7 @@
           >
             <div class="brick__block brick__block--images{{ figure_width_class }}">
               {%- if image -%}
-                <div class="brick__block__image wide-image">
+                <div class="brick__block__image">
                   {%- render 'image-hero',
                     image: image,
                     sizes: sizes,

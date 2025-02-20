@@ -106,7 +106,6 @@ class GridSwatch extends HTMLElement {
         const swatchLink = swatchTemplate.querySelector(selectors.swatchLink);
         const swatchText = swatchTemplate.querySelector(selectors.swatchText);
         const swatchHandle = this.swatchesJSON[swatch];
-        const swatchStyle = theme.settings.swatchesType == 'native' ? swatchHandle : `var(--${swatchHandle})`;
         const variantTitle = variant.title.replaceAll('"', "'");
 
         swatchButton.style = `--animation-delay: ${(100 * this.count) / 1250}s`;
@@ -116,7 +115,7 @@ class GridSwatch extends HTMLElement {
         swatchButton.dataset.swatchVariantName = variantTitle;
         swatchButton.dataset.swatchImage = image;
         swatchButton.dataset.variant = variant.id;
-        swatchButton.style.setProperty('--swatch', swatchStyle);
+        swatchButton.style.setProperty('--swatch', swatchHandle);
         swatchLink.href = getUrlWithVariant(this.product.url, variant.id);
         swatchLink.dataset.swatch = swatch;
         swatchLink.disabled = !variantAvailable;

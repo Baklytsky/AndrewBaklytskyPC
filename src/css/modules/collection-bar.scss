@@ -13,7 +13,7 @@
 
   @include scrollbar-on-hover;
 
-  .no-results { padding: var(--gutter) / 2 0; }
+  .no-results { padding: var(--gap) / 2 0; }
 }
 
 .collection__sidebar--has-buttons .collection__sidebar__slider::after { content: none; }
@@ -81,7 +81,7 @@
 
 .collection__sidebar__slider .collection__sidebar {
   @include media-query ($medium-up) {
-    padding: var(--inner) var(--gutter) var(--inner) var(--outer);
+    padding: var(--inner) var(--inner) var(--inner) var(--outer);
     transform: translateX(-100%);
     transition: transform var(--duration) $ease-out-fast, mask-position var(--duration), -webkit-mask-position var(--duration);
   }
@@ -103,7 +103,7 @@
   @include media-query($medium-up) {
     transform: translateZ(0);
     min-width: var(--sidebar-width);
-    margin-right: calc((var(--outer) - var(--gutter)) * -1);
+    margin-right: calc((var(--grid-outer) - var(--grid-gap)) * -1);
   }
 
   @include media-query($small) { transform: translateZ(0); }
@@ -140,7 +140,7 @@
 }
 
 .collection__sidebar__slider .collection__filters {
-  @include media-query ($medium-up) { --padding: calc(var(--gutter) + var(--outer)); }
+  @include media-query ($medium-up) { --padding: calc(var(--inner) + var(--outer) + var(--scrollbar-width)); }
 }
 
 .collection__sidebar__slide-out .collection__filters {
@@ -176,6 +176,7 @@
 
 .filter-group__heading {
   position: relative;
+  overflow: hidden;
   border-bottom: 1px solid var(--border);
   padding: 0 15px 5px 0;
   margin-bottom: 0;
@@ -346,6 +347,7 @@
     top: 100%;
     bottom: initial;
     right: 0;
+    left: auto;
     max-width: 100vw !important;
   }
 
