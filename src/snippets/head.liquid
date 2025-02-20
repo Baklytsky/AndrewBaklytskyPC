@@ -79,34 +79,109 @@
   assign nav_font = settings.type_nav_font
   assign btn_font = settings.type_btn_font
 
-  if settings.type_header_font_custom and settings.header_font_list == 'custom'
+  if settings.type_header_font_custom and settings.type_header_font_list == 'custom'
     assign heading_font_custom = settings.type_header_font_custom
-    assign heading_font_custom_name = heading_font_custom | split: '.' | first
     assign heading_font_custom_ext = heading_font_custom | split: '.' | last | strip
+    assign heading_font_custom_name = heading_font_custom | split: '.' | first
+    assign parts = heading_font_custom_name | split: '-'
+    assign last_part = parts | last
+    assign name_parts_size = parts | size | minus: 1
+    assign font_name = ''
+    for i in (0..name_parts_size)
+      assign part = parts[i]
+      if part != last_part
+        assign font_name = font_name | append: part
+        unless forloop.last or i == name_parts_size
+          assign font_name = font_name | append: ' '
+        endunless
+      endif
+    endfor
+
+    assign heading_font_custom_name = font_name | strip
   endif
 
-  if settings.type_subheading_font_custom and settings.subheading_font_list == 'custom'
+  if settings.type_subheading_font_custom and settings.type_subheading_font_list == 'custom'
     assign subheading_font_custom = settings.type_subheading_font_custom
-    assign subheading_font_custom_name = subheading_font_custom | split: '.' | first
     assign subheading_font_custom_ext = subheading_font_custom | split: '.' | last | strip
+    assign subheading_font_custom_name = subheading_font_custom | split: '.' | first
+    assign parts = subheading_font_custom_name | split: '-'
+    assign last_part = parts | last
+    assign name_parts_size = parts | size | minus: 1
+    assign font_name = ''
+    for i in (0..name_parts_size)
+      assign part = parts[i]
+      if part != last_part
+        assign font_name = font_name | append: part
+        unless forloop.last or i == name_parts_size
+          assign font_name = font_name | append: ' '
+        endunless
+      endif
+    endfor
+
+    assign subheading_font_custom_name = font_name | strip
   endif
 
-  if settings.type_base_font_custom and settings.base_font_list == 'custom'
+  if settings.type_base_font_custom and settings.type_base_font_list == 'custom'
     assign base_font_custom = settings.type_base_font_custom
-    assign base_font_custom_name = base_font_custom | split: '.' | first
     assign base_font_custom_ext = base_font_custom | split: '.' | last | strip
+    assign base_font_custom_name = base_font_custom | split: '.' | first
+    assign parts = base_font_custom_name | split: '-'
+    assign last_part = parts | last
+    assign name_parts_size = parts | size | minus: 1
+    assign font_name = ''
+    for i in (0..name_parts_size)
+      assign part = parts[i]
+      if part != last_part
+        assign font_name = font_name | append: part
+        unless forloop.last or i == name_parts_size
+          assign font_name = font_name | append: ' '
+        endunless
+      endif
+    endfor
+
+    assign base_font_custom_name = font_name | strip
   endif
 
-  if settings.type_nav_font_custom and settings.nav_font_list == 'custom'
+  if settings.type_nav_font_custom and settings.type_nav_font_list == 'custom'
     assign nav_font_custom = settings.type_nav_font_custom
-    assign nav_font_custom_name = nav_font_custom | split: '.' | first
     assign nav_font_custom_ext = nav_font_custom | split: '.' | last | strip
+    assign nav_font_custom_name = nav_font_custom | split: '.' | first
+    assign parts = nav_font_custom_name | split: '-'
+    assign last_part = parts | last
+    assign name_parts_size = parts | size | minus: 1
+    assign font_name = ''
+    for i in (0..name_parts_size)
+      assign part = parts[i]
+      if part != last_part
+        assign font_name = font_name | append: part
+        unless forloop.last or i == name_parts_size
+          assign font_name = font_name | append: ' '
+        endunless
+      endif
+    endfor
+
+    assign nav_font_custom_name = font_name | strip
   endif
 
-  if settings.type_btn_font_custom and settings.btn_font_list == 'custom'
+  if settings.type_btn_font_custom and settings.type_btn_font_list == 'custom'
     assign btn_font_custom = settings.type_btn_font_custom
-    assign btn_font_custom_name = btn_font_custom | split: '.' | first
     assign btn_font_custom_ext = btn_font_custom | split: '.' | last | strip
+    assign btn_font_custom_name = btn_font_custom | split: '.' | first
+    assign parts = btn_font_custom_name | split: '-'
+    assign last_part = parts | last
+    assign name_parts_size = parts | size | minus: 1
+    assign font_name = ''
+    for i in (0..name_parts_size)
+      assign part = parts[i]
+      if part != last_part
+        assign font_name = font_name | append: part
+        unless forloop.last or i == name_parts_size
+          assign font_name = font_name | append: ' '
+        endunless
+      endif
+    endfor
+
+    assign btn_font_custom_name = font_name | strip
   endif
 
   assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
@@ -167,6 +242,14 @@
   assign white = '#ffffff'
   assign black = '#000000'
 -%}
+
+<script>
+  console.log({{ heading_font_custom_name | json }})
+  console.log({{ subheading_font_custom_name | json }})
+  console.log({{ base_font_custom_name | json }})
+  console.log({{ nav_font_custom_name | json }})
+  console.log({{ btn_font_custom_name | json }})
+</script>
 
 <!-- CSS ================================================================== -->
 {% style %}
