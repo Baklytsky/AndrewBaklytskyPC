@@ -1,5 +1,5 @@
 {%- liquid
-  assign onboarding = onboarding | default: false
+  assign onboarding_product = onboarding_product | default: false
   assign buybutton_setting = false
   assign current_variant = product.selected_or_first_available_variant
   assign gift_card_recipient_feature_active = false
@@ -187,7 +187,7 @@
               </popup-component>
             {%- endif -%}
           </div>
-          {%- if buybutton_setting and onboarding == false -%}
+          {%- if buybutton_setting and onboarding_product == false -%}
             <div class="product__submit__item {{ block.settings.button_type_dynamic }} {{ block.settings.button_style_dynamic }}">
               {{ form | payment_button }}
             </div>
@@ -196,7 +196,7 @@
       </div>
     {%- endcapture -%}
 
-    {%- if onboarding -%}
+    {%- if onboarding_product -%}
       {{ product_form_code }}
     {%- else -%}
       {%- form 'product', product, id: product_form_id, class: 'product-form', data-product-form: '' -%}

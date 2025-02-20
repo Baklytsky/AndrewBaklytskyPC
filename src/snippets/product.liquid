@@ -1,7 +1,9 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
-  assign onboarding = onboarding | default: false
+  assign featured_product = featured_product | default: false
+  assign onboarding_product = false
   assign product_sticky_enable = section.settings.product_sticky_enable
+  assign variant_image_scroll = section.settings.variant_image_scroll
   assign enable_video_looping = section.settings.enable_video_looping
   assign image_size = section.settings.image_size
   assign image_layout = section.settings.image_layout
@@ -9,8 +11,18 @@
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
   assign is_title_linked = true
+
   if template.name == 'product'
     assign is_title_linked = false
+  endif
+
+  if product.empty?
+    assign onboarding_product = true
+  endif
+
+  if featured_product
+    assign product_sticky_enable = false
+    assign variant_image_scroll = false
   endif
 
   assign show_thumbnails = false
@@ -62,7 +74,7 @@
   assign show_cart_bar = false
   assign unique = section.id
 
-  if section.settings.show_cart_bar
+  if section.settings.show_cart_bar and featured_product != true
     assign show_cart_bar = true
   endif
 
@@ -138,7 +150,7 @@
   data-enable-history-state="true"
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
-  data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"
+  data-variant-image-scroll="{{ variant_image_scroll }}"
   {% if show_cart_bar %}
     data-cart-bar-enabled
   {% endif %}
@@ -253,9 +265,9 @@
           {%- else -%}
             <div class="product__slides product__slides--{{ image_size }} product-single__photos">
               <div
-                class="product__photo product__slide{% if onboarding %} svg-placeholder{% else %} product__photo--blank{% endif %} {% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
+                class="product__photo product__slide{% if onboarding_product %} svg-placeholder{% else %} product__photo--blank{% endif %} {% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
               >
-                {%- if onboarding -%}
+                {%- if onboarding_product -%}
                   {{ 'product-1' | placeholder_svg_tag }}
                 {%- endif -%}
               </div>
@@ -320,7 +332,7 @@
                       block: block,
                       block_style: block_style,
                       is_title_linked: is_title_linked,
-                      onboarding: onboarding
+                      onboarding_product: onboarding_product
                     -%}
 
                   {%- when 'price' -%}
@@ -329,7 +341,7 @@
                       unique: unique,
                       block: block,
                       block_style: block_style,
-                      onboarding: onboarding
+                      onboarding_product: onboarding_product
                     -%}
 
                   {%- when 'variants' -%}
@@ -351,7 +363,7 @@
                       block_style: block_style,
                       product_form_id: product_form_id,
                       preorder: preorder,
-                      onboarding: onboarding
+                      onboarding_product: onboarding_product
                     -%}
 
                   {%- when 'description' -%}

@@ -1,6 +1,6 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
-  assign onboarding = onboarding | default: false
+  assign onboarding_product = onboarding_product | default: false
   assign price_font_size = block.settings.text_font_size
   assign units = product.variants | map: 'unit_price' | compact
   if units[0]
@@ -30,7 +30,7 @@
           class="product__price--sale"
         {% endif %}
       >
-        {%- if onboarding -%}
+        {%- if onboarding_product -%}
           {{ '1999' | money }}
         {%- else -%}
           {%- if current_variant.price == 0 -%}
@@ -128,7 +128,7 @@
   </div>
 
   {% comment %} Shop pay split payment terms {% endcomment %}
-  {%- unless onboarding -%}
+  {%- unless onboarding_product -%}
     <div class="shop-pay-terms">
       {%- assign product_form_installment_id = 'product-form-installment-'
         | append: unique
