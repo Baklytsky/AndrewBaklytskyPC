@@ -56,7 +56,7 @@ if (!customElements.get('product-images')) {
       }
 
       connectedCallback() {
-        if (Object.keys(this.productMediaItems).length === 1) return;
+        if (Object.keys(this.productMediaItems).length <= 1) return;
 
         this.productMediaObserver();
         this.toggleEvents();
