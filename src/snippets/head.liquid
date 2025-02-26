@@ -79,6 +79,51 @@
   assign nav_font = settings.type_nav_font
   assign btn_font = settings.type_btn_font
 
+  if settings.type_header_font_custom and settings.type_header_font_list == 'custom'
+    assign heading_font_custom = settings.type_header_font_custom | split: '|'
+    assign heading_font_custom_filename = heading_font_custom[0]
+    assign heading_font_custom_name = heading_font_custom[1]
+    assign heading_font_custom_weight = heading_font_custom[2]
+    assign heading_font_custom_style = heading_font_custom[3]
+    assign heading_font_custom_format = heading_font_custom[4]
+  endif
+
+  if settings.type_subheading_font_custom and settings.type_subheading_font_list == 'custom'
+    assign subheading_font_custom = settings.type_subheading_font_custom | split: '|'
+    assign subheading_font_custom_filename = subheading_font_custom[0]
+    assign subheading_font_custom_name = subheading_font_custom[1]
+    assign subheading_font_custom_weight = subheading_font_custom[2]
+    assign subheading_font_custom_style = subheading_font_custom[3]
+    assign subheading_font_custom_format = subheading_font_custom[4]
+  endif
+
+  if settings.type_base_font_custom and settings.type_base_font_list == 'custom'
+    assign base_font_custom = settings.type_base_font_custom | split: '|'
+    assign base_font_custom_filename = base_font_custom[0]
+    assign base_font_custom_name = base_font_custom[1]
+    assign base_font_custom_weight = base_font_custom[2]
+    assign base_font_custom_style = base_font_custom[3]
+    assign base_font_custom_format = base_font_custom[4]
+  endif
+
+  if settings.type_nav_font_custom and settings.type_nav_font_list == 'custom'
+    assign nav_font_custom = settings.type_nav_font_custom | split: '|'
+    assign nav_font_custom_filename = nav_font_custom[0]
+    assign nav_font_custom_name = nav_font_custom[1]
+    assign nav_font_custom_weight = nav_font_custom[2]
+    assign nav_font_custom_style = nav_font_custom[3]
+    assign nav_font_custom_format = nav_font_custom[4]
+  endif
+
+  if settings.type_btn_font_custom and settings.type_btn_font_list == 'custom'
+    assign btn_font_custom = settings.type_btn_font_custom | split: '|'
+    assign btn_font_custom_filename = btn_font_custom[0]
+    assign btn_font_custom_name = btn_font_custom[1]
+    assign btn_font_custom_weight = btn_font_custom[2]
+    assign btn_font_custom_style = btn_font_custom[3]
+    assign btn_font_custom_format = btn_font_custom[4]
+  endif
+
   assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
   assign base_font_100 = base_font | font_modify: 'weight', '+100'
   assign base_font_200 = base_font | font_modify: 'weight', '+200'
@@ -140,11 +185,66 @@
 
 <!-- CSS ================================================================== -->
 {% style %}
-  {{ heading_font | font_face: font_display: 'swap' }}
-  {{ base_font | font_face: font_display: 'swap' }}
-  {{ nav_font | font_face: font_display: 'swap' }}
-  {{ btn_font | font_face: font_display: 'swap' }}
-  {{ subheading_font | font_face: font_display: 'swap' }}
+  {% if base_font_custom %}
+    @font-face {
+      font-family: "{{ base_font_custom_name }}";
+      font-weight: {{ base_font_custom_weight }};
+      font-style: {{ base_font_custom_style }};
+      font-display: swap;
+      src: url("{{ base_font_custom_filename | asset_url }}") format("{{ base_font_custom_format }}");
+    }
+  {% else %}
+    {{ base_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if heading_font_custom %}
+    @font-face {
+      font-family: "{{ heading_font_custom_name }}";
+      font-weight: {{ heading_font_custom_weight }};
+      font-style: {{ heading_font_custom_style }};
+      font-display: swap;
+      src: url("{{ heading_font_custom_filename | asset_url }}") format("{{ heading_font_custom_format }}");
+    }
+  {% else %}
+    {{ heading_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if subheading_font_custom %}
+    @font-face {
+      font-family: "{{ subheading_font_custom_name }}";
+      font-weight: {{ subheading_font_custom_weight }};
+      font-style: {{ subheading_font_custom_style }};
+      font-display: swap;
+      src: url("{{ subheading_font_custom_filename | asset_url }}") format("{{ subheading_font_custom_format }}");
+    }
+  {% else %}
+    {{ subheading_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if nav_font_custom %}
+    @font-face {
+      font-family: "{{ nav_font_custom_name }}";
+      font-weight: {{ nav_font_custom_weight }};
+      font-style: {{ nav_font_custom_style }};
+      font-display: swap;
+      src: url("{{ nav_font_custom_filename | asset_url }}") format("{{ nav_font_custom_format }}");
+    }
+  {% else %}
+    {{ nav_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
+  {% if btn_font_custom %}
+    @font-face {
+      font-family: "{{ btn_font_custom_name }}";
+      font-weight: {{ btn_font_custom_weight }};
+      font-style: {{ btn_font_custom_style }};
+      font-display: swap;
+      src: url("{{ btn_font_custom_filename | asset_url }}") format("{{ btn_font_custom_format }}");
+    }
+  {% else %}
+    {{ btn_font | font_face: font_display: 'swap' }}
+  {% endif %}
+
 
   {% if base_font_bold %}
     {{ base_font_bold | font_face: font_display: 'swap' }}
@@ -181,7 +281,7 @@
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-    {% if forloop.index == 1 -%}
+    {% if scheme == settings.color_scheme -%}
       :root,
     {%- endif %}
     .color-{{ scheme.id }} {
@@ -409,6 +509,9 @@
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /* === Typography ===*/
+    --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
+    --FONT-SIZE-NAV: {{ settings.nav_font_size | append: 'px' }};
+
     --FONT-BODY-X-SMALL: {{ settings.body_x_small | append: 'px' }};
     --FONT-BODY-SMALL: {{ settings.body_small | append: 'px' }};
     --FONT-BODY-MEDIUM: {{ settings.body_medium | append: 'px' }};
@@ -435,43 +538,77 @@
     --FONT-HEADING-LARGE-MOBILE: {{ settings.heading_large_mobile | append: 'px' }};
     --FONT-HEADING-X-LARGE-MOBILE: {{ settings.heading_x_large_mobile | append: 'px' }};
 
-    --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
-    --FONT-STYLE-BODY: {{ base_font.style }};
-    --FONT-WEIGHT-BODY: {{ base_font.weight }};
-    --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
-
-    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
-    --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
-    --FONT-STYLE-HEADING: {{ heading_font.style }};
-
-    --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
-    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
-    --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
-    --FONT-STYLE-SUBHEADING: {{ subheading_font.style }};
     --FONT-SIZE-SUBHEADING-DESKTOP: {{ settings.subheading_size_desktop | append: 'px' }};
     --FONT-SIZE-SUBHEADING-MOBILE: {{ settings.subheading_size_mobile | append: 'px' }};
 
-    --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
+    --LETTER-SPACING-BODY: {{ settings.body_letter_spacing | divided_by: 1000.0 | append: 'em' }};
+    --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
     --LETTER-SPACING-SUBHEADING: {{ settings.sub_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
-    --FONT-STACK-NAV: {{ nav_font.family }}, {{ nav_font.fallback_families }};
-    --FONT-WEIGHT-NAV: {{ nav_font.weight }};
-    --FONT-WEIGHT-NAV-BOLD: {{ nav_font_bold.weight | default: 700 }};
-    --FONT-STYLE-NAV: {{ nav_font.style }};
-    --FONT-SIZE-NAV: {{ settings.nav_font_size | append: 'px' }};
-
-
     --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
 
-    --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
 
-    /* === Parallax ===*/
+    --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
+    --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
+
+    {% if heading_font_custom %}
+      --FONT-STACK-HEADING: {{ heading_font_custom_name }};
+      --FONT-WEIGHT-HEADING: normal;
+      --FONT-STYLE-HEADING: normal;
+    {% else %}
+      --FONT-STACK-HEADING: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+      --FONT-WEIGHT-HEADING: {{ heading_font.weight }};
+      --FONT-STYLE-HEADING: {{ heading_font.style }};
+    {% endif %}
+
+    {% if subheading_font_custom %}
+      --FONT-STACK-SUBHEADING: {{ subheading_font_custom_name }};
+      --FONT-WEIGHT-SUBHEADING: normal;
+      --FONT-STYLE-SUBHEADING: normal;
+    {% else %}
+      --FONT-STACK-SUBHEADING: {{ subheading_font.family }}, {{ subheading_font.fallback_families }};
+      --FONT-WEIGHT-SUBHEADING: {{ subheading_font.weight }};
+      --FONT-STYLE-SUBHEADING: {{ subheading_font.style }};
+    {% endif %}
+
+    {% if base_font_custom %}
+      --FONT-STACK-BODY: {{ base_font_custom_name }};
+      --FONT-WEIGHT-BODY: normal;
+      --FONT-STYLE-BODY: normal;
+    {% else %}
+      --FONT-STACK-BODY: {{ base_font.family }}, {{ base_font.fallback_families }};
+      --FONT-STYLE-BODY: {{ base_font.style }};
+      --FONT-WEIGHT-BODY: {{ base_font.weight }};
+      --FONT-WEIGHT-BODY-BOLD: {{ base_font_bold.weight | default: 700 }};
+    {% endif %}
+
+    {% if btn_font_custom %}
+      --FONT-STACK-BTN: {{ btn_font_custom_name }};
+      --FONT-STYLE-BTN: normal;
+      --FONT-WEIGHT-BTN: normal;
+    {% else %}
+      --FONT-STACK-BTN: {{ btn_font.family }}, {{ btn_font.fallback_families }};
+      --FONT-WEIGHT-BTN: {{ btn_font.weight }};
+      --FONT-STYLE-BTN: {{ btn_font.style }};
+    {% endif %}
+
+    {% if nav_font_custom != blank %}
+      --FONT-STACK-NAV: {{ nav_font_custom_name }};
+    {% else %}
+      --FONT-STACK-NAV: {{ nav_font.family }}, {{ nav_font.fallback_families }};
+      --FONT-WEIGHT-NAV: {{ nav_font.weight }};
+      --FONT-WEIGHT-NAV-BOLD: {{ nav_font_bold.weight | default: 700 }};
+      --FONT-STYLE-NAV: {{ nav_font.style }};
+    {% endif %}
+
     --PARALLAX-STRENGTH-MIN: {{ settings.parallax_strength | plus: 100.0 | append: '%' }};
     --PARALLAX-STRENGTH-MAX: {{ settings.parallax_strength | plus: 110.0 | append: '%' }};
+
+    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
+    --SIDEBAR-WIDTH: 288px;
+    --SIDEBAR-WIDTH-MEDIUM: 258px;
+
+    {%- comment -%} Drawers {%- endcomment -%}
+    --DRAWER-WIDTH: 380px;
 
     {%- comment -%} Grid Variables {%- endcomment -%}
 
@@ -480,66 +617,163 @@
     --COLUMNS-SMALL: 2;
     --COLUMNS-MOBILE: 1;
 
+    {%- comment -%} Used for text padding inline when:
+     - Grid style is set to compact
+     - Grid override is enabled and grid gap is set to 0
+    {%- endcomment -%}
+    --GRID-INNER: 0px;
+    --GRID-INNER-MEDIUM: 0px;
+    --GRID-INNER-SMALL: 0px;
+
+    --LAYOUT-INNER: 20px;
+    --LAYOUT-INNER-MEDIUM: 18px;
+    --LAYOUT-INNER-SMALL: 16px;
+
     {%- unless settings.grid_override -%}
+      --WIDTH-FULL-PADDED: none;
+      --WIDTH-NORMAL: 1100px;
+      --WIDTH-NORMAL-WIDE: 80vw;
+      --WIDTH-NARROW: 670px;
+
       {%- if settings.grid_style == 'compact' -%}
         --LAYOUT-OUTER: 32px;
-        --LAYOUT-GUTTER: 32px;
         --LAYOUT-OUTER-MEDIUM: 22px;
-        --LAYOUT-GUTTER-MEDIUM: 22px;
         --LAYOUT-OUTER-SMALL: 16px;
-        --LAYOUT-GUTTER-SMALL: 16px;
+
+        --LAYOUT-GAP: 32px;
+        --LAYOUT-GAP-MEDIUM: 22px;
+        --LAYOUT-GAP-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+
+        --GRID-INNER: 20px;
+        --GRID-INNER-MEDIUM: 18px;
+        --GRID-INNER-SMALL: 16px;
+
+        --GRID-GAP: 0px;
+        --GRID-GAP-MEDIUM: 0px;
+        --GRID-GAP-SMALL: 0px;
+
+        --GRID-GAP-VERTICAL: 0px;
+        --GRID-GAP-VERTICAL-MEDIUM: 0px;
+        --GRID-GAP-VERTICAL-SMALL: 0px;
       {%- elsif settings.grid_style == 'classic' -%}
         --LAYOUT-OUTER: 50px;
-        --LAYOUT-GUTTER: 32px;
         --LAYOUT-OUTER-MEDIUM: 30px;
-        --LAYOUT-GUTTER-MEDIUM: 22px;
         --LAYOUT-OUTER-SMALL: 16px;
-        --LAYOUT-GUTTER-SMALL: 16px;
-      {%- else -%}
+
+        --LAYOUT-GAP: 32px;
+        --LAYOUT-GAP-MEDIUM: 22px;
+        --LAYOUT-GAP-SMALL: 16px;
+
+        --GRID-OUTER: 50px;
+        --GRID-OUTER-MEDIUM: 30px;
+        --GRID-OUTER-SMALL: 16px;
+
+        --GRID-GAP: 32px;
+        --GRID-GAP-MEDIUM: 22px;
+        --GRID-GAP-SMALL: 16px;
+      {%- elsif settings.grid_style == 'tight' -%}
+        --LAYOUT-OUTER: 16px;
+        --LAYOUT-OUTER-MEDIUM: 16px;
+        --LAYOUT-OUTER-SMALL: 16px;
+
+        --LAYOUT-INNER: 16px;
+        --LAYOUT-INNER-MEDIUM: 16px;
+        --LAYOUT-INNER-SMALL: 16px;
+
+        --LAYOUT-GAP: 16px;
+        --LAYOUT-GAP-MEDIUM: 12px;
+        --LAYOUT-GAP-SMALL: 8px;
+
+        --GRID-OUTER: 16px;
+        --GRID-OUTER-MEDIUM: 16px;
+        --GRID-OUTER-SMALL: 16px;
+
+        --GRID-GAP: 16px;
+        --GRID-GAP-MEDIUM: 12px;
+        --GRID-GAP-SMALL: 8px;
+      {%- elsif settings.grid_style == 'wide' -%}
         --LAYOUT-OUTER: 80px;
-        --LAYOUT-GUTTER: 80px;
         --LAYOUT-OUTER-MEDIUM: 60px;
-        --LAYOUT-GUTTER-MEDIUM: 40px;
         --LAYOUT-OUTER-SMALL: 30px;
-        --LAYOUT-GUTTER-SMALL: 30px;
+
+        --LAYOUT-GAP: 80px;
+        --LAYOUT-GAP-MEDIUM: 60px;
+        --LAYOUT-GAP-SMALL: 30px;
+
+        --GRID-OUTER: 80px;
+        --GRID-OUTER-MEDIUM: 60px;
+        --GRID-OUTER-SMALL: 30px;
+
+        --GRID-GAP: 80px;
+        --GRID-GAP-MEDIUM: 40px;
+        --GRID-GAP-SMALL: 30px;
+
+        --SIDEBAR-WIDTH: 317px;
+        --SIDEBAR-WIDTH-MEDIUM: 287px;
       {%- endif -%}
     {%- else -%}
-      --PAGE-WIDTH: {{ settings.page_width }}px;
+      --WIDTH-FULL-PADDED: {{ settings.section_width_padded }}%;
+      --WIDTH-NORMAL: {{ settings.page_width | times: settings.section_width_normal | divided_by: 100 }}px;
+      --WIDTH-NARROW: {{ settings.page_width | times: settings.section_width_narrow | divided_by: 100 }}px;
+      --WIDTH-FULL-PADDED-MOBILE: {{ settings.section_width_padded_mobile }}%;
+      --WIDTH-NORMAL-MOBILE: {{ settings.section_width_normal_mobile }}%;
+      --WIDTH-NARROW-MOBILE: {{ settings.section_width_narrow_mobile }}%;
+
       --LAYOUT-OUTER: 50px;
-      --LAYOUT-GUTTER: {{ settings.grid_gap_horizontal }}px;
       --LAYOUT-OUTER-MEDIUM: 30px;
-      --LAYOUT-GUTTER-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 }}px;
       --LAYOUT-OUTER-SMALL: 16px;
-      --LAYOUT-GUTTER-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 }}px;
+
+      --LAYOUT-GAP: 32px;
+      --LAYOUT-GAP-MEDIUM: 22px;
+      --LAYOUT-GAP-SMALL: 16px;
+
+      --GRID-OUTER: 50px;
+      --GRID-OUTER-MEDIUM: 30px;
+      --GRID-OUTER-SMALL: 16px;
+
+      --GRID-GAP: {{ settings.grid_gap_horizontal }}px;
+      --GRID-GAP-MEDIUM: {{ settings.grid_gap_horizontal | times: 0.6 | round }}px;
+      --GRID-GAP-SMALL: {{ settings.grid_gap_horizontal | times: 0.32 | round }}px;
+
+      --GRID-GAP-VERTICAL: {{ settings.grid_gap_vertical }}px;
+      --GRID-GAP-VERTICAL-MEDIUM: {{ settings.grid_gap_vertical | times: 0.6 | round }}px;
+      --GRID-GAP-VERTICAL-SMALL: {{ settings.grid_gap_vertical | times: 0.32 | round }}px;
+
+      {%- if settings.grid_gap_horizontal == 0 -%}
+        --LAYOUT-OUTER: 32px;
+        --LAYOUT-OUTER-MEDIUM: 22px;
+        --LAYOUT-OUTER-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+
+        --GRID-INNER: 20px;
+        --GRID-INNER-MEDIUM: 18px;
+        --GRID-INNER-SMALL: 16px;
+
+        --GRID-OUTER: 0px;
+        --GRID-OUTER-MEDIUM: 0px;
+        --GRID-OUTER-SMALL: 0px;
+      {%- endif -%}
     {%- endunless -%}
 
     {%- comment -%} Custom variables {%- endcomment -%}
     --base-animation-delay: 0ms;
     --line-height-normal: 1.375; /* Equals to line-height: normal; */
 
-    {%- comment -%} Sidebar on Collection and Search {%- endcomment -%}
-    {%- if settings.grid_style == 'compact' -%}
-      --SIDEBAR-WIDTH: 270px;
-      --SIDEBAR-WIDTH-MEDIUM: 258px;
-    {%- else -%}
-      --SIDEBAR-WIDTH: 288px;
-      --SIDEBAR-WIDTH-MEDIUM: 258px;
-    {%- endif -%}
-
-    {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 380px;
-
     {%- comment -%} Icon Variables {%- endcomment -%}
     --ICON-STROKE-WIDTH: {{ settings.icon_style }}px;
 
     /* === Button General ===*/
-    --BTN-FONT-STACK: {{ btn_font.family }}, {{ btn_font.fallback_families }};
-    --BTN-FONT-WEIGHT: {{ btn_font.weight }};
-    --BTN-FONT-STYLE: {{ btn_font.style }};
     --BTN-FONT-SIZE: {{ settings.btn_size }}px;
-    --BTN-MEDIUM-SIZE: {{ settings.button_medium_size }}px;
-    --BTN-LARGE-SIZE: {{ settings.button_large_size }}px;
-    --BTN-SMALL-SIZE: {{ settings.button_small_size }}px;
+    --BTN-MEDIUM-SIZE: {{ settings.button_medium }}px;
+    --BTN-LARGE-SIZE: {{ settings.button_large }}px;
+    --BTN-SMALL-SIZE: {{ settings.button_small }}px;
 
     {%- assign font_size_base_decimal = settings.base_font_size | append: '.0' -%}
     --BTN-FONT-SIZE-BODY: {{ settings.btn_size | divided_by: font_size_base_decimal }}rem;
@@ -582,7 +816,7 @@
       right: 0;
       bottom: 0;
       background: {{ settings.show_image_bg_color }};
-      opacity: 0.025;
+      opacity: {{ settings.show_image_bg_opacity | times: 0.01 }};
       pointer-events: none;
       {% if settings.show_image_bg == 'front' %}
         z-index: 5;
@@ -609,9 +843,6 @@
   body {
     position: relative;
     min-width: 320px;
-    font-size: var(--FONT-SIZE-BASE);
-    text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
   }
 {% endstyle %}
 
@@ -633,9 +864,8 @@
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-{%- if settings.swatches_type != 'disabled' -%}
+{%- if settings.enable_color_swatches -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
-  {%- render 'swatch-color-list' -%}
 {%- endif %}
 
 {%- if request.design_mode -%}
@@ -727,8 +957,10 @@
         enableAnimations: {{ settings.animations_enable | json }},
         variantOnSale: {{ settings.variant_on_sale | json }},
         collectionSwatchStyle: {{ settings.collection_swatch_style | json }},
-        swatchesType: {{ settings.swatches_type | json }},
         mobileMenuType: {{ settings.mobile_menu_type | json }},
+      },
+      variables: {
+        productPageSticky: false,
       },
       sliderArrows: {
         prev: '<button type="button" class="slider__button slider__button--prev" data-button-arrow data-button-prev>' + {{ 'general.pagination.prev' | t | json }} + '</button>',

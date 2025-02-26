@@ -1,5 +1,6 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
+  assign onboarding_product = onboarding_product | default: false
   assign price_font_size = block.settings.text_font_size
   assign units = product.variants | map: 'unit_price' | compact
   if units[0]
@@ -29,10 +30,14 @@
           class="product__price--sale"
         {% endif %}
       >
-        {%- if current_variant.price == 0 -%}
-          {{ 'general.money.free' | t }}
+        {%- if onboarding_product -%}
+          {{ '1999' | money }}
         {%- else -%}
-          {{ current_variant.price | money }}
+          {%- if current_variant.price == 0 -%}
+            {{ 'general.money.free' | t }}
+          {%- else -%}
+            {{ current_variant.price | money }}
+          {%- endif -%}
         {%- endif -%}
       </span>
 
@@ -123,20 +128,22 @@
   </div>
 
   {% comment %} Shop pay split payment terms {% endcomment %}
-  <div class="shop-pay-terms">
-    {%- assign product_form_installment_id = 'product-form-installment-'
-      | append: unique
-      | append: '-'
-      | append: product.id
-    -%}
-    {%- form 'product',
-      product,
-      id: product_form_installment_id,
-      class: 'installment',
-      data-product-form-installment: ''
-    -%}
-      <input type="hidden" name="id" value="{{ current_variant.id }}">
-      {{ form | payment_terms }}
-    {%- endform -%}
-  </div>
+  {%- unless onboarding_product -%}
+    <div class="shop-pay-terms">
+      {%- assign product_form_installment_id = 'product-form-installment-'
+        | append: unique
+        | append: '-'
+        | append: product.id
+      -%}
+      {%- form 'product',
+        product,
+        id: product_form_installment_id,
+        class: 'installment',
+        data-product-form-installment: ''
+      -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        {{ form | payment_terms }}
+      {%- endform -%}
+    </div>
+  {%- endunless -%}
 </div>

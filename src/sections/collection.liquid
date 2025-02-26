@@ -31,17 +31,9 @@
 
 {%- capture image_sizes -%}
   {%- if filter_layout == 'inline-open' and enable_filters -%}
-    {%- if settings.grid_style == 'compact' -%}
-      (min-width: 990px) calc((100vw - 288px) / {{ columns_desktop }}), (min-width: 750px) calc((100vw - 258px) / {{ columns_medium }}), (min-width: 480px) calc(100vw / {{ columns_small }}), calc(100vw / {{ columns_mobile }})
-    {%- else -%}
-      (min-width: 990px) calc((100vw - 288px - 100px) / {{ columns_desktop }} - 32px), (min-width: 750px) calc((100vw - 258px - 64px) / {{ columns_medium }} - 32px), (min-width: 480px) calc((100vw - 32px) / {{ columns_small }}), calc((100vw - 32px) / {{ columns_mobile }})
-    {%- endif -%}
+    (min-width: 990px) calc((100vw - 288px) / {{ columns_desktop }}), (min-width: 750px) calc((100vw - 258px) / {{ columns_medium }}), (min-width: 480px) calc(100vw / {{ columns_small }}), calc(100vw / {{ columns_mobile }})
   {%- else-%}
-    {%- if settings.grid_style == 'compact' -%}
-      (min-width: 990px) calc((100vw) / {{ columns_desktop }}), (min-width: 750px) calc((100vw) / {{ columns_medium }}), (min-width: 480px) calc(100vw / {{ columns_small }}), calc(100vw / {{ columns_mobile }})
-    {%- else -%}
-      (min-width: 990px) calc((100vw - 100px) / {{ columns_desktop }} - 32px), (min-width: 750px) calc((100vw - 64px) / {{ columns_medium }} - 32px), (min-width: 480px) calc((100vw - 32px) / {{ columns_small }}), calc((100vw - 32px) / {{ columns_mobile }})
-    {%- endif -%}
+    (min-width: 990px) calc((100vw) / {{ columns_desktop }}), (min-width: 750px) calc((100vw) / {{ columns_medium }}), (min-width: 480px) calc(100vw / {{ columns_small }}), calc(100vw / {{ columns_mobile }})
   {%- endif -%}
 {%- endcapture -%}
 
@@ -298,6 +290,7 @@
   </collection-component>
 
   {%- if enable_sort or enable_filters -%}
+    <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 {%- endpaginate -%}

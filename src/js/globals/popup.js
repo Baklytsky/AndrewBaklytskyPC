@@ -5,6 +5,9 @@ const selectors = {
   close: '[data-popup-close]',
   dialog: 'dialog',
   focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
+  newsletterForm: '[data-newsletter-form]',
+  newsletterHeading: '[data-newsletter-heading]',
+  newsletterField: '[data-newsletter-field]',
 };
 
 const attributes = {
@@ -13,6 +16,7 @@ const attributes = {
   scrollLock: 'data-scroll-lock-required',
   cookieName: 'data-cookie-name',
   cookieValue: 'data-cookie-value',
+  preventTopLayer: 'data-prevent-top-layer',
 };
 
 const classes = {
@@ -21,8 +25,6 @@ const classes = {
   cartBarVisible: 'cart-bar-visible',
   isVisible: 'is-visible',
   success: 'has-success',
-  selected: 'selected',
-  hasBlockSelected: 'has-block-selected',
   mobile: 'mobile',
   desktop: 'desktop',
   bottom: 'bottom',
@@ -33,6 +35,7 @@ class PopupComponent extends HTMLElement {
     super();
 
     this.popup = this.querySelector(selectors.dialog);
+    this.preventTopLayer = this.popup.hasAttribute(attributes.preventTopLayer);
     this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
     this.buttonPopupOpen = this.querySelector(selectors.open);
     this.a11y = window.theme.a11y;
@@ -55,12 +58,8 @@ class PopupComponent extends HTMLElement {
   checkCookie() {
     const cookieExists = this.cookie && this.cookie.read() !== false;
 
-    if (!cookieExists || window.Shopify.designMode) {
-      if (!window.Shopify.designMode) {
-        this.popupOpen();
-      } else {
-        this.showPopupEvents();
-      }
+    if (!cookieExists) {
+      this.showPopupEvents();
 
       this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
     }
@@ -104,7 +103,7 @@ class PopupComponent extends HTMLElement {
     this.isAnimating = true;
 
     // Check if browser supports Dialog tags
-    if (typeof this.popup.showModal === 'function') {
+    if (typeof this.popup.showModal === 'function' && !this.preventTopLayer) {
       this.popup.showModal();
     } else if (typeof this.popup.show === 'function') {
       this.popup.show();
@@ -277,6 +276,8 @@ class PopupNewsletter extends PopupComponent {
     super();
 
     this.form = this.popup.querySelector(selectors.newsletterForm);
+    this.heading = this.popup.querySelector(selectors.newsletterHeading);
+    this.newsletterField = this.popup.querySelector(selectors.newsletterField);
   }
 
   connectedCallback() {
@@ -302,7 +303,7 @@ class PopupNewsletter extends PopupComponent {
 
     if (!cookieExists || window.Shopify.designMode) {
       if (!window.Shopify.designMode && !window.location.pathname.endsWith('/challenge')) {
-        super.showDelayed();
+        super.showPopupEvents();
       }
 
       if (this.form && this.form.classList.contains(classes.success)) {
@@ -310,7 +311,7 @@ class PopupNewsletter extends PopupComponent {
         this.cookie.write();
       }
 
-      super.addEventListener('theme:popup:onclose', () => this.cookie.write());
+      this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
     }
 
     if (submissionSuccess) {
@@ -334,7 +335,7 @@ class PopupNewsletter extends PopupComponent {
   show() {
     if (!window.location.pathname.endsWith('/challenge')) {
       if (!window.Shopify.designMode) {
-        super.showDelayed();
+        super.showPopupEvents();
       } else {
         super.popupOpen();
       }
@@ -343,7 +344,7 @@ class PopupNewsletter extends PopupComponent {
     this.showForm();
     this.inputField();
 
-    this.addEventListener('theme:popup:onclose', () => this.cookie.write());
+    this.popup.addEventListener('theme:popup:onclose', () => this.cookie.write());
   }
 
   observeCartBar() {
@@ -370,7 +371,7 @@ class PopupNewsletter extends PopupComponent {
   }
 
   showForm() {
-    this.heading.addEventListener('click', (event) => {
+    this.heading?.addEventListener('click', (event) => {
       event.preventDefault();
 
       this.heading.classList.add(classes.hidden);
@@ -378,7 +379,7 @@ class PopupNewsletter extends PopupComponent {
       this.newsletterField.focus();
     });
 
-    this.heading.addEventListener('keyup', (event) => {
+    this.heading?.addEventListener('keyup', (event) => {
       if (event.code === 'Enter') {
         this.heading.dispatchEvent(new Event('click'));
       }
@@ -393,7 +394,7 @@ class PopupNewsletter extends PopupComponent {
       }
 
       if (this.newsletterField.value !== '') {
-        this.holder.classList.add(classes.hasValue);
+        this.popup.classList.add(classes.hasValue);
       }
     };
 
@@ -405,7 +406,7 @@ class PopupNewsletter extends PopupComponent {
 
       // Reset class
       this.resetClassTimer = setTimeout(() => {
-        this.holder.classList.remove(classes.hasValue);
+        this.popup.classList.remove(classes.hasValue);
       }, 2000);
     };
 

@@ -86,7 +86,7 @@ if (!customElements.get('announcement-bar')) {
 
       removeSlide(slide) {
         this.slider.dispatchEvent(
-          new CustomEvent('theme:slider:remove-cell', {
+          new CustomEvent('theme:slider:remove-slide', {
             bubbles: false,
             detail: {
               slide,

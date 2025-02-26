@@ -1,4 +1,5 @@
 {%- liquid
+  assign onboarding_product = onboarding_product | default: false
   assign buybutton_setting = false
   assign current_variant = product.selected_or_first_available_variant
   assign gift_card_recipient_feature_active = false
@@ -109,7 +110,7 @@
   {{ block.shopify_attributes }}
 >
   <product-form>
-    {%- form 'product', product, id: product_form_id, class: 'product-form', data-product-form: '' -%}
+    {%- capture product_form_code -%}
       {%- if gift_card_recipient_feature_active -%}
         {%- render 'gift-card-recipient-form', product: product, form: form -%}
       {%- endif -%}
@@ -186,13 +187,21 @@
               </popup-component>
             {%- endif -%}
           </div>
-          {%- if buybutton_setting -%}
+          {%- if buybutton_setting and onboarding_product == false -%}
             <div class="product__submit__item {{ block.settings.button_type_dynamic }} {{ block.settings.button_style_dynamic }}">
               {{ form | payment_button }}
             </div>
           {%- endif -%}
         </div>
       </div>
-    {%- endform -%}
+    {%- endcapture -%}
+
+    {%- if onboarding_product -%}
+      {{ product_form_code }}
+    {%- else -%}
+      {%- form 'product', product, id: product_form_id, class: 'product-form', data-product-form: '' -%}
+        {{ product_form_code }}
+      {%- endform -%}
+    {%- endif -%}
   </product-form>
 </div>

@@ -199,6 +199,7 @@ $rem-px-only: false !default;
 
 @mixin sidebar-close {
   --icon-size: 24px;
+
   position: absolute;
   top: 50%;
   right: 4px;
@@ -216,10 +217,11 @@ $rem-px-only: false !default;
 
   .icon {
     display: block;
-    fill: currentColor;
+    fill: currentcolor;
     transition: transform 0.3s;
     pointer-events: none;
   }
+
   @media (hover: hover) {
     &:hover { color: var(--link-hover); }
     &:hover .icon { transform: rotate(90deg); }
@@ -282,9 +284,9 @@ $rem-px-only: false !default;
 
 @mixin caps-link {
   font-size: var(--BTN-FONT-SIZE);
-  font-family: var(--BTN-FONT-STACK);
-  font-weight: var(--BTN-FONT-WEIGHT);
-  font-style: var(--BTN-FONT-STYLE);
+  font-family: var(--FONT-STACK-BTN);
+  font-weight: var(--FONT-WEIGHT-BTN);
+  font-style: var(--FONT-STYLE-BTN);
   text-transform: var(--BTN-UPPERCASE);
   letter-spacing: var(--BTN-LETTER-SPACING);
 
@@ -447,4 +449,28 @@ $rem-px-only: false !default;
   --btn-border-hover: #000;
   --btn-bg-hover: transparent;
   --btn-text-hover: #000;
+}
+
+// Aspect ratio
+@mixin aspect-ratio {
+  --aspect-ratio-default: 1 / 1;
+  --fallback-ratio-default: 100%;
+  --image-ratio-desktop: calc(1 / var(--aspect-ratio, var(--aspect-ratio-default)));
+  --image-ratio-fallback-desktop: calc((100 * var(--aspect-ratio, var(--fallback-ratio-default))) * 1%);
+  --image-ratio-mobile: calc(1 / var(--aspect-ratio-mobile, var(--aspect-ratio-default)));
+  --image-ratio-fallback-mobile: calc((100 * var(--aspect-ratio-mobile, var(--fallback-ratio-default))) * 1%);
+
+  aspect-ratio: var(--image-ratio-desktop);
+
+  @supports not (aspect-ratio: 16 / 9) {
+    padding-top: var(--image-ratio-fallback-desktop);
+  }
+
+  @include media-query ($small) {
+    aspect-ratio: var(--image-ratio-mobile);
+
+    @supports not (aspect-ratio: 16 / 9) {
+      padding-top: var(--image-ratio-fallback-mobile);
+    }
+  }
 }
