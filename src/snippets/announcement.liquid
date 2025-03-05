@@ -6,7 +6,6 @@
     assign show_browser_error = true
   endif
 
-  assign layout = section.settings.layout | default: 'marquee'
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
   assign bg_color = section.settings.bg_color
@@ -64,10 +63,6 @@
     endcomment
     assign marquee_time = 1.63
 
-    if layout == 'slider'
-      assign classes = classes | append: ' announcement__bar'
-    endif
-
     assign show_bar = true
 
     if block.settings.target_url_enabled and block.settings.target_url != blank
@@ -117,7 +112,7 @@
           assign widths = '100, 120, 140, 160, 180, 200, 240, 280, 320, 360, ' | append: image_width | append: ', ' | append: width_retina
         -%}
 
-        <div{% if layout == 'slider' %} data-ticker-text{% endif %} class="announcement__image" style="width: {{ image_width }}px; height: {{ image_width | divided_by: image_aspect_ratio }}px;">
+        <div class="announcement__image" style="width: {{ image_width }}px; height: {{ image_width | divided_by: image_aspect_ratio }}px;">
           {%- render 'image' image: image, sizes: sizes, width: width, widths: widths, show_backfill: false -%}
         </div>
       {%- else -%}
@@ -182,25 +177,9 @@
     {%- endcapture -%}
 
     {%- capture bar_html -%}
-      {%- if layout == 'marquee' -%}
-        <div class="announcement__slide{{ target_device_class }}" style="{{ block_style }}" {{ block.shopify_attributes }}>
-          {{ block_content }}
-        </div>
-      {%- else -%}
-        <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
-          <div data-ticker-frame class="announcement__message">
-            <div data-ticker-scale class="announcement__scale ticker--unloaded">
-              {%- if block.type == 'image' -%}
-                {{ block_content }}
-              {%- else -%}
-                <div data-ticker-text class="announcement__text">
-                  {{ block_content }}
-                </div>
-              {%- endif -%}
-            </div>
-          </div>
-        </ticker-bar>
-      {%- endif -%}
+      <div class="announcement__slide{{ target_device_class }}" style="{{ block_style }}" {{ block.shopify_attributes }}>
+        {{ block_content }}
+      </div>
     {%- endcapture -%}
 
     {%- assign bar_markup = bar_markup | append: bar_html -%}
@@ -310,40 +289,26 @@
         class="announcement__bar-outer section-padding{{ announcement_modifier }}"
         style="--padding-scrolling: {{ section.settings.message_spacing }}px;"
       >
-        {%- if layout == 'slider' -%}
-          <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
-            <slider-component
-              class="announcement__slider"
-              data-slider
-              data-options='{"fade": true, "pageDots": false, "adaptiveHeight": false, "autoPlay": {{ section.settings.slider_speed | times: 1000 }}, "prevNextButtons": {{ show_arrows }}, "draggable": ">1"}'
+        <div class="announcement__bar-holder announcement__bar-holder--marquee">
+          <div class="announcement__bar">
+            {%- comment -%}
+              The "autoplay" attribute forces ticker to start playing by cloning its text elements 10 times
+            {%- endcomment -%}
+
+            <ticker-bar
+              autoplay
+              speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}"
             >
-              {{ bar_markup }}
-            </slider-component>
-          </div>
-        {%- endif -%}
-
-        {%- if layout == 'marquee' -%}
-          <div class="announcement__bar-holder announcement__bar-holder--marquee">
-            <div class="announcement__bar">
-              {%- comment -%}
-                The "autoplay" attribute forces ticker to start playing by cloning its text elements 10 times
-              {%- endcomment -%}
-
-              <ticker-bar
-                autoplay
-                speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}"
-              >
-                <div data-ticker-frame class="announcement__message">
-                  <div data-ticker-scale class="announcement__scale ticker--unloaded">
-                    <div data-ticker-text class="announcement__text">
-                      {{ bar_markup }}
-                    </div>
+              <div data-ticker-frame class="announcement__message">
+                <div data-ticker-scale class="announcement__scale ticker--unloaded">
+                  <div data-ticker-text class="announcement__text">
+                    {{ bar_markup }}
                   </div>
                 </div>
-              </ticker-bar>
-            </div>
+              </div>
+            </ticker-bar>
           </div>
-        {%- endif -%}
+        </div>
       </announcement-bar>
     {%- endif -%}
   {%- elsif is_top == false -%}
