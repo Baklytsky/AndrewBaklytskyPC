@@ -14,7 +14,6 @@
   endcomment
 
   assign product_limit = section.settings.products_per_page
-  assign blocks_featured_image = section.blocks | where: 'type', 'featured_image'
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 3
@@ -211,14 +210,13 @@
       <div class="grid-outer" data-products-grid>
         <div class="grid" id="CollectionLoop">
           {%- if collection.products_count > 0 -%}
-            {%- if featured_images_array.size > 0 -%}
-              {%- liquid
-                assign counter_grid = 1
-                assign counter_delay = 0
-                assign added_images_index = ''
-                assign items_on_row_remaining = columns_desktop
+            {%- liquid
+              assign counter_grid = 1
+              assign added_images_index = ''
+              assign animation_delay = 0
 
-                for product in collection.products
+              for product in collection.products
+                if featured_images_array.size > 0
                   for featured_image in featured_images_array
                     if featured_image == ''
                       continue
@@ -239,28 +237,17 @@
                     endif
                   endfor
 
-                  assign counter_delay = counter_delay | plus: 1
                   assign counter_grid = counter_grid | plus: 1
-                  assign items_on_row_remaining = items_on_row_remaining | minus: 1
+                else
+                  assign grid_int = section.settings.grid | times: 1
+                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+                endif
 
-                  if collection
-                    render 'product-grid-item', product: product, index: forloop.index, sizes: image_sizes
-                  endif
-                endfor
-              -%}
-
-            {%- else -%}
-              {%- for product in collection.products -%}
-                {%- assign grid_int = section.settings.grid | times: 1 -%}
-                {%- assign animation_delay = forloop.index0 | modulo: grid_int | times: 1 -%}
-                {%- render 'product-grid-item',
-                  product: product,
-                  animation_delay: animation_delay,
-                  index: forloop.index,
-                  sizes: image_sizes
-                -%}
-              {%- endfor -%}
-            {%- endif -%}
+                if collection
+                  render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index, sizes: image_sizes
+                endif
+              endfor
+            -%}
           {%- else -%}
             <div class="no-results">
               <p>
