@@ -18,11 +18,6 @@
     assign show_border = false
   endif
   assign show_arrows = section.settings.show_arrows | default: false
-  assign text_align = section.settings.text_alignment | default: 'center'
-  assign justify_content = 'flex-start'
-  if text_align == 'center'
-    assign justify_content = 'center'
-  endif
   assign bar_markup = ''
   assign blocks_counter = 0
   assign block_count_desktop = 0
@@ -213,8 +208,6 @@
   {%- endunless -%}
 
   --text-size: var(--font-{{ text_font_size }});
-  --text-align: {{ text_align }};
-  --justify-content: {{ justify_content }};
 {%- endcapture -%}
 
 {%- if blocks_counter == 0 -%}
