@@ -182,7 +182,7 @@
                   -%}
 
                   {%- if next_block.type == 'button' and next_index != section.blocks.size -%}
-                    <div class="hero__button-group">
+                    <div class="hero__button-group hero__button-group--stacked">
                   {%- endif -%}
 
                   {%- if link_text != '' -%}
@@ -211,10 +211,73 @@
                   {%- endif -%}
 
                 {%- when 'side-buttons' -%}
-                  {%- render 'hero-buttons', block: block -%}
+                  {%- liquid
+                    assign link_url_primary = block.settings.link_primary
+                    assign link_text_primary = block.settings.link_text_primary
+                    assign link_url_secondary = block.settings.link_secondary
+                    assign link_text_secondary = block.settings.link_text_secondary
 
-                {%- when 'stacked-buttons' -%}
-                  {%- render 'hero-buttons', block: block, stacked: true -%}
+                    assign button_style_primary = block.settings.button_style_primary
+                    if button_style_primary == 'btn--text' and block.settings.show_arrow_primary
+                      assign button_style_primary = button_style_primary | append: ' btn--text-no-underline'
+                    endif
+
+                    assign button_style_secondary = block.settings.button_style_secondary
+                    if button_style_secondary == 'btn--text' and block.settings.show_arrow_secondary
+                      assign button_style_secondary = button_style_secondary | append: ' btn--text-no-underline'
+                    endif
+                  -%}
+
+                  {%- if link_text_primary != '' or link_text_secondary != '' -%}
+                    <div
+                      class="hero__button-group{% if block.settings.full_width %} hero__button-group--stacked{% endif %}"
+                      {{ block.shopify_attributes }}
+                    >
+                      {%- if link_text_primary != '' -%}
+                        {%- assign animation_order = animation_order | plus: 1 -%}
+
+                        <div
+                          class="hero__button"
+                          data-aos="hero"
+                          data-aos-anchor="#{{ section.id }}"
+                          data-aos-order="{{ animation_order }}"
+                        >
+                          <a
+                            class="btn {{ button_style_primary }} {{ block.settings.button_size_primary }} {{ block.settings.button_type_primary }}"
+                            href="{{ link_url_primary | default: '#!' }}"
+                          >
+                            <span>{{ link_text_primary | escape }}</span>
+
+                            {%- if block.settings.show_arrow_primary -%}
+                              {% render 'icon-arrow-right' %}
+                            {%- endif -%}
+                          </a>
+                        </div>
+                      {%- endif -%}
+
+                      {%- if link_text_secondary != '' -%}
+                        {%- assign animation_order = animation_order | plus: 1 -%}
+
+                        <div
+                          class="hero__button"
+                          data-aos="hero"
+                          data-aos-anchor="#{{ section.id }}"
+                          data-aos-order="{{ animation_order }}"
+                        >
+                          <a
+                            class="btn {{ button_style_secondary }} {{ block.settings.button_size_secondary }} {{ block.settings.button_type_secondary }}"
+                            href="{{ link_url_secondary | default: '#!' }}"
+                          >
+                            <span>{{ link_text_secondary | escape }}</span>
+
+                            {%- if block.settings.show_arrow_secondary -%}
+                              {% render 'icon-arrow-right' %}
+                            {%- endif -%}
+                          </a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
 
                 {%- when 'code' -%}
                   {%- assign animation_order = animation_order | plus: 1 -%}
@@ -589,121 +652,14 @@
       "settings": [
         {
           "type": "header",
-          "content": "Primary button"
-        },
-        {
-          "type": "text",
-          "id": "link_text_primary",
-          "label": "Text",
-          "default": "View products"
-        },
-        {
-          "type": "url",
-          "id": "link_primary",
-          "label": "Link"
-        },
-        {
-          "type": "select",
-          "id": "button_type_primary",
-          "label": "Color",
-          "default": "btn--primary",
-          "options": [
-            {"value": "btn--black", "label": "Black"},
-            {"value": "btn--white", "label": "White"},
-            {"value": "btn--primary", "label": "Primary"},
-            {"value": "btn--secondary", "label": "Secondary"}
-          ]
-        },
-        {
-          "type": "select",
-          "id": "button_size_primary",
-          "label": "Size",
-          "default": "",
-          "options": [
-            {"label": "Small", "value": "btn--small"},
-            {"label": "Medium", "value": ""},
-            {"label": "Large", "value": "btn--large"}
-          ]
-        },
-        {
-          "type": "select",
-          "id": "button_style_primary",
-          "label": "Style",
-          "default": "btn--solid",
-          "options": [
-            {"label": "Solid", "value": "btn--solid"},
-            {"label": "Outline", "value": "btn--outline"},
-            {"label": "Text", "value": "btn--text"}
-          ]
+          "content": "Layout"
         },
         {
           "type": "checkbox",
-          "id": "show_arrow_primary",
-          "label": "Show arrow",
+          "id": "full_width",
+          "label": "Full-width",
           "default": false
         },
-        {
-          "type": "header",
-          "content": "Secondary button"
-        },
-        {
-          "type": "text",
-          "id": "link_text_secondary",
-          "label": "Text",
-          "default": "Shop sale"
-        },
-        {
-          "type": "url",
-          "id": "link_secondary",
-          "label": "Link"
-        },
-        {
-          "type": "select",
-          "id": "button_type_secondary",
-          "label": "Color",
-          "default": "btn--primary",
-          "options": [
-            {"value": "btn--black", "label": "Black"},
-            {"value": "btn--white", "label": "White"},
-            {"value": "btn--primary", "label": "Primary"},
-            {"value": "btn--secondary", "label": "Secondary"}
-          ]
-        },
-        {
-          "type": "select",
-          "id": "button_size_secondary",
-          "label": "Size",
-          "default": "",
-          "options": [
-            {"label": "Small", "value": "btn--small"},
-            {"label": "Medium", "value": ""},
-            {"label": "Large", "value": "btn--large"}
-          ]
-        },
-        {
-          "type": "select",
-          "id": "button_style_secondary",
-          "label": "Style",
-          "default": "btn--solid",
-          "options": [
-            {"label": "Solid", "value": "btn--solid"},
-            {"label": "Outline", "value": "btn--outline"},
-            {"label": "Text", "value": "btn--text"}
-          ]
-        },
-        {
-          "type": "checkbox",
-          "id": "show_arrow_secondary",
-          "label": "Show arrow",
-          "default": false
-        }
-      ]
-    },
-    {
-      "type": "stacked-buttons",
-      "name": "Stacked buttons",
-      "limit": 2,
-      "settings": [
         {
           "type": "header",
           "content": "Primary button"
