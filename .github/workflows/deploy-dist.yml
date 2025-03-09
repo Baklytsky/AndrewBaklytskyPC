@@ -1,4 +1,4 @@
-name: Deploy /dist to new-theme-dist
+name: Deploy /dist to carbon-dist
 
 on:
   push:
@@ -44,29 +44,29 @@ jobs:
         ssh-keyscan github.com >> ~/.ssh/known_hosts
         pwd
 
-    - name: Remove existing new-theme-dist folder if it exists
+    - name: Remove existing carbon-dist folder if it exists
       run: |
-        if [ -d "new-theme-dist" ]; then
-          rm -rf new-theme-dist
+        if [ -d "carbon-dist" ]; then
+          rm -rf carbon-dist
         fi
 
     - name: Clone target repository
       run: |
         cd ~/
-        git clone git@github.com:invisiblethemes/new-theme-dist.git new-theme-dist
+        git clone git@github.com:invisiblethemes/carbon-dist.git carbon-dist
 
-    - name: Sync /dist contents to the root of new-theme-dist
+    - name: Sync /dist contents to the root of carbon-dist
       run: |
         # Ensure the dist folder exists
-        if [ -d ~/work/new-theme/new-theme/dist ]; then
-          rsync -av --delete --exclude '.git/' ~/work/new-theme/new-theme/dist/ ~/new-theme-dist/
+        if [ -d ~/work/carbon/carbon/dist ]; then
+          rsync -av --delete --exclude '.git/' ~/work/carbon/carbon/dist/ ~/carbon-dist/
         else
           echo "No dist folder found, skipping sync."
           exit 1
         fi
         # Commit and push changes
-        cd ~/new-theme-dist
-        git remote set-url origin git@github.com:invisiblethemes/new-theme-dist.git
+        cd ~/carbon-dist
+        git remote set-url origin git@github.com:invisiblethemes/carbon-dist.git
         git config user.name "GitHub Actions"
         git config user.email "github-actions@github.com"
         git add .

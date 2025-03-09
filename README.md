@@ -1,13 +1,13 @@
-# New Theme
+# Carbon
 
-### [🏷️ Releases](https://github.com/invisiblethemes/new-theme/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/new-theme/discussions)
+### [🏷️ Releases](https://github.com/invisiblethemes/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/carbon/discussions)
 
 ## Installation
 
 #### Clone the repo:
 
 ```
-git clone git@github.com:invisiblethemes/new-theme.git
+git clone git@github.com:invisiblethemes/carbon.git
 ```
 
 #### Install packages
@@ -16,7 +16,7 @@ git clone git@github.com:invisiblethemes/new-theme.git
 yarn install
 ```
 
-⚠️ The recommended node version for running new-theme is Node v20.9.x
+⚠️ The recommended node version for running carbon is Node v20.9.x
 
 Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
 If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
