@@ -1,0 +1,61 @@
+{% liquid
+  assign products = product.metafields.bundle.products.value
+  assign subtitle = product.metafields.bundle.subtitle.value
+  assign options = product.metafields.bundle.options.value
+  assign images = product.images
+  assign image_count = product.images.size
+  assign first_product = products | first
+  assign vip_customer = false
+  assign enable_sale_event = settings.enable_sale_event
+  assign show_klarna_afterpay_message_on_pdp = settings.show_klarna_afterpay_message_on_pdp
+
+  if customer and customer.tags contains "VIP"
+    assign vip_customer = true
+  endif
+
+  capture product_data
+    render 'json-product', product: product
+  endcapture
+
+  capture products_data
+    echo "["
+      for prod in products
+        render 'json-product', product: prod
+          unless forloop.last
+            echo ","
+          endunless
+      endfor
+    echo "]"
+  endcapture
+%}
+
+<div class="ra-product-main w-full lg:mb-8 max-w-[450px] mx-auto z-10" data-vue-root="ProductBundleForm">
+  <product-bundle-form
+    :product="{{ product_data | escape | strip }}"
+    :products="{{ products_data | replace: '"', "'" }}"
+    subtitle-text="{{ subtitle }}"
+    options-text="{{ options }}"
+    waitlist-text="{{ settings.waitlist_text | default: 'Coming Soon - Join Waitlist' }}"
+    sold-out-text="{{ settings.sold_out_badge_title }}"
+    :image-count="{{ image_count }}"
+    :vip-customer="{{ vip_customer }}"
+    order-limit="{{ 'general.order_limit_pdp' | t }}"
+    waitlist-modal-disabled="{{ settings.disable_bis_modal }}"
+    waitlist-modal-title="{{ settings.waitlist_modal_title }}"
+    waitlist-modal-description="{{ settings.waitlist_modal_description_rich_text }}"
+    waitlist-modal-legal-text="{{ settings.waitlist_modal_legal_text }}"
+    waitlist-modal-cta="{{ settings.waitlist_modal_cta | default: 'Get Notified' }}"
+    bis-modal-title="{{ settings.bis_modal_title }}"
+    bis-modal-description="{{ settings.bis_modal_description_rich_text }}"
+    bis-modal-legal-text="{{ settings.bis_modal_legal_text }}"
+    bis-modal-cta="{{ settings.bis_modal_cta | default: 'Get Notified' }}"
+    bis-text="{{ settings.bis_text | default: 'Back In Stock' }}"
+    :enable-sale-event="{{ enable_sale_event }}"
+    sale-event-tooltip-color="{{ settings.sale_event_tooltip_color_pdp }}"
+    sale-event-tooltip-copy="{{ settings.sale_event_tooltip_copy }}"
+    :show-klarna-afterpay-message="{{ show_klarna_afterpay_message_on_pdp }}"
+  >
+    {% render 'product-details-skeleton' %}
+    {% render 'product-form-desktop-skeleton' %}
+  </product-bundle-form>
+</div>

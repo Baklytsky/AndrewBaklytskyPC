@@ -1,0 +1,286 @@
+{% liquid
+  assign paginate_count = section.settings.paginate_count
+  assign disruptor_metafields = collection.metafields.custom.disruptors.value
+  assign disruptor_indexes = ''
+  comment
+    we keep track of the index of each of the disruptors to determine placement
+  endcomment
+  for disruptor in disruptor_metafields
+    if disruptor.enabled
+      assign disruptor_indexes = disruptor_indexes | append: disruptor.position | append: ','
+    endif
+  endfor
+  assign disruptor_indexes_split = disruptor_indexes | split: ','
+  assign show_sizes_on_hover = collection.metafields.product_card.show_sizes_on_hover
+  assign direct_access_only = collection.metafields.custom.direct_access_only
+%}
+
+<script>
+  //- this script will add a class of 'ra-collection-section__filtered-by-availability' to the ra-collection-section id if the url has a filter of availability in it -//
+  let previousUrl = '';
+  const observer = new MutationObserver(function(mutations) {
+  if (window.location.href !== previousUrl) {
+      previousUrl = window.location.href;
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (urlParams.has('filter.v.availability')) {
+        // add a class of ra-collection-section__filtered-by-availability to the ra-collection-section id
+        document.getElementById('ra-collection-section')?.classList.add('ra-collection-section__filtered-by-availability');
+      } else {
+        // remove the class of ra-collection-section__filtered-by-availability to the ra-collection-section id
+        document.getElementById('ra-collection-section')?.classList.remove('ra-collection-section__filtered-by-availability');
+      }
+    }
+  });
+  const config = {subtree: true, childList: true};
+
+  observer.observe(document, config)
+</script>
+
+<div id="ra-collection-section" class="ra-collection pb-4 md:pb-24" data-section-id="{{ section.id }}">
+  <div class="flex justify-center">
+    <div class="flex w-full pl-6 pr-6 gap-4" id="collectionMain">
+      {% if section.settings.enable_filters == true %}
+      <div
+        class="collection__sidebar fixed z-[500] lg:z-10 top-0 lg:top-12 lg:h-fit left-0 right-0 bottom-0 pt-2 overflow-y-scroll lg:block lg:w-1/4 lg:sticky rounded-lg pb-10 hidden"
+        data-collection-sidebar
+      >
+
+        <div class="collection__sidebar-top lg:hidden flex justify-end h-14 text-white items-center px-[24px] lg:px-[26px] ">
+          {% comment %} <div class="col-start-2 col-span-3 text-center text-[18px]">Item</div> {% endcomment %}
+          <button class="w-[44px] h-[44px] rounded-full bg-grey" data-action-close-filters>{% render 'ra-icon', icon: 'close', color: 'black', width: '16px', height: '16px', class: 'flex justify-center w-full' %}</button>
+        </div>
+        <aside class="collection__filters facets-wrapper px-6 lg:px-6 pt-4 lg:pb-0 id="main-collection-filters">
+          {% render 'ra-collection-filters', collection: collection %}
+          {% render 'ra-button',
+            label: 'Apply Filters',
+            style: 'secondary',
+            type: 'ra-button',
+            class: 'col-span-1 lg-5 w-full lg:hidden',
+            data: 'data-action-close-filters'
+          %}
+        </aside>
+      </div>
+    {% endif %}
+      <div class="collection__main w-full">
+        <div class="collection__header mb-8 ">
+          <div class="collection__header-content text-grey-100 relative
+                    w-full
+                    flex
+                    flex-col
+                    items-start
+                    ">
+            <div class="w-full mx-auto">
+              {% if section.settings.enable_filters == true %}
+              <div class="flex justify-between md:justify-end mt-6 md:mt-0 w-full md:w-auto gap-4">
+                <div class="collection__toggle-filters lg:hidden">
+                  {% render 'ra-button',
+                  label: 'Filter',
+                  style: 'primary',
+                  type: 'ra-button',
+                  icon: 'filter',
+                  class: 'h-11 min-h-0 min-w-[117px] bg-white pl-4 pr-4 flex justify-between items-center',
+                  data: 'data-action-toggle-mobile-filters'
+                  %}
+                </div>
+                <ra-collection-sort>
+                  <form name="sortBy">
+                    <div class="select relative z-0">
+                      {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+                      <select name="sort_by"
+                        class="appearance-none px-5 z-1 bg-white h-11 font-secondary text-black rounded-lg sans-14 min-w-[212px]"
+                        id="SortBy" aria-describedby="a11y-refresh-page-message">
+                        {%- for option in collection.sort_options -%}
+                        <option value="{{ option.value | escape }}" {% if option.value==sort_by %} selected="selected" {% endif
+                          %}>
+                          {{ option.name | escape }}
+                        </option>
+                        {%- endfor -%}
+                      </select>
+                      {% render 'ra-icon',
+                      width: '12px',
+                      color: 'black',
+                      icon: 'chevron-down',
+                      class: 'absolute right-3 -mt-3 top-1/2 -z-1 pointer-events-none'
+                      %}
+                    </div>
+                  </form>
+                </ra-collection-sort>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div id="ProductGrid" class="
+          {% if section.settings.enable_large_card == true %}
+          product-grid--large_card
+          {% endif %}
+          collection__product-grid mx-auto" data-product-grid>
+
+          {%- paginate collection.products by paginate_count -%}
+            {% comment %}
+              check the list of disruptor indexes to see if any exist on this page of the collection
+            {% endcomment %}
+
+            {% assign paginate_offset = paginate.current_page | minus: 1 | times: paginate_count %}
+            {% assign max_pagination = paginate_offset | plus: paginate_count %}
+            {% assign has_disruptors = false %}
+
+            {% for index in disruptor_indexes_split %}
+              {% assign numeric_index = index | plus: 0 %}
+              {% if numeric_index >= paginate_offset and numeric_index < max_pagination %}
+                {% assign has_disruptors = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            <div data-gap="-sm" data-columns="-sm,-md,-lg"
+                 class="ra-grid gap-4 md:gap-8 gap-y-12 ra-grid--inherit-gap mb-24">
+              {%- for product in collection.products -%}
+
+                {%- unless direct_access_only -%}
+                  {%- assign subject = product -%}
+                  {%- assign scip_subject = false -%}
+
+                  {%- for collection in subject.collections -%}
+                    {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                    {%- if vip_collection -%}
+                      {%- assign scip_subject = true -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- if scip_subject -%}
+                    {% continue %}
+                  {%- endif -%}
+                {%- endunless -%}
+
+                {% comment %}
+                  Large Card logic is in ra-product-tile.liquid snippet
+                {% endcomment %}
+                {% comment %}
+                  if any disruptors were found to exist on this page of the collection, find the appropriate disruptor and place it
+                {% endcomment %}
+
+                {%- assign active_filter = blank -%}
+                {%- for filter in collection.filters   -%}
+                  {% if filter.active_values.size > 0 %}
+                    {%- assign active_filter = true -%}
+                  {% endif %}
+                {%- endfor -%}
+
+                {% if has_disruptors and collection_product_groups != blank %}
+                  {% assign disruptor_index = forloop.index | plus: paginate_offset %}
+                  {% if disruptor_indexes contains disruptor_index %}
+                    {% for disruptor in disruptor_metafields %}
+                      {% if disruptor.position == disruptor_index and disruptor.enabled %}
+                        {% render 'ra-disruptor-tile', disruptor: disruptor, index: disruptor_index %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+
+                {% if active_filter != blank %}
+                  {% if product.available %}
+
+                    {% render 'ra-product-tile',
+                      disable_animation: true,
+                      product: product,
+                      index: forloop.index,
+                      class: class,
+                      show_sizes_on_hover: show_sizes_on_hover,
+                      custom_attribute: custom_attribute %}
+                  {% endif %}
+                {% else %}
+                  {% render 'ra-product-tile',
+                    disable_animation: true,
+                    product: product,
+                    index: forloop.index,
+                    class: class,
+                    show_sizes_on_hover: show_sizes_on_hover,
+                    custom_attribute: custom_attribute %}
+                {% endif %}
+
+              {%- endfor -%}
+            </div>
+            <div class="flex justify-center">
+              {%- if section.settings.enable_clp_lazy_loading and section.settings.clp_lazy_loading_btn_text != blank -%}
+                {%- render 'lazy-loading',
+                  paginate: paginate,
+                  elements_selector: "ra-product-tile"
+                  inner_selector: ".collection__product-grid .ra-grid",
+                  load_btn_text: section.settings.clp_lazy_loading_btn_text,
+                  loading_type: section.settings.clp_lazy_loading_type
+                -%}
+              {%- else -%}
+                {% render 'ra-pagination', paginate: paginate, anchor: '#collectionMain', hasArrows: true %}
+              {%- endif -%}
+            </div>
+          {%- endpaginate -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "ra-product-grid",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "paginate_count",
+      "min": 4,
+      "max": 48,
+      "step": 4,
+      "label": "Products per page",
+      "default": 48
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_clp_lazy_loading",
+      "label": "Enable products lazy loading",
+      "info": "The products of the next pagination page will be loaded by button click",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "clp_lazy_loading_type",
+      "label": "Lazy loading Type",
+      "options": [
+        {
+          "value": "scroll",
+          "label": "By scroll"
+        },
+        {
+          "value": "button",
+          "label": "By button"
+        }
+      ],
+      "default": "button"
+    },
+    {
+      "type": "text",
+      "id": "clp_lazy_loading_btn_text",
+      "label": "Lazy loading button text",
+      "default": "Load more"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filters",
+      "label": "Enable Filters",
+      "info": "Show filtering options on the collection page",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_large_card",
+      "label": "Enable Large Card effect",
+      "info": "Makes product images larger when their 'Large Card' metafield is set to true",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

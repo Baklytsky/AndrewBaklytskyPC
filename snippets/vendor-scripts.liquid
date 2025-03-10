@@ -1,0 +1,66 @@
+{% comment %}
+  Yotpo Script
+{% endcomment %}
+
+{% if settings.yotpo_app_key != blank and settings.review_platform == 'yotpo' %}
+  <script type="text/javascript">
+    (function e() {
+      var e = document.createElement('script');
+      (e.type = 'text/javascript'),
+        (e.async = true),
+        (e.src = '//staticw2.yotpo.com/{{ settings.yotpo_app_key }}/widget.js');
+      var t = document.getElementsByTagName('script')[0];
+      t.parentNode.insertBefore(e, t);
+    })();
+  </script>
+{% endif %}
+{% comment %}theme-check-disable RemoteAsset{% endcomment %}
+{% comment %}
+  Stamped Script
+{% endcomment %}
+
+{% if settings.stamped_api_key != blank and settings.review_platform == 'stamped' %}
+  <script
+    async
+    type="text/javascript"
+    data-api-key="{{ settings.stamped_api_key }}"
+    id="stamped-script-widget"
+    src="https://cdn1.stamped.io/files/widget.min.js"
+  ></script>
+{% endif %}
+
+{% comment %}
+  Bazaarvoice Script
+{% endcomment %}
+
+{% if settings.bazaarvoice_client != blank
+  and settings.bazaarvoice_id != blank
+  and settings.bazaarvoice_env != blank
+  and settings.review_platform == 'bazaarvoice'
+%}
+  <script
+    src="https://apps.bazaarvoice.com/deployments/{{ settings.bazaarvoice_client }}/{{ settings.bazaarvoice_id }}/{{ settings.bazaarvoice_env }}/en_US/bv.js"
+    async
+    defer
+  ></script>
+{% endif %}
+
+{% if settings.stamped_api_key != blank %}
+  <script
+    async
+    type="text/javascript"
+    data-api-key="{{ settings.stamped_api_key }}"
+    id="stamped-script-widget"
+    src="https://cdn1.stamped.io/files/widget.min.js"
+  ></script>
+{% endif %}
+
+{% comment %} Klaviyo {% endcomment %}
+<script async defer src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=Rf3A4Q"></script>
+{%- render 'klaviyo-events' -%}
+
+{% comment %} Gorgias Chat Widget {% endcomment %}
+<script id="gorgias-chat-widget-install-v3"
+  src="https://config.gorgias.chat/bundle-loader/01HA5FP1GY63ZKA9NK2YJN279X">
+</script>
+

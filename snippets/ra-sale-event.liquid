@@ -1,0 +1,34 @@
+{%- comment -%}
+  {% render 'ra-sale-event', product: product, class: 'flex mt-sm cursor-pointer' %}
+{%- endcomment -%}
+
+{%- if settings.enable_sale_event -%}
+  {%- assign sale_event_price = product.metafields.custom.sale_event_price.value | times: 100.00 -%}
+  {%- assign sale_event_discount = product.metafields.custom.sale_event_discount.value | times: 0.01 -%}
+  {%- assign color = settings.sale_event_tooltip_color -%}
+  {%- assign copy = settings.sale_event_tooltip_copy -%}
+  {%- assign trigger = settings.sale_event_tooltip_trigger -%}
+  {%- assign sale_price = false -%}
+
+  {%- if sale_event_price > 0 -%}
+    {%- assign sale_price = sale_event_price -%}
+  {%- endif -%}
+
+  {%- if sale_event_discount > 0 -%}
+    {%- assign discount = product.price | times: sale_event_discount -%}
+    {%- assign ceil_value = product.price | minus: discount | times: 0.01 | ceil -%}
+    {%- assign sale_price = ceil_value | times: 100 -%}
+  {%- endif -%}
+
+  {%- if sale_price -%}
+    <div class="{{ class }}" data-sale-event-tooltip>
+    <span
+      class="mono-12"
+      style="color: {{ color }};">
+      <strong>{{ sale_price | money_without_trailing_zeros }}</strong>
+      <span class="normal-case" style="font-size: 10px;">{{ copy }}</span>
+    </span>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+

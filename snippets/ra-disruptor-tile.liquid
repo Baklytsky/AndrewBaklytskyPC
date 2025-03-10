@@ -1,0 +1,61 @@
+{% liquid
+  assign disruptor_width = disruptor.width | split: '/3'
+  assign disruptor_width = disruptor_width | first
+  assign mobile_disruptor_width = 1
+
+  if disruptor_width == 3
+    assign mobile_disruptor_width = 2
+  endif
+
+  capture disruptor_classes
+    case disruptor_width
+      when '3'
+        echo 'col-span-2 md:col-span-3 h-0 pt-[65%] md:pt-[46%]'
+      when '2'
+        echo 'col-span-1 md:col-span-2'
+      when '1'
+        echo 'col-span-1'
+    endcase
+  endcapture
+%}
+{% assign new_index = index | minus: 1 %}
+<div
+  data-aos="fade-up"
+  data-aos-delay="{{ '50' | times: new_index }}"
+  class="ra-disruptor-tile flex p-6 relative overflow-hidden {{ disruptor_classes }}"
+  style="color: {{ disruptor.text_color }}"
+>
+  {% if disruptor.media != blank %}
+    {% assign media_text = disruptor.media | metafield_text %}
+    {% assign media_tag = disruptor.media | metafield_tag %}
+    <div
+      class="ra-disruptor-tile__background-container absolute top-0 left-0 right-0 bottom-0 bg-no-repeat bg-cover bg-center -z-10"
+      {% unless media_text contains 'video' %}
+        style="background-image: url('{{ disruptor.media | image_url: width: "800x" }}');"
+      {% endunless %}
+    >
+      {% if media_text contains 'video' %}
+        {% render 'ra-video',
+          metaobject_video: disruptor.media,
+          class: 'max-h-[none] max-w-none w-full h-full object-cover'
+        %}
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="ra-disruptor-tile__content flex justify-end flex-col items-baseline gap-2 w-full">
+    {% if disruptor.title %}
+      <h4>{{ disruptor.title }}</h4>
+    {% endif %}
+    {% if disruptor.body_text %}
+      <div>{{ disruptor.body_text | metafield_tag }}</div>
+    {% endif %}
+    {% if disruptor.cta_label and disruptor.cta_url and disruptor.cta_style %}
+      <a
+        class="ra-button ra-button--{{ disruptor.cta_style }} ra-button--md mt-2 w-full"
+        href="{{ disruptor.cta_url }}"
+      >
+        {{ disruptor.cta_label }}
+      </a>
+    {% endif %}
+  </div>
+</div>

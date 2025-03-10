@@ -1,0 +1,64 @@
+{% comment %}
+  Props:
+    type:       string [a, button] - (required)
+    style:      string [primary, secondary, tertiary] - (required)
+    label:      string button label text - (required)
+    title:      string title text - (required)
+    value:      string value attr text - (optional)
+    url:        string url used when button 'type' is set to 'a' - (required)
+    new_tab     boolean - (optional)
+    js:         string
+    icon:       string icon-name - (optional)
+    size:       string [xs, sm, md, lg] sizes - (optional)
+    id:         string add id attribute used for JS - (optional)
+    class:      string add custom CSS class - (optional)
+    data:       string add custom data attributes to the button
+    ghost:      boolean - (optional)
+    as_text:    boolean - (optional)
+    full_width: boolean - (optional)
+    disabled:   boolean - (optional)
+
+  Example standard button:
+    {% render 'button' type: 'a', style: 'primary', url: '#', size: 'sm', label: 'Learn More' %}
+{% endcomment %}
+
+{%- assign title = title | default: label -%}
+
+{% capture classes %}
+  {% if ghost %}
+    ra-button ra-button--ghost
+  {% elsif as_text %}
+    ra-link ra-button--{{ style }} ra-button--{{ size }}
+  {% else %}
+    ra-button ra-button ra-button--{{ style }} ra-button--{{ size }}
+  {% endif %}
+  {% if full_width %}
+    ra-button--full-width
+  {% endif %}
+  {{ class }}
+{% endcapture %}
+
+{% if js != blank %}
+  <div onclick="{{ js }}" class="{{ classes }}">
+    {{ label }}
+  </div>
+{% else %}
+  {% capture attributes %}
+    {% if id != blank %} id="{{ id }}"{% endif %}
+    {% if type == 'a' and url != blank and label != blank %} href="{{ url }}" title="{{ title }}" {% if new_tab %}target="_blank"{% endif %}{% endif %}
+    {% if type == 'button' %} aria-label="{{ title }}"{% endif %}
+    {% if disabled == true %} disabled{% endif %}
+    {% if value != blank %}value="{{ value }}"{% endif %}
+    {{ data }}
+  {% endcapture %}
+
+  {% if type != blank and label != blank %}
+    <{{ type }} class="{{ classes }}" {{ attributes }}>
+    {{ label }}
+    {% if icon != blank %}
+      {% render 'ra-icon', width: '14px', height: '14px', icon: icon %}
+    {% endif %}
+    </{{ type }}>
+  {% endif %}
+
+{% endif %}

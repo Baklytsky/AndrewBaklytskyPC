@@ -1,0 +1,41 @@
+{% comment %}
+  Props:
+  tabs:         string/html/markup tabs content - (required)
+  tabContent:   string/html/markup tabs content - (required)
+
+  Example Tabs:
+  {% capture tabs %}
+  <button class="ra-tab__button" data-tab="tab1">Tab 1</button>
+  <button class="ra-tab__button" data-tab="tab2">Tab 2</button>
+  <button class="ra-tab__button" data-tab="tab3">Tab 3</button>
+  </div>
+  {% endcapture %}
+  {% capture tabContent %}
+  <div class="ra-tab__panel" data-tab-target="tab1">
+  <div>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in massa a mi vestibulum mattis. Donec tincidunt urna sed mauris pharetra fringilla. Nunc id dui imperdiet, viverra turpis vel, feugiat elit. Mauris commodo commodo turpis, vel dapibus velit feugiat vitae.
+  </div>
+  </div>
+  <div class="ra-tab__panel" data-tab-target="tab2">
+  <div>
+  Nullam in sapien euismod, sagittis nisl id, tincidunt sapien. Duis rhoncus est a sapien bibendum tempus. Etiam fermentum euismod nibh, id elementum nulla pharetra vel. Praesent auctor vel libero ac tristique. Sed in nisl lorem. Proin commodo erat ac nisi rutrum, eget lacinia lectus vestibulum.
+  </div>
+  </div>
+  <div class="ra-tab__panel" data-tab-target="tab3">
+  <div>
+  Nunc eget lacus eu libero vehicula sollicitudin quis nec elit. Nunc at augue mollis, euismod quam vitae, congue turpis. Proin tempor eros eu turpis aliquet, vitae vehicula velit rhoncus. Aliquam vel enim quis ante feugiat hendrerit. Aenean nec ligula consectetur, rutrum ante sed, hendrerit augue. Donec ac metus nec sem ullamcorper auctor ac ut orci. Vestibulum sit amet erat eu erat venenatis rutrum. Aliquam sed tempus mi, ut finibus ipsum. Morbi vel lobortis lacus. Proin volutpat justo ac mauris laoreet, sit amet molestie mi vulputate. Etiam eu mollis velit.</div>
+  </div>
+  {% endcapture %}
+  {% render 'ra-tabs', tabs: tabs, tabContent: tabContent %}
+{% endcomment %}
+
+{% if tabs != blank and tabContent != blank %}
+  <ra-tabs>
+    <div class="ra-tab__button-container">
+      {{ tabs }}
+    </div>
+    <div class="ra-tab__container" data-tab-container>
+      {{ tabContent }}
+    </div>
+  </ra-tabs>
+{% endif %}

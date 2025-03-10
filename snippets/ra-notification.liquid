@@ -1,0 +1,49 @@
+{% comment %}
+  NOTE: To see all available icons or to add
+  additional SVG icons see: '/src/icons' dir
+
+  Props:
+    style:   String, [primary, secondary, tertiary, success, warning] - (optional)
+    title:   String, title of the notification - (optional)
+    message: String, message of the notification - (optional)
+    icon:    String, icon title to display aside the message - (optional)
+    class:   String, custom CSS class - (optional)
+
+  Example default notification with primary styles:
+    {%- render 'ra-notification',
+      icon: 'account',
+      title: 'Account Notification',
+      message: 'My account notification.'
+    -%}
+
+  Example notifcation using secondary style:
+    {%- render 'ra-notification',
+      style: 'secondary',
+      icon: 'account',
+      title: 'Account Notification',
+      message: 'My account notification.'
+    -%}
+{% endcomment %}
+
+{%- capture classes -%}
+  ra-notification ra-notification--{{ style | default: 'primary' }} {{ class }}
+{%- endcapture -%}
+
+<ra-notification class="ra-notification ra-notification--{{ style | default: 'primary' }} {{ class }}">
+  {% if icon %}
+    {%- render 'ra-icon', icon: icon, size: 'sm', class: 'ra-notification__icon', color: 'var(--text-inverse-primary)' -%}
+  {% endif %}
+  <div class="ra-notification__content">
+    {% if title %}
+      <div class="ra-notification__title">{{ title }}</div>
+    {% endif %}
+    {% if message %}
+      <span class="ra-notification__message">{{ message }}</span>
+    {% endif %}
+  </div>
+  <button class="ra-notification__close ra-button ra-icon-button ra-icon-button--ghost ra-icon-button--sm ra-icon-button--rounded">
+    <svg class="ra-icon ra-icon--xs">
+      <use xlink:href="#close"></use>
+    </svg>
+  </button>
+</ra-notification>

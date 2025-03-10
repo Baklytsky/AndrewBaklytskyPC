@@ -1,0 +1,464 @@
+{% liquid
+  assign title_level = section.settings.title_level
+  assign blocks_size_modulo = section.blocks.size | modulo: 4
+  assign blocks_size = section.blocks.size
+
+  assign desktop_slides = 4
+  assign mobile_slides = 1
+
+  if blocks_size_modulo != 0
+    assign block_difference = 4 | minus: blocks_size_modulo
+    assign blocks_size = blocks_size | plus: block_difference
+  endif
+
+  assign mobile_slide_count = blocks_size | divided_by: 4
+
+  assign show_pagination = false
+  if section.settings.show_pagination and section.blocks.size > 1
+    assign show_pagination = true
+  endif
+
+  assign show_navigation_desktop = false
+  if section.settings.show_navigation and section.blocks.size > 4
+    assign show_navigation_desktop = true
+  endif
+
+  assign show_navigation_mobile = false
+  if section.settings.show_navigation and mobile_slide_count > 1
+    assign show_navigation_mobile = true
+  endif
+%}
+
+{% capture swiper_init_params %}
+  {
+    "breakpoints": {
+      "768": {
+        "slidesPerView": 2,
+        "spaceBetween": 0
+      },
+      "1025": {
+        "slidesPerView": {{ desktop_slides }},
+        "spaceBetween": 0
+      }
+    }
+  }
+{% endcapture %}
+
+{% style %}
+  .content-carousel--{{ section.id }} {
+    --component-bg-color: {{ section.settings.bg_color }};
+    --component-fg-color: {{ section.settings.text_color }};
+  }
+
+  .content-carousel--{{ section.id }} .ra-heading {
+    --heading-margin:var(--spacing-lg);
+    --heading-text-align: left;
+  }
+
+  .content-carousel--{{ section.id }} .ra-heading__color,
+  .content-carousel--{{ section.id }} .ra-heading__color > * {
+    color: {{ section.settings.header_text_color }};
+  }
+
+  @media only screen and (min-width: 768px) {
+    .content-carousel--{{ section.id }} {
+      {% comment %}
+      padding: {{ section.settings.desktop_padding }}rem 2rem;
+      margin: {{ section.settings.desktop_margin }}rem 0;
+      {% endcomment %}
+    }
+
+    {% if section.blocks.size <= tablet_slides_count %}
+    .content-carousel--{{ section.id }} .ra-carousel__nav {
+      display: none;
+    }
+    {% endif %}
+  }
+
+  {% if section.blocks.size <= desktop_slides_count %}
+  @media only screen and (min-width: 1024px) {
+    .content-carousel--{{ section.id }} .ra-carousel__nav {
+      display: none;
+    }
+  }
+  {% endif %}
+{% endstyle %}
+
+<section class="ra-carousel-outer ra-carousel content-carousel content-carousel--{{ section.id }}">
+  <div class="ra-heading ra-heading__color ra-carousel__details ml-4 pt-6 md:pt-12 md:pb-4 empty:hidden {% if section.settings.center_text %} text-center{% endif %}">
+    {%- if section.settings.title != blank -%}
+      <{{ title_level }} class="">
+        {{- section.settings.title -}}
+      </{{ title_level }}>
+    {%- endif -%}
+    {%- if section.settings.description != blank -%}
+      <div class="ra-heading__description ra-heading__color rte">
+        {{- section.settings.description -}}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="ra-carousel__skeleton">
+    {%- render "content-skeleton", blocks: section.blocks -%}
+  </div>
+
+  <div class="ra-carousel">
+    <!-- prettier-ignore-attribute (data-init-params) -->
+    <swiper-container
+      class="swiper--{{ section.id }} max-md:hidden hidden"
+      init="false"
+      space-between="0"
+      {% if show_pagination %}
+        pagination="true"
+        pagination-clickable="true"
+        pagination-el=".content-carousel--{{ section.id }} .ra-carousel__pagination"
+      {% endif %}
+      {% if show_navigation_desktop %}
+        navigation-next-el=".content-carousel--{{ section.id }} .ra-carousel__nav .ra-carousel__nav-cta--next"
+        navigation-prev-el=".content-carousel--{{ section.id }} .ra-carousel__nav .ra-carousel__nav-cta--prev"
+      {% endif %}
+      speed="300"
+      draggable="true"
+      mousewheel-release-on-edges="true"
+      mousewheel-force-to-axis="true"
+      free-mode-enabled="{% if show_pagination %}false{% else %}true{% endif %}"
+      free-mode-sticky="{% if show_pagination %}false{% else %}true{% endif %}"
+      snap-on-release="{% if show_pagination %}true{% else %}false{% endif %}"
+      slides-per-view="{{ mobile_slides }}"
+      data-init-params='{{ swiper_init_params }}'
+    >
+      <!-- prettier-ignore-end -->
+      {%- for block in section.blocks -%}
+        <swiper-slide>
+          {% render 'ra-content-tile',
+            video: block.settings.video,
+            vimeo_video: block.settings.vimeo_video,
+            show_video: block.settings.show_video,
+            loop: block.settings.loop,
+            image: block.settings.slide_img,
+            alt: block.settings.slide_img.alt,
+            title: block.settings.title,
+            description: block.settings.slide_description,
+            overlay_link: block.settings.slide_url,
+            index: forloop.index
+          %}
+        </swiper-slide>
+      {% endfor %}
+    </swiper-container>
+    <swiper-container
+      class="swiper--{{ section.id }} md:hidden hidden"
+      init="false"
+      space-between="0"
+      {% if show_pagination %}
+      pagination="true"
+      pagination-clickable="true"
+      pagination-el=".content-carousel--{{ section.id }} .ra-carousel__pagination-mobile"
+      {% endif %}
+      {% if show_navigation_mobile %}
+        navigation-next-el=".content-carousel--{{ section.id }} .ra-carousel__nav.mobile-only .ra-carousel__nav-cta--next"
+        navigation-prev-el=".content-carousel--{{ section.id }} .ra-carousel__nav.mobile-only .ra-carousel__nav-cta--prev"
+      {% endif %}
+      speed="300"
+      draggable="true"
+      mousewheel-release-on-edges="true"
+      mousewheel-force-to-axis="true"
+      free-mode-enabled="{% if show_pagination %}false{% else %}true{% endif %}"
+      free-mode-sticky="{% if show_pagination %}false{% else %}true{% endif %}"
+      snap-on-release="{% if show_pagination %}true{% else %}false{% endif %}"
+      slides-per-view="1"
+      data-init-params='{{ swiper_init_params }}'
+    >
+      <!-- prettier-ignore-end -->
+      {% assign first_slide = 0 %}
+      {% assign second_slide = 1 %}
+      {% assign thrid_slide = 2 %}
+      {% assign forth_slide = 3 %}
+
+      {%- for slide in (1..mobile_slide_count) -%}
+
+        {% unless forloop.first %}
+          {% assign first_slide = first_slide | plus: 4 %}
+          {% assign second_slide = second_slide | plus: 4 %}
+          {% assign thrid_slide = thrid_slide | plus: 4 %}
+          {% assign forth_slide = forth_slide | plus: 4 %}
+        {% endunless %}
+
+        <swiper-slide>
+          <div class="grid grid-rows-2 grid-cols-2">
+            <div>
+              {% render 'ra-content-tile',
+                video: section.blocks[first_slide].settings.video,
+                vimeo_video: section.blocks[first_slide].settings.vimeo_video,
+                show_video: section.blocks[first_slide].settings.show_video,
+                loop: section.blocks[first_slide].settings.loop,
+                image: section.blocks[first_slide].settings.slide_img,
+                alt: section.blocks[first_slide].settings.slide_img.alt,
+                title: section.blocks[first_slide].settings.title,
+                description: section.blocks[first_slide].settings.slide_description,
+                overlay_link: section.blocks[first_slide].settings.slide_url,
+                index: forloop.index
+              %}
+            </div>
+            {%- if section.blocks[second_slide].settings.slide_img or section.blocks[second_slide].settings.video -%}
+              <div>
+                {% render 'ra-content-tile',
+                  video: section.blocks[second_slide].settings.video,
+                  vimeo_video: section.blocks[second_slide].settings.vimeo_video,
+                  show_video: section.blocks[second_slide].settings.show_video,
+                  loop: section.blocks[second_slide].settings.loop,
+                  image: section.blocks[second_slide].settings.slide_img,
+                  alt: section.blocks[second_slide].settings.slide_img.alt,
+                  title: section.blocks[second_slide].settings.title,
+                  description: section.blocks[second_slide].settings.slide_description,
+                  overlay_link: section.blocks[second_slide].settings.slide_url,
+                  index: forloop.index
+                %}
+              </div>
+            {%- endif -%}
+            {%- if section.blocks[thrid_slide].settings.slide_img or section.blocks[thrid_slide].settings.video -%}
+              <div>
+                {% render 'ra-content-tile',
+                  video: section.blocks[thrid_slide].settings.video,
+                  show_video: section.blocks[thrid_slide].settings.show_video,
+                  vimeo_video: section.blocks[thrid_slide].settings.vimeo_video,
+                  loop: section.blocks[thrid_slide].settings.loop,
+                  image: section.blocks[thrid_slide].settings.slide_img,
+                  alt: section.blocks[thrid_slide].settings.slide_img.alt,
+                  title: section.blocks[thrid_slide].settings.title,
+                  description: section.blocks[thrid_slide].settings.slide_description,
+                  overlay_link: section.blocks[thrid_slide].settings.slide_url,
+                  index: forloop.index
+                %}
+              </div>
+            {%- endif -%}
+            {%- if section.blocks[forth_slide].settings.slide_img or section.blocks[forth_slide].settings.video -%}
+              <div>
+                {% render 'ra-content-tile',
+                  video: section.blocks[forth_slide].settings.video,
+                  show_video: section.blocks[forth_slide].settings.show_video,
+                  vimeo_video: section.blocks[forth_slide].settings.vimeo_video,
+                  loop: section.blocks[forth_slide].settings.loop,
+                  image: section.blocks[forth_slide].settings.slide_img,
+                  alt: section.blocks[forth_slide].settings.slide_img.alt,
+                  title: section.blocks[forth_slide].settings.title,
+                  description: section.blocks[forth_slide].settings.slide_description,
+                  overlay_link: section.blocks[forth_slide].settings.slide_url,
+                  new_tab: section.blocks[forth_slide].settings.open_new_tab,
+                  index: forloop.index
+                %}
+              </div>
+            {%- endif -%}
+          </div>
+        </swiper-slide>
+
+      {%- endfor -%}
+    </swiper-container>
+    {% if show_navigation_desktop %}
+      <div class="ra-carousel__nav ra-carousel__nav--auto max-md:hidden">
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to previous slide',
+          icon: 'left-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--prev !pointer-events-auto'
+        %}
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to next slide',
+          icon: 'right-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--next !pointer-events-auto'
+        %}
+      </div>
+    {% endif %}
+    {% if show_navigation_mobile %}
+
+      <div class="ra-carousel__nav mobile-only ra-carousel__nav--auto md:hidden">
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to previous slide',
+          icon: 'left-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--prev !pointer-events-auto'
+        %}
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to next slide',
+          icon: 'right-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--next !pointer-events-auto'
+        %}
+      </div>
+    {% endif %}
+    {% if show_pagination and section.blocks.size > 4 %}
+      <div class="ra-carousel__pagination flex justify-center gap-4 py-6 md:py-12 max-md:hidden"></div>
+    {% endif %}
+    {% if show_pagination and mobile_slide_count > 1 %}
+      <div class="ra-carousel__pagination-mobile flex justify-center gap-4 py-4 md:hidden"></div>
+    {% endif %}
+  </div>
+</section>
+<script>
+const swipers = document.querySelectorAll('.swiper--{{ section.id }}')
+const skeleton = document.querySelector('.content-carousel--{{ section.id }} .ra-carousel__skeleton')
+
+swipers.forEach((swiper) => {
+  swiper.addEventListener('init', () => {
+    swiper.classList.remove('hidden')
+    if (!skeleton.classList.contains('hidden')) {
+      skeleton.classList.add('hidden')
+    }
+  })
+})
+</script>
+
+{% schema %}
+{
+  "name": "Content Carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header Text Color",
+      "info": "Set the header text color for all screen sizes",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_text",
+      "label": "Center text",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h2"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "info": "Set the background color for all screen sizes",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "info": "Set the text color for all screen sizes",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show Navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show Pagination",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "content-slide",
+      "name": "Content Slide",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Slide Content"
+        },
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_video",
+          "label": "Show video",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "loop",
+          "label": "Loop video",
+          "default": true
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video"
+        },
+        {
+          "type": "video_url",
+          "id": "vimeo_video",
+          "label": "Vimeo Video",
+          "accept": [
+            "vimeo"
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "slide_img",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "slide_description",
+          "label": "Description"
+        },
+        {
+          "type": "url",
+          "id": "slide_url",
+          "label": "Optional Slide URL link",
+          "default": "/"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Carousel"
+    }
+  ]
+}
+{% endschema %}

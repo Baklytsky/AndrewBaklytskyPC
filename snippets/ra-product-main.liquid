@@ -1,0 +1,58 @@
+{% liquid
+  assign vip_customer = false
+  if customer and customer.tags contains "VIP"
+    assign vip_customer = true
+  endif
+%}
+
+{%- assign complete_the_look_block = section.blocks | where: 'type', 'complete_the_look' -%}
+{%- assign has_complete_the_look_products = false -%}
+{%- assign enable_sale_event = settings.enable_sale_event -%}
+{%- assign show_klarna_afterpay_message_on_pdp = settings.show_klarna_afterpay_message_on_pdp -%}
+{%- assign enable_gift_note = settings.enable_gift_note -%}
+
+{%- for block in complete_the_look_block -%}
+  {%- assign product_list = block.settings.complete_the_look_products | default: block.settings.default_complete_the_look_products -%}
+
+  {%- for _product in product_list -%}
+    {%- assign coming_soon_product = _product.metafields.custom.coming_soon.value | default: false -%}
+
+    {%- unless coming_soon_product -%}
+      {%- assign has_complete_the_look_products = true -%}
+      {%- break -%}
+    {%- endunless -%}
+
+  {%- endfor -%}
+
+{%- endfor -%}
+
+<div class="ra-product-main w-full lg:mb-8 max-w-[450px] mx-auto z-10" data-vue-root="ProductMain" {{ enable_gift_note }}>
+  <product-main
+    :product="{{ product_data | escape | strip }}"
+    :vip-customer="{{ vip_customer }}"
+    template="{{ template }}"
+    waitlist-text="{{ settings.waitlist_text | default: 'Coming Soon - Join Waitlist' }}"
+    bis-text="{{ settings.bis_text | default: 'Back In Stock' }}"
+    sold-out-text="{{ settings.sold_out_badge_title }}"
+    pre-order-text="{{ settings.pre_order_text }}"
+    order-limit="{{ 'general.order_limit_pdp' | t }}"
+    waitlist-modal-disabled="{{ settings.disable_bis_modal }}"
+    waitlist-modal-title="{{ settings.waitlist_modal_title }}"
+    waitlist-modal-description="{{ settings.waitlist_modal_description_rich_text }}"
+    waitlist-modal-legal-text="{{ settings.waitlist_modal_legal_text }}"
+    waitlist-modal-cta="{{ settings.waitlist_modal_cta | default: 'Get Notified' }}"
+    bis-modal-title="{{ settings.bis_modal_title }}"
+    bis-modal-description="{{ settings.bis_modal_description_rich_text }}"
+    bis-modal-legal-text="{{ settings.bis_modal_legal_text }}"
+    bis-modal-cta="{{ settings.bis_modal_cta | default: 'Get Notified' }}"
+    :complete-the-look-anchor-link="{{ has_complete_the_look_products }}"
+    :enable-sale-event="{{ enable_sale_event }}"
+    sale-event-tooltip-color="{{ settings.sale_event_tooltip_color_pdp }}"
+    sale-event-tooltip-copy="{{ settings.sale_event_tooltip_copy }}"
+    :show-klarna-afterpay-message="{{ show_klarna_afterpay_message_on_pdp }}"
+    :enable-gift-note="{{ enable_gift_note }}"
+  >
+    {% render 'product-details-skeleton' %}
+    {% render 'product-form-desktop-skeleton', product: product %}
+  </product-main>
+</div>

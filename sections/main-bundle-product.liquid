@@ -1,0 +1,700 @@
+{% comment %} Begin Render Okendo star Rating {% endcomment %}
+
+<div class="hidden-okendo-rating">
+  <div ref="externalDiv" id="okendo-star-rating">
+    {% render 'okendo-reviews-product-rating-summary', product: product %}
+  </div>
+</div>
+{% comment %} End Render Okendo star Rating {% endcomment %}
+
+{% assign image_count_with_correct_alt_structure = 0 %}
+{% for image in product.images %}
+  {% if image.alt contains " :: " %}
+    {% assign image_count_with_correct_alt_structure = image_count_with_correct_alt_structure | plus: 1 %}
+  {% endif %}
+{% endfor %}
+{% assign size_guide_product = "" %}
+{% assign parent_product = product.metafields.custom.parent_product.value %}
+{% if parent_product.metafields.custom.size_guide.value %}
+  {% assign size_guide_product = parent_product %}
+  {% elsif product.metafields.custom.size_guide.value %}
+  {% assign size_guide_product = product %}
+{% endif %}
+
+{% capture size_guide_content %}
+
+  {% if size_guide_product != blank %}
+    <section class="ra-modal__content-main">
+      <h3 class="content-main__size-guide mono-16">SIZE GUIDE</h3>
+      <h4 class="content-main__product-title mono-24 mt-12 mb-12">{{ product.title }}</h4>
+      <div class="content-main__images_and_infos">
+
+        {% if image_count_with_correct_alt_structure > 0 %}
+          <main class="content-main__images">
+            {% for image in product.images %}
+              {% if image.alt contains " :: " %}
+                <!-- The alt structure is "Alt text :: Size" - EX: "Faux Leather Pant KHY :: XL"-->
+                <img data-size="{{ image.alt |  split: ' :: ' | last | escape }}" class="content-main__image"
+                     src="{{ image.src | image_url: width: 434 }}"
+                     alt="{{ image.alt |  split: ' :: ' | first | escape }}">
+              {% endif %}
+            {% endfor %}
+          </main>
+        {% endif %}
+
+        <aside class="content-main__infos">
+
+          <div class="content-main__infos--colors mb-9">
+            {% assign color_variant = size_guide_product.title | split: "|" | last | strip %}
+            {% assign child_products = size_guide_product.metafields.custom.child_products.value %}
+            <p class="content-main__size-guide-color-title text-black">Size guide applies to these colors:</p>
+            <div class="ra-product-tile__swatches child-product-swatches flex flex-row flex-wrap gap-4 mt-4">
+              <div class="ra-product-tile__swatch childs_parent_product relative cursor-default w-5 h-5 rounded-full">
+                <img class="rounded-full" alt="{{ color_variant }}"
+                     src="{{ color_variant | downcase | handle | append: '_swatch.png' | file_url }}" loading="eager"
+                     width="20px" height="20px">
+              </div>
+              {% for child_product in child_products %}
+                {% assign swatch_color = child_product.title | split: "|" | last | strip %}
+                <div
+                  class="ra-product-tile__swatch childs_parents_children relative cursor-default w-5 h-5 rounded-full">
+                  <img class="rounded-full" alt="{{ swatch_color }}"
+                       src="{{ swatch_color | downcase | handle | append: '_swatch.png' | file_url }}" loading="eager"
+                       width="20px" height="20px">
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="content-main__sizes inline">
+            <p class="content-main__view-model sizes mono-16 mr-6 inline mb-4">VIEW MODEL SIZE:</p>
+            {% for variant in product.variants %}
+              {% comment %} hide if the variant.title is not in any of the alt texts of the images {% endcomment %}
+              {% for image in product.images %}
+                {% if image.alt contains " :: " %}
+                  {% assign alt_tag_size = image.alt | split: ' :: ' | last | escape | upcase %}
+                  {% assign upcase_variant_title = variant.title | upcase %}
+                  {% if alt_tag_size == upcase_variant_title %}
+                    <button data-size="{{ variant.title |  split: ' :: ' | last | escape }}"
+                            class="size-button mono-16 p-0 ml-4 mb-4 leading-0 rounded text-text-inverse-primary border w-8 h-8">{{ variant.title }}</button>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+          </div>
+
+          {% for variant in product.variants %}
+            {% if variant.metafields.custom.model_info.value %}
+              <div class="content-main__model-info" data-size="{{ variant.title }}">
+                <div class="content-main__model-info__title">MODEL INFO:</div>
+                <p class="content-main__model-info__content">
+                  {{ variant.metafields.custom.model_info.value | newline_to_br }}
+                </p>
+              </div>
+            {% endif %}
+          {% endfor %}
+
+          {% if size_guide_product.metafields.custom.how_it_fits.value %}
+            <div class="content-main__how-it-fits">
+              <div class="content-main__how-it-fits__title ">HOW IT FITS:</div>
+              <p class="content-main__how-it-fits__content ">
+                {{ size_guide_product.metafields.custom.how_it_fits.value | newline_to_br }}
+              </p>
+            </div>
+          {% endif %}
+          {% if section.settings.modal_contact_us_content %}
+            <div class="content-main__contact-us ">
+              <p>{{ section.settings.modal_contact_us_content }}</p>
+            </div>
+          {% endif %}
+        </aside>
+      </div>
+    </section>
+    <hr class="ra-modal__content-divider">
+    <section class="ra-modal__content-table">
+      {{ size_guide_product.metafields.custom.size_guide.value.content }}
+    </section>
+  {% endif %}
+{% endcapture %}
+
+{% render 'ra-modal', id: 'modal-size-guide', title: 'Size Guide', content: size_guide_content, classes:
+  'size-guide-modal rounded', overlay: true %}
+
+{% liquid
+  assign isChildProduct = false
+  if product.metafields.custom.parent_product != blank
+  assign isChildProduct = true
+  endif %}
+
+<script>
+  // Select all size buttons and content main images
+  const sizeButtons = document.querySelectorAll(".size-button") || [];
+  const contentMainImages = document.querySelectorAll(".content-main__image");
+  const raProductTileSwatch = document.querySelectorAll(".ra-product-tile__swatch");
+  // Add click event listener to each size button
+  sizeButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+      size = e.target.dataset.size;
+
+      // Reset styles for all size buttons
+      sizeButtons.forEach((button) => {
+        button.style.backgroundColor = "#C0BEBA";
+        button.style.borderColor = "#C0BEBA";
+        button.style.color = "#ECEAE5";
+      });
+
+      // Apply active styles to the clicked size button
+      e.target.style.backgroundColor = "#ECEAE5";
+      e.target.style.borderColor = "#ECEAE5";
+      e.target.style.color = "#28282A";
+
+      // Show or hide content main images based on selected size
+      contentMainImages.forEach((image) => {
+        if (image.dataset.size === size) {
+          image.style.display = "block";
+          // apply style to that button
+        } else {
+          image.style.display = "none";
+        }
+      });
+
+      // Show or hide content-main__model-info based on selected size
+      modelInfo = document.querySelectorAll(".content-main__model-info");
+      modelInfo.forEach((info) => {
+        if (info.dataset.size === size) {
+          info.style.display = "grid";
+        } else {
+          info.style.display = "none";
+        }
+      });
+    });
+  });
+  if (sizeButtons.length > 0) {
+    sizeButtons[0].click();
+  } else {
+    const mainSizes = document.querySelector(".content-main__sizes");
+    if (mainSizes) {
+      mainSizes.style.display = "none";
+    }
+  }
+
+  if (raProductTileSwatch.length <= 1) {
+    const mainInfosColors = document.querySelector(".content-main__infos--colors");
+    if (mainInfosColors) {
+      mainInfosColors.style.display = "none";
+    }
+  }
+
+
+</script>
+
+<style>
+  :root {
+    --slide-nav-color: {{ section.settings.arrow_color }}
+  }
+</style>
+
+{%- assign product_carousel_block = section.blocks | where: 'type', 'product_carousel' -%}
+{%- assign product_looks_block = section.blocks | where: 'type', 'product_looks' -%}
+{%- assign complete_the_look_block = section.blocks | where: 'type', 'complete_the_look' -%}
+{%- assign has_complete_the_look_products = false -%}
+
+{%- assign product_carousel_mf_block = section.blocks | where: 'type', 'product_carousel_mf' -%}
+{%- assign product_carousel_mf_title = product.metafields.custom.product_carousel_title -%}
+{%- assign product_carousel_mf_collection = product.metafields.custom.product_carousel_collection.value -%}
+{%- assign product_carousel__mf_cta_title = product.metafields.custom.product_carousel_cta_title -%}
+{%- assign product_carousel_mf_cta_link = product.metafields.custom.product_carousel_cta_link -%}
+
+{%- for block in complete_the_look_block -%}
+  {%- assign product_list = block.settings.complete_the_look_products | where: 'available', true -%}
+
+  {%- for _product in product_list -%}
+    {%- assign coming_soon_product = _product.metafields.custom.coming_soon.value | default: false -%}
+
+    {%- unless coming_soon_product -%}
+      {%- assign has_complete_the_look_products = true -%}
+      {%- break -%}
+    {%- endunless -%}
+
+  {%- endfor -%}
+
+  {%- unless has_complete_the_look_products -%}
+  {%- assign product_list = block.settings.default_complete_the_look_products | where: 'available', true -%}
+
+    {%- for _product in product_list -%}
+      {%- assign coming_soon_product = _product.metafields.custom.coming_soon.value | default: false -%}
+
+      {%- unless coming_soon_product -%}
+        {%- assign has_complete_the_look_products = true -%}
+        {%- break -%}
+      {%- endunless -%}
+
+    {%- endfor -%}
+
+  {%- endunless -%}
+
+  {%- if has_complete_the_look_products -%}
+    {%- assign complete_the_look_product_list = product_list -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<style>
+  :root {
+    --pdp-container-max-height: calc(186px + var(--countdown-margin-top, 0px));
+    --pdp-badge-top-position: calc(100svh - (186px + var(--countdown-margin-top, 0px)) - 30px);
+  }
+</style>
+
+
+<div id="ra-main-product" class="ra-main-product relative ra-main-product--first-{{ section.settings.first_option }}"
+     data-section-id="{{ section.id }}">
+  <div class="wrapper">
+    <div id="pdp-container" class="w-full lg:bg-grey {% if template == 'product.giftcard' %} pdp-giftcard {% endif %}">
+      <div class="flex product flex-col-reverse lg:flex-row-reverse h-[100svh]">
+        {% comment %} Gallery {% endcomment %}
+        <div class="w-full absolute pl-0 top-0 h-[calc(100vh-150px)] lg:h-screen">
+          {% render 'ra-product-media-gallery', product: product %}
+        </div>
+
+        {% comment %} Buy Box {% endcomment %}
+        <div id="product-buy-box"
+          class="product-buy-box relative lg:w-1/2 z-10 bg-no-repeat bg-cover min-h-[var(--pdp-container-max-height)] h-[186px] lg:h-full block lg:mt-0 rounded-t-3xl lg:rounded-none">
+          <div id="product-buy-box-child"
+               class="relative product-main__container min-h-screen lg:h-full lg:flex lg:p-0 w-full items-center justify-center rounded-t-3xl lg:rounded-none"
+               style="background-image: url('{{ section.settings.buy_box_background_image | image_url }}')">
+            <!-- Mobile swipe indicator -->
+            <div id="product-buy-box__pill-container"
+                 class="lg:hidden sticky top-0 w-full left-0 right-0 text-center h-8 z-[10000000]">
+              <span id="product-buy-box__pill"
+                    class="w-[30px] h-[5px] bg-stroke-secondary rounded-full opacity-75 inline-block pointer-events-none"></span>
+            </div>
+            <div class="product-buy-box-blur absolute inset-0 blur min-h-full hidden"></div>
+            {% render 'ra-bundle-product-main',
+              product: product,
+              size_guide_content: size_guide_content,
+              blocks: section.blocks %}
+
+            {% comment %} Mobile Product Info & Complete the look {% endcomment %}
+
+            <div class="z-10 lg:hidden">
+              <div
+                class="relative w-full flex lg:bg-bg-primary px-6 pt-12 pb-0 lg:p-24 items-start border-t border-stroke-secondary lg:border-0">
+                {% comment %} Product Description {% endcomment %}
+                {% render 'ra-product-info', product: product %}
+              </div>
+
+              {% comment %} Product Recs Carousel and Looks {% endcomment %}
+              <div class="w-full lg:w-1/2 max-w-[100vw]">
+                {%- if has_complete_the_look_products -%}
+                  {%- for block in complete_the_look_block -%}
+                    {% render 'ra-product-complete-the-look',
+                      id: section.id,
+                      title: block.settings.complete_the_look_title,
+                      complete_the_look_products: complete_the_look_product_list,
+                      complete_the_look_sibling_products: block.settings.complete_the_look_sibling_products
+                    %}
+                  {%- endfor -%}
+                {%- endif -%}
+                {% if product_carousel_mf_block != blank and product_carousel_mf_collection != blank  %}
+                  {%- for block in product_carousel_mf_block -%}
+                    {% render 'ra-product-recs',
+                      id: section.id,
+                      product_id: product.id,
+                      title: product_carousel_mf_title,
+                      collection: product_carousel_mf_collection,
+                      product_limit: 16,
+                      cta_title: product_carousel__mf_cta_title,
+                      cta_link: product_carousel_mf_cta_link,
+                      open_new_tab: false
+                    %}
+                  {%- endfor -%}
+                {% endif %}
+                {%- for block in product_carousel_block -%}
+                  {% render 'ra-product-recs',
+                    id: section.id,
+                    product_id: product.id,
+                    title: block.settings.product_carousel_title,
+                    collection: block.settings.selected_collection,
+                    use_recommendations_api: block.settings.use_recommendations_api,
+                    recommendations_intent: block.settings.recommendations_intent,
+                    recommendations_product_1: block.settings.recommendations_product_1,
+                    recommendations_product_2: block.settings.recommendations_product_2,
+                    recommendations_product_3: block.settings.recommendations_product_3,
+                    recommendations_product_4: block.settings.recommendations_product_4,
+                    product_limit: block.settings.product_limit,
+                    cta_title: block.settings.cta_title,
+                    cta_link: block.settings.cta_link,
+                    open_new_tab: block.settings.open_new_tab
+                  %}
+                {%- endfor -%}
+                {%- for block in product_looks_block -%}
+                  {% render 'ra-product-looks',
+                    id: section.id,
+                    title: block.settings.product_looks_title,
+                    text_color: block.settings.text_color %}
+                {%- endfor -%}
+              </div>
+            </div>
+            {% if section.settings.show_desktop_okendo_reviews %}
+              <div class="mobile-okendo-review"
+                   id="okendo-rating-section-scroll-to-mobile"
+                   data-review-count="{{ product.metafields.okendo.summaryData.reviewCount | default: 0 }}">
+                {% render 'okendo-reviews-widget', product: product %}
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <div id="product-additional-info"
+           class="min-lg:hidden z-10 relative w-full flex flex-wrap lg:bg-bg-primary pt-12 pb-24 lg:p-24 items-start border-t border-stroke-secondary lg:border-0">
+        {% comment %} Desktop Product Info {% endcomment %}
+        <div class="product-additional-info-details z-10 hidden sticky lg:block lg:w-1/2 lg:pr-6 mb-12">
+          {% comment %} Product Description {% endcomment %}
+          {% render 'ra-product-info', product: product %}
+        </div>
+
+        {% comment %} Product Recs Carousel and Looks {% endcomment %}
+        <div class="w-full lg:w-1/2 max-w-[100vw]">
+          {%- if has_complete_the_look_products -%}
+            {%- for block in complete_the_look_block -%}
+              {% render 'ra-product-complete-the-look',
+                id: section.id,
+                title: block.settings.complete_the_look_title,
+                complete_the_look_products: complete_the_look_product_list,
+                complete_the_look_sibling_products: block.settings.complete_the_look_sibling_products
+              %}
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- unless has_complete_the_look_products -%}
+            {% if product_carousel_mf_block != blank and product_carousel_mf_collection != blank  %}
+              {%- for block in product_carousel_mf_block -%}
+                {% render 'ra-product-recs-desktop',
+                  id: section.id,
+                  product_id: product.id,
+                  title: product_carousel_mf_title,
+                  collection: product_carousel_mf_collection,
+                  product_limit: 16,
+                  cta_title: product_carousel__mf_cta_title,
+                  cta_link: product_carousel_mf_cta_link,
+                  open_new_tab: false
+                %}
+              {%- endfor -%}
+            {% endif %}
+
+            {%- for block in product_carousel_block -%}
+              {% render 'ra-product-recs-desktop',
+                id: section.id,
+                product_id: product.id,
+                title: block.settings.product_carousel_title,
+                collection: block.settings.selected_collection,
+                use_recommendations_api: block.settings.use_recommendations_api,
+                recommendations_intent: block.settings.recommendations_intent,
+                recommendations_product_1: block.settings.recommendations_product_1,
+                recommendations_product_2: block.settings.recommendations_product_2,
+                recommendations_product_3: block.settings.recommendations_product_3,
+                recommendations_product_4: block.settings.recommendations_product_4,
+                cta_title: block.settings.cta_title,
+                cta_link: block.settings.cta_link,
+                open_new_tab: block.settings.open_new_tab
+              %}
+            {%- endfor -%}
+          {%- endunless -%}
+
+          {%- for block in product_looks_block -%}
+            {% render 'ra-product-looks-desktop',
+              id: section.id,
+              title: block.settings.product_looks_title,
+              text_color: block.settings.text_color %}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- if has_complete_the_look_products -%}
+        <div class="w-full max-w-[100vw] min-lg:hidden z-10 relative lg:bg-bg-primary pb-24 pr-24 pl-24 items-start border-t border-stroke-secondary lg:border-0 overflow-hidden">
+          {% if product_carousel_mf_block != blank and product_carousel_mf_collection != blank  %}
+            {%- for block in product_carousel_mf_block -%}
+              {% render 'ra-product-recs',
+                id: section.id,
+                product_id: product.id,
+                title: product_carousel_mf_title,
+                collection: product_carousel_mf_collection,
+                product_limit: 16,
+                cta_title: product_carousel__mf_cta_title,
+                cta_link: product_carousel_mf_cta_link,
+                open_new_tab: false
+              %}
+            {%- endfor -%}
+          {% endif %}
+        </div>
+
+        <div class="w-full max-w-[100vw] min-lg:hidden z-10 relative lg:bg-bg-primary pb-24 pr-24 pl-24 items-start border-t border-stroke-secondary lg:border-0 overflow-hidden">
+          {%- for block in product_carousel_block -%}
+            {% render 'ra-product-recs',
+              id: section.id,
+              product_id: product.id,
+              title: block.settings.product_carousel_title,
+              collection: block.settings.selected_collection,
+              use_recommendations_api: block.settings.use_recommendations_api,
+              recommendations_intent: block.settings.recommendations_intent,
+              recommendations_product_1: block.settings.recommendations_product_1,
+              recommendations_product_2: block.settings.recommendations_product_2,
+              recommendations_product_3: block.settings.recommendations_product_3,
+              recommendations_product_4: block.settings.recommendations_product_4,
+              product_limit: block.settings.product_limit,
+              cta_title: block.settings.cta_title,
+              cta_link: block.settings.cta_link,
+              open_new_tab: block.settings.open_new_tab
+            %}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% if section.settings.show_desktop_okendo_reviews %}
+  <div id="okendo-rating-section-scroll-to"
+       class="desktop-okendo-review"
+       data-review-count="{{ product.metafields.okendo.summaryData.reviewCount | default: 0 }}">
+    {% render 'okendo-reviews-widget', product: product %}
+  </div>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Main Product",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_desktop_okendo_reviews",
+      "label": "Show Desktop Okendo Reviews",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "first_option",
+      "label": "First option",
+      "options": [
+        {
+          "value": "size",
+          "label": "Size"
+        },
+        {
+          "value": "color",
+          "label": "Color"
+        }
+      ],
+      "default": "size"
+    },
+    {
+      "type": "image_picker",
+      "id": "buy_box_background_image",
+      "label": "Mobile Buy Box Background"
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Pagination & Dots Color",
+      "default": "#ECEAE5"
+    },
+    {
+      "type": "richtext",
+      "id": "modal_contact_us_content",
+      "label": "Contact Us Content",
+      "default": "<p>Need size or style advice?<br><a href='/pages/contact'>Contact us</a>!</p>",
+      "info": "This content will be displayed in the contact us section of the size guide modal."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "product_carousel_mf",
+      "name": "Product Carousel (MF)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "The content is configured in product metafields"
+        }
+      ]
+    },
+    {
+      "type": "product_carousel",
+      "name": "Product Carousel",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_carousel_title",
+          "label": "Title"
+        },
+        {
+          "type": "header",
+          "content": "Data Sources"
+        },
+        {
+          "type": "paragraph",
+          "content": "There are 3 different ways to decide which product data will be used for this carousel, listed in order of priority. 1) Recommendations API (either intent), 2) A selected collection, 3) Individually selected products"
+        },
+        {
+          "type": "header",
+          "content": "CTA",
+          "info": "CTA Button will appear only when all settings are configured"
+        },
+        {
+          "type": "text",
+          "label": "CTA Title",
+          "default": "Shop Now",
+          "id": "cta_title"
+        },
+        {
+          "type": "url",
+          "label": "CTA Link",
+          "id": "cta_link"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Collection"
+        },
+        {
+          "type": "range",
+          "id": "product_limit",
+          "label": "Carousel Product limit",
+          "min": 4,
+          "max": 16,
+          "default": 4,
+          "info": "Only for carousel layout"
+        },
+        {
+          "type": "collection",
+          "id": "selected_collection",
+          "label": "Selected Collection",
+          "info": "Choosing a collection will override any products selected for this component."
+        },
+        {
+          "type": "header",
+          "content": "Recommendations API Settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_recommendations_api",
+          "label": "Use Recommendations API",
+          "info": "By checking this box, you will be choosing to override any products or collections you have selected for this component.",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "recommendations_intent",
+          "label": "Recommendation Intent",
+          "info": "Select your recommendations intent [Learn more about intent](https://shopify.dev/docs/themes/product-merchandising/recommendations#recommendation-intents)",
+          "options": [
+            {
+              "value": "related",
+              "label": "Related (You May Also Like)"
+            },
+            {
+              "value": "complementary",
+              "label": "Complementary (Pair it With)"
+            }
+          ],
+          "default": "related"
+        },
+        {
+          "type": "header",
+          "content": "Recommendation Products"
+        },
+        {
+          "type": "product",
+          "id": "recommendations_product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "recommendations_product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "recommendations_product_3",
+          "label": "Product 3"
+        }
+        ,
+        {
+          "type": "product",
+          "id": "recommendations_product_4",
+          "label": "Product 4"
+        }
+      ]
+    },
+    {
+      "type": "product_looks",
+      "name": "Product Looks",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_looks_title",
+          "label": "Title"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text Color",
+          "options": [{"label":"White","value":"--white"},{"label":"Primary","value":"--text-primary"},{"label":"Secondary","value":"--text-secondary"},{"label":"Inverse primary","value":"--text-inverse-primary"},{"label":"Inverse secondary","value":"--text-inverse-secondary"}],
+          "default": "--text-primary"
+        }
+      ]
+    },
+    {
+      "type": "complete_the_look",
+      "name": "Complete the Look",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "complete_the_look_title",
+          "label": "Title",
+          "default": "COMPLETE THE LOOK"
+        },
+        {
+          "type": "product_list",
+          "id": "complete_the_look_products",
+          "label": "Products",
+          "info": "Select a list of products manually or choose a list from product metafields"
+        },
+        {
+          "type": "header",
+          "content": "Default product list"
+        },
+        {
+          "type": "product_list",
+          "id": "default_complete_the_look_products",
+          "label": "Products"
+        },
+        {
+          "type": "checkbox",
+          "id": "complete_the_look_sibling_products",
+          "label": "Show sibling products",
+          "default": false
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

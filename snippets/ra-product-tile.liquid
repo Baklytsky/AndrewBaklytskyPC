@@ -1,0 +1,277 @@
+{% comment %}
+  Props:
+  product:     Object - Shopify product Obj -  (required)
+  class:       String add custom CSS class - (optional)
+  pre_title:   String, extra text before product title - (optional)
+  atc_button:  Boolean, toggle ATC button - (optional) [default=false]
+  atc_label:   String, add custom ATC button text - (optional)
+  atc_style:   String, [primary, secondary, tertiary] - optional
+  index:       Number
+  disable_animation:  Boolean, set true to turn off loading animation
+  badge_text:  String, Add custom badge text
+  badge_style: String, [primary, secondary, warning, danger, info, success] - (optional) [default=false]
+  wishlist:    Boolean, toggle add wishlist button on hover - (optional) [default=false]
+  wishlist_style: String, [primary, secondary, warning, danger, info, success] - optional
+  ligth_text: Boolean (Optional)
+  show_sizes_on_hover: Boolean (Optional)
+  custom_attribute: String (Optional)
+  show_title: Boolean (Optional)
+  show_price: Boolean (Optional)
+  show_swatches: Boolean (Optional)
+  show_sale_event: Boolean (Optional)
+
+  font_color:  String, hex code for text color - (optional)
+
+  Hover Video Effect Info:
+  When the second item in product.media is a video, it will be used as the hover image.
+
+  Example product-tile snippet:
+  {% render 'ra-product-tile' product: product %}
+{% endcomment %}
+
+{% liquid
+  assign show_title = show_title | default: true, allow_false: true
+  assign show_price = show_price | default: true, allow_false: true
+  assign show_swatches = show_swatches | default: true, allow_false: true
+  assign show_sale_event = show_sale_event | default: true, allow_false: true
+
+  assign is_coming_soon = product.metafields.custom.coming_soon.value
+  assign custom_badge_text = product.metafields.custom.custom_badge.value
+  assign is_child_product = false
+  assign child_products = product.metafields.custom.child_products.value
+  assign color_variant = product.title | split: "|" | last | strip
+  assign large_card = false
+  assign current_variant = product.selected_or_first_available_variant
+
+  if product.metafields.custom.large_card == true
+    assign large_card = true
+  endif
+
+  if product.metafields.custom.parent_product
+    assign is_child_product = true
+  endif
+
+  unless badge_style
+    assign badge_style = 'primary'
+  endunless
+
+  if badge_text != blank
+    assign badge_text = badge_text
+  elsif product.selected_or_first_available_variant.metafields.badge.label
+    assign badge_text = product.selected_or_first_available_variant.metafields.badge.label
+  else
+    assign badge_text = product.metafields.badge.label
+  endif
+
+  assign wishlistStyle = wishlist_style | default: 'danger'
+  assign index = index | default: 1
+%}
+
+{%- liquid
+  assign variant_colors = ''
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name == 'color'
+      assign option_index = option.position
+    endif
+  endfor
+  if option_index != blank
+    for variant in product.variants
+      assign variant_option = 'option' | append: option_index
+      assign variant_color = variant[variant_option] | downcase
+      if variant_color
+        if variant.inventory_quantity > 0 or variant.inventory_policy == 'continue'
+          unless variant_colors contains variant_color
+            assign variant_colors = variant_colors | append: variant_color | downcase | append: '%%%%'
+          endunless
+        endif
+      endif
+    endfor
+    assign variant_colors = variant_colors | split: '%%%%'
+  endif
+-%}
+
+{% comment %} {% capture product_json %}{%- render 'json-product', product: product -%}{% endcapture %} {% endcomment %}
+
+<ra-product-tile
+  data-product="{{ product.handle }}"
+  data-metafield="{{ product.metafields.custom.large_card }}"
+  data-current-variant="{{ current_variant.id }}" {% if custom_attribute %}{{ custom_attribute }}{% endif %}
+  class="ra-product-tile {% if large_card %} large-card {% endif %} {% if is_coming_soon %} ra-product-tile__is-coming-soon {% endif %}
+        {%- if show_sizes_on_hover and product.has_only_default_variant == false -%}ra-product-tile__size-hover{% endif %} ra-product-tile__media-hover"
+>
+  <div class="ra-product-tile__media">
+
+    <div data-tile-media>
+      {%- render 'ra-product-tile-media', product: product -%}
+    </div>
+
+    {% if badge_text and badge_style != blank %}
+      {% render 'ra-badge', class: 'ra-product-tile__badge', label: badge_text, style: badge_style, attributes: "data-product-badge" %}
+    {% endif %}
+
+    {% if wishlist %}
+      {%
+        render 'ra-icon-button'
+        type: 'ra-button',
+        style: wishlistStyle,
+        size: 'sm',
+        label: 'Add {{ product.title }} to wishlist',
+        rounded: true,
+        class: 'ra-product-tile__wishlist',
+        icon: 'heart'
+      %}
+    {% endif %}
+
+    {% if atc_label != blank %}
+      <div>
+        <button
+          type="button"
+          aria-label="Add to Bag {{ product.title }}"
+          onclick="document.location = '{{ product.url }}'"
+          class="ra-product-tile__atc ra-button ra-button--{{ atc_style | default: 'tertiary' }} ra-button--sm"
+        >
+          {% if atc_label != blank %}
+            {{ atc_label }}
+          {% else %}
+            {{ 'products.product.add_to_cart' | t | capitalize }}
+          {% endif %}
+        </button>
+      </div>
+    {% endif %}
+  </div>
+  <div class="ra-product-tile__details-wrapper">
+    <div
+      class="ra-product-tile__details mt-md"
+      {% if font_color %}
+        style="color: {{ font_color }}"
+      {% endif %}
+    >
+      <!-- Product title -->
+      {%- if show_title -%}
+        <a href="{{ product.url }}" class="ra-product-tile__name sans-14" data-variant-title>
+          {{ product.title | split: "|" | first | strip }}
+        </a>
+      {%- endif -%}
+      <!-- Product sale event -->
+      {%- if show_sale_event -%}
+        <div class="flex flex-col flex-wrap xl:flex-row xl:gap-[5px]">
+          {% render 'ra-sale-event', product: product, class: 'flex mt-sm cursor-pointer' %}
+        </div>
+      {%- endif -%}
+      <!-- Product Price -->
+      {%- if show_price -%}
+        {% render 'ra-price', product: product, class: 'ra-product-tile__price mt-sm gap-x-sm color-[--black]' %}
+      {%- endif -%}
+      <!-- Color Variants -->
+      {%- if show_swatches -%}
+        {% if child_products and product.tags contains 'parent-product' %}
+          <div class="ra-product-tile__swatches parent-product-swatches flex flex-row flex-wrap gap-2 mt-[12px]">
+            <div class="ra-product-tile__swatch parent-swatch relative cursor-pointer w-4 h-4 rounded-full active {% if product.available %}available{% else %}unavailable{% endif %}" data-product-swatch data-swatch-data="{{ product.id }}">
+              <img class="rounded-full" alt="{{ color_variant }}" src="{{ color_variant | downcase | handle | append: '_swatch.png' | file_url | append: '&width=20' }}" loading="eager" width="20px" height="20px">
+            </div>
+            {% for child_product in child_products %}
+              {% assign swatch_color = child_product.title | split: "|" | last | strip %}
+              {% capture swatch_data %}{% render 'json-child-product', product: child_product, parent: product.handle %}{% endcapture %}
+              <div class="ra-product-tile__swatch child_product relative cursor-pointer w-4 h-4 rounded-full {% if child_product.available %}available{% else %}unavailable{% endif %}" data-product-swatch data-swatch-data="{{ child_product.id }}">
+                <img class="rounded-full" alt="{{ swatch_color }}" src="{{ swatch_color | downcase | handle | append: '_swatch.png' | file_url | append: '&width=20' }}" loading="eager" width="20px" height="20px">
+              </div>
+            {% endfor %}
+          </div>
+        {% elsif is_child_product %}
+          {% assign parent_product = product.metafields.custom.parent_product.value %}
+          {% assign color_variant = parent_product.title | split: "|" | last | strip %}
+          {% assign child_products = parent_product.metafields.custom.child_products.value %}
+          <div class="ra-product-tile__swatches child-product-swatches flex flex-row flex-wrap gap-2 mt-[12px]">
+            <div class="ra-product-tile__swatch childs_parent_product relative cursor-pointer w-4 h-4 rounded-full {% if product.id == parent_product.id %} active {% endif %} {% if parent_product.available %}available{% else %}unavailable{% endif %}" data-product-swatch data-swatch-data="{{ parent_product.id }}">
+              <img class="rounded-full" alt="{{ color_variant }}" src="{{ color_variant | downcase | handle | append: '_swatch.png' | file_url | append: '&width=20' }}" loading="eager" width="20px" height="20px">
+            </div>
+            {% for child_product in child_products %}
+              {% assign swatch_color = child_product.title | split: "|" | last | strip %}
+              <div class="ra-product-tile__swatch childs_parents_children relative cursor-pointer w-4 h-4 rounded-full {% if product.id == child_product.id %} active {% endif %} {% if child_product.available %}available{% else %}unavailable{% endif %}" data-product-swatch data-swatch-data="{{ child_product.id }}">
+                <img class="rounded-full" alt="{{ swatch_color }}" src="{{ swatch_color | downcase | handle | append: '_swatch.png' | file_url | append: '&width=20' }}" loading="eager" width="20px" height="20px">
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {%- endif -%}
+    </div>
+    {%- if show_sizes_on_hover and product.has_only_default_variant == false -%}
+      <div class="ra-product-tile__details-hover">
+        <a href="{{ product.url }}" class="ra-product-tile__name sans-14" data-variant-title>
+          {{ product.title | split: "|" | first | strip }}
+        </a>
+
+        <div class="mt-sm">
+          {%- for option in product.options_with_values -%}
+            {%- assign option_name_handleize = option.name | handleize -%}
+            {%- assign option_position = option.position | minus: 1 -%}
+
+            {%- if option_name_handleize == 'size' -%}
+              <fieldset class="ra-product-tile__details-size-values" data-option-size>
+
+                {%- liquid
+                  assign variants_available_arr = product.variants | map: 'available'
+                  assign variants_option1_arr = product.variants | map: 'option1'
+                  assign variants_option2_arr = product.variants | map: 'option2'
+                  assign variants_option3_arr = product.variants | map: 'option3'
+                -%}
+
+                {%- for value in option.values -%}
+
+                  {%- liquid
+                    assign option_disabled = true
+                    assign value_handleize = value | handleize
+                    assign product_title_handleize = product.title | handleize
+
+                    for option1_name in variants_option1_arr
+                    case option.position
+                    when 1
+                      if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                        assign option_disabled = false
+                      endif
+                    when 2
+                      if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                        assign option_disabled = false
+                      endif
+                    when 3
+                      if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == product.selected_or_first_available_variant.option2 and variants_option3_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                        assign option_disabled = false
+                      endif
+                    endcase
+                    endfor
+                  -%}
+
+                  {%- capture input_id -%}
+                    {{- section.id -}}-{{ option.position }}-{{ product_title_handleize }}-{{- forloop.index -}}
+                  {%- endcapture -%}
+
+                  <input
+                    type="radio"
+                    id="{{ input_id }}"
+                    name="{{ option.name }}"
+                    value="{{ value | escape }}"
+                    class="sr-only"
+                    {% if option_disabled %}disabled{% endif %}
+                  >
+                  <label for="{{ input_id }}" class="mono-12 {% if option_disabled %}disabled text-primary-300 {% else %}cursor-pointer{% endif %}">
+                    {{- value -}}
+                  </label>
+
+                  <script type="application/json" data-resource="{{ input_id }}">
+                    {{ value.variant | json }}
+                  </script>
+                {%- endfor -%}
+              </fieldset>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <a href="{{ product.url }}" class="ra-product-tile__link ra-link mt-sm mono-12">
+          {{ 'products.product.product_card.view_details' | t }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</ra-product-tile>

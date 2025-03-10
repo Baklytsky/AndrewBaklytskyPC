@@ -1,0 +1,107 @@
+{% comment %}
+  Props:
+    classes:  String - (Optional) custom classes on the img element
+    image:    Shopify Image Object
+    src:      String - (Optional) img src that will be used in place of an image object
+    alt:      String - (Optional) Custom alt attribute value, defaults to value set on image object
+    crop:     String - (Optional) [top, center, bottom, left, right] Shopify crop filter string
+    width:    Int - (Optional) Image width
+    height:   Int - (Optional) Image height
+    lazyload: Boolean - (Optional) determines if the image is loaded lazily
+    srcset:   String - (Optional) srcset attribute for loading assets at different viewport sizes
+    sizes:    String - (Optional) sizes attribute for loading assets at different viewport sizes
+
+  Usage:
+
+    Render an image with an image object
+    {%- render 'ra-image' with product.featured_image -%}
+
+    Render an image with an override alt tag (by default will take an image object's alt)
+    {%- render 'ra-image' with product.featured_image,
+      alt: "A sample image description"
+    -%}
+
+    Render an image with a specific width
+    {%- render 'ra-image' with product.featured_image,
+      width: 400
+    -%}
+
+    Render an image with specific dimensions and crop
+    {%- render 'ra-image' with product.featured_image,
+      width: 400,
+      height: 300,
+      crop: 'center'
+    -%}
+
+    Render an image by image source URL
+    {%- render 'ra-image',
+      alt: "Alt tag needed for externally loaded images",
+      src: product.featured_image.src
+    -%}
+
+    Render an image with option src, srcset and sizes properties
+
+    {% capture srcset %}
+      {{ product.featured_image | image_url: width: 400 }} 400w,
+      {{ product.featured_image | image_url: width: 800 }} 800w,
+      {{ product.featured_image | image_url: width: 1200 }} 1200w
+    {% endcapture %}
+
+    {% render 'ra-image',
+      alt: product.featured_image.alt,
+      src: product.featured_image | image_url: width: 300,
+      srcset: srcset,
+      sizes: "100vw"
+    %}
+{% endcomment %}
+
+{% liquid
+  assign lazy = 'eager'
+  if lazyload
+    assign lazy = 'lazy'
+  endif
+
+  if alt == blank
+    assign alt = image.alt
+  endif
+
+  if src == blank
+    assign src = image | image_url: width: width, height: height, crop: crop
+  endif
+
+  assign fetch_priority = 'low'
+
+  if section.index <= 3
+    assign fetch_priority = 'high'
+    assign preload = true
+  endif
+%}
+
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{% comment %}theme-check-disable RemoteAsset{% endcomment %}
+
+{%- if preload -%}
+  <link rel="preload" href="{{ image | img_url: '1x' }}" as="image" imagesrcset="{{ srcset }}">
+{%- endif -%}
+
+<img
+  class="{{ classes }}"
+  {% comment %}theme-check-disable RemoteAsset{% endcomment %}
+  src="{{ src }}"
+  alt="{{ alt }}"
+  {% if srcset and sizes %}
+    srcset="{{ srcset }}"
+    sizes="{{ sizes }}"
+  {% endif %}
+  {% if width %}
+    width="{{ width }}"
+  {% endif %}
+  {% if height %}
+    height="{{ height }}"
+  {% endif %}
+  {% if image.presentation.focal_point %}
+    style="object-position:{{ image.presentation.focal_point }};"
+  {% endif %}
+  loading="{{ lazy }}"
+  fetchpriority="{{ fetch_priority }}"
+>

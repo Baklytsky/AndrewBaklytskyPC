@@ -1,0 +1,53 @@
+.countdown {
+  display: flex;
+  justify-content: var(--countdown-justify-content, space-between);
+  align-items: center;
+  column-gap: 20px;
+  background: var(--countdown-bg-color, transparent);
+  color: var(--countdown-text-color, #000);
+  padding: var(--countdown-desk-padding, 0) 40px;
+  font-size: var(--font-size-xs);
+
+  @media breakpoint(md-max) {
+    padding: var(--countdown-mob-padding, 0) 20px;
+  }
+
+  .countdown__content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 20px;
+    row-gap: 5px;
+
+    a {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  .countdown__timer {
+    display: flex;
+    align-items: center;
+  }
+
+  .countdown__timer-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+    position: relative;
+  }
+
+  .countdown__timer-date:not(:last-child):before {
+    content: ':';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    transform: translate(-50%, -50%);
+  }
+
+  .countdown__timer-date.days:after {content: 'DAY'}
+  .countdown__timer-date.hours:after {content: 'HRS'}
+  .countdown__timer-date.minutes:after {content: 'MIN'}
+  .countdown__timer-date.seconds:after {content: 'SEC'}
+}

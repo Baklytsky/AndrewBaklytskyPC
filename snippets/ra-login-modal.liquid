@@ -1,0 +1,266 @@
+{% capture login_content %}
+  <h3 class="text-center font-light mb-8 md:mb-14 text-grey-600">Log In</h3>
+  {% form 'customer_login', validate: 'novalidate' %}
+    <div class="hidden bg-primary-600 px-2 py-1 mb-4" data-password-reset-success>
+      <p class="text-sm font-light">{{ customer.recover_password.success | t }}</p>
+    </div>
+    <div class="grid gap-4 md:gap-6 grid-cols-1">
+      <div class="ra-grid-item">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="CustomerEmail">
+            {{ 'customer.login_page.email' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="email"
+              name="customer[email]"
+              id="CustomerEmail"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              data-required
+              placeholder="{{ 'customer.login_page.email' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter an email.</span>
+          </div>
+        </div>
+      </div>
+
+      {% if form.password_needed %}
+        <!-- Password -->
+        <div class="ra-grid-item">
+          <div class="ra-input">
+            <label class="font-secondary text-sm text-tertiary-900 mb-1" for="CustomerPassword">
+              {{ 'customer.login_page.password' | t }}
+            </label>
+            <div class="ra-input__wrapper">
+              <input
+                class="ra-input__control ra-input__control--text peer"
+                type="password"
+                value=""
+                name="customer[password]"
+                id="CustomerPassword"
+                autocomplete="current-password"
+                data-required
+                placeholder="{{ 'customer.login_page.password' | t }}">
+              <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a password.</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      {%- if form.password_needed -%}
+        <a
+          href="#"
+          data-toggle-account="recover"
+          class="text-sm ra-link block text-left font-light">
+          {{ 'customer.login_page.forgot_password' | t }}
+        </a>
+      {%- endif -%}
+      <button class="ra-button ra-button--primary ra-button--full-width ra-button--lg text-center" data-cy="login-btn_submit">
+        {{ 'customer.login_page.sign_in' | t }}
+      </button>
+    </div>
+  {% endform %}
+  <span class="text-center mt-4 text-base block font-light text-grey-600">Here for the first time?
+    <a
+      href="#"
+      class="underline"
+      data-toggle-account="register">Create an account</a>
+  </span>
+{% endcapture %}
+
+{% capture register_content %}
+  <h3 class="text-center font-light mb-8 md:mb-14 text-grey-600">Create An Account</h3>
+  {%- form 'create_customer', validate: 'novalidate', return_to: "/account" -%}
+    <div class="grid gap-4 md:gap-6 grid-cols-2">
+      <div class="ra-grid-item text-left col-span-2">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="RegisterForm-email">
+            {{ 'customer.register.email' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="email"
+              name="customer[email]"
+              id="RegisterForm-email"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="email"
+              aria-required="true"
+              data-required
+              placeholder="{{ 'customer.register.email' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter an email.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ra-grid-item text-left">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="RegisterForm-FirstName">
+            {{ 'customer.register.first_name' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="text"
+              name="customer[first_name]"
+              id="RegisterForm-FirstName"
+              autocomplete="given-name"
+              data-required
+              placeholder="{{ 'customer.register.first_name' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter your first name.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ra-grid-item text-left">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="RegisterForm-LastName">
+            {{ 'customer.register.last_name' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="text"
+              name="customer[last_name]"
+              id="RegisterForm-LastName"
+              autocomplete="family-name"
+              data-required
+              placeholder="{{ 'customer.register.last_name' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter your last name.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ra-grid-item text-left col-span-2">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="RegisterForm-password">
+            {{ 'customer.register.password' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="password"
+              name="customer[password]"
+              id="RegisterForm-password"
+              aria-required="true"
+              data-required
+              data-password
+              placeholder="{{ 'customer.register.password' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a password.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ra-grid-item text-left col-span-2">
+        <div class="ra-input">
+          <label class="font-secondary text-sm text-tertiary-900 mb-1" for="RegisterForm-password">
+            {{ 'customer.register.password' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              class="ra-input__control ra-input__control--text peer"
+              type="password"
+              name="customer[password]"
+              id="RegisterForm-password"
+              aria-required="true"
+              data-required
+              data-password
+              placeholder="{{ 'customer.register.confirm_password' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a password.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ra-grid-item text-left col-span-2">
+        {% capture accept_tos %}
+          <span class="font-light text-base text-grey-600">To continue, please
+            <a href="/policies/terms-of-service" class="underline">Accept Terms & Conditions</a>
+          </span>
+        {% endcapture %}
+        {%- render 'ra-checkbox' id: 'customer_accepts_terms', name: 'customer[accepts_terms]', style: 'classic', label: accept_tos, checked: false, required: true -%}
+      </div>
+
+      <button class="ra-button ra-button--full-width ra-button--lg col-span-2">
+        {{ 'customer.register.submit' | t }}
+      </button>
+    </div>
+  {%- endform -%}
+  <span class="mt-4 text-center block font-light text-grey-600">
+    Already have an account?
+    <a
+      href="#"
+      class="underline"
+      data-toggle-account="login">Log In Now</a>
+  </span>
+{% endcapture %}
+
+{% capture recover_content %}
+  <h3 class="text-center font-light mb-8 md:mb-14 text-grey-600">{{ 'customer.recover_password.title' | t }}</h3>
+  <p class="text-grey-600 font-light mb-4">{{ 'customer.recover_password.subtext' | t }}</p>
+  {%- form 'recover_customer_password', validate: 'novalidate' -%}
+    {% assign recover_success = form.posted_successfully? %}
+
+    <div class="grid gap-4 md:gap-6 grid-cols-1">
+      <div class="ra-grid-item text-left">
+        <div class="ra-input">
+          <label class="ra-input__label" for="RecoverEmail">
+            {{ 'customer.login_page.email' | t }}
+          </label>
+          <div class="ra-input__wrapper">
+            <input
+              type="email"
+              class="ra-input__control ra-input__control--text peer"
+              value=""
+              name="email"
+              id="RecoverEmail"
+              autocorrect="off"
+              autocapitalize="off"
+              autocomplete="email"
+              data-required
+              placeholder="{{ 'customer.login_page.email' | t }}">
+            <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter your email.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <button class="ra-button ra-button--full-width">
+        {{ 'customer.login_page.submit' | t }}
+      </button>
+    </div>
+
+    <span class="mt-4 text-center block font-light text-grey-600">
+      Already have an account?
+      <a
+        href="#"
+        class="underline"
+        data-toggle-account="login">Log In Now</a>
+    </span>
+  {%- endform -%}
+{% endcapture %}
+
+{% capture modal_content %}
+  <ra-account-auth>
+    <div data-account-container="login">
+      {{ login_content }}
+    </div>
+    <div data-account-container="register" class="hidden">
+      {{ register_content }}
+    </div>
+    <div data-account-container="recover" class="hidden">
+      {{ recover_content }}
+    </div>
+  </ra-account-auth>
+{% endcapture %}
+
+{% unless customer or request.path contains '/account/' %}
+  {% render 'ra-modal',
+    id: 'modal-login',
+    content: modal_content,
+    classes: 'auth-modal bg-tertiary-500',
+    overlay: true
+  %}
+{% endunless %}

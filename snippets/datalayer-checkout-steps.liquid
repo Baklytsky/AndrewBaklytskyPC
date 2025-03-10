@@ -1,0 +1,168 @@
+{% liquid
+  assign checkout_step = null
+  if checkout
+    if content_for_layout contains 'data-step="contact_information"'
+      assign checkout_step = 'contact_information'
+    elsif content_for_layout contains 'data-step="shipping_method"'
+      assign checkout_step = 'shipping_method'
+    elsif content_for_layout contains 'data-step="payment_method"'
+      assign checkout_step = 'payment_method'
+    elsif content_for_layout contains 'data-step="review"'
+      assign checkout_step = 'review'
+    endif
+  endif
+%}
+
+<script>
+
+  if ( !!Shopify.Checkout.step && !!!Shopify.Checkout.isOrderStatusPage ) {
+    function evalStep() {
+      if ( Shopify.Checkout.isOrderStatusPage ) return
+      let step, stepName;
+      if (Shopify.Checkout.page == "stock_problems") {
+        step = 1;
+        stepName = Shopify.Checkout.page;
+      } else if (Shopify.Checkout.step == "contact_information") {
+        step = 2;
+        stepName = Shopify.Checkout.step;
+      } else if (Shopify.Checkout.step == "shipping_method") {
+        step = 3;
+        stepName = Shopify.Checkout.step;
+      } else if (Shopify.Checkout.step == "payment_method") {
+        step = 4;
+        stepName = Shopify.Checkout.step;
+      } else if (Shopify.Checkout.step == "review") {
+        step = 5;
+        stepName = Shopify.Checkout.step;
+      } else if (Shopify.Checkout.step == "processing") {
+        step = 6;
+        stepName = Shopify.Checkout.step;
+      }
+      return { step, stepName };
+    }
+
+    if (!Shopify.Checkout.page.includes('thank_you')) {
+      dataLayer.push({ ecommerce: null });
+      dataLayer.push({
+      'event': 'acn_checkout_step',
+      'event_id': new Date().getTime() + '.' + Math.random().toString(36).substring(5),
+      'stepName': evalStep().stepName,
+      'stepNumber': evalStep().step,
+      ecommerce: {
+        coupon: {{ checkout.discount_applications[0].title | json }},
+        value: {{ checkout.total_price | divided_by: 100.00 }},
+        currency: {{ checkout.currency | json }},
+        items: [
+          {% for line_item in checkout.line_items %}
+          {
+            item_id: {{ line_item.product.selected_or_first_available_variant.id  | json }},
+            shopify_product_id: {{ line_item.product_id  | json }},
+            shopify_variant_id: {{ line_item.product.selected_or_first_available_variant.id | json }},
+            shopify_sku: {{ line_item.product.selected_or_first_available_variant.sku | json }},
+            shopify_handle: {{ line_item.product.handle | json  }},
+            shopify_compare_price: {{ line_item.product.compare_at_price | divided_by: 100.00 }},
+            item_name: {{ line_item.product.title | json }},
+            affiliation: {{ shop.name | json  }},
+            currency: {{ localization.country.currency.iso_code | json }},
+            item_brand: {{ line_item.product.vendor | json  }},
+            item_category: {{ line_item.product.type | json  }},
+            item_variant: {{ line_item.product.selected_or_first_available_variant.title | json }},
+            item_featured_image: "{{ line_item.product.featured_image }}",
+            option_one: {{ current_variant.option1 | json }},
+            option_two: {{ current_variant.option2 | json }},
+            option_three: {{ current_variant.option3 | json }},
+            price: {{ line_item.product.price | divided_by: 100.00 }},
+            quantity: {{ line_item.quantity }},
+            coupon: {{ line_item.line_level_discount_allocations[0].discount_application.title | json }},
+            discount: {{ line_item.line_level_discount_allocations.discount_allocation.amount | json }}
+          }
+          {% unless forloop.last %},{% endunless %}
+          {% endfor %}
+          ]
+        }
+      });
+    }
+
+    if (Shopify.Checkout.page.includes('thank_you')) {
+      // create discounts array
+      var discountCodes = [];
+      {% for discount_application in order.discount_applications %}
+        discountCodes.push({{ discount_application.title | json }});
+      {% endfor %}
+      let discountsRaw = [];
+      {% for discount_application in order.discount_applications %}
+        discountsRaw.push(
+          {
+            target_type: {{discount_application.target_type | json }},
+            title: {{discount_application.title | json }},
+            type: {{discount_application.type | json }},
+            value: {{discount_application.value | json }},
+            value_type: {{discount_application.value_type | json }}
+          }
+        );
+      {% endfor %}
+      dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object. 
+      dataLayer.push({
+          'event': 'acn_purchase',
+          'event_id': new Date().getTime() + '.' + Math.random().toString(36).substring(5),
+          ecommerce: {
+            coupon: discountCodes.join(' | '),
+            value: {{ checkout.total_price | divided_by: 100.00 }},
+            currency: {{ checkout.currency | json }},
+            transaction_id : {{ checkout.order_name | json }},
+            affiliation: {{ shop.name | json }},
+            tax: {{ checkout.tax_price | divided_by: 100.00 }},
+            shipping: {{ checkout.shipping_price | divided_by: 100.00 }},
+            discount: {{ checkout.discounts_amount | divided_by: 100.00 }},
+            items: [
+              {% for line_item in checkout.line_items %}
+              {
+                item_id: {{ line_item.product.selected_or_first_available_variant.id  | json }},
+                shopify_product_id: {{ line_item.product_id  | json }},
+                shopify_variant_id: {{ line_item.product.selected_or_first_available_variant.id | json }},
+                shopify_sku: {{ line_item.product.selected_or_first_available_variant.sku | json }},
+                shopify_handle: {{ line_item.product.handle | json  }},
+                shopify_compare_price: {{ line_item.product.compare_at_price | divided_by: 100.00 }},
+                item_name: {{ line_item.product.title | json }},
+                affiliation: {{ shop.name | json  }},
+                currency: {{ localization.country.currency.iso_code | json }},
+                item_brand: {{ line_item.product.vendor | json  }},
+                item_category: {{ line_item.product.type | json  }},
+                item_variant: {{ line_item.product.selected_or_first_available_variant.title | json }},
+                item_featured_image: "{{ line_item.product.featured_image }}",
+                item_list_id: 'tbd',
+                item_list_name: 'tbd',
+                option_one: {{ current_variant.option1 | json }},
+                option_two: {{ current_variant.option2 | json }},
+                option_three: {{ current_variant.option3 | json }},
+                price: {{ line_item.product.price | divided_by: 100.00 }},
+                quantity: {{ line_item.quantity }},
+                coupon: {{ line_item.line_level_discount_allocations[0].discount_application.title | json }},
+                discount: {{ line_item.line_level_discount_allocations.discount_allocation.amount | json }}
+              }
+              {% unless forloop.last %},{% endunless %}
+              {% endfor %}
+            ]},
+          'shopify_order': {
+            'email': {{ order.email | json }},
+            'phone': {{ order.phone | json }},
+            'number': {{ order.number | json }},
+            'name': {{ order.name | json }},
+            'shipping': {{ order.shipping_methods.title | json }},
+            'gateway': {{ order.transaction.gateway | json }},
+            'paymentDetails': {{ order.transaction.payment_details | json }},
+            'discount_applications': discountsRaw
+          },
+          'shopify_checkout': {
+            'id': {{checkout.id | json}},
+            'orderId': {{ checkout.order_id | json }},
+            'orderName': {{ checkout.order_name | json }},
+            'orderNumber': {{ checkout.order_number | json }},
+            'shipping': {{ checkout.shipping_method.title | json }},
+            'gateway': {{ checkout.transaction.gateway | json }},
+            'paymentDetails': {{ checkout.transaction.payment_details | json }}
+          }
+      });
+    }
+  }
+</script>

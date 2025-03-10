@@ -1,0 +1,24 @@
+{% liquid
+  assign empty_cart_settings_keys = 'empty_cart_header,'
+  assign empty_cart_settings_keys = empty_cart_settings_keys | split: ','
+%}
+
+{% capture empty_cart_settings %}
+  {
+    {%- for key in empty_cart_settings_keys -%}
+      "{{ key }}":{{- settings[key] | default: null | json -}},
+    {%- endfor -%}
+    {%- if settings.empty_cart_link_list != blank -%}
+    links: [
+    {%- for link in settings.empty_cart_link_list.links -%}
+      {
+        "title": {{ link.title | json }},
+        "url": {{ link.url | json }}
+      },
+    {%- endfor -%}
+    ]
+    {%- endif -%}
+  }
+{% endcapture %}
+
+{{ empty_cart_settings }}

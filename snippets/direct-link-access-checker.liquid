@@ -1,0 +1,52 @@
+{%- assign direct_link_access = false -%}
+
+{% if template.name == 'collection' %}
+  {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+  {%- assign password = collection.metafields.custom.password_access_only -%}
+  {%- assign hash = password | sha1 -%}
+  {%- assign passwords = hash | append: '##divider##' | append: hash | split: '##divider##' | uniq -%}
+
+  {%- if vip_collection -%}
+    {%- assign direct_link_access = true -%}
+  {%- endif -%}
+
+{% elsif template.name == 'product' %}
+  {% for collection in product.collections %}
+    {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+    {%- assign password = collection.metafields.custom.password_access_only -%}
+    {%- assign hash = password | sha1 -%}
+
+    {%- if vip_collection -%}
+      {%- assign direct_link_access = true -%}
+      {%- assign passString = passString | append: '##divider##' | append: hash -%}
+    {%- endif -%}
+  {% endfor %}
+
+  {%- assign passwords = passString | split: '##divider##' | uniq -%}
+
+{% endif %}
+
+{%- if request.design_mode -%}
+  {%- assign direct_link_access = false -%}
+{%- endif -%}
+
+{%- if direct_link_access -%}
+  <script>
+    function directLinkRedirects() {
+      const currentPasswords = {{ passwords | json }};
+      const savedPasswords = JSON.parse(localStorage.getItem("saved_passwords")) || [];
+      const hasAccess = savedPasswords.some((savedCondition) =>
+        currentPasswords.find((password) => savedCondition.hash === password)
+      );
+
+      if (document.referrer
+        && document.referrer.includes(window.location.hostname)
+        && document.referrer !== window.location.href
+        && !hasAccess) {
+        window.location.href = '/';
+      }
+    }
+
+    directLinkRedirects();
+  </script>
+{%- endif -%}

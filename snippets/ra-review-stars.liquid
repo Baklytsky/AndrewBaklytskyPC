@@ -1,0 +1,47 @@
+{% comment %}
+  Props:
+  product: Shopify Product Object
+  platform: String, [yotpo, stamped, bazaarvoice] - (Optional) - Fallback will pull from theme settings
+  on_pdp: Boolean - (Default: false) Used to determine if clicking stars should scroll to the review widget (for BV only)
+
+  Example default review star ratings using Yotpo:
+  {%- render 'ra-review-stars',
+  product: product,
+  platform: 'yotpo'
+  -%}
+{% endcomment %}
+
+{% if platform == blank %}
+  {% assign platform = settings.review_platform %}
+{% endif %}
+
+<div class="product-star-rating">
+  {% case platform %}
+    {% when 'yotpo' %}
+      <div class="yotpo bottomLine" data-product-id="{{ product.id }}"></div>
+    {% when 'stamped' %}
+      <span
+        class="stamped-product-reviews-badge stamped-main-badge"
+        data-id="{{ product.id }}"
+        data-product-sku="{{ product.handle }}"
+        data-product-title="{{ product.title }}"
+        data-product-type="{{ product.type }}"
+        style="display: block;"
+      >
+        {{ product.metafields.stamped.badge }}
+      </span>
+    {% when 'bazaarvoice' %}
+      {% assign id = product.metafields.bazaarvoice.handle | default: product.handle %}
+      {% if on_pdp %}
+        <a href="#ra-product-reviews">
+      {% endif %}
+        <div
+          data-bv-show="inline_rating"
+          data-bv-product-id="{{ id }}"
+          data-bv-seo="false"
+        ></div>
+      {% if on_pdp %}
+        </a>
+      {% endif %}
+  {% endcase %}
+</div>

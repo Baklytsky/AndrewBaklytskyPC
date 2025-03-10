@@ -1,0 +1,726 @@
+{% liquid
+  assign title_level = section.settings.title_level
+  assign show_pagination = section.settings.show_pagination | default: false
+  assign show_navigation = section.settings.show_navigation | default: false
+
+  assign mobile_padding_vertical = section.settings.mobile_padding_vertical | append: 'rem'
+  assign mobile_padding_horizontal = section.settings.mobile_padding_horizontal | append: 'rem'
+  assign desktop_padding_vertical = section.settings.desktop_padding_vertical | append: 'rem'
+  assign desktop_padding_horizontal = section.settings.desktop_padding_horizontal | append: 'rem'
+
+  assign mobile_slides_count = section.settings.mobile_slides_view | plus: 0
+  assign tablet_slides_count = section.settings.tablet_slides_view | plus: 0
+  assign desktop_slides_count = section.settings.desktop_slides_view | plus: 0
+
+  assign mobile_slide_width = 100 | divided_by: mobile_slides_count
+  assign tablet_slide_width = 100 | divided_by: tablet_slides_count
+  assign desktop_slide_width = 100 | divided_by: desktop_slides_count
+
+  assign gap_desktop = section.settings.gap_desktop
+  assign gap_mobile = section.settings.gap_mobile
+
+  assign mobile_slides_count_minus_1 = mobile_slides_count | minus: 1 | ceil
+  assign calc_gap_mobile = gap_mobile | times: mobile_slides_count_minus_1 | divided_by: mobile_slides_count
+
+  assign tablet_slides_count_minus_1 = tablet_slides_count | minus: 1 | ceil
+  assign calc_gap_tablet = gap_desktop | times: tablet_slides_count_minus_1 | divided_by: tablet_slides_count
+
+  assign desktop_slides_count_minus_1 =  desktop_slides_count | minus: 1 | ceil
+  assign calc_gap_desktop = gap_desktop | times: desktop_slides_count_minus_1 | divided_by: desktop_slides_count
+%}
+
+{% capture swiper_init_params %}
+  {
+    "breakpoints": {
+      "768": {
+        "slidesPerView": {{ section.settings.tablet_slides_view | at_most: 5 }},
+        "spaceBetween": {{ gap_desktop }},
+        "slidesOffsetBefore": 0
+        },
+      "1024": {
+        "slidesPerView": {{ section.settings.desktop_slides_view | at_most: 5 }},
+        "spaceBetween": {{ gap_desktop }},
+        "slidesOffsetBefore": 0
+        }
+    }
+  }
+{% endcapture %}
+
+{% style %}
+  .banner-carousel--{{ section.id }} {
+    --component-bg-color: {{ section.settings.bg_color }};
+    --component-fg-color: {{ section.settings.text_color }};
+    --text-primary: var({{ section.settings.text_color }});
+    --heading-description-color: {{ section.settings.text_color }};
+    --mobile-padding-vertical: {{ mobile_padding_vertical }};
+    --mobile-padding-horizontal: {{ mobile_padding_horizontal }};
+    --desktop-padding-vertical: {{ desktop_padding_vertical }};
+    --desktop-padding-horizontal: {{ desktop_padding_horizontal }};
+
+    --wrapper-width-mobile: calc(100vw - (2 * var(--mobile-padding-horizontal)));
+    --wrapper-width-desktop: calc(100vw - (2 * var(--desktop-padding-horizontal)));
+
+    --mobile-slide-width: calc((var(--wrapper-width-mobile) / {{ mobile_slides_count }}) - {{ calc_gap_mobile | append: 'px' }});
+    --tablet-slide-width: calc((var(--wrapper-width-desktop) / {{ tablet_slides_count }}) - {{ calc_gap_tablet | append: 'px' }});
+    --desktop-slide-width: calc((var(--wrapper-width-desktop) / {{ desktop_slides_count }}) - {{ calc_gap_desktop | append: 'px' }});
+
+    --mobile-slide-height: calc(var(--mobile-slide-width) * {{ section.settings.mobile_ratio | plus: 0 }});
+    --tablet-slide-height: calc(var(--tablet-slide-width) * {{ section.settings.tablet_ratio | plus: 0 }});
+    --desktop-slide-height: calc(var(--desktop-slide-width) * {{ section.settings.desktop_ratio | plus: 0 }});
+    padding: var(--mobile-padding-vertical) var(--mobile-padding-horizontal);
+
+    swiper-container:not(.swiper-initialized) {
+      display: flex;
+      gap: {{ gap_mobile | append: 'px' }};
+
+      swiper-slide {
+        width: 100%;
+        max-width: var(--mobile-slide-width);
+      }
+    }
+  }
+
+  .ra-heading__description p {
+    color: var(--component-fg-color);
+  }
+
+  .banner-carousel--{{ section.id }} .ra-heading {
+    --heading-margin: var(--spacing-lg);
+    --heading-text-align: {{ section.settings.text_align }};
+  }
+
+  .banner-carousel--{{ section.id }} .banner-carousel--slide p {
+    color: inherit;
+  }
+
+  .banner-carousel--{{ section.id }} .ra-carousel__nav {
+    .ra-button.swiper-button-lock {
+      display: none;
+    }
+  }
+
+
+  {% if section.settings.carousel_nav_location == 'auto' %}
+    .banner-carousel--{{ section.id }} .ra-carousel__nav--auto {
+      width: 100%;
+
+      @media only screen and (min-width: 768px) {
+      --carousel-controls-width: 120%;
+      --carousel-controls-left: 50%;
+      --carousel-controls-transform: translateX(-50%);
+      }
+    }
+  {% endif %}
+
+  @media only screen and (min-width: 768px) {
+    .banner-carousel--{{ section.id }} {
+      padding: var(--desktop-padding-vertical) var(--desktop-padding-horizontal);
+
+      swiper-container:not(.swiper-initialized) {
+        gap: {{ gap_desktop | append: 'px' }};
+
+        swiper-slide {
+          max-width: var(--tablet-slide-width);
+        }
+      }
+
+      .ra-carousel__nav--top-right {
+        --carousel-controls-bottom: calc(100% + 1rem);
+      }
+    }
+  }
+
+  @media only screen and (min-width: 1024px) {
+    .banner-carousel--{{ section.id }} {
+      swiper-container:not(.swiper-initialized) swiper-slide {
+        max-width: var(--desktop-slide-width);
+    }
+  }
+{% endstyle %}
+
+<section class="ra-carousel-outer banner-carousel banner-carousel--{{ section.id }} p-4 overflow-hidden">
+
+
+  <div class="ra-carousel-wrapper m-auto">
+    {%- if ection.settings.title != blank or section.settings.description != blank -%}
+      <div class="ra-heading ra-carousel__details ra_carousel__content mb-6">
+        {% if section.settings.title != blank %}
+          <{{ title_level }} class="ra-title ra-heading__title {{ section.settings.title_style }}">
+          <div>{{- section.settings.title -}}</div>
+        </{{ title_level }}>
+        {% endif %}
+        {% if section.settings.description != blank %}
+          <div class="ra-heading__description rte">
+            {{- section.settings.description -}}
+          </div>
+        {% endif %}
+      </div>
+    {%- endif -%}
+
+    <div class="ra-carousel {% if show_navigation %}ra-carousel--has-nav mt-16{% endif %}">
+      <!-- prettier-ignore-attribute (data-init-params) -->
+      <swiper-container
+        class="swiper--{{ section.id }} w-full flex overflow-visible"
+        data-section="{{ section.id }}"
+        init="false"
+        space-between="{{ gap_mobile }}"
+        {% if show_navigation %}
+          navigation-next-el=".banner-carousel--{{ section.id }} .ra-carousel__nav-cta--next"
+          navigation-prev-el=".banner-carousel--{{ section.id }} .ra-carousel__nav-cta--prev"
+        {% endif %}
+        {% if show_pagination %}
+          pagination="true"
+          pagination-clickable="true"
+          pagination-el=".banner-carousel--{{ section.id }} .ra-carousel__pagination"
+        {% endif %}
+        speed="300"
+        draggable="true"
+        slides-offset-before="0"
+        mousewheel-release-on-edges="true"
+        mousewheel-force-to-axis="true"
+        free-mode-enabled="true"
+        free-mode-sticky="{% if section.settings.scroll_interaction == "snap" %}true{% else %} false{% endif %}"
+        snap-on-release="{% if section.settings.scroll_interaction == "snap" %}false {% else %}true{% endif %}"
+        slides-per-view="{{ section.settings.mobile_slides_view }}"
+        data-init-params='{{ swiper_init_params }}'
+      >
+        {%- for block in section.blocks -%}
+        {%- liquid
+          assign image = block.settings.image
+          assign mobile_image = block.settings.mobile_image | default: image
+          assign eyebrow_text = block.settings.eyebrow_text
+          assign eyebrow_color = block.settings.eyebrow_color
+          assign heading = block.settings.heading
+          assign heading_color = block.settings.heading_color
+          assign heading_level = block.settings.heading_level
+          assign heading_style = block.settings.heading_style
+          assign description = block.settings.description
+          assign description_color = block.settings.description_color
+          assign content_position = block.settings.content_alignment_desktop
+          assign link = block.settings.link
+          assign open_new_tab = block.settings.open_new_tab
+          assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0
+          assign overlay_color = block.settings.overlay_color
+          assign overlay_behind_text = block.settings.overlay_behind_text
+
+          case block.settings.text_position
+          when 'center'
+          assign text_position = ' items-center text-center'
+          when 'end'
+          assign text_position = ' items-end text-right'
+          else
+          assign text_position = ' items-start text-left'
+          endcase
+
+          case block.settings.content_alignment_desktop
+          when 'center'
+          assign content_position = ' justify-center'
+          when 'end'
+          assign content_position = ' justify-end'
+          else
+          assign content_position = ' justify-start'
+          endcase
+
+          assign slide_content_position = 'w-full flex flex-col ' | append: text_position | append: content_position -%}
+
+        {%- if image or mobile_image -%}
+          {%- assign slide_bg = 'bg-[image:var(--bg-mobile)] md:bg-[image:var(--bg)] p-[16px]' -%}
+        {%- endif -%}
+
+        <swiper-slide class="flex h-auto">
+          <div class="banner-carousel--slide relative
+                        bg-center
+                        bg-no-repeat
+                        bg-cover
+                        min-h-[var(--mobile-slide-height)]
+                        md:min-h-[var(--tablet-slide-height)]
+                        lg:min-h-[var(--desktop-slide-height)] {{ slide_bg }} {{ slide_content_position }}"
+              style="
+                --overlay-color: rgba({{ overlay_color.red }}, {{ overlay_color.green }}, {{ overlay_color.blue }}, {{ overlay_opacity }});
+              {% if image or mobile_image %}
+                --bg: url('{{ image | img_url: 'master' }}');
+                --bg-mobile: url('{{ mobile_image | img_url: '900x' }}');
+              {% endif %}
+                "
+          >
+            {% if eyebrow_text != blank %}
+              <span class="z-[2] relative leading-[normal] {% if overlay_behind_text %}bg-[var(--overlay-color)]{% endif %}"
+                    style="color: {{ eyebrow_color }};">
+                {{ eyebrow_text }}
+              </span>
+            {% endif %}
+
+            {% if heading != blank %}
+              <{{ heading_level }} class="{{ heading_style }} !leading-[normal] z-[2] relative" style="color: {{ heading_color }};">
+                <span class="{% if overlay_behind_text %}bg-[var(--overlay-color)]{% endif %}">{{- heading -}}</span>
+              </{{ heading_level }}>
+            {% endif %}
+
+            {% if description != blank %}
+              <span class="mono-24 z-[2] relative leading-[normal] {% if overlay_behind_text %}bg-[var(--overlay-color)]{% endif %}"
+                    style="color: {{ description_color }};">
+                {{ description }}
+              </span>
+            {% endif %}
+
+            {%- if link != blank -%}
+              <a href="{{ link }}"
+                 class="image-abs-cover z-[2]"
+                 title="link to {{ heading }}"
+                  {% if open_new_tab %}target="_blank"{% endif %}
+              >
+              </a>
+            {%- endif -%}
+
+            {%- unless overlay_behind_text -%}
+              <div class="image-abs-cover z-[1] bg-[var(--overlay-color)]"></div>
+            {%- endunless -%}
+          </div>
+    </swiper-slide>
+    {% endfor %}
+    </swiper-container>
+    {% if show_navigation %}
+      <div class="ra-carousel__nav ra-carousel__nav--{{ section.settings.carousel_nav_location }}">
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to previous slide',
+          icon: 'left-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--prev !pointer-events-auto' %}
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          style: 'tertiary',
+          size: 'sm',
+          rounded: true,
+          label: 'Go to next slide',
+          icon: 'right-arrow',
+          class: 'ra-carousel__nav-cta ra-carousel__nav-cta--next !pointer-events-auto' %}
+      </div>
+    {% endif %}
+    {% if show_pagination %}
+      <div class="ra-carousel__pagination flex justify-center gap-4 py-6 md:py-12"></div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+  function applyFilteringAnimation(event, _this) {
+    event.preventDefault();
+    window.scrollTo(0,0)
+
+    const inputId = _this.getAttribute('for');
+    const filterTarget = document.getElementById(inputId);
+    filterTarget?.click();
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Banner carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text Align",
+      "info": "Align the title & description text",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "title_style",
+      "label": "Title Style",
+      "info": "Choose the styling of the header",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h3"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "info": "Set the background color for all screen sizes",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "info": "Set the text color for all screen sizes",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "range",
+      "id": "mobile_ratio",
+      "min": 0.5,
+      "max": 4,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Slide Scaling Ratio (Mobile)",
+      "info": "Tall to wide",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "tablet_ratio",
+      "min": 0.5,
+      "max": 4,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Slide Scaling Ratio (Tablet)",
+      "info": "Tall to wide",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "desktop_ratio",
+      "min": 0.5,
+      "max": 4,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Slide Scaling Ratio (Desktop)",
+      "info": "Tall to wide",
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show Navigation",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show Pagination",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "carousel_nav_location",
+      "label": "Carousel Navigation Location",
+      "info": "Choose which heading to (style) the title",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top"
+        }
+      ],
+      "default": "top-right"
+    },
+    {
+      "type": "range",
+      "id": "mobile_slides_view",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "label": "Mobile Slides Per View",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "tablet_slides_view",
+      "min": 1,
+      "max": 5,
+      "step": 0.1,
+      "label": "Tablet Slides Per View",
+      "default": 2.5
+    },
+    {
+      "type": "range",
+      "id": "desktop_slides_view",
+      "min": 1,
+      "max": 5,
+      "step": 0.1,
+      "label": "Desktop Slides Per View",
+      "default": 3.8
+    },
+    {
+      "type": "range",
+      "id": "gap_desktop",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Space between slides (Desktop)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "min": 0,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Space between slides (Desktop)",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "scroll_interaction",
+      "label": "Scroll Interaction",
+      "options": [
+        {
+          "value": "free",
+          "label": "Free Scroll"
+        },
+        {
+          "value": "snap",
+          "label": "Snap to slides"
+        }
+      ],
+      "default": "snap"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Vertical (rem)",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Horizontal (rem)",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Vertical (rem)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_horizontal",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Horizontal (rem)",
+      "default": 3
+    }
+  ],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Banner",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Background Image Mobile"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Overlay Opacity",
+          "info": "Increase contrast for image or text",
+          "default": 20
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay Color",
+          "default": "#000000"
+        },
+        {
+          "type": "checkbox",
+          "id": "overlay_behind_text",
+          "label": "Overlay Behind Text Only",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow_text",
+          "label": "Eyebrow Text"
+        },
+        {
+          "type": "color",
+          "id": "eyebrow_color",
+          "label": "Eyebrow Color",
+          "default": "#000000"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Title"
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Title Color",
+          "default": "#000000"
+        },
+        {
+          "type": "select",
+          "id": "heading_level",
+          "label": "Title Level",
+          "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+          "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+          "default": "h2"
+        },
+        {
+          "type": "select",
+          "id": "heading_style",
+          "label": "Title Style",
+          "info": "Choose the styling of the header",
+          "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+          "default": "h3"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "description_color",
+          "label": "Description Color",
+          "default": "#000000"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Text Position",
+          "options": [
+            {
+              "value": "start",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "end",
+              "label": "Right"
+            }
+          ],
+          "default": "start"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment_desktop",
+          "label": "Content Alignment",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ],
+          "default": "end"
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "To use it as a anchor link, enter '#' and the ID of the section you want to scroll to. Example: '#section-id'"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner carousel",
+      "category": "Banner"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","footer"]
+  }
+}
+{% endschema %}

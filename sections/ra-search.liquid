@@ -1,0 +1,237 @@
+<script>
+  //- this script will add a class of 'ra-search-section__filtered-by-availability' to the ra-search-section id if the url has a filter of availability in it -//
+  let previousUrl = '';
+  const observer = new MutationObserver(function(mutations) {
+  if (window.location.href !== previousUrl) {
+      previousUrl = window.location.href;
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (urlParams.has('filter.v.availability')) {
+        // add a class of ra-search-section__filtered-by-availability to the ra-search-section id
+        document.getElementById('ra-search-section')?.classList.add('ra-search-section__filtered-by-availability');
+      } else {
+        // remove the class of ra-search-section__filtered-by-availability to the ra-search-section id
+        document.getElementById('ra-search-section')?.classList.remove('ra-search-section__filtered-by-availability');
+      }
+    }
+  });
+  const config = {subtree: true, childList: true};
+
+  observer.observe(document, config)
+
+</script>
+
+{%- liquid
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign terms = search.terms | escape
+  assign search_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  assign paginate_count = 40
+  assign results_count = 0
+
+  paginate search.results by 1000
+    for item in search.results
+      assign subject = item
+      assign scip_subject = false
+
+      for collection in subject.collections
+        assign vip_collection = collection.metafields.custom.direct_access_only | default: false
+
+        if vip_collection
+          assign scip_subject = true
+          break
+        endif
+      endfor
+
+      if scip_subject
+        continue
+      endif
+
+      assign results_count = results_count | plus: 1
+    endfor
+  endpaginate
+-%}
+
+{% style %}
+  :root {
+    --search-margin-top: calc(var(--content-position-top) + 50px)
+  }
+{% endstyle %}
+
+{%- capture grid_content -%}
+  {%- paginate search.results by paginate_count -%}
+  {% assign has_disruptors = false %}
+
+    {% for index in disruptor_indexes_split %}
+      {% assign numeric_index = index | plus: 0 %}
+      {% if numeric_index >= paginate_offset and numeric_index < max_pagination %}
+        {% assign has_disruptors = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    <div data-gap="-sm" data-columns="-sm,-md,-lg" class="ra-grid gap-4 md:gap-8 gap-y-12 ra-grid--inherit-gap mb-24">
+      {%- for item in search.results -%}
+
+        {%- assign subject = item -%}
+        {%- assign scip_subject = false -%}
+
+        {%- for collection in subject.collections -%}
+          {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+          {%- if vip_collection -%}
+            {%- assign scip_subject = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if scip_subject -%}
+          {% continue %}
+        {%- endif -%}
+
+        {%- case item.object_type -%}
+        {%- when 'product' -%}
+        {% render 'ra-product-tile', product: item, index: forloop.index %}
+        {%- when 'article' -%}
+        {% render 'ra-article-tile', article: item %}
+        {%- when 'page' -%}
+        {% render 'ra-content-tile', src: item.image.src, title: item.title %}
+        {%- endcase -%}
+
+        {%- assign results_count = results_count | plus: 1 -%}
+
+      {%- endfor -%}
+    </div>
+    <div class="flex justify-center md:mb-5">
+      {% render 'ra-pagination', paginate: paginate, anchor: '#searchMain', hasArrows: true %}
+    </div>
+  {%- endpaginate -%}
+{%- endcapture -%}
+
+<div id="ra-search-section" class="ra-search" data-section-id="{{ section.id }}" data-search-terms="{{ search.terms }}">
+  <div class="search__header pl-6 pr-6 mt-[var(--search-margin-top)] mb-6 md:mb-2 flex justify-between flex-col lg:flex-row items-center">
+    <div class="h6 text-center ml-[14px] lg:text-left" data-results-count>
+      <h2 class="text-[18px] md:h2 mb-4 lg:mb-0">
+
+        {%- if results_count == 0 -%}
+          {{ 'templates.search.results_with_count' | t: terms: search.terms, count: results_count }}
+        {%- else -%}
+          {%- if search.results_count -%}
+            {{ 'templates.search.results_with_count' | t: terms: search.terms, count: search.results_count }}
+            {%- elsif search.products_count == search.all_products_count -%}
+            {{ 'products.facets.product_count_simple' | t: count: search.products_count }}
+          {%- else -%}
+            {{
+            'products.facets.product_count'
+            | t: product_count: search.products_count, count: search.all_products_count
+            }}
+          {%- endif -%}
+        {%- endif -%}
+
+    </h2>
+    </div>
+    {% if section.settings.enable_filtering == true %}
+      <div class="flex justify-between md:justify-end mt-6 md:mt-0 w-full md:w-auto gap-4">
+        {% if results_count > 0 %}
+          <div class="collection__toggle-filters lg:hidden">
+            {% render 'ra-button',
+            label: 'Filter',
+            style: 'primary',
+            type: 'ra-button',
+            icon: 'filter',
+            class: 'h-11 min-h-0 min-w-[117px] bg-white pl-4 pr-4 flex justify-between items-center',
+            data: 'data-action-toggle-mobile-filters'
+            %}
+          </div>
+
+          <ra-search-sort>
+            <form name="searchSortBy" id="searchSortByForm">
+              <div class="select relative z-0">
+                {%- assign sort_by = search.sort_by | default: search.default_sort_by -%}
+                <select
+                  name="sort_by"
+                  class="appearance-none px-5 z-1 bg-white h-11 font-secondary text-black rounded-lg sans-14 min-w-[212px]"
+                  id="searchSortBy"
+                  aria-describedby="a11y-refresh-page-message"
+                >
+                  {%- for option in search.sort_options -%}
+                    <option
+                      value="{{ option.value | escape }}"
+                      {% if option.value == sort_by %}
+                        selected="selected"
+                      {% endif %}
+                    >
+                      {{ option.name | escape }}
+                    </option>
+                  {%- endfor -%}
+                </select>
+                {% render 'ra-icon',
+                  width: '12px',
+                  color: 'black',
+                  icon: 'chevron-down',
+                  class: 'absolute right-3 -mt-3 top-1/2 -z-1 pointer-events-none'
+                  %}
+              </div>
+            </form>
+          </ra-search-sort>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="flex justify-center mt-1">
+    <div class="flex w-full pt-[14px] pl-6 pr-6 gap-4" id="searchMain">
+      {% if section.settings.enable_filtering == true and results_count > 0 %}
+      <div
+        class="ra-search__sidebar fixed z-[500] lg:z-10 top-0 lg:top-12 lg:mb-12 lg:h-fit left-0 right-0 bottom-0 pt-4 overflow-y-scroll lg:block lg:w-1/4 lg:sticky rounded-lg pb-10 hidden"
+        data-search-sidebar
+       >
+        <div class="ra-search__sidebar-top lg:hidden flex justify-end h-14 text-white items-center px-[24px] lg:px-[26px] ">
+          <button class="w-[44px] h-[44px] rounded-full bg-grey" data-action-close-filters>{% render 'ra-icon', icon: 'close', color: 'black', width: '16px', height: '16px', class: 'flex justify-center w-full' %}</button>
+        </div>
+        <aside class="search__filters facets-wrapper px-6 lg:px-5 pt-4" id="main-search-filters">
+          {% render 'ra-search-filters', search: search %}
+          {% render 'ra-button',
+            label: 'Apply Filters',
+            style: 'secondary',
+            type: 'ra-button',
+            class: 'col-span-1 mt-5 w-full lg:hidden',
+            data: 'data-action-close-filters'
+          %}
+        </aside>
+      </div>
+      {% endif %}
+      <div class="search__main w-full">
+        <div id="SearchProductGrid" class="search__product-grid" data-product-grid>
+          {%- if results_count == 0 -%}
+            <div>
+              <p class="h6 p-4">{{ 'templates.search.no_results' | t: terms: search.terms }}</p>
+
+              {% if settings.empty_search_cta_url != blank %}
+                <a class="ml-4 mb-10 ra-button ra-button ra-button--md ra-button--{{ settings.empty_search_cta_style }} " href="{{ settings.empty_search_cta_url }}" title="{{ settings.empty_search_cta_label }}">
+                  {{ settings.empty_search_cta_label }}
+                </a>
+              {% endif %}
+            </div>
+          {%- else -%}
+            {{ grid_content }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "main-search",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "default": true,
+      "label": "t:sections.main-search.settings.enable_filtering.label",
+      "info": "t:sections.main-search.settings.enable_filtering.info"
+    }
+  ]
+}
+{% endschema %}

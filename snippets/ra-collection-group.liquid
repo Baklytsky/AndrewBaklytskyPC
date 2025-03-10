@@ -1,0 +1,49 @@
+{%- comment -%}
+{%- render 'ra-collection-group' block: block, divider: divider -%}
+{%- endcomment -%}
+
+{%- assign group_id = block.settings.group_id -%}
+{%- assign heading = block.settings.heading -%}
+{%- assign heading_level = block.settings.heading_level -%}
+{%- assign heading_style = block.settings.heading_style -%}
+{%- assign description = block.settings.description -%}
+{%- assign text_width = block.settings.text_width -%}
+{%- assign image = block.settings.image -%}
+{%- assign image_mobile = block.settings.image_mobile | default: image -%}
+
+{{- divider -}}
+<div id="{{ group_id }}" class="col-span-2 md:col-span-4">
+  <div class="collection-group__header mb-6 flex flex-col">
+    {%- if image or image_mobile -%}
+      <div class="collection-group__header-image w-full relative pt-[45%] md:pt-[30%]">
+        {%- assign image_class = 'w-full h-full absolute top-0 left-0 object-center object-cover' -%}
+        {%- assign image_class_desk = image_class | append: ' max-md:hidden' -%}
+        {%- assign image_class_mob = image_class | append: ' md:hidden' -%}
+        {%- if image -%}
+          {{ image | image_url: width: 2000 | image_tag: loading: 'lazy', class: image_class_desk }}
+        {%- endif -%}
+        {%- if image_mobile -%}
+          {{ image_mobile | image_url: width: 1200 | image_tag: loading: 'lazy', class: image_class_mob }}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+    {% if heading != blank or description != blank %}
+      <div style="--text-width: {{ text_width | append: 'px' }}"
+           class="collection-group__header-content w-full max-w-[var(--text-width)] mt-3">
+        {% if heading != blank %}
+          <{{ heading_level }} class="ra-title ra-hero__title {{ heading_style }}">
+            {{ heading }}
+          </{{ heading_level }}>
+        {% endif %}
+        {% if description != blank %}
+          <p class="collection__header--description mono-24">
+            {{ description }}
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{{- divider -}}
+
+

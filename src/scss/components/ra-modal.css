@@ -1,0 +1,121 @@
+body.modal-open,
+html:has(dialog[open][data-modal-hide-overflow]) {
+  overflow: hidden;
+}
+
+dialog {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: fit-content;
+  height: fit-content;
+  margin: auto;
+  background: none;
+  color: black;
+  display: block;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, var(--modal-overlay-opacity));
+  }
+}
+
+dialog:not([open]) {
+  display: none;
+}
+
+dialog[open] {
+  @media breakpoint(md-max) {
+    width: 88%;
+    --modal-width: 100%;
+  }
+}
+
+dialog + .backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+._dialog_overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+dialog.fixed {
+  position: fixed;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+/* modal content container */
+
+.ra-modal__content {
+  --modal-padding: 40px;
+  padding-top: 60px;
+
+  --modal-radius: 42px;
+  --modal-border: 1px solid var(--stroke-secondary, rgba(236, 234, 229, 0.25));
+
+  background-blend-mode: luminosity;
+  background: var(--modal-background);
+  backdrop-filter: blur(50px); /* blurry background effect */
+
+  color: var(--text-secondary);
+
+  border-radius: 16px;
+}
+
+/* modal content rules */
+
+.ra-modal__content {
+  /* secondary text color for modal content */
+  & p,
+  & label,
+  & .ra-input__control::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+.ra-modal__content ra-button:not(.ra-icon-button) {
+  margin-top: 8px; /* add margin top spacing for buttons within modal (not close button) */
+}
+
+/* close button style */
+
+.ra-modal__content .ra-icon-button {
+  border-radius: var(--full, 360px);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ra-modal__content ra-button .ra-icon {
+  --icon-size: 14px;
+}
+
+/* hover rule */
+
+@media (hover: hover) {
+  .ra-modal__content .ra-modal__close:hover {
+    background: var(--surfaces-light-hover, rgba(70, 70, 70, 0.3));
+  }
+}
+
+/* optional modal background image */
+
+.ra-modal__background-image {
+  background-image: var(--modal-background-image);
+  opacity: var(--modal-opacity);
+  border-radius: 42px;
+}
+
+/* modal overlay opacity setting */
+
+/* UI-kit demo input */
+.ui-kit__modal-input .ra-input__control {
+  background: var(--black-25);
+}

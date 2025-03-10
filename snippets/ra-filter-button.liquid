@@ -1,0 +1,52 @@
+{% comment %}
+  Props:
+    id:       string unique ID - (required)
+    name:     string input name (required)
+    value:    string input value (required)
+    label:    string checkbox label - (required)
+    class:    string add custom CSS class - (optional)
+    checked:  boolean - (optional)
+    required: boolean - (optional)
+    disabled: boolean - (optional)
+{% endcomment %}
+
+{% if id != blank and style != blank and label != blank %}
+  {% capture classes %}
+    ra-choice
+    ra-choice--checkbox
+    ra-choice--{{ style }}
+    ra-choice--checkbox-{{ style }}
+    {{ class }}
+  {% endcapture %}
+
+  {% assign label_handelize = label | handleize | prepend: '_' %}
+  {%- capture input_id -%}
+    {{- id | handleize | append: label_handelize -}}
+  {%- endcapture -%}
+
+  {% capture attributes %}
+    {% if required %}
+      required="required"
+    {% endif %}
+    {% if disabled %}
+      disabled="disabled"
+    {% endif %}
+    {% if checked %}
+      checked="checked"
+    {% endif %}
+  {% endcapture %}
+
+  <div class="ra-choice {{ classes }} ra-filter-button">
+    <input
+      class="ra-choice__input"
+      name="{{ name }}"
+      value="{{ value }}"
+      id="{{ input_id }}"
+      type="checkbox"
+      {{ attributes }}
+    >
+    <label class="ra-choice__container set--sibling-deep-focus border border-bg-primary p-3 font-secondary pt-4 pb-4 rounded-lg min-w-[44px] bg-white-33 {% if disabled %}disabled{% endif %}" for="{{ input_id }}">
+      <span class="ra-choice__label text-center">{{ label }}</span>
+    </label>
+  </div>
+{% endif %}

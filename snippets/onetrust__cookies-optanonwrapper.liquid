@@ -1,0 +1,74 @@
+<script type="text/javascript">
+  if(window.Shopify && window.Shopify.Checkout) {
+    function OptanonWrapper() { }
+  } else {
+    const performanceCookieCategory = 'C0002,';
+
+  function waitForOneTrust() {
+    hasOneTrustLoaded();
+
+    let attempts = 0;
+    const interval = setInterval(function () {
+
+        if (hasOneTrustLoaded() || attempts > 100){
+            clearInterval(interval);
+        }
+        attempts++;
+    }, 100)
+  }
+
+function hasOneTrustLoaded() {
+
+    if(typeof window.OnetrustActiveGroups === 'string'){
+        //check now
+        OptanonWrapper()
+        // and wrap and trigger after cookie opt-in
+        window.OptanonWrapper = OptanonWrapper;
+
+        return true;
+    }
+
+    return false;
+}
+
+function sendConsent(trackingConsent) {
+    window.Shopify.customerPrivacy.setTrackingConsent(trackingConsent, () => {
+  });
+}
+
+  function OptanonWrapper() {
+    //default tracking setting
+    try{
+      if(window.Shopify.customerPrivacy && window.Shopify.customerPrivacy.setTrackingConsent  && OneTrust){
+        window.Shopify.customerPrivacy.setTrackingConsent(OneTrust.GetDomainData().ConsentModel.Name === 'opt-out', () => {
+          const trackingConsent = !!window.OnetrustActiveGroups.includes(performanceCookieCategory);
+          if(!trackingConsent){
+            document.querySelector('.fireworks').style.display = 'none';
+            'none'} else {
+              document.querySelector('.fireworks').style.display = 'block';
+            }
+        });
+      }
+
+      const trackingConsent = !!window.OnetrustActiveGroups.includes(performanceCookieCategory);
+      window.Shopify.loadFeatures(
+        [
+          {
+            name: 'consent-tracking-api',
+            version: '0.1',
+          },
+        ],
+        error => {
+          if (error) {
+            throw error;
+          }
+          sendConsent(trackingConsent)
+        },
+      );
+    }catch(e){}
+  }
+  (function () {
+    waitForOneTrust();
+})();
+  }
+</script>

@@ -1,0 +1,119 @@
+{%- comment -%}
+  {%- render 'ra-product-tile-media', product: product -%}
+{%- endcomment -%}
+
+{% liquid
+  assign custom_badge_text = product.metafields.custom.custom_badge.value
+  assign current_variant = product.selected_or_first_available_variant
+
+  assign hover_img = null
+  assign product_alt_image = null
+  assign variant_alt_image = null
+  assign hover_is_video = null
+
+  comment
+    when the second product media is a video, set up variables to show video on hover
+  endcomment
+
+  if product.media[1].media_type == 'video'
+    assign hover_is_video = true
+    assign hover_img = product.media[1]
+  else
+    for image in product.images reversed
+      unless image == product.featured_image
+        if image.alt contains current_variant.sku and variant_alt_image == null
+          assign variant_alt_image = image
+        endif
+        if product_alt_image == null
+          assign product_alt_image = image
+        endif
+      endunless
+    endfor
+
+    assign img_array = img_array | split: '||%%'
+    assign hover_img = product_alt_image
+
+    if variant_alt_image
+      assign hover_img = variant_alt_image
+    endif
+
+    assign hover_img = product.media[1]
+  endif
+%}
+
+{% if product.featured_image %}
+  <a href="{{ product.url }}" class="ra-product-tile__media-link" data-product-link>
+    <!-- ra-image -->
+    <div
+      class="ra-image ra-image--use-aspect-ratio ra-product-tile__image"
+      style="--media-width:1; --media-height:1.25;"
+    >
+
+      {% assign total_inventory = 0 %}
+
+      {% for variant in product.variants %}
+        {% if variant.available or variant.inventory_policy == 'continue' %}
+          {%- assign inventory = variant.inventory_quantity -%}
+
+          {%- if variant.inventory_policy == 'continue' -%}
+            {%- assign inventory = 100 -%}
+          {%- endif -%}
+
+          {% assign total_inventory = total_inventory | plus: inventory %}
+        {% endif %}
+      {% endfor %}
+      {% assign badgeQty = total_inventory %}
+
+      {% if custom_badge_text != blank %}
+        {% render 'ra-badge', label: custom_badge_text, size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif product.metafields.custom.pre_order %}
+        {% render 'ra-badge', label: 'pre-order', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif product.metafields.custom.coming_soon and badgeQty < 1 %}
+        {% render 'ra-badge', label: 'WAITLIST', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif badgeQty < 1 %}
+        {% render 'ra-badge', label: 'SOLD OUT', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif badgeQty < product.metafields.custom.few_items_left_quantity %}
+        {% render 'ra-badge', label: 'FEW ITEMS LEFT', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif badgeQty < product.metafields.custom.selling_fast_quantity %}
+        {% render 'ra-badge', label: 'SELLING FAST', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif badgeQty < settings.few_items_left %}
+        {% render 'ra-badge', label: 'FEW ITEMS LEFT', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+        {% elsif badgeQty < settings.selling_fast %}
+        {% render 'ra-badge', label: 'SELLING FAST', size: 'md', style: 'primary' class: 'ra-product-title_media-badge rounded' %}
+      {% endif %}
+      <img src="{{ product.featured_image | image_url: width: 650 }}"
+           alt="{{ product.title }}"
+           class="ra-image__media"
+           data-featured-image
+           width="1"
+           height="1.2"
+           loading="lazy"/>
+    </div>
+    <!-- ra hover-image -->
+    {% if hover_img %}
+      <div
+        class="ra-image--use-aspect-ratio ra-product-tile__image h-full"
+        data-alt-image-wrapper
+        style="--media-width:1; --media-height:1.25;"
+      >
+        {% if hover_is_video != blank %}
+          {% comment %} if second product media is detected as video, render hover image as video {% endcomment %}
+          {% render 'ra-video',
+            media: hover_img,
+            autoplay: true,
+            width: '100%',
+            muted: true,
+            class: 'w-full ra-video__media absolute',
+            lazyload: true %}
+        {% else %}
+          {% comment %} else, render hover image normally as an image {% endcomment %}
+          <img src="{{ hover_img | image_url: width: 650 }}" alt="{{ product.title }}"
+               class="ra-image__media"
+               data-alt-image width="1"
+               height="1.25"
+               loading="lazy" />
+        {% endif %}
+      </div>
+    {% endif %}
+  </a>
+{% endif %}

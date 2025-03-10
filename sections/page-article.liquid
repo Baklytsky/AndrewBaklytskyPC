@@ -1,0 +1,269 @@
+{%- comment -%}
+  Header
+{%- endcomment -%}
+{%- assign bradcrumsbs_classes = 'hidden' -%}
+
+{% if section.settings.show_breadcrumbs_desktop and section.settings.show_breadcrumbs_mobile %}
+  {%- assign bradcrumsbs_classes = '' -%}
+{% elsif section.settings.show_breadcrumbs_desktop == false and section.settings.show_breadcrumbs_mobile %}
+  {%- assign bradcrumsbs_classes = 'md:hidden' -%}
+{% elsif section.settings.show_breadcrumbs_desktop and section.settings.show_breadcrumbs_mobile == false %}
+  {%- assign bradcrumsbs_classes = 'hidden md:block' -%}
+{% endif %}
+
+<style>
+  .article-page__breadcrumbs .ra-breadcrumbs__list {
+    flex-wrap: wrap;
+  }
+  .article-page__breadcrumbs .ra-breadcrumbs__list-item--current {
+    text-decoration: underline;
+  }
+
+  .article-page__breadcrumbs .ra-link {
+    text-decoration: none;
+  }
+</style>
+
+<div class="pt-[var(--header-bottom-position)] pb-6 md:pb-20 bg-grey-100">
+  <div class="container">
+    <div class="article-page__breadcrumbs {{ bradcrumsbs_classes }}">
+      {% render 'ra-breadcrumbs', classes: 'py-10', divider: 'slash' %}
+    </div>
+    {% render 'featured-article',
+      article: article,
+      aspect_ratio: section.settings.aspect_ratio,
+      show_tags: section.settings.show_article_tags,
+      show_author: section.settings.show_article_author,
+      show_date: section.settings.show_article_date,
+      show_excerpt: section.settings.show_article_excerpt
+    %}
+  </div>
+</div>
+
+{%- comment -%}
+  Content
+{%- endcomment -%}
+<div class="container">
+  <div class="flex py-6 md:py-20">
+    <div class="w-full md:w-[650px] m-auto">
+      <div class="ra-wysiwyg">
+        {{ article.content }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Related Articles
+{%- endcomment -%}
+{% liquid
+  assign show_related_articles = section.settings.show_related_articles
+  assign related_articles_type = section.settings.related_articles_type
+  assign related_articles_limit = section.settings.related_articles_limit | default: 3
+  assign skip_articles = article.handle | split: '.....'
+
+  assign related_articles_found = 0
+
+  case related_articles_type
+  when 'tag'
+    for tag in article.tags
+      for related_article in blog.articles
+        if related_article.tags contains tag
+          unless skip_articles contains related_article.handle
+            assign related_articles_found = related_articles_found | plus: 1
+          endunless
+        endif
+      endfor
+    endfor
+  when 'date'
+    for related_article in blog.articles
+      unless skip_articles contains related_article.handle
+        assign related_articles_found = related_articles_found | plus: 1
+      endunless
+    endfor
+  endcase
+%}
+
+{% if related_articles_found > 0 %}
+  <div class="container py-10 md:py-20">
+    {% if section.settings.related_articles_title != blank %}
+      <h3 class="h3 flex items-center justify-center pb-5 md:pb-10">
+        {{ section.settings.related_articles_title }}
+      </h3>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-20">
+      {% assign counter = 0 %}
+
+      {%- case related_articles_type -%}
+      {%- when 'tag' -%}
+
+        {% for tag in article.tags %}
+
+          {% for related_article in blog.articles %}
+            {% if related_article.tags contains tag and counter < related_articles_limit %}
+              {% unless skip_articles contains related_article.handle %}
+                {% assign counter = counter | plus: 1 %}
+                {% assign temp = related_article.handle | split: '.....' %}
+                {% assign skip_articles = skip_articles | concat: temp %}
+
+                {% render 'ra-article-tile',
+                  article: related_article,
+                  aspect_ratio: section.settings.aspect_ratio,
+                  show_tags: section.settings.show_tags,
+                  show_date: section.settings.show_date,
+                  show_excerpt: section.settings.show_excerpt
+                %}
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+
+      {%- when 'date' -%}
+      {%- assign sorted_articles = blog.articles | sort: "created_at" | reverse -%}
+
+        {% for related_article in sorted_articles %}
+          {% if counter < related_articles_limit %}
+            {% unless skip_articles contains related_article.handle %}
+              {% assign counter = counter | plus: 1 %}
+
+              {% render 'ra-article-tile',
+                article: related_article,
+                aspect_ratio: section.settings.aspect_ratio,
+                show_tags: section.settings.show_tags,
+                show_date: section.settings.show_date,
+                show_excerpt: section.settings.show_excerpt
+              %}
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+
+      {%- endcase -%}
+    </div>
+  </div>
+{% endif %}
+
+{% render 'structured-data-article', article: article %}
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Article"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs_desktop",
+      "label": "Show Breadcrumbs Desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs_mobile",
+      "label": "Show Breadcrumbs Mobile",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "video",
+          "label": "Horizontal"
+        }
+      ],
+      "default": "video"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_excerpt",
+      "label": "Show Excerpt",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_tags",
+      "label": "Show Tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_author",
+      "label": "Show Author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_date",
+      "label": "Show Date",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Related articles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_articles",
+      "label": "Show Related Articles",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "related_articles_type",
+      "label": "Related Articles Type",
+      "options": [
+        {
+          "value": "tag",
+          "label": "By tag"
+        },
+        {
+          "value": "date",
+          "label": "By date"
+        }
+      ],
+      "default": "date"
+    },
+    {
+      "type": "range",
+      "id": "related_articles_limit",
+      "label": "Related Articles Limit",
+      "min": 3,
+      "max": 12,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "related_articles_title",
+      "label": "Related Articles Title",
+      "default": "Keep Reading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show Excerpt",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show Tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show Date",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

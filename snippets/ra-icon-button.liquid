@@ -1,0 +1,45 @@
+{% comment %}
+  Props:
+    type:       string [a, button] - (required)
+    style:      string [primary, secondary, tertiary] - (required)
+    icon:       string icon-name - (required)
+    label:      string button label text - (required for ADA)
+    value:      string value attr text - (optional)
+    url:        string url used when button 'type' is set to 'a' - (required)
+    size:       string [xs, sm, md, lg] sizes - (optional)
+    id:         string add id attribute used for JS - (optional)
+    class:      string add custom CSS class - (optional)
+    data:       string add custom data attributes to the button
+    rounded:    boolean - (optional)
+    disabled:   boolean - (optional)
+
+  Example icon button:
+    {% render 'ra-icon-button' type: 'a', style: 'primary', url: '#', size: 'sm', label: 'Learn More', icon: 'check' %}
+{% endcomment %}
+
+{%- capture classes -%}
+  ra-button ra-icon-button ra-button--{{ style }} ra-icon-button--{{ size }}
+  {% if rounded %}
+    ra-icon-button--rounded
+  {% endif %}
+  {{ class }}
+{%- endcapture -%}
+
+{%- capture attributes -%}
+  {% if id != blank %} id="{{ id }}"{% endif %}
+  {% if type == 'a' and url != blank and label != blank %} href="{{ url }}" title="{{ label }}"{% endif %}
+  {% if type == 'ra-button' %} aria-label="{{ label }}"{% endif %}
+  {% if disabled == true %} disabled{% endif %}
+  {% if value != blank %}value="{{ value }}"{% endif %}
+  {{ data }}
+{%- endcapture -%}
+
+{% if type != blank and style != blank and label != blank %}
+  <{{ type }} class="{{ classes }}" {{ attributes }}>
+    {% if icon != blank %}
+      <svg class="ra-icon ra-icon--{{ size }}">
+        <use xlink:href="#{{ icon }}"></use>
+      </svg>
+    {% endif %}
+  </{{ type }}>
+{% endif %}

@@ -1,0 +1,23 @@
+{% comment %}
+  Props:
+  product:  product object (required)
+
+  Example:
+  {%- render 'fabric-swatches' product: product -%}
+{% endcomment %}
+
+
+{%- assign fabric_swatches_value = product.metafields.swatches.fabric.value.products.value -%}
+
+{%- capture fabric_swatches_links -%}
+  {%- for fabric_product in fabric_swatches_value -%}
+    {%- assign swatch_label_from_title = fabric_product.title | truncatewords: 2 | remove: '...' -%}
+    {%- if product.id != fabric_product.id -%}
+      <a href="{{ fabric_product.url }}" class="link underline">{{ fabric_product.metafields.fabric_swatches.fabric_swatch_label | default: swatch_label_from_title | trim }}</a> and&nbsp;
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture %}
+
+{%- if fabric_swatches_links != blank -%}
+  {{- 'products.product.fabric_swatches_text' | t -}} <span class="block">{{- fabric_swatches_links | remove_last: " and&nbsp;" -}}.</span>
+{%- endif -%}

@@ -1,0 +1,203 @@
+{% comment %}
+  Props:
+  classes:       String - (Optional) custom classes on the img element
+  image:         Shopify Image Object - (Required) image to be displayed on the content tile
+  image_src:     String - (Optional) img src that will be used
+  alt:
+  width:         Int - (Optional) Image width
+  image_height:  Int - (Optional) Image component height
+  index:         Int - (Optional) index of tile if in a carousel
+  height:        Int - (Optional) Image height
+  aspect_ratio:  String - (Optional) determines the sizing of the image [square, tall, wide, respect-media, fill-space]
+
+  video:         String, - (Optional) src file for .mp4 video ONLY
+  show_video     Boolean, - (Optional)
+
+  subtitle:      String, text for subtitle - (optional)
+  title:         String, text for main title - (required)
+  description:   String, text for description area - (required)
+  overlay_link:  String, link url for global tile (optional)
+  new_tab:       Boolean, - (Optional)
+  link_url_1:    String, text for link url - (optional)
+  link_text_1:   String, text for link - (optional)
+  link_url_2:    String, text for second link url - (optional)
+  link_text_2:   String, text for second link - (optional)
+
+  header_style:          Number, style title as [h1, h2, h3] etc, (optional) - default is h6 (pass in just a number)
+  header_level:          Number, determine which h-tag semantically [h1, h2, h3] - (optional) - default is <h2></h2>
+
+  // Layout & Alignment
+
+  details_location:     String, [before, overlay, after] - (optional) set content layout
+  details_location_md:   String, [before, overlay, after] (larger screen size) - optional
+  horizontal_align:     String, [left, center, right] - (optional)
+  horizontal_align_md:   String, [left, center, right] - (larger screen size)
+  vertical_align:       String, [top, middle, bottom] set vertical alignment - (default = top) - (optional)
+  vertical_align_md:     String, [top, middle, bottom] - (larger screen size)
+{% endcomment %}
+
+{% liquid
+  if header_style == blank
+    assign header_style = 'h6'
+  endif
+
+  if header_level == blank
+    assign header_level = 'h3'
+  endif
+%}
+
+{% capture classes %}
+  ra-content-tile
+  set--details-{{ details_location | default: 'overlay' }}{% if details_location_md != blank %}-sm{% endif %}
+  {% if details_location_md != blank %}
+    set--details-{{ details_location_md }}-md
+  {% endif %}
+  {% if aspect_ratio != blank %}
+    set--aspect-ratio-{{ aspect_ratio }}
+  {% endif %}
+  {% if link_url != blank and link_text != blank %}
+    ra-content-tile--has-main-link
+  {% endif %}
+{% endcapture %}
+
+{% capture horizontal_classes %}
+  set--h-align-{{ horizontal_align | default: 'left' }}{% if horizontal_align_md != blank %}-sm{% endif %}
+  {% if horizontal_align_md != blank %}
+    set--h-align-{{ horizontal_align_md }}-md
+  {% endif %}
+{% endcapture %}
+
+{% capture vertical_classes %}
+  set--v-align-{{ vertical_align | default: 'bottom' }}{% if vertical_align_md != blank %}-sm{% endif %}
+  {% if vertical_align_md != blank %}
+    set--v-align-{{ vertical_align_md }}-md
+  {% endif %}
+{% endcapture %}
+
+{% capture color_style %}
+  {% if text_color != blank %}
+    color: var({{ text_color }});
+  {% endif %}
+{% endcapture %}
+
+{% capture image_style %}
+    --media-width: 4; --media-height: 5;
+{% endcapture %}
+
+{% capture height_classes %}
+  {% if image_height == 450 %}
+    h-[300px] md:h-[450px] overflow-y-hidden
+  {% endif %}
+  {% if image_height == 300 %}
+    h-[300px] overflow-y-hidden
+  {% endif %}
+{% endcapture %}
+
+
+{% if width == blank %}
+  {% assign width = 400 %}
+{% endif %}
+
+<article class="{{ classes }}">
+<div class="ra-content-tile__media component-media {{ height_classes }}">
+    {% if show_video %}
+      {% if vimeo_video != blank %}
+        <div class="ra-video ra-content-tile__video ra-video--use-aspect-ratio max-w-[50vw] lg:max-w-[25vw]">
+          <iframe
+            src="https://player.vimeo.com/video/{{ vimeo_video.id }}?autoplay=1&loop=1&autopause=0&muted=1&background=1"
+            allow="fullscreen" allow="autoplay"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+            allowfullscreen>
+          </iframe>
+        </div>
+      {% else %}
+        <div class="ra-video ra-content-tile__video ra-video--use-aspect-ratio max-w-[50vw] lg:max-w-[25vw]">
+          {{ video | video_tag: autoplay: true, loop: loop, muted: true, controls: false, image_size: '400x', class: 'h-full' }}
+        </div>
+      {% endif %}
+    {% elsif image != blank %}
+      <div class="ra-image ra-content-tile__image ra-image--use-aspect-ratio" style="{{ image_style }}">
+        {% assign alt = alt | default: image.alt %}
+        {{
+          image
+          | image_url: width: width
+          | image_tag: width: width, height: height, class: 'ra-image__media', alt: alt, loading: 'lazy'
+        }}
+      </div>
+    {% elsif image_src != blank %}
+      <div class="ra-icon-tile__media component-media {{ vertical_classes }}">
+        <div class="ra-image ra-icon-tile__image" style="--media-width:{{ width | default: 64 }}px">
+          {% comment %}theme-check-disable RemoteAsset{% endcomment %}
+          <img
+            loading="lazy"
+            src="{{ image_src }}"
+            width="{{ width | default: 64 }}"
+            height="auto"
+            alt="{{ image_alt }}"
+            src="ra-image__media"
+            class="ra-image__media"
+          >
+        </div>
+      </div>
+    {% else %}
+      <div
+        class="ra-image ra-content-tile__image ra-image--use-aspect-ratio border-grey-100 border-[1px] bg-white"
+        style="{{ image_style }}"
+      >
+        {{ 'collection-1' | placeholder_svg_tag }}
+    {% endif %}
+  </div>
+  <a href="{{ overlay_link }}" class="ra-component-anchor-overlay" {% if new_tab %}target="_blank"{% endif %}>
+    {% if description != blank %}
+      <div class="sr-only">{{- description -}}</div>
+    {% endif %}
+  </a>
+  <div class="ra-content-tile__details component-details">
+    <div class="ra-content-tile__copy {{ vertical_classes }} {{ horizontal_classes }} min-w-full overflow-hidden" style="{{ color_style }}">
+      {% if subtitle %}
+        <div class="ra-content-tile__subtitle">
+          {{- subtitle -}}
+        </div>
+      {% endif %}
+      {% if title != blank %}
+          <div class="ra-title ra-content-tile__title">
+            <div>
+              {{ title }}
+            </div>
+          </div>
+      {% endif %}
+      {% if description != blank %}
+        <div class="ra-content-tile__description">
+          {{ description }}
+        </div>
+      {% endif %}
+      {% if link_url_1 != blank and link_text_1 != blank and link_url_2 != blank and link_text_2 != blank %}
+        <div class="ra-link-list ra-content-tile__link-list">
+          {% if link_url_1 != blank and link_text_1 != blank %}
+            <a
+              href="{{ link_url_1 }}"
+              class="ra-link-list__cta ra-button ra-button--primary px-0 md:px-7"
+              tabindex="-1"
+              label="{{ link_text_1 }}"
+              title="Click Me"
+              aria-label="Click Me, navigate out"
+            >
+              {{ link_text_1 }}
+            </a>
+          {% endif %}
+          {% if link_url_2 != blank and link_text_2 != blank %}
+            <a
+              href="{{ link_url_2 }}"
+              class="ra-link-list__cta ra-button ra-button--tertiary"
+              label="{{ link_text_2 }}"
+              title="Click Me"
+              aria-label="Click Me, navigate out"
+            >
+              {{ link_text_2 }}
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</article>

@@ -1,0 +1,106 @@
+{% liquid
+  assign views = 'desktop,mobile'
+  assign views = views | split: ','
+  assign has_desktop_video = false
+  assign has_mobile_video = false
+  if block.settings.background_video_embed_mobile != blank or block.settings.background_video_file_mobile != blank
+    assign has_mobile_video = true
+  endif
+  if block.settings.bg_image_mobile != blank
+    assign has_mobile_image = true
+  endif
+  if block.settings.background_video_embed_desktop != blank or block.settings.background_video_file_desktop != blank
+    assign has_desktop_video = true
+  endif
+%}
+
+{% for view in views %}
+  {% liquid
+    assign video_embed_handle = 'background_video_embed_' | append: view
+    assign video_file_handle = 'background_video_file_' | append: view
+    assign image_handle = 'bg_image_' | append: view
+    if block.settings.bg_image_mobile == blank
+      assign image_handle = 'bg_image_desktop'
+    endif
+    assign image_width = 2000
+    if view == 'mobile'
+      assign image_width = 800
+    endif
+  %}
+
+  {% capture desktop_srcset %}
+    {{ block.settings[image_handle] | img_url: '480x' }} 240w,
+    {{ block.settings[image_handle] | img_url: '720x' }} 360w,
+    {{ block.settings[image_handle] | img_url: '1080x' }} 540w,
+    {{ block.settings[image_handle] | img_url: '1296x' }} 720w,
+    {{ block.settings[image_handle] | img_url: '1350x' }} 900w,
+    {{ block.settings[image_handle] | img_url: '1512x' }} 1080w,
+    {{ block.settings[image_handle] | img_url: '1728x' }} 1296w,
+    {{ block.settings[image_handle] | img_url: '1920x' }} 1350w,
+    {{ block.settings[image_handle] | img_url: '1980x' }} 1728w,
+    {{ block.settings[image_handle] | img_url: '2160x' }} 1920w,
+    {{ block.settings[image_handle] | img_url: '2560x' }} 2560w
+  {% endcapture %}
+
+  {% if block.settings[video_file_handle] != blank %}
+    {% capture file_classes %}
+      {% if view == 'desktop' %}
+        {% if has_mobile_video or has_mobile_image %}
+          hidden md:flex
+        {% else %}
+          max-md:h-full
+        {% endif %}
+      {% elsif view == 'mobile' %}
+        flex md:hidden h-full
+      {% endif %}
+    {% endcapture %}
+
+    {% capture embed_classes %}
+      {% if view == 'mobile' %}
+        {{ block.settings.video_aspect_ratio_mobile }} flex md:hidden
+      {% else %}
+        {{ block.settings.video_aspect_ratio_desktop }} hidden md:flex
+      {% endif %}
+    {% endcapture %}
+
+    <div class="embed {{ embed_classes }}">
+      {% render 'ra-video',
+        video: block.settings[video_file_handle],
+        lazyload: true,
+        autoplay: true,
+        muted: true,
+        loop: true,
+        controls: false,
+        block_id: block.id,
+        view: view %}
+    </div>
+  {% elsif block.settings[video_embed_handle] != blank %}
+    <div class="embed {{ embed_classes }}">
+      {% render 'ra-video',
+        video_url: block.settings[video_embed_handle],
+        muted: true,
+        controls: false,
+        autoplay: true,
+        loop: true,
+        block_id: block.id,
+        view: view
+      %}
+    </div>
+  {% elsif block.settings[image_handle] != blank %}
+    {% assign image_class = 'ra-image__media ra-image__media--mobile h-full ' %}
+    {% assign responsive_class = 'hidden md:block' %}
+    {% if view == 'mobile' %}
+      {% assign responsive_class = 'md:hidden' %}
+    {% endif %}
+    {% assign image_class = image_class | append: responsive_class %}
+
+    {% render 'ra-image',
+      image: block.settings[image_handle],
+      classes: image_class,
+      width: image_width,
+      lazyload: true,
+      srcset: desktop_srcset,
+      sizes: "100vw"
+    %}
+  {% endif %}
+{% endfor %}

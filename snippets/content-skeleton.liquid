@@ -1,0 +1,28 @@
+{% capture image_style %}
+    --media-width: 4; --media-height: 5;
+{% endcapture %}
+
+<div class="max-md:grid max-md:grid-rows-2 max-md:grid-cols-2 w-full md:flex">
+  {% for block in blocks limit: 4 %}
+    {% if block.settings.slide_img != blank %}
+      <div class="content-skeleton-tile w-full aspect-[275/344] relative" style="{{ image_style }}">
+        {{ block.settings.slide_img
+          | image_url: width: "400"
+          | image_tag: width: "400", height: "100%", class: 'ra-image__media', loading: 'lazy' }}
+      </div>
+    {% else %}
+      <div class="content-skeleton-tile w-full aspect-[275/344] relative" style="{{ image_style }}">
+        {{ block.settings.video.preview_image
+          | image_url: width: "400"
+          | image_tag: width: "400", height: "100%", class: 'ra-image__media', loading: 'lazy' }}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+<style>
+  @media (min-width: 768px) and (max-width: 1025px) {
+    .content-skeleton-tile:nth-last-child(-n + 2) {
+      display: none;
+    }
+  }
+</style>

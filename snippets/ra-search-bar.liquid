@@ -1,0 +1,80 @@
+{%- comment -%}
+{% render 'ra-search-bar', icon_color: icon_color, icon_bg: icon_bg %}
+{%- endcomment -%}
+
+<ra-search-bar class="header__search w-full justify-center flex px-[22px] md:px-[60px] items-start md:items-end absolute overflow-hidden -top-[46px] left-0 w-full bg-bg-primary h-[0px] md:transition-all md:duration-200">
+    <div class="search__inner max-w-[690px] md:pl-[43px] w-full flex items-center col-start-2 col-end-5 mx-auto">
+      <form
+        id="SearchBar"
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        class="search w-full relative md:mb-[23px] mt-[121px] md:mt-0"
+        data-search-form
+      >
+        <input type="hidden" name="options[prefix]" value="last">
+        <input type="hidden" name="type" value="product">
+
+        {% render 'ra-input', type: 'text', name: 'q', size: 'lg', placeholder: 'Search', class: 'searchBarInput' %}
+        <button type="submit" class="absolute right-auto left-[20px] top-[10px] md:left-auto md:right-[18px] md:top-[8px]">
+          {% render 'ra-icon', icon: 'search', width: '14px', height: '14px', color: 'black' %}
+        </button>
+      </form>
+    </div>
+
+  <div class="col-end-6 hidden md:block flex justify-end mb-[23px]" style="--btn-bg: {{ icon_bg }};">
+      <button data-action-close-search class="w-[44px] h-[44px] rounded-full bg-[var(--btn-bg)]">
+        {% render 'ra-icon', icon: 'close', color: 'white', width: '12px', height: '12px', color: icon_color %}
+      </button>
+    </div>
+
+    {%- comment -%} Mobile Menu {%- endcomment -%}
+    <div class="header__inner md:hidden absolute top-[25px] px-[26px] z-10 h-[45px] flex justify-between md:justify-normal w-full items-center">
+      {%- comment -%}
+        hamburger
+      {%- endcomment -%}
+      <a
+        class="header__hamburger mobile-search-close flex items-center justify-center group nav-icon-bg w-[44px] h-[44px] rounded-full"
+        href="#"
+        title="toggle menu"
+        aria-label="toggle menu"
+      >
+        {% render 'ra-icon',
+          icon: 'close',
+          width: '18px',
+          height: '14px',
+          color: icon_color,
+          class: 'hamburger-icon flex group-[.active]:hidden transition-all delay-300'
+        %}
+      </a>
+      {%- comment -%}
+        Logo
+      {%- endcomment -%}
+      {% if section.settings.alt_logo != blank %}
+        <a
+          class="header__logo flex items-center m-0 md:!mr-4 md:ml-7 {{ header_class | strip }}"
+          href="{{ shop.url }}"
+          title="{{ shop.name }} logo"
+          aria-label="{{ shop.name }} logo"
+        >
+          {% assign logo_alt = shop.name | append: ' Logo' %}
+
+            {{
+              section.settings.alt_logo
+              | image_url: width: 500
+              | image_tag: alt: logo_alt, class: 'header__logo-image w-full block'
+            }}
+
+        </a>
+      {% endif %}
+      {%- comment -%}
+        Cart
+      {%- endcomment -%}
+      <div class="header__action-item cart-icon-container cart-icon-dark flex justify-center items-center {% unless section.settings.use_cart_title %}nav-icon-bg{% endunless %} w-[44px] h-[44px] rounded-full">
+        <div data-vue-root="CartIcon">
+          <cart-icon icon-color="{{ icon_color }}" use-cart-title="{{ section.settings.use_cart_title | json }}"/>
+        </div>
+      </div>
+    </div>
+
+</ra-search-bar>

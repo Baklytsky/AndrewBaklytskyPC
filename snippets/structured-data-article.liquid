@@ -1,0 +1,40 @@
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "@id": "{{ shop.url | append: article.url }}",
+    "url": "{{ shop.url | append: article.url }}",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ request.origin | append: page.url }}"
+    },
+    "name": {{ article.title | json }},
+    "headline": {{ article.title | json }},
+    "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
+    "dateCreated": {{ article.created_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
+    {% if article.excerpt != blank %}
+      "description": {{ article.excerpt | json }},
+    {% endif %}
+    "articleBody": {{ article.content | json }},
+    "author": {
+      "@type": "Person",
+      "name": {{ article.author | json }}
+    },
+    {% if article.image %}
+      "image": {
+        "@type": "ImageObject",
+        "width": {{ article.image.width | json }},
+        "height": {{ article.image.height | json }},
+        "url": "https:{{ article.image.src | image_url }}"
+      },
+    {% endif %}
+    "publisher": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https:{{ shop.brand.logo | image_url }}"
+      }
+    }
+  }
+</script>

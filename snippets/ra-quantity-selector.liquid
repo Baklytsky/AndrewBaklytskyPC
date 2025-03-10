@@ -1,0 +1,92 @@
+{% comment %}
+  Props:
+    style:        string button styles [primary, secondary, tertiary] - (required)
+    value:        number specifies the default value - (required)
+    min:          number specifies the minimum value allowed - (optional)
+    max:          number specifies the maximum value allowed - (optional)
+    increment_id: string add id attribute "Increment" button - (optional)
+    decrement_id: string add id attribute "Decrement" button - (optional)
+    input_id:     string add id attribute "Input" - (optional)
+    btn_class:    string add custom CSS class to "Increment" and "Decrement" buttons - (optional)
+    input_class:  string add custom CSS class input - (optional)
+    required:     boolean - (optional)
+
+  Example quantity selector:
+    {%- render 'ra-quantity-selector' value: 1, style: 'tertiary', min: 0 -%}
+
+  Example quantity selector + max:
+    {%- render 'ra-quantity-selector' value: 1, style: 'tertiary' min: 0, max: 10 -%}
+{% endcomment %}
+
+{% if style != blank and value != blank %}
+  {% capture btn_classes %}
+    ra-quantity-selector__button
+    ra-button ra-icon-button ra-icon-button--{{ style }}
+    ra-icon-button--square
+    {{ btn_class }}
+  {% endcapture %}
+
+  {% capture input_classes %}
+    ra-input__control
+    ra-input__control--text
+    {{ input_class }}
+  {% endcapture %}
+
+  {% capture input_attributes %}
+    {% if value != blank %}
+      value="{{ value }}"
+    {% endif %}
+    {% if min != blank %}
+      min="{{ min }}"
+    {% endif %}
+    {% if max != blank %}
+      max="{{ max }}"
+    {% endif %}
+    {% if input_id != blank %}
+      id="{{ input_id }}"
+    {% endif %}
+    {% if required != blank %}
+      required="required"
+    {% endif %}
+  {% endcapture %}
+
+  {% capture inc_attributes %}
+    {%- if increment_id != blank -%}
+      id="{{ increment_id }}"
+    {%- endif -%}
+  {% endcapture %}
+
+  {% capture dec_attributes %}
+    {%- if decrement_id != blank -%}
+      id="{{ decrement_id }}"
+    {%- endif -%}
+  {% endcapture %}
+
+  <div aria-label="Quantity" class="ra-quantity-selector ra-quantity-selector--input">
+    <button
+      type="button"
+      aria-label="{{ 'accessibility.qty_decrement' | t }}"
+      class="ra-quantity-selector__button--minus {{ btn_classes }}"
+      {{ dec_attributes }}
+    >
+      <svg class="ra-icon">
+        <use xlink:href="#minus"></use>
+      </svg>
+    </button>
+    <div class="ra-input ra-quantity-selector__input is-filled">
+      <div class="ra-input__wrapper">
+        <input type="number" class="{{ input_classes }}" {{ input_attributes }}>
+      </div>
+    </div>
+    <button
+      type="button"
+      aria-label="{{ 'accessibility.qty_increment' | t }}"
+      class="ra-quantity-selector__button--plus {{ btn_classes }}"
+      {{ inc_attributes }}
+    >
+      <svg class="ra-icon">
+        <use xlink:href="#plus"></use>
+      </svg>
+    </button>
+  </div>
+{% endif %}

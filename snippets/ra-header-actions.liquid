@@ -1,0 +1,32 @@
+{%- comment -%}
+{% render 'ra-header-actions', icon_color: icon_color %}
+{%- endcomment -%}
+<ul class="flex justify-center items-center gap-6 h-full pl-0">
+  {% if section.settings.show_search %}
+    <li class="header__action-item search-icon-container hidden md:block flex justify-center items-center {% unless section.settings.use_search_title %}nav-icon-bg{% endunless %} w-[44px] h-[44px] rounded-full">
+      <button
+        id="header-action-search"
+        class="header__action-link nav-draw-icon-bg relative flex items-center justify-center w-[44px] h-[44px] rounded-full"
+        data-action-toggle-search
+        title="search"
+        aria-label="search"
+      >
+        {%- if section.settings.use_search_title -%}
+          <span style="color: {{ icon_color }}" class="header__action-link-title">Search</span>
+        {%- else -%}
+          {% render 'ra-icon', icon: section.settings.search_icon, width: '14px', height: '14px', color: icon_color, class: 'search-icon' %}
+        {%- endif -%}
+      </button>
+    </li>
+  {% endif %}
+  <li class="header__action-item cart-icon-container cart-icon flex justify-center items-center {% unless section.settings.use_cart_title %}nav-icon-bg{% endunless %} w-[44px] h-[44px] rounded-full">
+    <div data-vue-root="CartIcon">
+      <cart-icon icon-color="{{ icon_color }}" use-cart-title="{{ section.settings.use_cart_title }}"/>
+    </div>
+  </li>
+  <li class="header__action-item cart-icon-container cart-icon-dark hidden flex justify-center items-center {% unless section.settings.use_cart_title %}nav-icon-bg{% endunless %} w-[44px] h-[44px] rounded-full">
+    <div data-vue-root="CartIcon">
+      <cart-icon icon-color="{{ icon_color }}" use-cart-title="{{ section.settings.use_cart_title }}"/>
+    </div>
+  </li>
+</ul>

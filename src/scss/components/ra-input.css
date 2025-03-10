@@ -1,0 +1,269 @@
+/*
+  inherits style from @bva/ui-shared/styles/components.css
+  overriding CSS var for colors only
+*/
+
+.ra-input {
+  --input-message-spacing: 5px;
+  --input-label-spacing: 5px;
+
+  .ra-input__control {
+    font-family: var(--font-family-teritary)!important;
+    outline-offset: 2px;
+    --input-border-width: 1px;
+    --input-border-style: solid;
+    --input-border-color: var(--input-border-color-default);
+    --input-color: var(--input-text-color);
+
+    &::placeholder {
+      color: var(--input-placeholder-color);
+    }
+
+    &:active,
+    &.active,
+    &:hover,
+    &:focus {
+      --input-border-color: var(--input-border-color-hover);
+    }
+
+    &:focus {
+      outline: var(--input-border-width) var(--input-border-style)
+        var(--input-outline-color);
+    }
+
+    &.is-invalid {
+      --input-border-color: var(--input-error-color);
+      --input-border-color: var(--input-error-color);
+    }
+  }
+
+  .ra-input__label {
+    @apply font-primary uppercase;
+    font-size: var(--font-size-sm);
+  }
+
+  .ra-input__message {
+    color: var(--input-text-color);
+    --input-message-size: var(--font-size-xs);
+  }
+
+  .ra-input__error-message {
+    color: var(--input-error-color);
+    --input-message-size: var(--font-size-xs);
+  }
+
+
+  &__wrapper {
+    .ra-input__control {
+      @apply rounded-lg border-transparent text-text-inverse-primary font-secondary text-base;
+      background: var(--surfaces-dark, linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.08) 100%), rgba(214, 214, 214, 0.45));
+      background-blend-mode: luminosity, color-burn;
+      font-weight: 700;
+      line-height: 100%;
+      letter-spacing: 1.28px;
+
+      &:active,
+      &.active,
+      &:focus,
+      &:hover,
+      &.hover {
+        @apply border-stroke-inverse-primary outline-none;
+      }
+
+      &::placeholder {
+        @apply font-secondary text-base text-text-inverse-secondary;
+      }
+
+      &:disabled {
+        @apply pointer-events-none opacity-50;
+      }
+    }
+  }
+}
+
+/* Quantity Selector */
+.ra-quantity-selector,
+.ra-select__arrow {
+  display: grid;
+  svg {
+    width: 11px;
+  }
+
+  .ra-input__control--text {
+    --input-border-color: var(--input-border-color-hover);
+  }
+
+  &.ra-quantity-selector--dropdown {
+    --qty-selector-width: auto;
+  }
+
+  &.ra-quantity-selector--input {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Choices */
+.ra-choice {
+  --choice-background: var(--color-util-white);
+  --choice-border-color: var(--input-border-color-hover);
+  --input-message-spacing: 5px;
+
+  &__label {
+    color: var(--text-inverse-primary);
+  }
+
+  &.light {
+    .ra-choice__checkmark-icon {
+      background-color: var(--stroke-primary);
+    }
+
+    .ra-choice__checkmark {
+      &:after {
+        border: 1px solid var(--stroke-primary);
+      }
+    }
+
+    .ra-choice__input:checked ~ * {
+      .ra-choice__checkmark {
+        border-color: var(--stroke-primary);
+      }
+    }
+
+    &.ra-choice--radio {
+      .ra-choice__checkmark:before {
+        --choice-background: var(--stroke-primary);
+        background-color: var(--stroke-primary);
+      }
+      .ra-choice__checkmark {
+        --choice-background: transparent;
+        background-color: var(--choice-background);
+        border-color: var(--stroke-primary);
+      }
+    }
+
+    /* checkbox */
+    &.ra-choice--checkbox {
+      .ra-choice__checkmark {
+        border-color: var(--stroke-primary);
+      }
+    }
+
+    .ra-choice__label {
+      color: var(--stroke-primary);
+    }
+  }
+
+  svg {
+    width: 14px;
+    height: 13px;
+  }
+
+  .ra-choice__checkmark-icon {
+    opacity: 0;
+    background-color: var(--stroke-inverse-primary);
+  }
+
+  .ra-choice__checkmark {
+    position: relative;
+    color: transparent;
+    width: 20px;
+    height: 20px;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      width: calc(100% + 6px);
+      height: calc(100% + 6px);
+      border: 1px solid var(--stroke-inverse-primary);
+      opacity: 0;
+      border-radius: var(--choice-border-radius);
+    }
+  }
+
+  &:hover .ra-choice__checkmark:after {
+    opacity: 1;
+  }
+
+  .ra-choice__input:checked ~ * {
+    --choice-background: var(--color-primary-100);
+
+    .ra-choice__checkmark {
+      border-color: var(--stroke-inverse-primary);
+    }
+
+    svg {
+      color: var(--color-util-white);
+    }
+
+    .ra-choice__checkmark-icon {
+      opacity: 1;
+    }
+  }
+
+  /* radio */
+  &.ra-choice--radio {
+    .ra-choice__checkmark:before {
+      --choice-background: var(--stroke-inverse-primary);
+      background-color: var(--stroke-inverse-primary);
+      width: 16px;
+      height: 16px;
+    }
+    .ra-choice__checkmark {
+      --choice-background: transparent;
+      background-color: var(--choice-background);
+      border-color: var(--stroke-inverse-primary);
+    }
+  }
+
+  /* checkbox */
+  &.ra-choice--checkbox {
+    .ra-choice__checkmark {
+      border-radius: 4px;
+      border-color: var(--stroke-inverse-primary);
+      background-color: transparent;
+    }
+
+    .ra-choice__checkmark-icon {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* toggle */
+  &.ra-choice--toggle {
+    --choice-knob-color: var(--color-grey-900);
+
+    .ra-choice__input:checked ~ * {
+      --choice-knob-color: var(--color-util-white);
+    }
+  }
+
+  /* choice disbled */
+  .ra-choice__input:disabled ~ *,
+  &.ra-choice--radio .ra-choice__input:disabled + label .ra-choice__checkmark {
+    @apply pointer-events-none opacity-30;
+  }
+
+  /* info message */
+  .ra-choice__message {
+    font-weight: inherit;
+    font-size: 11px;
+    margin-top: var(--input-message-spacing);
+  }
+
+  .ra-choice__input:not(:focus)~.ra-choice__label-container .ra-choice__checkmark:hover {
+    box-shadow: inset 0 0 0 .0625rem var(--stroke-inverse-primary);
+  }
+
+  .ra-choice__label {
+    font-family: var(--font-family-primary);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: 1.12px;
+    text-transform: uppercase;
+  }
+}

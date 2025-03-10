@@ -1,0 +1,67 @@
+{% comment %}
+  Props:
+    id:             string unique ID - (required)
+    title:          string input name (optional)
+    looks_title_1:  string (optional)
+    looks_image_1:  image - (optional)
+    looks_url_1:    URL - (optional)
+    looks_title_2:  string - (optional)
+    looks_image_2:  image - (optional)
+    looks_url_2:    URL - (optional)
+    selected_page:  Page - (optional)
+    selected_collection: Collection - (optional)
+    text_color: Color - (required)
+{% endcomment %}
+{% liquid
+  assign looks_pages = product.metafields.custom.looks_carousel.value
+%}
+
+{% capture image_style %}
+    --media-width: 4; --media-height: 5;
+{% endcapture %}
+
+{% style %}
+#shopify-section-{{ section.id }} .looks-header {
+  color: var(--white);
+}
+
+@media (min-width: 1025px) {
+  #shopify-section-{{ section.id }} .looks-header {
+  color: var(--inverse-primary);
+}
+}
+
+#shopify-section-{{ section.id }} .looks-number {
+  color: var({{ text_color }});
+}
+{% endstyle %}
+
+{% if looks_pages != blank %}
+  <div class="mt-12">
+    <p class="mb-12 md:mb-6 sans-16 normal-case looks-header">{{ title }}</p>
+
+    <div>
+      <div class="max-lg:hidden grid grid-cols-2 gap-6">
+        {% for page in looks_pages %}
+          <div class="relative ra-image--use-aspect-ratio" style="{{ image_style }}">
+            <a href="{{ page.url }}">
+              {% if page.metafields.custom.looks_thumbnail != blank %}
+                <img class="ra-image__media" src="{{ page.metafields.custom.looks_thumbnail | image_url: width: 650 }}" loading="lazy" width="auto" height="auto" alt="{{ page.metafields.custom.looks_thumbnail.alt }}">
+              {% else %}
+                {% for looks_image in page.metafields.custom.looks_images.value %}
+                  {% if looks_image.media_type == "image" %}
+                    <img class="ra-image__media" src="{{ looks_image | image_url: width: 650 }}" loading="lazy" width="auto" height="auto" alt="{{ looks_image.alt }}">
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <div class="absolute top-0 left-0 w-full h-full flex p-6 items-end justify-start">
+                <p class="looks-number mono-16">{{ page.title }}</p>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}

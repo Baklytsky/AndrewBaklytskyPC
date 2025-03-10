@@ -1,0 +1,183 @@
+{%- comment -%}
+  Featured Article
+{%- endcomment -%}
+{% for block in section.blocks %}
+  {% case block.type %}
+    {% when 'featured' %}
+      {% if block.settings.featured_article != blank %}
+        <div class="py-6 md:py-20 bg-grey-100">
+          <div class="container">
+            {% render 'featured-article',
+              article: block.settings.featured_article,
+              aspect_ratio: block.settings.aspect_ratio,
+              show_tags: block.settings.show_tags,
+              show_date: block.settings.show_date,
+              show_excerpt: block.settings.show_excerpt
+            %}
+          </div>
+        </div>
+      {% endif %}
+  {% endcase %}
+{% endfor %}
+
+{%- paginate blog.articles by section.settings.per_page -%}
+  <div class="py-10 md:py-20">
+    {%- comment -%}
+      Tags - sort by tags
+    {%- endcomment -%}
+    {% if blog.all_tags.size > 0 %}
+      <ul
+        class="flex w-full overflow-x-auto items-center justify-start md:justify-center px-[24px] mb-10 md:mb-20 hide-scrollbar"
+        role="list"
+        tabindex="-1"
+      >
+        <li class="flex flex-auto md:flex-none list-none mx-1">
+          <a
+            class="capitalize whitespace-nowrap py-3 px-5 border border-grey-200 hover:border-grey-500"
+            href="{{ blog.url }}"
+          >
+            All
+          </a>
+        </li>
+        {% for tag in blog.all_tags %}
+          <li class="flex flex-auto md:flex-none list-none mx-1">
+            <a
+              class="capitalize whitespace-nowrap py-3 px-5 border border-grey-200 hover:border-grey-500"
+              href="{{ tag | link_to_tag: tag | split: 'href="' | last | split: '"' | first }}"
+            >
+              {{ tag.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="container">
+      {%- comment -%}
+        Article tiles
+      {%- endcomment -%}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-10">
+        {%- for article in blog.articles -%}
+          {% render 'ra-article-tile',
+            article: article,
+            aspect_ratio: section.settings.aspect_ratio,
+            show_tags: section.settings.show_tags,
+            show_date: section.settings.show_date,
+            show_excerpt: section.settings.show_excerpt %}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%}
+        Pagination
+      {%- endcomment -%}
+      {%- if paginate.pages > 1 -%}
+        <div class="flex items-center justify-center mt-10 md:mt-15">
+          {%- render 'ra-pagination', paginate: paginate, has_arrow: true -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Blogs",
+  "tag": "section",
+  "max_blocks": 1,
+  "settings": [
+    {
+      "type": "range",
+      "id": "per_page",
+      "min": 6,
+      "max": 30,
+      "step": 3,
+      "unit": "px",
+      "label": "Per Page",
+      "default": 12,
+      "info": "Article to show per page"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "video",
+          "label": "Horizontal"
+        }
+      ],
+      "default": "video"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show Excerpt",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show Tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show Date",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "featured",
+      "name": "Featured Article",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "article",
+          "id": "featured_article",
+          "label": "Featured Article"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Image Aspect Ratio",
+          "options": [
+            {
+              "value": "square",
+              "label": "Square"
+            },
+            {
+              "value": "video",
+              "label": "Horizontal"
+            }
+          ],
+          "default": "video"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_excerpt",
+          "label": "Show Excerpt",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_tags",
+          "label": "Show Tags",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_date",
+          "label": "Show Date",
+          "default": true
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

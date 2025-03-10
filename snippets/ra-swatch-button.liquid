@@ -1,0 +1,63 @@
+{% comment %}
+  Props:
+    id:       string unique ID - (required)
+    name:     string input name (required)
+    value:    string input value (required)
+    label:    string checkbox label - (required)
+    class:    string add custom CSS class - (optional)
+    checked:  boolean - (optional)
+    required: boolean - (optional)
+    disabled: boolean - (optional)
+    additional_attributes: string attribute values - (optional)
+{% endcomment %}
+
+{% if id != blank and style != blank and label != blank %}
+  {% capture classes %}
+    ra-choice
+    ra-choice--checkbox
+    ra-choice--{{ style }}
+    ra-choice--checkbox-{{ style }}
+    {{ class }}
+  {% endcapture %}
+
+  {% assign label_handelize = label | handleize | prepend: '_' %}
+  {%- capture input_id -%}
+    {{- id | handleize | append: label_handelize -}}
+  {%- endcapture -%}
+
+  {% capture attributes %}
+    {% if required %}
+      required="required"
+    {% endif %}
+    {% if disabled %}
+      disabled="disabled"
+    {% endif %}
+    {% if checked %}
+      checked="checked"
+    {% endif %}
+    {% if additional_attributes %}
+      {{ additional_attributes }}
+    {% endif %}
+  {% endcapture %}
+
+  {%- assign title = label | replace: '-', ' ' | capitalize -%}
+
+  <div class="ra-choice {{ classes }} ra-filter-button ra-swatch-filter"
+       data-title="{{ title }}">
+    <input
+      class="ra-choice__input"
+      name="{{ name }}"
+      value="{{ value }}"
+      id="{{ input_id }}"
+      type="checkbox"
+      {{ attributes }}
+    >
+    <label
+      class="ra-choice__container w-6 h-6 set--sibling-deep-focus border border-grey-400 p-0 rounded-full {% if disabled %}disabled{% endif %} focus:border-white"
+      for="{{ input_id }}"
+    >
+      {% comment %}theme-check-disable ImgWidthAndHeight{% endcomment %}
+      <img class="rounded-full" alt="{{ label }}" src="{{ label | downcase | append: '_swatch.png' | file_url }}" loading="eager">
+    </label>
+  </div>
+{% endif %}

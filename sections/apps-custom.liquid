@@ -1,0 +1,142 @@
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --section-apps-bg-color: var({{ section.settings.bg_color }});
+    --section-apps-color: var({{ section.settings.divider_color }});
+    --section-apps-desktop-padding-top: {{ section.settings.desktop_padding_top | append: "px" }};
+    --section-apps-desktop-padding-bottom: {{ section.settings.desktop_padding_bottom | append: "px" }};
+    --section-apps-desktop-padding-left: {{ section.settings.desktop_padding_left | append: "px" }};
+    --section-apps-desktop-padding-right: {{ section.settings.desktop_padding_right | append: "px" }};
+    --section-apps-mobile-padding-top: {{ section.settings.mobile_padding_top | append: "px" }};
+    --section-apps-mobile-padding-bottom: {{ section.settings.mobile_padding_bottom | append: "px" }};
+    --section-apps-mobile-padding-left: {{ section.settings.mobile_padding_left | append: "px" }};
+    --section-apps-mobile-padding-right: {{ section.settings.mobile_padding_right | append: "px" }};
+  }
+{% endstyle %}
+
+<div class="custom-apps">
+  <div class="custom-apps__wrapper {{ section.settings.width }}">
+    {%- for block in section.blocks -%}
+      {% render block %}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Apps",
+    "tag": "section",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper--none",
+        "options": [
+          { "value": "wrapper--none", "label": "Full width" },
+          { "value": "max-w-[--max-width-large]", "label": "Page width large" },
+          { "value": "max-w-[--max-width-xmedium]", "label": "Page width medium" },
+          { "value": "max-w-[--max-width-xsmall]", "label": "Page width small" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Section padding"
+      },
+      {
+        "type": "range",
+        "id": "desktop_padding_top",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top (desktop)",
+        "default": 50
+      },
+      {
+        "type": "range",
+        "id": "desktop_padding_bottom",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom (desktop)",
+        "default": 50
+      },
+      {
+        "type": "range",
+        "id": "desktop_padding_left",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding left (desktop)",
+        "default": 50
+      },
+      {
+        "type": "range",
+        "id": "desktop_padding_right",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding right (desktop)",
+        "default": 50
+      },
+      {
+        "type": "range",
+        "id": "mobile_padding_top",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top (mobile)",
+        "default": 20
+      },
+
+      {
+        "type": "range",
+        "id": "mobile_padding_bottom",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom (mobile)",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "mobile_padding_left",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding left (mobile)",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "mobile_padding_right",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding right (mobile)",
+        "default": 20
+      }
+    ],
+    "blocks": [
+      {
+      "type": "@app"
+      }
+    ],
+    "presets": [
+      {
+      "name": "Apps"
+      }
+    ]
+  }
+{% endschema %}

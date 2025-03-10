@@ -1,0 +1,751 @@
+{% liquid
+  assign title_level = section.settings.title_level
+
+  assign show_pagination = false
+  if section.settings.show_pagination
+    assign show_pagination = true
+  endif
+
+  assign mobile_slides_count = section.settings.mobile_slides_view | plus: 0 | ceil
+  assign tablet_slides_count = section.settings.tablet_slides_view | plus: 0 | ceil
+  assign desktop_slides_count = section.settings.desktop_slides_view | plus: 0 | ceil
+
+  assign show_navigation = false
+  assign mobile_slide_count = section.settings.mobile_slides_view | plus: 0
+  if section.settings.show_navigation
+    assign show_navigation = true
+  endif
+
+  if section.settings.recommendations_product != blank
+    assign recommendation_product_id = section.settings.recommendations_product.id
+  else
+    assign recommendation_product_id = product.id
+  endif
+
+  assign has_collection = false
+  if section.settings.selected_collection != blank
+    assign selected_collection = section.settings.selected_collection
+    assign has_collection = true
+  endif
+
+  assign current_product_collections = product.collections | map: 'handle' | default: false
+
+  assign show_product_card_title = section.settings.show_product_card_title
+  assign show_product_card_price = section.settings.show_product_card_price
+  assign show_product_card_swatches = section.settings.show_product_card_swatches
+  assign show_product_card_sale_event = section.settings.show_product_card_sale_event
+%}
+
+{% capture swiper_init_params %}
+  {
+    "breakpoints": {
+      "768": {
+        "slidesPerView": {{ section.settings.tablet_slides_view | at_most: 5 }},
+        "spaceBetween": 16,
+        "slidesOffsetBefore": 0
+      },
+      "1025": {
+        "slidesPerView": {{ section.settings.desktop_slides_view | at_most: 5 }},
+        "spaceBetween": 24,
+        "slidesOffsetBefore": 0
+      }
+    }
+  }
+{% endcapture %}
+
+{% style %}
+  .product-carousel--{{ section.id }} {
+    --component-bg-color: {{ section.settings.bg_color }};
+    --component-fg-color: {{ section.settings.text_color }};
+    --text-primary: var({{ section.settings.text_color }});
+    --heading-description-color: var({{ section.settings.text_color }});
+    padding: {{ section.settings.mobile_padding_vertical }}rem {{ section.settings.mobile_padding_horizontal }}rem;
+    margin: {{ section.settings.mobile_margin }}rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .product-carousel--{{ section.id }} {
+      padding-bottom: 48px;
+    }
+  }
+
+  .product-carousel--{{ section.id }} .ra_carousel__content {
+    padding: {{ section.settings.mobile_content_padding_vertical }}rem {{ section.settings.mobile_content_padding_horizontal }}rem;
+  }
+
+  .ra-carousel__details p {
+    color: {{ section.settings.text_color }};
+  }
+
+  .product-carousel--{{ section.id }} .ra-heading {
+    --heading-margin:var(--spacing-lg);
+    --heading-text-align: {{ section.settings.text_align }};
+  }
+
+  {% if section.settings.carousel_nav_location == 'auto' %}
+    .product-carousel--{{ section.id }} .ra-carousel__nav--auto {
+      @media only screen and (min-width: 768px) {
+        --carousel-controls-width: 120%;
+        --carousel-controls-left: 50%;
+        --carousel-controls-transform: translateX(-50%);
+
+      }
+    }
+  {% endif %}
+
+  .product-carousel--{{ section.id }} .ra-heading__description ul li {
+    list-style: inside disc;
+  }
+
+  .product-carousel--{{ section.id }} .ra-heading__description ol li {
+    list-style: inside decimal;
+  }
+
+  .product-carousel--{{ section.id }} .ra-icon--sm {
+    display: none !important;
+  }
+
+  .product-carousel--{{ section.id }} .ra-button {
+    min-width: 175px;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .product-carousel--{{ section.id }} .ra-button--primary {
+    border-radius: 12px;
+  }
+
+  @media only screen and (min-width: 768px) {
+    .product-carousel--{{ section.id }} {
+      padding-top: {{ section.settings.desktop_padding_top }}rem;
+      padding-bottom: {{ section.settings.desktop_padding_bottom }}rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      margin: {{ section.settings.desktop_margin }}rem 0;
+    }
+
+    .product-carousel--{{ section.id }} .ra_carousel__content {
+      padding: {{ section.settings.desktop_content_padding_vertical }}rem {{ section.settings.desktop_content_padding_horizontal }}rem;
+    }
+
+    .product-carousel--{{ section.id }} .ra-carousel__nav--top-right {
+      --carousel-controls-bottom: calc(100% + 1rem);
+    }
+
+
+  }
+
+
+{% endstyle %}
+
+{%- if recommendations.products_count > 0 or section.settings.selected_collection != blank or section.blocks.size > 0 -%}
+<section class="ra-carousel-outer {{ recommendations.products_count}} product-carousel product-carousel--{{ section.id }} p-4">
+  <div class="ra-carousel-wrapper max-w-[1920px] m-auto md:!pb-0 md:px-[48px]">
+    <div class="ra-heading ra-carousel__details ra_carousel__content">
+      {% if section.settings.title != blank %}
+        <{{ title_level }}
+          class="ra-title ra-heading__title {{ section.settings.title_style }}"
+        >
+          <div>{{- section.settings.title -}}</div>
+        </{{ title_level }}>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <div class="ra-heading__description rte">
+          {{- section.settings.description -}}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="ra-carousel {% if show_navigation %}ra-carousel--has-nav{% endif %} mt-12">
+      <!-- prettier-ignore-attribute (data-init-params) -->
+      <swiper-container
+        class="swiper--{{ section.id }} {% if section.settings.use_recommendations_api %} product-recommendations {% endif %} w-full md:flex"
+        data-section="{{ section.id }}"
+        {% if section.settings.use_recommendations_api %}
+          data-url="/{{ localization.country.iso_code }}{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ recommendation_product_id }}&limit=8&intent={{ section.settings.recommendations_intent }}"
+        {% endif %}
+        init="false"
+        space-between="8"
+        {% if show_navigation %}
+          navigation-next-el=".product-carousel--{{ section.id }} .ra-carousel__nav-cta--next"
+          navigation-prev-el=".product-carousel--{{ section.id }} .ra-carousel__nav-cta--prev"
+        {% endif %}
+        {% if show_pagination %}
+          pagination="true"
+          pagination-clickable="true"
+          pagination-el=".product-carousel--{{ section.id }} .ra-carousel__pagination"
+        {% endif %}
+        speed="300"
+        draggable="true"
+        slides-offset-before="16"
+        mousewheel-release-on-edges="true"
+        mousewheel-force-to-axis="true"
+        free-mode-enabled="true"
+        free-mode-sticky="{% if section.settings.scroll_interaction == "snap" %}true{% else %} false{% endif %}"
+        snap-on-release="{% if section.settings.scroll_interaction == "snap" %}false {% else %}true{% endif %}"
+        slides-per-view="{{ section.settings.mobile_slides_view }}"
+        data-init-params='{{ swiper_init_params }}'
+      >
+        {% if section.settings.use_recommendations_api %}
+          {%- if recommendations.performed? and recommendations.products_count > 0 -%}
+            {%- for recommended_product in recommendations.products -%}
+
+              {%- assign subject = recommended_product -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if scip_subject -%}
+                {% continue %}
+              {%- endif -%}
+
+              <swiper-slide class="md:w-[calc(25%-12px)] md:mr-[24px]">
+                {% render 'ra-product-tile',
+                  product: recommended_product,
+                  font_color: section.settings.text_color,
+                  index: forloop.index,
+                  show_title: show_product_card_title,
+                  show_price: show_product_card_price,
+                  show_swatches: show_product_card_swatches,
+                  show_sale_event: show_product_card_sale_event
+                %}
+              </swiper-slide>
+            {% endfor %}
+          {% endif %}
+        {% else %}
+          <!-- prettier-ignore-end -->
+
+          {% if section.settings.selected_collection != blank %}
+            {%- assign counter = 0 -%}
+
+            {%- for collection_product in selected_collection.products -%}
+
+              {%- capture selected_collection_content -%}
+                {{ selected_collection_content }}
+
+              {%- assign subject = collection_product -%}
+              {%- assign scip_subject = false -%}
+
+                {%- for collection in subject.collections -%}
+                  {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                  {%- if vip_collection -%}
+
+                    {%- unless current_product_collections contains collection.handle -%}
+                      {%- assign scip_subject = true -%}
+                      {%- break -%}
+                    {%- endunless -%}
+
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if scip_subject -%}
+                  {% continue %}
+                {%- endif -%}
+
+                <swiper-slide class="md:w-[calc(25%-12px)] md:mr-[24px]">
+                  {% render 'ra-product-tile',
+                    product: collection_product,
+                    font_color: section.settings.text_color,
+                    index: forloop.index,
+                    show_title: show_product_card_title,
+                    show_price: show_product_card_price,
+                    show_swatches: show_product_card_swatches,
+                    show_sale_event: show_product_card_sale_event
+                  %}
+                </swiper-slide>
+
+              {%- assign counter = counter | plus: 1 -%}
+              {%- endcapture -%}
+
+              {%- if counter == section.settings.limit -%}
+                {%- break -%}
+              {%- endif -%}
+            {% endfor %}
+
+            {{ selected_collection_content }}
+          {% else  %}
+            {%- for block in section.blocks -%}
+
+              {%- assign subject = block.settings.product -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if scip_subject -%}
+                {% continue %}
+              {%- endif -%}
+
+              <swiper-slide>
+                {% render 'ra-product-tile',
+                  product: block.settings.product,
+                  font_color: section.settings.text_color,
+                  index: forloop.index,
+                  show_title: show_product_card_title,
+                  show_price: show_product_card_price,
+                  show_swatches: show_product_card_swatches,
+                  show_sale_event: show_product_card_sale_event
+                %}
+              </swiper-slide>
+            {% endfor %}
+          {% endif  %}
+
+        {% endif %}
+
+      </swiper-container>
+      {% if show_navigation %}
+        <div class="ra-carousel__nav ra-carousel__nav--{{ section.settings.carousel_nav_location }}">
+          {% render 'ra-icon-button',
+            type: 'ra-button',
+            style: 'tertiary',
+            size: 'sm',
+            rounded: true,
+            label: 'Go to previous slide',
+            icon: 'left-arrow',
+            class: 'ra-carousel__nav-cta ra-carousel__nav-cta--prev !pointer-events-auto'
+          %}
+          {% render 'ra-icon-button',
+            type: 'ra-button',
+            style: 'tertiary',
+            size: 'sm',
+            rounded: true,
+            label: 'Go to next slide',
+            icon: 'right-arrow',
+            class: 'ra-carousel__nav-cta ra-carousel__nav-cta--next !pointer-events-auto'
+          %}
+        </div>
+      {% endif %}
+      {% if show_pagination %}
+        <div class="ra-carousel__pagination flex justify-center gap-4 py-6 md:py-12"></div>
+      {% endif %}
+    </div>
+    {% if section.settings.cta_title != blank and section.settings.cta_link != blank %}
+      <div class="flex col justify-around md:mt-0 md:mb-[4rem] py-8 md:py-0 ra_carousel__content">
+        <a class="w-[100%] md:w-auto ra-button ra-button ra-button--primary ra-button--md " href="{{ section.settings.cta_link }}" {% if section.settings.open_new_tab %}target="_blank"{% endif %} title="{{ section.settings.cta_title }}">
+          {{ section.settings.cta_title }}
+          <div class="absolute right-[21px] flex md:hidden">
+          {%- render 'ra-icon', icon: 'right-arrow', size: 'sm', height: '14px', width: '14px' -%}
+          </div>
+        </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{%- endif -%}
+
+
+{% schema %}
+{
+  "name": "Product Carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text Align",
+      "info": "Align the title & description text",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "title_style",
+      "label": "Title Style",
+      "info": "Choose the styling of the header",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h3"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "info": "Set the background color for all screen sizes",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "info": "Set the text color for all screen sizes",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Data Sources"
+    },
+    {
+      "type": "paragraph",
+      "content": "There are 3 different ways to decide which product data will be used for this carousel, listed in order of priority. 1) Recommendations API (either intent), 2) A selected collection, 3) Individually selected products"
+    },
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 4,
+      "max": 48,
+      "step": 4,
+      "label": "Limit on the number of products to show",
+      "info": "Will show first products in collection or recommendations up to limit.",
+      "default": 24
+    },
+    {
+      "type": "collection",
+      "id": "selected_collection",
+      "label": "Selected Collection",
+      "info": "Choosing a collection will override any products selected for this component."
+    },
+    {
+      "type": "header",
+      "content": "Recommendations API Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_recommendations_api",
+      "label": "Use Recommendations API",
+      "info": "By checking this box, you will be choosing to override any products or collections you have selected for this component.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "recommendations_intent",
+      "label": "Recommendation Intent",
+      "info": "Select your recommendations intent [Learn more about intent](https://shopify.dev/docs/themes/product-merchandising/recommendations#recommendation-intents)",
+      "options": [
+        {
+          "value": "related",
+          "label": "Related (You May Also Like)"
+        },
+        {
+          "value": "complementary",
+          "label": "Complementary (Pair it With)"
+        }
+      ],
+      "default": "related"
+    },
+    {
+      "type": "product",
+      "id": "recommendations_product",
+      "label": "Recommendations Product",
+      "info": "If no product is selected and you are placing this component on a PDP, this will default to that product."
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show Navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show Pagination",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "carousel_nav_location",
+      "label": "Carousel Navigation Location",
+      "info": "Choose which heading to (style) the title",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top"
+        }
+      ],
+      "default": "top-right"
+    },
+    {
+      "type": "text",
+      "id": "mobile_slides_view",
+      "label": "Mobile Slides Per View",
+      "info": "Enter amount of slides to show on mobile viewport (supports fractions) maximum of 3",
+      "default": "1.5"
+    },
+    {
+      "type": "text",
+      "id": "tablet_slides_view",
+      "label": "Tablet Slides Per View",
+      "info": "Enter amount of slides to show on tablet viewport (supports fractions) maximum of 5",
+      "default": "3"
+    },
+    {
+      "type": "text",
+      "id": "desktop_slides_view",
+      "label": "Desktop Slides Per View",
+      "info": "Enter amount of slides to show on desktop viewport (supports fractions) maximum of 5",
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "scroll_interaction",
+      "label": "Scroll Interaction",
+      "options": [
+        {
+          "value": "free",
+          "label": "Free Scroll"
+        },
+        {
+          "value": "snap",
+          "label": "Snap to slides"
+        }
+      ],
+      "default": "snap"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Vertical (rem)",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Horizontal (rem)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Content Padding Vertical (rem)",
+      "info": "Padding ONLY for non-carousel items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Horizontal (rem)",
+      "info": "Padding ONLY for non-carousel items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_top",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Top (rem)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_bottom",
+      "min": 1,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Bottom (rem)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_content_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Content Padding Vertical (rem)",
+      "info": "Padding ONLY for non-carousel items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "desktop_content_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Horizontal (rem)",
+      "info": "Padding ONLY for non-carousel items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "mobile_margin",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Margin (rem)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "desktop_margin",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Margin (rem)",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "CTA",
+      "info": "CTA Button will appear only when all settings are configured"
+    },
+    {
+      "type": "text",
+      "label": "CTA Title",
+      "default": "Shop Now",
+      "id": "cta_title"
+    },
+    {
+      "type": "url",
+      "label": "CTA Link",
+      "id": "cta_link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Open in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "CTA Style",
+      "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_card_title",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_card_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_card_swatches",
+      "label": "Show swatches",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_card_sale_event",
+      "label": "Show sale event",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product-slide",
+      "name": "Product Slide",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Slide Content"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Carousel"
+    }
+  ]
+}
+{% endschema %}

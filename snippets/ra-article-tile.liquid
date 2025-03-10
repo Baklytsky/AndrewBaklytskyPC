@@ -1,0 +1,79 @@
+{% comment %}
+  Props:
+  article:      Article object - (required)
+  aspect_ratio: String [horizonatal, video] - (required)
+  show_date:    Boolean - (optional)
+  show_tags:    Boolean - (optional)
+  show_excerpt: Boolean - (optional)
+
+  Example:
+  {% render 'ra-article-tile'
+  article: article,
+  aspect_ratio: section.settings.aspect_ratio,
+  show_date: section.settings.show_date,
+  show_tags: section.settings.show_tags,
+  show_excerpt: section.settings.show_excerpt
+  %}
+{% endcomment %}
+
+{% if article != blank %}
+  <div class="block">
+    <a
+      class="flex mb-5 aspect-{{ aspect_ratio }}"
+      href="{{ article.url }}"
+      title="{{ article.title }}"
+      aria-label="{{ article.title }}"
+    >
+      {% capture srcset %}
+        {{ article.image.src | image_url: width: 500 }} 400w,
+        {{ article.image.src | image_url: width: 600 }} 800w,
+        {{ article.image.src | image_url: width: 700 }} 1200w
+      {% endcapture %}
+      {%
+        render 'ra-image',
+        alt: article.image.src.alt,
+        src: article.image.src | image_url: width: 600,
+        srcset: srcset,
+        width: 100,
+        height: 100,
+        sizes: "100vw"
+        classes: "w-full h-full object-cover object-center",
+        lazyload: true
+      %}
+    </a>
+
+    {% if article.tags.size > 0 and show_tags %}
+      <div class="capitalize mb-2">
+        {% for tag in article.tags %}
+          {% render 'ra-badge', style: 'primary', label: tag.title, class: 'mb-1' %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <a
+      class="flex"
+      href="{{ article.url }}"
+      title="{{ article.title }}"
+      aria-label="{{ article.title }}"
+    >
+      <h3 class="h4 mb-2">{{ article.title }}</h3>
+    </a>
+
+    {% if section.settings.show_excerpt and article.excerpt.size > 0 or article.content.size > 0 %}
+      {%- if article.excerpt.size > 0 -%}
+        <p>{{ article.excerpt | strip_html | truncatewords: 20 }}</p>
+      {%- else -%}
+        <p>{{ article.content | strip_html | truncatewords: 20 }}</p>
+      {%- endif -%}
+    {% endif %}
+
+    {%- if section.settings.show_date -%}
+      <p class="text-sm mt-5">{{ article.published_at | time_tag: format: 'date' }}</p>
+    {%- endif -%}
+
+    <div class="mt-5">
+      {%- assign title = 'Read more about ' | append: article.title -%}
+      {% render 'ra-button', type: 'a', as_text: true, url: article.url, title: title, label: 'Read More' %}
+    </div>
+  </div>
+{% endif %}

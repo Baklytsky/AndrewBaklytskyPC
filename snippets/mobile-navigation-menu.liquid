@@ -1,0 +1,451 @@
+{% liquid
+  assign has_child = false
+  assign has_sub_child = false
+  assign child_links = link.links
+  assign link_label_handleize = link.title | handleize
+  assign link_block = section.blocks | where: 'type', 'link'
+
+  if child_links.size != 0
+    assign has_child = true
+  endif
+
+  for child in child_links
+    for sub_child in child.links
+      if sub_child != blank
+        assign has_sub_child = true
+      endif
+    endfor
+  endfor
+%}
+
+{%- capture tags -%}
+{%- endcapture -%}
+
+{%- capture sub_blocks -%}
+{%- endcapture -%}
+{%- assign sub_block_counter = 0 -%}
+
+{%- capture images -%}
+{%- endcapture -%}
+
+{% for featured in featured_contents %}
+  {% assign featured_item_handleize = featured.settings.chaining_handle | handleize %}
+  {% if featured_item_handleize == link_label_handleize %}
+    {% case featured.type %}
+
+    {% when 'tag' %}
+      {% assign tag_title = featured.settings.title %}
+      {% assign tag_url = featured.settings.tag_url %}
+      {% assign new_tab = featured.settings.open_new_tab %}
+      {% assign tag_style = featured.settings.style %}
+
+        {% if tag_title != blank %}
+          {%- capture tags -%}
+            {{ tags }}
+            {%- if tag_url != blank -%}
+              <a href="{{ tag_url }}"
+                 title="{{ tag_title }}"
+                 aria-label="{{ tag_title }}"
+                 {% if new_tab %}target="_blank"{% endif %}
+              >
+                {% render 'ra-badge',
+                  class: "mb-[10px] rounded"
+                  label: tag_title,
+                  size: 'md',
+                  rounded: true,
+                  style: tag_style %}
+              </a>
+            {%- else -%}
+              {% render 'ra-badge',
+                class: "mb-[10px] rounded"
+                label: tag_title,
+                size: 'md',
+                rounded: true,
+                style: tag_style %}
+            {%- endif -%}
+          {%- endcapture -%}
+        {% endif %}
+
+    {% when 'sub_block' %}
+      {%- assign sub_block_counter = sub_block_counter | plus: 1 -%}
+      {%- assign image = featured.settings.image -%}
+      {%- assign title = featured.settings.title -%}
+      {%- assign pretitle = featured.settings.pretitle -%}
+      {%- assign url = featured.settings.url | default: link.url -%}
+      {%- assign new_tab = featured.settings.open_new_tab -%}
+      {%- assign alt = link_image.alt | default: link.title -%}
+
+      {%- if sub_block_counter < 10 -%}
+        {%- assign counter = '00' | append: sub_block_counter -%}
+      {%- else -%}
+        {%- assign counter = '0' | append: sub_block_counter -%}
+      {%- endif -%}
+
+      {%- capture sub_blocks -%}
+        {{ sub_blocks }}
+        <div class="flex flex-col max-w-[135px] max-w-[182px]:md mb-[16px]">
+          <a href="{{ url }}"
+             class="ra-image--use-as-background relative block w-full h-[113px] mb-[12px]"
+             title="{{ alt }}"
+             aria-label="{{ alt }}"
+             {% if new_tab %}target="_blank"{% endif %}
+          >
+            {% render 'ra-image',
+              image: image,
+              width: 350,
+              classes: "ra-image__media w-full",
+              alt: alt,
+              lazyload: true %}
+          </a>
+          <a href="{{ url }}"
+             title="{{ alt }}"
+             aria-label="{{ alt }}">
+            <span class="block mono-12">{{ pretitle }}</span>
+            <span class="block mono-12">{{ title }}</span>
+          </a>
+        </div>
+        {%- endcapture -%}
+
+    {% when 'image' %}
+      {% assign image = featured.settings.image %}
+      {% assign url = featured.settings.image_url | default: link.url %}
+      {%- assign new_tab = featured.settings.open_new_tab -%}
+      {%- assign alt = image.alt | default: link.title -%}
+
+        {% if image %}
+          {%- capture images -%}
+            {{ images }}
+            <a href="{{ url }}"
+               class="ra-image--use-as-background relative block w-full max-w-[175px] h-[148px] mb-[16px]"
+               title="{{ alt }}"
+               aria-label="{{ alt }}"
+               {% if new_tab %}target="_blank"{% endif %}
+            >
+              {% render 'ra-image',
+                image: image,
+                width: 350,
+                classes: "ra-image__media w-full",
+                alt: alt,
+                lazyload: true %}
+            </a>
+          {%- endcapture -%}
+
+        {% endif %}
+
+    {% endcase %}
+  {% endif %}
+{% endfor %}
+
+{%- capture link_content -%}
+  {% if has_child or sub_blocks != blank %}
+    {% for child in child_links %}
+      <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[16px] last:mb-0 pl-[24px]">
+        <a
+          class="mono-16"
+          href="{{ child.url }}"
+          title="{{ child.title }}"
+          data-navigation-drawer="drawer-{{ child.title | handleize }}"
+          aria-label="{{ child.title }}"
+        >
+          {{ child.title }}
+        </a>
+        <div class="header__mobile-navigation-item-arrow overflow-hidden">
+          {%- render 'ra-icon', icon: 'left-arrow', width: '12px' height: '10px', class: 'duration-100', color: 'inherit' -%}
+        </div>
+      </li>
+      {% if has_sub_child %}
+        {% for sub_child in child.links %}
+          <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[16px] last:mb-0 pl-[24px]">
+            <a
+              class="mono-16 pl-[40px]"
+              href="{{ sub_child.url }}"
+              title="{{ sub_child.title }}"
+              data-navigation-drawer="drawer-{{ sub_child.title | handleize }}"
+              aria-label="{{ sub_child.title }}"
+            >
+              {{ sub_child.title }}
+            </a>
+            <div class="header__mobile-navigation-item-arrow overflow-hidden">
+              {%- render 'ra-icon', icon: 'left-arrow', width: '12px' height: '10px', class: 'duration-100', color: 'inherit' -%}
+            </div>
+          </li>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+
+    {%- if sub_blocks != blank -%}
+      <li class="header__mobile-navigation-item grid gap-x-[35px] gap-x-[47px]:md grid-cols-2 max-w-[330px] max-w-[342px]:md pb-[16px] pl-[24px]">
+        {{ sub_blocks }}
+      </li>
+    {%- endif -%}
+
+  {% endif %}
+{%- endcapture -%}
+
+{%- capture aditional_content -%}
+  {%- if tags != blank or images != blank  -%}
+    <li class="header__mobile-navigation-item flex flex-col gap-x-md mb-[32px] last:mb-0 mt-[-6px]">
+      {%- if tags -%}
+        <div class="header__mobile-navigation-item-tags flex items-center flex-wrap gap-[10px]">
+          {{ tags }}
+        </div>
+      {%- endif -%}
+      {%- if images -%}
+        {{ images }}
+      {%- endif -%}
+    </li>
+  {%- endif -%}
+{%- endcapture -%}
+
+  {% if has_child or sub_blocks != blank %}
+    {% if link_block[0] != blank and menu == 'primary' %}
+      {% liquid
+        assign link_url = link_block[0].settings.link_url
+        assign title = link_block[0].settings.title
+        assign open_new_tab = link_block[0].settings.open_new_tab
+        assign link_position = link_block[0].settings.link_position | minus : 1
+      %}
+      {% if link_position == index %}
+        <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[32px] last:mb-0">
+          <a
+            class="mono-16"
+            href="{{ link_url }}"
+            title="{{ title }}"
+            data-navigation-drawer="drawer-{{ title | handleize }}"
+            aria-label="{{ title }}"
+            {% if open_new_tab %}target="_blank"{% endif %}
+          >
+            {{ title }}
+          </a>
+        </li>
+      {% endif %}
+    {% endif %}
+    <ul class="mb-[16px] last:mb-0 p-0">
+      {% render 'ra-accordion-item',
+        title: link.title,
+        content: link_content,
+        show_icon: true,
+        class: 'header__mobile-navigation-item__accordion'
+      %}
+    </ul>
+    {%- if aditional_content != blank -%}
+      {{ aditional_content }}
+    {%- endif -%}
+  {%- else -%}
+    {% if link_block[0] != blank and menu == 'primary'  %}
+      {% liquid
+        assign link_url = link_block[0].settings.link_url
+        assign title = link_block[0].settings.title
+        assign open_new_tab = link_block[0].settings.open_new_tab
+        assign link_position = link_block[0].settings.link_position | minus : 1
+      %}
+      {% if link_position == index %}
+        <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[32px] last:mb-0">
+          <a
+            class="mono-16"
+            href="{{ link_url }}"
+            title="{{ title }}"
+            data-navigation-drawer="drawer-{{ title | handleize }}"
+            aria-label="{{ title }}"
+            {% if open_new_tab %}target="_blank"{% endif %}
+          >
+            {{ title }}
+          </a>
+        </li>
+      {% endif %}
+    {% endif %}
+    <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[16px] last:mb-0" data-index="{{ index }}" data-position="{{ link_position }}">
+      <a
+        class="mono-16"
+        href="{{ link.url }}"
+        title="{{ link.title }}"
+        data-navigation-drawer="drawer-{{ link.title | handleize }}"
+        aria-label="{{ link.title }}"
+      >
+        {{ link.title }}
+      </a>
+      <div class="header__mobile-navigation-item-arrow overflow-hidden">
+        {%- render 'ra-icon', icon: 'left-arrow', width: '12px' height: '10px', class: 'duration-100', color: 'inherit' -%}
+      </div>
+    </li>
+
+    {% if link_block[0] != blank and menu == 'primary'  %}
+      {% liquid
+        assign link_url = link_block[0].settings.link_url
+        assign title = link_block[0].settings.title
+        assign open_new_tab = link_block[0].settings.open_new_tab
+        assign link_position = link_block[0].settings.link_position | minus : 1
+      %}
+      {% if link_position == 4 and index == 3 %}
+        <li class="header__mobile-navigation-item flex items-center gap-x-md mb-[32px] last:mb-0">
+          <a
+            class="mono-16"
+            href="{{ link_url }}"
+            title="{{ title }}"
+            data-navigation-drawer="drawer-{{ title | handleize }}"
+            aria-label="{{ title }}"
+            {% if open_new_tab %}target="_blank"{% endif %}
+          >
+            {{ title }}
+          </a>
+        </li>
+      {% endif %}
+    {% endif %}
+    {%- if aditional_content != blank -%}
+      {{ aditional_content }}
+    {%- endif -%}
+  {%- endif -%}
+
+  {% comment %}
+    Legacy Drawer Code - Renders child and subchilds into an interactive drawer
+  {% endcomment %}
+
+  {% comment %}
+  {% if has_child or has_sub_child %}
+    <a
+      class="mono-48 text-white"
+      href="#"
+      title="{{ link.title }}"
+      aria-label="{{ link.title }} drawer"
+      data-toggle-drawer="drawer-{{ link.title | handleize }}"
+    >
+      {% if has_child or has_sub_child %}
+        {% render 'ra-icon', icon: 'chevron-right', class: 'transition-all delay-300', height: '12px', width: '12px' %}
+      {% endif %}
+    </a>
+  {% endif %}
+
+  {%- comment -%}
+    drawer
+  {%- endcomment -%}
+  {% if has_child or has_sub_child %}
+    <ul
+      class="header__mobile-navigation-drawer [&.active]:left-0  fixed flex-col top-0 left-full w-full flex h-full z-[515] transition-all duration-500"
+      id="drawer-{{ link.title | handleize }}"
+      role="list"
+      tabindex="-1"
+    >
+      {%- comment -%}
+        drawer header
+      {%- endcomment -%}
+      <div class="header__mobile-navigation-drawer-header border-b h-[70px] absolute top-0 left-0 w-full flex items-center justify-between">
+        <a
+          class="p-6 flex"
+          href="#"
+          title="close {{ link.title }} drawer"
+          aria-label="close {{ link.title }} drawer"
+          data-close-drawer="drawer-{{ link.title | handleize }}"
+        >
+          {% render 'ra-icon', icon: 'chevron-left', class: 'transition-all delay-300', width: '16px', height: '16px' %}
+        </a>
+        <p class="header__mobile-navigation-drawer-title text-lg capitalize font-medium"></p>
+        <a
+          class="p-6 flex"
+          href="#"
+          title="close {{ link.title }} drawer"
+          aria-label="close {{ link.title }} drawer"
+          data-close-drawer="drawer-{{ link.title | handleize }}"
+        >
+          {% render 'ra-icon', icon: 'close', class: 'transition-all delay-300', width: '16px', height: '16px' %}
+        </a>
+      </div>
+
+      {%- comment -%}
+        Link - columns
+      {%- endcomment -%}
+      <div class="mt-[70px] overflow-y-auto overflow-x-hidden block">
+        {% for child in child_links %}
+          <li class="header__mobile-navigation-item border-b flex flex-wrap p-0 justify-between items-center">
+            <a
+              class="p-6 text-lg"
+              href="{{ child.url }}"
+              title="{{ child.title }}"
+              aria-label="{{ child.title }}"
+            >
+              {{ child.title }}
+            </a>
+
+            {% if has_sub_child %}
+              <a
+                class="p-6 text-lg group"
+                href="#"
+                title="{{ child.title }}"
+                aria-label="{{ child.title }} dropdown"
+                data-toggle-dropdown="dropdown-{{ child.title | handleize }}"
+              >
+                {% if has_child or has_sub_child %}
+                  {% render 'ra-icon',
+                    icon: 'chevron-down',
+                    class: 'transition-all group-[.active]:-rotate-180',
+                    width: '12px',
+                    height: '12px'
+                  %}
+                {% endif %}
+              </a>
+            {% endif %}
+
+            {% if has_sub_child %}
+              <ul
+                class="header__mobile-navigation-dropdown [&.active]:overflow-visible px-6 py-0 w-full flex flex-col h-0 overflow-hidden transition-all ease-in-out"
+                id="dropdown-{{ child.title | handleize }}"
+                role="list"
+                tabindex="-1"
+              >
+                <div data-header-inner-mobile>
+                  {% for sub_child in child.links %}
+                    <li class="header__mobile-navigation-item border-b flex flex-wrap mb-3 last:mb-6 justify-between items-center !border-0 !p-0">
+                      <a
+                        class="text-base !border-0 !p-0"
+                        href="{{ sub_child.url }}"
+                        title="{{ sub_child.title }}"
+                        aria-label="{{ sub_child.title }}"
+                      >
+                        {{ sub_child.title }}
+                      </a>
+                    </li>
+                  {% endfor %}
+                </div>
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+
+        {%- comment -%}
+          featured contents - columns
+        {%- endcomment -%}
+        {% if has_sub_child %}
+          {% for featured in featured_contents %}
+            {% assign featured_item_handleize = featured.settings.menu_item | handleize %}
+            {% assign link_label_handleize = link.title | handleize %}
+
+            {% if featured_item_handleize == link_label_handleize and featured.settings.image != blank %}
+              <li class="max-w-[calc(100%-32px)] mt-4 left-4 relative flex aspect-[3.8/2] last:mb-4">
+                {{
+                  featured.settings.image
+                  | image_url: width: 600
+                  | image_tag: class: 'w-full h-full absolute top-0 z-1 object-cover'
+                }}
+                <div class="p-4 w-full h-full absolute top-0 flex flex-col justify-end items-start z-2">
+                  {% if featured.settings.title != blank %}
+                    <h4 class="color-grey-900 text-lg">{{ featured.settings.title }}</h4>
+                  {% endif %}
+
+                  {% if featured.settings.link_label != blank and featured.settings.link_url != blank %}
+                    {%
+                      render 'ra-button'
+                      type: 'a',
+                      class: 'text-sizeInherit mt-3'
+                      style: featured.settings.link_style,
+                      label: featured.settings.link_label,
+                      url: featured.settings.link_url,
+                    %}
+                  {% endif %}
+                </div>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </ul>
+  {% endif %}
+{% endcomment %}

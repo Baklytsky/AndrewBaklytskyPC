@@ -1,0 +1,230 @@
+{% comment %}
+  Renders a product media gallery. Should be used with 'media-gallery.js'
+  Also see 'product-media-modal'
+
+  Accepts:
+  - product: {Object} Product liquid object
+{% endcomment %}
+
+{% liquid
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign custom_badge_text = product.metafields.custom.custom_badge
+  assign badge_text = ''
+  assign badge_override = false
+
+  assign back_in_stock = current_variant.metafields.custom.back_in_stock
+
+  if current_variant.metafields.badge.label
+    assign badge_text = current_variant.metafields.badge.label
+    assign badge_override = current_variant.metafields.badge.override
+  else
+    if product.metafields.badge.label
+      assign badge_text = product.metafields.badge.label
+      assign badge_override = product.metafields.badge.override
+    endif
+  endif
+
+  unless badge_override
+    if current_variant.inventory_quantity == 0 and current_variant.inventory_policy == 'deny' and product.metafields.custom.no_waitlist
+      assign badge_text = 'Sold Out'
+    elsif back_in_stock
+      assign back_in_stock_seconds = back_in_stock | date: '%Y-%m-%d' | date: '%s'
+      assign today_seconds = 'now' | date: '%Y-%m-%d' | date: '%s'
+      assign days_difference = back_in_stock_seconds | minus: today_seconds | divided_by: 86400
+      if days_difference < 14
+        assign badge_text = 'Back in Stock'
+      endif
+    elsif current_variant.price < current_variant.compare_at_price
+      assign badge_text = 'On Sale'
+    endif
+  endunless
+%}
+
+{% capture swiper_init_params %}
+  {
+    "breakpoints": {
+      "1024": {
+        "slidesPerView": 2,
+        "direction": "horizontal",
+        "loop": "true",
+        "freeMode": "false"
+      }
+    }
+  }
+{% endcapture %}
+
+<ra-media-gallery
+  class="ra-gallery product-media-gallery block h-full overflow-hidden"
+  style="--vertical-carousel-height: {{ thumbnail_carousel_height | append: "px" }}"
+>
+  {% assign total_inventory = 0 %}
+
+  {% for variant in product.variants %}
+    {% if variant.available or variant.inventory_policy == 'continue' %}
+      {%- assign inventory = variant.inventory_quantity -%}
+
+      {%- if variant.inventory_policy == 'continue' -%}
+        {%- assign inventory = 100 -%}
+      {%- endif -%}
+
+      {% assign total_inventory = total_inventory | plus: inventory %}
+    {% endif %}
+  {% endfor %}
+  {% assign badgeQty = total_inventory %}
+
+  {% if custom_badge_text != blank %}
+    {% render 'ra-badge', label: custom_badge_text, size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif product.metafields.custom.pre_order %}
+    {% render 'ra-badge', label: 'pre-order', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif product.metafields.custom.coming_soon and badgeQty < 1 %}
+    {% render 'ra-badge', label: 'WAITLIST', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif badgeQty < 1 %}
+    {% render 'ra-badge', label: 'SOLD OUT', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif badgeQty < product.metafields.custom.few_items_left_quantity %}
+    {% render 'ra-badge', label: 'FEW ITEMS LEFT', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif badgeQty < product.metafields.custom.selling_fast_quantity %}
+    {% render 'ra-badge', label: 'SELLING FAST', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif product.metafields.custom.few_items_left_quantity == blank and badgeQty < settings.few_items_left %}
+    {% render 'ra-badge', label: 'FEW ITEMS LEFT', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% elsif product.metafields.custom.selling_fast_quantity == blank and badgeQty < settings.selling_fast %}
+    {% render 'ra-badge', label: 'SELLING FAST', size: 'md', style: 'primary' class: 'ra-gallery-carousel-badge rounded font-primary absolute ' %}
+  {% endif %}
+  <div class="ra-gallery-carousel h-full">
+    {% comment %}
+      Primary Slider
+    {% endcomment %}
+    <div
+      class="ra-carousel-outer ra-gallery-carousel__main ra-carousel--has-arrows relative max-w-full h-full"
+    >
+      {% comment %} {% render 'ra-badge',
+        class: 'ra-product-tile__badge z-50',
+        label: badge_text,
+        attributes: 'data-pdp-badge',
+        placeholder: true
+      %} {% endcomment %}
+      <swiper-container
+        init="false"
+        auto-height="false"
+        class="w-full product-media-gallery__primary h-[78dvh] sm:h-full"
+        navigation-prev-el=".swiper-primary-prev"
+        navigation-next-el=".swiper-primary-next"
+        slides-per-view="1"
+        pagination="true"
+        pagination-clickable="true"
+        pagination-el=".product-media-gallery .ra-carousel__pagination"
+        speed="500"
+        free-mode="true"
+        loop="false"
+        direction="vertical"
+        data-init-params='{{ swiper_init_params }}'
+      >
+        {%- for media in product.media -%}
+          <swiper-slide
+            data-slide-index="{{ forloop.index0 }}"
+            data-media-id="{{ media.id }}"
+            class="ra-carousel-slide h-full {% if forloop.index0 != 0 or forloop.index0 != 1 %}hidden{% endif %} {% if forloop.index == product.media.size %}swiper-last-slide{% endif %} lg:w-[50%]"
+          >
+            {% case media.media_type %}
+              {% when 'image' %}
+                {% if media.media_type == 'image' %}
+                  <div
+                    class="h-full"
+                    data-slide-index="{{ forloop.index0 }}"
+                  >
+                    {% capture srcset %}
+                      {{ media | img_url: '480x' }} 240w,
+                      {{ media | img_url: '720x' }} 360w,
+                      {{ media | img_url: '1080x' }} 540w,
+                      {{ media | img_url: '1296x' }} 720w,
+                      {{ media | img_url: '1350x' }} 900w,
+                      {{ media | img_url: '1512x' }} 1080w,
+                      {{ media | img_url: '1728x' }} 1296w,
+                      {{ media | img_url: '1920x' }} 1350w,
+                      {{ media | img_url: '1980x' }} 1728w,
+                      {{ media | img_url: '2160x' }} 1920w,
+                      {{ media | img_url: '2560x' }} 2560w
+                    {% endcapture %}
+
+                    {% render 'ra-image',
+                      image: media,
+                      classes: 'w-full h-full object-cover',
+                      width: 2000,
+                      lazyload: true,
+                      srcset: srcset,
+                      sizes: "100vw"
+                    %}
+
+                    {%- unless gallery_preloader -%}
+                      {%- capture gallery_preloader -%}
+                        {% render 'ra-image',
+                          image: media,
+                          classes: 'w-full h-full object-cover',
+                          width: 2000,
+                          lazyload: true,
+                          srcset: srcset,
+                          sizes: "100vw"
+                        %}
+                      {%- endcapture -%}
+                    {%- endunless -%}
+
+                  </div>
+                {% endif %}
+              {% when 'video' %}
+                <div class="ra-carousel-slide__inner h-full">
+                  <div class="absolute inset-0"></div>
+                  {% render 'ra-video', media: media, class: 'w-full h-full object-cover', lazyload: true, controls: false %}
+                </div>
+              {% when 'external_video' %}
+                <div class="ra-carousel-slide__inner cursor-pointer h-full">
+                  <button data-action-load-video class="w-full h-full">
+                    {{
+                      media.preview_image
+                      | image_url: width: 1600
+                      | image_tag:
+                        class: 'w-full h-full',
+                        loading: 'lazy',
+                        width: 1600,
+                        widths: '600, 800, 1200, 1600',
+                        alt: media.alt
+                      | escape
+                    }}
+                  </button>
+                  <template>
+                    <div class="absolute inset-0"></div>
+                    {%- capture video_classes -%}
+                    aspect-video w-full ra-iframe--{{- media.host -}}
+                  {%- endcapture -%}
+                    {% render 'ra-video',
+                      media: media,
+                      autoplay: false,
+                      width: 1600,
+                      muted: true,
+                      class: video_classes,
+                      lazyload: true
+                    %}
+                  </template>
+                </div>
+            {% endcase %}
+          </swiper-slide>
+        {%- endfor -%}
+      </swiper-container>
+
+      {%- if gallery_preloader -%}
+        <div class="ra-gallery-carousel-preloader w-full h-full lg:w-1/2">
+          {{ gallery_preloader }}
+        </div>
+      {%- endif -%}
+
+      {% if product.media.size > 1 %}
+        <svg class='swiper-primary-prev absolute left-[1%] top-1/2 z-10 -mt-3 hidden lg:block' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M19 12L6 12M12 5L5 12L12 19" stroke="var(--slide-nav-color)" stroke-width="2"/>
+        </svg>
+        <svg class='swiper-primary-next absolute right-[51%] top-1/2 z-10 -mt-3 hidden lg:block' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H18M12 19L19 12L12 5" stroke="var(--slide-nav-color)" stroke-width="2"/>
+        </svg>
+        <div class="ra-carousel__pagination flex justify-center gap-1"></div>
+      {% endif %}
+    </div>
+  </div>
+</ra-media-gallery>

@@ -1,0 +1,484 @@
+{% comment %}
+  Props:
+  id: string unique ID - (required)
+  product_id: string unique ID - (required)
+  title: string input name (required)
+  collection: collection reference (optional)
+  use_recommendations_api: boolean - (optional)
+  recommendations_intent: select - (optional)
+  recommendations_product_1: product reference - (optional)
+  recommendations_product_2: product reference - (optional)
+  recommendations_product_3: product reference - (optional)
+  product_limit: number - (required)
+{% endcomment %}
+
+{% liquid
+  assign show_pagination = false
+  assign show_navigation = false
+  assign product_limit = product_limit | default: 4
+  assign recommendation_product_id = product_id
+  assign has_collection = false
+  if collection != blank
+    assign selected_collection = collection
+    assign has_collection = true
+  endif
+  assign current_product_collections = product.collections | map: 'handle' | default: false
+%}
+
+{% capture swiper_init_params %}
+  {
+    "breakpoints": {
+      "768": {
+        "slidesPerView": 3,
+        "spaceBetween": 16,
+        "slidesOffsetBefore": 0
+    },
+      "1025": {
+        "slidesPerView": 4,
+        "spaceBetween": 24,
+        "slidesOffsetBefore": 0
+      }
+    }
+  }
+{% endcapture %}
+{% style %}
+  .product-carousel--{{ id }} {}
+
+.product-carousel--{{ id }}
+.ra-heading {
+  --heading-margin: var(--spacing-lg);
+  --heading-text-align: left;
+}
+
+@media only screen and (min-width: 768px) {
+  .product-carousel--{{ id }} {}
+
+  .product-carousel--{{ id }}
+    .ra-carousel__nav--top-right {
+      --carousel-controls-bottom: calc(100% + 1rem);
+    }
+}
+{% endstyle %}
+
+<ra-recommendation data-recommendation="mobile"
+                   class="block ra-carousel-outer product-carousel product-carousel--{{ id }} bg-bg-primary max-lg:overflow-hidden" >
+  <div class="ra-carousel-wrapper max-lg:pl-6 max-lg:py-12 max-lg:border-y max max-lg:border-stroke-secondary">
+    <div class="mb-12 lg:mb-6 ">
+      {% if title != blank %}
+        <p class="sans-16 text-text-inverse-primary normal-case">{{ title }}</p>
+      {% endif %}
+    </div>
+
+    <div class="ra-carousel {% if show_navigation %}ra-carousel--has-nav{% endif %}">
+      <!-- prettier-ignore-attribute (data-init-params) -->
+      <swiper-container
+        class="swiper--{{ id }} mt-12 product-recommendations w-full"
+        data-section="{{ id }}"
+        id="mobile-recs"
+        data-type="mobile"
+        {% if use_recommendations_api %}
+        data-url="/{{ localization.country.iso_code }}{{ routes.product_recommendations_url }}?section_id={{ id }}&product_id={{ recommendation_product_id }}&limit=10&intent={{ recommendations_intent }}"
+        {% endif %}
+        init="false"
+        space-between="8"
+        slides-per-view="1.7"
+        {% if show_navigation %}
+        navigation-next-el=".product-carousel--{{ id }} .ra-carousel__nav-cta--next"
+        navigation-prev-el=".product-carousel--{{ id }} .ra-carousel__nav-cta--prev"
+        {% endif %}
+        {% if show_pagination %}
+        pagination="true"
+        pagination-clickable="true"
+        pagination-el=".product-carousel--{{ id }} .ra-carousel__pagination"
+        {% endif %}
+        speed="300"
+        draggable="true"
+        mousewheel-release-on-edges="true"
+        mousewheel-force-to-axis="true"
+        free-mode-enabled="false"
+        data-init-params='{{ swiper_init_params }}'>
+
+        {%- capture complementary_recommendations -%}
+          {%- if use_recommendations_api and recommendations_intent == 'complementary' -%}
+            {%- if recommendations.performed? and recommendations.products_count > 0 -%}
+              {%- assign counter = 0 -%}
+
+              {%- for recommended_product in recommendations.products -%}
+
+                {%- capture complementary_recommendations_content -%}
+                  {{ complementary_recommendations_content }}
+
+                {%- assign subject = recommended_product -%}
+                {%- assign scip_subject = false -%}
+
+                  {%- for collection in subject.collections -%}
+                    {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                    {%- if vip_collection -%}
+
+                      {%- unless current_product_collections contains collection.handle -%}
+                        {%- assign scip_subject = true -%}
+                        {%- break -%}
+                      {%- endunless -%}
+
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- if scip_subject -%}
+                    {% continue %}
+                  {%- endif -%}
+
+                  <swiper-slide>
+                    {% render 'ra-product-tile'
+                      , product: recommended_product
+                      , index: forloop.index
+                      , disable_animation: true %}
+                  </swiper-slide>
+                  {%- assign counter = counter | plus: 1 -%}
+                {%- endcapture -%}
+
+                {%- if counter == product_limit -%}
+                  {%- break -%}
+                {%- endif -%}
+
+              {%- endfor -%}
+
+              {{ complementary_recommendations_content }}
+
+            {%- endif -%}
+          {%- endif -%}
+        {%- endcapture -%}
+
+        {%- capture related_recommendations -%}
+          {% if use_recommendations_api and recommendations_intent == 'related' %}
+            {%- comment -%} This is the start of the logic for the recommendations API using related products {%- endcomment -%}
+            {%- if recommendations.performed? and recommendations.products_count > 0 -%}
+              {%- assign count_valid_recommendation = 0 -%}
+              {%- assign counter = 0 -%}
+              {%- assign recommendation_needs_to_be_in_this_collection = product.metafields.custom.collection_to_filter_recommendation_section.value.handle -%}
+              {%- for recommended_product in recommendations.products -%}
+
+                {%- capture related_recommendations_content_1 -%}
+                  {{ related_recommendations_content_1 }}
+
+                {%- assign subject = recommended_product -%}
+                {%- assign scip_subject = false -%}
+
+                  {%- for collection in subject.collections -%}
+                    {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                    {%- if vip_collection -%}
+
+                      {%- unless current_product_collections contains collection.handle -%}
+                        {%- assign scip_subject = true -%}
+                        {%- break -%}
+                      {%- endunless -%}
+
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- if scip_subject -%}
+                    {% continue %}
+                  {%- endif -%}
+
+                  {%- comment -%} Break loop if we have product_limit valid recommendations {%- endcomment -%}
+                  {%- if count_valid_recommendation < product_limit -%}
+
+                    {%- comment -%} check if the  coming soon metafield is set to true {%- endcomment -%}
+                    {%- if recommended_product.metafields.custom.coming_soon.value != true -%}
+                      {%- assign recommended_product_has_metafield_collection = false -%}
+
+                      {%- comment -%} check if the recommended product is in the collection chosen in the metafield of this PDP {%- endcomment -%}
+                      {%- for collection in recommended_product.collections -%}
+                        {%- if collection.handle == recommendation_needs_to_be_in_this_collection -%}
+                          {%- assign recommended_product_has_metafield_collection = true -%}
+                        {%- endif -%}
+                      {%- endfor -%}
+
+                      {%- if recommended_product_has_metafield_collection -%}
+
+                        {%- comment -%} increment by 1 valid recommendation and display the product {%- endcomment -%}
+                        {%- assign count_valid_recommendation = count_valid_recommendation | plus: 1 -%}
+                        <swiper-slide class="valid-product-recommended this-is-the-{{ count_valid_recommendation }}-valid-product-recommended">
+                          {% render 'ra-product-tile',
+                            product: recommended_product,
+                            index: forloop.index,
+                            disable_animation: true
+                          %}
+                        </swiper-slide>
+                      {%- endif -%}
+
+                    {%- endif -%}
+                  {%- endif -%}
+
+                  {%- assign counter = counter | plus: 1 -%}
+                {%- endcapture -%}
+
+                {%- if counter == product_limit -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {{ related_recommendations_content_1 }}
+
+              {%- comment -%} Loop of product from backup collection if count_valid_recommendation is 0. There was not enough valid product so we show the backup collection's product{%- endcomment -%}
+              {%- if count_valid_recommendation == 0 -%}
+                {%- assign counter = 0 -%}
+
+                {%- for backup_product in product.metafields.custom.collection_to_filter_recommendation_section.value.products -%}
+
+                  {%- capture related_recommendations_content_2 -%}
+                    {{ related_recommendations_content_2 }}
+
+                    {%- assign subject = backup_product -%}
+                    {%- assign scip_subject = false -%}
+
+                    {%- for collection in subject.collections -%}
+                      {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                      {%- if vip_collection -%}
+
+                        {%- unless current_product_collections contains collection.handle -%}
+                          {%- assign scip_subject = true -%}
+                          {%- break -%}
+                        {%- endunless -%}
+
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- if scip_subject -%}
+                      {% continue %}
+                    {%- endif -%}
+
+                    <swiper-slide>
+                      {% render 'ra-product-tile',
+                        product: backup_product,
+                        index: forloop.index,
+                        disable_animation: true
+                      %}
+                    </swiper-slide>
+
+                    {%- assign counter = counter | plus: 1 -%}
+                  {%- endcapture -%}
+
+                  {%- if counter == product_limit -%}
+                    {%- break -%}
+                  {%- endif -%}
+
+                {%- endfor -%}
+
+                {{ related_recommendations_content_2 }}
+
+              {%- endif -%}
+
+            {%- endif -%}
+          {%- endif -%}
+        {%- endcapture -%}
+
+        {%- capture base_recommendations -%}
+          {%- if selected_collection != blank -%}
+            {%- assign counter = 0 -%}
+
+            {%- for collection_product in selected_collection.products -%}
+              {%- capture base_recommendations_content -%}
+                {{ base_recommendations_content }}
+
+              {%- assign subject = collection_product -%}
+              {%- assign scip_subject = false -%}
+
+                {%- for collection in subject.collections -%}
+                  {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                  {%- if vip_collection -%}
+
+                    {%- unless current_product_collections contains collection.handle -%}
+                      {%- assign scip_subject = true -%}
+                      {%- break -%}
+                    {%- endunless -%}
+
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if scip_subject -%}
+                  {% continue %}
+                {%- endif -%}
+
+                <swiper-slide>
+                  {% render 'ra-product-tile',
+                    product: collection_product,
+                    index: forloop.index,
+                    disable_animation: true %}
+                </swiper-slide>
+
+                {%- assign counter = counter | plus: 1 -%}
+              {%- endcapture -%}
+
+              {%- if counter == product_limit -%}
+                {%- break -%}
+              {%- endif -%}
+
+            {%- endfor -%}
+
+            {{ base_recommendations_content }}
+          {%- else -%}
+
+            {%- if recommendations_product_1.title != blank -%}
+
+              {%- assign subject = recommendations_product_1 -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- unless scip_subject -%}
+                <swiper-slide>
+                  {% render 'ra-product-tile',
+                    product: recommendations_product_1,
+                    index: forloop.index,
+                    disable_animation: true %}
+                </swiper-slide>
+              {%- endunless -%}
+
+            {%- endif -%}
+            {%- if recommendations_product_2.title != blank -%}
+
+              {%- assign subject = recommendations_product_2 -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- unless scip_subject -%}
+                <swiper-slide>
+                  {% render 'ra-product-tile',
+                    product: recommendations_product_2,
+                    index: forloop.index,
+                    disable_animation: true %}
+                </swiper-slide>
+              {%- endunless -%}
+
+            {%- endif -%}
+            {%- if recommendations_product_3.title != blank -%}
+
+              {%- assign subject = recommendations_product_3 -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- unless scip_subject -%}
+                <swiper-slide>
+                  {% render 'ra-product-tile',
+                    product: recommendations_product_3,
+                    index: forloop.index,
+                    disable_animation: true %}
+                </swiper-slide>
+              {%- endunless -%}
+
+            {%- endif -%}
+            {%- if recommendations_product_4.title != blank -%}
+
+              {%- assign subject = recommendations_product_4 -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- unless scip_subject -%}
+                <swiper-slide>
+                  {% render 'ra-product-tile',
+                    product: recommendations_product_4,
+                    index: forloop.index,
+                    disable_animation: true %}
+                </swiper-slide>
+              {%- endunless -%}
+
+            {%- endif -%}
+          {% endif %}
+        {%- endcapture -%}
+
+        {%- if complementary_recommendations != blank -%}
+          {{ complementary_recommendations }}
+          {%- elsif related_recommendations != blank -%}
+          {{ related_recommendations }}
+        {%- else -%}
+          {{ base_recommendations }}
+        {%- endif -%}
+
+      </swiper-container>
+      {% if show_navigation %}
+        <div class="ra-carousel__nav">
+          {% render 'ra-icon-button'
+            , type: 'ra-button'
+            , style: 'tertiary'
+            , size: 'sm'
+            , rounded: true
+            , label: 'Go to previous slide'
+            , icon: 'left-arrow'
+            , class: 'ra-carousel__nav-cta ra-carousel__nav-cta--prev !pointer-events-auto'
+          %}
+          {% render 'ra-icon-button'
+            , type: 'ra-button'
+            , style: 'tertiary'
+            , size: 'sm'
+            , rounded: true
+            , label: 'Go to next slide'
+            , icon: 'right-arrow'
+            , class: 'ra-carousel__nav-cta ra-carousel__nav-cta--next !pointer-events-auto'
+          %}
+        </div>
+      {% endif %}
+      {% if show_pagination %}
+        <div class="ra-carousel__pagination flex justify-center gap-1 mt-4"></div>
+      {% endif %}
+    </div>
+
+    {% if cta_title != blank and cta_link != blank %}
+      <div class="flex col justify-around md:mt-[4rem] md:mb-[4rem] py-8 md:py-0 md:pr-0 pr-[1.5rem] ra_carousel__content">
+        <a class="w-[100%] md:w-auto ra-button ra-button ra-button--{{ cta_style }} ra-button--md " href="{{ cta_link }}" {% if open_new_tab %}target="_blank"{% endif %} title="{{ cta_title }}">
+          {{ cta_title }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</ra-recommendation>

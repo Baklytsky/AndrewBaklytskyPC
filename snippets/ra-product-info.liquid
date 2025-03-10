@@ -1,0 +1,57 @@
+{% comment %}
+  Props:
+    product: product - (required)
+{% endcomment %}
+{% assign parent_product = product.metafields.custom.parent_product.value %}
+{% if parent_product.metafields.custom.size_guide.value %}
+  {%  assign size_guide_product = parent_product %}
+{%  elsif product.metafields.custom.size_guide.value %}
+  {%  assign size_guide_product = product %}
+{% endif %}
+
+{%  comment  %}
+  Fabric swatches
+{%  endcomment %}
+
+{%- capture fabric_swatch_content -%}
+  {%- render 'fabric-swatches' product: product -%}
+{%- endcapture -%}
+
+<div class="product-main__description lg:pr-6">
+  <p class="mono-16 text-text-inverse-primary mb-4 hidden lg:block">Desc</p>
+  <p class="mono-12 text-white mb-4 lg:hidden">Desc</p>
+  <div class="mb-2 text-uppercase metafield-rich_text_field mb-6">{{ product.description }}</div>
+
+  {%- if fabric_swatch_content != blank -%}
+    <div class="mb-8 text-uppercase mono-16 metafield-rich_text_field">
+      {{ fabric_swatch_content }}
+    </div>
+  {%- endif -%}
+
+  {% if product.metafields.custom.note != blank %}
+    <div class="flex mb-6">
+      <p class="product-main__description-title mono-16 text-text-inverse-primary mr-6 hidden lg:block">Details</p>
+      <p class="product-main__description-title mono-12 text-white mr-6 lg:hidden">Details</p>
+      <div>{{ product.metafields.custom.note | metafield_tag }}</div>
+    </div>
+  {% endif %}
+  {% if size_guide_product.metafields.custom.how_it_fits != blank %}
+  <div class="flex mb-6">
+    <p class="product-main__description-title mono-16 text-text-inverse-primary mr-6 hidden lg:block">How It Fits</p>
+    <p class="product-main__description-title mono-12 text-white mr-6 lg:hidden">How It Fits</p>
+    <div class="product-main__how-it-fits">
+      <div class="product-main__how-it-fits-metafield">
+        <p>{{ size_guide_product.metafields.custom.how_it_fits | metafield_tag }}</p>
+      </div>
+      {% render 'ra-button', type: 'ra-button', as_text: true, style: 'primary', label: 'VIEW SIZE GUIDE', id: 'modal-size-guide', classes: '' %}
+    </div>
+    </div>
+  {% endif %}
+  {% if product.metafields.custom.spec != blank %}
+    <div class="flex mb-12">
+      <p class="product-main__description-title mono-16 text-text-inverse-primary mr-6 hidden lg:block">Fabric</p>
+      <p class="product-main__description-title mono-12 text-white mr-6 lg:hidden">Fabric</p>
+      <div>{{ product.metafields.custom.spec | metafield_tag }}</div>
+    </div>
+  {% endif %}
+</div>

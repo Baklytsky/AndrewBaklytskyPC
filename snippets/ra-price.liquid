@@ -1,0 +1,56 @@
+{% comment %}
+  Props:
+  product:      object - used instead of manually passing all prices -  (required)
+  class:        string add custom CSS class - (optional)
+  stacked:      boolean - toggle if layout of two prices should stack or not [default - false] - (optional)
+  show_range:   boolean - show price range if variants vary in price - (optional)
+  ligth_text: Boolean (Optional)
+
+  Example price-snippet:
+  {% render 'ra-price' product: product, stacked: true %}
+{% endcomment %}
+
+{% capture classes %}
+  ra-price
+  {% if stacked %}
+    ra-price--stacked
+  {% endif %}
+  {% if class %}
+    {{ class }}
+  {% endif %}
+{% endcapture %}
+
+<div class="{{ classes }}">
+
+  {% liquid
+    assign selected = product.selected_or_first_available_variant
+    assign has_compare = false
+    if selected.compare_at_price and selected.compare_at_price > selected.price
+      assign has_compare = true
+    endif
+  %}
+
+  {% if product.price_varies and show_range %}
+    <span class="ra-price__regular">{{ product.price_min | money_without_trailing_zeros }}</span>
+    <span class="px-1">&nbsp;&#8212;&nbsp;</span>
+    <span class="ra-price__regular">{{ product.price_max | money_without_trailing_zeros }}</span>
+  {% else %}
+    <span class="mono-12" data-price="{{ selected.price }}" {% if has_compare %} data-sale-price="true" {% endif %}>
+      {%- if cart.currency.iso_code == "USD" -%}
+        {{- selected.price | money_without_trailing_zeros }} {{ shop.currency }}
+      {%- else -%}
+        {{- cart.currency.symbol -}}{{- selected.price | money_without_currency }} {{ cart.currency.iso_code }}
+      {%- endif -%}
+    </span>
+    <span
+      class="mono-12 line-through {% unless has_compare %} hidden {% endunless %}"
+      data-price-compare="{{ selected.compare_at_price }}"
+    >
+      {%- if cart.currency.iso_code == "USD" -%}
+        {{- selected.compare_at_price | money_without_trailing_zeros }} {{ shop.currency }}
+      {%- else -%}
+        {{- cart.currency.symbol -}}{{- selected.compare_at_price | money_without_currency }} {{ cart.currency.iso_code }}
+      {%- endif -%}
+    </span>
+  {% endif %}
+</div>

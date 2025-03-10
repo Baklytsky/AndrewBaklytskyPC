@@ -1,391 +1,465 @@
-{{ 'customer.css' | asset_url | stylesheet_tag }}
-
 <script src="{{ 'customer.js' | asset_url }}" defer></script>
 
 {%- style -%}
   .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}
+    px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}
+    px;
   }
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-top: {{ section.settings.padding_top }}
+      px;
+      padding-bottom: {{ section.settings.padding_bottom }}
+      px;
     }
   }
 {%- endstyle -%}
 
 {%- paginate customer.addresses by 5 -%}
-  <div class="customer addresses section-{{ section.id }}-padding" data-customer-addresses>
-    <h1>{{ 'customer.addresses.title' | t }}</h1>
-    <a href="{{ routes.account_url }}">
-      {{ 'customer.account.return' | t }}
-    </a>
+  <section
+    class="customer addresses address-book ra-container set--spacing-top-large set--spacing-bottom-large gutter--regular max-width--xmedium"
+    data-customer-addresses
+  >
+    <ra-account>
+      <div class="ra-row">
+        <div class="basis-full md:basis-1/4">
+          {% render 'ra-account-navigation' %}
+        </div>
+        <div class="basis-full md:basis-3/4">
+          <div class="flex mb-6 md:mb-10">
+            <h3 class="color-grey-900 !font-light">
+              {{ 'customer.addresses.title' | t }}
+            </h3>
+          </div>
 
-    <div data-address>
-      <button
-        type="button"
-        aria-expanded="false"
-        aria-controls="AddAddress"
-      >
-        {{ 'customer.addresses.add_new' | t }}
-      </button>
-      <div id="AddAddress">
-        <h2 id="AddressNewHeading">{{ 'customer.addresses.add_new' | t }}</h2>
-        {%- form 'customer_address', customer.new_address, aria-labelledBy: 'AddressNewHeading' -%}
-          <div class="field">
-            <input
-              type="text"
-              id="AddressFirstNameNew"
-              name="address[first_name]"
-              value="{{ form.first_name }}"
-              autocomplete="given-name"
-              placeholder="{{ 'customer.addresses.first_name' | t }}"
-            >
-            <label for="AddressFirstNameNew">{{ 'customer.addresses.first_name' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressLastNameNew"
-              name="address[last_name]"
-              value="{{ form.last_name }}"
-              autocomplete="family-name"
-              placeholder="{{ 'customer.addresses.last_name' | t }}"
-            >
-            <label for="AddressLastNameNew">{{ 'customer.addresses.last_name' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressCompanyNew"
-              name="address[company]"
-              value="{{ form.company }}"
-              autocomplete="organization"
-              placeholder="{{ 'customer.addresses.company' | t }}"
-            >
-            <label for="AddressCompanyNew">{{ 'customer.addresses.company' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressAddress1New"
-              name="address[address1]"
-              value="{{ form.address1 }}"
-              autocomplete="address-line1"
-              placeholder="{{ 'customer.addresses.address1' | t }}"
-            >
-            <label for="AddressAddress1New">{{ 'customer.addresses.address1' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressAddress2New"
-              name="address[address2]"
-              value="{{ form.address2 }}"
-              autocomplete="address-line2"
-              placeholder="{{ 'customer.addresses.address2' | t }}"
-            >
-            <label for="AddressAddress2New">{{ 'customer.addresses.address2' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressCityNew"
-              name="address[city]"
-              value="{{ form.city }}"
-              autocomplete="address-level2"
-              placeholder="{{ 'customer.addresses.city' | t }}"
-            >
-            <label for="AddressCityNew">{{ 'customer.addresses.city' | t }}</label>
-          </div>
-          <div>
-            <label for="AddressCountryNew">{{ 'customer.addresses.country' | t }}</label>
-            <div class="select">
-              <select
-                id="AddressCountryNew"
-                name="address[country]"
-                data-default="{{ form.country }}"
-                autocomplete="country"
+          <div class="address-container">
+            {% if customer.addresses.size > 0 %}
+              {% if customer.default_address and paginate.current_page == 1 %}
+                {% assign default_address = customer.default_address %}
+                <div class="py-6 relative border-b first:border-t border-grey-500">
+                  <div class="grid gap-4 grid-cols-5 max-md:text-sm ">
+                    <div class="ra-grid-item col-span-3">
+                      <address class="not-italic flex flex-col items-start font-light leading-4 md:leading-6">
+                        <h6 class="mb-2">Default Address</h6>
+                        <p>{{ default_address.name }}</p>
+                        {% if default_address.company != blank %}
+                          <p>{{ default_address.company }}</p>
+                        {% endif %}
+                        <p>
+                          <span>{{ default_address.address1 }}</span>
+                          <span>{{ default_address.address2 }}</span>
+                        </p>
+                        <p>
+                          <span>{{ default_address.city }},</span>
+                          <span>{{ default_address.province_code }}</span>
+                          <span>{{ default_address.zip }}</span>
+                        </p>
+                        <p>{{ default_address.country_code }}</p>
+                        <p>
+                          <a href="tel:+{{ default_address.phone }}" class="ra-link ra-link--inherit-color">
+                            {{ default_address.phone }}
+                          </a>
+                        </p>
+                      </address>
+                    </div>
+
+                    <div class="ra-grid-item flex col-span-2 flex-col items-end">
+                      <button
+                        type="button"
+                        class="mb-2 text-right ra-link !font-light text-grey-700"
+                        id="modal-edit-address-{{ default_address.id }}"
+                        aria-label="{{ 'customer.addresses.edit_address' | t }} Default"
+                        aria-controls="EditAddress_{{ default_address.id }}"
+                        aria-expanded="false"
+                        data-address-id="{{ default_address.id }}"
+                      >
+                        {{ 'customer.addresses.edit' | t }}
+                      </button>
+                      <button
+                        type="button"
+                        class="mb-2 text-right ra-link !font-light text-grey-700"
+                        aria-label="{{ 'customer.addresses.delete' | t }} Default"
+                        data-target="{{ default_address.url }}"
+                        data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
+                      >
+                        {{ 'customer.addresses.delete' | t }}
+                      </button>
+
+                      <!-- Edit Address Form / Modal -->
+                      {% capture edit_address_form %}
+                        {% render 'ra-account-address-form' with default_address as address %}
+                      {% endcapture %}
+                      <!-- End Edit Address -->
+                      {% assign modal_id = 'modal-edit-address-' | append: default_address.id %}
+
+                      {% render 'ra-modal',
+                        id: modal_id,
+                        content: edit_address_form,
+                        classes: 'address-book-edit-modal max-w-[calc(100% - 30px)] rounded-[5px]',
+                        overlay: true
+                      %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              {%- for address in customer.addresses -%}
+                {% unless address == customer.default_address %}
+                  <div class="py-6 relative border-b first:border-t border-grey-500">
+                    <div class="grid gap-4 grid-cols-5 max-md:text-sm ">
+                      <div class="ra-grid-item col-span-3">
+                        <address class="not-italic flex flex-col items-start font-light leading-4 md:leading-6">
+                          <p>{{ address.name }}</p>
+                          {% if address.company != blank %}
+                            <p>{{ address.company }}</p>
+                          {% endif %}
+                          <p>
+                            <span>{{ address.address1 }}</span>
+                            <span>{{ address.address2 }}</span>
+                          </p>
+                          <p>
+                            <span>{{ address.city }},</span>
+                            <span>{{ address.province_code }}</span>
+                            <span>{{ address.zip }}</span>
+                          </p>
+                          <p>{{ address.country_code }}</p>
+                          <p>
+                            <a href="tel:+{{ address.phone }}" class="ra-link ra-link--inherit-color">
+                              {{ address.phone }}
+                            </a>
+                          </p>
+                        </address>
+                      </div>
+
+                      <div class="ra-grid-item flex col-span-2 flex-col items-end">
+                        <button
+                          type="button"
+                          class="mb-2 text-right ra-link !font-light text-grey-700"
+                          id="modal-edit-address-{{ address.id }}"
+                          aria-label="{{ 'customer.addresses.edit_address' | t }} {{ forloop.index }}"
+                          aria-controls="EditAddress_{{ address.id }}"
+                          aria-expanded="false"
+                          data-address-id="{{ address.id }}"
+                        >
+                          {{ 'customer.addresses.edit' | t }}
+                        </button>
+                        <button
+                          type="button"
+                          class="mb-2 text-right ra-link !font-light text-grey-700"
+                          aria-label="{{ 'customer.addresses.delete' | t }} {{ forloop.index }}"
+                          data-target="{{ address.url }}"
+                          data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
+                        >
+                          {{ 'customer.addresses.delete' | t }}
+                        </button>
+
+                        <!-- Edit Address Form / Modal -->
+                        {% capture edit_address_form %}
+                          {% render 'ra-account-address-form' with address as address %}
+                        {% endcapture %}
+                        <!-- End Edit Address -->
+                        {% assign modal_id = 'modal-edit-address-' | append: address.id %}
+
+                        {% render 'ra-modal',
+                          id: modal_id,
+                          content: edit_address_form,
+                          classes: 'address-book-edit-modal max-w-[calc(100% - 30px)] rounded-[5px]',
+                          overlay: true
+                        %}
+                      </div>
+                    </div>
+                  </div>
+                {% endunless %}
+              {%- endfor -%}
+              <button
+                id="modal-add-address"
+                class="ra-button ra-button--has-icon ra-button--icon-trailing mt-4 max-md:w-full md:mt-9 flex md:ml-auto"
+                type="button"
+                aria-expanded="false"
+                aria-controls="AddAddress"
               >
-                {{ all_country_option_tags }}
-              </select>
-              <span class="svg-wrapper">
-                {{- 'icon-caret.svg' | inline_asset_content -}}
-              </span>
+                {{ 'customer.addresses.add_new' | t }}
+                <span aria-hidden="true" class="ra-icon ra-icon--sm">
+                  {% render 'ra-icon', icon: 'plus', width: '16px', height: '16px' %}
+                </span>
+              </button>
+            {% else %}
+              <div class="border-t border-grey-500 py-[7.5rem]">
+                <h4 class="font-light text-center">{{ 'customer.addresses.none' | t }}</h4>
+
+                <button
+                  id="modal-add-address"
+                  class="ra-button ra-button--has-icon ra-button--icon-trailing mt-4 max-md:w-full md:mt-9 flex md:mx-auto"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="AddAddress"
+                >
+                  {{ 'customer.addresses.add_new' | t }}
+                  <span aria-hidden="true" class="ra-icon ra-icon--sm">
+                    {% render 'ra-icon', icon: 'plus', width: '16px', height: '16px' %}
+                  </span>
+                </button>
+              </div>
+            {% endif %}
+          </div>
+
+          {% capture addAddressContent %}
+            <!-- Add address -->
+            <div id="AddAddress" class="m-auto max-w-[55.75rem]">
+              <h4 class="mb-6 font-light" aria-label="AddressNewHeading">
+                {{ 'customer.addresses.add_new' | t }}
+              </h4>
+              {%- form 'customer_address', customer.new_address, aria-labelledBy: 'AddressNewHeading', validate: 'novalidate' -%}
+                <div class="grid gap-2 md:gap-6 grid-cols-1 md:grid-cols-2">
+                  <!-- First Name -->
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressFirstNameNew">
+                        {{ 'customer.addresses.first_name' | t }}
+                      </label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text peer"
+                          id="AddressFirstNameNew"
+                          name="address[first_name]"
+                          value="{{ form.first_name }}"
+                          autocomplete="given-name"
+                          data-required
+                          placeholder="{{ 'customer.addresses.first_name' | t }}">
+                        <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a first name.</span>
+                        <span class="flex text-sm font-light text-grey-500 mt-1 peer-[.border-red]:hidden">Required</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Last Name -->
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressLastNameNew">
+                        {{ 'customer.addresses.last_name' | t }}
+                      </label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text peer"
+                          id="AddressLastNameNew"
+                          name="address[last_name]"
+                          value="{{ form.last_name }}"
+                          autocomplete="family-name"
+                          data-required
+                          placeholder="{{ 'customer.addresses.last_name' | t }}">
+                        <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a last name.</span>
+                        <span class="flex text-sm font-light text-grey-500 mt-1 peer-[.border-red]:hidden">Required</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Street Name -->
+                  <div class="col-span-1 md:col-span-2">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressAddress1New">{{ 'customer.addresses.address1' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text peer"
+                          id="AddressAddress1New"
+                          name="address[address1]"
+                          value="{{ form.address1 }}"
+                          autocomplete="address-line1"
+                          data-required
+                          placeholder="{{ 'customer.addresses.address1' | t }}">
+                        <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter an address.</span>
+                        <span class="flex text-sm font-light text-grey-500 mt-1 peer-[.border-red]:hidden">Required</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressAddress2New">{{ 'customer.addresses.address2' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text"
+                          id="AddressAddress2New"
+                          name="address[address2]"
+                          value="{{ form.address2 }}"
+                          autocomplete="address-line2"
+                          placeholder="{{ 'customer.addresses.address2' | t }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressCompanyNew">{{ 'customer.addresses.company' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text"
+                          id="AddressCompanyNew"
+                          name="address[company]"
+                          value="{{ form.company }}"
+                          autocomplete="organization"
+                          placeholder="{{ 'customer.addresses.company' | t }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressCityNew">{{ 'customer.addresses.city' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text peer"
+                          id="AddressCityNew"
+                          name="address[city]"
+                          value="{{ form.city }}"
+                          autocomplete="address-level2"
+                          data-required
+                          placeholder="{{ 'customer.addresses.city' | t }}">
+                        <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a city</span>
+                        <span class="flex text-sm font-light text-grey-500 mt-1 peer-[.border-red]:hidden">Required</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Country (maybe dont need) -->
+                  <div class="ra-grid-item" style="display: none;">
+                    <div class="form__select form__element ra-input ra-select">
+                      <label class="ra-input__label" for="AddressCountryNew">{{ 'customer.addresses.country' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <select
+                          class="ra-input__control ra-select__control"
+                          id="AddressCountryNew"
+                          name="address[country]"
+                          data-default="{{ form.country }}"
+                          autocomplete="country"
+                          data-required>
+                          {{ all_country_option_tags }}
+                        </select>
+                        <span aria-hidden="true" class="ra-select__arrow ra-icon ra-icon--md">
+                          {% render 'ra-icon', icon: 'caret-down', width: '24px', height: '24px' %}
+                        </span>
+                      </div>
+                      <div class="font-light text-grey-500 text-xs mt-1">Required</div>
+                    </div>
+                  </div>
+
+                  <div id="AddressProvinceContainerNew" class="ra-grid-item">
+                    <div class="form__select form__element ra-input ra-select">
+                      <label class="ra-input__label" for="AddressProvinceNew">{{ 'customer.addresses.province' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <select
+                          class="ra-input__control ra-select__control"
+                          id="AddressProvinceNew"
+                          name="address[province]"
+                          data-default="{{ form.province }}"
+                          autocomplete="address-level1"
+                          data-required></select>
+                        <span aria-hidden="true" class="ra-select__arrow ra-icon ra-icon--md">
+                          {% render 'ra-icon', icon: 'caret-down', width: '24px', height: '24px' %}
+                        </span>
+                      </div>
+                      <div class="font-light text-grey-500 text-xs mt-1">Required</div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressZipNew">{{ 'customer.addresses.zip' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="text"
+                          class="ra-input__control ra-input__control--text peer"
+                          id="AddressZipNew"
+                          name="address[zip]"
+                          value="{{ form.zip }}"
+                          autocapitalize="characters"
+                          autocomplete="postal-code"
+                          data-required
+                          placeholder="{{ 'customer.addresses.zip' | t }}">
+                        <span class="hidden text-sm font-light text-red mt-1 peer-[.border-red]:flex">Please enter a zipcode.</span>
+                        <span class="flex text-sm font-light text-grey-500 mt-1 peer-[.border-red]:hidden">Required</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="ra-input">
+                      <label class="ra-input__label" for="AddressPhoneNew">{{ 'customer.addresses.phone' | t }}</label>
+                      <div class="ra-input__wrapper">
+                        <input
+                          type="tel"
+                          class="ra-input__control ra-input__control--text"
+                          id="AddressPhoneNew"
+                          name="address[phone]"
+                          value="{{ form.phone }}"
+                          autocomplete="tel"
+                          placeholder="{{ 'customer.addresses.phone' | t }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item">
+                    <div class="form__checkbox-isDefault ra-choice ra-choice--checkbox ra-choice--classic ra-choice--checkbox-classic">
+                      <input
+                        type="checkbox"
+                        id="address_default_address_new"
+                        class="ra-choice__input"
+                        name="address[default]"
+                        value="1">
+                      <label class="ra-choice__label-container ra-choice__container" for="address_default_address_new">
+                        <div data-focus="" class="ra-choice__checkmark"><!----></div>
+                        <span class="ra-choice__label font-secondary text-sm">
+                          {{ 'customer.addresses.set_default' | t }}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="ra-grid-item mt-14">
+                    <div class="ra-grid gap-4 grid-cols-1 md:grid-cols-2">
+                      <div class="ra-grid-item">
+                        <button type="reset" class="ra-button ra-button--full-width ra-button--tertiary">
+                          {{ 'customer.addresses.cancel' | t }}
+                        </button>
+                      </div>
+                      <div class="ra-grid-item">
+                        <button class="ra-button ra-button--full-width">
+                          {{ 'customer.addresses.add' | t }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              {%- endform -%}
             </div>
-          </div>
-          <div id="AddressProvinceContainerNew" style="display: none">
-            <label for="AddressProvinceNew">{{ 'customer.addresses.province' | t }}</label>
-            <div class="select">
-              <select
-                id="AddressProvinceNew"
-                name="address[province]"
-                data-default="{{ form.province }}"
-                autocomplete="address-level1"
-              ></select>
-              <span class="svg-wrapper">
-                {{- 'icon-caret.svg' | inline_asset_content -}}
-              </span>
-            </div>
-          </div>
-          <div class="field">
-            <input
-              type="text"
-              id="AddressZipNew"
-              name="address[zip]"
-              value="{{ form.zip }}"
-              autocapitalize="characters"
-              autocomplete="postal-code"
-              placeholder="{{ 'customer.addresses.zip' | t }}"
-            >
-            <label for="AddressZipNew">{{ 'customer.addresses.zip' | t }}</label>
-          </div>
-          <div class="field">
-            <input
-              type="tel"
-              id="AddressPhoneNew"
-              name="address[phone]"
-              value="{{ form.phone }}"
-              autocomplete="tel"
-              placeholder="{{ 'customer.addresses.phone' | t }}"
-            >
-            <label for="AddressPhoneNew">{{ 'customer.addresses.phone' | t }}</label>
-          </div>
-          <div>
-            {{ form.set_as_default_checkbox }}
-            <label for="address_default_address_new">{{ 'customer.addresses.set_default' | t }}</label>
-          </div>
-          <div>
-            <button>{{ 'customer.addresses.add' | t }}</button>
-            <button type="reset">{{ 'customer.addresses.cancel' | t }}</button>
-          </div>
-        {%- endform -%}
+          {% endcapture %}
+
+          {% render 'ra-modal',
+            id: 'modal-add-address',
+            content: addAddressContent,
+            classes: 'address-book-edit-modal max-w-[calc(100% - 30px)] rounded-[5px]',
+            overlay: true
+          %}
+
+          {% render 'ra-account-pagination', paginate: paginate %}
+        </div>
       </div>
-    </div>
-
-    <ul role="list">
-      {%- for address in customer.addresses -%}
-        <li data-address>
-          {%- if address == customer.default_address -%}
-            <h2>{{ 'customer.addresses.default' | t }}</h2>
-          {%- endif -%}
-          {{ address | format_address }}
-          <button
-            type="button"
-            id="EditFormButton_{{ address.id }}"
-            aria-label="{{ 'customer.addresses.edit_address' | t }} {{ forloop.index }}"
-            aria-controls="EditAddress_{{ address.id }}"
-            aria-expanded="false"
-            data-address-id="{{ address.id }}"
-          >
-            {{ 'customer.addresses.edit' | t }}
-          </button>
-          <button
-            type="button"
-            aria-label="{{ 'customer.addresses.delete' | t }} {{ forloop.index }}"
-            data-target="{{ address.url }}"
-            data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
-          >
-            {{ 'customer.addresses.delete' | t }}
-          </button>
-          <div id="EditAddress_{{ address.id }}">
-            <h2>{{ 'customer.addresses.edit_address' | t }}</h2>
-            {%- form 'customer_address', address -%}
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressFirstName_{{ form.id }}"
-                  name="address[first_name]"
-                  value="{{ form.first_name }}"
-                  autocomplete="given-name"
-                  placeholder="{{ 'customer.addresses.first_name' | t }}"
-                >
-                <label for="AddressFirstName_{{ form.id }}">{{ 'customer.addresses.first_name' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressLastName_{{ form.id }}"
-                  name="address[last_name]"
-                  value="{{ form.last_name }}"
-                  autocomplete="family-name"
-                  placeholder="{{ 'customer.addresses.last_name' | t }}"
-                >
-                <label for="AddressLastName_{{ form.id }}">{{ 'customer.addresses.last_name' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressCompany_{{ form.id }}"
-                  name="address[company]"
-                  value="{{ form.company }}"
-                  autocomplete="organization"
-                  placeholder="{{ 'customer.addresses.company' | t }}"
-                >
-                <label for="AddressCompany_{{ form.id }}">{{ 'customer.addresses.company' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressAddress1_{{ form.id }}"
-                  name="address[address1]"
-                  value="{{ form.address1 }}"
-                  autocomplete="address-line1"
-                  placeholder="{{ 'customer.addresses.address1' | t }}"
-                >
-                <label for="AddressAddress1_{{ form.id }}">{{ 'customer.addresses.address1' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressAddress2_{{ form.id }}"
-                  name="address[address2]"
-                  value="{{ form.address2 }}"
-                  autocomplete="address-line2"
-                  placeholder="{{ 'customer.addresses.address2' | t }}"
-                >
-                <label for="AddressAddress2_{{ form.id }}">{{ 'customer.addresses.address2' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressCity_{{ form.id }}"
-                  name="address[city]"
-                  value="{{ form.city }}"
-                  autocomplete="address-level2"
-                  placeholder="{{ 'customer.addresses.city' | t }}"
-                >
-                <label for="AddressCity_{{ form.id }}">{{ 'customer.addresses.city' | t }}</label>
-              </div>
-              <div>
-                <label for="AddressCountry_{{ form.id }}">
-                  {{ 'customer.addresses.country' | t }}
-                </label>
-                <div class="select">
-                  <select
-                    id="AddressCountry_{{ form.id }}"
-                    name="address[country]"
-                    data-address-country-select
-                    data-default="{{ form.country }}"
-                    data-form-id="{{ form.id }}"
-                    autocomplete="country"
-                  >
-                    {{ all_country_option_tags }}
-                  </select>
-                  <span class="svg-wrapper">
-                    {{- 'icon-caret.svg' | inline_asset_content -}}
-                  </span>
-                </div>
-              </div>
-              <div id="AddressProvinceContainer_{{ form.id }}" style="display:none;">
-                <label for="AddressProvince_{{ form.id }}">
-                  {{ 'customer.addresses.province' | t }}
-                </label>
-                <div class="select">
-                  <select
-                    id="AddressProvince_{{ form.id }}"
-                    name="address[province]"
-                    data-default="{{ form.province }}"
-                    autocomplete="address-level1"
-                  ></select>
-                  <span class="svg-wrapper">
-                    {{- 'icon-caret.svg' | inline_asset_content -}}
-                  </span>
-                </div>
-              </div>
-              <div class="field">
-                <input
-                  type="text"
-                  id="AddressZip_{{ form.id }}"
-                  name="address[zip]"
-                  value="{{ form.zip }}"
-                  autocapitalize="characters"
-                  autocomplete="postal-code"
-                  placeholder="{{ 'customer.addresses.zip' | t }}"
-                >
-                <label for="AddressZip_{{ form.id }}">{{ 'customer.addresses.zip' | t }}</label>
-              </div>
-              <div class="field">
-                <input
-                  type="tel"
-                  id="AddressPhone_{{ form.id }}"
-                  name="address[phone]"
-                  value="{{ form.phone }}"
-                  autocomplete="tel"
-                  placeholder="{{ 'customer.addresses.phone' | t }}"
-                >
-                <label for="AddressPhone_{{ form.id }}">{{ 'customer.addresses.phone' | t }}</label>
-              </div>
-              <div>
-                {{ form.set_as_default_checkbox }}
-                <label for="address_default_address_{{ form.id }}">
-                  {{ 'customer.addresses.set_default' | t }}
-                </label>
-              </div>
-              <div>
-                <button>{{ 'customer.addresses.update' | t }}</button>
-                <button type="reset">{{ 'customer.addresses.cancel' | t }}</button>
-              </div>
-            {%- endform -%}
-          </div>
-        </li>
-      {%- endfor -%}
-    </ul>
-
-    {%- if paginate.pages > 1 -%}
-      {%- if paginate.parts.size > 0 -%}
-        <nav class="pagination" role="navigation" aria-label="{{ 'general.pagination.label' | t }}">
-          <ul role="list">
-            {%- if paginate.previous -%}
-              <li>
-                <a href="{{ paginate.previous.url }}" aria-label="{{ 'general.pagination.previous' | t }}">
-                  <span class="svg-wrapper">
-                    {{- 'icon-caret.svg' | inline_asset_content -}}
-                  </span>
-                </a>
-              </li>
-            {%- endif -%}
-
-            {%- for part in paginate.parts -%}
-              <li>
-                {%- if part.is_link -%}
-                  <a href="{{ part.url }}" aria-label="{{ 'general.pagination.page' | t: number: part.title }}">
-                    {{- part.title -}}
-                  </a>
-                {%- else -%}
-                  {%- if part.title == paginate.current_page -%}
-                    <span aria-current="page" aria-label="{{ 'general.pagination.page' | t: number: part.title }}">
-                      {{- part.title -}}
-                    </span>
-                  {%- else -%}
-                    <span>{{ part.title }}</span>
-                  {%- endif -%}
-                {%- endif -%}
-              </li>
-            {%- endfor -%}
-
-            {%- if paginate.next -%}
-              <li>
-                <a href="{{ paginate.next.url }}" aria-label="{{ 'general.pagination.next' | t }}">
-                  <span class="svg-wrapper">
-                    {{- 'icon-caret.svg' | inline_asset_content -}}
-                  </span>
-                </a>
-              </li>
-            {%- endif -%}
-          </ul>
-        </nav>
-      {%- endif -%}
-    {%- endif -%}
-  </div>
+    </ra-account>
+  </section>
 {%- endpaginate -%}
 
 <script>
-  window.addEventListener('load', () => {
+  window.onload = () => {
     typeof CustomerAddresses !== 'undefined' && new CustomerAddresses();
-  });
+  };
 </script>
 
 {% schema %}

@@ -1,0 +1,222 @@
+{% comment %}
+Props:
+video:        Shopify video object - Video Object from theme and section schema
+video_url:    Shopify video_url - Video asset url from Shopify video_url schema setting from either youtube or vimeo
+media:        Shopify media object - (Optional) Used only when referencing product media or file_reference metafield
+poster_url:   String - (Optional) image to display before playback occurs on native video elements
+controls:     Boolean - (Default: false) Enable video controls
+autoplay:     Boolean - (Default: true) Enable playback as soon as the video is loaded
+muted:        Boolean - (Default: true) Disable any audio tracks on the video. Note: This must be set to true for autoplay to work on certain browsers.
+loop:         Boolean - (Default: true) Allow automatically restarting a video after it ends
+width:        Int - (Optional) video width
+height:       Int - (Optional) video height
+lazyload:     Boolean - (Default: false) Determines whether videos loaded within iframes are loaded lazily
+class:        String - (Optional) Classes to add to element tag
+video_class:  String - (Optional) Classes to add to video tag
+block_id:     String - (Optional) for player controls
+view:         String - (Optional) for screen, for player controls
+
+Usage:
+Render video with a Shopify video object from section schema
+{%- render 'ra-video' with section.settings.video -%}
+Render video from a Shopify video_url theme or section schema (Accepts Youtube and Vimeo URLs)
+{%- render 'ra-video',
+video_url: section.settings.video
+-%}
+Render media object from a product's media library or file_reference metafield
+{%- render 'ra-video',
+media: product.metafields.media.featured_video
+-%}
+Render video object with that autoplays and loops with no sound
+{% render 'ra-video' with section.settings.video,
+muted: true,
+controls: false,
+autoplay: true
+%}
+Render video object with that autoplays and loops with no sound
+{% render 'ra-video' with section.settings.video,
+muted: true,
+controls: false,
+autoplay: true
+%}
+{% endcomment %}
+{% liquid
+  # Autoplay - default true
+  assign autoplay = autoplay | default: true, allow_false: true
+  # Controls - default false
+  assign controls = controls | default: false
+  # Mute Video - default true
+  assign muted = muted | default: true, allow_false: true
+  # Video Looping - default true
+  assign loop = loop | default: true, allow_false: true
+  # Width
+  assign width = width | default: '400x'
+  # Ensure that width value has matches proper format: '400x'
+  unless width contains 'x'
+    assign width = width | append: 'x'
+  endunless
+  # Height
+  assign height = height | default: '400'
+  # combines width + height if both are entered
+  if width != blank and height != blank
+    assign width = width | append: height
+  endif
+  # Lazyloading -  default false
+  if lazyload == true
+    assign lazyload = 'lazy'
+  else
+    assign lazyload = 'eager'
+  endif
+
+%}
+{%- if video -%}
+  {% comment %}
+  video (Video Object):
+  Used when a video object is passed in from theme or section schema settings
+  {% endcomment %}
+  {%- assign block_class = " ra-default-video-block-id-" | append: block_id | append: "-" | append: view -%}
+  {%- assign video_class = video_class | append: block_class  -%}
+
+  {%- if controls == false -%}
+    {%- style -%}
+      .{{ block_class }}::-webkit-media-controls {
+        display: none !important;
+        opacity: 0;
+      }
+
+      .{{ block_class }}::-webkit-media-controls-start-playback-button {
+        display: none !important;
+      }
+    {%- endstyle -%}
+  {%- endif -%}
+
+  {{- video | video_tag:
+  image_size: width,
+  autoplay: autoplay,
+  loop: loop,
+  muted: muted,
+  controls: controls,
+  poster: poster_url,
+  loading: lazyload,
+  preload: "none",
+  class: video_class -}}
+{%- elsif metaobject_video -%}
+  {% comment %}
+  metaobject_video comes from Metaobjects that contain media objects. They need to be handled separately.
+  {% endcomment %}
+  {% assign media_text = metaobject_video | metafield_text %}
+  {% assign media_type = null %}
+  {% if media_text contains ".mp4" %}
+    {% assign media_type = "video/mp4" %}
+  {% elsif media_text contains ".mov" %}
+    {% assign media_type = "video/mov" %}
+  {% endif %}
+  {% if media_type and media_text %}
+    <video
+      autoplay="{{ autoplay }}"
+      width="{{ width }}"
+      loop="{{ loop }}"
+      playsinline
+      muted="{{ muted }}"
+      class="{{ class }} ra-default-video-block-id-{{ block_id }}-{{ view }}"
+      data-video-type="default">
+      {% comment %}theme-check-disable RemoteAsset{% endcomment %}
+      <source src="https://{{ media_text }}" type="{{ media_type }}"></source>
+    </video>
+  {% endif %}
+{%- elsif video_url -%}
+  {% comment %}
+  video_url (string):
+  Used when a video_url string is passed in representing a video from Vimeo or Youtube
+  {% endcomment %}
+  {%- if video_url.type == 'youtube' -%}
+    {%- capture video_params -%}
+      &autoplay={%- if autoplay -%}1{%- else -%}0{%- endif -%}
+      &controls={%- if controls -%}1{%- else -%}0{%- endif -%}
+      &mute={%- if muted -%}1{%- else -%}0{%- endif -%}
+      &loop={%- if loop -%}1{%- else -%}0{%- endif -%}
+      &modestbranding=1
+    {%- endcapture -%}
+    <iframe
+      src="https://www.youtube.com/embed/{{ video_url.id }}?enablejsapi=1{{- video_params -}}"
+      class="{{ class }} ra-iframe--vimeo ra-youtube-video-block-id-{{ block_id }}-{{ view }} "
+      allow="{%- if autoplay -%}autoplay;{%- endif -%} encrypted-media"
+      allowfullscreen
+      title="{{ section.settings.description | escape }}"
+      data-video-type="youtube"></iframe>
+  {%- elsif video_url.type == 'vimeo' -%}
+    {%- capture video_params -%}
+      ?loop={%- if loop -%}1{%- else -%}0{%- endif -%}
+      {%- if controls -%}{%- else -%}&byline=0&title=0&portrait=0{%- endif -%}
+      &muted={%- if muted -%}1{%- else -%}0{%- endif -%}
+      &autoplay={%- if autoplay -%}1{%- else -%}0{%- endif -%}
+      &playsinline={%- if autoplay -%}1{%- else -%}0{%- endif -%}
+      &background={%- if autoplay -%}1{%- else -%}0{%- endif -%}
+    {%- endcapture -%}
+    <iframe
+      src="https://player.vimeo.com/video/{{ video_url.id }}{{- video_params -}}"
+      class="{{ class }} ra-iframe--vimeo ra-vimeo-video-block-id-{{ block_id }}-{{ view }} "
+      allow="{%- if autoplay -%}autoplay;{%- endif -%} encrypted-media; fullscreen"
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+      allowfullscreen
+      title="{{ section.settings.description | escape }}"
+      data-video-type="vimeo">
+    </iframe>
+  {%- endif -%}
+{%- elsif media -%}
+  {% comment %}
+  media (Media Object):
+  Used when a video object is passed in from a product media gallery or metafield
+  {% endcomment %}
+  {%- if media.media_type == 'external_video' -%}
+    {% comment %}
+    The external_video_url filter uses a different format for applying video parameters
+    {% endcomment %}
+    {%- if autoplay == false -%}
+      {%- assign autoplay = '0' -%}
+    {%- else -%}
+      {%- assign autoplay = '1' -%}
+    {%- endif -%}
+    {%- if controls == false -%}
+      {%- assign controls = '0' -%}
+    {%- else -%}
+      {%- assign controls = '1' -%}
+    {%- endif -%}
+    {%- if loop == false -%}
+      {%- assign loop = '0' -%}
+    {%- else -%}
+      {%- assign loop = '1' -%}
+    {%- endif -%}
+    {%- if muted == false -%}
+      {%- assign muted = '0' -%}
+    {%- else -%}
+      {%- assign muted = '1' -%}
+    {%- endif -%}
+    {% if width != null %}
+      {% comment %} {% assign height = width | divided_by: media.aspect_ratio %} {% endcomment %}
+    {% endif %}
+    {{- media | external_video_url:
+    autoplay: autoplay,
+    loop: loop,
+    muted: muted,
+    controls: controls,
+    modestbranding: 1,
+    enablejsapi: 1,
+    background: autoplay,
+    playlist: media.external_id | external_video_tag: width: width, height: height, class: class, lazyload: lazyload -}}
+  {%- elsif media.media_type == 'video' -%}
+    {%- assign media_class = " ra-default-video-block-id-" | append: block_id | append: "-" | append: view -%}
+    {%- assign class = class | append: media_class  -%}
+    {{- media | video_tag:
+      image_size: width,
+      autoplay: autoplay,
+      loop: loop,
+      muted: muted,
+      controls: controls,
+      poster: poster_url,
+      loading: lazyload,
+      preload: "none",
+      class: class
+    -}}
+  {%- endif -%}
+{%- endif -%}

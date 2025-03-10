@@ -1,0 +1,583 @@
+{% liquid
+  assign bg_color = section.settings.bg_color
+  assign text_color = section.settings.text_color
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign heading_position = section.settings.heading_position
+  assign subheading_position = section.settings.subheading_position
+  assign item_text_position = section.settings.item_text_position
+  assign item_title_inside = section.settings.item_title_inside
+  assign item_inside_position = section.settings.item_inside_position
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+
+  assign image_count_desktop = section.settings.image_count_desktop
+  assign image_count_tablet = section.settings.image_count_tablet
+  assign image_count_mobile = section.settings.image_count_mobile
+
+  assign image_gap_desktop = section.settings.image_gap_desktop
+  assign image_gap_tablet = section.settings.image_gap_tablet
+  assign image_gap_mobile = section.settings.image_gap_mobile
+%}
+
+{% if image_count_desktop > section.blocks.size %}
+  {%- assign image_count_desktop = section.blocks.size -%}
+{% endif %}
+
+{% if image_count_tablet > section.blocks.size %}
+  {%- assign image_count_tablet = section.blocks.size -%}
+{% endif %}
+
+{% if image_count_mobile > section.blocks.size %}
+  {%- assign image_count_mobile = section.blocks.size -%}
+{% endif %}
+
+{% if section.blocks.size > 0 %}
+  <div class="ra-collection-blocks overflow-hidden" style="
+    --bg-color: {{ bg_color }};
+    --text-color: {{ text_color }};
+    --padding-top: {{ padding_top }}px;
+    --padding-bottom: {{ padding_bottom }}px;
+    --heading-align: {{ heading_position }};
+    --subheading-align: {{ subheading_position }};
+    --item-align: {{ item_text_position }};
+    " data-inside="{{ item_inside_position }}">
+    {% if heading != blank or subheading != blank %}
+      <div class="ra-collection-blocks__heading-wrapper mx-auto pb-12 px-6">
+        {% if heading != blank %}
+          <div class="ra-collection-blocks__heading">
+            {{ heading }}
+          </div>
+        {% endif %}
+        {% if subheading != blank %}
+          <div class="ra-collection-blocks__subheading  pt-[10px]">{{ subheading }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="mx-auto flex justify-center ra-collection-blocks_desktop">
+      <div class="ra-collection-blocks__wrapper flex {% if image_count_desktop < section.blocks.size %}justify-start{% else %}justify-center{% endif %} overflow-x-auto overflow-y-hidden pb-[10px]" style="gap: {{ image_gap_desktop }}px">
+        {% for block in section.blocks %}
+          {% liquid
+            assign image = block.settings.image
+            assign title = block.settings.title
+            assign block_link = block.settings.block_link
+            assign new_tab = block.settings.new_tab
+            assign metafield_namespace = block.settings.metafield_namespace
+            assign metafield_key = block.settings.metafield_key
+            assign metafield_value = block.settings.metafield_value
+            assign product_type_value = block.settings.product_type_value
+          %}
+
+          {% if title != blank %}
+            <div class="ra-collection-blocks__item" style="{% if section.blocks.size < 4 %}max-width: calc((100% / 4) - {{ image_gap_desktop }}px); flex: 1 0 auto;{% else %}flex: 1 0 calc((100% / {{ image_count_desktop }}) - {{ image_gap_desktop }}px);{% endif %}">
+              {% if image != blank %}
+                <div class="collection-blocks__item-image-wrapper">
+                  {% if block_link != blank %}
+                    <a href="{{ block_link }}" class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </a>
+                  {%- elsif template.name == 'collection' and product_type_value != blank -%}
+                    {%- assign value = product_type_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.product_type={{ value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             title="filter by {{ product_type_value }} product type"
+                             data-type-value="{{ value }}"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {%- elsif template.name == 'collection' and metafield_namespace != blank and metafield_key != blank and metafield_value != blank -%}
+                    {%- assign namespace = metafield_namespace | handleize -%}
+                    {%- assign key = metafield_key | handleize -%}
+                    {%- assign value = metafield_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.m.{{ namespace }}.{{ key }}={{ metafield_value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             title="filter by {{ metafield_key }} {{ metafield_value }}"
+                             data-metalield-value="{{ metafield_value }}"
+                             data-search-param="filter.p.m.{{ namespace }}.{{ key }}"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="{% if item_title_inside %}ra-collection-blocks__item-title-inside {{ item_inside_position }}{% else %}ra-collection-blocks__item-title pt-[10px]{% endif %}">{{ title }}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+
+      </div>
+    </div>
+
+    <div class="mx-auto flex justify-center ra-collection-blocks_tablet">
+      <div class="ra-collection-blocks__wrapper flex justify-start overflow-x-auto overflow-y-hidden pb-[10px]" style="gap: {{ image_gap_tablet }}px">
+        {% for block in section.blocks %}
+          {% liquid
+            assign image = block.settings.image
+            assign title = block.settings.title
+            assign block_link = block.settings.block_link
+            assign new_tab = block.settings.new_tab
+            assign metafield_namespace = block.settings.metafield_namespace
+            assign metafield_key = block.settings.metafield_key
+            assign metafield_value = block.settings.metafield_value
+            assign product_type_value = block.settings.product_type_value
+          %}
+
+          {% if title != blank %}
+            <div class="ra-collection-blocks__item" style="flex: 1 0 calc((100% / {{ image_count_tablet }}) - {{ image_gap_tablet }}px)">
+              {% if image != blank %}
+                <div class="collection-blocks__item-image-wrapper">
+                  {% if block_link != blank %}
+                    <a href="{{ block_link }}" class="ra-image ra-image--use-aspect-ratio ra-product-tile__image z-[2]">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </a>
+                  {%- elsif template.name == 'collection' and product_type_value != blank -%}
+                    {%- assign value = product_type_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.product_type={{ value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             title="filter by {{ product_type_value }} product type"
+                             data-type-value="{{ value }}"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {%- elsif template.name == 'collection' and metafield_namespace != blank and metafield_key != blank and metafield_value != blank -%}
+                    {%- assign namespace = metafield_namespace | handleize -%}
+                    {%- assign key = metafield_key | handleize -%}
+                    {%- assign value = metafield_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.m.{{ namespace }}.{{ key }}={{ metafield_value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             title="filter by {{ metafield_key }} {{ metafield_value }}"
+                             data-metalield-value="{{ metafield_value }}"
+                             data-search-param="filter.p.m.{{ namespace }}.{{ key }}"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="{% if item_title_inside %}ra-collection-blocks__item-title-inside {{ item_inside_position }}{% else %}ra-collection-blocks__item-title pt-[10px]{% endif %}">{{ title }}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+
+      </div>
+    </div>
+
+    <div class="mx-auto flex justify-center ra-collection-blocks_mobile">
+      <div class="ra-collection-blocks__wrapper flex justify-start overflow-x-auto overflow-y-hidden pb-[10px]" style="gap: {{ image_gap_mobile }}px">
+        {% for block in section.blocks %}
+          {% liquid
+            assign image = block.settings.image
+            assign title = block.settings.title
+            assign block_link = block.settings.block_link
+            assign new_tab = block.settings.new_tab
+            assign metafield_namespace = block.settings.metafield_namespace
+            assign metafield_key = block.settings.metafield_key
+            assign metafield_value = block.settings.metafield_value
+            assign product_type_value = block.settings.product_type_value
+          %}
+
+          {% if title != blank %}
+            <div class="ra-collection-blocks__item" style="flex: 1 0 calc((100% / {{ image_count_mobile }}) - ({{ image_gap_mobile }}px * 1.6))">
+              {% if image != blank %}
+                <div class="collection-blocks__item-image-wrapper">
+                  {% if block_link != blank %}
+                    <a href="{{ block_link }}" class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </a>
+                  {%- elsif template.name == 'collection' and product_type_value != blank -%}
+                    {%- assign value = product_type_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.product_type={{ value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             data-type-value="{{ value }}"
+                             title="filter by {{ product_type_value }} product type"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {%- elsif template.name == 'collection' and metafield_namespace != blank and metafield_key != blank and metafield_value != blank -%}
+                    {%- assign namespace = metafield_namespace | handleize -%}
+                    {%- assign key = metafield_key | handleize -%}
+                    {%- assign value = metafield_value | handleize -%}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                      <label for="filter.p.m.{{ namespace }}.{{ key }}={{ metafield_value }}"
+                             class="image-abs-cover z-[2] cursor-pointer ra-collection-blocks-label"
+                             data-metalield-value="{{ metafield_value }}"
+                             title="filter by {{ metafield_key }} {{ metafield_value }}"
+                             data-search-param="filter.p.m.{{ namespace }}.{{ key }}"
+                             {% comment %}onclick="applyFilteringAnimation(event, this)"{% endcomment %}
+                      >
+
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="ra-image ra-image--use-aspect-ratio ra-product-tile__image">
+                      {% render 'ra-image', image: image, width: width, height: height, classes: "ra-image__media", lazyload: true %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="{% if item_title_inside %}ra-collection-blocks__item-title-inside {{ item_inside_position }}{% else %}ra-collection-blocks__item-title pt-[10px]{% endif %}">{{ title }}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Collection blocks",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#FAFAF9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_position",
+      "label": "Heading position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "subheading_position",
+      "label": "Subheading position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "item_text_position",
+      "label": "Item title position",
+      "info": "It works if ‘Title inside’ checkbox is inactive",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_title_inside",
+      "label": "Title inside",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "item_inside_position",
+      "label": "Item title inside position",
+      "options": [
+        {
+          "value": "top-left",
+          "label": "Top Left"
+        },
+        {
+          "value": "top-center",
+          "label": "Top Center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top Right"
+        },
+        {
+          "value": "center-left",
+          "label": "Center Left"
+        },
+        {
+          "value": "center-center",
+          "label": "Center Center"
+        },
+        {
+          "value": "center-right",
+          "label": "Center Right"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom Left"
+        },
+        {
+          "value": "bottom-center",
+          "label": "Bottom Center"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom Right"
+        }
+      ],
+      "default": "center-center"
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "Image per view"
+    },
+    {
+      "type": "range",
+      "id": "image_count_desktop",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "label": "Image per view desktop",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "image_count_tablet",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "label": "Image per view tablet",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "image_count_mobile",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "label": "Image per view mobile",
+      "default": 1
+    },
+    {
+      "type": "paragraph",
+      "content": "Image gap"
+    },
+    {
+      "type": "range",
+      "id": "image_gap_desktop",
+      "min": 5,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Image gap desktop",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "image_gap_tablet",
+      "min": 5,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Image gap tablet",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "image_gap_mobile",
+      "min": 5,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Image gap mobile",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Section paddings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 16
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "limit": 8,
+      "name": "Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "block_link",
+          "label": "URL",
+          "info": "Image URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "new_tab",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "CLP Filter"
+        },
+        {
+          "type": "paragraph",
+          "content": "On the CLP pages, you can assign a metafield value to the banner that will work as a filter."
+        },
+        {
+          "type": "header",
+          "content": "Using metafields:"
+        },
+        {
+          "type": "text",
+          "id": "metafield_namespace",
+          "label": "Metafield Namespace"
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "label": "Metafield Key"
+        },
+        {
+          "type": "text",
+          "id": "metafield_value",
+          "label": "Metafield Value"
+        },
+        {
+          "type": "header",
+          "content": "OR using product type:"
+        },
+        {
+          "type": "paragraph",
+          "content": "If a product type value is entered, it will take priority over metafields."
+        },
+        {
+          "type": "text",
+          "id": "product_type_value",
+          "label": "Product type value"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection blocks",
+      "blocks": [
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

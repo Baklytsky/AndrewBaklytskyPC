@@ -1,0 +1,142 @@
+{% comment %}
+  Props:
+  type:          String [a, div] - (option) * default is <nav>
+  breadcrumbs:   Array for list of link objects - (required)
+  classes:       String add custom CSS class - (optional)
+  disable_last:  Boolean to toggle if last item / current page should be disabled - (optional) [default = disabled]
+  divider:       String [slash, minus] choose divider style - (optional) default is (slash)
+
+  Example Breadcrumb:
+  {% render 'breadcrumb' %}
+{% endcomment %}
+
+{% capture divider %}
+  {% if divider == 'minus' %}
+    {% render 'ra-icon', icon: 'divider-minus', class: 'ra-icon ra-icon--sm ra-breadcrumbs__divider' %}
+  {% else %}
+    {% render 'ra-icon', icon: 'divider-slash', class: 'ra-icon ra-icon--sm ra-breadcrumbs__divider' %}
+  {% endif %}
+{% endcapture %}
+
+{% capture last_type %}
+  {% if disable_last %}
+    'span'
+  {% else %}
+    'a'
+  {% endif %}
+{% endcapture %}
+
+<nav
+  class="ra-breadcrumbs ra-breadcrumbs--wrap {{ classes }}"
+  {% if type != blank %}
+    as="{{- type -}}"
+  {% endif %}
+>
+  <ol class="ra-breadcrumbs__list">
+    <li class="ra-breadcrumbs__list-item">
+      <a class="ra-link ra-link--no-underline ra-breadcrumbs__breadcrumb" href="/">
+        {{- 'general.breadcrumbs.home' | t -}}
+      </a>
+
+      {% comment %}checks here for separator{% endcomment %}
+      {% if template contains 'collection'
+      or template contains 'page'
+      or template contains 'product'
+      or template contains 'blog'
+      or template contains 'article'
+      %}
+        {{ divider }}
+      {% endif %}
+    </li>
+    {% if template contains 'page' %}
+      <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="page">
+        <a
+          class="ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current"
+          {% if last_type == 'a' %}
+            href="{{ page.url }}"
+          {% endif %}
+        >
+          {{ page.title }}
+        </a>
+      </li>
+    {% elsif template contains 'product' %}
+      {% comment %} Handle product with collection {% endcomment %}
+
+      {% for collection in product.collections %}
+        {% if forloop.index == 1 %}
+          <li class="ra-breadcrumbs__list-item" aria-current="false">
+            <a class="ra-link ra-link--no-underline ra-breadcrumbs__breadcrumb" href="{{ collection.url }}">
+              {{- collection.title -}}
+            </a>
+          </li>
+          {{ divider }}
+        {% endif %}
+      {% endfor %}
+
+      <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="true">
+        <a
+          class="ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current"
+          {% if last_type == 'a' %}
+            href="{{ product.url }}"
+          {% endif %}
+        >
+          {{- product.title -}}
+        </a>
+      </li>
+
+    {% elsif template contains 'collection' and collection.handle %}
+      {% comment %} Handle just collection {% endcomment %}
+      {% if current_tags %}
+        {% capture url %}/collections/{{ collection.handle }}{% endcapture %}
+        <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="collection">
+          <a
+            class="ra-link ra-link--no-underline ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current"
+            {% if last_type == 'a' %}
+              href="{{ url }}"
+            {% endif %}
+          >
+            {{- current_tags | join: ' + ' -}}
+          </a>
+        </li>
+      {% else %}
+        <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="collection">
+          <a
+            class="ra-link ra-link--no-underline ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current"
+            {% if last_type == 'a' %}
+              href="{{ url }}"
+            {% endif %}
+          >
+            {{- collection.title -}}
+          </a>
+        </li>
+      {% endif %}
+
+    {% elsif template == 'blog' %}
+      {% comment %} Handle blogs {% endcomment %}
+      <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="blog">
+        <a class="ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current">
+          {{ blog.title }}
+        </a>
+      </li>
+
+    {% elsif template == 'article' %}
+      {% comment %} Handle article pages {% endcomment %}
+      <li class="ra-breadcrumbs__list-item" aria-current="false">
+        <a class="ra-breadcrumbs__breadcrumb" href="{{ blog.url }}">
+          {{ blog.title }}
+        </a>
+        {{ divider }}
+      </li>
+      <li class="ra-breadcrumbs__list-item ra-breadcrumbs__list-item--current" aria-current="article">
+        <a
+          class="ra-breadcrumbs__breadcrumb ra-breadcrumbs__breadcrumb--current"
+          {% if last_type == 'a' %}
+            href="{{ article.url }}"
+          {% endif %}
+        >
+          {{ article.title }}
+        </a>
+      </li>
+    {% endif %}
+  </ol>
+</nav>

@@ -1,0 +1,74 @@
+{% comment %}
+  Props:
+    label:           String add text to badge - (required)
+    size:            String [xs, sm, md, lg] sizes - (optional)
+    rounded:         Boolean, changes style of badge to rounded - (optional)
+    class:           String add custom CSS class - (optional)
+    style:           String, [primary, secondary, tertiary, success, warning, danger] - (optional) [default is 'primary']
+    icon:            String icon-name - (optional)
+    icon_pos:        String, [left, right] - (optional)
+    no_padding:      Boolean, removes padding of badge - (optional)
+
+    Example Badge:
+    {% render 'ra-badge', label: 'Out of Stock', size: 'md', style: 'danger' %}
+{% endcomment %}
+
+{% capture classes %}
+  ra-badge
+  {% if rounded %}
+    ra-badge--notification
+  {% else %}
+    ra-badge--standard
+  {% endif %}
+  {% if label %}
+    ra-badge--has-text
+  {% endif %}
+  {% if style %}
+    ra-badge--{{ style }}
+  {% else %}
+    ra-badge--primary
+  {% endif %}
+  {% if size %}
+    ra-badge--{{ size }}
+  {% endif %}
+  {% if icon_pos %}
+    ra-badge--icon-{{ icon_pos }}
+  {% endif %}
+  {% if no_padding %}
+    ra-badge--no-padding
+  {% endif %}
+  {% if icon_pos == 'left' %}
+    mr-2
+  {% endif %}
+  {% if icon_pos == 'right' %}
+    ml-2
+  {% endif %}
+
+  {{class}}
+{% endcapture %}
+
+{% capture icon_classes %}
+  {% if icon_pos == 'left' %}
+    mr-2
+  {% endif %}
+  {% if icon_pos == 'right' %}
+    ml-2
+  {% endif %}
+{% endcapture %}
+
+
+{% if label != blank or icon != blank %}
+  <div class="{{ classes }}" label="{{ label }}">
+    {% if icon != blank and icon_pos == 'left' %}
+      {% render 'ra-icon', width: '15px', height: '15px', icon: icon, class: icon_classes %}
+    {% endif %}
+
+    {% if label != blank %}
+      {{ label }}
+    {% endif %}
+
+    {% if icon != blank and icon_pos != 'left'%}
+      {% render 'ra-icon', width: '15px', height: '15px', icon: icon, class: icon_classes %}
+    {% endif %}
+  </div>
+{% endif %}

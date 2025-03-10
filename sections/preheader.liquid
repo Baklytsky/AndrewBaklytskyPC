@@ -1,0 +1,297 @@
+{% style %}
+  #shopify-section-{{ section.id }} .ra-preheader,
+  #FreeShippingBanner {
+    color: {{ section.settings.text_color }} !important;
+  }
+
+  #shopify-section-{{ section.id }} .ra-preheader__text {
+    color: {{ section.settings.text_color }};
+  }
+  #shopify-section-{{ section.id }} .ra-preheader__text p {
+    text-align: {{ section.settings.alignment }};
+  }
+  #shopify-section-{{ section.id }} .ra-preheader__background,
+  #FreeShippingBanner {
+    background-color: rgb({{ section.settings.background_color.red }}, {{ section.settings.background_color.green }}, {{ section.settings.background_color.blue }}, {{ section.settings.preheader_opacity | divided_by: 100.00 }}) !important;
+  }
+{% endstyle %}
+
+{%- capture arrow_color -%}
+  var({{ section.settings.text_color }})
+{%- endcapture -%}
+
+{%- assign message_blocks = section.blocks | where: 'type', 'message' -%}
+{%- assign timer_block = section.blocks | where: 'type', 'timer' -%}
+
+{% if section.blocks.size > 0 %}
+  <pre-header>
+    <div class="ra-preheader top-0 left-0 w-full z-50 fixed transition-all duration-100 ge-hide-display-none">
+      {%- if timer_block.size > 0 -%}
+        {%- render 'countdown-timer', section: timer_block[0] -%}
+      {%- endif -%}
+      {% comment %} <form method="close" class="absolute right-0 top-1/2 transform -translate-y-1/2">
+        {% comment %} {% render 'ra-icon-button',
+          type: 'ra-button',
+          value: 'close',
+          style: 'primary',
+          class: 'ra-preheader__close'
+          size: 'sm',
+          label: 'close modal',
+          icon: 'close',
+          rounded: true,
+          data: 'data-preheader-close'
+        %} {% endcomment %}
+      </form> {% endcomment %}
+      <div class="ra-preheader__background absolute w-full h-full"></div>
+      <div class="ra-preheader__wrapper px-7 md:px-7 relative">
+        <div class="ra-preheader__slider ra-preheader__slider--{{ section.settings.alignment }} flex items-center">
+          <div class="swiper-wrapper max-w-[400px] mx-0">
+            <swiper-container
+              loop="true"
+              autoplay-delay="{{ section.settings.delay | times: 1000 }}"
+              slides-per-view="1"
+              space-between="0"
+              navigation-next-el="#shopify-section-{{ section.id }} .swiper-button-next"
+              navigation-prev-el="#shopify-section-{{ section.id }} .swiper-button-prev"
+              class="w-full"
+            >
+              {% for block in message_blocks %}
+                <swiper-slide class="pr-2 py-2 h-full">
+                  {% if block.settings.text != blank %}
+                    <div class="ra-preheader__text rte">{{ block.settings.text }}</div>
+                  {% endif %}
+                </swiper-slide>
+              {% endfor %}
+            </swiper-container>
+            {% if message_blocks.size > 1 %}
+            {% comment %} Soft removing left arrow incase design complains
+              <div class="{{ section.id }} swiper-button-prev -left-2.5">
+                {% render 'ra-icon', icon: 'chevron-left', width: '14px', height: '14px', color: arrow_color %}
+              </div>
+            {% endcomment %}
+              {% comment %} <div class="{{ section.id }} swiper-button-next relative">
+                {% render 'ra-icon', icon: 'chevron-right', width: '14px', height: '14px', color: arrow_color %}
+              </div> {% endcomment %}
+            {% endif %}
+          </div>
+          <div class="{{ section.id }} ra-preheader__close absolute right-6 top-1/2 -translate-y-1/2 flex flex-col justify-center p-1 z-10" data-preheader-close>
+            {% comment %} {% render 'ra-icon', icon: 'close', width: '14px', height: '14px', color: arrow_color %} {% endcomment %}
+            <svg width="14" height="14"  viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path width="100%" height="100%" d="M0.681641 11.3896C0.339844 11.0547 0.353516 10.4736 0.674805 10.1523L4.74902 6.07129L0.674805 1.99707C0.353516 1.67578 0.34668 1.10156 0.681641 0.759766C1.0166 0.417969 1.59766 0.431641 1.92578 0.75293L6 4.82715L10.0674 0.75293C10.4023 0.417969 10.9697 0.424805 11.3115 0.759766C11.6533 1.10156 11.6533 1.66895 11.3184 2.00391L7.25098 6.07129L11.3184 10.1455C11.6533 10.4805 11.6465 11.0479 11.3115 11.3896C10.9766 11.7314 10.4023 11.7314 10.0674 11.3965L6 7.32227L1.92578 11.3965C1.59766 11.7178 1.02344 11.7314 0.681641 11.3896Z" fill="currentColor"/>
+            </svg>
+          </div>
+        </div>
+        {% comment %}
+          Utility links disabled
+        {% render 'ra-header-util' %}
+        {% endcomment %}
+      </div>
+    </div>
+  </pre-header>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Pre-header",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "preheader_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Background Opacity",
+      "default": 30,
+      "info": "0 is invisible, 100% is compleatly opaque"
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Slider Alignment",
+      "info": "Select hero height",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center align"
+        },
+        {
+          "value": "left",
+          "label": "Left align"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Delay",
+      "default": 5,
+      "info": "Delay between transitions (in seconds). Applys delay only if 'Autoplay' is checked."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Welcome to our store.</p>",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "timer",
+      "name": "Timer",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Paddings"
+        },
+        {
+          "type": "range",
+          "id": "vertical_padding_desktop",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "label": "Vertical padding (Desktop)",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "vertical_padding_mobile",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "label": "Vertical padding (Mobile)",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Color"
+        },
+        {
+          "type": "color_background",
+          "id": "background",
+          "label": "Background",
+          "default": "linear-gradient(#000000, #000000)"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Link text"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "justification",
+          "options": [
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "space-between",
+              "label": "Space between"
+            },
+            {
+              "value": "space-evenly",
+              "label": "Space evenly"
+            }
+          ],
+          "default": "space-between",
+          "label": "Content justification (desktop)"
+        },
+        {
+          "type": "header",
+          "content": "Date"
+        },
+        {
+          "type": "paragraph",
+          "content": "Expiration date is calculated from the [store primary timezone](https://admin.shopify.com/store/ccdc23/settings/general)."
+        },
+        {
+          "type": "text",
+          "id": "end_date",
+          "label": "Expiration date",
+          "info": "Use the format YYYY-MM-DD HH:MM (hours and minutes are optional). Do not use a date farther than 99 days."
+        },
+        {
+          "type": "select",
+          "id": "action",
+          "options": [
+            {
+              "value": "leave",
+              "label": "Leave timer at zero"
+            },
+            {
+              "value": "hide",
+              "label": "Hide section"
+            }
+          ],
+          "default": "hide",
+          "label": "When timer expires..."
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

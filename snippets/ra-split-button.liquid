@@ -1,0 +1,50 @@
+{% comment %}
+  Props:
+    style:      string [primary, secondary, tertiary] - (required)
+    label:      string button label text - (required)
+    icon:       string icon-name - (required)
+    url:        string url used when button 'type' is set to 'a' - (required)
+    size:       string [xs, sm, md, lg] sizes - (optional)
+    main_id:    string id attribute to main button - (optional)
+    alt_id:     string id attribute to alt(icon) button - (optional)
+    main_class: string custom CSS class to main button - (optional)
+    alt_class:  string custom CSS class to alt(icon) button - (optional)
+    disabled:   boolean - (optional)
+
+  Example split button:
+    {% render 'ra-split-button' label: 'Learn More', icon: 'chevron-down', style: 'primary', size: 'sm' %}
+{% endcomment %}
+
+{%- capture main_btn_classes -%}
+  ra-split-button__main-action ra-button ra-button--{{ style }} ra-button--{{ size }} {{ main_class }}
+{%- endcapture -%}
+
+{%- capture alt_btn_classes -%}
+  ra-split-button__alt-action ra-button ra-button--{{ style }} ra-chevron ra-chevron--{{ size }} {{ alt_class }}
+{%- endcapture -%}
+
+{%- capture main_btn_attributes -%}
+  {%- if main_id != blank -%} id="{{ main_id }}" aria-label="{{ label }}"{%- endif -%}
+  {% if disabled == true %} disabled{% endif %}
+{%- endcapture -%}
+
+{%- capture alt_btn_attributes -%}
+  {%- if alt_id != blank -%} id="{{ alt_id }}" aria-label="{{ label }}"{%- endif -%}
+  {% if disabled == true %} disabled{% endif %}
+{%- endcapture -%}
+
+{% if style != blank and label != blank %}
+  <div class="ra-split-button ra-split-button--{{ size }}">
+    <button type="button" class="{{ main_btn_classes }}" {{ main_btn_attributes }}>
+      {{ label }}
+    </button>
+
+    {%- if icon != blank -%}
+      <button type="button" class="{{ alt_btn_classes }}" {{ alt_btn_attributes }}>
+        <svg class="ra-icon ra-icon--xs">
+          <use xlink:href="#{{ icon }}"></use>
+        </svg>
+      </button>
+    {%- endif -%}
+  </div>
+{% endif %}

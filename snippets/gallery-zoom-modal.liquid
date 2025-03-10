@@ -1,0 +1,41 @@
+{% comment %}
+  This modal is only used on the PDP product gallery.
+  If you're developing modal for purposes other than that, use the modal.liquid snippet.
+
+  Props:
+  id:       string unique ID, should start with 'modal-' - (required)
+  title:    string modal title - (optional)
+  content:  string/html/markup modal content - (required)
+  classes:  string extra class names - (optional)
+{% endcomment %}
+
+{% if id != blank %}
+  <ra-modal dialog-id="{{id}}">
+    <dialog data-dialog-id="{{ id }}" class="{{ classes }}">
+      <div class="ra-modal__content bg-transparent max-w-full pb-6 md:pb-16">
+        <div class="flex justify-between justify-items-center">
+          {% if title != blank %}
+            <h4 class="sr-only">{{ title }}</h4>
+            <h4 class="h4">{{ title }}</h4>
+          {% endif %}
+        </div>
+        {% if content != blank %}
+          <div class="pt-3">
+            {{ content }}
+          </div>
+        {% endif %}
+      </div>
+      <form method="dialog" class="close-modal absolute top-0 right-0 z-10" data-modal-close>
+        {% render 'ra-icon-button',
+          type: 'ra-button',
+          value: 'close',
+          style: 'tertiary',
+          size: 'md',
+          label: 'close modal',
+          icon: 'close',
+          rounded: false
+        %}
+      </form>
+    </dialog>      
+  </ra-modal>
+{% endif %}

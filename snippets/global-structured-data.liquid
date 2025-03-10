@@ -1,0 +1,575 @@
+{%- comment -%}
+This snippet structures the micro-data using JSON-LD specification. Please note that for Product especially,
+the schema often changes. We try to output as much info as possible, but Google may add new requirements over time,
+or change the format of some info
+{%- endcomment -%}
+{%- if request.page_type == 'product' -%}
+  {%- assign days_product_price_valid_until = 10 | times: 86400 -%}
+  {%- capture main_entity_microdata -%}
+    {%- assign is_valid_global_gtin_length = false -%}
+    {%- if product.selected_or_first_available_variant.barcode != blank -%}
+      {%- assign gtin_string_length = product.selected_or_first_available_variant.barcode | size -%}
+      {%- if gtin_string_length == 8 or gtin_string_length == 12 or gtin_string_length == 13 or gtin_string_length == 14 -%}
+        {%- assign is_valid_global_gtin_length = true -%}
+      {%- endif -%}
+    {%- endif -%}
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "productID": {{ product.id | json }},
+      "offers": [
+        {%- for variant in product.variants -%}
+          {%- assign is_valid_gtin_length = false -%}
+          {%- if variant.barcode != blank -%}
+            {%- assign gtin_string_length = variant.barcode | size -%}
+            {%- if gtin_string_length == 8 or gtin_string_length == 12 or gtin_string_length == 13 or gtin_string_length == 14 -%}
+              {%- assign is_valid_gtin_length = true -%}
+            {%- endif -%}
+          {%- endif -%}
+          {
+          "@type": "Offer",
+          "name": {% if product.has_only_default_variant %}{{ product.title | truncate: 150 | json }}{% else %}{{ variant.title | truncate: 150 | json }}{% endif %},
+          "availability": {%- if variant.available -%}"https://schema.org/InStock"{%- elsif variant.incoming -%}"https://schema.org/BackOrder"{% else %}"https://schema.org/OutOfStock"{%- endif -%},
+          "price": {{ variant.price | divided_by: 100.0 | json }},
+          "priceCurrency": {{ cart.currency.iso_code | json }},
+          "priceValidUntil": "{{ 'now' | date: '%s' | plus: days_product_price_valid_until | date: '%Y-%m-%d' }}",
+          {%- if variant.sku != blank -%}
+            "sku": {{ variant.sku | json }},
+          {%- endif -%}
+          {%- if variant.barcode != blank -%}
+            {%- if is_valid_gtin_length -%}
+              "gtin": {{ variant.barcode | json }},
+            {%- else -%}
+              "mpn": {{ variant.barcode | json }},
+            {%- endif -%}
+          {%- endif -%}
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+            "merchantReturnDays": 14,
+            "applicableCountry": {
+              "@type": "Country",
+              "name": "US"
+            },
+            "merchantReturnLink": {{ shop.refund_policy.url | prepend: request.origin | json }},
+            "description": "Customers are responsible for return shipping fees. The fee amount is $8."
+          },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "US"
+            },
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": "0.00",
+              "currency": {{ cart.currency.iso_code | json }}
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": "1",
+                "maxValue": "2",
+                "unitCode": "d"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": "2",
+                "maxValue": "5",
+                "unitCode": "d"
+              }
+            },
+            "shippingSettingsLink": {{ shop.shipping_policy.url | prepend: request.origin | json }}
+          },
+          "url": "{{ shop.url }}{{ product.url }}?variant={{ variant.id }}"
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ],
+      {%- if product.metafields.reviews.rating.value != blank and product.metafields.reviews.rating_count.value > 0 -%}
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "{{ product.metafields.reviews.rating.value }}",
+          "reviewCount": "{{ product.metafields.reviews.rating_count.value }}",
+          "worstRating": "{{ product.metafields.reviews.rating.value.scale_min }}",
+          "bestRating": "{{ product.metafields.reviews.rating.value.scale_max }}"
+        },
+      {%- endif -%}
+      "brand": {
+        "@type": "Brand",
+        "name": {{ product.vendor | json }}
+      },
+      "name": {{ product.title | json }},
+      "description": {{ product.description | strip_html | json }},
+      "category": {{ product.type | json }},
+      "url": "{{ shop.url }}{{ product.url }}",
+      "sku": {{ product.selected_or_first_available_variant.sku | json }},
+      {%- if product.selected_or_first_available_variant.barcode != blank -%}
+        {%- if is_valid_global_gtin_length -%}
+          "gtin": {{ product.selected_or_first_available_variant.barcode | json }},
+        {%- else -%}
+          "mpn": {{ product.selected_or_first_available_variant.barcode | json }},
+        {%- endif -%}
+      {%- endif -%}
+      {%- if product.selected_or_first_available_variant.weight -%}
+        "weight": {
+        "@type": "QuantitativeValue",
+        "unitCode": {{ product.selected_or_first_available_variant.weight_unit | json }},
+        "value": {{ product.selected_or_first_available_variant.weight_in_unit | json }}
+        },
+      {%- endif -%}
+      "image": {
+        "@type": "ImageObject",
+        "url": "https:{{ page_image | image_url: width: 1024 }}",
+        "name": {{ page_image.alt | json }},
+        "width": "1024",
+        "height": "1024"
+      }
+    }
+  {%- endcapture -%}
+  {% if main_entity_microdata != blank %}
+    <script type="application/ld+json">
+    {{ main_entity_microdata }}
+    </script>
+  {% endif %}
+{%- elsif request.page_type == 'article' -%}
+  {%- capture main_entity_microdata -%}
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": "{{ article.url }}",
+      "articleSection": {{ blog.title | json }},
+      "keywords": "{{ article.tags | join: ', ' }}",
+      "headline": {{ article.title | json }},
+      "description": {{ article.excerpt_or_content | strip_html | truncatewords: 25 | json }},
+      "dateCreated": "{{ article.created_at | date: '%Y-%m-%dT%H:%M:%S%:z' }}",
+      "datePublished": "{{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%:z' }}",
+      "dateModified": "{{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%:z' }}",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https:{{ page_image | image_url: width: 1024 }}",
+        "name": {{ page_image.alt | json }},
+        "width": "1024",
+        "height": "1024"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "{{ article.user.first_name | escape }} {{ article.user.last_name | escape }}",
+        "givenName": {{ article.user.first_name | json }},
+        "familyName": {{ article.user.last_name | json }},
+        "url": "https://www.khy.com/pages/about-us"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ shop.name | json }}
+      },
+      "commentCount": {{ article.comments_count }},
+      "comment": [
+        {%- for comment in article.comments limit: 5 -%}
+          {
+            "@type": "Comment",
+            "author": {{ comment.author | json }},
+            "datePublished": "{{ comment.created_at | date: '%Y-%m-%dT%T' }}",
+            "text": {{ comment.content | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    }
+  {%- endcapture -%}
+  {% if main_entity_microdata != blank %}
+    <script type="application/ld+json">
+    {{ main_entity_microdata }}
+    </script>
+  {% endif %}
+{%- endif -%}
+{%- capture breadcrumb_entity_microdata -%}
+  {% unless template contains 'index' %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "{{ shop.url }}"
+      },
+      {% if request.path contains '/a/' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ page_title | escape }}",
+        "item": "{{ shop.url }}{{ request.path }}"
+      }
+      {% elsif template contains 'collection' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ collection.title | default: 'Collections' | escape }}",
+        "item": "{{ shop.url }}/collections/{{ collection.handle | default: '' }}"
+      }
+      {% elsif template contains 'product' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ product.collections.first.title | default: 'Collection' | escape }}",
+        "item": "{{ shop.url }}/collections/{{ product.collections.first.handle }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "{{ product.title | escape }}",
+        "item": "{{ shop.url }}/products/{{ product.handle }}"
+      }
+      {% elsif template contains 'page' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ page.title | escape }}",
+        "item": "{{ shop.url }}/pages/{{ page.handle }}"
+      }
+      {% elsif template contains 'blog' or template contains 'article' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": "{{ shop.url }}/blogs/{{ blog.handle }}"
+      }
+      {% if template contains 'article' %}
+      ,{
+        "@type": "ListItem",
+        "position": 3,
+        "name": "{{ article.title | escape }}",
+        "item": "{{ shop.url }}/blogs/{{ article.handle }}"
+      }
+      {% endif %}
+      {% elsif request.path contains '/policies/' %}
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ page_title | escape }}",
+        "item": "{{ shop.url }}{{ request.path }}"
+      }
+      {% endif %}
+    ]
+  }
+  </script>
+  {% endunless %}
+{%- endcapture -%}
+{% if breadcrumb_entity_microdata contains 'itemListElement' %}
+  {{ breadcrumb_entity_microdata }}
+{% endif %}
+{%- if request.page_type == 'index' -%}
+  {%- assign potential_action_target = request.origin | append: routes.search_url | append: "?q={search_term_string}" -%}
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | append: page.url | json }},
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {{ potential_action_target | json }},
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      {% if section.settings.logo %}
+        {% assign image_size = section.settings.logo.width | append: 'x' %}
+        "logo": {{ section.settings.logo | img_url: image_size | prepend: "https:" | json }},
+      {% endif %}
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": {{ shop.phone | json }},
+        "email": {{ shop.email | json }},
+        "contactType": "customer service"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": {{ shop.address.street | json }},
+        "addressLocality": {{ shop.address.city | json }},
+        "addressRegion": {{ shop.address.province_code | json }},
+        "postalCode": {{ shop.address.zip | json }},
+        "addressCountry": {{ shop.address.country_code | json }}
+      },
+      "foundingDate": "2023",
+      "founder": [
+        {
+          "@type": "Person",
+          "name": "kylie Jenner",
+          "jobTitle": "Founder",
+          "url": "https://www.instagram.com/kyliejenner/"
+        }
+      ],
+      "sameAs": [
+        "https://twitter.com/khybrand",
+        "https://www.facebook.com/khybrand",
+        "https://www.instagram.com/khy/",
+        "https://www.pinterest.com/khybrand/",
+        "https://www.youtube.com/@Khybrand",
+        "https://www.tiktok.com/@khy",
+        "https://www.linkedin.com/company/khy-by-kylie-jenner/"
+      ],
+      "url": {{ shop.url | append: page.url | json }}
+    }
+  ]
+  </script>
+{%- endif -%}
+{%- assign page_title = page.title | escape -%}
+{%- assign page_description = page.description | escape -%}
+{%- assign about_name = "Information about " | append: shop.name -%}
+{%- assign audience_type = "General Audience" -%}
+{%- assign action_description = "Explore more information about " | append: page.title | escape -%}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "WebPage",
+  "name": "{{ page_title }}",
+  "url": "{{ shop.url }}{{ request.path }}",
+  "description": "{{ page_description | escape }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ shop.name }}",
+    "url": "{{ shop.url }}"
+  },
+  "about": {
+    "@type": "Thing",
+    "name": "{{ about_name }}"
+  },
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "{{ audience_type }}"
+  },
+  "potentialAction": {
+    "@type": "ReadAction",
+    "target": {
+      "urlTemplate": "{{ shop.url }}{{ request.path }}"
+    },
+    "description": "{{ page_description | escape }}"
+  },
+  "inLanguage": "en"
+}
+</script>
+{%- if request.path == '/pages/faq' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "WHERE CAN I BUY KHY?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Khy is exclusively sold online at khy.com."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHY DID AN ORDER IN MY CART BECOME UNAVAILABLE DURING CHECKOUT?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Due to the exclusivity of our collections, items in your shopping cart are not reserved. As a result, items in your cart may sell out before you complete your order.
+
+In the event an item is no longer available, you can sign up to receive a back in stock email on the product page."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHEN WILL MY ORDER SHIP?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Orders are processed as quickly as possible, pending item availability and payment approval. Due to the exclusivity of our collections, we expect high volumes. You will receive an email notifying you of your tracking information when your order has been shipped.
+
+Most orders placed Monday through Friday (excluding holidays) will be processed and shipped within 2-3 business days. Weekend orders will begin processing on Monday.
+
+Certain products may have longer processing times. These will be noted on the product and cart pages."
+    }
+  },{
+    "@type": "Question",
+    "name": "HOW CAN I TRACK MY ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "You can track your order with the tracking link provided in your shipment notification email or by logging in to your account on khy.com.
+
+Orders containing multiple items may arrive in multiple shipments."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHAT ARE THE PAYMENT OPTIONS?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Credit Cards
+We accept Visa, MasterCard, American Express, and Discover cards. Payment is authorized at time of purchase and captured once your order has been shipped.
+
+PayPal
+When selecting this option at checkout, you will be directed to the PayPal site to Log In' and review before clicking 'Pay Now'. Once this transaction is complete, you will then return to khy.com. Please make sure your address in PayPal is up to date."
+    }
+  },{
+    "@type": "Question",
+    "name": "CAN I MAKE CHANGES TO MY ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Due to the volume of orders, we are unable to make any changes to the items in your order after it has been placed. This includes order modifications, cancellations, and address changes.
+
+If you'd like to add another item to your order, please place a new order for the item."
+    }
+  },{
+    "@type": "Question",
+    "name": "CAN I CANCEL MY ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "We are unable to change or cancel an order after you've placed it. If you have placed an order in error, you can return your order once received.
+
+Domestic returns are subject to a $6 return shipping fee.
+
+International returns are subject to a $15 return shipping fee, which will be deducted from your refund."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHY WAS MY ORDER CANCELED?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It is possible that your order may be canceled during high-volume periods due to inventory selling out. If your order is canceled, all charges will be automatically refunded. We recommend signing up for our waitlist for the sold-out item.
+
+To ensure your security, we take additional steps in verifying the details of your order. If you receive a cancellation notification, please contact support@khy.com for more information."
+    }
+  },{
+    "@type": "Question",
+    "name": "CAN I CHANGE MY SHIPPING ADDRESS?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Once an order is placed, the shipping address cannot be changed. We will only ship to the shipping address entered when the order was originally placed."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHEN WILL YOU RESTOCK?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Please click \"Join the Waitlist\" to receive a notification when a product is back in stock.
+
+You may also sign up for email notifications and/or text messages to be notified of any restocks or new product launches."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHAT IS YOUR SHIPPING POLICY?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Orders may take up to 2 business days to process before shipping.
+
+We offer free standard shipping on U.S. orders over $150 and free express shipping for international orders over $200.
+
+
+We have the following shipping options available in the U.S.
+
+Standard Shipping - 4 to 6 business days $8
+
+Expedited Shipping - 3 business days $19
+
+Overnight Shipping - Order by 1 pm PST. Delivery in 1 to 2 Business Days $28
+
+If shipping to a P.O. Box or APO/FPO address, we only offer standard shipping by UPS Surepost Flat Rate of $10
+
+For orders under $200, international shipping rates vary."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHAT IF MY PACKAGE HAS BEEN LOST OR STOLEN?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "If your order has been marked as delivered, but cannot be located, please contact our Customer Service team via email at support@khy.com for assistance."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHERE IS MY ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Once an order is placed, please allow 2-3 business days for the order to be packed and shipped from our warehouse. Upon shipment, you will receive an email with your tracking information so you may track the package online. Please allow up to 7 business days for the package to arrive to you from the day your order is shipped."
+    }
+  },{
+    "@type": "Question",
+    "name": "HOW CAN I TRACK MY ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "You can track your order with the tracking link provided in your shipment notification email or by logging in to your account on khy.com.
+
+Orders containing multiple items may arrive in multiple shipments with a unique tracking number for each package."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHAT IS YOUR RETURN POLICY?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "If you don't love your purchase, you may return it for a refund. Returns must be requested within 14 days of the date of delivery. Domestic returns are subject to an $8 return shipping fee, which will be deducted from your refund.
+
+International returns are subject to a $15 return shipping fee, which will be deducted from your refund.
+
+Products must be returned unworn, unwashed, in their original condition, and with all tags attached.  We reserve the right to refuse returns that show signs of wear or do not meet the above criteria.
+
+Products marked as \"Final Sale\" are not eligible for return."
+    }
+  },{
+    "@type": "Question",
+    "name": "HOW DO I START A RETURN?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Visit our returns page to begin your return: khy.com/pages/returns Please reach out to support@khy.com if you have questions or need assistance with your return."
+    }
+  },{
+    "@type": "Question",
+    "name": "CAN I EXCHANGE MY ITEM?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "At this time we are unable to offer exchanges. We recommend requesting a return for the item you'd like to return and placing a new order for the new item. Once your return is received at our warehouse and processed, you will receive a refund back to your original payment method."
+    }
+  },{
+    "@type": "Question",
+    "name": "WHERE IS MY RETURN/REFUND?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Once your return is received and processed, you will be notified via email. This process can take up to 2 business days from the date your return tracking information shows delivered.
+
+If your return is accepted, your refund will be processed and applied to the original method of payment.
+
+Please note that refunds can take up to 3-5 business days to appear on your bank account due to varying processing times of financial institutions."
+    }
+  },{
+    "@type": "Question",
+    "name": "DO YOU SHIP INTERNATIONALLY?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, international customers can browse and shop our website in their local currency by selecting their country from the dropdown menu located at bottom of site."
+    }
+  },{
+    "@type": "Question",
+    "name": "CAN I RETURN AN INTERNATIONAL ORDER?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, please visit our international returns portal here."
+    }
+  },{
+    "@type": "Question",
+    "name": "ARE DUTIES AND TAXES INCLUDED?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Once you have selected the country that you will be shipping to, all prices will include relevant taxes and duties. There will be no additional charges upon delivery."
+    }
+  },{
+    "@type": "Question",
+    "name": "CONTACT US",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Our Customer Service Team is available Monday-Friday from 9 am to 6 pm PST, we are closed on weekends and U.S. federal holidays.
+
+EMAIL: support@khy.com
+
+Please note that refunds can take up to 3-5 business days to appear on your bank account due to varying processing times of financial institutions."
+    }
+  }]
+}
+</script>
+{%- endif -%}

@@ -1,0 +1,59 @@
+{%- comment -%}
+{% render 'product-form-desktop-skeleton', product: product %}
+{%- endcomment -%}
+
+<div class="flex animate-skeleton flex-row h-full justify-between px-6">
+  <div class="w-full">
+    <div class="w-full flex flex-row justify-between mb-6 pb-8 lg:pb-12 h-[32px]">
+      <div class="sans-16 text-stroke-primary w-[50%] min-h-[48px]">
+        {{ product.title | split: "|" | first | strip }}
+      </div>
+      <div class="text-uppercase text-right mono-16 text-stroke-primary flex font-light flex-col">
+        {% liquid
+          assign selected = product.selected_or_first_available_variant
+          assign has_compare = false
+          if selected.compare_at_price and selected.compare_at_price > selected.price
+          assign has_compare = true
+          endif %}
+
+        {%- if has_compare -%}
+          <div class="flex flex-wrap justify-end">
+            <span class="text-text-highlight">
+              {{- selected.price | money_without_trailing_zeros }} {{ localization.country.currency.iso_code }}
+            </span>
+            <span class="ml-2 line-through ra-product-form__compare_price">
+              {{- selected.compare_at_price | money_without_trailing_zeros }} {{ localization.country.currency.iso_code }}
+            </span>
+          </div>
+        {%- else -%}
+          {{- selected.price | money_without_trailing_zeros }} {{ localization.country.currency.iso_code }}
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="caption-font text-stroke-primary mb-6 md:mb-8 flex gap-[10px]"></div>
+
+    {% comment %} Star Review Rating Skeleton {% endcomment %}
+    <div class="flex items-center mb-3">
+      <span class="text-xl" style="color: #A4A39D; font-size: 35px;margin-right: 4px;">&#9733;</span>
+      <span class="text-xl" style="color: #A4A39D; font-size: 35px;margin-right: 4px;">&#9733;</span>
+      <span class="text-xl" style="color: #A4A39D; font-size: 35px;margin-right: 4px;">&#9733;</span>
+      <span class="text-xl" style="color: #A4A39D; font-size: 35px;margin-right: 4px;">&#9733;</span>
+      <span class="text-xl" style="color: #A4A39D; font-size: 35px;margin-right: 4px;">&#9733;</span>
+    </div>
+
+    <div class="w-full bg-grey-300 h-[103px] rounded-sm mb-8 md:mb-8"></div>
+
+    <div class="w-[110px] bg-grey-300 h-3 rounded-sm"></div>
+    <div class="w-[200px] bg-grey-300 h-[24px] rounded-sm !mt-6 mb-12"></div>
+    <button
+      class="ra-button ra-button ra-button--primary ra-button--lg w-full relative"
+      title="Add to bag"
+      disabled="true">
+      <span class="khySpinner" style="width: 24px; height: 24px; border-width: 2px"></span>
+    </button>
+    <div class="w-full flex justify-center mt-[12px]">
+      <div class="w-[120px] bg-grey-300 h-4 rounded-sm"></div>
+    </div>
+  </div>
+</div>

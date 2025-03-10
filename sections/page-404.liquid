@@ -1,0 +1,98 @@
+{% if section.settings.full_height %}
+<div class="!h-screen p-5 flex items-center justify-center">
+  {% else %}
+  <div class="h-[400px] md:h-[600px] p-5 flex items-center justify-center">
+    {% endif %}
+    {% if section.settings.bg_image != blank %}
+      {% capture srcset %}
+        {{ section.settings.bg_image.src | image_url: width: 800 }} 400w,
+        {{ section.settings.bg_image.src | image_url: width: 960 }} 800w,
+        {{ section.settings.bg_image.src | image_url: width: 1800 }} 1200w
+      {% endcapture %}
+      {% render 'ra-image',
+        alt: section.settings.bg_image.src.alt,
+        src: section.settings.bg_image.src | image_url: width: 1800,
+        sizes: "100vw"
+      srcset: srcset,
+        classes: "w-full h-full object-cover object-center absolute"
+      %}
+    {% endif %}
+
+    <div class="flex justify-center flex-col w-[500px] relative z-10">
+      {% if section.settings.title != blank %}
+        <h1 class="h1 mb-2 md:mb-4 text-center">{{ section.settings.title }}</h1>
+      {% endif %}
+
+      {% if section.settings.description != blank %}
+        <div class="ra-wysiwyg leading-5 text-center">{{ section.settings.description }}</div>
+      {% endif %}
+
+      {% if section.settings.cta_label != blank and section.settings.cta_url != blank %}
+        <div class="text-center mt-5 md:mt-8">
+          {% render 'ra-button'
+            type: 'a',
+            style: section.settings.cta_style,
+            label: section.settings.cta_label,
+            url: section.settings.cta_url,
+            new_tab: section.settings.open_new_tab
+          %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% schema %}
+  {
+    "name": "404",
+    "tag": "section",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "full_height",
+        "label": "Full-Screen Height",
+        "default": true
+      },
+      {
+        "type": "image_picker",
+        "id": "bg_image",
+        "label": "Background Image"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title",
+        "default": "404 WHOOPS"
+      },
+      {
+        "type": "richtext",
+        "id": "description",
+        "label": "Description",
+        "default": "<p>Sorry we couldn’t find that page! Click here to navigate back to homepage/keep shopping OR see our favorites below.</p>"
+      },
+      {
+        "type": "text",
+        "id": "cta_label",
+        "label": "CTA Label",
+        "default": "Back to Homepage"
+      },
+      {
+        "type": "url",
+        "id": "cta_url",
+        "label": "CTA URL"
+      },
+      {
+        "type": "checkbox",
+        "id": "open_new_tab",
+        "label": "Open in new tab",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "cta_style",
+        "label": "CTA Style",
+        "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+        "default": "primary"
+      }
+    ]
+  }
+  {% endschema %}

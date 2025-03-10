@@ -1,0 +1,146 @@
+{%- liquid
+  comment
+    set variables related to localization
+  endcomment
+  assign current_country_display_name = ''
+  assign current_country = localization.country
+  assign current_country_code = current_country.iso_code
+  assign current_language_code = localization.language.iso_code
+  assign current_currency_code = current_country.currency.iso_code
+  assign primary_locale = ''
+  for l in localization.available_languages
+    if l.primary == true
+      assign primary_locale = l.iso_code
+    endif
+  endfor
+  assign default_country_code = section.settings.default_country_code
+  assign default_locale_code = '/' | append: primary_locale
+  if default_country_code != blank
+    assign default_locale_code = default_locale_code | append: '-' | append: default_country_code
+  endif
+  assign default_locale_code = default_locale_code
+
+  assign current_locale_code = '/' | append: current_language_code
+  if current_country_code != blank
+    assign current_locale_code = current_locale_code | append: '-' | append: current_country_code
+  endif
+  assign current_locale_code = current_locale_code
+-%}
+<script>
+  window.shopify_locale_root = '{{ request.locale.root_url }}';
+  window.shopify_locale_current = ' {{ current_locale_code }}';
+  window.shopify_currency_code = '{{ current_currency_code }}';
+  window.shopify_currency_default = '{{ section.settings.default_currency_code }}';
+  window.shopify_country_default = '{{ default_country_code }}';
+  window.shopify_available_countries = [];
+</script>
+{% capture country_content %}
+  <div class="flex flex-col gap-2 max-h-[600px] flex-wrap h-full">
+    {% for block in section.blocks %}
+      {% liquid
+        assign country_code = block.settings.country_code | default: ""
+        assign language_code = block.settings.language_code | default: ""
+        assign display_name = block.settings.title | default: ""
+        assign iso_code = country_code | upcase
+        if country_code != blank
+          assign active_country_list = localization.available_countries | where: 'iso_code', iso_code | default: ""
+          assign country_object = active_country_list | first
+          if iso_code == current_country_code
+            assign current_country_display_name = display_name
+          endif
+        endif
+      %}
+      <a href="#" class="ra-link flex flex-row gap-2" data-country data-language-code="{{ language_code }}" data-country-code="{{ iso_code }}">{{ country_object | image_url: width: 32 | image_tag }} {{ display_name }}</a>
+      {% capture country_json %}
+        {
+          "country_name": "{{ display_name }}",
+          "iso_code": "{{ country_object.iso_code }}",
+          "currency_code": "{{ country_object.currency.iso_code }}",
+          "currency_name": "{{ country_object.currency.name }}",
+          "currency_symbol": "{{ country_object.currency.symbol }}",
+          "flag_image": "{{ current_country | image_url: width: 64 }}",
+          "language_code": "{{ language_code }}"
+        }
+      {% endcapture %}
+      <script>
+        window.shopify_available_countries.push(JSON.parse({{ country_json | json }}))
+      </script>
+    {% endfor %}
+  </div>
+{% endcapture %}
+
+{% capture country_checker_content %}
+  <div class="max-w-[500px] w-full rounded p-2 flex items-start flex-col">
+    <div class="w-full">
+      {{ current_country | image_url: width: 64 | image_tag: class: 'block mx-auto mb-4', data-country-image: '', alt: current_country_display_name | default: "" }}
+      <h5>{{ 'localize_modal.current_location' | t }} {{ current_country_display_name }}</h5><br />
+      <p>{{ 'localize_modal.detected_location' | t }} <span data-country-name></span>.</p><br />
+      <p>{{ 'localize_modal.update_location' | t }} </p>
+      <ul class="list-disc pl-4 mb-6">
+        <li>{{ 'localize_modal.currency_options' | t }}<span data-currency-name></span> (<span data-currency-symbol></span>)</li>
+        <li>{{ 'localize_modal.shipping_options' | t }} <span data-country-name>{{ current_country.name }}</span></li>
+      </ul>
+      <a href="#" class="ra-button ra-button--primary ra-button--small w-full" data-set-country>{{ 'localize_modal.update_location_cta' | t }}</a>
+      <span id="intl-modal" class="text-center underline block mx-auto cursor-pointer mt-4" data-modal-close>{{ 'localize_modal.change_location_cta' | t }}</span>
+    </div>
+  </div>
+{% endcapture %}
+
+<ra-countries>
+  {% form 'localization' %}
+    <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
+    <input type="hidden" name="language_code" value="{{ localization.language.iso_code }}">
+    {% render 'ra-modal',
+      id: 'intl-modal',
+      title: 'Change Your Country',
+      content: country_content,
+      classes: 'gap-4 max-h-full max-md:fixed'
+    %}
+    {% render 'ra-modal', id: 'country-checker-modal', content: country_checker_content, title: 'Check Your Country' %}
+  {% endform %}
+</ra-countries>
+
+{% schema %}
+{
+  "name": "Countries",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Default Country Code",
+      "id": "default_country_code",
+      "info": "The ISO code of the Default country in ISO 3166-1 (alpha 2) format (e.g: US, CA, GB)"
+    },
+    {
+      "type": "text",
+      "label": "Default Currency Code",
+      "id": "default_currency_code",
+      "info": "The Currency Code of the Default country. (e.g. USD, CAD, EUR)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "country",
+      "name": "Country",
+      "settings": [
+        {
+          "type": "text",
+          "label": "Title",
+          "id": "title"
+        },
+        {
+          "type": "text",
+          "label": "Country Code",
+          "id": "country_code",
+          "info": "The ISO code of the country in ISO 3166-1 (alpha 2) format (e.g: US, CA, GB)"
+        },
+        {
+          "type": "text",
+          "label": "Language Code",
+          "id": "language_code",
+          "info": "The ISO code of the locale in IETF language tag format (i.e. en for English, es for Spanish) "
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

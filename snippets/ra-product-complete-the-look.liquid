@@ -1,0 +1,84 @@
+{% comment %}
+  Props:
+  id: string unique ID - (required)
+  title: string input name (required)
+  complete_the_look_products - product list (required)
+  complete_the_look_sibling_products - show sibling products (boolean)
+{% endcomment %}
+
+{% style %}
+.product-ctl--{{ id }} .ra-heading {
+  --heading-margin: var(--spacing-lg);
+  --heading-text-align: left;
+}
+{% endstyle %}
+
+{%- liquid
+  assign vip_customer = false
+  assign enable_sale_event = settings.enable_sale_event
+
+  if customer and customer.tags contains "VIP"
+    assign vip_customer = true
+  endif
+
+  capture products
+    echo "["
+      for prod in complete_the_look_products
+
+        assign subject = prod
+        assign scip_subject = false
+        assign coming_soon_product = prod.metafields.custom.coming_soon.value | default: false
+
+        if coming_soon_product
+          assign scip_subject = true
+        endif
+
+        for collection in subject.collections
+          assign vip_collection = collection.metafields.custom.direct_access_only | default: false
+
+          if vip_collection
+            unless current_product_collections contains collection.handle
+              assign scip_subject = true
+              break
+            endunless
+          endif
+        endfor
+
+        if prod.template_suffix == 'bundle' or scip_subject
+          continue
+        endif
+
+        render 'json-product', product: prod
+        unless forloop.last
+          echo ","
+        endunless
+      endfor
+    echo "]"
+  endcapture
+-%}
+
+<div data-vue-root="CompleteTheLook" id="CompleteTheLook">
+  <complete-the-look
+    :products="{{ products | replace: '"', "'" }}"
+    id="{{ id }}"
+    title="{{ title }}"
+    :show-sibling-products="{{ complete_the_look_sibling_products }}"
+    sold-out-text="{{ settings.sold_out_badge_title }}"
+    :vip-customer="{{ vip_customer }}"
+    order-limit="{{ 'general.order_limit_pdp' | t }}"
+    waitlist-modal-disabled="{{ settings.disable_bis_modal }}"
+    waitlist-modal-title="{{ settings.waitlist_modal_title }}"
+    waitlist-modal-description="{{ settings.waitlist_modal_description_rich_text }}"
+    waitlist-modal-legal-text="{{ settings.waitlist_modal_legal_text }}"
+    waitlist-modal-cta="{{ settings.waitlist_modal_cta | default: 'Get Notified' }}"
+    bis-modal-title="{{ settings.bis_modal_title }}"
+    bis-modal-description="{{ settings.bis_modal_description_rich_text }}"
+    bis-modal-legal-text="{{ settings.bis_modal_legal_text }}"
+    bis-modal-cta="{{ settings.bis_modal_cta | default: 'Get Notified' }}"
+    bis-text="{{ settings.bis_text | default: 'Sold Out - Join Waitlist' }}"
+    pre-order-text="{{ settings.pre_order_text }}"
+    :enable-sale-event="{{ enable_sale_event }}"
+    sale-event-tooltip-color="{{ settings.sale_event_tooltip_color }}"
+    sale-event-tooltip-copy="{{ settings.sale_event_tooltip_copy }}"
+  ></complete-the-look>
+</div>

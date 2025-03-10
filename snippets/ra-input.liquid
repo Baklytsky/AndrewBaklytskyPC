@@ -1,0 +1,79 @@
+{% comment %}
+  Props:
+  type:        string input types [text, email, password, search, tel, hidden] - (required)
+  size:        string [md, lg, xl] - (required)
+  name:        string name attr - (optional)
+  label:       string input label - (optional)
+  id:          string add id attribute used for JS - (optional)
+  class:       string add custom CSS class - (optional)
+  message:     string info message - (optional)
+  placeholder: string placeholder text - (optional)
+  required:    boolean - (optional)
+  disabled:    boolean - (optional)
+  value:       string - (optional) default value for hidden inputs
+
+  Example input:
+  {%- render 'ra-input' type: 'text', size: 'md', placeholder: 'enter name' -%}
+
+  Example input + label:
+  {%- render 'ra-input' type: 'text', size: 'md', label: 'name', placeholder: 'enter name' -%}
+
+  Example input + message:
+  {%- render 'ra-input' type: 'text', size: 'md', message: 'This is a custom message' -%}
+{% endcomment %}
+
+{% if type != blank %}
+  {% capture classes %}
+    ra-input
+    {% if size != blank %}
+      ra-input--{{ size }}{% endif %}
+    {{ class }}
+  {% endcapture %}
+
+  {%- capture input_id -%}
+    {%- if id != blank -%}
+      {{- id | strip -}}
+    {%- elsif label != blank -%}
+      {{- label | handleize -}}
+    {% endif %}
+  {% endcapture %}
+
+  {% capture attributes %}
+    {% if name != blank %}
+      name="{{ name | handleize }}"
+    {% endif %}
+    {% if value != blank %}
+      value="{{ value }}"
+    {% endif %}
+    {% if input_id != blank %}
+      id="{{ input_id }}"
+    {% endif %}
+    {% if placeholder != blank %}
+      placeholder="{{ placeholder }}"
+    {% else %}
+      placeholder="{{ label }}"
+    {% endif %}
+    {% if disabled != blank %}
+      disabled="disabled"
+    {% endif %}
+    {% if required != blank %}
+      required="required"
+    {% endif %}
+  {% endcapture %}
+
+  <div class="{{ classes }}">
+    {%- if label != blank -%}
+      <label class="ra-input__label" for="{{ input_id }}">{{ label }}</label>
+    {%- endif -%}
+    <div class="ra-input__wrapper">
+      <input
+        type="{{ type }}"
+        class="ra-input__control ra-input__control--text"
+        {{ attributes }}
+      >
+    </div>
+    {% if message != blank %}
+      <p class="ra-input__message">{{ message }}</p>
+    {% endif %}
+  </div>
+{% endif %}

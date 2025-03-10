@@ -1,0 +1,135 @@
+{% comment %}
+Props:
+title: string - (required) - Item Title
+filter: Shopify filter object - (required)
+as_buttons: boolean - (optional) Display filters as buttons instead of checkboxes
+show_icon: boolean - (optional)
+is_open: boolean - (optional)
+{% endcomment %}
+
+{% assign color_variant = "stone" %}
+
+{% if filter.type == 'price_range' %}
+<div class="ra-range-slider ">
+  {% assign min_start = filter.min_value.value | default: 0 | money_without_currency %}
+  {% assign max_start = filter.max_value.value | default: filter.range_max | money_without_currency %}
+
+  <ra-range-slider data-min="0" data-max="{{ filter.range_max | money_without_currency }}"
+    data-min-start="{{ min_start }}" data-max-start="{{ max_start }}">
+    <div class="flex flex-col">
+      <div class="ra-slider"></div>
+      <div class="w-full flex justify-between relative">
+        <span class="absolute left-0 translate-x-[-50%]" data-min>
+          {{ filter.min_value.value | money_without_trailing_zeros }}
+        </span>
+        <span class="absolute right-0 translate-x-[40%]" data-max>
+          {{ filter.max_value.value | money_without_trailing_zeros }}
+        </span>
+
+        <input type="" id="PriceMin" name="{{ filter.min_value.param_name }}"
+          value="{{ filter.min_value.value | money_without_currency }}"/>
+        <input type="" id="PriceMax" name="{{ filter.max_value.param_name }}"
+          value="{{ filter.max_value.value | money_without_currency }}"/>
+      </div>
+    </div>
+  </ra-range-slider>
+</div>
+{% elsif display_as_swatches %}
+<div class="ra-option-picker ra-option-picker--grid">
+  <div class="ra-option-picker__items flex flex-wrap gap-2 pl-[5px]">
+    {%- for value in filter.values -%}
+      {% assign checked = false %}
+      {% assign disabled = true %}
+      {% assign count = value.count %}
+
+      {% if filter.active_values contains value %}
+        {% assign checked = true %}
+      {% endif %}
+
+      {% if count > 0 %}
+        {% assign disabled = false %}
+      {% endif %}
+
+      {%- render 'ra-swatch-button',
+      name: value.param_name,
+      class: 'ra-filter-input',
+      id: value.param_name,
+      checked: checked,
+      value: value.value,
+      label: value.label,
+      style: 'classic',
+      disabled: disabled
+      -%}
+    {%- endfor -%}
+  </div>
+</div>
+{% elsif display_as_buttons %}
+
+<div class="ra-option-picker ra-option-picker--grid">
+  <div class="ra-option-picker__items flex flex-wrap gap-2">
+    {%- for value in filter.values -%}
+    {% assign checked = false %}
+    {% assign disabled = true %}
+    {% assign count = value.count %}
+    {% if filter.active_values contains value %}
+    {% assign checked = true %}
+    {% endif %}
+    {% if count > 0 %}
+    {% assign disabled = false %}
+    {% endif %}
+      {%- render 'ra-filter-button',
+        name: value.param_name,
+        class: 'ra-filter-input',
+        id: value.param_name,
+        checked: checked,
+        value: value.value,
+        label: value.label,
+        style: 'classic',
+        disabled: disabled
+      -%}
+    {%- endfor -%}
+  </div>
+</div>
+{% else %}
+<ul class="list-none pl-0" data-filter="{{ filter.label | handleize }}">
+
+  {% comment %} <img class="rounded-full" alt="{{ color_variant }}" src="{{ color_variant | downcase | handle | append: '_swatch.png' | file_url }}" loading="eager" width="auto" height="auto"> {% endcomment %}
+  {% assign max_visible_options = 5 %}
+  {%- for value in filter.values -%}
+  {% assign show_more_class = 'filter-show' %}
+  {% assign checked = false %}
+  {% assign disabled = true %}
+  {% assign count = value.count %}
+  {% if filter.active_values contains value %}
+  {% assign checked = true %}
+  {% endif %}
+  {% if count > 0 %}
+  {% assign disabled = false %}
+  {% endif %}
+  {% if forloop.index > max_visible_options %}
+  {% assign show_more_class = 'filter-hide' %}
+  {% endif %}
+
+  {% comment %} <div class="ra-product-tile__swatch childs_parents_children relative cursor-pointer w-6 h-6 rounded-full  active  available border-2 border-black" data-product-swatch="" data-swatch-data="7340233916463">
+    <img class="rounded-full" alt="{{ value.value }}" src="{{ value.value | downcase | handle | append: '_swatch.png' | file_url }}" loading="eager" width="auto" height="auto">
+  </div> {% endcomment %}
+
+  <li class="mb-3 ml-[2px] {{ show_more_class }}">
+    {%- render 'ra-checkbox',
+    name: value.param_name,
+    class: 'ra-filter-input',
+    id: value.param_name,
+    checked: checked,
+    value: value.value,
+    label: value.label,
+    style: 'classic',
+    disabled: disabled
+    -%}
+  </li>
+  {%- endfor -%}
+</ul>
+{% if filter.values.size > max_visible_options %}
+<div class="cursor-pointer underline" data-toggle-filter="{{ filter.label | handleize }}"
+  data-filter-label="{{ filter.label | handleize }}">show more</div>
+{% endif %}
+{% endif %}

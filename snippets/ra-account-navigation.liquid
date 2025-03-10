@@ -1,0 +1,33 @@
+<div class="account-navigation">
+  <div class="mb-4 md:mb-10 flex justify-between">
+    <h5 class="color-grey-900 capitalize font-light">Hello, {{ customer.first_name }}</h5>
+    <a href="{{ routes.account_logout_url }}" class="flex md:hidden"> Logout </a>
+  </div>
+
+  <ul class="flex flex-row md:flex-col flex-nowrap overflow-auto whitespace-nowrap max-md:mb-8 list-none">
+    <li class="max-md:mr-4 md:mb-5 leading-[1.3]">
+      <a
+        href="{%- render 'locale-root' -%}/account"
+        class="text-sm tracking-wide md:text-lg font-semibold {% if request.path == "/account" or request.path contains "/account/orders" %}underline text-grey-900{% else %}no-underline max-md:text-grey-600{% endif %}"
+      >
+        Order History
+      </a>
+    </li>
+    <li class="max-md:mr-4 md:mb-5 leading-[1.3]">
+      <a
+        href="{%- render 'locale-root' -%}/{{ routes.account_addresses_url }}"
+        class="text-sm tracking-wide md:text-lg font-semibold {% if request.path == "/account/addresses" %}underline text-grey-900{% else %}no-underline max-md:text-grey-600{% endif %}"
+      >
+        Address Book
+      </a>
+    </li>
+    <li class="max-md:mr-4 md:mt-6 hidden md:flex leading-[1.3]">
+      <a
+        href="{{ routes.account_logout_url }}"
+        class="text-sm tracking-wide md:text-lg font-semibold no-underline uppercase color-current"
+      >
+        Logout
+      </a>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,71 @@
+{% comment %}
+  Renders a set of links for paginated results. Must be used within paginate tags.
+
+  Props:
+  paginate:   Object
+  has_arrow:  Boolean (optional) show arrows or not (default: true)
+  anchor:     String (optional) This can be added so that on page reload it takes you to wherever you've placed your anchor tag.
+
+  Example:
+  {% paginate results by 2 %}
+  {% render 'ra-pagination', paginate: paginate, anchor: '#yourID', has_arrow: true %}
+  {% endpaginate %}
+{% endcomment %}
+
+{%- if paginate.parts.size > 0 -%}
+  <nav class="ra-pagination" role="navigation">
+    {% if has_arrow %}
+      <a
+        href="{{ paginate.previous.url }}{{ anchor }}"
+        class="ra-pagination__item ra-pagination__item--prev ra-button ra-icon-button ra-icon-button--ghost ra-icon-button--sm ra-icon-button--rounded"
+        aria-label="Go to previous page"
+        {%- unless paginate.previous -%}
+          disabled="disabled"
+        {%- endunless -%}
+      >
+        {% render 'ra-icon', icon: 'chevron-left', width: '14px', height: '14px' %}
+      </a>
+    {% endif %}
+
+    {%- for part in paginate.parts -%}
+      {%- if part.is_link -%}
+        <a
+          href="{{ part.url }}{{ anchor }}"
+          class="ra-pagination__item ra-pagination__item--number ra-button ra-button--ghost"
+          aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+        >
+          {{- part.title -}}
+        </a>
+      {%- else -%}
+        {%- if part.title == paginate.current_page -%}
+          <a
+            role="link"
+            aria-disabled="true"
+            class="ra-pagination__item ra-pagination__item--number ra-button ra-button--primary ra-pagination__item--current"
+            aria-current="page"
+            aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+          >
+            {{- part.title -}}
+          </a>
+        {%- else -%}
+          <span class="ra-pagination__item ra-pagination__item--number ra-button ra-button--primary">
+            {{- part.title -}}
+          </span>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {% if has_arrow %}
+      <a
+        href="{{ paginate.next.url }}{{ anchor }}"
+        aria-label="Go to next page"
+        class="ra-pagination__item ra-pagination__item--next ra-button ra-icon-button ra-icon-button--ghost ra-icon-button--sm ra-icon-button--rounded"
+        {%- unless paginate.next -%}
+          disabled="disabled"
+        {%- endunless -%}
+      >
+        {% render 'ra-icon', icon: 'chevron-right', width: '14px', height: '14px' %}
+      </a>
+    {% endif %}
+  </nav>
+{%- endif -%}

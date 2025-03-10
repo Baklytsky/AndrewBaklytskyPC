@@ -1,0 +1,77 @@
+{% comment %}
+Make a list of filters to display as buttons based on filter.label
+{% endcomment %}
+
+{% liquid
+assign button_filters_string = 'size'
+assign button_filters = button_filters_string | split: ','
+%}
+
+{% liquid
+assign swatch_filters_string = 'color'
+assign swatch_filters = swatch_filters_string | split: ','
+%}
+
+<ra-collection-filters>
+  <div class="flex justify-between mb-4">
+    <div class="uppercase text-black mono-16-spaced">Filters</div>
+    <button class="sans-14-spaced ra-link tracking-normal" data-clear-filters>Clear All</button>
+  </div>
+  <div id="CollectionActiveFilters"
+    class="ra-filters__active-filters flex flex-wrap gap-2 py-4 border-t border-stroke-inverse-secondary" data-active-filters>
+    {% for filter in collection.filters %}
+    {% for filter_value in filter.active_values %}
+    <div class="inline-flex gap-[6px] items-center py-2 px-3 bg-black text-white font-light text-[13px] rounded-[8px]">
+      <span class="mono-12 uppercase">{{ filter_value.label }}</span>
+      <button class="flex items-center" data-action-remove-filter data-param="{{ filter.param_name }}"
+        data-value="{{ filter_value.value }}">
+        {% render 'ra-icon', icon: 'close', width: '8px', height: '8px' %}
+      </button>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+  <form id="CollectionFilters" data-collection-filters>
+    <ra-accordion class="ra-accordion block mb-3 mb-lg-0" data-multi-open="true">
+      {%- for filter in collection.filters -%}
+      {% assign display_as_buttons = false %}
+      {% assign display_as_swatches = false %}
+      {% assign filter_label = filter.label | downcase | strip %}
+      {% assign filter_label_handleized = filter.label | handleize | append: ' filter-accordion' %}
+      {% assign filter_label_handleize = filter.label | handleize %}
+
+      {% if button_filters contains filter_label %}
+      {% assign display_as_buttons = true %}
+      {% endif %}
+
+      {% if swatch_filters contains filter_label %}
+      {% assign display_as_swatches = true %}
+      {% endif %}
+
+      {% capture filter_content %}
+        <div {% if display_as_swatches %}data-swatch-block{% endif %}>
+          {% render 'ra-filter-group',
+            filter: filter,
+            display_as_buttons: display_as_buttons,
+            display_as_swatches: display_as_swatches %}
+
+          {%- if display_as_swatches -%}
+            <span class="collection__toggle-label block mt-[10px] mono-12 uppercase" data-label></span>
+          {%- endif -%}
+        </div>
+      {% endcapture %}
+
+        {%  if filter_label_handleize == 'type-sorting' %}
+          <div class="hidden">
+            {% render 'ra-accordion-item', title: filter.label, content: filter_content, show_icon: true, is_open: true,
+              class: filter_label_handleized %}
+          </div>
+        {% else %}
+          {% render 'ra-accordion-item', title: filter.label, content: filter_content, show_icon: true, is_open: true,
+            class: filter_label_handleized %}
+        {% endif %}
+
+      {%- endfor -%}
+    </ra-accordion>
+  </form>
+</ra-collection-filters>

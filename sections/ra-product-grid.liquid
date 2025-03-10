@@ -1,0 +1,425 @@
+{% liquid
+  assign title_level = section.settings.title_level
+%}
+
+{% liquid
+  assign disruptor_metafields = collection.metafields.custom.disruptors.value
+  assign disruptor_indexes = ''
+  comment
+    we keep track of the index of each of the disruptors to determine placement
+  endcomment
+  for disruptor in disruptor_metafields
+    if disruptor.enabled
+      assign disruptor_indexes = disruptor_indexes | append: disruptor.position | append: ','
+    endif
+  endfor
+  assign disruptor_indexes_split = disruptor_indexes | split: ','
+  assign current_product_collections = product.collections | map: 'handle' | default: false
+%}
+
+{% style %}
+  .product-grid--{{ section.id }} {
+    --component-bg-color: {{ section.settings.bg_color }};
+    --component-fg-color: {{ section.settings.text_color }};
+    --text-primary: var({{ section.settings.text_color }});
+    --heading-description-color: {{ section.settings.text_color }};
+    padding: {{ section.settings.mobile_padding_vertical }}rem {{ section.settings.mobile_padding_horizontal }}rem;
+    margin: {{ section.settings.mobile_margin }}rem 0;
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+  }
+
+  @media (max-width: 768px) {
+    .product-grid--{{ section.id }} {
+      padding-bottom: 48px;
+    }
+  }
+
+  .product-grid--{{ section.id }} .ra_product-grid__content {
+    padding: {{ section.settings.mobile_content_padding_vertical }}rem {{ section.settings.mobile_content_padding_horizontal }}rem;
+  }
+
+  .ra-product-grid__details p {
+    color: {{ section.settings.text_color }};
+  }
+
+  .product-grid--{{ section.id }} .ra-heading {
+    --heading-margin:var(--spacing-lg);
+    --heading-text-align: {{ section.settings.text_align }};
+  }
+
+  {% if section.settings.product-grid_nav_location == 'auto' %}
+    .product-grid--{{ section.id }} .ra-product-grid__nav--auto {
+      @media only screen and (min-width: 768px) {
+        --product-grid-controls-width: 120%;
+        --product-grid-controls-left: 50%;
+        --product-grid-controls-transform: translateX(-50%);
+
+      }
+    }
+  {% endif %}
+
+  .product-grid--{{ section.id }} .ra-heading__description ul li {
+    list-style: inside disc;
+  }
+
+  .product-grid--{{ section.id }} .ra-heading__description ol li {
+    list-style: inside decimal;
+  }
+
+  @media only screen and (min-width: 768px) {
+    .product-grid--{{ section.id }} {
+      padding-top: {{ section.settings.desktop_padding_top }}rem;
+      padding-bottom: {{ section.settings.desktop_padding_bottom }}rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      margin: {{ section.settings.desktop_margin }}rem 0;
+    }
+
+    .product-grid--{{ section.id }} .ra_product-grid__content {
+      padding: {{ section.settings.desktop_content_padding_vertical }}rem {{ section.settings.desktop_content_padding_horizontal }}rem;
+    }
+
+    .product-grid--{{ section.id }} .ra-product-grid__nav--top-right {
+      --product-grid-controls-bottom: calc(100% + 1rem);
+    }
+  }
+{% endstyle %}
+
+<section class="ra-product-grid-outer product-grid product-grid--{{ section.id }}">
+  <div class="ra-product-grid-wrapper max-w-[1920px] m-auto md:!pb-0 md:px-[48px]">
+
+    <div class="ra_product-grid__content">
+      {% comment %} Heading {% endcomment %}
+      <div class="ra-heading ra-product-grid__details">
+        {% if section.settings.title != blank %}
+          <{{ title_level }}
+            class="ra-title ra-heading__title {{ section.settings.title_style }}"
+          >
+            <div>{{- section.settings.title -}}</div>
+          </{{ title_level }}>
+        {% endif %}
+        {% if section.settings.description != blank %}
+          <div class="ra-heading__description rte">
+            {{- section.settings.description | replace: "<p>", "<p class='capitalize'>" -}}
+          </div>
+        {% endif %}
+      </div>
+
+      {% comment %} Grid {% endcomment %}
+      <div id="ProductGrid" class="collection__product-grid mx-auto ra-collection" data-product-grid>
+          {% comment %}
+            check the list of disruptor indexes to see if any exist on this page of the collection
+          {% endcomment %}
+
+          {% assign has_disruptors = false %}
+
+          {% for index in disruptor_indexes_split %}
+            {% assign numeric_index = index | plus: 0 %}
+            {% if numeric_index >= paginate_offset and numeric_index < max_pagination %}
+              {% assign has_disruptors = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+
+          <div data-gap="-sm" data-columns="-sm,-md,-lg" class="ra-grid gap-4 md:gap-8 ra-grid--inherit-gap">
+            {%- assign counter = 0 -%}
+            {%- for product in section.settings.selected_collection.products -%}
+              {%- capture content -%}
+                {{ content }}
+
+              {%- assign subject = product -%}
+              {%- assign scip_subject = false -%}
+
+                {%- for collection in subject.collections -%}
+                  {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                  {%- if vip_collection -%}
+
+                    {%- unless current_product_collections contains collection.handle -%}
+                      {%- assign scip_subject = true -%}
+                      {%- break -%}
+                    {%- endunless -%}
+
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if scip_subject -%}
+                  {% continue %}
+                {%- endif -%}
+
+                {% comment %}
+                  if any disruptors were found to exist on this page of the collection, find the appropriate disruptor and place it
+                {% endcomment %}
+
+                {% if has_disruptors %}
+                  {% assign disruptor_index = forloop.index | plus: paginate_offset %}
+                  {% if disruptor_indexes contains disruptor_index %}
+                    {% for disruptor in disruptor_metafields %}
+                      {% if disruptor.position == disruptor_index and disruptor.enabled %}
+                        {% render 'ra-disruptor-tile', disruptor: disruptor, index: disruptor_index %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+              {% render 'ra-product-tile', product: product, index: forloop.index %}
+
+              {%- assign counter = counter | plus: 1 -%}
+              {%- endcapture -%}
+
+              {%- if counter == section.settings.limit -%}
+                {%- break -%}
+              {%- endif -%}
+
+            {%- endfor -%}
+
+            {{ content }}
+          </div>
+      </div>
+
+      {% comment %} CTA {% endcomment %}
+      {% if section.settings.cta_title != blank and section.settings.cta_link != blank %}
+        <div class="flex col justify-around pt-8">
+          <a class="w-[100%] md:w-auto ra-button ra-button ra-button--md ra-button--{{ section.settings.cta_style }} " href="{{ section.settings.cta_link }}" {% if section.settings.open_new_tab %}target="_blank"{% endif %} title="{{ section.settings.cta_title }}">
+            {{ section.settings.cta_title }}
+            <div class="absolute right-[21px] flex md:hidden">
+            {%- render 'ra-icon', icon: 'right-arrow', size: 'sm', height: '14px', width: '14px' -%}
+            </div>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Grid",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text Align",
+      "info": "Align the title & description text",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "title_style",
+      "label": "Title Style",
+      "info": "Choose the styling of the header",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h3"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "info": "Set the background color for all screen sizes",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "info": "Set the text color for all screen sizes",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 4,
+      "max": 48,
+      "step": 4,
+      "label": "Limit on the number of products to show",
+      "info": "Will show first products in collection or recommendations up to limit.",
+      "default": 4
+    },
+    {
+      "type": "collection",
+      "id": "selected_collection",
+      "label": "Selected Collection",
+      "info": "Choosing a collection will override any products selected for this component."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Vertical (rem)",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Horizontal (rem)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Content Padding Vertical (rem)",
+      "info": "Padding ONLY for non-product-grid items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Horizontal (rem)",
+      "info": "Padding ONLY for non-product-grid items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_top",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Top (rem)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_bottom",
+      "min": 1,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Bottom (rem)",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_content_padding_vertical",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Content Padding Vertical (rem)",
+      "info": "Padding ONLY for non-product-grid items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "desktop_content_padding_horizontal",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Horizontal (rem)",
+      "info": "Padding ONLY for non-product-grid items like title & cta",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "mobile_margin",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Margin (rem)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "desktop_margin",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Margin (rem)",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "CTA",
+      "info": "CTA Button will appear only when all settings are configured"
+    },
+    {
+      "type": "text",
+      "label": "CTA Title",
+      "default": "Shop Now",
+      "id": "cta_title"
+    },
+    {
+      "type": "url",
+      "label": "CTA Link",
+      "id": "cta_link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Open in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "CTA Style",
+      "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+      "default": "primary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Grid"
+    }
+  ]
+}
+{% endschema %}

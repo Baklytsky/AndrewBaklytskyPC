@@ -1,0 +1,732 @@
+{% liquid
+  assign cta_1_text = section.settings.cta_1_text
+  assign cta_1_url = section.settings.cta_1_url
+  assign open_new_tab_1 = section.settings.open_new_tab_1
+  assign cta_1_style = section.settings.cta_1_style
+
+  assign cta_2_text = section.settings.cta_2_text
+  assign cta_2_url = section.settings.cta_2_url
+  assign open_new_tab_2 = section.settings.open_new_tab_2
+  assign cta_2_style = section.settings.cta_2_style
+
+  assign enable_cta_1 = false
+  assign enable_cta_2 = false
+
+  if cta_1_text != blank and cta_1_url != blank
+    assign enable_cta_1 = true
+  endif
+
+  if cta_2_text != blank and cta_2_url != blank
+    assign enable_cta_2 = true
+  endif
+
+  assign section_split = section.settings.section_split
+  assign aspect_ratio = section.settings.aspect_ratio
+  assign image_width = 850
+  assign details_location_mobile = section.settings.details_location
+  assign details_location = section.settings.details_location_md
+
+  capture left_col_classes
+    if details_location == 'after'
+      echo 'component-media '
+    else
+      echo 'component-details z-10 px-[32px] md:p-10 md:pr-[111px] flex items-center '
+      if details_location_mobile == 'after'
+        echo '-order-1 md:order-none'
+      endif
+    endif
+  endcapture
+
+  capture right_col_classes
+    if details_location == 'after'
+      echo 'component-details z-10 px-[32px] md:p-10 md:pl-[111px] flex items-center '
+      if details_location_mobile == 'after'
+        echo '-order-1 md:order-none'
+      endif
+    else
+      echo 'component-media '
+    endif
+  endcapture
+
+  case aspect_ratio
+    when 'square'
+      assign width = image_width
+      assign height = image_width
+    when 'tall'
+      assign width = image_width
+      assign height = image_width | divided_by: 0.85
+    when 'wide'
+      assign width = image_width
+      assign height = image_width | times: 0.625
+    else
+      assign width = section.settings.image.width
+      assign height = width | divided_by: section.settings.image.aspect_ratio
+  endcase
+%}
+
+{% style %}
+  @media (max-width: 47.9375rem) {
+    #shopify-section-{{ section.id }} .ra-split-section__copy {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  #shopify-section-{{ section.id }} .ra-split-section {
+    --component-bg-color: var({{- section.settings.bg_color -}});
+    --component-bg-color-md: var({{- section.settings.bg_color_md -}});
+    --component-fg-color: var({{- section.settings.text_color_mobile -}});
+    --component-fg-color-md: var({{- section.settings.text_color_desktop -}});
+  }
+
+  #shopify-section-{{ section.id }} .ra-left-split {
+    --col-size: 100%;
+    {%- case section_split -%}
+      {%- when '50-50' -%}
+        --col-size-md: 50%;
+      {%- when '60-40' -%}
+        --col-size-md: 60%;
+      {%- when '40-60' -%}
+        --col-size-md: 40%;
+    {%- endcase -%}
+  }
+
+  #shopify-section-{{ section.id }} .ra-right-split {
+    --col-size: 100%;
+    {% if details_location == "overlay" %}
+      --col-size-md: 100%;
+    {% else %}
+      {%- case section_split -%}
+        {%- when '50-50' -%}
+          --col-size-md: 50%;
+        {%- when '60-40' -%}
+          --col-size-md: 40%;
+        {%- when '40-60' -%}
+          --col-size-md: 60%;
+      {%- endcase -%}
+    {% endif %}
+  }
+
+  #shopify-section-{{- section.id }} .ra-split-section__image {
+    {%- case aspect_ratio -%}
+      {%- when 'square' -%}
+        --media-width:1;
+        --media-height: 1;
+      {%- when 'tall' -%}
+        --media-width: 0.85;
+        --media-height: 1;
+      {%- when 'wide' -%}
+        --media-width: 1;
+        --media-height: 0.625;
+    {%- endcase -%}
+  }
+{% endstyle %}
+
+{% capture text_content %}
+  <div class="ra-split-section__copy max-w-[380px] set--v-align-middle-sm set--v-align-{{ section.settings.vertical_align_md }}-md set--h-align-{{ section.settings.horizontal_align }}-sm set--h-align-{{ section.settings.horizontal_align_md }}-md">
+    {% if section.settings.eyebrow_text != blank %}
+      <div class="ra-split-section__subtitle mono-16 flex items-center gap-x-3 mb-[18px]" >
+        {% if section.settings.show_eyebrow_arrow == true %}
+          {%- render 'ra-icon', icon: 'right-arrow', width: '9px' height: '9px' -%}
+        {% endif %}
+        {{- section.settings.eyebrow_text -}}
+      </div>
+    {% endif %}
+    {% if section.settings.title != blank %}
+      <div
+        class="ra-split-section__title
+        {% if section.settings.description != blank %}
+          {% if section.settings.show_countdown == false %}
+           mb-[76px]
+          {% endif %}
+        {% endif %}"
+  >
+        {{- section.settings.title -}}
+      </div>
+    {% endif %}
+
+    {% if section.settings.show_countdown %}
+      <div class="ra-split-section__countdown my-12 w-full flex justify-between">
+        <p>{{ section.settings.countdown_text }}</p>
+        <p class="ra-split-section__countdown-timer"></p>
+      </div>
+    {% endif %}
+
+    {% if section.settings.description != blank %}
+      <div class="mono-16 rte {% if enable_cta_1 or enable_cta_2 or section.settings.show_calendar_button %} mb-12 {% endif %}">
+        {{- section.settings.description | replace: "<p", "<p class='mono-16'" -}}
+      </div>
+    {% endif %}
+    {% if section.settings.show_calendar_button %}
+      <div data-vue-root="AddToCalendarButton"   class="w-full">
+        <add-to-calendar-button
+          name="{{ section.settings.calendar_reminder_title }}"
+          startDate="{{ section.settings.countdown_date }}"
+          {% if section.settings.countdown_end_time != blank %}
+            startTime="{{ section.settings.countdown_time }}"
+            endTime="{{ section.settings.countdown_end_time }}"
+          {% endif %}
+          options="'Apple','Google','iCal'"
+          hideIconButton="true"
+          hideBackground
+          label="{{ section.settings.calendar_button_text }}"
+          {% if section.settings.calendar_reminder_description != blank %}
+            description="{{ section.settings.calendar_reminder_description }}"
+          {% endif %}
+          buttonStyle="custom"
+          trigger="click"
+          customCss="{{ 'main.css' | asset_url | split: '?' | first }}"
+          lightMode="light"
+          timeZone="America/Los_Angeles"
+          listStyle="overlay"
+    ></add-to-calendar-button>
+      </div>
+    {% else %}
+      {% if enable_cta_1 or enable_cta_2 %}
+        <div class="ra-link-list ra-text-only-banner__link-list">
+          {% if enable_cta_1 %}
+            {% render 'ra-button',
+              type: 'a',
+              style: cta_1_style,
+              url: cta_1_url,
+              new_tab: open_new_tab_1,
+              label: cta_1_text,
+              class: 'ra-link-list min-w-[175px] w-full'
+            %}
+          {% endif %}
+          {% if enable_cta_2 %}
+            {% render 'ra-button',
+              type: 'a',
+              style: cta_2_style,
+              url: cta_2_url,
+              new_tab: open_new_tab_2,
+              label: cta_2_text,
+              class: 'ra-link-list min-w-[175px] w-full'
+            %}
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endcapture %}
+
+{% capture media_content %}
+  {% if section.settings.internal_video != blank %}
+    <div class="ra-split-section__media">
+      <div class="ra-image ra-split-section__image ra-image--use-aspect-ratio">
+        {% render 'ra-video',
+          video: section.settings.internal_video,
+          lazyload: true,
+          controls: true,
+          autoplay: true,
+          loop: true,
+          width: width,
+          class: "ra-image__media w-full",
+          video_class: "h-full object-cover"
+        %}
+      </div>
+    </div>
+  {% elsif section.settings.external_video != blank %}
+    <div class="ra-split-section__media">
+      <div class="ra-image ra-split-section__image ra-image--use-aspect-ratio">
+        {% render 'ra-video',
+          video_url: section.settings.external_video,
+          lazyload: true,
+          controls: true,
+          autoplay: true,
+          loop: true,
+          width: width,
+          class: "ra-image__media w-full",
+          video_class: "h-full object-cover"
+        %}
+      </div>
+    </div>
+  {% elsif section.settings.image != blank %}
+    <div class="ra-split-section__media">
+      <div class="ra-image ra-split-section__image ra-image--use-aspect-ratio">
+        {% render 'ra-image', image: section.settings.image, width: width, height: height, classes: "ra-image__media w-full", lazyload: true %}
+      </div>
+    </div>
+  {% endif %}
+{% endcapture %}
+
+<div class="">
+  <article class="ra-split-section set--details-{{ section.settings.details_location }}-sm {% if details_location == "overlay" %}set--details-{{ details_location }}{% else %}mx:px-7{% endif %} set--aspect-ratio-{{ section.settings.aspect_ratio }}">
+    <div class="ra-split-section__layout-container component-layout ra-row ra-no-gap !items-stretch">
+      <div
+        class="ra-col ra-left-split {{ left_col_classes }}"
+        {% if details_location == 'overlay' %}
+          data-col-size="-size,-md"
+        {% else %}
+          data-col-size="-size" data-col-auto="-md"
+        {% endif %}
+  >
+        {% if details_location == 'after' %}
+          {{ media_content }}
+        {% else %}
+          {{ text_content }}
+        {% endif %}
+      </div>
+      <div
+        class="ra-col ra-right-split {{ right_col_classes }}"
+        {% if details_location == 'overlay' %}
+          data-col-size="-size" data-col-auto="-md"
+        {% else %}
+          data-col-size="-size,-md"
+        {% endif %}
+  >
+        {% if details_location == 'after' %}
+          {{ text_content }}
+        {% else %}
+          {{ media_content }}
+        {% endif %}
+      </div>
+    </div>
+  </article>
+</div>
+
+<script>
+  const countdownContainer = document.querySelector('#shopify-section-{{ section.id }} .ra-split-section__countdown-timer')
+  const end = new Date('{{ section.settings.countdown_date }} {{ section.settings.countdown_time }}');
+  let timer;
+  let _second = 1000;
+  let _minute = _second * 60;
+  let _hour = _minute * 60;
+  let _day = _hour * 24;
+
+  function showRemaining() {
+      const now = new Date();
+      const distance = end - now;
+      if (distance < 0) {
+
+          clearInterval(timer);
+          countdownContainer.innerHTML = 'EXPIRED!';
+
+          return;
+      }
+      let days = Math.floor(distance / _day);
+      let hours = Math.floor((distance % _day) / _hour);
+      let minutes = Math.floor((distance % _hour) / _minute);
+      let seconds = Math.floor((distance % _minute) / _second);
+
+      countdownContainer.innerHTML = String(days).length === 1 ? '0' + days + ':'  : days + ':';
+      countdownContainer.innerHTML += String(hours).length === 1 ? '0' + hours + ':'  : hours + ':';
+      countdownContainer.innerHTML += String(minutes).length === 1 ? '0' + minutes  : minutes;
+  }
+  if (countdownContainer) {
+    timer = setInterval(showRemaining, 1000);
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Split Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Eyebrow Text",
+      "default": "Eyebrow Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_eyebrow_arrow",
+      "label": "Show eyebrow arrow",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "<p>Title</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Section Media"
+    },
+    {
+      "type": "paragraph",
+      "content": "This section will look for a video file, then an external video, and then an uploaded image"
+    },
+    {
+      "type": "video",
+      "id": "internal_video",
+      "label": "A Shopify-hosted video"
+    },
+    {
+      "type": "video_url",
+      "id": "external_video",
+      "label": "An external video",
+      "info": "Accepts Youtube or Vimeo",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Aspect Ratio",
+      "info": "Choose aspect ratio for section media image",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "tall",
+          "label": "Tall"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "respect-media",
+          "label": "Respect Media"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout and Alignment"
+    },
+    {
+      "type": "select",
+      "id": "section_split",
+      "label": "Section Split",
+      "info": "Choose between 50/50 60/40 & 40/60 split (desktop only)",
+      "options": [
+        {
+          "value": "50-50",
+          "label": "50/50"
+        },
+        {
+          "value": "60-40",
+          "label": "60/40"
+        },
+        {
+          "value": "40-60",
+          "label": "40/60"
+        }
+      ],
+      "default": "50-50"
+    },
+    {
+      "type": "select",
+      "id": "details_location_md",
+      "label": "Desktop Layout",
+      "info": "Choose layout for desktop",
+      "options": [
+        {
+          "value": "before",
+          "label": "Text left, Media right"
+        },
+        {
+          "value": "after",
+          "label": "Media left, Text right"
+        },
+        {
+          "value": "overlay",
+          "label": "Overlay"
+        }
+      ],
+      "default": "after"
+    },
+    {
+      "type": "select",
+      "id": "details_location",
+      "label": "Mobile Layout",
+      "info": "Choose layout for mobile devices",
+      "options": [
+        {
+          "value": "after",
+          "label": "Media Top, Text Bottom"
+        },
+        {
+          "value": "before",
+          "label": "Text Top, Media Bottom"
+        },
+        {
+          "value": "overlay",
+          "label": "Overlay"
+        }
+      ],
+      "default": "after"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 12,
+      "max": 154,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile top padding for copy",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 12,
+      "max": 154,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile bottom padding for copy",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Horizontal Text Alignment"
+    },
+    {
+      "type": "select",
+      "id": "horizontal_align_md",
+      "label": "Desktop Horizontal Alignment",
+      "info": "Set horizontal alignment for content on desktop",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "horizontal_align",
+      "label": "Mobile Horizontal Alignment",
+      "info": "Set horizontal alignment for content on mobile devices",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Vertical Text Alignment"
+    },
+    {
+      "type": "select",
+      "id": "vertical_align_md",
+      "label": "Desktop Vertical Alignment",
+      "info": "Set vertical alignment for content on desktop",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "middle",
+          "label": "Middle"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Countdown and Calendar"
+    },
+    {
+      "type": "text",
+      "id": "countdown_text",
+      "label": "Countdown text",
+      "default": "see you in"
+    },
+    {
+      "type": "text",
+      "id": "countdown_date",
+      "label": "Countdown date",
+      "info": "Date format YEAR-MONTH-DAY => 2023-08-03. Note: Dates must have at least 2 digits"
+    },
+    {
+      "type": "text",
+      "id": "countdown_time",
+      "label": "Countdown time",
+      "info": "24 hour time format HOUR:MINUTE => 16:00",
+      "default": "16:00"
+    },
+    {
+      "type": "text",
+      "id": "countdown_end_time",
+      "label": "Countdown end time",
+      "info": "Setting 30 minutes after the countdown time above to specify calendar time",
+      "default": "16:30"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show countdown",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_calendar_button",
+      "label": "Show calendar button",
+      "default": false,
+      "info": "If set to `true` the calendar will be the only CTA"
+    },
+    {
+      "type": "text",
+      "id": "calendar_button_text",
+      "label": "Calendar button text",
+      "default": "Add to Calendar"
+    },
+    {
+      "type": "text",
+      "id": "calendar_reminder_title",
+      "label": "Calendar reminder title",
+      "default": "Khy drop 002"
+    },
+    {
+      "type": "text",
+      "id": "calendar_reminder_description",
+      "label": "Calendar reminder description",
+      "default": "Brief description of drop"
+    },
+    {
+      "type": "header",
+      "content": "Section CTA's"
+    },
+    {
+      "type": "text",
+      "id": "cta_1_text",
+      "label": "CTA 1 Text",
+      "default": "Default"
+    },
+    {
+      "type": "url",
+      "id": "cta_1_url",
+      "label": "CTA 1 URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab_1",
+      "label": "Open in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_1_style",
+      "label": "CTA 1 Style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "text",
+      "id": "cta_2_text",
+      "label": "CTA 2 Text",
+      "default": "Secondary"
+    },
+    {
+      "type": "url",
+      "id": "cta_2_url",
+      "label": "CTA 2 URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab_2",
+      "label": "Open in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_2_style",
+      "label": "CTA 2 Style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "header",
+      "content": "Section Styles"
+    },
+    {
+      "type": "select",
+      "id": "bg_color",
+      "label": "Mobile Background Color",
+      "info": "Set the background color for mobile screen sizes",
+      "options": [{"label":"White","value":"--bg-primary"},{"label":"Light","value":"--bg-light"},{"label":"Dark","value":"--bg-dark"},{"label":"Black","value":"--black"},{"label":"Transparent","value":"--bg-transparent"}],
+      "default": "--bg-primary"
+    },
+    {
+      "type": "select",
+      "id": "bg_color_md",
+      "label": "Desktop Background Color",
+      "info": "Set the background color for larger screen sizes (if different from mobile)",
+      "options": [{"label":"White","value":"--bg-primary"},{"label":"Light","value":"--bg-light"},{"label":"Dark","value":"--bg-dark"},{"label":"Black","value":"--black"},{"label":"Transparent","value":"--bg-transparent"}],
+      "default": "--bg-primary"
+    },
+    {
+      "type": "select",
+      "id": "text_color_mobile",
+      "label": "Text Color (mobile)",
+      "info": "Set the text color for mobile screen sizes",
+      "options": [{"label":"White","value":"--white"},{"label":"Primary","value":"--text-primary"},{"label":"Secondary","value":"--text-secondary"},{"label":"Inverse primary","value":"--text-inverse-primary"},{"label":"Inverse secondary","value":"--text-inverse-secondary"}],
+      "default": "--text-primary"
+    },
+    {
+      "type": "select",
+      "id": "text_color_desktop",
+      "label": "Text Color (desktop)",
+      "info": "Set the text color for larger screen sizes (if different from mobile)",
+      "options": [{"label":"White","value":"--white"},{"label":"Primary","value":"--text-primary"},{"label":"Secondary","value":"--text-secondary"},{"label":"Inverse primary","value":"--text-inverse-primary"},{"label":"Inverse secondary","value":"--text-inverse-secondary"}],
+      "default": "--text-primary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Split Section"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,75 @@
+{% comment %}
+  Props:
+  rows:        number determines the input height in rows - (required)
+  label:       string input label - (optional)
+  name:        string name attr - (optional)
+  minlength:   string minimum characters allowed, validation - (optional)
+  maxlength:   string maximum characters allowed, validation - (optional)
+  id:          string add id attribute used for JS - (optional)
+  class:       string add custom CSS class - (optional)
+  message:     string info message - (optional)
+  placeholder: string placeholder text - (optional)
+  required:    boolean - (optional)
+  disabled:    boolean - (optional)
+
+  Example textarea:
+  {%- render 'ra-textarea' rows: 4, placeholder: 'Enter your message' -%}
+
+  Example textarea + label + message:
+  {%- render 'ra-textarea' rows: 4, label: 'Your message', placeholder: 'Enter your message', message: 'This is custom message' -%}
+
+  Example textarea + minlength & maxlength:
+  {%- render 'ra-textarea' rows: 4, label: 'Your message', minlength: 5, maxlength: 100, placeholder: 'Enter your message' -%}
+{% endcomment %}
+
+{%- if rows != blank -%}
+  {% capture classes %}
+    ra-textarea__control
+    {{ class }}
+  {% endcapture %}
+
+  {%- capture input_id -%}
+    {%- if id != blank -%}
+      {{- id | strip -}}
+    {%- elsif label != blank -%}
+      {{- label | handleize -}}
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {% capture attributes %}
+    {% if name != blank %}
+      name="{{ name | handleize }}"
+    {% endif %}
+    {% if rows != blank %}
+      rows="{{ rows }}"
+    {% endif %}
+    {% if maxlength != blank %}
+      maxlength="{{ maxlength }}"
+    {% endif %}
+    {% if minlength != blank %}
+      minlength="{{ minlength }}"
+    {% endif %}
+    {% if input_id != blank %}
+      id="{{ input_id }}"
+    {% endif %}
+    {% if placeholder != blank %}
+      placeholder="{{ placeholder }}"
+    {% else %}
+      placeholder="{{ label }}"
+    {% endif %}
+    {% if disabled != blank %}
+      disabled="disabled"
+    {% endif %}
+    {% if required != blank %}
+      required="required"
+    {% endif %}
+  {% endcapture %}
+
+  <div class="ra-input ra-textarea">
+    <label for="{{ input_id }}" class="ra-input__label">{{ label }}</label>
+    <textarea class="{{ classes }}" {{ attributes }}></textarea>
+    {% if message != blank %}
+      <p class="ra-input__message">{{ message }}</p>
+    {% endif %}
+  </div>
+{%- endif -%}

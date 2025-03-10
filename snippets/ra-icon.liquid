@@ -1,0 +1,74 @@
+{% comment %}
+  NOTE: To see all available icons or to add
+  additional SVG icons see: '/src/icons' dir
+
+  Props:
+  icon:    string - (required)
+  size:    string [sm, md, lg, xl] - (required)
+  height:  string CSS unit [px, rem] overrides height - (optional)
+  width:   string CSS unit [px, rem] overrides width - (optional)
+  color:   string Hex color or CSS var '#000000', 'var(--color-primary-900)' - (optional)
+  margin:  string CSS margin [px, rem] '5px 1rem 10px 0' - (optional)
+  top:     string CSS top margin [px, rem] - (optional)
+  right:   string CSS right margin [px, rem] - (optional)
+  bottom:  string CSS bottom margin [px, rem] - (optional)
+  left:    string CSS left margin [px, rem] - (optional)
+  class:   string custom CSS class - (optional)
+
+  Example icon:
+  {%- render 'ra-icon', icon: 'account', size: 'xl' -%}
+
+  Example custom size:
+  {%- render 'ra-icon', icon: 'account', width: '100px' height: '100px' -%}
+
+  Example custom color (hex):
+  {%- render 'ra-icon', icon: 'account', color: '#C0C7AF' -%}
+
+  Example custom color (css var):
+  {%- render 'ra-icon', icon: 'account', color: 'var(--color-primary-900)' -%}
+{% endcomment %}
+
+{% if icon %}
+  {%- capture icon_variables -%}
+    {%- if color -%}
+      --icon-color: {{ color }};
+    {%- endif -%}
+    {%- if width -%}
+      --icon-width: {{ width }};
+    {%- endif -%}
+    {%- if height -%}
+      --icon-height: {{ height }};
+    {%- endif -%}
+    {%- if margin -%}
+      --icon-margin: {{ margin }};
+    {%- endif -%}
+    {%- if top -%}
+      --icon-margin-top: {{ top }};
+    {%- endif -%}
+    {%- if right -%}
+      --icon-margin-right: {{ right }};
+    {%- endif -%}
+    {%- if bottom -%}
+      --icon-margin-bottom: {{ bottom }};
+    {%- endif -%}
+    {%- if left -%}
+      --icon-margin-left: {{ left }};
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture classes -%}
+    ra-icon
+    {% if size %}ra-icon--{{ size }}{% endif %}
+    {{ class }}
+  {%- endcapture -%}
+
+  <span
+    class="{{ classes }}"
+    style="{{ icon_variables }}"
+    aria-hidden="true"
+  >
+    <svg>
+      <use xlink:href="#{{ icon }}"></use>
+    </svg>
+  </span>
+{% endif %}

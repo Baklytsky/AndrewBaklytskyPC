@@ -1,0 +1,78 @@
+{% comment %}
+  Get platform from settings.review_platform
+{% endcomment %}
+
+{% if platform == blank %}
+  {% assign platform = settings.review_platform %}
+{% endif %}
+
+
+<div
+  class="product-reviews my-0 mx-auto"
+  data-aos="fade"
+  data-aos-offset="300"
+  id="ra-product-reviews"
+>
+  {% case platform %}
+    {% when 'yotpo' %}
+      <div
+        class="yotpo yotpo-main-widget"
+        data-product-id="{{ product.id }}"
+        data-name="{{ product.title | escape }}"
+        data-url="{{ shop.url }}{{ product.url }}"
+        data-image-url="{{ product.featured_image | image_url: width: 700 | replace: '?', '%3F' | replace: '&', '%26' }}"
+        data-price="{{ variant.price | money_without_currency }}"
+        data-currency="{{ shop.currency }}"
+        data-description="{{ product.description | escape }}"
+      ></div>
+    {% when 'stamped' %}
+      <div
+        id="stamped-main-widget"
+        data-product-id="{{ product.id }}"
+        data-name="{{ product.title | escape }}"
+        data-url="{{ shop.url }}{{ product.url }}"
+        data-image-url="{{ product.featured_image | image_url: width: 800 | replace: '?', '%3F' | replace: '&', '%26' }}"
+        data-description="{{ product.description | escape }}"
+        data-product-sku="{{ product.handle }}"
+        data-product-type="{{ product.type }}"
+      >
+        {{ product.metafields.stamped.reviews }}
+      </div>
+    {% when 'bazaarvoice' %}
+      {% assign id = product.metafields.bazaarvoice.handle | default: product.handle %}
+      {% assign staging_api = settings.bazaarvoice_staging_api %}
+      {% assign production_api = settings.bazaarvoice_production_api %}
+      {% assign environment = settings.bazaarvoice_env %}
+
+      {% if settings.implementation_type == 'api' %}
+        <div class="w-full" data-vue-root="BazaarVoiceMainWidget">
+          <bazaar-voice-main-widget
+            id="{{ id }}"
+            staging-api="{{ staging_api }}"
+            production-api="{{ production_api }}"
+            environment="{{ environment }}"
+          />
+        </div>
+      {% else %}
+        <div data-bv-show="reviews" data-bv-product-Id="{{ id }}">
+          {% if product.metafields.bazaarvoice.reviews %}
+            {{ product.metafields.bazaarvoice.reviews }}
+          {% endif %}
+        </div>
+      {% endif %}
+  {% endcase %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Reviews",
+  "settings": [],
+  "templates": ["product"],
+  "presets": [
+    {
+      "name": "Product Reviews",
+      "category": "Reviews"
+    }
+  ]
+}
+{% endschema %}

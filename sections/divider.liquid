@@ -1,0 +1,94 @@
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --section-divider-bg-color: {{ section.settings.bg_color }};
+    --section-divider-color: {{ section.settings.divider_color }};
+    --section-divider-desktop-padding-top: {{ section.settings.desktop_padding_top | append: "px" }};
+    --section-divider-desktop-padding-bottom: {{ section.settings.desktop_padding_bottom | append: "px" }};
+    --section-divider-mobile-padding-top: {{ section.settings.mobile_padding_top | append: "px" }};
+    --section-divider-mobile-padding-bottom: {{ section.settings.mobile_padding_bottom | append: "px" }};
+  }
+{% endstyle %}
+
+<section>
+  <div class="container">
+    {% if section.settings.show_divider %}
+      <div class="divider"></div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Divider",
+  "class": "section-divider",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top (desktop)",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom (desktop)",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top (mobile)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom (mobile)",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Divider"
+    }
+  ]
+}
+{% endschema %}

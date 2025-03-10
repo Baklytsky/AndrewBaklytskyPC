@@ -1,0 +1,48 @@
+{%- comment -%}
+  {%- render 'countdown-timer', section: section / block -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign vertical_padding_desktop = section.settings.vertical_padding_desktop | append: 'px'
+  assign vertical_padding_mobile = section.settings.vertical_padding_mobile | append: 'px'
+  assign justification = section.settings.justification
+  assign bg_color = section.settings.background
+  assign text_color = section.settings.text_color
+  assign content = section.settings.content
+  assign link_text = section.settings.link_text
+  assign link_url = section.settings.link_url
+  assign new_tab = section.settings.open_new_tab
+  assign today_date = 'now' | date: '%Y-%m-%d %H:%M'
+  assign end_content_date = section.settings.end_date | date: '%Y-%m-%d %H:%M'
+  assign action = section.settings.action
+-%}
+
+{% style %}
+  #{{ section.id }}.countdown {
+  --countdown-bg-color: {{ bg_color }};
+  --countdown-text-color: {{ text_color }};
+  --countdown-desk-padding: {{ vertical_padding_desktop }};
+  --countdown-mob-padding: {{ vertical_padding_mobile }};
+  --countdown-justify-content: {{ justification }};
+  }
+{% endstyle %}
+
+<countdown-timer
+  id="{{ section.id }}"
+  class="countdown"
+  data-end-date="{{ end_content_date }}"
+  data-action="{{ action }}"
+  style="display: none">
+  <div class="countdown__content">
+    {{ content }}
+    {%- if link_text != blank and link_url != blank -%}
+      <a href="{{ link_url }}" {% if new_tab %}target="_blank"{% endif %}>{{ link_text }}</a>
+    {%- endif -%}
+  </div>
+  <div class="countdown__timer">
+    <span class="countdown__timer-date days">00</span>
+    <span class="countdown__timer-date hours">00</span>
+    <span class="countdown__timer-date minutes">00</span>
+    <span class="countdown__timer-date seconds">00</span>
+  </div>
+</countdown-timer>

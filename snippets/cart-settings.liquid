@@ -1,0 +1,37 @@
+{% liquid
+  assign cart_upsell_product = null
+  assign cart_upsell_product_data = null
+  if settings.upsell_enabled and settings.upsell_product != blank
+    assign cart_upsell_product = all_products[settings.upsell_product]
+  endif
+
+  assign settings_keys = 'cart_header_text,cart_message_1,cart_message_1_color,cart_message_2,cart_message_2_color,free_gift_enabled,free_gift_threshold,gift_message_enabled,gift_message_text,upsell_enabled,free_shipping_bar_enabled,free_shipping_csv_url'
+  assign settings_keys = settings_keys | split: ','
+%}
+
+{% if settings.upsell_product != blank and settings.upsell_enabled %}
+  {%- capture cart_upsell_product_data -%}
+    {%- render 'json-product', product: cart_upsell_product -%}
+  {%- endcapture -%}
+{% endif %}
+
+{% capture cart_settings %}
+  {
+  {%- for key in settings_keys -%}
+    "{{ key }}":{{- settings[key] | default: null | json -}},
+  {%- endfor -%}
+    "currency_code": "{{ localization.country.currency.iso_code }}",
+    "country_code": "{{ localization.country.iso_code }}",
+  {%- if cart_upsell_product_data -%}
+    "upsell_product":{{ cart_upsell_product_data }},
+  {%- endif -%}
+  "items": [
+    {%- for item in cart.items -%}
+       {%- render 'json-product', product: item.product -%}
+       {%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+    ]
+  }
+{% endcapture %}
+
+{{ cart_settings }}

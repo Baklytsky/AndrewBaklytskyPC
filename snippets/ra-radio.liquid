@@ -1,0 +1,63 @@
+{% comment %}
+  Props:
+  id:       string unique ID - (required)
+  label:    string radio label - (required)
+  class:    string add custom CSS class - (optional)
+  message:  string info message - (optional)
+  checked:  boolean - (optional)
+  required: boolean - (optional)
+  disabled: boolean - (optional)
+
+  Example radio:
+  {%- render 'ra-radio' id: 'default_radio', label: 'default' -%}
+
+  Example radio + message:
+  {%- render 'ra-radio' id: 'message_radio', label: 'message', message: 'This is an info message' -%}
+{% endcomment %}
+
+{% if id != blank and label != blank %}
+  {% capture classes %}
+    ra-choice
+    ra-choice--radio
+        ra-choice--classic
+        ra-choice--radio-classic
+    {{ class }}
+  {% endcapture %}
+
+  {% assign label_handelize = label | handleize | prepend: '_' %}
+  {%- capture input_id -%}
+    {{- id | handleize | append: label_handelize -}}
+  {%- endcapture -%}
+
+  {% capture attributes %}
+    {% if required %}
+      required="required"
+    {% endif %}
+    {% if disabled %}
+      disabled="disabled"
+    {% endif %}
+    {% if checked %}
+      checked="checked"
+    {% endif %}
+  {% endcapture %}
+
+  <div class="{{ classes }}">
+    <input
+      id="{{ input_id }}"
+      type="radio"
+      class="ra-choice__input"
+      {{ attributes }}
+    >
+    <label for="{{ input_id }}" class="ra-choice__label-container ra-choice__container set--sibling-deep-focus">
+      <div class="ra-choice__checkmark set--inherit-focus">
+        <span class="ra-choice__checkmark-icon"></span>
+      </div>
+      <span class="ra-choice__label uppercase">{{ label }}</span>
+    </label>
+    {% if message != blank %}
+      <div class="ra-choice__message">
+        <p class="ra-choice__message--hint">{{ message }}</p>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

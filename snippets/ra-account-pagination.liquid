@@ -1,0 +1,67 @@
+{%- if paginate.pages > 1 -%}
+  {%- if paginate.parts.size > 0 -%}
+    <nav
+      class="pagination mt-10"
+      role="navigation"
+      aria-label="{{ 'general.pagination.label' | t }}"
+    >
+      <ul role="list" class="flex justify-center list-none p-0 items-center">
+        {%- if paginate.previous -%}
+          <li class="mr-1">
+            <a
+              href="{{ paginate.previous.url }}"
+              class="rotate-180 flex"
+              aria-label="{{ 'general.pagination.previous' | t }}"
+            >
+              {% render 'ra-icon',
+                icon: 'chevron-right',
+                class: 'transition-all delay-300',
+                height: '14px',
+                width: '9px'
+              %}
+            </a>
+          </li>
+        {%- endif -%}
+
+        {%- for part in paginate.parts -%}
+          <li class="mr-1">
+            {%- if part.is_link -%}
+              <a
+                href="{{ part.url }}"
+                class="w-9 h-9 flex justify-center items-center"
+                aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+              >
+                {{- part.title -}}
+              </a>
+            {%- else -%}
+              {%- if part.title == paginate.current_page -%}
+                <span
+                  aria-current="page"
+                  class="w-9 h-9 bg-primary-900 flex justify-center items-center text-white"
+                  aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+                >
+                  {{- part.title -}}
+                </span>
+              {%- else -%}
+                <span>{{ part.title }}</span>
+              {%- endif -%}
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+
+        {%- if paginate.next -%}
+          <li class="flex">
+            <a href="{{ paginate.next.url }}" aria-label="{{ 'general.pagination.next' | t }}">
+              {% render 'ra-icon',
+                icon: 'chevron-right',
+                class: 'transition-all delay-300',
+                height: '14px',
+                width: '9px'
+              %}
+            </a>
+          </li>
+        {%- endif -%}
+      </ul>
+    </nav>
+  {%- endif -%}
+{%- endif -%}

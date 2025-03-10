@@ -1,0 +1,99 @@
+<!-- prettier-ignore -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  // prettier-ignore
+  dataLayer.push({
+    'event': 'acn_gtm_init',
+    'event_id': new Date().getTime() + '.' + Math.random().toString(36).substring(5),
+    'template': {
+      'active': {{ template | json }},
+      'name': {{ template.name | json }},
+      'directory': {{ template.directory | json }}
+    },
+    'localization': {
+      'country': {{ localization.country.iso_code | json }},
+      'currency': {{ localization.country.currency.iso_code | json }},
+      'language': {{ localization.language.iso_code | json }},
+      'checkoutCurrency': {{ checkout.currency | json }},
+      'location': {{ location | json }}
+    },
+  {% if product %}
+    'product_available' : {{ product.available }},
+  {% endif %}
+  {% if customer %}
+    customer : {
+      'id': {{ customer.id | downcase | json }},
+      'acceptsMarketing': {{ customer.accepts_marketing }},
+      'ordersCount': {{ customer.orders_count | json }},
+      'totalSpent': {{ customer.total_spent | divided_by: 100.00 }},
+      'tags': {{ customer.tags | json }},
+      'email': {{ customer.email | json }},
+      'emailHashed':{{ customer.email | sha256 | json | default: '' }},
+      'phoneHashed':{{ customer.phone | sha256 | json | default: '' }},
+      'firstNameHashed':{{ customer.first_name | sha256 | json | default: '' }},
+      'lastNameHashed':{{ customer.last_name | sha256 | json | default: '' }},
+      'defaultAddressHashed': {
+        'zip': {{ customer.default_address.zip | sha256 | json | default: '' }},
+        'city': {{ customer.default_address.city | sha256 | json | default: '' }},
+        'street': {{ customer.default_address.street | sha256 | json | default: '' }},
+        'province': {{ customer.default_address.province | sha256 | json | default: '' }},
+        'country': {{ customer.default_address.country | sha256 | json | default: '' }},
+        'phone': {{ customer.default_address.phone | sha256 | json | default: '' }}
+      }
+    },
+  {% endif %}
+  {% if checkout %}
+      'checkoutId' : {{ checkout.id | json }},
+      'customer' : {
+        'id': {{ checkout.customer.id | downcase | json }},
+        'acceptsMarketing': {{ checkout.customer.accepts_marketing | json }},
+        'hasAccount': {{ checkout.customer.has_account | json }},
+        'ordersCount': {{ checkout.customer.orders_count | json }},
+        'totalSpent': {{ checkout.customer.total_spent | json }},
+        'tags': {{ checkout.customer.tags | json }}
+      },
+      'customerCheckout' : {
+        'email': {{ checkout.email | json }},
+        'emailHashed': {{ checkout.email | sha256 | json | default: '' }},
+        'acceptsMarketing': {{ checkout.buyer_accepts_marketing | json }},
+        {% assign billing = checkout.billing_address %}
+        {% assign shipping = checkout.shipping_address %}
+        'billingAddressHash': {
+          'firstName': {{ billing.first_name | sha256 | json | default: '' }},
+          'lastName': {{ billing.last_name | sha256 | json | default: '' }},
+          'street': {{ billing.street | sha256 | json | default: '' }},
+          'phone': {{ billing.phone | sha256 | json | default: '' }},
+          'zip': {{ billing.zip | sha256 | json | default: '' }},
+          'city': {{ billing.city | sha256 | json | default: '' }},
+          'province': {{ billing.province | sha256 | json | default: '' }},
+          'country': {{ billing.country | sha256 | json | default: '' }}
+        },
+        'shippingAddressHash': {
+          'firstName': {{ shipping.first_name | sha256 | json | default: '' }},
+          'lastName': {{ shipping.last_name | sha256 | json | default: '' }},
+          'street': {{ shipping.street | sha256 | json | default: '' }},
+          'phone': {{ shipping.phone | sha256 | json | default: '' }},
+          'zip': {{ shipping.zip | sha256 | json | default: '' }},
+          'city': {{ shipping.city | sha256 | json | default: '' }},
+          'province': {{ shipping.province | sha256 | json | default: '' }},
+          'country': {{ shipping.country | sha256 | json | default: '' }}
+        }
+      },
+  {% endif %}
+  });
+</script>
+<!-- GTM ID added via Theme Settings -->
+<script>
+  (function (w, d, s, l, i) {
+    w[l] = w[l] || [];
+    w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+    var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s),
+      dl = l != 'dataLayer' ? '&l=' + l : '';
+    j.async = true;
+    j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+    f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', '{{- settings.datalayer_gtm_id -}}');
+</script>
+<!-- End Google Tag Manager -->
+<!-- prettier-ignore-end -->

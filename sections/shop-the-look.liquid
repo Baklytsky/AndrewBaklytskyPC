@@ -1,0 +1,436 @@
+{% comment %}theme-check-disable UndefinedObject{% endcomment %}
+{% liquid
+  assign layout = section.settings.layout
+  assign title = section.settings.title
+  assign title_level = section.settings.title_level
+  assign cta_url = section.settings.cta_url
+  assign open_new_tab = section.settings.open_new_tab
+  assign cta_label = section.settings.cta_label
+  assign cta_style = section.settings.cta_style
+  assign desktop_image = section.settings.desktop_bg_image
+  assign mobile_image = section.settings.mobile_bg_image
+  assign bg_color = section.settings.bg_color
+  assign text_color = section.settings.text_color
+  assign look_dot_color = section.settings.look_dot_color
+  assign look_bg_color = section.settings.look_bg_color
+  assign look_text_color = section.settings.look_text_color
+  assign current_product_collections = product.collections | map: 'handle' | default: false
+%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+  --background-color: var({{ bg_color }});
+  --text-color: var({{ text_color }});
+  --look-dot-color: var({{ look_dot_color }});
+  --look-bg-color: var({{ look_bg_color }});
+  --look-text-color: var({{ look_text_color }});
+  }
+  {% for block in section.blocks %}
+    #shopify-section-{{ section.id }} #block-{{ block.id }} {
+    --vertical-position: {{ block.settings.vertical_position | append: '%' }};
+    --horizontal-position: {{ block.settings.horizontal_position | append: '%' }};
+    --vertical-position-mobile: {{ block.settings.vertical_position_mobile | append: '%' }};
+    --horizontal-position-mobile: {{ block.settings.horizontal_position_mobile | append: '%' }};
+    }
+  {% endfor %}
+{% endstyle %}
+
+{% capture arrow_color %}
+  var({{ section.settings.text_color }})
+{% endcapture %}
+
+<ra-shop-the-look class="ra-shop-the-look">
+  {%- comment -%}
+    Section header + Slider
+  {%- endcomment -%}
+{% if layout == 'fifty-fifty' %}
+  <div class="md:grid grid-cols-1 md:grid-cols-2 items-center">
+    {% endif %}
+
+    {% if title != blank or section.settings.description != blank or cta_url != blank %}
+    <div class="flex flex-col items-center justify-center px-5 py-8 md:py-15 {% if layout == 'fifty-fifty' %}order-2{% endif %}">
+      <div class="w-full md:w-2/3 text-center">
+        {% if title != blank %}
+        <div class="mb-4">
+          <{{ title_level }} class="{{ section.settings.title_style }} ra-shop-the-look__title">{{ title }}</{{ title_level }}>
+      </div>
+      {% endif %}
+
+      {% if section.settings.description != blank %}
+        <div class="mb-4 ra-shop-the-look__body rte">{{ section.settings.description }}</div>
+      {% endif %}
+
+      {% if cta_url != blank and cta_label %}
+        <div class="mb-4">
+          {% render 'ra-button',
+            type: 'a',
+            style: cta_style,
+            url: cta_url,
+            new_tab: open_new_tab,
+            label: cta_label %}
+        </div>
+      {% endif %}
+    </div>
+
+    {%- comment -%}
+      Product Slider - Fifty-Fifty Layout
+    {%- endcomment -%}
+    {% if layout == 'fifty-fifty' %}
+      <div class="hidden md:flex w-96 relative">
+        <swiper-container
+          slides-per-view="1"
+          navigation-prev-el=".{{ section.id }}.swiper-button-prev"
+          navigation-next-el=".{{ section.id }}.swiper-button-next">
+
+          {% for block in section.blocks %}
+            {% if block.settings.product != blank %}
+              {%- assign product = block.settings.product -%}
+
+              {%- assign subject = product -%}
+              {%- assign scip_subject = false -%}
+
+              {%- for collection in subject.collections -%}
+                {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+                {%- if vip_collection -%}
+
+                  {%- unless current_product_collections contains collection.handle -%}
+                    {%- assign scip_subject = true -%}
+                    {%- break -%}
+                  {%- endunless -%}
+
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if scip_subject -%}
+                {% continue %}
+              {%- endif -%}
+
+              <swiper-slide>
+                <div class="ra-shop-the-look__slider-product flex flex-col justify-center items-center">
+                  <div class="w-72">
+
+                    {%- if product.featured_media -%}
+                      <a class="flex" href="{{ product.url }}" title="{{ product.title }}">
+                        {{ product.featured_image | image_url: width: 450 | image_tag: loading: 'lazy', class: 'w-full' }}
+                      </a>
+                    {%- endif -%}
+
+                    <div class="w-full text-center flex flex-col justify-center">
+                      {% if product.vendor %}
+                        <p class="text-xs mt-2 mb-1">{{ product.vendor }}</p>
+                      {% endif %}
+                      <a class="text-lg mb-1.5" href="{{ product.url }}" title="{{ product.title }}">{{ product.title }}</a>
+                      <span class="flex justify-center items-center">
+                          <span class="sr-only">{{ 'sections.shop-the-look.product-price' | t }}</span>
+                          {{ product.price | money }}
+                        </span>
+                    </div>
+
+                  </div>
+                </div>
+              </swiper-slide>
+            {% endif %}
+          {% endfor %}
+        </swiper-container>
+        <div class="{{ section.id }} swiper-button-prev">
+          {% render 'ra-icon', icon: "chevron-left", width: '18px', height: '18px', color: arrow_color %}
+        </div>
+        <div class="{{ section.id }} swiper-button-next">
+          {% render 'ra-icon', icon: "chevron-right", width: '18px', height: '18px', color: arrow_color %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if section.blocks.size > 0 %}
+    <div class="order-1 flex items-center relative">
+
+      {%- comment -%}
+        Background - images
+      {%- endcomment -%}
+      {% capture srcset %}
+        {{ desktop_image | image_url: width: 600 }} 400w,
+        {{ desktop_image | image_url: width: 800 }} 800w,
+        {{ desktop_image | image_url: width: 1200 }} 1200w
+      {% endcapture %}
+      {% capture mobile_srcset %}
+        {{ mobile_image | image_url: width: 600 }} 400w,
+        {{ mobile_image | image_url: width: 800 }} 800w
+      {% endcapture %}
+
+      {% if mobile_image == blank %}
+        <div class="hidden md:block">
+          {% render 'ra-image', alt: desktop_image.alt, src: desktop_image | image_url: width: 1800, srcset: srcset, sizes: "100vw", classes: 'w-full' %}
+        </div>
+        <div class="block md:hidden w-full">
+          {% render 'ra-image', alt: desktop_image.alt, src: desktop_image | image_url: width: 800, srcset: srcset, sizes: "100vw", classes: 'w-full' %}
+        </div>
+      {% else %}
+        <div class="hidden md:block">
+          {% render 'ra-image', alt: desktop_image.alt, src: desktop_image | image_url: width: 1800, srcset: srcset, sizes: "100vw", classes: 'w-full' %}
+        </div>
+        <div class="block md:hidden w-full">
+          {% render 'ra-image', alt: mobile_image.alt, src: mobile_image | image_url: width: 800, srcset: mobile_srcset, sizes: "100vw", classes: 'w-full' %}
+        </div>
+      {% endif %}
+
+      {%- comment -%}
+        Look
+      {%- endcomment -%}
+      {% for block in section.blocks %}
+        {% if block.settings.product != blank %}
+          {%- assign product = block.settings.product -%}
+          <div class="ra-shop-the-look__item absolute overflow-hidden w-full h-full top-0 left-0" id="block-{{ block.id }}">
+
+            {%- comment -%}
+              Dot
+            {%- endcomment -%}
+            {% if layout == 'fifty-fifty' %}
+              <button
+                data-index="{{ forloop.index0 }}"
+                data-slider="product-{{ block.id }}"
+                class="hidden md:block ra-shop-the-look__dot relative z-10 bg-transparent rounded-full w-6 h-6 after:content-[''] after:absolute after:w-8 after:h-8 after:-left-1 after:-top-1 after:rounded-full">
+                <span class="sr-only">{{ 'sections.shop-the-look.product-show' | t }} {{ product.title }}</span>
+              </button>
+              <button
+                data-popover="product-{{ block.id }}"
+                class="block md:hidden ra-shop-the-look__dot relative z-10 bg-transparent rounded-full w-6 h-6 after:content-[''] after:absolute after:w-8 after:h-8 after:-left-1 after:-top-1 after:rounded-full">
+                <span class="sr-only">{{ 'sections.shop-the-look.product-show' | t }} {{ product.title }}</span>
+              </button>
+            {% else %}
+              <button
+                data-popover="product-{{ block.id }}"
+                class="ra-shop-the-look__dot block relative z-10 bg-transparent rounded-full w-6 h-6 after:content-[''] after:absolute after:w-8 after:h-8 after:-left-1 after:-top-1 after:rounded-full">
+                <span class="sr-only">{{ 'sections.shop-the-look.product-show' | t }} {{ product.title }}</span>
+              </button>
+            {% endif %}
+
+            {%- comment -%}
+              Product popover
+            {%- endcomment -%}
+            <div class="ra-shop-the-look__product absolute z-20 flex p-3 pr-8 {% if block.settings.horizontal_position > 60 or block.settings.horizontal_position_mobile > 60 %}ra-shop-the-look__product--left{% endif %}"
+                 id="product-{{ block.id }}">
+              <button class="absolute flex w-3.5 h-3.5 top-2.5 right-2.5" data-popover="product-{{ block.id }}">
+                {% render 'ra-icon', icon: 'close', width: '14px', height: '14px' %}
+                <span class="sr-only">{{ 'sections.shop-the-look.product-hide' | t }} {{ product.title }}</span>
+              </button>
+
+              {%- if product.featured_media -%}
+                <a class="flex mr-3" href="{{ product.url }}" title="{{ product.title }}">
+                  {{ product.featured_media | image_url: width: 200 | image_tag: loading: 'lazy', class: 'w-27' }}
+                </a>
+              {%- endif -%}
+
+              <div class="flex flex-col justify-center">
+                {% if product.vendor %}
+                  <p class="text-xs m-0">{{ product.vendor }}</p>
+                {% endif %}
+                <a class="text-lg mb-1.5" href="{{ product.url }}" title="{{ product.title }}">{{ product.title }}</a>
+                <span class="flex">
+                  <span class="sr-only">{{ 'sections.shop-the-look.product-price' | t }}</span>
+                  {{ product.price | money }}
+                </span>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if layout == 'fifty-fifty' %}
+    </div>
+  {% endif %}
+</ra-shop-the-look>
+
+{% schema %}
+{
+  "name": "Shop the Look",
+  "tag": "section",
+  "class": "ra-shop-the-look",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "full-screen",
+          "label": "Full-Screen"
+        },
+        {
+          "value": "fifty-fifty",
+          "label": "Fifty-Fifty"
+        }
+      ],
+      "default": "full-screen"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_bg_image",
+      "label": "Background Image (desktop)",
+      "info": "Recommended Size: 1800x1000 (Full-screen) or 750x1000 (Fifty-Fifty)"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_bg_image",
+      "label": "Background Image (mobile)",
+      "info": "Recommended Size: 700x800"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Shop the Look"
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "title_style",
+      "label": "Title Style",
+      "info": "Choose the styling of the header",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h3"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Section CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Label",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Open in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "CTA Style",
+      "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text Color",
+      "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+      "default": "--color-primary-900"
+    },
+    {
+      "type": "select",
+      "id": "bg_color",
+      "label": "Background Color",
+      "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+      "default": "--color-util-white"
+    },
+    {
+      "type": "select",
+      "id": "look_dot_color",
+      "label": "Look Dot Color",
+      "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+      "default": "--color-util-white"
+    },
+    {
+      "type": "select",
+      "id": "look_bg_color",
+      "label": "Look Background Color",
+      "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+      "default": "--color-util-white"
+    },
+    {
+      "type": "select",
+      "id": "look_text_color",
+      "label": "Look Text Color",
+      "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+      "default": "--color-primary-900"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "look",
+      "name": "Look",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position",
+          "min": 10,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal Position (desktop)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position",
+          "min": 10,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical Position (desktop)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile",
+          "min": 10,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal Position (mobile)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile",
+          "min": 10,
+          "max": 90,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical Position (mobile)",
+          "default": 30
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the Look"
+    }
+  ]
+}
+{% endschema %}

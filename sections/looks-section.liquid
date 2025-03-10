@@ -1,0 +1,131 @@
+{% liquid
+  assign bg_image = page.metafields.custom.shop_the_look_background_image.value
+  assign products = page.metafields.custom.looks_products.value
+  assign images = page.metafields.custom.looks_images.value
+  assign image_count = 0
+  assign first_product = products | first
+  assign vip_customer = false
+
+  if customer and customer.tags contains "VIP"
+    assign vip_customer = true
+  endif
+
+  for img in images
+    assign image_count = image_count | plus: 1
+  endfor
+  capture product_data
+    echo "["
+      for prod in products
+
+        assign subject = prod
+        assign scip_subject = false
+
+        for collection in subject.collections
+          assign vip_collection = collection.metafields.custom.direct_access_only | default: false
+            if vip_collection
+              assign scip_subject = true
+            break
+          endif
+        endfor
+
+        if scip_subject
+          continue
+        endif
+
+        render 'json-product', product: prod
+        unless forloop.last
+        echo ","
+        endunless
+      endfor
+    echo "]"
+  endcapture
+%}
+{% capture product_badge_json %}{%- render 'product-badge-settings' -%}{% endcapture %}
+<div data-vue-root="LooksSection">
+  <looks-section
+    :product-badge-settings="{{- product_badge_json | escape | strip -}}"
+    :products="{{ product_data | replace: '"', "'" }}"
+    waitlist-text="{{ settings.waitlist_text | default: 'Coming Soon - Join Waitlist' }}"
+    sold-out-text="{{ settings.sold_out_badge_title }}"
+    :image-count="{{ image_count }}"
+    :vip-customer="{{ vip_customer }}"
+    order-limit="{{ 'general.order_limit_pdp' | t }}"
+    waitlist-modal-disabled="{{ settings.disable_bis_modal }}"
+    waitlist-modal-title="{{ settings.waitlist_modal_title }}"
+    waitlist-modal-description="{{ settings.waitlist_modal_description_rich_text }}"
+    waitlist-modal-legal-text="{{ settings.waitlist_modal_legal_text }}"
+    waitlist-modal-cta="{{ settings.waitlist_modal_cta | default: 'Get Notified' }}"
+    bis-modal-title="{{ settings.bis_modal_title }}"
+    bis-modal-description="{{ settings.bis_modal_description_rich_text }}"
+    bis-modal-legal-text="{{ settings.bis_modal_legal_text }}"
+    bis-modal-cta="{{ settings.bis_modal_cta | default: 'Get Notified' }}"
+    bis-text="{{ settings.bis_text | default: 'Back In Stock' }}"
+  >
+    <template #slides>
+        {%- for looks_image in images -%}
+          <swiper-slide>
+            <div class="looks-gallery__image-container relative w-full">
+              {% if looks_image.media_type == 'video' %}
+                {{ looks_image | video_tag: image_size: '2000x', autoplay: true, loop: true, muted: true, controls: false }}
+              {% else %}
+                {{ looks_image | image_url: width: "2000" | image_tag }}
+              {% endif %}
+            </div>
+          </swiper-slide>
+        {%- endfor -%}
+    </template>
+    <template #slides-nav>
+      {%- for looks_image in images -%}
+        <swiper-slide>
+          <div class="looks-nav__image-container relative w-full h-full">
+            {% if looks_image.media_type == 'video' %}
+              {{ looks_image | video_tag: image_size: '75x' }}
+            {% else %}
+              {{ looks_image | image_url: width: "75", height: "75", crop: "center", format: 'jpg' | image_tag }}
+            {% endif %}
+          </div>
+        </swiper-slide>
+      {%- endfor -%}
+    </template>
+    <template #page-content>
+      <div class="looks__page-content">
+        {{ page.content }}
+      </div>
+    </template>
+  </looks-section>
+</div>
+
+{%- style -%}
+
+#shopify-section-{{ section.id }} .looks__bg-blur {
+    z-index: -2;
+  }
+  #shopify-section-{{ section.id }} .looks__bg-image {
+    z-index: -3;
+  }
+
+@media not all and (max-width: 1025px) {
+  #shopify-section-{{ section.id }} .looks__bg-blur {
+    background-color: var(--bg-color-nav);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  #shopify-section-{{ section.id }} .looks__bg-image {
+    background-image: url({{ bg_image | image_url }});
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Looks Section",
+  "settings": [],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Looks Section"
+    }
+  ]
+}
+{% endschema %}

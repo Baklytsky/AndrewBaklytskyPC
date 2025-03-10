@@ -1,0 +1,211 @@
+{% liquid
+
+  comment
+   Settings & Logic
+  endcomment
+
+  assign split_on_desktop = section.settings.split_on_desktop
+
+
+%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    background-color: {{- section.settings.bg_color -}};
+    color: {{- section.settings.text_color -}};
+    padding-top: {{ section.settings.padding_mobile_top }}rem;
+    padding-bottom: {{ section.settings.padding_mobile_bottom }}rem;
+  }
+
+  #shopify-section-{{- section.id }} .ra-accordion-item__header, #shopify-section-{{- section.id }} .ra-icon,
+  #shopify-section-{{- section.id }} .ra-accordion-item__content {
+    color: var({{- section.settings.text_color -}});
+  }
+
+  #shopify-section-{{- section.id }} .ra-accordion-item__content ul li {
+    list-style: inside disc;
+  }
+
+  #shopify-section-{{- section.id }} .ra-accordion-item__content ol li {
+    list-style: inside decimal;
+  }
+
+  @media only screen and (min-width: 768px) {
+
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_desktop_top }}rem;
+      padding-bottom: {{ section.settings.padding_desktop_bottom }}rem;
+  }
+
+  }
+
+
+
+{%- endstyle -%}
+<div class="w-full max-w-[--max-width-large] px-6 my-0 mx-auto lg:px-24 flex flex-col justify-center
+  {% if split_on_desktop == true %}
+    lg:flex-row
+  {% endif%}
+">
+  <div class="
+    {% if split_on_desktop == true %}
+    lg:w-[30%] pr-0 lg:pr-12
+    {% endif %}
+    ">
+    <div class=" mb-14
+        {% if split_on_desktop == true %}
+        max-w-[200px]
+        lg:mb-0
+        {% endif %}
+    ">
+      <{{ section.settings.section_title_level }} class="{{ section.settings.title_style }}">
+        {{- section.settings.section_title -}}
+      </{{ section.settings.section_title_level }}>
+    </div>
+  </div>
+  <div class="
+    {% if split_on_desktop == true %}
+      lg:w-[70%] pl-0 lg:pl-12
+    {% endif %}
+  ">
+    <ra-accordion class="ra-accordion" data-multi-open="false">
+      {%- for block in section.blocks -%}
+        {% capture accordion_title %}
+          <{{ section.settings.title_level }} class="{{ section.settings.accordion_title_style }}">
+          {{ block.settings.title }}
+          </{{ section.settings.title_level }}>
+        {% endcapture %}
+        {% render 'ra-accordion-item', title: accordion_title, content: block.settings.item_content, show_icon: true %}
+      {%- endfor -%}
+    </ra-accordion>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Accordion",
+  "class": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_title_level",
+      "label": "Section Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h3"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title"
+    },
+    {
+      "type": "select",
+      "id": "title_level",
+      "label": "Accordion Title Level",
+      "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h5"
+    },
+    {
+      "type": "select",
+      "id": "accordion_title_style",
+      "label": "Accordion Title Style",
+      "info": "Choose the style H-Tag for this title",
+      "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+      "default": "h6"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "info": "Set the background color for all screen sizes",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#BD572F"
+    },
+    {
+      "type": "header",
+      "content": "Split Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "split_on_desktop",
+      "label": "Split section on Desktop",
+      "info": "When selected, accordion desktop display will be a split section with the title to the left.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Padding Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_mobile_top",
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Top (rem) ",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "padding_mobile_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Mobile Padding Bottom (rem)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "padding_desktop_top",
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Top (rem)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_desktop_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Desktop Padding Bottom (rem) ",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "accordion-item",
+      "name": "Accordion Item",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "richtext",
+          "id": "item_content",
+          "label": "Content"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Accordion"
+    }
+  ]
+}
+{% endschema %}

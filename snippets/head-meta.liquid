@@ -1,0 +1,114 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google-site-verification" content="Oken34ypcqN1M9Hp4fOfHaODlajmOz_rLQ-8G9m-g1w">
+<link rel="canonical" href="{{ canonical_url }}">
+
+{%- if settings.favicon != blank -%}
+  <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+{%- endif -%}
+
+<title>
+  {{ page_title }}
+  {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+  {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+  {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+</title>
+
+{% if page_description %}
+  <meta name="description" content="{{ page_description | escape }}">
+{% endif %}
+
+{% assign nofollow = false %}
+
+{% if template.name == 'collection' %}
+  {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+  {%- if vip_collection -%}
+    {%- assign nofollow = true -%}
+  {%- endif -%}
+
+  {% elsif template.name == 'product' %}
+  {% for collection in product.collections %}
+    {%- assign vip_collection = collection.metafields.custom.direct_access_only | default: false -%}
+
+    {%- if vip_collection -%}
+      {%- assign nofollow = true -%}
+      {%- break -%}
+    {%- endif -%}
+  {% endfor %}
+
+{% endif %}
+
+{% if nofollow %}
+  <meta name="robots" content="noindex, nofollow">
+{% else %}
+  <meta name="robots" content="index, follow">
+{% endif %}
+
+{% if template == 'index' %}
+  {% comment %}
+    ------------ Organization Schema ------------
+  {% endcomment %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": "{{ shop.url }}",
+      "logo": "https:{{ shop.brand.logo.src | image_url }}",
+      "alternateName": {{ shop.name | json }},
+      "sameAs": [
+        {% if settings.social_twitter_link != blank %}
+          "{{ settings.social_twitter_link }}",
+        {% endif %}
+        {% if settings.social_facebook_link != blank %}
+          "{{ settings.social_facebook_link }}",
+        {% endif %}
+        {% if settings.social_instagram_link != blank %}
+          "{{ settings.social_instagram_link }}",
+        {% endif %}
+        {% if settings.social_linkedin_link != blank %}
+          "{{ settings.social_linkedin_link }}",
+        {% endif %}
+        {% if settings.social_pinterest_link != blank %}
+          "{{ settings.social_pinterest_link }}",
+        {% endif %}
+        {% if settings.social_youtube_link != blank %}
+          "{{ settings.social_youtube_link }}",
+        {% endif %}
+        {% if settings.social_tiktok_link != blank %}
+          "{{ settings.social_tiktok_link }}",
+        {% endif %}
+        "{{ shop.url }}"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": {{ shop.phone | json }},
+          "contactType": "customer service",
+          "email": {{ shop.email | json }},
+          "areaServed": "US",
+          "availableLanguage": {{ request.locale.iso_code | json }}
+        }
+      ]
+    }
+  </script>
+  {% comment %}
+    ------------ Sitelinks Searchbox Schema ------------
+  {% endcomment %}
+  {%- assign search_url = shop.url | append: routes.search_url | append: "?q={search_term_string}" -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "url": "{{ shop.url }}",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {{ search_url | json }},
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+{% endif %}

@@ -1,0 +1,36 @@
+<script>
+  dataLayer.push({ecommerce: null});
+  dataLayer.push({
+    'event': 'acn_view_item',
+    'event_id': new Date().getTime() + '.' + Math.random().toString(36).substring(5),
+    ecommerce: {
+      {% assign current_variant = product.selected_or_first_available_variant %}
+      currency: {{ localization.country.currency.iso_code | json }},
+      value: {{ current_variant.price | divided_by: 100.00 }},
+      items: [
+        {
+          item_id: {{ current_variant.id | json }},
+          shopify_product_id: {{ product.id | json }},
+          shopify_variant_id: {{ current_variant.id | json }},
+          shopify_sku: {{ current_variant.sku | json }},
+          shopify_handle: {{ product.handle | json }},
+          shopify_compare_price: {{ current_variant.compare_at_price | divided_by: 100.00 }},
+          item_name: {{ product.title | json }},
+          affiliation: {{ shop.name | json }},
+          currency: {{ localization.country.currency.iso_code | json }},
+          item_brand: {{ product.vendor | json }},
+          item_category: {{ product.type | json }},
+          item_list_id:{{ current_variant.id }}{% if template.name contains 'collection' %}_{{- collection.id -}}{% endif %},
+          item_list_name: {% if template.name contains 'product' %}'product' {% else %}{{ collection.handle | json }}{% endif %},
+          item_variant: {{ current_variant.title | json }},
+          item_featured_image: "{{ current_variant.featured_image | default: product.featured_image }}",
+          option_one: {{ current_variant.option1 | json }},
+          option_two: {{ current_variant.option2 | json }},
+          option_three: {{ current_variant.option3 | json }},
+          price: {{ current_variant.price | divided_by: 100.00 }},
+          quantity: 1
+        }
+      ]
+    }
+  });
+</script>

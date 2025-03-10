@@ -1,0 +1,550 @@
+{%- style -%}
+  {%- assign mobile_styles = blank -%}
+  {%- assign desktop_styles = blank -%}
+
+
+  {%- for block in section.blocks -%}
+    {%- capture mobile_block_styles -%}
+    #block-{{- section.id -}}-{{- block.id -}} {
+      background-color: var({{- block.settings.bg_color -}});
+      color: var({{- block.settings.text_color_mobile -}});
+
+      {% assign mobile_aspect_settings = block.settings.video_aspect_ratio_mobile | remove: 'embed--' %}
+      {% assign mobile_aspect_values = mobile_aspect_settings | split: 'x' %}
+      background-color: {{ mobile_aspect_values }};
+      --component-media-ratio-x: {{ mobile_aspect_values[0] }};
+      --component-media-ratio-y: {{ mobile_aspect_values[1] }};
+
+      @media (min-width: 481px) and (max-width: 767px) {
+          --component-media-ratio-x: 4;
+          --component-media-ratio-y: 3;
+      }
+
+      @media (min-width: 768px) {
+        {% assign desktop_aspect_settings = block.settings.video_aspect_ratio_desktop | remove: 'embed--' %}
+        {% assign desktop_aspect_values = desktop_aspect_settings | split: 'x' %}
+        --component-media-ratio-x: {{ desktop_aspect_settings[1] }};
+        --component-media-ratio-y: {{ desktop_aspect_settings[0] }};
+      }
+
+    }
+    {%- endcapture -%}
+    {%- capture desktop_block_styles -%}
+    #block-{{- section.id -}}-{{- block.id -}} {
+      color: var({{- block.settings.text_color_desktop -}});
+
+    }
+    {%- endcapture -%}
+
+    {%- assign mobile_styles = mobile_styles | append: mobile_block_styles -%}
+    {%- assign desktop_styles = desktop_styles | append: desktop_block_styles -%}
+  {%- endfor -%}
+
+  #shopify-section-{{ section.id }} {
+    --swiper-pagination-color: {{- section.settings.pagination_color -}}
+  }
+
+  {{- mobile_styles -}}
+  @media (min-width: 768px) {
+    #shopify-section-{{- section.id }} .ra-hero__details {
+      {%- if block.settings.text_color_desktop != blank -%}
+      color: var({{- block.settings.text_color_desktop | default: "inherit" -}});
+      {%- endif -%}
+    }
+    {{- desktop_styles -}}
+  }
+{%- endstyle -%}
+
+{% capture arrow_color %}
+  {{ section.settings.arrow_color }}
+{% endcapture %}
+
+<div class="relative ra-hero__wrapper">
+  <swiper-container
+    class="ra-hero overflow-hidden set--aspect-ratio-{{ section.settings.height }} {% if section.settings.stack_mobile %}set--details-after-sm set--details-overlay-md{% else %}set--details-overlay{% endif %}"
+    {% if section.settings.autoplay %}
+      autoplay-delay="{{ section.settings.delay | times: 1000 }}"
+    {% endif %}
+    effect="{{ section.settings.effect }}"
+    navigation-prev-el="#shopify-section-{{ section.id }} .swiper-button-prev"
+    navigation-next-el="#shopify-section-{{ section.id }} .swiper-button-next"
+    pagination-el=".swiper-pagination-{{ section.id }}"
+    pagination-clickable="true"
+    slides-per-view="1"
+    space-between="0"
+    loop="true"
+  >
+    {% for block in section.blocks %}
+      <swiper-slide id="block-{{ section.id }}-{{ block.id }}">
+        <div class="ra-hero__media component-media relative">
+          {% if block.type == 'slide' %}
+            {% render 'hero-slide', block: block %}
+          {% endif %}
+        </div>
+        <div class="ra-hero__details component-details--set-order h-auto {% if section.settings.stack_mobile %}!relative md:!absolute{% endif %}">
+          <div class="ra-hero__copy {{ block.settings.text_alignment }}">
+            {% capture eyebrow_styles %}
+              {% if block.settings.color_overrides_enabled %}
+                color: {{ block.settings.eyebrow_color }};
+              {% endif %}
+            {% endcapture %}
+            {% if block.settings.eyebrow_text != blank %}
+              <div class="ra-hero__subtitle" style="{{ eyebrow_styles }}">{{ block.settings.eyebrow_text }}</div>
+            {% endif %}
+
+            {% capture title_styles %}
+              {% if block.settings.color_overrides_enabled %}
+                color: {{ block.settings.title_color }};
+              {% endif %}
+            {% endcapture %}
+            {% if block.settings.title != blank %}
+              <{{ block.settings.title_level }}
+                class="ra-title ra-hero__title {{ block.settings.title_style }}"
+                style="{{ title_styles }}"
+              >
+                {{ block.settings.title }}
+              </{{ block.settings.title_level }}>
+            {% endif %}
+
+            {% capture description_styles %}
+              {% if block.settings.color_overrides_enabled %}
+                color: {{ block.settings.description_color }};
+              {% endif %}
+            {% endcapture %}
+            {% if block.settings.description != blank %}
+              <div class="ra-hero__description rte" style="{{ description_styles }}">
+                {{ block.settings.description }}
+              </div>
+            {% endif %}
+            {% comment %}
+              Check to see if CTA or Player Controls are present. If they are, render Link List which holds them.
+            {% endcomment %}
+            {% if block.settings.cta_1_url != blank or block.settings.cta_2_url != blank or block.settings.background_video_embed_desktop != blank or block.settings.background_video_embed_mobile != blank %}
+              <div class="ra-link-list ra-hero__link-list">
+                {% if block.settings.cta_1_label != blank and block.settings.cta_1_url != blank %}
+                  {% render 'ra-button',
+                    type: 'a',
+                    style: block.settings.cta_1_style,
+                    label: block.settings.cta_1_label,
+                    url: block.settings.cta_1_url,
+                    new_tab: block.settings.open_new_tab_1,
+                    class: 'min-w-[175px] ra-link-list__cta '
+                  %}
+                {% endif %}
+
+                {% if block.settings.cta_2_label != blank and block.settings.cta_2_url != blank %}
+                  {% render 'ra-button',
+                    type: 'a',
+                    style: block.settings.cta_2_style,
+                    label: block.settings.cta_2_label,
+                    url: block.settings.cta_2_url,
+                    new_tab: block.settings.open_new_tab_2,
+                    class: 'min-w-[175px] ra-link-list__cta'
+                  %}
+                {% endif %}
+                {% if block.settings.background_video_embed_desktop != blank
+                  or block.settings.background_video_embed_mobile != blank
+                  or block.settings.background_video_file_desktop != blank
+                  or block.settings.background_video_file_mobile != blank %}
+                  {% render 'ra-player-controls' block: block %}
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </swiper-slide>
+    {% endfor %}
+  </swiper-container>
+
+  {% if section.settings.show_pagination and section.blocks.size > 1 %}
+    <div class="swiper-pagination swiper-pagination-{{ section.id }}"></div>
+  {% endif %}
+
+  {% if section.settings.show_arrows and section.blocks.size > 1 %}
+    <div class="{{ section.id }} swiper-button-prev">
+      {% render 'ra-icon', icon: 'chevron-left', color: arrow_color %}
+    </div>
+    <div class="{{ section.id }} swiper-button-next">
+      {% render 'ra-icon', icon: 'chevron-right', color: arrow_color %}
+    </div>
+  {% endif %}
+</div>
+
+
+{% schema %}
+{
+  "name": "Hero - Carousel",
+  "tag": "section",
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "color_overrides_enabled",
+          "label": "Use Color Overrides",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "eyebrow_text",
+          "label": "Eyebrow Text",
+          "default": "Eyebrow Text"
+        },
+        {
+          "type": "color",
+          "id": "eyebrow_color",
+          "label": "Eyebrow Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "This is a title"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "select",
+          "id": "title_level",
+          "label": "Title Level",
+          "info": "Choose the semantic H-Tag for this title (Note - please do not update)",
+          "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+          "default": "h2"
+        },
+        {
+          "type": "select",
+          "id": "title_style",
+          "label": "Title Style",
+          "info": "Choose the styling of the header",
+          "options": [{"label":"H1","value":"h1"},{"label":"H2","value":"h2"},{"label":"H3","value":"h3"},{"label":"H4","value":"h4"},{"label":"H5","value":"h5"},{"label":"H6","value":"h6"}],
+          "default": "h3"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text Alignment",
+          "options": [{"label":"Top Right","value":"set--v-align-top set--h-align-right"},{"label":"Top Center","value":"set--v-align-top set--h-align-center"},{"label":"Top Left","value":"set--v-align-top set--h-align-left"},{"label":"Middle Right","value":"set--v-align-middle set--h-align-right"},{"label":"Middle Center","value":"set--v-align-middle set--h-align-center"},{"label":"Middle Left","value":"set--v-align-middle set--h-align-left"},{"label":"Bottom Right","value":"set--v-align-bottom set--h-align-right"},{"label":"Bottom Center","value":"set--v-align-bottom set--h-align-center"},{"label":"Bottom Left","value":"set--v-align-bottom set--h-align-left"}],
+          "default": "set--v-align-middle set--h-align-center"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "color",
+          "id": "description_color",
+          "label": "Description Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "header",
+          "content": "Media (Desktop)",
+          "info": "Choose between an image or video to set as your background element on desktop"
+        },
+        {
+          "type": "image_picker",
+          "id": "bg_image_desktop",
+          "label": "Background Image (desktop)",
+          "info": "Recommended Size: 1800x1800"
+        },
+        {
+          "type": "video",
+          "id": "background_video_file_desktop",
+          "label": "Video Upload (file upload)",
+          "info": "Upload as MP4"
+        },
+        {
+          "type": "video_url",
+          "id": "background_video_embed_desktop",
+          "label": "Video Upload (embed option)",
+          "info": "Paste link for Youtube or Vimeo",
+          "accept": [
+            "youtube",
+            "vimeo"
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "video_controls_desktop",
+          "label": "Show Video Controls (desktop)",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "video_aspect_ratio_desktop",
+          "label": "Video Aspect Ratio",
+          "options": [
+            {
+              "value": "embed--21x9",
+              "label": "21x9"
+            },
+            {
+              "value": "embed--16x9",
+              "label": "16x9"
+            },
+            {
+              "value": "embed--4x3",
+              "label": "4x3"
+            },
+            {
+              "value": "embed--1x1",
+              "label": "1x1"
+            }
+          ],
+          "default": "embed--16x9"
+        },
+        {
+          "type": "header",
+          "content": "Media (Mobile)",
+          "info": "Choose between an image or video to set as your background element on mobile. If no mobile media is chosen, will default to desktop."
+        },
+        {
+          "type": "image_picker",
+          "id": "bg_image_mobile",
+          "label": "Background Image (mobile)",
+          "info": "Recommended Size: 800x800"
+        },
+        {
+          "type": "video_url",
+          "id": "background_video_embed_mobile",
+          "label": "Mobile Video Upload (embed option)",
+          "info": "Paste link for Youtube or Vimeo",
+          "accept": [
+            "youtube",
+            "vimeo"
+          ]
+        },
+        {
+          "type": "video",
+          "id": "background_video_file_mobile",
+          "label": "Mobile Video Upload (file upload)",
+          "info": "Upload as MP4"
+        },
+        {
+          "type": "checkbox",
+          "id": "video_controls_mobile",
+          "label": "Show Video Controls (mobile)",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "video_aspect_ratio_mobile",
+          "label": "Video Aspect Ratio (Mobile) ",
+          "options": [
+            {
+              "value": "embed--3x4",
+              "label": "4x3"
+            },
+            {
+              "value": "embed--4x5",
+              "label": "5x4"
+            },
+            {
+              "value": "embed--1x1",
+              "label": "1x1"
+            },
+            {
+              "value": "embed--9x16",
+              "label": "16x9"
+            }
+          ],
+          "default": "embed--1x1"
+        },
+        {
+          "type": "header",
+          "content": "Color Settings"
+        },
+        {
+          "type": "select",
+          "id": "text_color_desktop",
+          "label": "Text Color (desktop)",
+          "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+          "default": "--color-primary-900"
+        },
+        {
+          "type": "select",
+          "id": "text_color_mobile",
+          "label": "Text Color (mobile)",
+          "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+          "default": "--color-primary-900"
+        },
+        {
+          "type": "select",
+          "id": "bg_color",
+          "label": "Background Color",
+          "info": "Set the background color for all screen sizes",
+          "options": [{"label":"Primary","value":"--color-primary-900"},{"label":"Secondary","value":"--color-secondary-900"},{"label":"Tertiary","value":"--color-tertiary-900"},{"label":"Black","value":"--color-grey-900"},{"label":"Util - Red","value":"--color-util-red"},{"label":"Util - Green","value":"--color-util-green"},{"label":"Util - Yellow","value":"--color-util-yellow"},{"label":"Util - White","value":"--color-util-white"}],
+          "default": "--color-primary-900"
+        },
+        {
+          "type": "header",
+          "content": "Block CTA's"
+        },
+        {
+          "type": "text",
+          "id": "cta_1_label",
+          "label": "CTA 1 Text",
+          "default": "Learn More"
+        },
+        {
+          "type": "url",
+          "id": "cta_1_url",
+          "label": "CTA 1 URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab_1",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "cta_1_style",
+          "label": "CTA 1 Style",
+          "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+          "default": "primary"
+        },
+        {
+          "type": "text",
+          "id": "cta_2_label",
+          "label": "CTA 2 Text",
+          "default": "Learn More"
+        },
+        {
+          "type": "url",
+          "id": "cta_2_url",
+          "label": "CTA 2 URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab_2",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "cta_2_style",
+          "label": "CTA 2 Style",
+          "options": [{"label":"Primary","value":"primary"},{"label":"Secondary","value":"secondary"},{"label":"Tertiary","value":"tertiary"}],
+          "default": "secondary"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "default": "main",
+      "info": "Select hero height",
+      "options": [
+        {
+          "value": "short",
+          "label": "Small"
+        },
+        {
+          "value": "main",
+          "label": "Medium"
+        },
+        {
+          "value": "tall",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_mobile",
+      "label": "Stack on Mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Delay",
+      "default": 5,
+      "info": "Delay between transitions (in seconds). Applys delay only if 'Autoplay' is checked."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show Arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show Pagination",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "pagination_color",
+      "label": "Pagination Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "effect",
+      "label": "Slider Effect",
+      "default": "slide",
+      "options": [
+        {
+          "value": "slide",
+          "label": "Slide"
+        },
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "coverflow",
+          "label": "Coverflow"
+        },
+        {
+          "value": "flip",
+          "label": "Flip"
+        },
+        {
+          "value": "creative",
+          "label": "Creative"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero - Carousel"
+    }
+  ]
+}
+{% endschema %}

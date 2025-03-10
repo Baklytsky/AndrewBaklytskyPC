@@ -1,0 +1,71 @@
+.ra-preheader {
+  /*height must initially be 0 until preheader status is computed by custom element script */
+  height:0;
+  overflow-y: hidden;
+
+  swiper-slide {
+    display: none;
+
+    &:first-child {
+      display: block;
+    }
+  }
+
+  .swiper-initialized {
+    swiper-slide {
+      display: block;
+    }
+  }
+
+  .swiper-wrapper {
+    height: 46px;
+  }
+
+  .ra-preheader__slider {
+    &.ra-preheader__slider--left swiper-container,
+    &.ra-preheader__slider--left .swiper {
+      @media breakpoint(md) {
+        margin-left: 0;
+      }
+    }
+  }
+
+  .ra-preheader__slider--left {
+    justify-content: left;
+  }
+  .ra-preheader__slider--center {
+    justify-content: center;
+  }
+
+  .ra-preheader__text {
+
+    width: 100%;
+    &,
+    * {
+      text-align: left;
+      color: var(--preheader-text-color);
+      white-space: nowrap;
+      line-height: 30px;
+    }
+
+    p {
+      @media breakpoint(md-max) {
+        font-size: 12px;
+        line-height: 33px;
+      }
+    }
+  }
+
+  /* script adds this class if header should be shown */
+  &--active {
+    height: auto;
+  }
+
+  /* close button */
+  &__close {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,39 @@
+{% comment %}
+  Props:
+  collapseLabel:  string item for showing scrollable content - (optional)
+  expandLabel:    string item for hiding scrollable content - (optional)
+  content:        raw or captured markup to inject - (required)
+  maxHeight:      string define max height in (rem) unit - optional (or just use stylesheet for this)
+
+  Example scrollable:
+  {%- render 'ra-scrollable', content: 'some content as raw or <strong>HTML</strong>.', maxHeight: '4rem' -%}
+{% endcomment %}
+
+<div
+  class="ra-scrollable"
+  {% if maxHeight %}
+    style="--scrollable-max-height: {{ maxHeight }};"
+  {% endif %}
+>
+  {% if content != blank %}
+    <div class="ra-scrollable__content">
+      {{ content }}
+    </div>
+  {% endif %}
+  <button type="button" class="ra-scrollable__expand ra-link">
+    <span class="ra-expand">
+      {% if expandLabel == blank %}
+        Show
+      {% else %}
+        {{ expandLabel }}
+      {% endif %}
+    </span>
+    <span class="ra-collapse">
+      {% if collapseLabel == blank %}
+        Hide
+      {% else %}
+        {{ collapseLabel }}
+      {% endif %}
+    </span>
+  </button>
+</div>

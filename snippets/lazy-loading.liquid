@@ -1,0 +1,45 @@
+{%- comment -%}
+{%- render 'lazy-loading',
+  url: url,
+  paginate: paginate,
+  elements_selector: elements_selector,
+  inner_selector: inner_selector,
+  load_btn_text: load_btn_text,
+  loading_type: loading_type
+-%}
+{%- endcomment -%}
+
+{%- if paginate != blank and elements_selector != blank -%}
+  {%- assign pages_count = paginate.pages -%}
+  {%- assign current_page = paginate.current_page -%}
+
+  {% style %}
+    lazy-loading[data-loading=false] .khySpinner {
+      display: none;
+    }
+    lazy-loading[data-loading=true] [data-load-btn] {
+      display: none;
+    }
+  {% endstyle %}
+
+  <lazy-loading
+    class="hidden"
+    data-loading="false"
+    data-elements-selector="{{ elements_selector }}"
+    data-inner-selector="{{ inner_selector }}"
+    data-pages="{{ pages_count }}"
+    data-current-page="{{ current_page }}"
+    {% if url != blank %}data-url="{{ url }}"{% endif %}
+    data-loading-type="{{ loading_type }}">
+    <div class="khySpinner mx-auto"></div>
+    {%- if loading_type == 'button' -%}
+      <button type="button"
+              class="w-[100%] md:w-auto ra-button ra-button ra-button--primary ra-button--md"
+              data-load-btn>
+        {{ load_btn_text }}
+      </button>
+    {%- endif -%}
+  </lazy-loading>
+{%- endif -%}
+
+

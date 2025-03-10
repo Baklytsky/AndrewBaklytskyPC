@@ -1,0 +1,124 @@
+{% comment %}
+  Props:
+  image:               Image Object, image to be used as the icon
+  image_src:           String, url for tile image - (required)
+  image_alt:             String, alt text for tile image
+  image_width:           String, number used to define px value of image width - (optional) (default maintains aspect-ratio)
+  subtitle:            String, text for subtitle - (optional)
+  title:               String, text for main title - (required)
+  description:         String, text for description area - (required)
+  link_url:            String, text for link url - (optional)
+  linkText:            String, text for link - (optional)
+
+  title_as:            Number, style title as [h1, h2, h3] etc, (optional) - default is h6 (pass in just a number)
+  stacked:             Boolean, stack content vertically (default is false) - (optional)
+
+  // Layout & Alignment
+  details_location:    String, [before, overlay, after] - (optional)
+  details_location_md: String, [before, overlay, after] (larger screen size) - optional
+  horizontal_align:    String, [left, center, right] - (optional)
+  horizontal_align_md: String, [left, center, right] - (larger screen size)
+  vertical_align:      String, [top, middle, bottom] set vertical alignment - (default = top) - (optional)
+  vertical_align_md:   String, [top, middle, bottom] - (larger screen size)
+
+  Example Breadcrumb:
+  {% render 'icon-tile' %}
+{% endcomment %}
+
+{% capture classes %}
+  ra-icon-tile
+  set--details-{{ details_location | default: 'after' }}{% if details_location_md != blank %}-sm{% endif %}
+  {% if details_location_md != blank %}
+    set--details-{{ details_location_md }}-md
+  {% endif %}
+  set--h-align-{{ horizontal_align | default: 'center' }}{% if horizontal_align_md != blank %}-sm{% endif %}
+  {% if horizontal_align_md != blank %}
+    set--h-align-{{ horizontal_align_md }}-md
+  {% endif %}
+  {% if link_url and linkText != blank %}
+    ra-icon-tile--has-main-link
+  {% endif %}
+  {% unless stacked == false %}
+    ra-icon-tile--stack
+  {% endunless %}
+{% endcapture %}
+
+{% capture horizontal_classes %}
+  set--h-align-{{ horizontal_align | default: 'center' }}{% if horizontal_align_md != blank %}-sm{% endif %}
+  {% if horizontal_align_md != blank %}
+    set--h-align-{{ horizontal_align_md }}-md
+  {% endif %}
+{% endcapture %}
+
+{% capture vertical_classes %}
+  set--v-align-{{ vertical_align | default: 'top' }}{% if vertical_align_md != blank %}-sm{% endif %}
+  {% if vertical_align_md != blank %}
+    set--v-align-{{ vertical_align_md }}-md
+  {% endif %}
+{% endcapture %}
+
+<article class="{{ classes }}">
+  {% if image != blank %}
+    <div class="ra-icon-tile__media component-media {{ vertical_classes }}">
+      <div class="ra-image ra-icon-tile__image" style="--media-width: {{ image_width | default: 64 }}px">
+        {% assign image_alt = image_alt | default: image.alt %}
+        {{
+          image
+          | image_url: width: image_width
+          | image_tag: width: image_width, class: 'ra-image__media', alt: image_alt, loading: 'lazy'
+        }}
+      </div>
+    </div>
+  {% elsif image_src != blank %}
+    <div class="ra-icon-tile__media component-media {{ vertical_classes }}">
+      <div class="ra-image ra-icon-tile__image" style="--media-width:{{ image_width | default: 64 }}px">
+        {% assign image_alt = image_alt | default: title %}
+        {% comment %}theme-check-disable RemoteAsset{% endcomment %}
+        <img
+          loading="lazy"
+          src="{{ image_src }}"
+          width="{{ image_width | default: 64 }}"
+          height="auto"
+          alt="{{ image_alt }}"
+          src="ra-image__media"
+          class="ra-image__media"
+        >
+      </div>
+    </div>
+  {% endif %}
+  <div class="ra-icon-tile__details component-details {{ vertical_classes }}">
+    <div class="ra-icon-tile__copy {{ horizontal_classes }}">
+      {% if subtitle != blank %}
+        <div class="ra-icon-tile__subtitle">
+          {{ subtitle }}
+        </div>
+      {% endif %}
+      {% if title != blank %}
+        <h2
+          class="ra-title ra-icon-title__title"
+          style="--title-font-size:var(--font-size-h{{- title_as | default: '6' -}});"
+        >
+          <div>{{ title }}</div>
+        </h2>
+      {% endif %}
+      {% if description != blank %}
+        <div class="ra-icon-tile__description">
+          {{ description }}
+        </div>
+      {% endif %}
+      {% if link_url and linkText != blank %}
+        <div class="ra-link-list ra-icon-tile__link-list">
+          <a
+            href="{{ link_url }}"
+            class="ra-link-list__cta ra-link"
+            label="{{ linkText }}"
+            title="Click Me"
+            aria-label="Click Me, navigate out"
+          >
+            {{ linkText }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</article>

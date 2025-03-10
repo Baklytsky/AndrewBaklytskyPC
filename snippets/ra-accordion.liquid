@@ -1,0 +1,59 @@
+{% comment %}
+  Props:
+  item1_title:      string item 1 title - (required)
+  item1_content:    string item 1 content - (required)
+  item2_title:      string item 2 title - (required)
+  item2_content:    string item 2 content- (required)
+  ...               upto 10 accordion items
+  show_icon:        boolean show or hide accordion toggle icon - (optional)
+  multiple_open:    boolean whether to allow multiple items to be open - (optional)
+  first_item_open:  boolean whether the first item should be open on page load - (optional)
+
+  Example accordion:
+  {% render 'ra-accordion',
+  item1_title: 'Heading 1',
+  item1_content: 'Content for <strong>heading 1</strong> as <em>HTML</em>.',
+  item2_title: 'Heading 2'
+  item2_content: 'Content for <strong>heading 2</strong> as <em>HTML</em>.'
+  %}
+
+  Example accordion + icon:
+  {% render 'ra-accordion',
+  show_icon: true
+  item1_title: 'Heading 1',
+  item1_content: 'Content for <strong>heading 1</strong> as <em>HTML</em>.',
+  item2_title: 'Heading 2',
+  item2_content: 'Content for <strong>heading 2</strong> as <em>HTML</em>.'
+  %}
+{% endcomment %}
+
+{%- capture item_titles -%}
+  {{ item1_title }}|{{ item2_title }}|{{ item3_title }}|{{ item4_title }}|{{ item5_title }}|{{ item6_title }}|{{ item7_title }}|{{ item8_title }}|{{ item9_title }}|{{ item10_title }}
+{%- endcapture -%}
+
+{%- capture item_contents -%}
+  {{ item1_content }}|{{ item2_content }}|{{ item3_content }}|{{ item4_content }}|{{ item5_content }}|{{ item6_content }}|{{ item7_content }}|{{ item8_content }}|{{ item9_content }}|{{ item10_content }}
+{%- endcapture -%}
+
+{%- assign item_titles = item_titles | split: '|' -%}
+{%- assign item_contents = item_contents | split: '|' -%}
+
+<ra-accordion class="ra-accordion {{ classes }}" data-multi-open="{{ multiple_open | default: 'false' }}">
+  {%- liquid
+    if content
+      echo content
+    else
+      for title in item_titles
+        if title != blank
+          if forloop.first and first_item_open
+            assign is_open = true
+          else
+            assign is_open = false
+          endif
+
+          render 'ra-accordion-item', title: title, content: item_contents[forloop.index0], show_icon: show_icon, is_open: is_open
+        endif
+      endfor
+    endif
+  -%}
+</ra-accordion>

@@ -1,0 +1,118 @@
+{% comment %}
+  Props:
+  article:      Article object - (required)
+  aspect_ratio: String [horizonatal, video] - (required)
+  show_date:    Boolean - (optional)
+  show_tags:    Boolean - (optional)
+  show_excerpt: Boolean - (optional)
+
+  Example:
+  {% render 'ra-article-tile'
+  article: article,
+  aspect_ratio: section.settings.aspect_ratio,
+  show_date: section.settings.show_date,
+  show_author: section.settings.show_article_author,
+  show_tags: section.settings.show_tags,
+  show_excerpt: section.settings.show_excerpt
+  %}
+{% endcomment %}
+
+<div class="grid grid-cols-1 md:grid-cols-5" data-template="{{ template.name }}">
+  {% if template.name == 'article' %}
+    <div class="flex aspect-{{ aspect_ratio }} md:col-span-2"
+         title="{{ article.title }}"
+         aria-label="{{ article.title }}">
+      {% capture srcset %}
+        {{ article.image.src | image_url: width: 500 }} 400w,
+        {{ article.image.src | image_url: width: 600 }} 800w,
+        {{ article.image.src | image_url: width: 700 }} 1200w
+      {% endcapture %}
+
+      {%- assign src = article.image.src | image_url: width: 800 -%}
+
+      {%
+        render 'ra-image',
+        alt: article.image.src.alt,
+        src: src,
+        classes: "w-full h-full object-cover object-center"
+      %}
+    </div>
+  {% else %}
+    <a
+      class="flex aspect-{{ aspect_ratio }} md:col-span-2"
+      href="{{ article.url }}"
+      title="{{ article.title }}"
+      aria-label="{{ article.title }}"
+    >
+      {% capture srcset %}
+        {{ article.image.src | image_url: width: 500 }} 400w,
+        {{ article.image.src | image_url: width: 600 }} 800w,
+        {{ article.image.src | image_url: width: 700 }} 1200w
+      {% endcapture %}
+
+      {%- assign src = article.image.src | image_url: width: 800 -%}
+
+      {%
+        render 'ra-image',
+        alt: article.image.src.alt,
+        src: src,
+        classes: "w-full h-full object-cover object-center"
+      %}
+    </a>
+  {% endif %}
+
+  <div class="py-5 flex flex-col justify-center pl-0 md:pl-20 md:col-span-3">
+    {% if article.tags.size > 0 and show_tags %}
+      <div class="capitalize mb-2">
+        {% for tag in article.tags %}
+          {% render 'ra-badge', style: 'primary', label: tag.title, class: 'mb-1' %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if template.name == 'article' %}
+      <div
+        class="flex"
+        title="{{ article.title }}"
+        aria-label="{{ article.title }}"
+      >
+        <h1 class="h4 mb-2">{{ article.title }}</h1>
+      </div>
+    {% else %}
+      <a
+        class="flex"
+        href="{{ article.url }}"
+        title="{{ article.title }}"
+        aria-label="{{ article.title }}"
+      >
+        <h2 class="h4 mb-2">{{ article.title }}</h2>
+      </a>
+    {% endif %}
+
+    {% if show_excerpt and article.excerpt.size > 0 or article.content.size > 0 %}
+      {%- if article.excerpt.size > 0 -%}
+        <p>{{ article.excerpt | strip_html | truncatewords: 20 }}</p>
+      {%- else -%}
+        <p>{{ article.content | strip_html | truncatewords: 20 }}</p>
+      {%- endif -%}
+    {% endif %}
+
+    {%- if show_date -%}
+      <p class="text-sm mt-5" itemprop="dateCreated pubdate datePublished">
+        {{ article.published_at | time_tag: format: 'date' }}
+      </p>
+    {%- endif -%}
+
+    {%- if show_author -%}
+      <p class="text-sm" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">By {{ article.author }}</span>
+      </p>
+    {%- endif -%}
+
+    {% if template.name != 'article' %}
+      <div class="mt-5">
+        {% render 'ra-button', type: 'a', as_text: true, url: article.url, label: 'Read More' %}
+      </div>
+    {% endif %}
+  </div>
+</div>
