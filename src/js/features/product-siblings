@@ -1,6 +1,4 @@
 import {getSizedImageUrl} from '@shopify/theme-images';
-import Tooltip from './tooltip';
-import NativeScrollbar from './native-scrollbar';
 
 const selectors = {
   productCutline: '[data-product-cutline]',
@@ -14,7 +12,6 @@ const selectors = {
   siblingCount: '[data-sibling-count]',
   siblingFieldset: '[data-sibling-fieldset]',
   siblingLink: '[data-sibling-link]',
-  tooltip: '[data-tooltip]',
 };
 
 const classes = {
@@ -197,7 +194,7 @@ if (!customElements.get('product-siblings')) {
 
       connectedCallback() {
         this.product = this.closest(selectors.productGridItem);
-        this.siblingScrollbar = this.querySelector(selectors.siblingsInnerHolder);
+        // this.siblingScrollbar = this.querySelector(selectors.siblingsInnerHolder); TODO: test this
         this.siblingCount = this.querySelector(selectors.siblingCount);
         this.siblingFieldset = this.querySelector(selectors.siblingFieldset);
         this.siblingLinks = this.querySelectorAll(selectors.siblingLink);
@@ -205,8 +202,6 @@ if (!customElements.get('product-siblings')) {
         this.productLink = this.closest(selectors.link);
         this.hideSwatchesTimer = 0;
         this.swatchesStyle = theme.settings.collectionSwatchStyle;
-
-        this.initScrollbar();
 
         if (this.siblingFieldset && this.productInfo) {
           if (this.swatchesStyle == 'grid' || this.swatchesStyle == 'slider' || this.swatchesStyle == 'limited') {
@@ -225,10 +220,7 @@ if (!customElements.get('product-siblings')) {
           new SiblingSwatches(this.siblingLinks, this.product);
         }
 
-        // Init Tooltips
-        this.querySelectorAll(selectors.tooltip).forEach((tooltip) => {
-          new Tooltip(tooltip);
-        });
+        // Init Tooltips: TODO: test this
       }
 
       showSiblings() {
@@ -251,12 +243,6 @@ if (!customElements.get('product-siblings')) {
 
           this.siblingFieldset.classList.remove(classes.visible);
         }, 100);
-      }
-
-      initScrollbar() {
-        if (this.siblingScrollbar) {
-          new NativeScrollbar(this.siblingScrollbar);
-        }
       }
     }
   );
