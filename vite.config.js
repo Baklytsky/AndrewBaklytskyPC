@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 import shopify from 'vite-plugin-shopify'
+import vue from '@vitejs/plugin-vue'
 import cleanup from '@by-association-only/vite-plugin-shopify-clean'
 import pageReload from 'vite-plugin-page-reload'
 import tailwindcss from '@tailwindcss/vite'
 import autoprefixer from 'autoprefixer'
-import path from 'path'
-import fs from 'fs'
 
 export default defineConfig({
   plugins: [
+    vue(),
     cleanup(),
     shopify({
       // Root path to your Shopify theme directory (location of snippets, sections, templates, etc.)
@@ -33,41 +33,6 @@ export default defineConfig({
     pageReload('/tmp/theme.update', {
       delay: 2000
     }),
-    {
-      name: 'vite-plugin-css-to-liquid',
-      generateBundle(options, bundle) {
-        Object.keys(bundle).forEach(fileName => {
-          if (fileName.endsWith('.css') && fileName.startsWith('inline-')) {
-            const source = bundle[fileName].source;
-            const liquidContent = `{% style %}\n${source}\n{% endstyle %}`;
-            const fileNameWithoutHash = path.basename(fileName, '.min.css').split('.')[0];
-            const liquidFileName = fileNameWithoutHash + '.liquid';
-            const outputDir = path.resolve(__dirname, 'snippets');
-            if (!fs.existsSync(outputDir)) {
-              fs.mkdirSync(outputDir, { recursive: true });
-            }
-            fs.writeFileSync(path.join(outputDir, liquidFileName), liquidContent);
-          }
-        });
-      },
-    },
-    {
-      name: 'watch-additional-entrypoints',
-      apply: 'serve',
-      configureServer(server) {
-        server.watcher.add([
-          'src/scss/inline/*.scss',
-          'src/scss/sections/*.scss',
-          'src/js/sections/*.js',
-        ]);
-
-        server.watcher.on('change', (filePath) => {
-          if (filePath.endsWith('.scss') || filePath.endsWith('.js')) {
-            server.ws.send({ type: 'full-reload' });
-          }
-        });
-      }
-    }
   ],
   css: {
     preprocessorOptions: {

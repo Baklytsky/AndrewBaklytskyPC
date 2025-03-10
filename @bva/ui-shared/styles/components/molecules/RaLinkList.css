@@ -1,0 +1,33 @@
+
+.ra-link-list {
+  display: flex;
+  align-items: var(--link-list-align-items, center);
+  flex-flow: var(--link-list-flow, wrap);
+  gap: var(--link-list-gap, var(--spacing-sm));
+
+  @media breakpoint(md) {
+    width: var(--link-list-width, auto);
+  }
+
+  @media breakpoint(md-max) {
+    width: var(--link-list-width, 100%);
+  }
+}
+
+  .ra-link-list__cta {
+    /* START: Accessibility
+    Set these at a higher z-index so that they are accessible
+    when using the invisible anchor Overlay. */
+    z-index: var(--z-index-base);;
+    /* END: Accessibility */
+
+    @media breakpoint(md) {
+      flex: var(--link-item-grow, 1) 1 auto;
+      min-width: var(--link-item-min-width, 10.625rem);
+    }
+
+    @media breakpoint(md-max) {
+      flex: var(--link-item-grow, 1) 1 calc(50% - (2 * var(--link-list-gap, var(--spacing-sm))));
+    }
+  }
+

@@ -1,0 +1,114 @@
+
+/*------------------------------------*\
+  #CUSTOM SELECT CONTAINER
+\*------------------------------------*/
+.ra-select-custom {
+  position: relative;
+  width: var(--select-custom-width);
+  margin: var(--select-custom-margin);
+  color: var(--select-custom-color);
+  font-size: var(--select-custom-font-size);
+  cursor: default;
+}
+
+  .ra-select-custom__wrapper {
+    position: relative;
+    border-radius: var(--select-custom-border-radius);
+    box-shadow: var(--select-custom-box-shadow);
+  }
+
+  .ra-select-custom__trigger {
+    border-radius: inherit;
+    font-family: var(--select-custom-font-family, var(--font-family-secondary));
+    color: var(--select-custom-color, var(--c-copy));
+  }
+
+  .ra-select-custom__trigger--placeholder {
+    color: var(--select-custom-placeholder-color, var(--c-gray-500));
+  }
+
+  .ra-select-custom__chevron {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+  }
+
+  .ra-select-custom__drawer {
+    left: 0;
+    z-index: var(--select-drawer-z-index, var(--z-index-above-overlay));
+    width: 100%;
+    background-color: var(--select-drawer-background, var(--c-panel));
+    border-radius: var(--select-drawer-border-radius);
+    box-shadow: var(--select-drawer-box-shadow);
+    overflow: hidden;
+
+    @media breakpoint(md) {
+      position: absolute;
+      top: calc(100% - .0625rem);
+      border: var(--select-drawer-border, solid .0625rem var(--c-border-primary));
+    }
+
+    @media breakpoint(md-max) {
+      position: fixed;
+      bottom: 0;
+      border-top: var(--select-drawer-border, solid .0625rem var(--c-border-primary));
+    }
+  }
+
+  .ra-select-custom__drawer--closed {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .ra-select-custom__options {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    overflow: auto;
+    min-height: var(--select-drawer-min-height);
+    max-height: var(--select-drawer-max-height);
+  }
+
+  .ra-select-custom__cancel {
+    --button-width: 90%;
+
+    margin: 1rem auto;
+  }
+
+/*------------------------------------*\
+  #CUSTOM SELECT OPTION
+\*------------------------------------*/
+.ra-select-custom-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: var(--select-custom-height, 2.75rem);
+  padding: var(--select-custom-padding, 0 1rem);
+  font-family: var(--select-option-font-family, var(--select-custom-font-family));
+
+  &:not(:first-child) {
+    border-top: var(--select-option-border, solid .0625rem var(--c-gray-100));
+  }
+
+  &:hover, &:focus {
+    cursor: pointer;
+  }
+}
+
+.ra-select-custom-option:hover,
+.ra-select-custom-option:focus,
+.ra-select-custom-option--highlight {
+  background-color: var(--select-option-interact-background, var(--c-primary));
+  color: var(--select-option-interact-color, var(--c-primary-contrast));
+}
+
+  .ra-select-custom-option__icon {
+    position: absolute;
+    top: 0;
+    right: var(--select-option-icon-right, 1rem);
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+  }

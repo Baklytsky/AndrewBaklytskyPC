@@ -1,0 +1,72 @@
+
+.ra-image {
+  position: relative;
+  border-radius: var(--media-border-radius, 0);
+  box-shadow: var(--media-box-shadow);
+  height: var(--media-container-height);
+  display: var(--media-display, block);
+  align-items: var(--media-align);
+}
+
+.ra-image--inline {
+  --media-display: inline-block;
+}
+
+/* This class is automatically added if the image component receives a `:useAsBackground` flag set to `true`. */
+.ra-image--use-as-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* This class is automatically added if the image component receives a `:useAspectRatio` flag set to `true`. */
+.ra-image--use-aspect-ratio {
+  background-color: var(--media-loading-bg, var(--c-gray-100));
+
+  /* Default aspect ratio to a perfect square. */
+  aspect-ratio: var(--media-width, 1) / var(--media-height, 1);
+}
+
+.ra-image--use-as-background,
+.ra-image--use-aspect-ratio {
+  .ra-image__media {
+    --media-width: 100%;
+    --media-height: 100%;
+
+    /* Ensure image expands to the parent's boundaries. */
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    max-height: none;
+  }
+}
+
+  .ra-image__media {
+    object-fit: var(--media-object-fit, cover);
+    object-position: var(--media-focus-x, 50%) var(--media-focus-y, 50%);
+    width: var(--media-width, 100%);
+    height: var(--media-height, auto);
+    border-radius: inherit;
+    border: var(--media-border);
+    transition-property: var(--media-transition-property, opacity);
+    transition-duration: var(--media-transition-duration, var(--transition-duration-default));
+    transition-timing-function: var(--media-transition-function, var(--transition-function-default));
+
+    &:not([alt]),
+    &[alt=""] {
+      outline-color: red;
+      outline-width: .0625rem;
+      outline-style: dashed;
+    }
+
+    &.set-media--loading {
+      opacity: 0;
+    }
+  }
+
+  .ra-image__placeholder {
+    display: inline-block;
+  }

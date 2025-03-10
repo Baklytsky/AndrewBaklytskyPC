@@ -1,0 +1,153 @@
+
+.ra-tooltip-container {}
+
+.ra-tooltip-container--filled {
+  position: relative;
+}
+
+/* If there's no content to wrap with the container, display the tooltip's contents.
+This allows using a custom container with custom positioning. */
+.ra-tooltip-container--empty {
+  display: contents;
+}
+
+.ra-tooltip {
+  --effective-component-color: var(--component-fg-color, var(--c-highlight));
+  --effective-component-background: var(--component-bg-color, var(--c-contrast));
+  --effective-tooltip-pointer-size: var(--tooltip-pointer-size, var(--spacing-sm));
+
+  z-index: var(--z-index-reset);
+  position: absolute;
+  width: var(--tooltip-width, 10rem);
+  padding: var(--tooltip-padding, var(--spacing-xs));
+  font-size: var(--tooltip-font-size, var(--font-size-sm));
+  color: var(--effective-component-color);
+  background-color: var(--effective-component-background);
+
+  transform:
+    translateY(var(--tooltip-transform-y, 0))
+    translateX(var(--tooltip-transform-x, 0));
+
+  &:after {
+    z-index: var(--z-index-negative);
+    position: absolute;
+    width: var(--effective-tooltip-pointer-size);
+    height: var(--effective-tooltip-pointer-size);
+
+    top: var(--tooltip-pointer-top, '');
+    left: var(--tooltip-pointer-left, '');
+    right: var(--tooltip-pointer-right, '');
+    bottom: var(--tooltip-pointer-bottom, '');
+    margin: auto;
+
+    transform:
+      rotate(var(--tooltop-pointer-rotate, 45deg))
+      translateY(var(--tooltip-pointer-adjust-y, -37.5%))
+      translateX(var(--tooltip-pointer-adjust-x, -37.5%));
+
+    background-color: var(--tooltip-pointer-color, var(--effective-component-background));
+
+    content: '';
+  }
+}
+
+.ra-tooltip--hidden {
+  pointer-events: none;
+}
+
+.ra-tooltip[class*="-center"] {
+  --tooltip-pointer-left: 0;
+  --tooltip-pointer-right: 0;
+  --tooltip-transform-x: -50%;
+
+  left: 50%;
+  text-align: center;
+}
+
+.ra-tooltip[class*="top-left"],
+.ra-tooltip[class*="bottom-left"] {
+  --tooltip-pointer-left: 2rem;
+
+  left: 0;
+}
+
+.ra-tooltip[class*="top-right"],
+.ra-tooltip[class*="bottom-right"] {
+  --tooltip-pointer-right: 2rem;
+
+  right: 0;
+  text-align: right;
+}
+
+[class*="ra-tooltip--top-"] {
+  --tooltip-pointer-top: 100%;
+
+  bottom: calc(100% + var(--effective-tooltip-pointer-size));
+}
+
+[class*="ra-tooltip--bottom-"] {
+  --tooltip-pointer-bottom: 100%;
+  --tooltop-pointer-rotate: -135deg;
+
+  top: calc(100% + var(--effective-tooltip-pointer-size));
+}
+
+[class*="ra-tooltip--middle-"] {
+  --tooltip-pointer-top: 0;
+  --tooltip-pointer-bottom: 0;
+  --tooltip-transform-y: -50%;
+
+  top: 50%;
+}
+
+[class*="ra-tooltip--middle-left"] {
+  --tooltip-pointer-left: 100%;
+  --tooltop-pointer-rotate: -45deg;
+
+  right: calc(100% + var(--effective-tooltip-pointer-size));
+}
+
+[class*="ra-tooltip--middle-right"] {
+  --tooltip-pointer-right: 100%;
+  --tooltop-pointer-rotate: 135deg;
+
+  left: calc(100% + var(--effective-tooltip-pointer-size));
+}
+
+[class*="ra-tooltip-motion"] {
+  pointer-events: none;
+
+  transition-property: opacity, transform;
+  transition-duration: var(--transition-duration-default);
+  transition-timing-function: var(--transition-function-bounce-lg);
+}
+
+.ra-tooltip-motion-top,
+.ra-tooltip-motion-bottom,
+.ra-tooltip-motion-left,
+.ra-tooltip-motion-right,
+.ra-tooltip-motion-center {
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+    transform:
+      translateY(var(--transition-distance-y, var(--tooltip-transform-y, 0)))
+      translateX(var(--transition-distance-x, var(--tooltip-transform-x, 0)));
+  }
+}
+
+[class*="ra-tooltip-motion-top"] {
+  --transition-distance-y: -.5rem;
+}
+
+[class*="ra-tooltip-motion-bottom"] {
+  --transition-distance-y: .5rem;
+}
+
+[class*="ra-tooltip-motion-left"] {
+  --transition-distance-x: -.5rem;
+}
+
+[class*="ra-tooltip-motion-right"] {
+  --transition-distance-x: .5rem;
+}

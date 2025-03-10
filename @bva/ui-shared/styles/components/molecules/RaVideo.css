@@ -1,0 +1,124 @@
+
+.ra-video {
+  position: relative;
+  border-radius: var(--media-border-radius, 0);
+  box-shadow: var(--media-box-shadow);
+}
+
+/* This class is automatically added if the video component receives a `:asBackground` flag set to `true`. */
+.ra-video--use-as-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* This class is automatically added if the video component receives a `:aspectRatio` flag set to `true`. */
+.ra-video--use-aspect-ratio {
+  background-color: var(--media-loading-bg, var(--c-gray-100));
+
+  /* Default aspect ratio to a perfect square. */
+  aspect-ratio: var(--media-width, 1) / var(--media-height, 1);
+}
+
+.ra-video--use-as-background,
+.ra-video--use-aspect-ratio {
+  .ra-video__media {
+    --media-width: 100%;
+    --media-height: 100%;
+
+    /* Ensure image expands to the parent's boundaries. */
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    max-height: none;
+  }
+}
+
+.ra-video--display-button-hover {
+  &:hover {
+    .ra-video__button-play {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+}
+
+  .ra-video__media {
+    object-fit: cover;
+    object-position: var(--media-focus-x, 50%) var(--media-focus-y, 50%);
+    width: var(--media-width, 100%);
+    height: var(--media-height, auto);
+    border-radius: inherit;
+    border: var(--media-border);
+    transition-property: width, height, top, left, right, bottom, opacity;
+    transition-duration: var(--transition-duration-default);
+    transition-timing-function: var(--transition-function-default);
+
+    &.set-media--loading {
+      opacity: 0;
+    }
+
+    &.set-media--loaded {
+      opacity: 1;
+    }
+  }
+
+  .ra-video__button-play {
+    z-index: var(--z-index-above-base);
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+
+    transition-property: opacity;
+    transition-duration: var(--transition-duration-fast);
+    transition-timing-function: var(--transition-function-default);
+
+    &:focus {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
+  .ra-video__button-play--middle-center,
+  .ra-video__button-play--middle-left,
+  .ra-video__button-play--middle-right {
+    position: absolute;
+    top: 50%
+  }
+
+  .ra-video__button-play--middle-center {
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+
+  .ra-video__button-play--middle-left,
+  .ra-video__button-play--middle-right {
+    transform: translate3d(0, -50%, 0);
+  }
+
+  .ra-video__button-play--top-left,
+  .ra-video__button-play--top-right {
+    position: absolute;
+    top: var(--spacing-sm);
+  }
+
+  .ra-video__button-play--top-left,
+  .ra-video__button-play--middle-left,
+  .ra-video__button-play--bottom-left {
+    left: var(--spacing-sm);
+  }
+
+  .ra-video__button-play--top-right,
+  .ra-video__button-play--middle-right,
+  .ra-video__button-play--bottom-right {
+    right: var(--spacing-sm);
+  }
+
+  .ra-video__button-play--bottom-left,
+  .ra-video__button-play--bottom-right {
+    position: absolute;
+    bottom: var(--spacing-sm);
+  }

@@ -1,0 +1,216 @@
+.set--w-100 {
+  width: 100%;
+}
+
+.set--h-100 {
+  height: 100%;
+}
+
+/*------------------------------------*\
+  #MAX-WIDTH & CONTAINERS
+\*------------------------------------*/
+[class*="max-width--"] {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.max-width {
+  max-width: token('maxWidth.tiny');
+}
+
+@variant $key, $value in token(maxWidth) {
+  .max-width--$key {
+    max-width: $value-var;
+  }
+}
+
+/*------------------------------------*\
+  #BOUNDARY SPACING
+\*------------------------------------*/
+[data-boundary-top] {
+  padding-top: var(--br-spacing-top, var(--spacing-top));
+}
+
+[data-boundary-bottom] {
+  padding-bottom: var(--br-spacing-bottom, var(--spacing-bottom));
+}
+
+[data-boundary-edge] {
+  padding-right: var(--br-spacing-edge, var(--spacing-edge));
+  padding-left: var(--br-spacing-edge, var(--spacing-edge));
+}
+
+@variant $namespace in token(sortedBreakpoints) {
+  @media breakpoint($namespace) {
+    [data-boundary-top*="-$namespace"] {
+      --br-spacing-top: var(--spacing-top-$namespace);
+    }
+
+    [data-boundary-bottom*="-$namespace"] {
+      --br-spacing-bottom: var(--spacing-bottom-$namespace);
+    }
+
+    [data-boundary-edge*="-$namespace"] {
+      --br-spacing-edge: var(--spacing-edge-$namespace);
+    }
+  }
+}
+
+@media breakpoint(lg) {
+  /*------------------------------------*\
+    #DESKTOP HORIZONTAL SPACING
+  \*------------------------------------*/
+  .gutter--large,
+  .gutter--small-up-large {
+    padding-right: var(--spacing-2xl);
+    padding-left: var(--spacing-2xl);
+  }
+
+  .gutter--medium,
+  .gutter--small-up-medium {
+    padding-right: var(--spacing-xl);
+    padding-left: var(--spacing-xl);
+  }
+
+  .gutter--regular,
+  .gutter--small-up-regular {
+    padding-right: var(--spacing);
+    padding-left: var(--spacing);
+  }
+
+  .gutter--small,
+  .gutter--small-up-small {
+    padding-right: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+  }
+}
+
+@media breakpoint(md-to-lg) {
+  /*------------------------------------*\
+    #TABLET HORIZONTAL SPACING
+  \*------------------------------------*/
+  .gutter--large,
+  .gutter--small-up-large {
+    padding-right: var(--spacing-lg);
+    padding-left: var(--spacing-lg);
+  }
+
+  .gutter--medium,
+  .gutter--small-up-medium {
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+  }
+
+  .gutter--regular,
+  .gutter--small-up-regular {
+    padding-right: var(--spacing);
+    padding-left: var(--spacing);
+  }
+
+  .gutter--small,
+  .gutter--small-up-small {
+    padding-right: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+  }
+}
+
+@media breakpoint(md) {
+  /*------------------------------------*\
+    #DESKTOP/TABLET VERTICAL SPACING
+  \*------------------------------------*/
+  .set--spacing-top-large {
+    padding-top: var(--spacing-2xl);
+  }
+
+  .set--spacing-top-medium {
+    padding-top: var(--spacing-xl);
+  }
+
+  .set--spacing-top-regular {
+    padding-top: var(--spacing-lg);
+  }
+
+  .set--spacing-top-small {
+    padding-top: var(--spacing-sm);
+  }
+
+  .set--spacing-bottom-large {
+    padding-bottom: var(--spacing-2xl);
+  }
+
+  .set--spacing-bottom-medium {
+    padding-bottom: var(--spacing-xl);
+  }
+
+  .set--spacing-bottom-regular {
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .set--spacing-bottom-small {
+    padding-bottom: var(--spacing-sm);
+  }
+}
+
+@media breakpoint(md-max) {
+  /*------------------------------------*\
+    #MOBILE VERTICAL SPACING
+  \*------------------------------------*/
+  .set--spacing-top-large {
+    padding-top: var(--spacing-lg);
+  }
+
+  .set--spacing-top-medium {
+    padding-top: var(--spacing-md);
+  }
+
+  .set--spacing-top-regular {
+    padding-top: var(--spacing);
+  }
+
+  .set--spacing-top-small {
+    padding-top: var(--spacing-sm);
+  }
+
+  .set--spacing-bottom-large {
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .set--spacing-bottom-medium {
+    padding-bottom: var(--spacing-md);
+  }
+
+  .set--spacing-bottom-regular {
+    padding-bottom: var(--spacing);
+  }
+
+  .set--spacing-bottom-small {
+    padding-bottom: var(--spacing-sm);
+  }
+
+  /*------------------------------------*\
+    #MOBILE HORIZONTAL SPACING
+  \*------------------------------------*/
+  .gutter--large,
+  .gutter--small-only-large {
+    padding-right: var(--spacing-lg);
+    padding-left: var(--spacing-lg);
+  }
+
+  .gutter--medium,
+  .gutter--small-only-medium {
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+  }
+
+  .gutter--regular,
+  .gutter--small-only-regular {
+    padding-right: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+  }
+
+  .gutter--small,
+  .gutter--small-only-small {
+    padding-right: var(--spacing-xs);
+    padding-left: var(--spacing-xs);
+  }
+}

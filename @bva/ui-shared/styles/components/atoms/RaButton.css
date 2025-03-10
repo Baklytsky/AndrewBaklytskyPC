@@ -1,0 +1,153 @@
+/*------------------------------------*\
+  #BUTTON COMPONENT
+\*------------------------------------*/
+.ra-button {
+  -webkit-appearance: none;
+
+  position: relative;
+  cursor: pointer;
+  display: var(--button-display, flex);
+  align-items: center;
+  justify-content: center;
+  width: var(--button-width, var(--button-size));
+  min-height: var(--button-height, var(--button-size, 3rem));
+  padding: var(--button-padding, .825rem 1.775rem);
+  background-color: var(--button-background, var(--c-primary));
+  border-style: var(--button-border-style, solid);
+  border-width: var(--button-border-width, .0625rem);
+  border-color: var(--button-border-color, var(--c-primary));
+  border-radius: var(--button-border-radius, 0);
+  color: var(--button-color, var(--c-primary-contrast));
+  white-space: var(--button-wrap, nowrap);
+  font-family: var(--button-font-family, var(--font-family-secondary));
+  font-size: var(--button-font-size, var(--font-size-sm));
+  font-weight: var(--button-font-weight, var(--font-weight-medium));
+  line-height: var(--button-line-height);
+  text-transform: var(--button-text-transform);
+  text-decoration: var(--button-text-decoration);
+  letter-spacing: var(--button-letter-spacing, var(--letter-spacing));
+  transition: color var(--transition-duration-default) var(--transition-function-default),
+              background-color var(--transition-duration-default) var(--transition-function-default),
+              border-color var(--transition-duration-default) var(--transition-function-default);
+
+  &:hover, &:active {
+    background-color: var(--button-background-interact, var(--button-background, var(--c-primary-interact)));
+    border-color: var(--button-border-color-interact, var(--button-border-color, var(--c-primary-interact)));
+    color: var(--button-color-interact, var(--button-color, var(--c-primary-contrast)));
+  }
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-button--$color {
+    --button-color: var(--button-color-$color, $map-contrast-var);
+    --button-background: var(--button-background-$color, $map-DEFAULT-var);
+    --button-border-color: var(--button-border-color-$color, $map-DEFAULT-var);
+    --button-background-interact: var(--button-background-interact-$color, $map-interact-var);
+    --button-border-color-interact: var(--button-border-color-interact-$color, $map-interact-var);
+  }
+}
+
+.ra-button--tertiary {
+  --button-color-interact: var(--button-color-interact-tertiary, var(--c-tertiary));
+  --button-border-color: var(--button-border-color-tertiary, var(--c-tertiary-contrast));
+  --button-border-color-interact: var(--button-border-color-interact-tertiary, var(--c-tertiary-contrast));
+
+  &.ra-button--loading {
+    --loader-color: var(--c-tertiary-contrast);
+  }
+}
+
+.ra-button--ghost {
+  --button-background: var(--button-background-ghost, transparent);
+  --button-color: var(--button-color-ghost, currentColor);
+  --button-border-color: var(--button-border-color-ghost, transparent);
+
+  &.ra-button--loading {
+    --loader-color: var(--c-body);
+  }
+
+  &:hover, &:active {
+    --button-color: var(--c-primary-interact);
+    --button-background: transparent;
+    --button-border-color: transparent;
+  }
+}
+
+.ra-button[disabled],
+.ra-button--loading {
+  &, &:hover {
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+.ra-button[disabled]:not(.ra-button--loading) {
+  --button-border-color: var(--c-gray-100);
+  --button-background: var(--c-gray-100);
+  --button-color: var(--c-gray-400);
+}
+
+.ra-button--loading {
+  --button-color: transparent;
+}
+
+.ra-button--full-width {
+  --button-width: 100%;
+}
+
+.ra-button--has-icon {
+  --icon-margin-top: -.25rem;
+  --icon-margin-bottom: -.25rem;
+}
+
+.ra-button--icon-leading {
+  --icon-margin-right: .375rem;
+}
+
+.ra-button--icon-trailing {
+  --icon-margin-left: .375rem;
+}
+
+.ra-button--xs {
+  min-height: var(--button-height, 1.5rem);
+  padding: var(--button-padding, .175rem .375rem);
+  font-size: var(--button-font-size, var(--font-size-xs));
+}
+
+.ra-button--sm {
+  min-height: var(--button-height, 2.75rem);
+  padding: var(--button-padding, .25rem 1.5rem);
+}
+
+.ra-button--lg {
+  min-height: var(--button-height, 3.375rem);
+  padding: var(--button-padding, .5rem 2.125rem);
+}
+
+.ra-button--raw {
+  position: relative;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.ra-button--pure {
+  --button-padding: 0;
+  --button-background: transparent;
+  --button-border-width: 0;
+  --button-color: currentColor;
+  --button-text-transform: none;
+  --button-font-family: var(--font-family-primary);
+  --button-font-size: var(--font-size);
+}
+
+.ra-button--pure {
+  --button-wrap: normal;
+  --button-font-weight: normal;
+
+  &:active, &:hover {
+    --button-background: transparent;
+    --button-text-decoration: none;
+  }
+}

@@ -1,0 +1,133 @@
+
+.ra-fade,
+.ra-insert-fade {
+  &-enter-active,
+  &-leave-active,
+  &-move {
+    transition: opacity var(--transition-duration-default) var(--transition-function-default);
+  }
+
+  &-enter,
+  &-leave,
+  &-leave-to {
+    opacity: 0 !important;
+  }
+}
+
+.ra-insert-fade {
+  &-leave-active {
+    position: absolute !important;
+  }
+}
+
+[class*="ra-slide-"],
+[class*="ra-insert-"],
+[class*="ra-scale-"] {
+  transition-property: opacity, transform;
+  transition-duration: var(--transition-duration-medium);
+  transition-timing-function: var(--transition-function-bezier-ease);
+}
+
+/* USE THESE FOR SMOOTH LIST ITEM INSERTIONS */
+.ra-insert-left, .ra-insert-right,
+.ra-insert-top, .ra-insert-top-short,
+.ra-insert-bottom, .ra-insert-bottom-short,
+.ra-insert-scale {
+  &-leave-active {
+    position: absolute !important;
+  }
+}
+
+.ra-slide-left,
+.ra-insert-left {
+  &-enter,
+  &-leave-to {
+    opacity: 0 !important;
+    transform: translate3d(var(--transition-distance, -100%), 0, 0) !important;
+  }
+}
+
+.ra-slide-right,
+.ra-insert-right {
+  &-enter,
+  &-leave-to {
+    opacity: 0 !important;
+    transform: translate3d(var(--transition-distance, 100%), 0, 0) !important;
+  }
+}
+
+.ra-slide-top,
+.ra-slide-top-short,
+.ra-insert-top,
+.ra-insert-top-short {
+  &-enter,
+  &-leave-to {
+    opacity: 0 !important;
+    transform: translate3d(0, var(--transition-distance, -100%), 0) !important;
+  }
+}
+
+[class*="ra-slide-top-short"],
+[class*="ra-insert-top-short"] {
+  --transition-distance: -3rem;
+}
+
+.ra-slide-bottom,
+.ra-slide-bottom-short,
+.ra-insert-bottom,
+.ra-insert-bottom-short {
+  &-enter,
+  &-leave-to {
+    opacity: 0 !important;
+    transform: translate3d(0, var(--transition-distance, 100%), 0) !important;
+  }
+}
+
+[class*="ra-slide-bottom-short"],
+[class*="ra-insert-bottom-short"] {
+  --transition-distance: 3rem;
+}
+
+.ra-scale,
+.ra-insert-scale {
+  &-enter,
+  &-leave,
+  &-leave-to {
+    opacity: 0 !important;
+    transform: scale(.85) !important;
+  }
+}
+
+.ra-expand {
+  &-enter-active,
+  &-leave-active {
+    transition-property:
+      height,
+      opacity,
+      padding-top,
+      padding-bottom,
+      margin-top,
+      margin-bottom,
+      border-color,
+      border-top-width,
+      border-bottom-width;
+    transition-duration: var(--transition-duration-medium);
+    transition-timing-function: var(--transition-function-bezier-ease);
+    overflow: hidden;
+  }
+}
+
+.ra-expand {
+  &-enter,
+  &-leave-to {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border-top-width: 0 !important;
+    border-bottom-width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+  }
+}
+

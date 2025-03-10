@@ -1,0 +1,102 @@
+
+.ra-select {
+  --input-padding: 0 2rem 0 .75rem;
+  --input-font-family: var(--font-family-secondary);
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-select--$color {
+    --input-background: $map-DEFAULT-var;
+    --input-border-color: $map-DEFAULT-var;
+    --input-color: $map-contrast-var;
+    --icon-color: $map-contrast-var;
+
+    .ra-input__wrapper:hover {
+      --input-background: $map-interact-var;
+      --input-border-color: $map-interact-var;
+    }
+  }
+}
+
+.ra-select--tertiary {
+  .ra-input__wrapper:hover {
+    --input-color: var(--c-tertiary);
+    --icon-color: var(--c-tertiary);
+  }
+
+  &, .ra-input__wrapper:hover {
+    --input-border-color: var(--c-tertiary-contrast);
+  }
+}
+
+.ra-select--ghost {
+  --input-padding: 0;
+  --input-border-width: 0 0 .0625rem 0;
+  --input-border-color: transparent;
+  --input-icon-position: 0;
+
+  &:not(.is-invalid) {
+    .ra-input__wrapper:hover,
+    .ra-input__control:focus {
+      --input-border-color: currentColor;
+    }
+  }
+}
+
+.ra-select--inline-label {
+  .ra-select__label--inline {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .ra-select__control {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    left: 0;
+  }
+}
+
+  .ra-select__control {
+    appearance: none;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &:disabled {
+      &:hover {
+        cursor: initial;
+      }
+
+      .ra-select--ghost & {
+        --input-background: transparent;
+        --input-border-color: transparent;
+      }
+    }
+
+    &::-ms-expand {
+      display: none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  .ra-select__arrow {
+    position: absolute;
+    top: 0;
+    right: var(--input-icon-right, .5rem);
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    pointer-events: none;
+
+    transition-property: fill;
+    transition-duration: var(--transition-duration-default);
+    transition-timing-function: var(--transition-function-default);
+  }

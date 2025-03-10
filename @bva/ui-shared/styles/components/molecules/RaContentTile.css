@@ -1,0 +1,181 @@
+
+.ra-content-tile {
+  /* The "active" scope refers to the value that is currently applicable.
+  This value may be overriden on a per breakpoint or modifier basis.
+  The approach simplifies re-usability since you always get the most up-to-date value. */
+  --active-component-color: var(--component-fg-color);
+  --active-component-background: var(--component-bg-color);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: var(--active-component-color, var(--active-component-color-fallback, inherit));
+
+  &.set--aspect-ratio-fill-space {
+    min-height: 100%;
+  }
+
+  @media breakpoint(md) {
+    --active-component-color: var(--component-fg-color-md, var(--component-fg-color));
+    --active-component-background: var(--component-bg-color-md, var(--component-bg-color));
+
+    &.set--details-overlay,
+    &.set--details-overlay-md {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+
+  @media breakpoint(md-max) {
+    &.set--details-overlay,
+    &.set--details-overlay-sm {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+}
+
+.ra-content-tile--has-main-link {
+  @media breakpoint(md) {
+    /* The "--media-expand" custom property can be used to control how much should the tile grow when interacting with it.
+    It can be set to 0, i.e. "--media-expand: 0px;", to disable expanding. */
+    --active-expand-x: var(--media-expand, var(--media-expand-x, 1.5rem));
+    --active-expand-y: var(--media-expand, var(--media-expand-y, 1.5rem));
+    --active-adjust-x: calc(var(--active-expand-x) * -.5);
+    --active-adjust-y: calc(var(--active-expand-y) * -.5);
+    /* These are the final, calculated width and height that are applicable to the elements that must expand. */
+    --active-expand-width: calc(100% + var(--active-expand-x));
+    --active-expand-height: calc(100% + var(--active-expand-y));
+
+    &.set--details-overlay,
+    &.set--details-overlay-md {
+      --media-transition-property: width, height, top, left, right, bottom, opacity;
+
+      &:hover {
+        .ra-video__media,
+        .ra-image__media,
+        .ra-content-tile__details:before,
+        .ra-component-anchor-overlay {
+          --media-width: var(--active-expand-width);
+          --media-height: var(--active-expand-height);
+
+          top: var(--active-adjust-y);
+          bottom: var(--active-adjust-y);
+          right: var(--active-adjust-x);
+          left: var(--active-adjust-x);
+        }
+
+        .ra-content-tile__details:before,
+        .ra-component-anchor-overlay {
+          width: var(--active-expand-width);
+          height: var(--active-expand-height);
+        }
+      }
+    }
+  }
+}
+
+  .ra-content-tile__media {
+    position: relative;
+
+    .set--aspect-ratio-fill-space & {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+
+      .ra-video,
+      .ra-image {
+        flex-grow: 1;
+
+        /* Required to fix aspect-ratio layout issue on Safari. */
+        width: 100%;
+      }
+    }
+  }
+
+    .ra-content-tile__image {}
+
+  .ra-content-tile__details {
+    display: flex;
+    position: relative;
+
+    /* Separate background so that it is possible to use an expand animation without affecting the text positioning. */
+    &:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--active-component-background, transparent);
+      transition-property: width, height, top, left, right, bottom, opacity;
+      transition-duration: var(--transition-duration-default);
+      transition-timing-function: var(--transition-function-default);
+      content: "";
+    }
+
+    @media breakpoint(md) {
+      .set--details-overlay &,
+      .set--details-overlay-md &,
+      .set--has-background:not(.set--details-overlay):not(.set--details-overlay-md) & {
+        padding: 1rem;
+      }
+
+      .set--details-after &,
+      .set--details-after-md & {
+        padding-top: 1rem;
+      }
+
+      .set--details-before &,
+      .set--details-before-md & {
+        padding-bottom: 1rem;
+      }
+    }
+
+    @media breakpoint(md-max) {
+      .set--details-overlay &,
+      .set--details-overlay-sm &,
+      [class*="set--has-background"]:not(.set--details-overlay):not(.set--details-overlay-sm) & {
+        padding: 1rem;
+      }
+
+      .set--details-after &,
+      .set--details-after-sm & {
+        padding-top: 1rem;
+      }
+
+      .set--details-before &,
+      .set--details-before-sm & {
+        padding-bottom: 1rem;
+      }
+    }
+  }
+
+    .ra-content-tile__copy {
+      display: flex;
+      flex-direction: column;
+      /* Supports background positioning. */
+      position: relative;
+    }
+
+    .ra-content-tile__subtitle {
+      font-size: var(--font-size-sm);
+      margin-bottom: .5rem
+    }
+
+    .ra-content-tile__title {
+      display: flex;
+      align-items: center;
+    }
+
+    .ra-content-tile__description {
+      margin-top: .5rem;
+    }
+
+    .ra-content-tile__link-list {
+      --link-item-min-width: 7rem;
+
+      margin-top: .5rem;
+
+      .ra-link {
+        flex: initial;
+        min-width: initial;
+      }
+    }

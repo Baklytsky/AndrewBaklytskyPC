@@ -1,0 +1,96 @@
+
+.ra-modal {
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--modal-index, var(--z-index-modal));
+  display: flex;
+  align-items: var(--modal-outer-align, center);
+  justify-content: var(--modal-outer-justify, center);
+  padding: var(--modal-outer-padding, var(--spacing-md) 0);
+
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+}
+
+.ra-modal--full-screen {
+  --modal-width: 100%;
+  --modal-height: 100%;
+  --modal-outer-padding: 0;
+}
+
+.ra-modal--align-middle-center {
+  /* Default "auto" ensures modal is centered regardless of how tall it is. This is sort of a browser quirk. */
+  --modal-margin: auto;
+}
+
+.ra-modal--align-top-left,
+.ra-modal--align-middle-left,
+.ra-modal--align-bottom-left {
+  --modal-outer-justify: start;
+}
+
+.ra-modal--align-top-right,
+.ra-modal--align-middle-right,
+.ra-modal--align-bottom-right {
+  --modal-outer-justify: end;
+}
+
+.ra-modal--align-top-left,
+.ra-modal--align-top-center,
+.ra-modal--align-top-right {
+  --modal-outer-align: start;
+}
+
+.ra-modal--align-bottom-left,
+.ra-modal--align-bottom-center,
+.ra-modal--align-bottom-right {
+  --modal-outer-align: end;
+}
+
+  .ra-modal__content {
+    z-index: var(--z-index-above-overlay);
+    position: relative;
+    overflow-y: auto;
+    top: var(--modal-top);
+    right: var(--modal-right);
+    bottom: var(--modal-bottom);
+    left: var(--modal-left);
+    transform: var(--modal-transform);
+    width: var(--modal-width, 32rem);
+    height: var(--modal-height);
+    max-height: var(--modal-max-height);
+    margin: var(--modal-margin);
+    padding: var(--modal-padding, var(--spacing-sm));
+    background-color: var(--modal-background, var(--c-panel));
+    border: var(--modal-border);
+    border-radius: var(--modal-radius, .25rem);
+  }
+
+  .ra-modal__content--loading {
+    opacity: 0;
+  }
+
+  .ra-modal__loader {
+    z-index: var(--z-index-above-overlay);
+    position: absolute;
+  }
+
+  .ra-modal__close {
+    z-index: var(--z-index-above-modal);
+    right: var(--modal-close-right, var(--spacing-sm));
+    top: var(--modal-close-top, var(--spacing-sm));
+  }
+
+  .ra-modal__close--inside {
+    position: absolute;
+  }
+
+  .ra-modal__close--outside {
+    z-index: var(--z-index-above-modal);
+    position: fixed;
+  }

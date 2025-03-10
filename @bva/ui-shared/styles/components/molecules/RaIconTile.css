@@ -1,0 +1,56 @@
+
+.ra-icon-tile {
+  display: flex;
+
+  /* The "active" scope refers to the value that is currently applicable.
+  This value may be overriden on a per breakpoint or modifier basis.
+  The approach simplifies re-usability since you always get the most up-to-date value. */
+  --active-component-color: var(--component-fg-color);
+  --active-component-background: var(--component-bg-color);
+
+  background-color: var(--active-component-background, transparent);
+  color: var(--active-component-color, inherit);
+  padding: var(--component-padding, var(--spacing-xs));
+
+  @media breakpoint(md) {
+    --active-component-color: var(--component-fg-color-md, var(--component-fg-color));
+    --active-component-background: var(--component-bg-color-md, var(--component-bg-color));
+  }
+}
+
+.ra-icon-tile--stack {
+  flex-direction: column;
+}
+
+  .ra-icon-tile__media,
+  .ra-icon-tile__details {
+    display: flex;
+    margin: var(--component-details-spacing, var(--spacing-xs));
+  }
+
+  .ra-icon-tile__details {
+    flex: 1 1;
+  }
+
+  .ra-icon-tile__copy {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ra-icon-tile__title {
+    margin-bottom: var(--component-title-spacing, var(--spacing-xs));
+  }
+
+  .ra-icon-tile__description {
+    color: var(--component-description-color, inherit);
+  }
+
+  .ra-icon-tile__link-list {
+    width: auto;
+    margin-top: var(--component-links-spacing, var(--spacing-sm));
+
+    .ra-link {
+      flex: initial;
+      min-width: initial;
+    }
+  }

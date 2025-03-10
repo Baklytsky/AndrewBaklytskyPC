@@ -1,0 +1,101 @@
+
+/*------------------------------------*\
+  #PLUGIN STYLES
+\*------------------------------------*/
+.swiper {
+  max-width: var(--carousel-width, calc(100% - var(--carousel-controls-size)));
+}
+
+/* THE CSS HEIGHT PROPERTY IS NECESSARY IF YOU WANT TO USE VERTICAL CAROUSELS */
+.swiper-vertical {
+  height: var(--vertical-carousel-height, 300px);
+}
+
+.swiper-slide-thumb-active {
+  border: solid .0625rem currentColor;
+}
+
+  /* Fix image display when using "infinite" carousels. */
+  .swiper-slide-duplicate {
+    & > *,
+    .set-media--loading {
+      opacity: 1 !important;
+    }
+  }
+
+/*------------------------------------*\
+  #CUSTOM COMPONENT STYLES
+\*------------------------------------*/
+.ra-carousel-outer {
+  background-color: var(--component-bg-color, transparent);
+
+  @media breakpoint(md) {
+    background-color: var(--component-bg-color-md, var(--component-bg-color, transparent));
+  }
+}
+
+.ra-carousel {
+  z-index: var(--z-index-base);;
+  position: relative;
+}
+
+.ra-carousel--auto-align {
+  .ra-carousel__wrapper,
+  .swiper-wrapper {
+    align-items: center;
+  }
+}
+
+  .ra-carousel__details {
+    color: var(--component-fg-color, inherit);
+
+    @media breakpoint(md) {
+      color: var(--component-fg-color-md, var(--component-fg-color, inherit));
+    }
+  }
+
+  .ra-carousel__nav {
+    z-index: var(--z-index-above-base);
+    pointer-events: none;
+    position: var(--carousel-controls-position, absolute);
+    display: var(--carousel-controls-display, flex);
+    justify-content: space-between;
+
+    > * {
+      pointer-events: all;
+    }
+  }
+
+  .ra-carousel__nav--vertical {
+    align-items: center;
+    flex-direction: column;
+    top: var(--carousel-controls-top, 0);
+    bottom: var(--carousel-controls-bottom, 0);
+    left: var(--carousel-controls-left, 0);
+    right: var(--carousel-controls-right, 0);
+    width: var(--carousel-controls-width, 4rem);
+    height: var(--carousel-controls-height, calc(100% - 2rem));
+    margin: auto;
+  }
+
+  .ra-carousel__nav--center,
+  .ra-carousel__nav--fixed,
+  .ra-carousel__nav--auto {
+    top: var(--carousel-controls-top, 50%);
+    left: var(--carousel-controls-left, 1rem);
+    right: var(--carousel-controls-right, 1rem);
+    width: var(--carousel-controls-width);
+    margin: auto;
+
+    transform: var(--carousel-controls-transform, translate3d(0, -50%, 0));
+  }
+
+  .ra-carousel__nav--fixed {
+    --carousel-controls-position: fixed;
+  }
+
+  .ra-carousel__nav--top-right {
+    bottom: var(--carousel-controls-bottom, calc(100% + 1.5rem));
+    right: var(--carousel-controls-right, 0);
+    width: var(--carousel-controls-width, 5rem);
+  }

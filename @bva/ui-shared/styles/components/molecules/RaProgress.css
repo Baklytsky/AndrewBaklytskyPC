@@ -1,0 +1,40 @@
+.ra-progress {
+  max-width: var(--progress-max-width, 100%);
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-progress--$color {
+    --progress-bar-background: $map-DEFAULT-var;
+  }
+}
+
+.ra-progress--tertiary {
+  .ra-progress__bar {
+    border: solid .0625rem var(--c-gray-200);
+  }
+}
+
+  .ra-progress__label {
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+  }
+
+  .ra-progress__bar {
+    position: relative;
+    height: var(--progress-bar-height, .3125rem);
+    background-color: var(--c-gray-200);
+    border-radius: var(--progress-bar-radius, 0);
+
+    &:after {
+      display: block;
+      width: var(--progress-bar-percent);
+      max-width: 100%;
+      height: 100%;
+      background-color: var(--progress-bar-background, var(--c-primary));
+      border-radius: inherit;
+      transition-property: width;
+      transition-timing-function: var(--transition-function-bezier-ease);
+      transition-duration: var(--transition-duration-slow);
+      content: '';
+    }
+  }

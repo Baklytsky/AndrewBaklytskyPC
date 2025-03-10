@@ -1,0 +1,117 @@
+
+.ra-split-section {
+  /* The "active" scope refers to the value that is currently applicable.
+  This value may be overriden on a per breakpoint or modifier basis.
+  The approach simplifies re-usability since you always get the most up-to-date value. */
+  --active-component-color: var(--component-fg-color);
+  --active-component-background: var(--component-bg-color);
+
+  color: var(--active-component-color, var(--active-component-color-fallback, inherit));
+  background-color: var(--active-component-background, transparent);
+
+  @media breakpoint(md) {
+    --active-component-color: var(--component-fg-color-md, var(--component-fg-color));
+    --active-component-background: var(--component-bg-color-md, var(--component-bg-color));
+
+    &.set--details-before,
+    &.set--details-before-md,
+    &.set--details-after,
+    &.set--details-after-md {
+      padding: var(--component-padding, 2rem 2.75rem);
+    }
+
+    &.set--details-overlay,
+    &.set--details-overlay-md {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+
+  @media breakpoint(md-max) {
+    &.set--details-overlay,
+    &.set--details-overlay-sm {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+}
+
+  .ra-split-section__media-col {
+    .ra-split-section:not(.set--aspect-ratio-fill-space) & {
+      align-self: center;
+    }
+
+    .set--aspect-ratio-fill-space & {
+      display: flex;
+    }
+  }
+
+  .ra-split-section__media {
+    position: relative;
+
+    .set--aspect-ratio-fill-space & {
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+
+      .ra-video,
+      .ra-image {
+        flex-grow: 1;
+
+        /* Required to fix aspect-ratio layout issue on Safari. */
+        width: 100%;
+      }
+    }
+  }
+
+  .ra-split-section__details {
+    display: flex;
+    word-break: break-word;
+    height: 100%;
+
+    @media breakpoint(md) {
+      padding: var(--component-details-padding, min(3rem, 3vw) min(4.125rem, 4vw));
+    }
+
+    @media breakpoint(md-max) {
+      .set--details-overlay &,
+      .set--details-overlay-sm & {
+        background-color: var(--active-component-background, transparent);
+      }
+
+      .set--details-before &,
+      .set--details-before-sm &,
+      .set--details-after &,
+      .set--details-after-sm & {
+        padding: var(--component-details-padding, 3.75rem 1rem 3.75rem);
+      }
+    }
+  }
+
+    .ra-split-section__copy {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ra-split-section__subtitle {
+      color: var(--active-component-color);
+      font-size: var(--font-size-sm);
+      margin-bottom: .5rem
+    }
+
+    .ra-split-section__description {
+      margin-top: var(--spacing-xs);
+    }
+
+    .ra-split-section__link-list {
+      @media breakpoint(lg) {
+        margin-top: var(--component-links-spacing, 2.5rem);
+      }
+
+      @media breakpoint(lg-max) {
+        margin-top: var(--component-links-spacing, 1.5rem);
+      }
+
+      .ra-link {
+        flex: initial;
+        min-width: initial;
+      }
+    }

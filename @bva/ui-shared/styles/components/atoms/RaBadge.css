@@ -1,0 +1,89 @@
+/* Use this helper class on a container which uses badges and requires interaction with it. */
+.ra-badge-interact-container {
+  &:hover {
+    .ra-badge {
+      background-color: var(--c-primary-interact);
+    }
+  }
+}
+
+.ra-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--c-primary);
+  text-align: center;
+  color: var(--c-primary-contrast);
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing-sm);
+
+  transition-property: background-color;
+  transition-timing-function: var(--transition-function-default);
+  transition-duration: var(--transition-duration-default);
+
+  &:not(.ra-badge--notification) {
+    padding: .25em .75em;
+  }
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-badge--$color {
+    background-color: $map-DEFAULT-var;
+    color: $map-contrast-var;
+
+    .ra-badge-interact-container:hover & {
+      background-color: $map-interact-var;
+    }
+  }
+}
+
+.ra-badge--tertiary {
+  border: solid .0625rem;
+}
+
+.ra-badge--notification {
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border-radius: 1.875rem;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+
+  &.ra-badge--xs,
+  &.ra-badge--sm {
+    min-width: 1em;
+    height: 1em;
+  }
+
+  &.ra-badge--xs {
+    font-size: var(--font-size-xs);
+  }
+
+  &.ra-badge--lg {
+    min-width: 1.875rem;
+    height: 1.875rem;
+    font-size: var(--font-size);
+  }
+}
+
+.ra-badge--standard {
+  min-width: 4.25rem;
+  height: 1.375rem;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-secondary);
+
+  &.ra-badge--xs,
+  &.ra-badge--sm {
+    height: 1rem;
+  }
+
+  &.ra-badge--lg {
+    height: 1.875rem;
+    font-size: var(--font-size-sm);
+  }
+}
+
+.ra-badge--has-text {
+  padding: 0 .5em;
+}
+

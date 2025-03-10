@@ -1,0 +1,95 @@
+/*------------------------------------*\
+  #ICON BUTTON COMPONENT
+\*------------------------------------*/
+.ra-icon-button {
+  /* Set a standard icon size when using non-standard IconButton sizes. */
+  --icon-size: calc(var(--button-size) * .7);
+  --button-size: 2.5rem;
+  --button-padding: 0;
+  --button-border-color: var(--c-contrast);
+
+  &:hover, &:active {
+    --button-border-color: var(--c-contrast);
+  }
+}
+
+  .ra-icon-button__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+/*------------------------------------*\
+  #ICON BUTTON TYPES
+\*------------------------------------*/
+
+@variant $color, $map in token(UIColors) {
+  .ra-icon-button--$color {
+    --button-background: $map-DEFAULT-var;
+    --button-color: $map-contrast-var;
+
+    &:hover, &:active {
+      --button-background: $map-interact-var;
+    }
+  }
+}
+
+.ra-icon-button--tertiary {
+  &:hover, &:active {
+    --button-color: var(--c-tertiary);
+  }
+}
+
+.ra-icon-button--ghost {
+  --button-color: currentColor;
+  --button-border-width: 0;
+
+  &, &:hover, &:active,
+  &[disabled]:not(.ra-button--loading) {
+    --button-background: transparent;
+  }
+
+  &:hover, &:active {
+    --button-color: var(--c-primary-interact);
+  }
+}
+
+.ra-icon-button[disabled],
+.ra-icon-button[disabled]:hover {
+
+  &:not(.ra-button--loading) {
+    --button-border-color: var(--c-gray-400);
+  }
+}
+
+/*------------------------------------*\
+  #ICON BUTTON SIZES
+\*------------------------------------*/
+
+.ra-icon-button--xs {
+  --button-size: 1.5rem;
+}
+
+.ra-icon-button--sm {
+  --button-size: 2.125rem;
+}
+
+.ra-icon-button--md {
+  --button-size: 2.5rem;
+}
+
+.ra-icon-button--lg {
+  --button-size: 3rem;
+}
+
+.ra-icon-button--xl {
+  --button-size: 3.5rem;
+}
+
+/*------------------------------------*\
+  #ICON BUTTON SHAPES
+\*------------------------------------*/
+
+.ra-icon-button--rounded {
+  --button-border-radius: 100%;
+}

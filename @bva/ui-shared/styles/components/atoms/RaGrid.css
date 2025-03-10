@@ -1,0 +1,46 @@
+
+.ra-grid {
+  /* Redundant, but forces reset the internal vars to prevent leaks. */
+  --br-grid-columns: var(--grid-columns);
+
+  display: grid;
+
+  grid-gap: var(--br-grid-gap, var(--grid-gap));
+  grid-template-columns: var(--grid-template-columns, repeat(
+    var(--br-grid-columns, var(--grid-columns)),
+    var(--grid-repeat-tracks, minmax(0, 1fr))
+  ));
+
+  &:not(.ra-grid--inherit-gap) {
+    --br-grid-gap: var(--grid-gap);
+  }
+}
+
+.ra-grid-item {
+  /* Redundant, but forces reset the internal vars to prevent leaks. */
+  --br-grid-row: var(--grid-row, 1);
+  --br-grid-column: var(--grid-column, 1);
+
+  grid-row: span var(--br-grid-row, var(--grid-row, 1));
+  grid-column: span var(--br-grid-column, var(--grid-column, 1));
+}
+
+@variant $namespace in token(sortedBreakpoints) {
+  @media breakpoint($namespace) {
+    .ra-grid[data-gap*="-$namespace"]:not(.ra-grid--inherit-gap) {
+      --br-grid-gap: var(--grid-gap-$namespace);
+    }
+
+    .ra-grid[data-columns*="-$namespace"] {
+      --br-grid-columns: var(--grid-columns-$namespace);
+    }
+
+    .ra-grid-item[data-row*="-$namespace"] {
+      --br-grid-row: var(--grid-row-$namespace);
+    }
+
+    .ra-grid-item[data-column*="-$namespace"] {
+      --br-grid-column: var(--grid-column-$namespace);
+    }
+  }
+}

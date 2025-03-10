@@ -1,0 +1,152 @@
+
+.ra-product-tile--default {
+  --media-border-radius: var(--product-tile-media-border-radius);
+
+  position: relative;
+/*   z-index: var(--product-tile-z-index); */
+  height: var(--product-tile-height);
+  padding: var(--product-tile-padding, 0);
+  background-color: var(--product-tile-background);
+  border-radius: var(--product-tile-border-radius);
+
+  &:hover {
+    --product-tile-image-opacity: 1;
+    --product-tile-image-even-opacity: 1;
+    --product-tile-wishlist-opacity: 1;
+    --product-tile-atc-opacity: 1;
+/*     --product-tile-z-index: var(--z-index-base); */
+  }
+}
+
+.ra-product-tile--card {
+  --br-product-card-media-width: var(--product-card-media-width, 7rem);
+
+  position: relative;
+  display: flex;
+  align-items: var(--product-card-align-items);
+  gap: var(--product-card-gap, var(--spacing-sm));
+  padding: var(--product-card-padding, var(--product-card-padding-top, .75rem) var(--product-card-padding-horizontal, .75rem) var(--product-card-padding-bottom, .75rem));
+  background-color: var(--product-card-background, var(--product-tile-background));
+  border-radius: var(--product-card-radius, var(--product-tile-radius, 0));
+}
+
+  .ra-product-tile__media {
+    position: relative;
+  }
+
+  .ra-product-tile__media--card {
+    width: var(--br-product-card-media-width);
+    flex: 0 0 var(--br-product-card-media-width);
+  }
+
+    .ra-product-tile__media-link {
+      display: block;
+      width: 100%;
+    }
+
+    .ra-product-tile__image {
+      transition: var(--product-tile-image-transition, opacity 150ms ease-in-out);
+      opacity: var(--product-tile-image-opacity);
+
+      &:nth-child(even) {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        opacity: var(--product-tile-image-even-opacity, 0);
+      }
+    }
+
+    .ra-product-tile__badge {
+      position: absolute;
+      top: var(--product-tile-badge-top, var(--spacing-xs));
+      left: var(--product-tile-badge-left, var(--spacing-xs));
+    }
+
+    .ra-product-tile__atc,
+    .ra-product-tile__wishlist {
+      transition-property: opacity, color, background-color, border-color;
+    }
+
+    .ra-product-tile__atc {
+      position: absolute;
+      right: var(--product-tile-atc-right, var(--spacing-sm));
+      bottom: var(--product-tile-atc-bottom, var(--spacing-sm));
+      width: calc(100% - (2 * var(--product-tile-atc-right, var(--spacing-sm))));
+      opacity: var(--product-tile-atc-opacity, 0);
+
+      &:focus {
+        --product-tile-atc-opacity: 1;
+      }
+    }
+
+    .ra-product-tile__wishlist {
+      position: absolute;
+      top: var(--product-tile-wishlist-top, var(--spacing-xs));
+      right: var(--product-tile-wishlist-right, var(--spacing-xs));
+      opacity: var(--product-tile-wishlist-opacity, 0);
+
+      &:focus {
+        --product-tile-wishlist-opacity: 1;
+      }
+
+      @media breakpoint(md-max) {
+        --product-tile-wishlist-opacity: 1;
+
+        .ra-product-tile--card  {
+          min-width: var(--product-card-min-width, 17.9375rem)
+        }
+      }
+    }
+
+    .ra-product-tile__wishlist--active {
+      --product-tile-wishlist-opacity: 1;
+    }
+
+  .ra-product-tile__details {
+    padding: var(--product-tile-details-spacing, var(--spacing-2xs) var(--spacing-xs) var(--spacing-sm));
+  }
+
+  .ra-product-tile__details--card {
+    max-width: calc(100% - var(--br-product-card-media-width));
+    flex: 1 1 auto;
+    padding: var(--product-card-details-spacing);
+  }
+
+    .ra-product-tile__attribute {
+      font-size: var(--product-tile-attribute-font-size, var(--font-size-sm));
+      color: var(--product-tile-attribute-color, var(--c-gray-700));
+    }
+
+    .ra-product-tile__name {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .ra-product-tile__name--card {
+      white-space: initial;
+    }
+
+    .ra-product-tile__name {
+      font-size: var(--product-tile-font-size, var(--font-size-sm-to-md));
+      color: var(--product-tile-color, currentColor);
+    }
+
+    .ra-product-tile__price {
+      font-size: var(--product-tile-price-font-size, var(--font-size-sm-to-md));
+      color: var(--product-tile-price-color);
+    }
+
+    .ra-product-tile__rating,
+    .ra-product-tile__picker {
+      margin-top: var(--spacing-xs);
+    }
+
+    .ra-product-tile__rating {
+      &:not(:last-child) {
+        margin-bottom: var(--spacing);
+      }
+    }

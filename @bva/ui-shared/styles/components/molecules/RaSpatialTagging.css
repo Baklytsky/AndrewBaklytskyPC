@@ -1,0 +1,289 @@
+
+.ra-spatial-tagging {
+  /* The "active" scope refers to the value that is currently applicable.
+  This value may be overriden on a per breakpoint or modifier basis.
+  The approach simplifies re-usability since you always get the most up-to-date value. */
+  --active-component-color: var(--component-fg-color);
+  --active-component-background: var(--component-bg-color);
+
+  color: var(--active-component-color, var(--active-component-color-fallback, inherit));
+  background-color: var(--active-component-background, transparent);
+
+  @media breakpoint(md) {
+    --active-component-color: var(--component-fg-color-md, var(--component-fg-color));
+    --active-component-background: var(--component-bg-color-md, var(--component-bg-color));
+  }
+}
+
+.ra-spatial-tagging--split {
+  display: flex;
+}
+
+.ra-spatial-media,
+.ra-spatial-widget {
+  position: relative;
+}
+
+.ra-spatial-media {
+  overflow: hidden;
+}
+
+.ra-spatial-widget {
+  display: flex;
+  flex-direction: column;
+}
+
+  .ra-spatial-overlay {
+    position: absolute;
+
+    @media breakpoint(md) {
+      top: var(--overlay-top);
+      left: var(--overlay-left);
+    }
+  }
+
+  .ra-spatial-tagging__tag {
+    z-index: var(--z-index-above-base);
+    transform: translate(-50%, -50%);
+  }
+
+  .ra-spatial-popup {
+    z-index: var(--z-index-overlay);
+    max-width: var(--spatial-tag-popup-max-width, 100%);
+    padding: var(--spatial-tag-popup-padding, 0 var(--spacing-lg) 0 0);
+    border: var(--spatial-tag-popup-border);
+    border-radius: var(--spatial-tag-popup-border-radius);
+    background: var(--spatial-tag-popup-background, var(--c-panel));
+    box-shadow: var(--spatial-tag-popup-box-shadow);
+  }
+
+    .ra-spatial-popup__close {
+      z-index: var(--z-index-base);
+      position: absolute;
+      top: var(--spatial-tag-popup-close-top, var(--spacing-xs));
+      right: var(--spatial-tag-popup-close-right, var(--spacing-xs));
+      left: var(--spatial-tag-popup-close-left, initial);
+    }
+
+  .ra-spatial-content__copy {
+    display: flex;
+    flex-direction: column;
+
+    @media breakpoint(md) {
+      max-width: var(--spatial-tag-copy-max-width, 31.25rem);
+    }
+  }
+
+  .ra-spatial-content__title {
+    font-size: var(--spatial-tag-title-font-size, var(--title-font-size));
+  }
+
+  .ra-spatial-content__description {
+    font-size: var(--spatial-tag-description-font-size);
+  }
+
+  .ra-spatial-content__link-list {
+    --link-item-min-width: 7rem;
+    --link-item-grow: 0;
+
+    margin-top: var(--spacing-md);
+  }
+
+/* Product Tag */
+.ra-tag-indicator {
+  position: relative;
+  height: var(--spatial-tag-indicator-outer-size, var(--spatial-tag-indicator-puter-height, 2.5rem));
+  width: var(--spatial-tag-indicator-outer-size, var(--spatial-tag-indicator-outer-width, 2.5rem));
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  border-radius: 100%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 0.125rem solid transparent;
+  transition-property: border-color;
+  transition-timing-function: var(--transition-function-default);
+  transition-duration: var(--transition-duration-medium);
+
+  &.ra-tag-indicator--active,
+  &:hover,
+  &:focus {
+    border-color: var(--spatial-tag-indicator-color, var(--c-white));
+    box-shadow: none;
+  }
+
+  &:not(.ra-tag-indicator--active):not(:hover) {
+    &::before {
+      content: '';
+      border: 0.0625rem solid var(--spatial-tag-indicator-color, var(--c-white));
+      border-radius: 50%;
+      height: var(--spatial-tag-indicator-size, var(--spatial-tag-indicator-height, 2rem));
+      width: var(--spatial-tag-indicator-size, var(--spatial-tag-indicator-width, 2rem));
+      position: absolute;
+      animation: pulsate 1.6s ease-out;
+      animation-iteration-count: infinite;
+      opacity: 0;
+      z-index: var(--z-index-base);
+    }
+  }
+}
+
+@keyframes pulsate {
+  0% {transform: scale(1, 1); opacity: 0.0;}
+  50% {opacity: 1.0;}
+  100% {transform: scale(1.3, 1.3); opacity: 0.0;}
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-tag-indicator--$color {
+    --spatial-tag-indicator-color: $map-DEFAULT-var;
+    --spatial-tag-indicator-border-color: $map-contrast-var;
+  }
+}
+
+  .ra-tag-indicator__inner {
+    position: relative;
+    height: var(--spatial-tag-indicator-size, var(--spatial-tag-indicator-height, 2rem));
+    width: var(--spatial-tag-indicator-size, var(--spatial-tag-indicator-width, 2rem));
+
+    border-radius: 100%;
+
+    box-shadow:
+      inset 0 0 0 .0625rem var(--spatial-tag-indicator-border-color, var(--c-black)),
+      inset 0 0 0 .5625rem var(--spatial-tag-indicator-color, var(--c-white)),
+      inset 0 0 0 .625rem var(--spatial-tag-indicator-border-color, var(--c-black));
+  }
+
+@media breakpoint(md) {
+  .ra-spatial-tagging--split {
+    align-items: center;
+  }
+
+    .ra-spatial-widget {
+      align-items: center;
+    }
+
+      .ra-spatial-widget__contents {
+        width: 85%;
+        max-width: 28.25rem;
+      }
+
+      .ra-spatial-widget__carousel {
+        width: 60%;
+        max-width: 19.5rem;
+
+        --carousel-controls-left: -3.625rem;
+        --carousel-controls-right: -3.625rem;
+      }
+
+    .ra-spatial-column {
+      width: 50%;
+    }
+
+  .ra-spatial-popup {
+    --br-spatial-tag-popup-arrow-width: var(--spatial-tag-popup-arrow-width, 1rem);
+    --br-spatial-tag-popup-arrow-height: var(--spatial-tag-popup-arrow-height, .75rem);
+    --br-spatial-tag-popup-arrow-adjust: calc(var(--br-spatial-tag-popup-arrow-width) * -1);
+
+    width: var(--spatial-tag-popup-width, 24rem);
+
+    &:not([class*="inverted"]) {
+      transform: translate(var(--overlay-offsetX), var(--overlay-offsetY));
+
+      &::before {
+        content: '';
+        border-right: var(--br-spatial-tag-popup-arrow-width) solid var(--spatial-tag-popup-background, var(--c-panel));
+        left: var(--br-spatial-tag-popup-arrow-adjust);
+        top: 1rem;
+      }
+    }
+
+    &.inverted {
+      &::before {
+        content: '';
+        border-left:  var(--br-spatial-tag-popup-arrow-width) solid var(--spatial-tag-popup-background, var(--c-panel));
+        right: var(--br-spatial-tag-popup-arrow-adjust);
+        bottom: 1rem;
+      }
+    }
+
+    &.inverted--vertically {
+      --standard-xoffset: 42px;
+
+      &::before {
+        content: '';
+        border-right: var(--br-spatial-tag-popup-arrow-width) solid var(--spatial-tag-popup-background, var(--c-panel));
+        left: var(--br-spatial-tag-popup-arrow-adjust);
+        bottom: 1rem;
+      }
+    }
+
+    &.inverted--horizontally {
+      --standard-yoffset: -30px;
+
+      &::before {
+        content: '';
+        border-left: var(--br-spatial-tag-popup-arrow-width) solid var(--spatial-tag-popup-background, var(--c-panel));
+        right: var(--br-spatial-tag-popup-arrow-adjust);
+        top: 1rem;
+      }
+    }
+
+    &::before {
+      content: '';
+      width: 0; 
+      height: 0; 
+      border-top: var(--br-spatial-tag-popup-arrow-height) solid transparent;
+      border-bottom: var(--br-spatial-tag-popup-arrow-height) solid transparent; 
+      position: absolute;
+    }
+  }
+
+  .ra-spatial-content__details {
+    margin-bottom: var(--spatial-tag-details-spacing, var(--spacing-xl));
+  }
+
+  .ra-spatial-content__description {
+    margin-top: var(--spatial-tag-description-spacing, var(--spacing-xs));
+  }
+}
+
+@media breakpoint(md-max) {
+  .ra-spatial-tagging {
+    flex-direction: column;
+  }
+
+  .ra-spatial-tagging__tag-button {
+    background: var(--spatial-tag-bg, transparent);
+
+    &:hover {
+      background: var(--spatial-tag-active-bg,var( --c-primary));
+    }
+  }
+
+  .ra-spatial-popup {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: var(--spatial-tag-popup-width);
+  }
+
+  .ra-spatial-widget {
+    order: 0;
+    justify-content: center;
+  }
+
+  .ra-spatial-media {
+      order: 1;
+  }
+
+  .ra-spatial-content__details {
+    margin-bottom: var(--spacing-xl);
+  }
+
+    .ra-spatial-content__title {
+      margin-bottom: var(--spacing-xs);
+    }
+}

@@ -1,0 +1,31 @@
+
+.ra-overlay {
+  z-index: var(--overlay-z-index, var(--z-index-overlay));
+  position: var(--overlay-position, fixed);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  /* Since Vue transitions are applied directly on the ra-overlay node,
+  this pseudo-element serves as a way to prevent conflict with the transitions.
+  Specifically, opacity changes controlled by Vue transitions would otherwise cause a flicker. */
+  &:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: inherit;
+    height: inherit;
+    background-color: var(--overlay-background, var(--c-black));
+    opacity: var(--overlay-opacity, 0.65);
+
+    content: '';
+  }
+}
+
+.ra-overlay--primary {
+  --overlay-background: var(--c-primary);
+  --overlay-opacity: .9;
+}

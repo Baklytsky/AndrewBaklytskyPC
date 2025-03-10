@@ -1,0 +1,49 @@
+
+.ra-row {
+  --br-row-gap: var(--row-gap);
+
+  --applicable-gap: calc(var(--br-row-gap, var(--row-gap)) / 2);
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  /**
+   * I wish I could use gap with percentage column calculations, but the gods will not allow it.
+   */
+  /* gap: var(--br-row-gap, var(--row-gap)); */
+  margin: calc(var(--applicable-gap) * -1);
+}
+
+.ra-col {
+  --br-col-size: var(--col-size);
+
+  flex-grow: var(--br-col-grow, 0);
+  flex-shrink: var(--br-col-shrink, 0);
+
+  /* flex-basis: calc(var(--br-col-basis, var(--br-col-size, var(--col-size))) - var(--br-row-gap, 0px)); */
+  /* max-width:  calc(var(--br-col-width, var(--br-col-size, var(--col-size))) - var(--br-row-gap, 0px)); */
+  flex-basis: var(--br-col-basis, var(--br-col-size, var(--col-size)));
+  max-width: var(--br-col-width, var(--br-col-size, var(--col-size)));
+  min-height: .0625rem;
+
+  padding: var(--applicable-gap);
+}
+
+@variant $namespace in token(sortedBreakpoints) {
+  @media breakpoint($namespace) {
+    .ra-row[data-row-gap*="-$namespace"] {
+      --br-row-gap: var(--row-gap-$namespace);
+    }
+
+    .ra-col[data-col-size*="-$namespace"] {
+      --br-col-size: var(--col-size-$namespace);
+    }
+
+    .ra-col[data-col-auto*="-$namespace"] {
+      --br-col-grow: 1;
+      --br-col-basis: 0px;
+      --br-col-width: 100%;
+    }
+  }
+}

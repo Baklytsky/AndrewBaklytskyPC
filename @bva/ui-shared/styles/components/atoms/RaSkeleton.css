@@ -1,0 +1,151 @@
+
+/*------------------------------------*\
+  #SKELETON
+\*------------------------------------*/
+
+.ra-skeleton {}
+
+.ra-skeleton--align-left {
+  justify-items: start;
+}
+
+.ra-skeleton--align-center {
+  justify-items: center;
+}
+
+.ra-skeleton--align-right {
+  justify-items: end;
+}
+
+  .ra-skeleton__item {
+    display: grid;
+    grid-gap: .5rem;
+  }
+
+  .ra-skeleton__item-section {
+    margin-bottom: var(--spacing-md);
+  }
+
+/*------------------------------------*\
+  #BONE TYPES
+\*------------------------------------*/
+
+.ra-bone {
+  z-index: var(--z-index-reset);
+  background: var(--c-gray-100);
+  position: relative;
+  overflow: hidden;
+  border-radius: .25rem;
+  width: var(--component-width, 100%);
+  
+  &:before {
+    content: "";
+    display: block;
+    width: 100%;
+    padding-bottom: var(--component-height, auto);
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    z-index: var(--z-index-negative);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    animation: left-to-right 1.25s ease-in-out infinite;
+    background-image: linear-gradient(90deg, var(--c-gray-100) 0, rgba(255, 255, 255, 0.4) 50%, var(--c-gray-100) 100%);
+  }
+}
+
+.ra-bone--avatar {
+  border-radius: 100%;
+  width: var(--component-width, 6.25rem);
+
+  &:before {
+    padding-bottom: var(--component-height, 6.25rem);
+  }
+}
+
+.ra-bone--paragraph {
+  &:before {
+    padding-bottom: var(--component-height, 1rem);
+  }
+}
+
+.ra-bone--image {
+  &:before {
+    padding-bottom: var(--component-height, 75%);
+  }
+}
+
+.ra-bone--button {
+  width: var(--component-width, 10.5rem);
+  border: solid .125rem var(--c-gray-200);
+
+  &:before {
+    padding-bottom: var(--component-height, 2.75rem);
+  }
+}
+
+.ra-bone--input {
+  border: solid .0625rem var(--c-gray-200);
+
+  &:before {
+    padding-bottom: var(--component-height, 2.75rem);
+  }
+}
+
+
+/*------------------------------------*\
+  #BONE ANIMATIONS
+\*------------------------------------*/
+.ra-bone--fade {
+  &:after {
+    animation: fade 2s ease-in-out infinite;
+    background-image: none;
+    background-color: var(--c-highlight);
+  }
+}
+
+.ra-bone--pulsate {
+  &:after {
+    background-image: none;
+  }
+
+  animation: pulsate 1.5s ease-in-out infinite;
+}
+
+.ra-bone--none {
+  &:after {
+    animation: none;
+    background: var(--c-gray-200);
+  }
+}
+
+@keyframes left-to-right {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulsate {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.95);
+  }
+}

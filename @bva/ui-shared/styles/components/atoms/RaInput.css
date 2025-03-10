@@ -1,0 +1,173 @@
+
+[type="password"],
+[type="text"],
+[type="tel"],
+[type="email"],
+[type="search"],
+[type="number"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  letter-spacing: var(--letter-spacing);
+
+  &::placeholder {
+    color: var(--c-gray-500);
+    font-size: var(--font-size-sm);
+  }
+}
+
+[type="number"] {
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  -moz-appearance: textfield;
+}
+
+.ra-input {
+  position: relative;
+  margin: var(--input-margin);
+
+  &.is-invalid {
+    --input-border-color: var(--c-danger);
+  }
+
+  &.is-required {
+
+  }
+
+  &.is-disabled {
+    --icon-color: var(--c-copy-disabled);
+  }
+}
+
+.ra-input--lg {
+  --input-height: 2.875rem;
+}
+
+.ra-input--xl {
+  @media breakpoint(md) {
+    --input-height: 3.625rem;
+    --input-label-size: var(--font-size);
+    --input-label-spacing: var(--spacing-2xs);
+    --input-message-size: var(--font-size);
+    --input-message-spacing: var(--spacing-3xs);
+  }
+
+  @media breakpoint(md-max) {
+    --input-height: 2.875rem;
+  }
+}
+
+  .ra-input__wrapper {
+    position: relative;
+  }
+
+  .ra-input__control {
+    display: block;
+    width: var(--input-width, 100%);
+    height: var(--input-height, 2.75rem);
+
+    padding: var(--input-padding, 0 .75rem);
+    background-color: var(--input-background, transparent);
+    color: var(--input-color, currentColor);
+    text-align: var(--input-text-align);
+    border: var(--input-border,
+      var(--input-border-style, solid)
+      var(--input-border-width, .0625rem)
+      var(--input-border-color, var(--c-border-primary))
+    );
+    border-radius: var(--input-border-radius, 0);
+    font-size: var(--input-font-size);
+    font-family: var(--input-font-family);
+
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--transition-duration-default);
+    transition-timing-function: var(--transition-function-default);
+
+    &:disabled, .is-disabled & {
+      --input-background: var(--input-disabled-background, var(--c-gray-100));
+      --input-color: var(--input-disabled-color, var(--c-copy-disabled));
+
+      &, .is-filled &, &:focus, &:hover {
+        --input-border-color: var(--input-disabled-border-color, var(--c-gray-300));
+      }
+
+      /* Added to provide color on iOS */
+      -webkit-text-fill-color: var(--c-copy-disabled);
+    }
+
+    &[multiple] {
+      height: 18.5rem;
+      padding: var(--input-padding, 0);
+    }
+  }
+
+  .ra-input__control--text {
+    .is-filled &, &:focus, &:hover {
+      --input-border-color: var(--c-gray-900);
+    }
+  }
+
+  .ra-input__password-button {
+    position: absolute;
+    top: 50%;
+    right: var(--spacing-xs);
+    transform: translate3d(0, -50%, 0);
+
+    &::after {
+      position: absolute;
+      top: 50%;
+      width: 65%;
+      height: .0625rem;
+      background-color: var(--c-contrast);
+      transform: translate3d(0, -50%, 0) rotate(45deg) scaleX(var(--input-password-icon-scaleX, 1));
+      transition: transform var(--transition-duration-default) var(--transition-function-default);
+      content: "";
+    }
+  }
+
+  .ra-input__password-button--password-visible {
+    --input-password-icon-scaleX: 0;
+  }
+
+/*------------------------------------*\
+  #INPUT LABEL
+\*------------------------------------*/
+
+.ra-input__label {
+  display: var(--input-label-display, inline-flex);
+  margin-bottom: var(--input-label-spacing, 0);
+  font-family: var(--font-family-secondary);
+  font-size: var(--input-label-size, var(--font-size-sm));
+
+  color: var(--input-label-color, var(--c-gray-900));
+  background-color: var(--input-label-background);
+
+  &::after {
+    content: var(--input-label-required);
+    color: var(--c-danger);
+  }
+}
+
+/*------------------------------------*\
+  #INPUT MESSAGE
+\*------------------------------------*/
+
+.ra-input__message {
+  margin-top: var(--input-message-spacing, 0);
+  margin-left: var(--input-message-horizontal-spacing, 0);
+  color: var(--c-gray-500);
+  font-size: var(--input-message-size, var(--font-size-xs));
+}
+
+/*------------------------------------*\
+  #INPUT ERROR
+\*------------------------------------*/
+
+.ra-input__error-message {
+  margin-top: var(--input-message-spacing, 0);
+  color: var(--c-danger);
+  font-size: var(--input-message-size, var(--font-size-xs));
+}

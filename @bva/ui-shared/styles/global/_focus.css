@@ -1,0 +1,32 @@
+
+/* Sets a standard focus styles for elements across the site. */
+*:focus,
+*:focus ~ .set--sibling-focus,
+*:focus ~ [data-focus="sibling"],
+*:focus ~ .set--sibling-deep-focus .set--inherit-focus,
+*:focus ~ [data-focus="deep-sibling"] [data-focus],
+.set--deep-focus:focus-within .set--inherit-focus,
+[data-focus="deep"]:focus-within [data-focus] {
+  outline: none;
+
+  /* Allow for box-shadow to still be usable without overriding a component's default box-shadow and vice-versa.
+  This makes adding a box-shadow for focusable elements a bit more verbose, however it becomes more extensible.
+  The general gist is to use the `box-shadow` property only when the component is not focused,
+  and then use `--component-box-shadow` when the component is focused. */
+
+  /* **Usage example**:
+    .my-component:not(:focus) {
+      box-shadow: 0 .25rem 2rem #000;
+    }
+    
+    .my-component:focus {
+      --component-box-shadow: 0 .25rem 2rem #000;
+    } */
+  box-shadow: var(--component-focus-outline, 0 0 0 .1875rem var(--c-body), 0 0 0 .25rem var(--c-focus-outline)),
+              var(--component-box-shadow, 0 0 transparent);
+
+  .set--hide-focus-outline &,
+  [data-hide-focus-outline] & {
+    --focus-outline: none;
+  }
+}

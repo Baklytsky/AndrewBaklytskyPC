@@ -1,0 +1,132 @@
+
+.ra-swatch {
+  display: block;
+  position: relative;
+  width: var(--swatch-width, var(--swatch-size, 100%));
+  transition-property: transform, box-shadow;
+  transition-duration: var(--transition-duration-default);
+  transition-timing-function: var(--transition-function-default);
+
+  &:focus {
+    z-index: var(--z-index-base);;
+  }
+
+  &:hover:not(.ra-swatch--selected):not(:disabled) {
+    &:after {
+/*       --swatch-border-color: var(--c-contrast); */
+      --swatch-border-width: .125rem;
+    }
+  }
+
+  &:before {
+    display: block;
+    /* Set background on the :before pseudo-element to prevent opacity overrides  */
+    background: var(--swatch-value);
+    background-image: var(--swatch-image);
+    background-size: var(--swatch-background-size, cover);
+    background-repeat: var(--swatch-background-repeat, no-repeat);
+
+    padding-bottom: var(--swatch-height, var(--swatch-size, 100%));
+    border-radius: inherit;
+
+    content: '';
+  }
+
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+
+    width: 100%;
+    height: 100%;
+    /* Do not exceed these dimensions */
+    max-width: calc(100% + var(--spacing-xs));
+    max-height: calc(100% + var(--spacing-xs));
+    border-radius: inherit;
+
+    box-shadow:
+      inset 0 0 0 var(--swatch-selected-border-width, var(--swatch-border-width, .0625rem)) var(--swatch-selected-border-color, var(--swatch-border-color, var(--c-contrast))),
+      inset 0 0 0 var(--br-swatch-selected-background-size, 0) var(--swatch-selected-background-color, var(--c-body));
+
+    content: '';
+  }
+
+  &:disabled {
+    --swatch-border-width: 0;
+
+    &:before {
+      opacity: .5;
+    }
+  }
+}
+
+.ra-swatch--invisible {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.ra-swatch--no-badge {
+  &:after {
+    transition-property: width, height, box-shadow;
+    transition-duration: var(--transition-duration-default);
+    transition-timing-function: var(--transition-function-default);
+  }
+
+  &.ra-swatch--selected {
+    --br-swatch-selected-background-size: var(--swatch-selected-background-size, .25rem);
+
+    &:after {
+      /* Note that this may be capped by an intentional max width/height. */
+      width: var(--swatch-selected-size, 100%);
+      height: var(--swatch-selected-size, 100%);
+    }
+  }
+}
+
+.ra-swatch--2xs {
+  --swatch-size: 1rem;
+}
+
+.ra-swatch--xs {
+  --swatch-size: 1.25rem;
+}
+
+.ra-swatch--sm {
+  --swatch-size: 1.75rem;
+}
+
+.ra-swatch--lg {
+  --swatch-size: 3.5rem;
+}
+
+.ra-swatch--rounded {
+  &, &:after {
+    border-radius: 100%;
+  }
+}
+
+  .ra-swatch__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+
+    width: var(--spacing-sm);
+  }
+
+  .ra-swatch__disabled-icon {
+    position: absolute;
+    top: 0;
+    right: -50%;
+    bottom: 0;
+    left: -50%;
+    margin: auto;
+    width: var(--swatch-disabled-width, 120%);
+    height: var(--swatch-disabled-height, .0625rem);
+    background-color: var(--swatch-disabled-color, var(--c-contrast));
+
+    transform: rotate(var(--swatch-disabled-rotate, -45deg));
+  }

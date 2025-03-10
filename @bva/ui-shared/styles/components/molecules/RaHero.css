@@ -1,0 +1,205 @@
+
+.ra-hero {
+  /* The "active" scope refers to the value that is currently applicable.
+  This value may be overriden on a per breakpoint or modifier basis.
+  The approach simplifies re-usability since you always get the most up-to-date value. */
+  --active-component-color: var(--component-fg-color);
+  --active-component-background: var(--component-bg-color);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: var(--active-component-color, var(--active-component-color-fallback, inherit));
+
+  @media breakpoint(md) {
+    --active-component-color: var(--component-fg-color-md, var(--component-fg-color));
+    --active-component-background: var(--component-bg-color-md, var(--component-bg-color));
+
+    &.set--details-overlay,
+    &.set--details-overlay-md {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+
+  @media breakpoint(md-max) {
+    &.set--details-overlay,
+    &.set--details-overlay-sm {
+      --active-component-color-fallback: var(--c-copy-overlay);
+    }
+  }
+}
+
+  .ra-hero__media {
+    [class*="set--details-before"] &,
+    [class*="set--details-after"] & {
+      position: relative;
+    }
+
+    /* Control media aspect ratios here instead of through the RaImage component.
+    This is cause the hero is meant to have different sizes on large vs small viewports. */
+    @media breakpoint(md) {
+      .set--aspect-ratio-short & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, .25);
+      }
+
+      .set--aspect-ratio-main & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, .42);
+      }
+
+      .set--aspect-ratio-tall & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, .6);
+      }
+    }
+
+    @media breakpoint(md-max) {
+      .set--aspect-ratio-short &,
+      .set--aspect-ratio-short & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, .5);
+      }
+
+      .set--aspect-ratio-main.set--details-before &,
+      .set--aspect-ratio-main.set--details-before-sm &,
+      .set--aspect-ratio-main.set--details-after &,
+      .set--aspect-ratio-main.set--details-after-sm & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, 1.05);
+      }
+
+      /* Since "aspect ratio main" has special handling for height,
+      this prevents the media elements from collapsing when using transitions (i.e. transform is added to a parent container). */
+      .set--aspect-ratio-main.set--details-overlay &,
+      .set--aspect-ratio-main.set--details-overlay-sm & {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .set--aspect-ratio-tall &,
+      .set--aspect-ratio-tall & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, 1.4);
+      }
+    }
+  }
+
+  .ra-hero__details {
+    display: flex;
+    width: 100%;
+    background-color: var(--active-component-background, transparent);
+
+    @media breakpoint(md) {
+      .set--details-overlay &,
+      .set--details-overlay-md & {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+      }
+    }
+
+    @media breakpoint(lg) {
+      .set--aspect-ratio-short & {
+        padding: 2rem;
+      }
+
+      .set--aspect-ratio-main &,
+      .set--aspect-ratio-tall &,
+      .set--aspect-ratio-respect-media & {
+        padding: 3.75rem;
+      }
+    }
+
+    @media breakpoint(md-to-lg) {
+      padding: 2.5rem;
+
+      .ra-carousel--has-arrows .set--details-overlay &,
+      .ra-carousel--has-arrows .set--details-overlay-md & {
+        padding-right: 4rem;
+        padding-left: 4rem;
+      }
+    }
+
+    @media breakpoint(md-max) {
+      position: relative;
+
+      .set--details-overlay &,
+      .set--details-overlay-sm & {
+        padding: 2.5rem 1rem;
+      }
+
+      .set--details-before &,
+      .set--details-before-sm &,
+      .set--details-after &,
+      .set--details-after-sm &, {
+        padding: 1.75rem 1rem;
+      }
+
+      /* Override horizontal padding when inside a carousel with arrows. */
+      .ra-carousel--has-arrows .set--details-overlay &,
+      .ra-carousel--has-arrows .set--details-overlay-sm & {
+        padding-right: 4rem;
+        padding-left: 4rem;
+      }
+
+      /* Override vertical padding when inside a carousel with bullets. */
+      .ra-carousel--has-bullets .set--details-after &,
+      .ra-carousel--has-bullets .set--details-after-sm & {
+        padding-bottom: 4.25rem;
+      }
+
+      /* On "aspect ratio main" only, when using copy overlay on small viewports,
+      make the copy dictate how tall the hero should be.
+      This prevents the copy/ctas from overflowing its media. */
+      .set--details-overlay.set--aspect-ratio-main &,
+      .set--details-overlay-sm.set--aspect-ratio-main & {
+        aspect-ratio: var(--component-media-ratio-x, 1) / var(--component-media-ratio-y, 1.05);
+      }
+
+      /* Make details position absolute for when NOT using "aspect ratio main". */
+      .set--details-overlay:not(.set--aspect-ratio-main) &,
+      .set--details-overlay-sm:not(.set--aspect-ratio-main) & {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+    .ra-hero__copy {
+      display: flex;
+      flex-direction: column;
+      padding: var(--component-copy-padding);
+      background-color: var(--component-copy-background);
+      border-radius: var(--component-copy-border-radius);
+      /* Fixes copy display when using Videos in Safari. */
+      transform: translate3d(0,0,0);
+
+      @media breakpoint(md) {
+        max-width: var(--component-copy-max-width, 41.25rem);
+      }
+    }
+
+    .ra-hero__subtitle {
+      font-size: var(--font-size-sm);
+      font-family: var(--component-subtitle-font-family);
+    }
+
+    .ra-hero__title {
+      font-weight: var(--font-weight-bold);
+      font-family: var(--component-title-font-family);
+    }
+
+    .ra-hero__description {
+      font-size: var(--font-size-sm-to-base);
+      font-family: var(--component-description-font-family);
+    }
+
+    .ra-hero__link-list {
+      @media breakpoint(lg) {
+        margin-top: 2.5rem;
+      }
+
+      @media breakpoint(lg-max) {
+        margin-top: 1.5rem;
+      }
+    }

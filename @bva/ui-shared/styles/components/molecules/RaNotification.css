@@ -1,0 +1,67 @@
+
+.ra-notification {
+  position: relative;
+  display: flex;
+  align-items: var(--notification-align-items, center);
+  max-width: var(--notification-max-width);
+  padding: var(--notification-padding, var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-xs));
+  box-shadow: var(--notification-box-shadow);
+  border: var(--notification-border, none);
+  border-radius: var(--notification-border-radius, .3125rem);
+  background-color: var(--notification-background);
+  color: var(--notification-color);
+}
+
+@variant $color, $map in token(UIColors) {
+  .ra-notification--$color {
+    color: var(--notification-color, $map-contrast-var);
+    background-color: var(--notification-background, $map-DEFAULT-var);
+  }
+}
+
+.ra-notification--tertiary {
+  border: var(--notification-border, solid .0625rem);
+}
+
+.ra-notification--overlay {
+  z-index: var(--notification-z-index, var(--z-index-above-base));
+  position: var(--notification-position, absolute);
+  top: var(--notification-top, 0);
+  left: var(--notification-left, 0);
+  width: var(--notification-width, 100%);
+  height: var(--notification-height, 100%);
+  border-radius: var(--notification-border-radius, 0);
+}
+
+.ra-notification--no-icon {
+  padding: var(--notification-padding, var(--spacing-sm));
+}
+
+  .ra-notification__content {}
+
+  .ra-notification__title {
+    font-size: var(--notification-title-font-size, var(--font-size-md20));
+    font-weight: var(--notification-title-font-weight, var(--font-weight-bold));
+  }
+
+  .ra-notification__message {
+    font-size: var(--notification-message-font-size);
+    font-weight: var(--notification-message-font-weight);
+  }
+
+  .ra-notification__action {
+    color: var(--notification-link-color, var(--link-color));
+  }
+
+  .ra-notification__icon {
+    margin-right: var(--notification-icon-margin, var(--spacing-xs));
+  }
+
+  .ra-notification__close {
+    position: absolute;
+    top: var(--notification-close-top, 0);
+    right: var(--notification-close-right, var(--spacing-xs));
+    bottom: var(--notification-close-bottom, 0);
+    margin-top: auto;
+    margin-bottom: auto;
+  }
