@@ -33,6 +33,7 @@ import './globals/predictive-search';
 import './globals/product-form';
 import './globals/product-grid';
 import './globals/product-images';
+import './globals/product-siblings';
 import './globals/shopify-products';
 import './globals/slider';
 import './globals/tabs';
