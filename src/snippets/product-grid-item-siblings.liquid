@@ -57,7 +57,8 @@
                   endif
 
                   assign sib_cutline = sib_product.metafields.theme.cutline | strip_html
-                  assign sib_color = sib_product.metafields.theme.sibling_color.value | default: sib_product.metafields.theme.sibling_colour.value | default: sib_product.metafields.theme.siblings_color.value | default: sib_product.metafields.theme.siblings_colour.value | default: sib_product.metafields.theme.siblings_colors.value | default: sib_product.metafields.theme.siblings_colours.value
+                  assign legacy_metafield_color = sib_product.metafields.theme.sibling_color.value | default: sib_product.metafields.theme.sibling_colour.value | default: sib_product.metafields.theme.siblings_color.value | default: sib_product.metafields.theme.siblings_colour.value | default: sib_product.metafields.theme.siblings_colors.value | default: sib_product.metafields.theme.siblings_colours.value
+                  assign sib_color = legacy_metafield_color | default: sib_product.title
                   assign swatch_color = sib_color | handle
 
                   if sib_cutline != blank
