@@ -27,7 +27,7 @@
       -%}
 
       <product-siblings class="product-item__siblings product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
-        <div class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-sibling-fieldset>
+        <native-scrollbar class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-sibling-fieldset>
           <div class="selector-wrapper__scrollbar" data-sibling-inner data-scrollbar>
             {%- liquid
               assign any_sibling_cutline = false
@@ -72,7 +72,7 @@
                 endif
               -%}
 
-              <div
+              <tooltip-component
                 class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ swatch_color }}"
                 style="
                   --animation-delay: {{ forloop.index0 | times: 50 }}ms;
@@ -112,7 +112,7 @@
                     -%}
                   {%- endif -%}
                 </div>
-              </div>
+              </tooltip-component>
             {%- endfor -%}
 
             {%- if settings.collection_swatch_style == 'limited' and siblingSwatchesLeft > 0 -%}
@@ -141,7 +141,7 @@
               </button>
             </div>
           {%- endif -%}
-        </div>
+        </native-scrollbar>
 
         {%- if settings.collection_swatch_style == 'text' or settings.collection_swatch_style == 'text-slider' -%}
           <span class="product-item__swatches__count">
