@@ -5,10 +5,16 @@ import cleanup from '@by-association-only/vite-plugin-shopify-clean'
 import pageReload from 'vite-plugin-page-reload'
 import tailwindcss from '@tailwindcss/vite'
 import autoprefixer from 'autoprefixer'
+import css from 'rollup-plugin-css-only'
+import path from "path";
 
 export default defineConfig({
+  server: {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  },
   plugins: [
-    vue(),
     cleanup(),
     shopify({
       // Root path to your Shopify theme directory (location of snippets, sections, templates, etc.)
@@ -19,7 +25,6 @@ export default defineConfig({
       entrypointsDir: 'src/entrypoints',
       // Additional files to use as entry points (accepts an array of file paths or glob patterns)
       additionalEntrypoints: [
-        'src/scss/inline/*.scss',
         'src/scss/sections/*.scss',
         'src/js/sections/*.js',
       ],
@@ -33,15 +38,21 @@ export default defineConfig({
     pageReload('/tmp/theme.update', {
       delay: 2000
     }),
+    css({ output: 'main.min.css' }),
+    vue(),
   ],
+  resolve: {
+    alias: {
+      '@bva': path.resolve(__dirname, '@bva')
+    }
+  },
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern-compiler'
+        api: 'modern-compiler',
       },
     },
     plugins: [
-      tailwindcss(),
       autoprefixer(),
     ],
   },
@@ -50,9 +61,9 @@ export default defineConfig({
     emptyOutDir: false,
     rollupOptions: {
       output: {
-        entryFileNames: '[name].[hash].min.js',
-        chunkFileNames: '[name].[hash].min.js',
-        assetFileNames: '[name].[hash].min.[ext]',
+        entryFileNames: '[name].min.js',
+        chunkFileNames: '[name].min.js',
+        assetFileNames: '[name].min.[ext]',
       },
     },
   },

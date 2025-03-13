@@ -6,7 +6,6 @@ import { ucfirst, upcase, unhandleize } from "../vue/filters/string.js";
 import { money, moneyWithoutDecimals } from "../vue/filters/money.js";
 
 import { register } from "swiper/element/bundle";
-import "swiper/css/bundle";
 
 import components from "../vue/components/index.js";
 import "../js/custom-elements/custom-elements.js";
@@ -15,13 +14,6 @@ import "../js/custom-elements/ra-product-carousel.js";
 import "../js/custom-elements/ra-product-main.js";
 import "../js/custom-elements/ra-hero-video-controls.js";
 import Vue3TouchEvents from "vue3-touch-events";
-
-import "tailwindcss/base.css";
-import "@bva/ui-shared/styles/reset.css";
-import "@bva/ui-shared/styles/required.css";
-import "@bva/ui-shared/styles/components.css";
-import "tailwindcss/utilities.css";
-import "aos/dist/aos.css";
 
 const isDesignMode = window.Shopify.designMode || window.Shopify.inspectMode;
 const pinia = createPinia();

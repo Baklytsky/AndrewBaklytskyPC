@@ -149,8 +149,8 @@
 
 <script setup>
 import { computed, reactive, watch, ref, onMounted } from "vue";
-import { RaIcon } from "@bva/ui-vue";
-import { RaBadge } from "@bva/ui-vue";
+import { RaIcon } from "../../../@bva/ui-vue";
+import { RaBadge } from "../../../@bva/ui-vue";
 import { useProductPageStore } from "../stores/productPage.js";
 import { getSizedImageFromUrl } from "../filters/image.js";
 import { CartSwatchPicker, CartOptionPicker } from "./CartComponents/index";

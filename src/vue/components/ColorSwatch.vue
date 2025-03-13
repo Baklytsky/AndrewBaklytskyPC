@@ -37,7 +37,7 @@ const props = defineProps({
   product: Object,
   activeColor: String,
 });
-import { reinitializeVueComponent } from "../../entries/main";
+import { reinitializeVueComponent } from "@/entrypoints/main.js";
 const emit = defineEmits(["update-product"]);
 const productTileSwatch = ref(null);
 const isActive = computed(() => window.location.pathname === props.product.url);

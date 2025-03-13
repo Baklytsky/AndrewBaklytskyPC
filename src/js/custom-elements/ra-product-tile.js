@@ -1,5 +1,5 @@
 import { money, moneyWithoutDecimals } from "../utils/money.js";
-import { getToken } from "@bva/ui-shared/helpers";
+import { getToken } from "../../../@bva/ui-shared/helpers";
 import axios from "axios";
 
 export default class RaProductTile extends HTMLElement {

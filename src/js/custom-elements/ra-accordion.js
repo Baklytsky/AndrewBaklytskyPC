@@ -1,4 +1,4 @@
-import { getToken } from "@bva/ui-shared/helpers";
+import { getToken } from "../../../@bva/ui-shared/helpers";
 export default class RaAccordion extends HTMLElement {
   constructor() {
     super();

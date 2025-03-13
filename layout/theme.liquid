@@ -30,8 +30,10 @@
       <link rel="stylesheet" href="https://use.typekit.net/uuq0jfz.css">
       {% endcomment %}
 
-      {{ 'main.css' | asset_url | preload_tag: as: 'style' }}
-      {{ 'main.css' | asset_url | stylesheet_tag }}
+      {%- liquid
+        render 'vite-tag' with 'main.scss', preload_stylesheet: true
+        render 'vite-tag' with 'main.js'
+      -%}
 
       {%- render 'css-variables' -%}
       {%- render 'icon-store' -%}
@@ -94,10 +96,6 @@
       {% section 'footer' %}
 
       {% render 'ra-login-modal' %}
-
-      {% comment %}theme-check-disable ParserBlockingScriptTag{% endcomment %}
-      {{ 'main.js' | asset_url | preload_tag: as: 'script' }}
-      {{ 'main.js' | asset_url | script_tag }}
 
       {% liquid
         assign vip_customer = false

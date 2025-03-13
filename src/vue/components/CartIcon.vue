@@ -27,7 +27,7 @@
 </template>
 <script setup>
 import { storeToRefs } from "pinia";
-import { RaIcon } from "@bva/ui-vue";
+import { RaIcon } from "../../../@bva/ui-vue";
 import { computed } from "vue";
 import { useCartStore } from "../stores/cart.js";
 
