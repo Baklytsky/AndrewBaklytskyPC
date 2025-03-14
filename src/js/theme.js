@@ -7,6 +7,7 @@ import './globals/height';
 import './globals/scroll-to';
 import './globals/theme-a11y';
 import './globals/throttle';
+import './globals/html-update';
 
 /* ================ Globals ================ */
 import './globals/aria-toggle';
@@ -33,6 +34,7 @@ import './globals/predictive-search';
 import './globals/product-form';
 import './globals/product-grid';
 import './globals/product-images';
+import './globals/product-item';
 import './globals/product-siblings';
 import './globals/shopify-products';
 import './globals/slider';

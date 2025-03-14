@@ -55,19 +55,19 @@ class SiblingSwatches {
       swatch.addEventListener('focusin', (event) => this.showSibling(event));
     });
 
-    if (this.productLinks.length) {
-      this.swatches.forEach((swatch) => {
-        swatch.addEventListener('click', () => {
-          this.productLinks[0].click();
-        });
+    // if (this.productLinks.length) {
+    //   this.swatches.forEach((swatch) => {
+    //     swatch.addEventListener('click', () => {
+    //       this.productLinks[0].click();
+    //     });
 
-        swatch.addEventListener('keyup', (e) => {
-          if (e.code === 'Enter') {
-            this.productLinks[0].click();
-          }
-        });
-      });
-    }
+    //     swatch.addEventListener('keyup', (e) => {
+    //       if (e.code === 'Enter') {
+    //         this.productLinks[0].click();
+    //       }
+    //     });
+    //   });
+    // }
   }
 
   cacheDefaultValues() {
