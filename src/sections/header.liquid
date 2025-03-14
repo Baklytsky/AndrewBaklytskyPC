@@ -40,13 +40,6 @@
   endif
 
   assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
-  assign mobile_menu_linklist = section.settings.mobile_menu_linklist
-  assign secondary_menu_linklist = section.settings.secondary_menu_linklist
-  assign tertiary_menu_linklist = section.settings.tertiary_menu_linklist
-  assign has_mobile_menu = false
-  if mobile_menu_linklist != blank and linklists[mobile_menu_linklist].links.size > 0 and mobile_menu_linklist != main_menu_linklist
-    assign has_mobile_menu = true
-  endif
 
   assign logo = section.settings.logo
   assign transparent_logo = section.settings.transparent_logo
@@ -84,11 +77,6 @@
     assign header_height_medium = menu_height_medium_default | plus: padding_top_medium | plus: padding_bottom_medium
     assign header_height_mobile = menu_height_mobile_default | plus: padding_top_mobile | plus: padding_bottom_mobile
     assign logo_width = 'auto'
-  endif
-
-  if tertiary_menu_linklist != blank and linklists[tertiary_menu_linklist].links.size > 0
-    assign tertiary_menu_height = 0.75 | times: settings.nav_font_size | times: 1.2 | plus: 32
-    assign header_height_mobile = header_height_mobile | plus: tertiary_menu_height
   endif
 
   if toolbar_block
@@ -367,20 +355,6 @@
       </a>
     </div>
   </div>
-
-  {%- if tertiary_menu_linklist != blank and linklists[tertiary_menu_linklist].links.size > 0 -%}
-    <div class="header__mobile__bottom">
-      <nav class="header__mobile__nav{% if settings.type_nav_caps %} caps{% endif %}" data-mobile-nav>
-        <div class="header__mobile__nav__scroller">
-          {%- for link in linklists[tertiary_menu_linklist].links -%}
-            <a class="navlink" href="{{ link.url }}">
-              <span class="navtext">{{ link.title }}</span>
-            </a>
-          {%- endfor -%}
-        </div>
-      </nav>
-    </div>
-  {%- endif -%}
 {%- endcapture -%}
 
 {%- capture buttons -%}
@@ -470,28 +444,12 @@
         <div class="drawer__content" data-drawer-content>
           <div class="drawer__content__scroll" data-scroll-lock-scrollable>
             <nav class="drawer__menu" data-scroll-lock-scrollable data-sliderule-pane="0">
-              <div class="drawer__main-menu{% if has_mobile_menu %} drawer__main-menu--desktop{% endif %}">
+              <div class="drawer__main-menu">
                 {%- for link in linklists[main_menu_linklist].links -%}
                   {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
                   {%- render 'nav-item-mobile', link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'mobile-menu--desktop' -%}
                 {%- endfor -%}
               </div>
-
-              {%- if has_mobile_menu -%}
-                <div class="drawer__main-menu drawer__main-menu--mobile">
-                  {%- for link in linklists[mobile_menu_linklist].links -%}
-                    {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
-                    {%- render 'nav-item-mobile', link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'mobile-menu--mobile' -%}
-                  {%- endfor -%}
-                </div>
-              {%- endif -%}
-
-              {%- unless secondary_menu_linklist == blank -%}
-                {%- for link in linklists[secondary_menu_linklist].links -%}
-                  {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
-                  {%- render 'nav-item-mobile', link: link, index: forloop.index, forloop_index: forloop.index, secondary_menu: true, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'secondary-menu' -%}
-                {%- endfor -%}
-              {%- endunless -%}
             </nav>
           </div>
         </div>
@@ -747,12 +705,6 @@
       "id": "main_menu_linklist"
     },
     {
-      "type": "link_list",
-      "label": "Mobile menu",
-      "info": "This will be deprecated in the future, please use the new Mobile menu section",
-      "id": "mobile_menu_linklist"
-    },
-    {
       "type": "checkbox",
       "id": "enable_search",
       "default": true,
@@ -888,23 +840,6 @@
       "type": "image_picker",
       "id": "transparent_logo_pdp",
       "label": "Product pages logo"
-    },
-    {
-      "type": "header",
-      "content": "Mobile menu",
-      "info": "These menus won't show dropdown items."
-    },
-    {
-      "type": "link_list",
-      "id": "secondary_menu_linklist",
-      "label": "Secondary menu",
-      "info": "Visible in the hamburger menu."
-    },
-    {
-      "type": "link_list",
-      "id": "tertiary_menu_linklist",
-      "label": "Navigation menu",
-      "info": "Visible on mobile below the header."
     },
     {
       "type": "header",
