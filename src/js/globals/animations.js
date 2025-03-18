@@ -75,6 +75,12 @@ const aosAnchorObserver = new IntersectionObserver(
 
         // Stop observing anchor element after inner elements were animated
         observer.unobserve(entry.target);
+
+        // Remove the container from the anchorContainers array
+        const sectionIndex = anchorContainers.indexOf('#' + entry.target.id);
+        if (sectionIndex !== -1) {
+          anchorContainers.splice(sectionIndex, 1);
+        }
       }
     });
   },
