@@ -20,6 +20,7 @@ const classes = {
   fade: 'is-fade',
   stopEvents: 'no-events',
   active: 'is-active',
+  isFocused: 'is-focused',
 };
 
 const attributes = {
@@ -49,11 +50,15 @@ class SiblingSwatches {
     this.cacheDefaultValues();
 
     this.siblingsInnerHolder.addEventListener('mouseleave', () => this.resetProductValues());
-    this.siblingsInnerHolder.addEventListener('focusout', () => this.resetProductValues());
+    this.siblingsInnerHolder.addEventListener('focusout', () => {
+      if (document.body.classList.contains(classes.isFocused)) this.resetProductValues();
+    });
 
     this.swatches.forEach((swatch) => {
       swatch.addEventListener('mouseenter', (event) => this.showSibling(event));
-      swatch.addEventListener('focusin', (event) => this.showSibling(event));
+      swatch.addEventListener('focusin', (event) => {
+        if (document.body.classList.contains(classes.isFocused)) this.showSibling(event);
+      });
     });
   }
 
