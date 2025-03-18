@@ -12,6 +12,7 @@ const selectors = {
   siblingCount: '[data-sibling-count]',
   siblingFieldset: '[data-sibling-fieldset]',
   siblingLink: '[data-sibling-link]',
+  siblingLinkCurrent: '.sibling__link--current',
 };
 
 const classes = {
@@ -25,7 +26,6 @@ const attributes = {
   siblingAddedImage: 'data-sibling-added-image',
   siblingCutline: 'data-sibling-cutline',
   siblingImage: 'data-sibling-image',
-  siblingLink: 'data-sibling-link',
   siblingPrice: 'data-sibling-price',
   siblingCompareAtPrice: 'data-sibling-compare-at-price',
   productLink: 'data-product-link',
@@ -40,6 +40,7 @@ class SiblingSwatches {
     this.productPrice = this.product.querySelector(selectors.productPrice);
     this.productImage = this.product.querySelector(selectors.productImage);
     this.productImageSibling = this.product.querySelector(selectors.productImageSibling);
+    this.siblingsInnerHolder = this.product.querySelector(selectors.siblingsInnerHolder);
 
     this.init();
   }
@@ -47,30 +48,19 @@ class SiblingSwatches {
   init() {
     this.cacheDefaultValues();
 
-    this.product.addEventListener('mouseleave', () => this.resetProductValues());
-    this.product.addEventListener('focusout', () => this.resetProductValues());
+    this.siblingsInnerHolder.addEventListener('mouseleave', () => this.resetProductValues());
+    this.siblingsInnerHolder.addEventListener('focusout', () => this.resetProductValues());
 
     this.swatches.forEach((swatch) => {
       swatch.addEventListener('mouseenter', (event) => this.showSibling(event));
       swatch.addEventListener('focusin', (event) => this.showSibling(event));
     });
-
-    // if (this.productLinks.length) {
-    //   this.swatches.forEach((swatch) => {
-    //     swatch.addEventListener('click', () => {
-    //       this.productLinks[0].click();
-    //     });
-
-    //     swatch.addEventListener('keyup', (e) => {
-    //       if (e.code === 'Enter') {
-    //         this.productLinks[0].click();
-    //       }
-    //     });
-    //   });
-    // }
   }
 
   cacheDefaultValues() {
+    this.activeSibling = this.siblingsInnerHolder.querySelector(selectors.siblingLinkCurrent).closest(selectors.siblingLink);
+    this.productImageSibling.setAttribute(attributes.siblingImage, this.activeSibling.dataset.siblingImage);
+
     this.productLinkValue = this.productLinks[0].hasAttribute(attributes.productLink) ? this.productLinks[0].getAttribute(attributes.productLink) : '';
     this.productPriceValue = this.productPrice.innerHTML;
 
@@ -81,12 +71,6 @@ class SiblingSwatches {
 
   resetProductValues() {
     this.product.classList.remove(classes.active);
-
-    if (this.productLinkValue) {
-      this.productLinks.forEach((productLink) => {
-        productLink.href = this.productLinkValue;
-      });
-    }
 
     if (this.productPrice) {
       this.productPrice.innerHTML = this.productPriceValue;
@@ -102,17 +86,10 @@ class SiblingSwatches {
 
   showSibling(event) {
     const swatch = event.target;
-    const siblingLink = swatch.hasAttribute(attributes.siblingLink) ? swatch.getAttribute(attributes.siblingLink) : '';
     const siblingPrice = swatch.hasAttribute(attributes.siblingPrice) ? swatch.getAttribute(attributes.siblingPrice) : '';
     const siblingCompareAtPrice = swatch.hasAttribute(attributes.siblingCompareAtPrice) ? swatch.getAttribute(attributes.siblingCompareAtPrice) : '';
     const siblingCutline = swatch.hasAttribute(attributes.siblingCutline) ? swatch.getAttribute(attributes.siblingCutline) : '';
     const siblingImage = swatch.hasAttribute(attributes.siblingImage) ? swatch.getAttribute(attributes.siblingImage) : '';
-
-    if (siblingLink) {
-      this.productLinks.forEach((productLink) => {
-        productLink.href = siblingLink;
-      });
-    }
 
     if (siblingCompareAtPrice) {
       this.productPrice.innerHTML = `<span class="price sale"><span class="new-price">${siblingPrice}</span> <span class="old-price">${siblingCompareAtPrice}</span></span>`;
@@ -149,6 +126,15 @@ class SiblingSwatches {
       this.productImageSibling.querySelector(`[src="${imageSrc}"]`).classList.add(classes.fade);
     };
     const swapImages = () => {
+      const activeSiblingImage = this.productImageSibling.getAttribute(attributes.siblingImage);
+      const swapNewImageOnHover = siblingImage !== activeSiblingImage;
+      const swapActiveSiblingImage = siblingImage === activeSiblingImage && this.productImageSibling.classList.contains(classes.visible);
+
+      // Avoid changing the image when hovering over the currently active sibling link, if the featured image remains unchanged.
+      const shouldSwap = Boolean(swapActiveSiblingImage || swapNewImageOnHover);
+
+      if (!shouldSwap) return;
+
       this.productImageSibling.querySelectorAll('img').forEach((image) => {
         image.classList.remove(classes.fade);
       });
@@ -194,7 +180,6 @@ if (!customElements.get('product-siblings')) {
 
       connectedCallback() {
         this.product = this.closest(selectors.productGridItem);
-        // this.siblingScrollbar = this.querySelector(selectors.siblingsInnerHolder); TODO: test this
         this.siblingCount = this.querySelector(selectors.siblingCount);
         this.siblingFieldset = this.querySelector(selectors.siblingFieldset);
         this.siblingLinks = this.querySelectorAll(selectors.siblingLink);
@@ -219,8 +204,6 @@ if (!customElements.get('product-siblings')) {
         if (this.siblingLinks.length) {
           new SiblingSwatches(this.siblingLinks, this.product);
         }
-
-        // Init Tooltips: TODO: test this
       }
 
       showSiblings() {
