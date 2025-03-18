@@ -270,13 +270,13 @@ if (!customElements.get('predictive-search')) {
         this.setAttribute('open', true);
         this.input.setAttribute('aria-expanded', true);
         this.isOpen = true;
-        this.predictiveSearchResults.style.setProperty('--full-screen', `${window.visualViewport.height}px`);
+        this.predictiveSearchResults.style.setProperty('--results-height', `${window.visualViewport.height - this.predictiveSearchResults.getBoundingClientRect().top}px`);
       }
 
       close(clearSearchTerm = false) {
         this.closeResults(clearSearchTerm);
         this.isOpen = false;
-        this.predictiveSearchResults.style.removeProperty('--full-screen');
+        this.predictiveSearchResults.style.removeProperty('--results-height');
       }
 
       closeResults(clearSearchTerm = false) {
