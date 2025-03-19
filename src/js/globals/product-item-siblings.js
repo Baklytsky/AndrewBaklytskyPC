@@ -175,9 +175,9 @@ class SiblingSwatches {
   }
 }
 
-if (!customElements.get('product-siblings')) {
+if (!customElements.get('product-item-siblings')) {
   customElements.define(
-    'product-siblings',
+    'product-item-siblings',
     class ProductSiblings extends HTMLElement {
       constructor() {
         super();

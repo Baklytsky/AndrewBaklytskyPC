@@ -35,7 +35,7 @@ import './globals/product-form';
 import './globals/product-grid';
 import './globals/product-images';
 import './globals/product-item';
-import './globals/product-siblings';
+import './globals/product-item-siblings';
 import './globals/shopify-products';
 import './globals/slider';
 import './globals/tabs';
