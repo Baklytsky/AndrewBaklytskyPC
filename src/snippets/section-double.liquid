@@ -4,6 +4,9 @@
 {%- endcomment -%}
 
 {%- liquid
+  assign overlapping_images = overlapping_images | default: false
+  assign images_offset = section.settings.images_offset
+  assign hide_secondary_image = section.settings.hide_image_2
   assign desktop_height = section.settings.height
   assign mobile_height = section.settings.mobile_height
   assign width = section.settings.width
@@ -104,27 +107,38 @@
 -%}
 
 {%- capture section_images -%}
-  {%- if image_1 != blank -%}
-    <div class="brick__block__image"
+  {%- liquid
+    assign image_desktop_height = desktop_height
+    assign image_mobile_height = mobile_height
+    assign image_aspect_ratio = ''
+    if overlapping_images
+      assign image_desktop_height = 'image-height'
+      assign image_mobile_height = 'image-height--mobile'
+      assign image_aspect_ratio = 0.765
+    endif
+  -%}
+
+  {%- if image_1 != blank or overlapping_images -%}
+    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} brick__block__image--offset{% endif %}"
       {% unless enable_slider %}
         data-slide="1"
       {% endunless %}
     >
-      {%- render 'image-hero' image: image_1, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
+      {%- render 'image-hero', aspect_ratio: image_aspect_ratio, image: image_1, sizes: sizes, desktop_height: image_desktop_height, mobile_height: image_mobile_height -%}
     </div>
   {%- endif -%}
 
-  {%- if image_2 != blank -%}
-    <div class="brick__block__image"
+  {%- if image_2 != blank or overlapping_images -%}
+    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} desktop{% endif %}"
       {% unless enable_slider %}
         data-slide="2"
       {% endunless %}
     >
-      {%- render 'image-hero' image: image_2, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
+      {%- render 'image-hero', aspect_ratio: image_aspect_ratio, image: image_2, sizes: sizes, desktop_height: image_desktop_height, mobile_height: image_mobile_height -%}
     </div>
   {%- endif -%}
 
-  {%- if image_1 == blank and image_2 == blank -%}
+  {%- if image_1 == blank and image_2 == blank and overlapping_images == false -%}
     <div class="brick__block__image">
       {%- render 'image-hero' sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height -%}
     </div>
@@ -794,13 +808,17 @@
       <div class="brick__section{% if section.settings.layout == 'is-reversed' %} brick__section--reversed{% endif %}{% if section.settings.reverse_blocks %} brick__section--reversed-mobile{% endif %}{% if accordion_blocks.size > 0 %} brick__section--accordion{% endif %} {{ width }} {{ desktop_height }} {{ mobile_height }}">
         {%- liquid
           assign block_images_tag = 'div'
-          if image_1 != blank and image_2 != blank
+          if image_1 != blank and image_2 != blank and overlapping_images == false
             assign block_images_tag = 'slider-component'
           endif
         -%}
+
         <{{ block_images_tag }}
-          class="brick__block {{ figure_width_class }} brick__block--images"
-          {% if image_1 != blank and image_2 != blank %}
+          class="brick__block {{ figure_width_class }} {% if overlapping_images %}brick__block--overlap{% else %}brick__block--images{% endif %}"
+          {% if overlapping_images %}
+            style="--image-offset-value: {{ images_offset }}px;"
+          {% endif %}
+          {% if image_1 != blank and image_2 != blank and overlapping_images == false %}
             data-slider
             data-slider-fullwidth
             data-dots="{{ settings.dots_style }}"
