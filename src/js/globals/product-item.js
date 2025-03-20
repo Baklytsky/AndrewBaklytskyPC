@@ -13,7 +13,6 @@ if (!customElements.get('product-item')) {
     class ProductItem extends HTMLElement {
       abortController = undefined;
       pendingSwapHandle = null;
-      preProcessHtmlCallbacks = [];
       postProcessHtmlCallbacks = [];
 
       handleClick = (event) => this.handleChange(event);
@@ -49,11 +48,6 @@ if (!customElements.get('product-item')) {
       }
 
       initProductSwapUtility() {
-        this.preProcessHtmlCallbacks.push((html) => {
-          // console.log('Pre-processing HTML:', html);
-          // Add animation or active classes, etc.
-        });
-
         this.postProcessHtmlCallbacks.push((newNode) => {
           if (this.pendingSwapHandle) {
             const swapHandle = newNode.querySelector(`[${attributes.swapHandle}="${this.pendingSwapHandle}"]`);
@@ -103,7 +97,6 @@ if (!customElements.get('product-item')) {
           window.theme.htmlUpdate.viewTransition(
             this, // Current product-item element to be replaced
             processedProductItem, // New product-item element with updated content
-            this.preProcessHtmlCallbacks, // Run any pre-processing on the new HTML before swap
             this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
           );
         };
