@@ -1,13 +1,11 @@
-import appendCartItems from '../globals/append-cart-items';
+import {initAnimations} from '../globals/animations';
 import floatLabels from '../globals/forms';
 import resizeListener from '../globals/resize';
 import scrollListener from '../globals/scroll';
 import wrapElements from '../globals/wrap';
 import isTouch from '../util/touch';
 import {ariaToggle} from '../globals/aria-toggle';
-import {loading} from '../globals/loading';
 import {loadedImagesEventHook, removeLoadingClassFromLoadedImages} from '../globals/images';
-import {initAnimations} from '../globals/animations';
 
 // Safari requestIdleCallback polyfill
 window.requestIdleCallback =
@@ -43,8 +41,6 @@ window.addEventListener('DOMContentLoaded', () => {
   floatLabels(document);
   wrapElements(document);
   removeLoadingClassFromLoadedImages(document);
-  loading();
-  appendCartItems();
 
   requestIdleCallback(() => {
     if (Shopify.visualPreviewMode) {

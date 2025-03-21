@@ -19,12 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
   if (window.self !== window.top) {
     document.querySelector('html').classList.add('iframe');
   }
-
-  // Safari smoothscroll polyfill
-  let hasNativeSmoothScroll = 'scrollBehavior' in document.documentElement.style;
-  if (!hasNativeSmoothScroll) {
-    loadScript({url: window.theme.assets.smoothscroll});
-  }
 });
 
 // Apply a specific class to the html element for browser support of cookies.
