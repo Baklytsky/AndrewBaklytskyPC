@@ -1,26 +1,53 @@
-{%- liquid
-  assign button_style = block.settings.style
-  assign show_arrow = block.settings.show_arrow
+{% comment %}
+  Renders list of products in grid layout
 
-  if button_style == 'btn--text' and show_arrow
-    assign button_style = button_style | append: ' btn--text-no-underline'
+  Accepts:
+  - text: {String} Button label (required)
+  - link: {String} Button link
+  - type: {String} Button color (default: btn--primary)
+  - size: {String} Button size (default: '')
+  - style: {String} Button style (default: btn--solid)
+  - show_arrow: {Boolean} Show arrow icon (default: false)
+  - full_width: {Boolean} Full-width button (default: false)
+  - shopify_attributes: {String} Additional shopify_attributes for the button
+
+  Usage:
+  {%- render 'button',
+    text: block.settings.text,
+    link: block.settings.link,
+    type: block.settings.type,
+    size: block.settings.size,
+    style: block.settings.style,
+    show_arrow: block.settings.show_arrow,
+    full_width: block.settings.full_width,
+    shopify_attributes: block.shopify_attributes
+  -%}
+{% endcomment %}
+
+{%- liquid
+  if style == 'btn--text' and show_arrow
+    assign style = style | append: ' btn--text-no-underline'
+  endif
+
+  if full_width
+    assign style = style | append: ' btn--full'
   endif
 -%}
 
 <div
-  class="hero__button {% if block.settings.full_width %}hero__button--stacked{% else %}hero__button--placeholder{% endif %}"
+  class="hero__button"
   data-aos="hero"
   data-aos-order="auto"
   data-aos-anchor="{{ section.id }}"
-  {{ block.shopify_attributes }}
+  {{ shopify_attributes }}
 >
   <a
-    class="btn {{ block.settings.size }} {{ button_style }} {{ block.settings.type }}"
-    href="{{ block.settings.link }}"
+    class="btn {{ size }} {{ style }} {{ type }}"
+    href="{{ link }}"
   >
-    <span>{{ block.settings.text | escape }}</span>
+    <span>{{ text | escape }}</span>
 
-    {%- if block.settings.show_arrow -%}
+    {%- if show_arrow -%}
       {%- render 'icon-arrow-right' -%}
     {%- endif -%}
   </a>
