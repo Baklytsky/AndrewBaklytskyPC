@@ -55,7 +55,7 @@ jobs:
         cd ~/
         git clone git@github.com:invisiblethemes/carbon-dist.git carbon-dist
 
-    - name: Sync /dist contents to the root of carbon-dist
+    - name: Sync /dist contents to the root of carbon-dist repository
       run: |
         # Ensure the dist folder exists
         if [ -d ~/work/carbon/carbon/dist ]; then
@@ -66,9 +66,9 @@ jobs:
         fi
         # Commit and push changes
         cd ~/carbon-dist
-        git remote set-url origin git@github.com:invisiblethemes/carbon-dist.git
-        git config user.name "GitHub Actions"
-        git config user.email "github-actions@github.com"
+        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/invisiblethemes/carbon-dist.git
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Update files from /dist (commit $GITHUB_SHA)" || echo "No changes to commit"
         git push origin main

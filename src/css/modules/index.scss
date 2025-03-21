@@ -44,7 +44,7 @@
   left: 0;
   right: 0;
   z-index: 10;
-  background-color: var(--overlay-bg);
+  background-color: var(--OVERLAY-BG);
   opacity: var(--overlay-opacity);
 }
 
@@ -409,6 +409,7 @@ body.has-header-transparent .section-overlay-header:first-of-type .index-image-t
 .hero__title,
 .hero__subheading,
 .hero__rte,
+.hero__stars,
 .hero__description,
 .hero__button,
 .hero__collections,
@@ -444,6 +445,12 @@ body.has-header-transparent .section-overlay-header:first-of-type .index-image-t
   .text-center & { align-self: center; }
 }
 
+.hero__stars {
+  --icons: var(--text);
+
+  .icon-star-full { fill: var(--text); }
+}
+
 /*=== Text sections ===*/
 
 .text-link,
@@ -476,18 +483,8 @@ p a {
   .text-right & { justify-content: flex-end; }
 
   .hero__button { margin: 8px; }
-}
 
-.hero__button-group--stacked {
-  flex-direction: column;
-  align-items: var(--alignment-justify-content, flex-start);
-
-  .hero__button {
-    max-width: 400px;
-    width: calc(100% - 16px);
-  }
-
-  .btn { width: 100%; }
+  .hero__button--stacked { width: calc(100% - 16px); }
 }
 
 .hero__button {
@@ -503,6 +500,15 @@ p a {
     .text-left--mobile & { --alignment-justify-content: flex-start; }
     .text-center--mobile & { --alignment-justify-content: center; }
     .text-right--mobile & { --alignment-justify-content: flex-end; }
+  }
+}
+
+.hero__button--stacked {
+  width: 100%;
+
+  .btn {
+    max-width: 100%;
+    width: 400px;
   }
 }
 
@@ -535,7 +541,7 @@ p a {
     width: var(--backdrop-size);
     height: var(--backdrop-size);
     border-radius: 50%;
-    background: radial-gradient(ellipse at center, var(--overlay-bg) 0%, rgb(255 255 255 / 0%) 70%);
+    background: radial-gradient(ellipse at center, var(--OVERLAY-BG) 0%, rgb(255 255 255 / 0%) 70%);
     opacity: var(--overlay-opacity);
     transform: translate(-50%, -50%);
   }
@@ -667,8 +673,6 @@ p a {
 
   .grid__heading-holder--inline .grid__heading-actions .btn { width: auto; }
 }
-
-.template-index .container { background-color: var(--TRANSPARENT); }
 
 .index-newsletter .hero__content__wrapper { z-index: 11; }
 
