@@ -136,6 +136,15 @@ class ProductFormReader {
     } else return null;
   }
 
+  targetProps(event) {
+    if (!event.target.dataset.optionValueId) return '';
+
+    return {
+      // element: event.target,
+      optionValueId: event.target.dataset.optionValueId,
+    };
+  }
+
   /**
    * Getter method which returns a collection of objects containing name and values
    * of property inputs
@@ -160,14 +169,16 @@ class ProductFormReader {
     return this.quantityInputs[0] ? Number.parseInt(this.quantityInputs[0].value, 10) : 1;
   }
 
-  getFormState() {
+  getFormState(event) {
     const variant = this.variant();
+
     return {
       options: this.options(),
       variant: variant,
       properties: this.properties(),
       quantity: this.quantity(),
       plan: this.plan(variant),
+      target: event ? this.targetProps(event) : '',
     };
   }
 
@@ -184,7 +195,7 @@ class ProductFormReader {
   }
 
   _onSubmit(options, event) {
-    event.dataset = this.getFormState();
+    event.dataset = this.getFormState(event);
     if (options.onFormSubmit) {
       options.onFormSubmit(event);
     }
@@ -200,7 +211,7 @@ class ProductFormReader {
     }
 
     return function (event) {
-      event.dataset = this.getFormState();
+      event.dataset = this.getFormState(event);
       this._setIdInputValue(event.dataset.variant);
       cb(event);
     }.bind(this);
