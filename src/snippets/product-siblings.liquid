@@ -3,7 +3,8 @@
 {%- liquid
   assign product_api = product_api | default: false
 
-  assign sibling_color = block.settings.sibling_color | default: product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+  assign legacy_sibling_color = block.settings.sibling_color | default: product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+  assign sibling_color = legacy_metafield_color | default: product.title
   assign hide_labels_class = ''
 
   if settings.show_labels == false
