@@ -15,7 +15,10 @@ const htmlUpdate = {
       // Update element ID if it exists
       element.id && (element.id = `${element.id}-${timestamp}`);
       // Update form reference if it exists
-      element.form && element.setAttribute('form', `${element.getAttribute('form')}-${timestamp}`);
+      if (element.form) {
+        const formId = element.closest('form') ? element.closest('form').getAttribute('id') : `${element.form.getAttribute('id')}-${timestamp}`;
+        element.setAttribute('form', formId);
+      }
       // Update data-aos-anchor if it exists
       if (element.dataset.aosAnchor) {
         const anchorId = element.dataset.aosAnchor.replace('#', '');
@@ -32,7 +35,10 @@ const htmlUpdate = {
       // Update element ID if it exists
       element.id && (element.id = `${element.id}-old-${timestamp}`);
       // Update form reference if it exists
-      element.form && element.setAttribute('form', `${element.form.getAttribute('id')}-old-${timestamp}`);
+      if (element.form) {
+        const formId = element.closest('form') ? element.closest('form').getAttribute('id') : `${element.form.getAttribute('id')}-old-${timestamp}`;
+        element.setAttribute('form', formId);
+      }
       // Update data-aos-anchor if it exists
       if (element.dataset.aosAnchor) {
         const anchorId = element.dataset.aosAnchor.replace('#', '');
