@@ -9,7 +9,10 @@ const htmlUpdate = {
     // Add timestamp to ensure unique IDs
     const timestamp = Date.now();
     // Update the main element's ID if it exists
-    newContent.id && (newContent.id = `${newContent.id}-${timestamp}`);
+    if (newContent.dataset.swapId === 'true' && newContent.id) {
+      newContent.id = `${newContent.id}-${timestamp}`;
+    }
+
     // Update all child elements' IDs, forms, and AOS anchors
     newContent.querySelectorAll('[id], [form], [data-aos-anchor]').forEach((element) => {
       // Update element ID if it exists
@@ -31,6 +34,9 @@ const htmlUpdate = {
     const newNode = newNodeWrapper.firstChild;
 
     // dedupe IDs in the old node to avoid conflicts during transition
+    if (oldNode.dataset.swapId === 'true' && oldNode.id) {
+      oldNode.id = `${oldNode.id}-old-${timestamp}`;
+    }
     oldNode.querySelectorAll('[id], [form], [data-aos-anchor]').forEach((element) => {
       // Update element ID if it exists
       element.id && (element.id = `${element.id}-old-${timestamp}`);
