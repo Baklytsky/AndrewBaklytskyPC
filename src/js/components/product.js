@@ -126,7 +126,7 @@ if (!customElements.get('product-component')) {
 
       toggleCartBarOnScroll() {
         const scrolled = window.scrollY;
-        const element = theme.variables.productPageSticky && this.formWrapper ? this.formWrapper : this.form;
+        const element = theme.settings.productPageSticky && this.formWrapper ? this.formWrapper : this.form;
 
         if (element && this.cartBar) {
           const formOffset = element.offsetTop;
