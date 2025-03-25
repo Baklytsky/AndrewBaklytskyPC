@@ -137,16 +137,9 @@ class ProductFormReader {
   }
 
   selectedOptionValues() {
-    return Array.from(this.element.querySelectorAll(`${selectors.optionInput}`)).map(({dataset}) => dataset.optionValueId);
-  }
-
-  targetProps(event) {
-    // if (!event.target.dataset.optionValueId) return '';
-
+    const selectedOptionValues = Array.from(this.element.querySelectorAll(`${selectors.optionInput}`)).map((input) => input.value);
     return {
-      // element: event.target,
-      selectedOptionValues: this.selectedOptionValues(),
-      optionValueId: event.target.dataset.optionValueId,
+      optionValues: selectedOptionValues,
     };
   }
 
@@ -174,7 +167,7 @@ class ProductFormReader {
     return this.quantityInputs[0] ? Number.parseInt(this.quantityInputs[0].value, 10) : 1;
   }
 
-  getFormState(event) {
+  getFormState() {
     const variant = this.variant();
 
     return {
@@ -183,7 +176,7 @@ class ProductFormReader {
       properties: this.properties(),
       quantity: this.quantity(),
       plan: this.plan(variant),
-      target: event ? this.targetProps(event) : '',
+      selected: this.selectedOptionValues(),
     };
   }
 
@@ -200,7 +193,7 @@ class ProductFormReader {
   }
 
   _onSubmit(options, event) {
-    event.dataset = this.getFormState(event);
+    event.dataset = this.getFormState();
     if (options.onFormSubmit) {
       options.onFormSubmit(event);
     }
@@ -216,7 +209,7 @@ class ProductFormReader {
     }
 
     return function (event) {
-      event.dataset = this.getFormState(event);
+      event.dataset = this.getFormState();
       this._setIdInputValue(event.dataset.variant);
       cb(event);
     }.bind(this);

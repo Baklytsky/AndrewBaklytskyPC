@@ -568,8 +568,8 @@ class ProductForm extends HTMLElement {
 
   fireHookEvent(formState) {
     const variant = formState.variant;
-    const target = formState.target;
-    this.container.dispatchEvent(new CustomEvent('theme:variant:change', {detail: {variant, target}, bubbles: true}));
+    const selected = formState.selected;
+    this.container.dispatchEvent(new CustomEvent('theme:variant:change', {detail: {variant, selected}, bubbles: true}));
   }
 
   /**

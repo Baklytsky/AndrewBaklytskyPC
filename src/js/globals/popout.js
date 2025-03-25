@@ -7,7 +7,6 @@ const selectors = {
   productGridImage: '[data-product-image]',
   productGridItem: '[data-grid-item]',
   section: '[data-section-type]',
-  fieldset: 'fieldset',
 };
 
 const classes = {
@@ -23,7 +22,6 @@ const attributes = {
   dataValue: 'data-value',
   popoutToggleText: 'data-popout-toggle-text',
   submit: 'submit',
-  optionValueId: 'data-option-value-id',
 };
 
 if (!customElements.get('popout-select')) {
@@ -144,11 +142,6 @@ if (!customElements.get('popout-select')) {
             const currentTarget = evt.currentTarget.parentElement;
             const listTargetElement = this.popoutList.querySelector(`.${classes.active}`);
             const targetAttribute = this.popoutList.querySelector(`[${attributes.ariaCurrent}]`);
-
-            const inFieldset = Boolean(this.popoutInput.closest(selectors.fieldset));
-            if (inFieldset) {
-              this.popoutInput.setAttribute(attributes.optionValueId, evt.currentTarget.dataset.optionValueId);
-            }
 
             this.popoutInput.dispatchEvent(new Event('change'));
 
