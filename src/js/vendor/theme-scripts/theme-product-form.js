@@ -136,11 +136,16 @@ class ProductFormReader {
     } else return null;
   }
 
+  selectedOptionValues() {
+    return Array.from(this.element.querySelectorAll(`${selectors.optionInput}`)).map(({dataset}) => dataset.optionValueId);
+  }
+
   targetProps(event) {
-    if (!event.target.dataset.optionValueId) return '';
+    // if (!event.target.dataset.optionValueId) return '';
 
     return {
       // element: event.target,
+      selectedOptionValues: this.selectedOptionValues(),
       optionValueId: event.target.dataset.optionValueId,
     };
   }
