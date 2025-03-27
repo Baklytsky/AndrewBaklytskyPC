@@ -10,11 +10,14 @@ const selectors = {
   productMediaList: '[data-product-media-list]',
   form: '[data-product-form]',
   cartBar: '#cart-bar',
-  productNotificationPopupButton: '[data-popup-open]',
   productSubmitAdd: '.product__submit__add',
   formWrapper: '[data-form-wrapper]',
   productVariants: '[data-product-variants]',
   swapUrl: '[data-swap-url]',
+  productNotification: 'product-notification',
+  notificationPopupButton: '[data-notification-popup-button]',
+  popupComponent: 'popup-component',
+  popupOpen: '[data-popup-open]',
 };
 
 const classes = {
@@ -29,7 +32,6 @@ const attributes = {
   cartBarEnabled: 'data-cart-bar-enabled',
   cartBarAdd: 'data-add-to-cart-bar',
   cartBarScroll: 'data-cart-bar-scroll',
-  cartBarProductNotification: 'data-cart-bar-product-notification',
   stickyEnabled: 'data-sticky-enabled',
   swapUrl: 'data-swap-url',
 };
@@ -50,6 +52,7 @@ if (!customElements.get('product-component')) {
 
         this.stickyEnabled = this.getAttribute(attributes.stickyEnabled) === 'true';
         this.formWrapper = this.querySelector(selectors.formWrapper);
+        this.productNotification = this.querySelector(selectors.productNotification);
         this.cartBarEnabled = this.hasAttribute(attributes.cartBarEnabled);
         this.cartBar = this.querySelector(selectors.cartBar);
         this.setCartBarHeight = this.setCartBarHeight.bind(this);
@@ -84,6 +87,8 @@ if (!customElements.get('product-component')) {
 
         this.form = this.querySelector(selectors.form);
 
+        this.bindNotificationPopupEvents();
+
         if (this.swapElements.length > 0) {
           this.initializeProductSwapUtility();
           this.addEventListener('theme:variant:change', (event) => this.storeOptionValues(event));
@@ -99,10 +104,11 @@ if (!customElements.get('product-component')) {
         }
 
         if (this.cartBarEnabled) {
-          this.initCartBar();
-          this.setCartBarHeight();
-          document.addEventListener('theme:scroll', this.toggleCartBarOnScroll);
-          document.addEventListener('theme:resize', this.setCartBarHeight);
+          // TODO: Fix JS errors here 👇
+          // this.initCartBar();
+          // this.setCartBarHeight();
+          // document.addEventListener('theme:scroll', this.toggleCartBarOnScroll);
+          // document.addEventListener('theme:resize', this.setCartBarHeight);
         }
       }
 
@@ -173,8 +179,8 @@ if (!customElements.get('product-component')) {
         return (html) => {
           // TODO: remove elements?
           // TODO: update URL
-          const variant = this.getSelectedVariant(html.querySelector(selectors.productComponent));
-          this.updateURL(productUrl, variant?.id);
+          // const variant = this.getSelectedVariant(html.querySelector(selectors.productComponent));
+          // this.updateURL(productUrl, variant?.id);
 
           window.theme.htmlUpdate.viewTransition(
             this, // Current product-component element to be replaced
@@ -185,37 +191,49 @@ if (!customElements.get('product-component')) {
         };
       }
 
+      bindNotificationPopupEvents() {
+        if (!this.productNotification) return;
+
+        this.notificationPopupButtons = this.querySelectorAll(selectors.notificationPopupButton);
+        this.notificationPopup = this.productNotification.closest(selectors.popupComponent);
+        this.notificationPopupOpen = this.notificationPopup.querySelector(selectors.popupOpen);
+
+        this.notificationPopupButtons.forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.preventDefault();
+            this.notificationPopupOpen.dispatchEvent(new Event('click'));
+          });
+        });
+      }
+
       initCartBar() {
         // Submit product form on cart bar button click
         this.cartBarBtns = this.cartBar.querySelectorAll(selectors.productSubmitAdd);
-        if (this.cartBarBtns.length > 0) {
-          this.cartBarBtns.forEach((button) => {
-            button.addEventListener('click', (e) => {
-              e.preventDefault();
 
-              if (e.currentTarget.hasAttribute(attributes.cartBarAdd)) {
-                if (this.cartBarEnabled) {
-                  e.currentTarget.classList.add(classes.loading);
-                  e.currentTarget.setAttribute('disabled', 'disabled');
-                }
+        this.cartBarBtns?.forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.preventDefault();
 
-                this.form.querySelector(selectors.addToCart).dispatchEvent(
-                  new Event('click', {
-                    bubbles: true,
-                  })
-                );
-              } else if (e.currentTarget.hasAttribute(attributes.cartBarScroll)) {
-                this.scrollToTop();
-              } else if (e.currentTarget.hasAttribute(attributes.cartBarProductNotification)) {
-                this.form.querySelector(selectors.productNotificationPopupButton)?.dispatchEvent(new Event('click'));
+            if (e.currentTarget.hasAttribute(attributes.cartBarAdd)) {
+              if (this.cartBarEnabled) {
+                e.currentTarget.classList.add(classes.loading);
+                e.currentTarget.setAttribute('disabled', 'disabled');
               }
-            });
 
-            if (button.hasAttribute(attributes.cartBarAdd)) {
-              document.addEventListener('theme:product:add-error', this.scrollToTop);
+              this.form.querySelector(selectors.addToCart).dispatchEvent(
+                new Event('click', {
+                  bubbles: true,
+                })
+              );
+            } else if (e.currentTarget.hasAttribute(attributes.cartBarScroll)) {
+              this.scrollToTop();
             }
           });
-        }
+
+          if (button.hasAttribute(attributes.cartBarAdd)) {
+            document.addEventListener('theme:product:add-error', this.scrollToTop);
+          }
+        });
 
         this.setCartBarHeight();
       }
