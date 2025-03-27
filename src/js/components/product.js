@@ -1,6 +1,7 @@
 import {ProductModel} from '../features/product-model';
 
 const selectors = {
+  productComponent: 'product-component',
   addToCart: '[data-add-to-cart]',
   productImage: '[data-product-image]',
   productJson: '[data-product-json]',
@@ -13,6 +14,7 @@ const selectors = {
   productSubmitAdd: '.product__submit__add',
   formWrapper: '[data-form-wrapper]',
   productVariants: '[data-product-variants]',
+  swapUrl: '[data-swap-url]',
 };
 
 const classes = {
@@ -29,12 +31,20 @@ const attributes = {
   cartBarScroll: 'data-cart-bar-scroll',
   cartBarProductNotification: 'data-cart-bar-product-notification',
   stickyEnabled: 'data-sticky-enabled',
+  swapUrl: 'data-swap-url',
 };
 
 if (!customElements.get('product-component')) {
   customElements.define(
     'product-component',
     class ProductComponent extends HTMLElement {
+      abortController = undefined;
+      pendingRequestUrl = null;
+      preProcessHtmlCallbacks = [];
+      postProcessHtmlCallbacks = [];
+
+      handleClick = (event) => this.handleChange(event);
+
       constructor() {
         super();
 
@@ -46,6 +56,8 @@ if (!customElements.get('product-component')) {
         this.scrollToTop = this.scrollToTop.bind(this);
         this.toggleCartBarOnScroll = this.toggleCartBarOnScroll.bind(this);
         this.unlockTimer = 0;
+        this.swapElements = this.querySelectorAll(selectors.swapUrl);
+        this.sectionId = this.dataset.sectionId;
       }
 
       connectedCallback() {
@@ -72,13 +84,105 @@ if (!customElements.get('product-component')) {
 
         this.form = this.querySelector(selectors.form);
 
+        if (this.swapElements.length > 0) {
+          this.initializeProductSwapUtility();
+          this.addEventListener('theme:variant:change', (event) => this.storeOptionValues(event));
+
+          this.swapElements?.forEach((element) => {
+            element.addEventListener('click', this.handleClick);
+            // TODO:
+            // element.addEventListener('keyup', this.handleKeyup);
+          });
+
+          // TODO:
+          // this.dispatchEvent(new CustomEvent('product-component:loaded', { bubbles: true }));
+        }
+
         if (this.cartBarEnabled) {
           this.initCartBar();
           this.setCartBarHeight();
-
           document.addEventListener('theme:scroll', this.toggleCartBarOnScroll);
           document.addEventListener('theme:resize', this.setCartBarHeight);
         }
+      }
+
+      initializeProductSwapUtility() {
+        this.preProcessHtmlCallbacks.push((html) => {
+          // console.log('Pre-processing HTML:', html);
+          // Add animation or active classes, etc.
+        });
+        this.postProcessHtmlCallbacks.push((newNode) => {
+          window?.Shopify?.PaymentButton?.init();
+          window?.ProductModel?.loadShopifyXR();
+        });
+      }
+
+      storeOptionValues(event) {
+        this.selectedOptionValues = '';
+        const variant = event.detail.variant;
+        const selected = event.detail.selected;
+
+        if (!event || !variant) return;
+
+        if (selected.optionValues?.length) {
+          this.selectedOptionValues = selected.optionValues;
+        }
+      }
+
+      handleChange(event) {
+        event.preventDefault();
+        if (!this.contains(event.target)) return;
+
+        const element = event.target.closest(selectors.swapUrl);
+        const targetUrl = element.dataset.swapUrl;
+        const productUrl = targetUrl || this.pendingRequestUrl || this.dataset.url;
+        this.pendingRequestUrl = productUrl;
+
+        const shouldSwapProduct = this.dataset.url !== productUrl;
+        if (!shouldSwapProduct) return;
+
+        this.renderProductComponent({
+          // Fetch the new product's HTML with section rendering API
+          requestUrl: `${productUrl}?section_id=${this.sectionId}`,
+          // Returns a function that will process and swap the HTML after fetch completes
+          callback: this.handleSwapProduct(productUrl),
+        });
+      }
+
+      renderProductComponent({requestUrl, callback}) {
+        this.abortController?.abort();
+        this.abortController = new AbortController();
+
+        fetch(requestUrl, {signal: this.abortController.signal})
+          .then((response) => response.text())
+          .then((responseText) => {
+            this.pendingRequestUrl = null;
+            const html = new DOMParser().parseFromString(responseText, 'text/html');
+            callback(html);
+          })
+          .catch((error) => {
+            if (error.name === 'AbortError') {
+              console.log('Fetch aborted by user');
+            } else {
+              console.error(error);
+            }
+          });
+      }
+
+      handleSwapProduct(productUrl) {
+        return (html) => {
+          // TODO: remove elements?
+          // TODO: update URL
+          const variant = this.getSelectedVariant(html.querySelector(selectors.productComponent));
+          this.updateURL(productUrl, variant?.id);
+
+          window.theme.htmlUpdate.viewTransition(
+            this, // Current product-component element to be replaced
+            html.querySelector(selectors.productComponent), // New product-component element with updated content
+            // this.preProcessHtmlCallbacks, // animations? Toggle active classes for selected options?
+            this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
+          );
+        };
       }
 
       initCartBar() {
