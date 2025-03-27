@@ -9,7 +9,7 @@ const selectors = {
   headerSticky: '[data-header-sticky]',
   productMediaList: '[data-product-media-list]',
   form: '[data-product-form]',
-  cartBar: '#cart-bar',
+  cartBar: '[data-cart-bar]',
   productSubmitAdd: '.product__submit__add',
   formWrapper: '[data-form-wrapper]',
   productVariants: '[data-product-variants]',
@@ -104,11 +104,10 @@ if (!customElements.get('product-component')) {
         }
 
         if (this.cartBarEnabled) {
-          // TODO: Fix JS errors here 👇
-          // this.initCartBar();
-          // this.setCartBarHeight();
-          // document.addEventListener('theme:scroll', this.toggleCartBarOnScroll);
-          // document.addEventListener('theme:resize', this.setCartBarHeight);
+          this.initCartBar();
+          this.setCartBarHeight();
+          document.addEventListener('theme:scroll', this.toggleCartBarOnScroll);
+          document.addEventListener('theme:resize', this.setCartBarHeight);
         }
       }
 
@@ -214,10 +213,10 @@ if (!customElements.get('product-component')) {
           button.addEventListener('click', (event) => {
             event.preventDefault();
 
-            if (e.currentTarget.hasAttribute(attributes.cartBarAdd)) {
+            if (event.currentTarget.hasAttribute(attributes.cartBarAdd)) {
               if (this.cartBarEnabled) {
-                e.currentTarget.classList.add(classes.loading);
-                e.currentTarget.setAttribute('disabled', 'disabled');
+                event.currentTarget.classList.add(classes.loading);
+                event.currentTarget.setAttribute('disabled', 'disabled');
               }
 
               this.form.querySelector(selectors.addToCart).dispatchEvent(
@@ -225,7 +224,7 @@ if (!customElements.get('product-component')) {
                   bubbles: true,
                 })
               );
-            } else if (e.currentTarget.hasAttribute(attributes.cartBarScroll)) {
+            } else if (event.currentTarget.hasAttribute(attributes.cartBarScroll)) {
               this.scrollToTop();
             }
           });
