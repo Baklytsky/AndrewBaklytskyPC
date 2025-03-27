@@ -23,24 +23,6 @@
     -%}
   </div>
 
-  {% comment %}
-    {%- if block.settings.image != blank -%}
-      <div
-        class="icon__animated icon__animated--image"
-        style="--icon-size: 20px;"
-      >
-        {%- liquid
-          assign icon_width = 20
-          assign icon_width_retina = icon_width | times: 2
-          assign icon_sizes = icon_width | append: 'px'
-          assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
-
-          render 'image', image: block.settings.image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, loading: loading
-        -%}
-      </div>
-    {%- endif -%}
-  {% endcomment %}
-
   {%- if block.settings.text != blank -%}
     <div class="hero__reviews__text {{ block.settings.text_font_size }}">
       {{ block.settings.text }}
@@ -86,11 +68,6 @@
       "id": "stars_text_inline",
       "label": "Stars and text go side by side",
       "default": false
-    },
-    {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Icon"
     }
   ],
   "presets": [
