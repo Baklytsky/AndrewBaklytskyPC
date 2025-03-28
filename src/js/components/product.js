@@ -43,7 +43,6 @@ if (!customElements.get('product-component')) {
     class ProductComponent extends HTMLElement {
       abortController = undefined;
       pendingRequestUrl = null;
-      preProcessHtmlCallbacks = [];
       postProcessHtmlCallbacks = [];
 
       handleClick = (event) => this.handleChange(event);
@@ -94,14 +93,7 @@ if (!customElements.get('product-component')) {
           this.initializeProductSwapUtility();
           this.addEventListener('theme:variant:change', (event) => this.storeOptionValues(event));
 
-          this.swapElements?.forEach((element) => {
-            element.addEventListener('click', this.handleClick);
-            // TODO:
-            // element.addEventListener('keyup', this.handleKeyup);
-          });
-
-          // TODO:
-          // this.dispatchEvent(new CustomEvent('product-component:loaded', { bubbles: true }));
+          this.swapElements?.forEach((element) => element.addEventListener('click', this.handleClick));
         }
 
         if (this.cartBarEnabled) {
@@ -113,13 +105,10 @@ if (!customElements.get('product-component')) {
       }
 
       initializeProductSwapUtility() {
-        this.preProcessHtmlCallbacks.push((html) => {
-          // console.log('Pre-processing HTML:', html);
-          // Add animation or active classes, etc.
-        });
         this.postProcessHtmlCallbacks.push((newNode) => {
           window?.Shopify?.PaymentButton?.init();
           window?.ProductModel?.loadShopifyXR();
+          // TODO: focus on the last clicked swatch
         });
       }
 
@@ -183,7 +172,6 @@ if (!customElements.get('product-component')) {
           window.theme.htmlUpdate.viewTransition(
             this, // Current product-component element to be replaced
             html.querySelector(selectors.productComponent), // New product-component element with updated content
-            // this.preProcessHtmlCallbacks, // animations? Toggle active classes for selected options?
             this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
           );
         };
