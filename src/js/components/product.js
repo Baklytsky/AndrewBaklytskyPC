@@ -18,6 +18,7 @@ const selectors = {
   notificationPopupButton: '[data-notification-popup-button]',
   popupComponent: 'popup-component',
   popupOpen: '[data-popup-open]',
+  inputId: 'input[name="id"][form]',
 };
 
 const classes = {
@@ -176,10 +177,8 @@ if (!customElements.get('product-component')) {
 
       handleSwapProduct(productUrl) {
         return (html) => {
-          // TODO: remove elements?
-          // TODO: update URL
-          // const variant = this.getSelectedVariant(html.querySelector(selectors.productComponent));
-          // this.updateURL(productUrl, variant?.id);
+          const variantId = this.getSelectedVariantId(html.querySelector(selectors.productComponent));
+          this.updateURL(productUrl, variantId);
 
           window.theme.htmlUpdate.viewTransition(
             this, // Current product-component element to be replaced
@@ -188,6 +187,15 @@ if (!customElements.get('product-component')) {
             this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
           );
         };
+      }
+
+      getSelectedVariantId(productComponent) {
+        const selectedVariant = productComponent.querySelector(selectors.inputId)?.value;
+        return selectedVariant || null;
+      }
+
+      updateURL(url, variantId) {
+        window.history.replaceState({}, '', `${url}${variantId ? `?variant=${variantId}` : ''}`);
       }
 
       bindNotificationPopupEvents() {
@@ -219,11 +227,7 @@ if (!customElements.get('product-component')) {
                 event.currentTarget.setAttribute('disabled', 'disabled');
               }
 
-              this.form.querySelector(selectors.addToCart).dispatchEvent(
-                new Event('click', {
-                  bubbles: true,
-                })
-              );
+              this.form.querySelector(selectors.addToCart).dispatchEvent(new Event('click', {bubbles: true}));
             } else if (event.currentTarget.hasAttribute(attributes.cartBarScroll)) {
               this.scrollToTop();
             }
