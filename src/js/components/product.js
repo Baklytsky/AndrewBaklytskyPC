@@ -47,6 +47,7 @@ if (!customElements.get('product-component')) {
       postProcessHtmlCallbacks = [];
 
       handleClick = (event) => this.handleChange(event);
+      handleHover = (event) => this.preFetchAndCache(event);
 
       constructor() {
         super();
@@ -94,7 +95,10 @@ if (!customElements.get('product-component')) {
           this.initializeProductSwapUtility();
           this.addEventListener('theme:variant:change', (event) => this.storeOptionValues(event));
 
-          this.swapElements?.forEach((element) => element.addEventListener('click', this.handleClick));
+          this.swapElements?.forEach((element) => {
+            element.addEventListener('click', this.handleClick);
+            element.addEventListener('mouseover', this.handleHover);
+          });
         }
 
         if (this.cartBarEnabled) {
@@ -122,6 +126,36 @@ if (!customElements.get('product-component')) {
         if (selected.optionValues?.length) {
           this.selectedOptionValues = selected.optionValues;
         }
+      }
+
+      preFetchAndCache(event) {
+        const element = event.target.closest(selectors.swapUrl);
+        if (!element) return;
+
+        const targetUrl = element.dataset.swapUrl;
+        const productUrl = targetUrl || this.dataset.url;
+
+        // Don't prefetch if it's the current product URL
+        if (this.dataset.url === productUrl) return;
+
+        const requestUrl = `${productUrl}?section_id=${this.sectionId}`;
+
+        // Skip fetching if already cached
+        const cacheKey = `product-component-html-${encodeURIComponent(requestUrl)}`;
+        if (sessionStorage.getItem(cacheKey)) return;
+
+        // Prefetch and cache the HTML
+        fetch(requestUrl)
+          .then((response) => response.text())
+          .then((responseText) => {
+            const bytes = new TextEncoder().encode(responseText).length;
+            const megabytes = bytes / (1024 * 1024);
+            // Only cache if less than 4MB
+            if (megabytes < 4) {
+              sessionStorage.setItem(cacheKey, responseText);
+            }
+          })
+          .catch((error) => console.error('Prefetch error:', error));
       }
 
       handleChange(event) {
