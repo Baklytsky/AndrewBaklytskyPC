@@ -153,6 +153,8 @@ if (!customElements.get('product-component')) {
         if (cachedHtml) {
           // Use cached HTML
           callback(new DOMParser().parseFromString(cachedHtml, 'text/html'));
+          // Restore scroll position after DOM update
+          this.setFocusAndRestoreScroll();
           return;
         }
 
@@ -179,11 +181,7 @@ if (!customElements.get('product-component')) {
           })
           .then(() => {
             // Set focus to last clicked sibling link element
-            if (this.pendingSwapTarget) {
-              const swapElement = document.querySelector(`[${attributes.swapTarget}="${this.pendingSwapTarget}"]`);
-              swapElement?.focus();
-              this.pendingSwapTarget = null;
-            }
+            this.setFocusAndRestoreScroll();
           })
           .catch((error) => {
             if (error.name === 'AbortError') {
@@ -192,6 +190,16 @@ if (!customElements.get('product-component')) {
               console.error(error);
             }
           });
+      }
+
+      setFocusAndRestoreScroll() {
+        if (!this.pendingSwapTarget) return;
+        requestAnimationFrame(() => {
+          const swapElement = document.querySelector(`[${attributes.swapTarget}="${this.pendingSwapTarget}"]`);
+          swapElement?.focus();
+          swapElement.scrollIntoView({behavior: 'instant', block: 'center'});
+          this.pendingSwapTarget = null;
+        });
       }
 
       handleSwapProduct(productUrl) {
