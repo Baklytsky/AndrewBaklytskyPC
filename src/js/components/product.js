@@ -146,12 +146,33 @@ if (!customElements.get('product-component')) {
       }
 
       renderProductComponent({requestUrl, callback}) {
+        // Check sessionStorage for cached HTML
+        const cacheKey = `product-component-html-${encodeURIComponent(requestUrl)}`;
+        const cachedHtml = sessionStorage.getItem(cacheKey);
+
+        if (cachedHtml) {
+          // Use cached HTML
+          callback(new DOMParser().parseFromString(cachedHtml, 'text/html'));
+          return;
+        }
+
         this.abortController?.abort();
         this.abortController = new AbortController();
 
         fetch(requestUrl, {signal: this.abortController.signal})
           .then((response) => response.text())
           .then((responseText) => {
+            // Store fetched HTML in sessionStorage
+            // Check size before storing
+            const bytes = new TextEncoder().encode(responseText).length;
+            const megabytes = bytes / (1024 * 1024);
+            // Only cache if less than 4MB to be safe across browsers
+            if (megabytes < 4) {
+              sessionStorage.setItem(cacheKey, responseText);
+            } else {
+              console.warn(`Response too large (${megabytes.toFixed(2)}MB) to cache in sessionStorage`);
+            }
+
             this.pendingRequestUrl = null;
             const html = new DOMParser().parseFromString(responseText, 'text/html');
             callback(html);
