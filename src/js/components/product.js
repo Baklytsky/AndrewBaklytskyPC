@@ -34,7 +34,7 @@ const attributes = {
   cartBarAdd: 'data-add-to-cart-bar',
   cartBarScroll: 'data-cart-bar-scroll',
   stickyEnabled: 'data-sticky-enabled',
-  swapUrl: 'data-swap-url',
+  swapTarget: 'data-swap-target',
 };
 
 if (!customElements.get('product-component')) {
@@ -43,6 +43,7 @@ if (!customElements.get('product-component')) {
     class ProductComponent extends HTMLElement {
       abortController = undefined;
       pendingRequestUrl = null;
+      pendingSwapTarget = null;
       postProcessHtmlCallbacks = [];
 
       handleClick = (event) => this.handleChange(event);
@@ -108,7 +109,6 @@ if (!customElements.get('product-component')) {
         this.postProcessHtmlCallbacks.push((newNode) => {
           window?.Shopify?.PaymentButton?.init();
           window?.ProductModel?.loadShopifyXR();
-          // TODO: focus on the last clicked swatch
         });
       }
 
@@ -132,6 +132,7 @@ if (!customElements.get('product-component')) {
         const targetUrl = element.dataset.swapUrl;
         const productUrl = targetUrl || this.pendingRequestUrl || this.dataset.url;
         this.pendingRequestUrl = productUrl;
+        this.pendingSwapTarget = element.dataset.swapTarget;
 
         const shouldSwapProduct = this.dataset.url !== productUrl;
         if (!shouldSwapProduct) return;
@@ -154,6 +155,14 @@ if (!customElements.get('product-component')) {
             this.pendingRequestUrl = null;
             const html = new DOMParser().parseFromString(responseText, 'text/html');
             callback(html);
+          })
+          .then(() => {
+            // Set focus to last clicked sibling link element
+            if (this.pendingSwapTarget) {
+              const swapElement = document.querySelector(`[${attributes.swapTarget}="${this.pendingSwapTarget}"]`);
+              swapElement?.focus();
+              this.pendingSwapTarget = null;
+            }
           })
           .catch((error) => {
             if (error.name === 'AbortError') {
