@@ -74,6 +74,8 @@
   assign show_cart_bar = false
   assign unique = section.id
 
+  assign sibling_color = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+
   if section.settings.show_cart_bar and featured_product != true
     assign show_cart_bar = true
   endif
@@ -396,6 +398,16 @@
                     >
                       {{ block.settings.code }}
                     </div>
+
+                  {%- when 'siblings' -%}
+                    {%- render 'product-siblings',
+                      product: product,
+                      product_form_id: product_form_id,
+                      current_variant: current_variant,
+                      block: block,
+                      block_style: block_style,
+                      quick_add_product: false
+                    -%}
 
                   {%- when 'text' -%}
                     {%- render 'product-block-text', block: block, block_style: block_style -%}
