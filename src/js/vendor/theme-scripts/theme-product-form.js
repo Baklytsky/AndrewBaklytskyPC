@@ -136,6 +136,13 @@ class ProductFormReader {
     } else return null;
   }
 
+  selectedOptionValues() {
+    const selectedOptionValues = Array.from(this.element.querySelectorAll(`${selectors.optionInput}`)).map((input) => input.value);
+    return {
+      optionValues: selectedOptionValues,
+    };
+  }
+
   /**
    * Getter method which returns a collection of objects containing name and values
    * of property inputs
@@ -162,12 +169,14 @@ class ProductFormReader {
 
   getFormState() {
     const variant = this.variant();
+
     return {
       options: this.options(),
       variant: variant,
       properties: this.properties(),
       quantity: this.quantity(),
       plan: this.plan(variant),
+      selected: this.selectedOptionValues(),
     };
   }
 
