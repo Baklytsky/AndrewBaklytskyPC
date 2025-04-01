@@ -9,6 +9,7 @@
 {% endcomment %}
 
 {%- liquid
+  assign featured_video = block.settings.featured_video
   assign featured_image = block.settings.featured_image
   assign featured_header = block.settings.featured_heading
   assign featured_text = block.settings.featured_text
@@ -73,7 +74,7 @@
     </div>
   {%- endcapture -%}
 
-  {%- unless featured_image == blank -%}
+  {%- if featured_image != blank -%}
     <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
       <div
         class="product-item__bg"
@@ -95,6 +96,38 @@
 
       {{ featured_image_content }}
     </div>
+  {%- elsif featured_video != blank -%}
+    <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+      <div
+        class="product-item__bg"
+        data-aos="img-in"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay | times: 150 }}"
+        data-aos-duration="{{ animation_duration }}"
+        data-aos-easing="ease-out-quart"
+      >
+        <div class="video__poster">
+          {%- render 'image-hero', image_desktop: featured_video.preview_image -%}
+        </div>
+
+        <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
+
+        <video-background
+          class="video__player is-loading"
+          data-video-player
+          data-video-id="{{ section.id }}-video-background"
+        >
+          <template data-video-template>
+            {{
+              featured_video
+              | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false
+            }}
+          </template>
+        </video-background>
+      </div>
+
+      {{ featured_image_content }}
+    </div>
   {%- else -%}
     <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
       <div class="svg-placeholder">
@@ -103,5 +136,5 @@
 
       {{ featured_image_content }}
     </div>
-  {%- endunless -%}
+  {%- endif -%}
 </div>
