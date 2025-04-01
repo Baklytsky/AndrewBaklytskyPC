@@ -287,7 +287,7 @@ a ~ .hero__content__wrapper {
 @include media-query($large-up) {
   //Limits content wrapper width for hero sections
   .hero__aside__wrapper.frame__item,
-  .index-hero .hero__content { max-width: 50%; }
+  .index-hero .hero__content { max-width: var(--hero-content-width, 50%); }
 
   .hero__aside .product-upsell__holder {
     max-width: 500px;
@@ -331,7 +331,7 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   }
 }
 body:has([data-header-transparent]):not(:has([data-prevent-transparent-header])) .section-overlay-header:first-of-type .hero__content__wrapper { padding-top: var(--header-height); }
-body:has([data-header-transparent]):not(:has([data-prevent-transparent-header])) .section-overlay-header .index-image-text .brick__block--text { padding-top: var(--header-height); }
+body:has([data-header-transparent]):not(:has([data-prevent-transparent-header])) .section-overlay-header:first-of-type .index-image-text .brick__block--text { padding: var(--header-height) 0; }
 
 // Fallback for browsers that don't support :has() selector
 body.has-header-transparent.has-first-section-overlay-header .header__backfill { display: none; }
@@ -342,7 +342,7 @@ body.has-header-transparent.has-first-section-overlay-header.template-product .h
   }
 }
 body.has-header-transparent .section-overlay-header:first-of-type .hero__content__wrapper { padding-top: var(--header-height); }
-body.has-header-transparent .section-overlay-header:first-of-type .index-image-text .brick__block--text { padding-top: var(--header-height); }
+body.has-header-transparent .section-overlay-header:first-of-type .index-image-text .brick__block--text { padding: var(--header-height) 0; }
 
 .hero__slide { width: 100%; }
 
@@ -483,8 +483,6 @@ p a {
   .text-right & { justify-content: flex-end; }
 
   .hero__button { margin: 8px; }
-
-  .hero__button--stacked { width: calc(100% - 16px); }
 }
 
 .hero__button {
@@ -500,15 +498,6 @@ p a {
     .text-left--mobile & { --alignment-justify-content: flex-start; }
     .text-center--mobile & { --alignment-justify-content: center; }
     .text-right--mobile & { --alignment-justify-content: flex-end; }
-  }
-}
-
-.hero__button--stacked {
-  width: 100%;
-
-  .btn {
-    max-width: 100%;
-    width: 400px;
   }
 }
 

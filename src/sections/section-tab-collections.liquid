@@ -167,6 +167,7 @@
                     assign align_with_image = block.settings.align_with_product_images
                     assign featured_animation_order = 1
                     assign image = block.settings.image
+                    assign featured_video = block.settings.video
                     assign featured_collection_first_product_image = nil
 
                     for product in featured_collection.products
@@ -204,21 +205,42 @@
                   {%- endif -%}
 
                     <div class="grid__heading-image">
-                      {%- capture image_animations -%}
-                        data-aos="img-in"
-                        data-aos-duration="800"
-                        data-aos-anchor="{{ animation_anchor }}"
-                        data-aos-easing="ease-out-quart"
-                      {%- endcapture -%}
+                      {%- if featured_video != blank -%}
+                        <div class="video__poster">
+                          {%- render 'image-hero', image_desktop: featured_video.preview_image -%}
+                        </div>
 
-                      {%- liquid
-                        assign sizes = '(min-width: 990px) 28vw, (min-width: 750px) 38vw, calc(100vw - 32px - 50px)'
-                        if block_index > 1
-                          assign loading = 'lazy'
-                        endif
+                        <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
 
-                        render 'image' image: image, sizes: sizes, cover: true, loading: loading, attributes: image_animations, placeholder: image_placeholder, attributes: 'data-featured-image'
-                      -%}
+                        <video-background
+                          class="video__player is-loading"
+                          data-video-player
+                          data-video-id="{{ section.id }}-video-background"
+                        >
+                          <template data-video-template>
+                            {{
+                              featured_video
+                              | video_tag: autoplay: true, image_size: '1085x', loop: true, muted: true, controls: false
+                            }}
+                          </template>
+                        </video-background>
+                      {%- else -%}
+                        {%- capture image_animations -%}
+                          data-aos="img-in"
+                          data-aos-duration="800"
+                          data-aos-anchor="{{ animation_anchor }}"
+                          data-aos-easing="ease-out-quart"
+                        {%- endcapture -%}
+
+                        {%- liquid
+                          assign sizes = '(min-width: 990px) 28vw, (min-width: 750px) 38vw, calc(100vw - 32px - 50px)'
+                          if block_index > 1
+                            assign loading = 'lazy'
+                          endif
+
+                          render 'image' image: image, sizes: sizes, cover: true, loading: loading, attributes: image_animations, placeholder: image_placeholder, attributes: 'data-featured-image'
+                        -%}
+                      {%- endif -%}
                     </div>
 
                     {%- liquid
@@ -650,12 +672,12 @@
         },
         {
           "type": "header",
-          "content": "Featured image"
+          "content": "Featured media"
         },
         {
           "type": "checkbox",
           "id": "show_image",
-          "label": "Show image",
+          "label": "Show media",
           "default": true
         },
         {
@@ -668,6 +690,12 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "Overrides image."
         },
         {
           "type": "range",

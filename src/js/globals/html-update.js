@@ -9,6 +9,7 @@ const htmlUpdate = {
     // Add timestamp to ensure unique IDs
     const timestamp = Date.now();
     // Update the main element's ID if it exists
+
     if (newContent.dataset.swapId === 'true' && newContent.id) {
       newContent.id = `${newContent.id}-${timestamp}`;
     }
@@ -18,10 +19,12 @@ const htmlUpdate = {
       // Update element ID if it exists
       element.id && (element.id = `${element.id}-${timestamp}`);
       // Update form reference if it exists
+
       if (element.form) {
         const formId = element.closest('form') ? element.closest('form').getAttribute('id') : `${element.form.getAttribute('id')}-${timestamp}`;
         element.setAttribute('form', formId);
       }
+
       // Update data-aos-anchor if it exists
       if (element.dataset.aosAnchor) {
         const anchorId = element.dataset.aosAnchor.replace('#', '');
@@ -37,14 +40,17 @@ const htmlUpdate = {
     if (oldNode.dataset.swapId === 'true' && oldNode.id) {
       oldNode.id = `${oldNode.id}-old-${timestamp}`;
     }
+
     oldNode.querySelectorAll('[id], [form], [data-aos-anchor]').forEach((element) => {
       // Update element ID if it exists
       element.id && (element.id = `${element.id}-old-${timestamp}`);
       // Update form reference if it exists
+
       if (element.form) {
         const formId = element.closest('form') ? element.closest('form').getAttribute('id') : `${element.form.getAttribute('id')}-old-${timestamp}`;
         element.setAttribute('form', formId);
       }
+
       // Update data-aos-anchor if it exists
       if (element.dataset.aosAnchor) {
         const anchorId = element.dataset.aosAnchor.replace('#', '');
