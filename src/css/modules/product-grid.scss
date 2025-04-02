@@ -492,16 +492,22 @@
 
 .no-touch .double__image:hover hover-images { opacity: 1; }
 
-.no-touch .double__image.is-visible hover-images { opacity: 1; }
-.no-touch .double__image.is-visible:hover hover-images { opacity: 0; }
-
-.no-touch body.is-focused .double__image .product-link--image:focus hover-images { opacity: 1; }
-.no-touch body.is-focused .double__image.is-visible hover-images { opacity: 0; }
-.no-touch body.is-focused .double__image.is-visible .product-link--image:focus hover-images { opacity: 1; }
+.no-touch .double__image:hover .product-item__bg__under--desktop {
+  @include media-query($small) {
+    opacity: 0;
+  }
+}
 
 hover-images {
   --slides-count: 10;
   --slider-index: 0;
+}
+
+.supports-touch .product-item__bg__under--desktop {
+  @include media-query($small) {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .supports-touch hover-images {
