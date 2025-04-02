@@ -84,10 +84,10 @@
 
           <div class="look__slide look__slide--{{ block.id }}" data-slide="{{ block.id }}" {{ block.shopify_attributes }}>
             {%- if product != blank -%}
-              {%- render 'product-grid-item', product: product, index: forloop.index, show_product_card: block.settings.show_product_card -%}
+              {%- render 'product-grid-item', product: product, index: forloop.index -%}
             {%- else -%}
               {%- assign placeholder = 'product-' | append: forloop.index -%}
-              {%- render 'onboarding-product-grid-item', title: 'Product Title', show_product_card: block.settings.show_product_card, placeholder: placeholder, index: forloop.index, animation_delay: forloop.index0 -%}
+              {%- render 'onboarding-product-grid-item', title: 'Product Title', placeholder: placeholder, index: forloop.index, animation_delay: forloop.index0 -%}
             {%- endif -%}
           </div>
         {%- endcapture -%}
@@ -433,12 +433,6 @@
           "id": "product",
           "label": "Product",
           "info": "Product displayed in the photo"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_product_card",
-          "label": "Show product card",
-          "default": true
         },
         {
           "type": "header",

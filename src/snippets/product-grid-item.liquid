@@ -24,7 +24,6 @@
   assign aos_duration = 800
   assign layout_desktop = section.settings.layout_desktop
   assign layout_mobile = section.settings.layout_mobile
-  assign product_card_class = ''
   assign modifier_class = modifier_class | default: ''
   assign index = index | default: 1
 
@@ -43,10 +42,6 @@
 
   if columns_desktop == 2 or columns_desktop == 4
     assign columns_medium = 2
-  endif
-
-  if show_product_card
-    assign product_card_class = 'product-item--card'
   endif
 
   if settings.product_grid_center
@@ -397,7 +392,7 @@
 
 {%- unless hidden_product -%}
   <div
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     {{ attributes }}
