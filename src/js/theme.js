@@ -7,8 +7,8 @@ import './globals/height';
 import './globals/scroll-to';
 import './globals/theme-a11y';
 import './globals/throttle';
-import './main/globals';
 import './globals/html-update';
+import './main/globals';
 
 /* ================ Globals ================ */
 import './globals/accessibility-handle';
