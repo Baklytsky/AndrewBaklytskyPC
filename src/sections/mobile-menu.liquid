@@ -195,7 +195,7 @@
                   endcapture
                 -%}
 
-                <nav class="drawer__menu" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
+                <nav class="drawer__menu{% if settings.type_nav_caps %} caps{% endif %}" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
                   <div class="drawer__main-menu {{ block.settings.text_font_size }}">
                     {%- for link in linklist -%}
                       {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
@@ -337,7 +337,7 @@
   {%- endfor -%}
 
   <header-drawer
-    class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
+    class="drawer drawer--header"
     data-drawer="hamburger-{{ section.id }}"
     aria-label="{{ 'layout.header.menu' | t }}"
     id="mobile-menu-{{ section.id }}"
