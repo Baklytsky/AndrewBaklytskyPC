@@ -219,11 +219,18 @@
               {%- when 'icon' -%}
                 {%- render 'icon' block: block -%}
 
+              {%- when 'subheading' -%}
+                {%- if block.settings.subheading != '' -%}
+                  <div class="drawer__subheading">
+                    <p class="subheading">{{ block.settings.subheading }}</p>
+                  </div>
+                {%- endif -%}
+
               {%- when 'text' -%}
                 {%- if block.settings.text != '' -%}
-                  <p class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
+                  <div class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
                     {{ block.settings.text }}
-                  </p>
+                  </div>
                 {%- endif -%}
 
               {%- when 'button' -%}
@@ -720,6 +727,31 @@
           "id": "pin_to_bottom",
           "label": "Pin to bottom",
           "default": false
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 14
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
         },
         {
           "type": "header",
