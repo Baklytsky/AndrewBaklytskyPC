@@ -295,7 +295,7 @@ class ProductForm extends HTMLElement {
 
     const variantTitle = this.productNotification.querySelector(selectors.variantTitle);
     const notificationProduct = this.productNotification.querySelector(selectors.notificationProduct);
-    if (variantTitle != null) {
+    if (variantTitle != null && notificationProduct != null) {
       variantTitle.textContent = formState.variant.title;
       notificationProduct.value = formState.variant.name;
     }
