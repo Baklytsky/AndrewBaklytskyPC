@@ -177,6 +177,20 @@
   assign aos_anchor = aos_anchor | default: aos_anchor_default
 -%}
 
+{%- liquid
+  if settings.show_siblings
+    capture siblings_html
+      render 'product-grid-item-siblings', part: 'html', product: product
+    endcapture
+    capture siblings_line_item_props
+      render 'product-grid-item-siblings', part: 'line-item-props', product: product
+    endcapture
+    capture siblings_image
+      render 'product-grid-item-siblings', part: 'image', product: product
+    endcapture
+  endif
+-%}
+
 {%- capture over_image_content -%}
   {%- liquid
     assign product_tags = product.tags | join: ',' | append: ','
@@ -285,6 +299,8 @@
           {%- form 'product', product, id: product_form_id -%}
             <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
 
+            {{- siblings_line_item_props -}}
+
             {%- if preorder_value != blank -%}
               <input
                 type="hidden"
@@ -371,7 +387,7 @@
   endcapture
 
   capture swatches_class
-    if has_colors
+    if siblings_html != blank or has_colors
       echo 'product-item--swatches'
     endif
   endcapture
@@ -391,10 +407,13 @@
 {%- endcapture -%}
 
 {%- unless hidden_product -%}
-  <div
+  <product-item
     class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
+    data-url="{{ product.url }}"
+    data-swap-id="true"
+
     {{ attributes }}
   >
     <div
@@ -506,6 +525,8 @@
           {%- comment -%} Show Empty image if product has no media {%- endcomment -%}
           <div class="product-item__bg image--empty" data-product-image-default></div>
         {%- endif -%}
+
+        {{- siblings_image -}}
       </a>
 
       {{ over_image_content }}
@@ -530,6 +551,9 @@
 
               <span
                 class="product-item__cutline"
+                {%- if siblings_html != blank -%}
+                  data-product-cutline
+                {%- endif -%}
                 {% if style != blank %}
                   style="{{ style }}"
                 {% endif %}
@@ -544,7 +568,9 @@
           </div>
         </a>
 
-        {%- if has_colors -%}
+        {%- if siblings_html != blank -%}
+          {{ siblings_html }}
+        {%- elsif has_colors -%}
           <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
             {{ swatches }}
 
@@ -555,5 +581,5 @@
         {%- endif -%}
       </div>
     </div>
-  </div>
+  </product-item>
 {%- endunless -%}

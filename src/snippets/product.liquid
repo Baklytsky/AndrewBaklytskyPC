@@ -74,6 +74,8 @@
   assign show_cart_bar = false
   assign unique = section.id
 
+  assign sibling_color = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+
   if section.settings.show_cart_bar and featured_product != true
     assign show_cart_bar = true
   endif
@@ -123,30 +125,13 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
-{%- style -%}
-  {%- if show_cart_bar -%}
-    :root { --cart-bar-height: 80px; }
-  {%- endif -%}
-
-  #Product--{{ section.id }} {
-    --PT: {{ section.settings.padding_top }}px;
-    --PB: {{ section.settings.padding_bottom }}px;
-
-    --swatch-size: var(--swatch-size-product);
-  }
-{%- endstyle -%}
-
-<script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
-{%- if product_sticky_enable -%}
-  <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 <product-component
   id="Product--{{ unique }}"
   class="index-product section-padding {{ color_scheme }}"
   data-section-id="{{ unique }}"
   data-section-type="product"
   data-product-handle="{{ product.handle }}"
+  data-url="{{ product.url }}"
   data-enable-history-state="true"
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
@@ -155,6 +140,24 @@
     data-cart-bar-enabled
   {% endif %}
 >
+  {%- style -%}
+    {%- if show_cart_bar -%}
+      :root { --cart-bar-height: 80px; }
+    {%- endif -%}
+
+    #Product--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+
+      --swatch-size: var(--swatch-size-product);
+    }
+  {%- endstyle -%}
+
+  <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+  {%- if product_sticky_enable -%}
+    <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
     <div class="product__wrapper__inner">
       <div class="product__page">
@@ -396,6 +399,16 @@
                     >
                       {{ block.settings.code }}
                     </div>
+
+                  {%- when 'siblings' -%}
+                    {%- render 'product-siblings',
+                      product: product,
+                      product_form_id: product_form_id,
+                      current_variant: current_variant,
+                      block: block,
+                      block_style: block_style,
+                      quick_add_product: false
+                    -%}
 
                   {%- when 'text' -%}
                     {%- render 'product-block-text', block: block, block_style: block_style -%}

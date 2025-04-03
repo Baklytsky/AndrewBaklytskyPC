@@ -1,6 +1,7 @@
 {% comment %} Icon block for Product page & Cart drawer/page {% endcomment %}
 {%- liquid
   assign text = block.settings.text
+  assign align_text = align_text | default: block.settings.align_text | default: ''
   assign prev_index = index | minus: 1
   assign next_index = index | plus: 1
   assign prev_block = section.blocks[prev_index]
@@ -36,7 +37,8 @@
   {%- endif -%}
 {%- endif -%}
 
-<div class="product__block block__icon__container{{ width }} block-padding"
+<div
+  class="product__block block__icon__container{{ width }} block-padding{% if align_text != '' %} {{ align_text }}{% endif %}"
   {{ block.shopify_attributes }}
   {{ block_style }}
 >
@@ -60,7 +62,7 @@
         assign icon_sizes = icon_width | append: 'px'
         assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-        render 'image' image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+        render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
       else
         render 'animated-icon', filename: block.settings.icon_name
       endif
