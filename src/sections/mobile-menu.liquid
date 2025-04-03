@@ -195,7 +195,7 @@
                   endcapture
                 -%}
 
-                <nav class="drawer__menu" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
+                <nav class="drawer__menu{% if settings.type_nav_caps %} caps{% endif %}" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
                   <div class="drawer__main-menu {{ block.settings.text_font_size }}">
                     {%- for link in linklist -%}
                       {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
@@ -219,11 +219,18 @@
               {%- when 'icon' -%}
                 {%- render 'icon' block: block -%}
 
+              {%- when 'subheading' -%}
+                {%- if block.settings.subheading != '' -%}
+                  <div class="drawer__subheading">
+                    <p class="subheading">{{ block.settings.subheading }}</p>
+                  </div>
+                {%- endif -%}
+
               {%- when 'text' -%}
                 {%- if block.settings.text != '' -%}
-                  <p class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
+                  <div class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
                     {{ block.settings.text }}
-                  </p>
+                  </div>
                 {%- endif -%}
 
               {%- when 'button' -%}
@@ -337,24 +344,13 @@
   {%- endfor -%}
 
   <header-drawer
-    class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
+    class="drawer drawer--header"
     data-drawer="hamburger-{{ section.id }}"
     aria-label="{{ 'layout.header.menu' | t }}"
     id="mobile-menu-{{ section.id }}"
   >
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
-        <button
-          class="drawer__close"
-          data-drawer-close
-          aria-label="{{ 'general.accessibility.show_menu' | t }}"
-          aria-haspopup="true"
-          aria-expanded="true"
-          aria-controls="mobile-menu-{{ section.id }}"
-        >
-          {%- render 'icon-cancel' -%}
-        </button>
-
         {%- if logo != blank -%}
           <a
             class="header__logo__link header__logo__link--drawer"
@@ -367,6 +363,17 @@
             -%}
           </a>
         {%- endif -%}
+
+        <button
+          class="drawer__close"
+          data-drawer-close
+          aria-label="{{ 'general.accessibility.show_menu' | t }}"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="mobile-menu-{{ section.id }}"
+        >
+          {%- render 'icon-cancel' -%}
+        </button>
       </header>
 
       <div class="drawer__body">
@@ -738,14 +745,39 @@
       ]
     },
     {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 14
+        }
+      ]
+    },
+    {
       "type": "text",
       "name": "Text",
       "settings": [
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "text",
           "label": "Text",
-          "default": "Free shipping on orders over $100"
+          "default": "<p>Free shipping on orders over $100</p>"
         },
         {
           "type": "select",
