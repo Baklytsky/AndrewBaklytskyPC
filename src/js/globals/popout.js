@@ -4,14 +4,11 @@ const selectors = {
   popoutToggleText: '[data-popout-toggle-text]',
   popoutInput: '[data-popout-input]',
   popoutOptions: '[data-popout-option]',
-  productGridImage: '[data-product-image]',
-  productGridItem: '[data-grid-item]',
   section: '[data-section-type]',
 };
 
 const classes = {
   listVisible: 'popout-list--visible',
-  visible: 'is-visible',
   active: 'is-active',
   popoutListTop: 'popout-list--top',
 };
@@ -38,7 +35,6 @@ if (!customElements.get('popout-select')) {
         this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
         this.popoutInput = this.querySelector(selectors.popoutInput) || this.parentNode.querySelector(selectors.popoutInput);
         this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
-        this.productGridItem = this.popoutList.closest(selectors.productGridItem);
         this.fireSubmitEvent = this.hasAttribute(attributes.submit);
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
@@ -56,16 +52,6 @@ if (!customElements.get('popout-select')) {
       onPopupToggleClick(evt) {
         const button = evt.currentTarget;
         const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
-
-        if (this.productGridItem) {
-          const productGridItemImage = this.productGridItem.querySelector(selectors.productGridImage);
-
-          if (productGridItemImage) {
-            productGridItemImage.classList.toggle(classes.visible, !ariaExpanded);
-          }
-
-          this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
-        }
 
         evt.currentTarget.setAttribute(attributes.ariaExpanded, !ariaExpanded);
         this.popoutList.classList.toggle(classes.listVisible);

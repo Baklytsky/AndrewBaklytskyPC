@@ -7,10 +7,10 @@ import './globals/height';
 import './globals/scroll-to';
 import './globals/theme-a11y';
 import './globals/throttle';
+import './main/globals';
 import './globals/html-update';
 
 /* ================ Globals ================ */
-import './globals/aria-toggle';
 import './globals/accessibility-handle';
 import './globals/animation-end-promise';
 import './globals/all-animations-end-promise';
@@ -44,4 +44,3 @@ import './globals/tooltip';
 
 /* ================ Main ================ */
 import './main/main';
-import './main/globals';

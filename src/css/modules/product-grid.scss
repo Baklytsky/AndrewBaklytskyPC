@@ -22,20 +22,6 @@
   .video__poster { height: 100%; }
 }
 
-.product-item--card {
-  --bg: var(--COLOR-BG-ACCENT);
-  --text: var(--COLOR-TEXT);
-  --grid-inner: var(--inner);
-
-  background: var(--bg);
-  color: var(--text);
-
-  .radio__fieldset--pgi {
-    --bg: var(--COLOR-BG-ACCENT);
-    --bg-arrow: var(--COLOR-BG-ACCENT);
-  }
-}
-
 .product-item--swatches .product-item__info { padding-bottom: calc((var(--inner) / 2) - 8px); }
 
 .sale-box,
@@ -494,16 +480,22 @@
 
 .no-touch .double__image:hover hover-images { opacity: 1; }
 
-.no-touch .double__image.is-visible hover-images { opacity: 1; }
-.no-touch .double__image.is-visible:hover hover-images { opacity: 0; }
-
-.no-touch body.is-focused .double__image .product-link--image:focus hover-images { opacity: 1; }
-.no-touch body.is-focused .double__image.is-visible hover-images { opacity: 0; }
-.no-touch body.is-focused .double__image.is-visible .product-link--image:focus hover-images { opacity: 1; }
+.no-touch .double__image:hover .product-item__bg__under--desktop {
+  @include media-query($small) {
+    opacity: 0;
+  }
+}
 
 hover-images {
   --slides-count: 10;
   --slider-index: 0;
+}
+
+.supports-touch .product-item__bg__under--desktop {
+  @include media-query($small) {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .supports-touch hover-images {
