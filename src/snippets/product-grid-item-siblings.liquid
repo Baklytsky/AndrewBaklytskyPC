@@ -1,5 +1,7 @@
 {%- for entry in settings.siblings -%}
   {%- assign sibling_products = entry.product_list.value -%}
+  {%- assign sibling_color_names = entry.color_name.value -%}
+  {%- assign sibling_color_values = entry.color_value.value -%}
   {%- assign has_siblings = sibling_products | has: 'id', product.id -%}
 
   {%- if has_siblings and sibling_products != blank -%}
@@ -56,10 +58,22 @@
                     assign sib_product_price = 'general.money.free' | t
                   endif
 
+                  assign sibling_color_name = sibling_color_names[forloop.index0]
+                  assign sibling_color_value = sibling_color_values[forloop.index0]
                   assign sib_cutline = sib_product.metafields.theme.cutline | strip_html
                   assign legacy_metafield_color = sib_product.metafields.theme.sibling_color.value | default: sib_product.metafields.theme.sibling_colour.value | default: sib_product.metafields.theme.siblings_color.value | default: sib_product.metafields.theme.siblings_colour.value | default: sib_product.metafields.theme.siblings_colors.value | default: sib_product.metafields.theme.siblings_colours.value
-                  assign sib_color = legacy_metafield_color | default: sib_product.title
+                  assign sib_color = sibling_color_name | default: legacy_metafield_color | default: sib_product.title
                   assign swatch_color = sib_color | handle
+
+                  capture swatch_color_prop
+                    if sibling_color_value != blank
+                      echo '--'
+                      echo swatch_color
+                      echo ': '
+                      echo sibling_color_value
+                      echo '; '
+                    endif
+                  endcapture
 
                   if sib_cutline != blank
                     assign any_sibling_cutline = true
@@ -70,6 +84,7 @@
                   class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ swatch_color }}"
                   style="
                     --animation-delay: {{ forloop.index0 | times: 50 }}ms;
+                    {%- if swatch_color_prop != blank %} {{ swatch_color_prop }}{% endif -%}
                     --swatch: var(--{{ swatch_color }});
                   "
                   data-tooltip="{{ sib_color }}"
