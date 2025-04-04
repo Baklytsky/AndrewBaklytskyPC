@@ -41,6 +41,3 @@ import './globals/slider';
 import './globals/tabs';
 import './globals/toggle-ellipsis';
 import './globals/tooltip';
-
-/* ================ Main ================ */
-import './main/main';
