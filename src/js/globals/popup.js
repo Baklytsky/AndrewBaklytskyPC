@@ -8,6 +8,7 @@ const selectors = {
 const attributes = {
   closing: 'closing',
   scrollLock: 'data-scroll-lock-required',
+  preventTopLayer: 'data-prevent-top-layer',
 };
 
 const classes = {
@@ -19,6 +20,7 @@ class PopupComponent extends HTMLElement {
     super();
 
     this.popup = this.querySelector(selectors.dialog);
+    this.preventTopLayer = this.popup.hasAttribute(attributes.preventTopLayer);
     this.enableScrollLock = this.popup.hasAttribute(attributes.scrollLock);
     this.buttonPopupOpen = this.querySelector(selectors.open);
     this.a11y = window.theme.a11y;
@@ -65,7 +67,7 @@ class PopupComponent extends HTMLElement {
     this.isAnimating = true;
 
     // Check if browser supports Dialog tags
-    if (typeof this.popup.showModal === 'function') {
+    if (typeof this.popup.showModal === 'function' && !this.preventTopLayer) {
       this.popup.showModal();
     } else if (typeof this.popup.show === 'function') {
       this.popup.show();
