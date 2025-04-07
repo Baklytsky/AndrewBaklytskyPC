@@ -18,6 +18,7 @@
   assign featured_color_text = block.settings.featured_color_text
   assign featured_color_overlay = block.settings.featured_color_overlay
   assign featured_overlay_opacity = block.settings.featured_overlay_opacity | times: 0.01
+  assign align_with_image = block.settings.align_with_product_images
 
   assign button_style = block.settings.button_style
   if button_style == 'btn--text' and block.settings.show_arrow
@@ -34,7 +35,7 @@
 {%- endcapture -%}
 
 <div
-  class="grid-item product-item product-item--featured-image"
+  class="grid-item product-item product-item--featured-image{% if align_with_image %} product-item--aligned{% endif %}"
   id="Product-item--{{ block.id }}"
   style="{{ style }}"
   {{ block.shopify_attributes }}
