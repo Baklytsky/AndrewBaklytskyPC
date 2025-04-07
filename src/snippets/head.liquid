@@ -240,7 +240,9 @@
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-
+    {% if forloop.first -%}
+      :root,
+    {%- endif %}
     .color-{{ scheme.id }} {
       {%- liquid
         assign hover_opacity = 0.70
@@ -412,6 +414,7 @@
     --COLOR-SUBMENU-BG: {{ settings.submenu_bg_color }};
     --COLOR-SUBMENU-LINK: {{ settings.submenu_link_color }};
     --COLOR-SUBMENU-LINK-HOVER: {{ settings.submenu_link_color | color_modify: 'alpha', hover_opacity }};
+    --COLOR-SUBMENU-OPPOSITE: {{ settings.submenu_link_color | color_modify: 'alpha', hover_opacity }};
     --COLOR-SUBMENU-TEXT-LIGHT: {{ settings.submenu_link_color | color_mix: settings.submenu_bg_color, 70 }};
     --COLOR-MENU-TRANSPARENT: {{ settings.menu_transparent_color }};
     --COLOR-MENU-TRANSPARENT-HOVER: {{ settings.menu_transparent_color }};
