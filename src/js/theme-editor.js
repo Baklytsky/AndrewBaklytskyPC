@@ -1,6 +1,6 @@
 document.addEventListener('shopify:section:select', (event) => {
   // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') || event.target.querySelector('popup-newsletter') : null;
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') : null;
   if (popupComponent) {
     popupComponent.classList.add('popup--selected');
 
@@ -16,7 +16,7 @@ document.addEventListener('shopify:section:select', (event) => {
 
 document.addEventListener('shopify:section:deselect', (event) => {
   // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') || event.target.querySelector('popup-newsletter') : null;
+  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') : null;
   if (popupComponent) {
     restorePopups();
   }
@@ -166,7 +166,7 @@ document.addEventListener('shopify:block:deselect', (event) => {
 });
 
 function hideOtherPopups(selectedPopup) {
-  document.querySelectorAll('popup-component, popup-newsletter')?.forEach((popup) => {
+  document.querySelectorAll('popup-component')?.forEach((popup) => {
     if (popup !== selectedPopup) {
       const dialog = popup.querySelector('dialog');
       if (dialog.hasAttribute('open')) {
@@ -185,12 +185,12 @@ function hideOtherPopups(selectedPopup) {
 }
 
 function restorePopups() {
-  document.querySelectorAll('popup-component.popup--hidden, popup-newsletter.popup--hidden')?.forEach((popup) => {
+  document.querySelectorAll('popup-component.popup--hidden')?.forEach((popup) => {
     popup.classList.remove('popup--hidden');
     popup.popupOpen();
   });
 
-  document.querySelectorAll('popup-component.popup--selected, popup-newsletter.popup--selected')?.forEach((popup) => {
+  document.querySelectorAll('popup-component.popup--selected')?.forEach((popup) => {
     popup.classList.remove('popup--selected');
     if (popup.classList.contains('popup--force-open')) {
       popup.popupClose();
