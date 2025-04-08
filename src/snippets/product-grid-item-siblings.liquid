@@ -62,16 +62,12 @@
                   endif
 
                   assign sibling_color_name = ''
-                  assign sibling_color_hex_code = ''
-                  assign sibling_color_image = ''
-                  for color_list in color_props_list
-                    assign product_list = color_list.product_list.value
+                  for color_props in color_props_list
+                    assign product_list = color_props.product_list.value
                     assign found_in_list = product_list | where: 'id', sib_product.id | first
 
                     if found_in_list != null
-                      assign sibling_color_name = color_list.name
-                      assign sibling_color_hex_code = color_list.hex_code
-                      assign sibling_color_image = color_list.image
+                      assign sibling_color_name = color_props.name
                       break
                     endif
                   endfor
@@ -80,27 +76,6 @@
                   assign legacy_metafield_color = sib_product.metafields.theme.sibling_color.value | default: sib_product.metafields.theme.sibling_colour.value | default: sib_product.metafields.theme.siblings_color.value | default: sib_product.metafields.theme.siblings_colour.value | default: sib_product.metafields.theme.siblings_colors.value | default: sib_product.metafields.theme.siblings_colours.value
                   assign sib_color = sibling_color_name | default: legacy_metafield_color | default: sib_product.title
                   assign swatch_color = sib_color | handle
-
-                  capture swatch_color_prop
-                    if sibling_color_hex_code != blank
-                      echo '--'
-                      echo swatch_color
-                      echo ': '
-                      echo sibling_color_hex_code
-                      echo '; '
-                    endif
-
-                    if sibling_color_image != blank
-                      assign swatch_image = sibling_color_image | image_url: width: 50
-                      assign swatch_image_url = 'url(' | append: swatch_image | append: ')'
-
-                      echo '--'
-                      echo swatch_color
-                      echo ': '
-                      echo swatch_image_url
-                      echo '; '
-                    endif
-                  endcapture
 
                   if sib_cutline != blank
                     assign any_sibling_cutline = true
@@ -111,7 +86,6 @@
                   class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ swatch_color }}"
                   style="
                     --animation-delay: {{ forloop.index0 | times: 50 }}ms;
-                    {%- if swatch_color_prop != blank %} {{ swatch_color_prop }}{% endif -%}
                     --swatch: var(--{{ swatch_color }});
                   "
                   data-tooltip="{{ sib_color }}"
