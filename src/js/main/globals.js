@@ -49,9 +49,20 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.self !== window.top) {
+    document.querySelector('html').classList.add('iframe');
+  }
+});
+
 document.addEventListener('shopify:section:load', (e) => {
   const container = e.target;
   floatLabels(container);
   wrapElements(container);
   ariaToggle(document);
 });
+
+// Apply a specific class to the html element for browser support of cookies.
+if (window.navigator.cookieEnabled) {
+  document.documentElement.className = document.documentElement.className.replace('supports-no-cookies', 'supports-cookies');
+}
