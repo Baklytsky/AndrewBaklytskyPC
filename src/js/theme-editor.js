@@ -1,27 +1,3 @@
-document.addEventListener('shopify:section:select', (event) => {
-  // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') : null;
-  if (popupComponent) {
-    popupComponent.classList.add('popup--selected');
-
-    const dialog = popupComponent.querySelector('dialog');
-    if (!dialog.hasAttribute('open')) {
-      popupComponent.classList.add('popup--force-open');
-      popupComponent.popupOpen();
-    }
-
-    setTimeout(() => hideOtherPopups(popupComponent), 300);
-  }
-});
-
-document.addEventListener('shopify:section:deselect', (event) => {
-  // Popup components
-  const popupComponent = event.target.classList.contains('shopify-section-popups') ? event.target.querySelector('popup-component') : null;
-  if (popupComponent) {
-    restorePopups();
-  }
-});
-
 document.addEventListener('shopify:block:select', (event) => {
   // Open accordion on Block select
   const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
@@ -164,40 +140,6 @@ document.addEventListener('shopify:block:deselect', (event) => {
     logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
   }
 });
-
-function hideOtherPopups(selectedPopup) {
-  document.querySelectorAll('popup-component')?.forEach((popup) => {
-    if (popup !== selectedPopup) {
-      const dialog = popup.querySelector('dialog');
-      if (dialog.hasAttribute('open')) {
-        popup.classList.add('popup--hidden');
-
-        // Check if browser supports Dialog tags
-        if (typeof dialog.close === 'function') {
-          dialog.close();
-        } else {
-          dialog.removeAttribute('open');
-          dialog.setAttribute('aria-hidden', true);
-        }
-      }
-    }
-  });
-}
-
-function restorePopups() {
-  document.querySelectorAll('popup-component.popup--hidden')?.forEach((popup) => {
-    popup.classList.remove('popup--hidden');
-    popup.popupOpen();
-  });
-
-  document.querySelectorAll('popup-component.popup--selected')?.forEach((popup) => {
-    popup.classList.remove('popup--selected');
-    if (popup.classList.contains('popup--force-open')) {
-      popup.popupClose();
-      popup.classList.remove('popup--force-open');
-    }
-  });
-}
 
 // Mobile menu - Theme Editor events
 if (!customElements.get('mobile-menu')) {
