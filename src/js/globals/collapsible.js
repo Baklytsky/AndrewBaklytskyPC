@@ -4,6 +4,7 @@ const selectors = {
   body: '[data-collapsible-body]',
   content: '[data-collapsible-content]',
   shopifySection: '.shopify-section',
+  cartBlock: '.cart-block',
 };
 
 const attributes = {
@@ -54,8 +55,11 @@ class CollapsibleElements extends HTMLElement {
       section.addEventListener('shopify:section:deselect', this.bindEditorClose);
 
       this.collapsibles.forEach((element) => {
-        element.addEventListener('shopify:block:select', this.bindEditorOpen);
-        element.addEventListener('shopify:block:deselect', this.bindEditorClose);
+        const cartBlock = element.closest(selectors.cartBlock);
+        const collapsible = cartBlock ? cartBlock : element;
+
+        collapsible.addEventListener('shopify:block:select', this.bindEditorOpen);
+        collapsible.addEventListener('shopify:block:deselect', this.bindEditorClose);
       });
     }
   }
