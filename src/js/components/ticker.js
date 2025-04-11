@@ -38,6 +38,8 @@ if (!customElements.get('ticker-bar')) {
         this.appendChild(this.comparitor);
         this.scale.classList.remove(classes.unloaded);
         this.checkWidthEvent = this.checkWidth.bind(this);
+        this.bindEditorPause = this.bindEditorPause.bind(this);
+        this.bindEditorResume = this.bindEditorResume.bind(this);
       }
 
       connectedCallback() {
@@ -49,10 +51,31 @@ if (!customElements.get('ticker-bar')) {
 
         screen.orientation.addEventListener('change', this.checkWidthEvent);
         document.addEventListener('theme:resize:width', this.checkWidthEvent);
+
+        if (Shopify.designMode) {
+          this.addEventListener('shopify:block:select', this.bindEditorPause);
+          this.addEventListener('shopify:block:deselect', this.bindEditorResume);
+        }
       }
 
       disconnectedCallback() {
         document.removeEventListener('theme:resize:width', this.checkWidthEvent);
+      }
+
+      bindEditorPause(event) {
+        // Pause ticker on block select
+        const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
+        if (ticker) {
+          ticker.setAttribute('paused', '');
+        }
+      }
+
+      bindEditorResume(event) {
+        // Resume ticker on block deselect
+        const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
+        if (ticker) {
+          ticker.removeAttribute('paused');
+        }
       }
 
       checkWidth() {

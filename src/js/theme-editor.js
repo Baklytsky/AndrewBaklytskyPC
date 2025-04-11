@@ -25,12 +25,6 @@ document.addEventListener('shopify:block:select', (event) => {
     }
   }
 
-  // Pause ticker on block select
-  const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
-  if (ticker) {
-    ticker.setAttribute('paused', '');
-  }
-
   // Scroll to a selected block
   const scrollableBlock = event.target.matches('[data-block-scroll]') ? event.target : event.target.querySelector('[data-block-scroll]') || event.target.closest('[data-block-scroll]');
   if (scrollableBlock && !scrollableBlock.classList.contains('flickity-enabled')) {
@@ -94,12 +88,6 @@ document.addEventListener('shopify:block:select', (event) => {
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
-  // Resume ticker on block deselect
-  const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
-  if (ticker) {
-    ticker.removeAttribute('paused');
-  }
-
   // Resume slider on block deselect
   const blockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (blockSelectedIsSlide) {
