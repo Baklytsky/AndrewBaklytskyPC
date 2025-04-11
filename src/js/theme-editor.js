@@ -1,10 +1,4 @@
 document.addEventListener('shopify:block:select', (event) => {
-  // Open accordion on Block select
-  const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
-  if (collapsible && !collapsible?.hasAttribute('open')) {
-    collapsible.querySelector('[data-collapsible-trigger]')?.dispatchEvent(new Event('click'));
-  }
-
   // Select slide on Block select
   const blockSelectedIsSlide = event.target.closest('slider-component') && (event.target.hasAttribute('data-slide') || event.target.closest('[data-slide]'));
   if (blockSelectedIsSlide) {
@@ -100,12 +94,6 @@ document.addEventListener('shopify:block:select', (event) => {
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
-  // Close accordion on Block deselect
-  const collapsible = event.target.hasAttribute('data-collapsible') ? event.target : null;
-  if (collapsible && collapsible.hasAttribute('open')) {
-    collapsible.querySelector('[data-collapsible-trigger]')?.dispatchEvent(new Event('click'));
-  }
-
   // Resume ticker on block deselect
   const ticker = event.target.matches('ticker-bar') ? event.target : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
   if (ticker) {
