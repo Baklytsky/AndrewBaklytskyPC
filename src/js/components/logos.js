@@ -139,9 +139,10 @@ if (!customElements.get('logos-component')) {
         }
       }
 
-      onBlockSelect(evt) {
-        if (!this.slideshowNav) return;
-        const slide = this.slideshowNav.querySelector(`[${attributes.slideData}="${evt.detail.blockId}"]`);
+      onBlockSelect(event) {
+        // Select logos slide on block select
+        if (!this.slideshowNav || !event.target.hasAttribute(attributes.slideData)) return;
+        const slide = this.slideshowNav.querySelector(`[${attributes.slideData}="${event.detail.blockId}"]`);
         const slideIndex = parseInt(Array.from(slide.parentNode.children).indexOf(slide));
 
         if (this.flktyNav) {
@@ -153,12 +154,18 @@ if (!customElements.get('logos-component')) {
       }
 
       onBlockDeselect() {
+        // Resume logos slider on block deselect
         this.flktyNav?.playPlayer();
       }
 
       bindEvents() {
-        this.addEventListener('theme:slider-logos:select', (e) => this.onBlockSelect(e.detail.evt));
-        this.addEventListener('theme:slider-logos:deselect', () => this.onBlockDeselect());
+        if (Shopify.designMode) {
+          this.bindEditorSelect = this.onBlockSelect.bind(this);
+          this.bindEditorDeselect = this.onBlockDeselect.bind(this);
+
+          this.addEventListener('shopify:block:select', this.bindEditorSelect);
+          this.addEventListener('shopify:block:deselect', this.bindEditorDeselect);
+        }
       }
 
       disconnectedCallback() {

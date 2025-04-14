@@ -38,22 +38,6 @@ document.addEventListener('shopify:block:select', (event) => {
       });
     }
   }
-
-  // Logos - select logos slide on block select
-  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
-  if (logosBlockSelectedIsSlide) {
-    const logosComponent = event.target.closest('logos-component');
-
-    // Go to selected slide, pause autoplay
-    logosComponent?.dispatchEvent(
-      new CustomEvent('theme:slider-logos:select', {
-        bubbles: false,
-        detail: {
-          evt: event,
-        },
-      })
-    );
-  }
 });
 
 document.addEventListener('shopify:block:deselect', (event) => {
@@ -69,14 +53,6 @@ document.addEventListener('shopify:block:deselect', (event) => {
       slide.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
-  }
-
-  // Logos - resume logos slider on block deselect
-  const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
-  if (logosBlockSelectedIsSlide) {
-    const logosComponent = event.target.closest('logos-component');
-
-    logosComponent?.dispatchEvent(new CustomEvent('theme:slider-logos:deselect', {bubbles: false}));
   }
 });
 
