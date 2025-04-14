@@ -39,12 +39,6 @@ document.addEventListener('shopify:block:select', (event) => {
     }
   }
 
-  // Show mega menu on block select
-  const hoverDisclosure = event.target.closest('hover-disclosure');
-  if (hoverDisclosure) {
-    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:show', {bubbles: false}));
-  }
-
   // Show tab content on block select
   const tabs = event.target.closest('tabs-component');
   if (tabs) {
@@ -91,12 +85,6 @@ document.addEventListener('shopify:block:deselect', (event) => {
       slide.classList.remove('is-selected');
       slider.dispatchEvent(new CustomEvent('theme:slider:deselect', {bubbles: false}));
     }
-  }
-
-  // Hide mega menu on block select
-  const hoverDisclosure = event.target.closest('hover-disclosure');
-  if (hoverDisclosure) {
-    hoverDisclosure.dispatchEvent(new CustomEvent('theme:disclosure:hide', {bubbles: false}));
   }
 
   // Logos - resume logos slider on block deselect
