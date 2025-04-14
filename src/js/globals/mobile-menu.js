@@ -1,42 +1,54 @@
+const selectors = {
+  shopifySection: '.shopify-section',
+  headerDrawer: 'header-drawer',
+};
+
+const classes = {
+  isOpen: 'is-open',
+};
+
 if (!customElements.get('mobile-menu')) {
   customElements.define(
     'mobile-menu',
     class MobileMenu extends HTMLElement {
       constructor() {
         super();
+        this.isOpen = false;
+        this.bindEditorSelect = this.onSelect.bind(this);
+        this.bindEditorDeselect = this.onDeselect.bind(this);
+      }
 
-        this.showDrawerOnSelect = this.showDrawerOnSelect.bind(this);
-        this.hideDrawerOnDeselect = this.hideDrawerOnDeselect.bind(this);
+      get drawer() {
+        return this.querySelector(selectors.headerDrawer);
       }
 
       connectedCallback() {
-        document.addEventListener('shopify:block:select', this.showDrawerOnSelect);
-        document.addEventListener('shopify:section:load', this.showDrawerOnSelect);
-        document.addEventListener('shopify:section:select', this.showDrawerOnSelect);
-        document.addEventListener('shopify:section:deselect', this.hideDrawerOnDeselect);
+        if (Shopify.designMode) {
+          const section = this.closest(selectors.shopifySection);
+          section.addEventListener('shopify:section:load', this.bindEditorSelect);
+          section.addEventListener('shopify:section:select', this.bindEditorSelect);
+          section.addEventListener('shopify:section:deselect', this.bindEditorDeselect);
+
+          this.addEventListener('shopify:block:select', this.bindEditorSelect);
+        }
       }
 
-      disconnectedCallback() {
-        document.removeEventListener('shopify:block:select', this.showDrawerOnSelect);
-        document.removeEventListener('shopify:section:load', this.showDrawerOnSelect);
-        document.removeEventListener('shopify:section:select', this.showDrawerOnSelect);
-        document.removeEventListener('shopify:section:deselect', this.hideDrawerOnDeselect);
+      getMobileMenu(event) {
+        return event.target.querySelector('mobile-menu') || event.target.closest('mobile-menu');
       }
 
-      showDrawerOnSelect(e) {
-        const mobileMenu = e.target.querySelector('mobile-menu') || e.target.closest('mobile-menu');
+      onSelect(event) {
+        this.isOpen = this.drawer.classList.contains(classes.isOpen);
 
-        if (!mobileMenu) return;
-
-        mobileMenu.querySelector('header-drawer')?.dispatchEvent(new CustomEvent('theme:drawer:open', {bubbles: true}));
+        if (!this.getMobileMenu(event) || this.isOpen) return;
+        if (typeof this.drawer.showDrawer === 'function') this.drawer.showDrawer();
       }
 
-      hideDrawerOnDeselect(e) {
-        const mobileMenu = e.target.querySelector('mobile-menu') || e.target.closest('mobile-menu');
+      onDeselect(event) {
+        this.isOpen = this.drawer.classList.contains(classes.isOpen);
 
-        if (!mobileMenu) return;
-
-        mobileMenu.querySelector('header-drawer')?.dispatchEvent(new CustomEvent('theme:drawer:close', {bubbles: true}));
+        if (!this.getMobileMenu(event) || !this.isOpen) return;
+        if (typeof this.drawer.hideDrawer === 'function') this.drawer.hideDrawer();
       }
     }
   );
