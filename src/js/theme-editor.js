@@ -39,22 +39,6 @@ document.addEventListener('shopify:block:select', (event) => {
     }
   }
 
-  // Show tab content on block select
-  const tabs = event.target.closest('tabs-component');
-  if (tabs) {
-    const tab = event.target;
-
-    if (tab.hasAttribute('data-tab')) {
-      tab.dispatchEvent(new Event('click'));
-    }
-
-    tab.parentNode.scrollTo({
-      top: 0,
-      left: tab.offsetLeft - tab.clientWidth,
-      behavior: 'smooth',
-    });
-  }
-
   // Logos - select logos slide on block select
   const logosBlockSelectedIsSlide = event.target.hasAttribute('data-slide');
   if (logosBlockSelectedIsSlide) {

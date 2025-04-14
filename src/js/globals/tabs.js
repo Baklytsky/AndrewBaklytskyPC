@@ -28,6 +28,7 @@ if (!customElements.get('tabs-component')) {
         super();
 
         this.a11y = window.theme.a11y;
+        this.bindEditorShow = this.bindEditorShow.bind(this);
       }
 
       connectedCallback() {
@@ -49,6 +50,28 @@ if (!customElements.get('tabs-component')) {
               this.tabChange(element, tab);
             }
           });
+        });
+
+        if (Shopify.designMode) {
+          this.addEventListener('shopify:block:select', this.bindEditorShow);
+        }
+      }
+
+      bindEditorShow(event) {
+        // Show tab content on block select
+        const tabs = event.target.closest('tabs-component');
+        if (!tabs) return;
+
+        const tab = event.target;
+
+        if (tab.hasAttribute(attributes.dataTab)) {
+          tab.dispatchEvent(new Event('click'));
+        }
+
+        tab.parentNode.scrollTo({
+          top: 0,
+          left: tab.offsetLeft - tab.clientWidth,
+          behavior: 'smooth',
         });
       }
 
