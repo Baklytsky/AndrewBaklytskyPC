@@ -5,21 +5,11 @@ if (!customElements.get('mobile-menu')) {
       constructor() {
         super();
 
-        this.mobileBlocks = this.querySelectorAll('[data-mobile-menu-block]');
-        this.hideBlocks = this.hideBlocks.bind(this);
-        this.showBlocks = this.showBlocks.bind(this);
-
         this.showDrawerOnSelect = this.showDrawerOnSelect.bind(this);
         this.hideDrawerOnDeselect = this.hideDrawerOnDeselect.bind(this);
-
-        this.menuDrawerSection = this.closest('.shopify-section');
-        this.menuDrawerIsOpen = false;
       }
 
       connectedCallback() {
-        this.addEventListener('theme:search:open', this.hideBlocks);
-        this.addEventListener('theme:search:close', this.showBlocks);
-
         document.addEventListener('shopify:block:select', this.showDrawerOnSelect);
         document.addEventListener('shopify:section:load', this.showDrawerOnSelect);
         document.addEventListener('shopify:section:select', this.showDrawerOnSelect);
@@ -31,18 +21,6 @@ if (!customElements.get('mobile-menu')) {
         document.removeEventListener('shopify:section:load', this.showDrawerOnSelect);
         document.removeEventListener('shopify:section:select', this.showDrawerOnSelect);
         document.removeEventListener('shopify:section:deselect', this.hideDrawerOnDeselect);
-      }
-
-      hideBlocks() {
-        this.mobileBlocks.forEach((block) => {
-          block.classList.add('mobile-menu__block--hidden');
-        });
-      }
-
-      showBlocks() {
-        this.mobileBlocks.forEach((block) => {
-          block.classList.remove('mobile-menu__block--hidden');
-        });
       }
 
       showDrawerOnSelect(e) {
