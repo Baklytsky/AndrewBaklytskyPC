@@ -39,15 +39,6 @@ document.addEventListener('shopify:block:select', (event) => {
     }
   }
 
-  // Collections hover - force hover on block select
-  const collectionsHoverImage = event.target.matches('[data-collection-image]');
-  if (collectionsHoverImage) {
-    const collectionsHoverImageId = event.target?.id;
-    const collectionsHoverComponent = event.target.closest('collections-hover');
-    const collectionsHoverButton = collectionsHoverComponent?.querySelector('[data-hover-target="' + collectionsHoverImageId + '"]');
-    collectionsHoverButton?.dispatchEvent(new Event('mouseenter'));
-  }
-
   // Show mega menu on block select
   const hoverDisclosure = event.target.closest('hover-disclosure');
   if (hoverDisclosure) {
