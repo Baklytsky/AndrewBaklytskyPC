@@ -1,0 +1,465 @@
+<!-- /sections/bundle-collection.liquid -->
+
+{% comment %}
+  This snippet demonstrates how to implement a simple "Build Your Own Bundle" interface
+  similar to the example provided, where customers can select a specific number of products.
+{% endcomment %}
+
+{%- liquid
+  assign max_selection = collection.metafields.carbon.max_selection | default: 3
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign product_limit = section.settings.products_per_page
+
+  assign columns_desktop = section.settings.grid | plus: 0
+  assign columns_medium = 3
+  assign columns_small = 2
+  assign columns_mobile = section.settings.grid_mobile | plus: 0
+
+  if columns_desktop == 2 or columns_desktop == 4
+    assign columns_medium = 2
+  endif
+
+  assign animation_anchor = '.collection-' | append: collection.handle
+  assign animation_duration = 800
+-%}
+
+{%- style -%}
+  #Collection--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+
+    --COLUMNS: {{ columns_desktop }};
+    --COLUMNS-MEDIUM: {{ columns_medium }};
+    --COLUMNS-SMALL: {{ columns_small }};
+    --COLUMNS-MOBILE: {{ columns_mobile }};
+
+    {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
+      --border-hairline: {{ border_color }};
+    {% endunless %}
+  }
+{%- endstyle -%}
+
+{% paginate collection.products by product_limit %}
+  <bundle-collection
+    class="{{ color_scheme }} section-padding"
+    id="Collection--{{ section.id }}"
+    data-max-selection="{{ max_selection }}"
+  >
+    <div class="wrapper--full-padded">
+      <p>Select {{ max_selection }} items from this collection to complete your bundle</p>
+
+      <div class="bundle-placeholders" data-max-selection="{{ max_selection }}">
+        <h3>Your Bundle Selections</h3>
+        <div class="placeholder-container">
+          {% for i in (1..max_selection) %}
+            <div class="product-placeholder" data-slot="{{ forloop.index }}">
+              <div class="placeholder-empty">
+                <div class="placeholder-number">{{ forloop.index }}</div>
+                <div class="placeholder-text">Select an item</div>
+              </div>
+              <div class="placeholder-filled">
+                <div class="placeholder-filled__container"></div>
+                <button class="remove-selection" data-slot="{{ forloop.index }}">Remove</button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="available-products">
+        <h3>Available Products</h3>
+        <div class="grid">
+          {% for product in collection.products %}
+            {%- render 'product-grid-item',
+              product: product,
+              animation_delay: animation_delay,
+              index: forloop.index,
+              sizes: image_sizes,
+              bundle_product: true
+            -%}
+
+            {%- comment -%}
+              {% assign first_variant = product.variants | first %}
+              <div class="product-card">
+                <p class="product-price">{{ first_variant.price | money }}</p>
+
+                {% if product.has_only_default_variant == false and product.variants.size > 1 %}
+                  <div class="variant-wrapper">
+                    <label for="variant-{{ product.id }}">Options:</label>
+                    <select id="variant-{{ product.id }}" class="variant-selector">
+                      {% for variant in product.variants %}
+                        <option
+                          value="{{ variant.id }}"
+                          {% if forloop.first %}
+                            selected
+                          {% endif %}
+                        >
+                          {{ variant.title }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                {% endif %}
+
+                <button class="add-to-bundle" data-product-id="{{ product.id }}" data-variant-id="{{ first_variant.id }}">
+                  Add to Bundle
+                </button>
+              </div>
+            {%- endcomment -%}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="bundle-summary">
+        <p>Selected: <span data-selected-count>0</span> of {{ max_selection }}</p>
+        <p>
+          Total: <span data-bundle-total>{{ 0 | money }}</span>
+        </p>
+        <button data-add-bundle-to-cart disabled>Add Bundle to Cart</button>
+      </div>
+
+      {%- render 'pagination', paginate: paginate -%}
+    </div>
+  </bundle-collection>
+{% endpaginate %}
+
+{%- comment -%}
+{%- endcomment -%}
+<script src="{{ 'bundle-collection.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  bundle-collection {
+    display: block;
+  }
+
+  .placeholder-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  .product-placeholder {
+    width: 200px;
+    height: 250px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+  .product-placeholder.filled {
+    border: 2px solid #008060;
+  }
+  .product-placeholder.filled .placeholder-empty {
+    display: none;
+  }
+  .placeholder-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  .placeholder-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .product-placeholder.filled .placeholder-filled {
+    display: flex;
+  }
+  .placeholder-filled {
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  .placeholder-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .placeholder-title {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  .placeholder-price {
+    color: #008060;
+    margin-bottom: 10px;
+  }
+  .remove-selection {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .variant-wrapper {
+    margin: 10px 0;
+    width: 100%;
+  }
+  .variant-selector {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+  #add-bundle-to-cart {
+    background-color: #008060;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+  }
+  #add-bundle-to-cart:hover {
+    background-color: #006e52;
+  }
+  #add-bundle-to-cart:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #008060;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+{%- comment -%}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const maxSelection = {{ max_selection }};
+      const selectedCount = document.querySelector('[data-selected-count]');
+      const bundleTotal = document.querySelector('[data-bundle-total]');
+      const addButton = document.querySelector('[data-add-bundle-to-cart]');
+      const productCards = document.querySelectorAll('.product-card');
+      const placeholders = document.querySelectorAll('.product-placeholder');
+      const selectedProducts = new Array(maxSelection).fill(null);
+
+      function updateUI() {
+        const filledCount = selectedProducts.filter(product => product !== null).length;
+        selectedCount.textContent = filledCount;
+        const total = selectedProducts.reduce((sum, product) => {
+          return sum + (product ? parseFloat(product.price) : 0);
+        }, 0);
+        bundleTotal.textContent = '$' + total.toFixed(2);
+        addButton.disabled = filledCount !== maxSelection;
+        productCards.forEach(card => {
+          const variantId = card.dataset.variantId;
+          const isSelected = selectedProducts.some(product => product && product.variantId === variantId);
+          if (isSelected) {
+            card.classList.add('selected');
+            card.querySelector('.add-to-bundle').textContent = 'Added to Bundle';
+            card.querySelector('.add-to-bundle').disabled = true;
+          } else {
+            card.classList.remove('selected');
+            card.querySelector('.add-to-bundle').textContent = 'Add to Bundle';
+            card.querySelector('.add-to-bundle').disabled = filledCount >= maxSelection;
+          }
+          if (filledCount >= maxSelection && !isSelected) {
+            card.classList.add('disabled');
+          } else {
+            card.classList.remove('disabled');
+          }
+        });
+      }
+
+      function addProductToBundle(variantId) {
+        // Find the card by product ID from the button that was clicked
+        const button = document.querySelector('.add-to-bundle[data-variant-id="' + variantId + '"]');
+        if (!button) return;
+
+        const productId = button.dataset.productId;
+        const card = button.closest('.product-card');
+        if (!card) return;
+        const productData = {
+          id: card.dataset.productId,
+          variantId: card.dataset.variantId,
+          title: card.dataset.productTitle,
+          price: card.dataset.productPrice,
+          image: card.dataset.productImage
+        };
+        const emptyIndex = selectedProducts.findIndex(product => product === null);
+        if (emptyIndex === -1) return;
+        selectedProducts[emptyIndex] = productData;
+        const placeholder = placeholders[emptyIndex];
+        placeholder.classList.add('filled');
+        const emptyEl = placeholder.querySelector('.placeholder-empty');
+        const filledEl = placeholder.querySelector('.placeholder-filled');
+        emptyEl.style.display = 'none';
+        filledEl.style.display = 'flex';
+        filledEl.querySelector('.placeholder-image').src = productData.image;
+        filledEl.querySelector('.placeholder-title').textContent = productData.title;
+        filledEl.querySelector('.placeholder-price').textContent = '$' + parseFloat(productData.price).toFixed(2);
+        updateUI();
+      }
+
+      function removeProductFromBundle(slot) {
+        const index = parseInt(slot) - 1;
+        if (index < 0 || index >= selectedProducts.length) return;
+        selectedProducts[index] = null;
+        const placeholder = placeholders[index];
+        placeholder.classList.remove('filled');
+        const emptyEl = placeholder.querySelector('.placeholder-empty');
+        const filledEl = placeholder.querySelector('.placeholder-filled');
+        emptyEl.style.display = 'flex';
+        filledEl.style.display = 'none';
+        updateUI();
+      }
+
+      document.querySelectorAll('.add-to-bundle').forEach(button => {
+        button.addEventListener('click', function() {
+          const variantId = this.dataset.variantId;
+          addProductToBundle(variantId);
+        });
+      });
+
+      document.querySelectorAll('.remove-selection').forEach(button => {
+        button.addEventListener('click', function() {
+          const slot = this.dataset.slot;
+          removeProductFromBundle(slot);
+        });
+      });
+
+      addButton.addEventListener('click', async function() {
+        if (selectedProducts.filter(p => p !== null).length === maxSelection) {
+          addButton.disabled = true;
+          addButton.innerHTML = '<span class="spinner"></span> Processing...';
+          for (let i = 0; i < selectedProducts.length; i++) {
+            if (selectedProducts[i] !== null) {
+              await fetch('/cart/add.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: selectedProducts[i].variantId, quantity: 1 })
+              });
+            }
+          }
+          window.location.href = '/cart';
+        }
+      });
+
+      updateUI();
+    });
+  </script>
+{%- endcomment -%}
+{% schema %}
+{
+  "name": "Bundle collection",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product grid"
+    },
+    {
+      "type": "range",
+      "id": "grid",
+      "label": "Products per row on desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "radio",
+      "id": "grid_mobile",
+      "label": "Products per row on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "One"
+        },
+        {
+          "value": "2",
+          "label": "Two"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "label": "Products per page",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle mix and match"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "custom.pre_footer", "footer"]
+  }
+}
+{% endschema %}

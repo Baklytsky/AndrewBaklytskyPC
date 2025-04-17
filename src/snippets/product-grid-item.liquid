@@ -26,6 +26,7 @@
   assign layout_mobile = section.settings.layout_mobile
   assign modifier_class = modifier_class | default: ''
   assign index = index | default: 1
+  assign bundle_product = bundle_product | default: false
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 2
@@ -577,6 +578,39 @@
             <span class="product-item__swatches__count">
               <span data-swatch-count>&nbsp;</span>
             </span>
+          </div>
+        {%- endif -%}
+
+        {%- if bundle_product -%}
+          <div class="product-item__bundle">
+            <template data-bundle-template>
+              {%- render 'image',
+                image: product.featured_media.preview_image,
+                aspect_ratio: aspect_ratio,
+                sizes: sizes,
+                widths: widths,
+                loading: loading,
+                fetchpriority: fetchpriority,
+                preload: preload,
+                attributes: image_animations,
+                cover: true
+              -%}
+              <span>{{ product.title }}</span>
+              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+            </template>
+            <button
+              class="btn btn--black btn--small btn--full btn--solid product-item__button"
+              data-product-button
+              data-product-id="{{ product.id }}"
+              data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+              data-product-title="{{ product.title }}"
+              data-product-price="{{ product.selected_or_first_available_variant.price | money_without_currency }}"
+              data-product-image="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
+            >
+              <span class="product-item__button-added">Added to Bundle</span>
+
+              <span class="product-item__button-default">Add to Bundle</span>
+            </button>
           </div>
         {%- endif -%}
       </div>
