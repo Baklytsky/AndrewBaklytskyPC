@@ -1,18 +1,29 @@
 const selectors = {
   cartDrawer: 'cart-drawer',
+  template: '[data-bundle-template]',
   productGridItem: '[data-grid-item]',
-  button: '[data-product-button]',
-  selectedCount: '[data-selected-count]',
+  button: '[data-bundle-product-button]',
+  selectedCount: '[data-bundle-selected-count]',
   bundleTotal: '[data-bundle-total]',
-  addButton: '[data-add-bundle-to-cart]',
+  addButton: '[data-bundle-add-to-cart]',
+  removeButton: '[data-bundle-remove-button]',
+  placeholder: '[data-bundle-placeholder]',
+  placeholderFilled: '[data-bundle-placeholder-filled]',
+  placeholderPrice: '[data-placeholder-price]',
 };
 
 const attributes = {
-  maxSelection: 'data-max-selection',
+  maxSelection: 'data-bundle-max-selection',
+  quickAdd: 'data-quick-add-btn',
+  bundleVariantId: 'data-bundle-variant-id',
+  bundlePrice: 'data-bundle-price',
 };
 
 const classes = {
   selected: 'is-selected',
+  filled: 'is-filled',
+  disabled: 'is-disabled',
+  loading: 'is-loading',
 };
 
 if (!customElements.get('bundle-collection')) {
@@ -28,30 +39,30 @@ if (!customElements.get('bundle-collection')) {
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
         this.addButton = this.querySelector(selectors.addButton);
         this.productCards = this.querySelectorAll(selectors.productGridItem);
-        this.placeholders = this.querySelectorAll('.product-placeholder');
+        this.placeholders = this.querySelectorAll(selectors.placeholder);
         this.selectedProducts = new Array(this.maxSelection).fill(null);
       }
 
       connectedCallback() {
         this.querySelectorAll(selectors.button).forEach((button) => {
-          button.addEventListener('click', (e) => {
-            const variantId = e.currentTarget.dataset.variantId;
-            this.addProductToBundle(e.currentTarget, variantId);
+          button.addEventListener('click', () => {
+            if (!button.hasAttribute(attributes.quickAdd)) {
+              this.addProductToBundle(button);
+            }
           });
         });
 
-        this.querySelectorAll('.remove-selection').forEach((button) => {
-          button.addEventListener('click', (e) => {
-            const slot = e.currentTarget.dataset.slot;
-            this.removeProductFromBundle(slot);
-          });
+        this.addEventListener('theme:bundle:button', (e) => {
+          const button = e.detail.button;
+          button.setAttribute(attributes.bundleVariantId, e.detail.variantId);
+          button.setAttribute(attributes.bundlePrice, e.detail.price);
+          this.addProductToBundle(button);
         });
 
         this.addButton.addEventListener('click', () => {
           if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
+            this.addButton.classList.add(classes.loading);
             this.addButton.disabled = true;
-            this.addButton.innerHTML = '<span class="spinner"></span> Processing...';
-            console.log(this.selectedProducts);
             fetch(theme.routes.cart_add_url, {
               method: 'POST',
               headers: {
@@ -60,33 +71,24 @@ if (!customElements.get('bundle-collection')) {
               body: JSON.stringify({items: this.selectedProducts}),
             })
               .then((response) => {
-                console.log(response);
-                const cartDrawer = document.querySelector(selectors.cartDrawer);
-                if (cartDrawer) {
-                  cartDrawer.dispatchEvent(new CustomEvent('theme:cart:refresh', {bubbles: true}));
-                  cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show', {bubbles: true}));
-                  // window.theme.a11y.lastElement = button;
-                  setTimeout(() => {}, 5000);
-                }
-
                 if (theme.settings.cartType === 'page') {
                   window.location = theme.routes.cart_url;
+                } else {
+                  const cartDrawer = document.querySelector(selectors.cartDrawer);
+                  if (cartDrawer) {
+                    cartDrawer.dispatchEvent(new CustomEvent('theme:cart:refresh', {bubbles: true}));
+                    cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show', {bubbles: true}));
+                    // window.theme.a11y.lastElement = button;
+
+                    this.addButton.classList.remove(classes.loading);
+                    this.addButton.disabled = false;
+                  }
                 }
               })
               .catch((error) => {
                 console.error('Error:', error);
               });
-            for (let i = 0; i < this.selectedProducts.length; i++) {
-              if (this.selectedProducts[i] !== null) {
-                // fetch(theme.routes.cart_add_url, {
-                //   method: 'POST',
-                //   headers: {'Content-Type': 'application/json'},
-                //   body: JSON.stringify({id: this.selectedProducts[i].variantId, quantity: 1}),
-                // }).then((response) => {
-                //   console.log(response);
-                // });
-              }
-            }
+
             // window.location.href = '/cart';
             // const cartDrawer = document.querySelector(selectors.cartDrawer);
 
@@ -106,11 +108,11 @@ if (!customElements.get('bundle-collection')) {
         const total = this.selectedProducts.reduce((sum, product) => {
           return sum + (product ? parseFloat(product.price) : 0);
         }, 0);
-        this.bundleTotal.textContent = '$' + total.toFixed(2);
+        this.bundleTotal.innerHTML = this.formatRate(total);
         this.addButton.disabled = filledCount !== this.maxSelection;
         this.productCards.forEach((card) => {
           const button = card.querySelector(selectors.button);
-          const variantId = button.dataset.variantId;
+          const variantId = button.getAttribute(attributes.bundleVariantId);
           const isSelected = this.selectedProducts.some((product) => product && product.id === variantId);
           if (isSelected) {
             card.classList.add(classes.selected);
@@ -120,46 +122,48 @@ if (!customElements.get('bundle-collection')) {
             button.disabled = filledCount >= this.maxSelection;
           }
           if (filledCount >= this.maxSelection && !isSelected) {
-            card.classList.add('disabled');
+            card.classList.add(classes.disabled);
           } else {
-            card.classList.remove('disabled');
+            card.classList.remove(classes.disabled);
           }
         });
       }
 
-      addProductToBundle(button, variantId) {
+      addProductToBundle(button) {
         // Find the card by product ID from the button that was clicked
         const productData = {
-          id: variantId,
+          id: button.getAttribute(attributes.bundleVariantId),
           quantity: 1,
+          price: button.getAttribute(attributes.bundlePrice),
         };
         const emptyIndex = this.selectedProducts.findIndex((product) => product === null);
         if (emptyIndex === -1) return;
         this.selectedProducts[emptyIndex] = productData;
-        // const placeholder = this.placeholders[emptyIndex];
-        // placeholder.classList.add('filled');
-        // const filledEl = placeholder.querySelector('.placeholder-filled');
-        // filledEl.querySelector('.placeholder-image').src = productData.image;
-        // filledEl.querySelector('.placeholder-title').textContent = productData.title;
-        // filledEl.querySelector('.placeholder-price').textContent = '$' + parseFloat(productData.price).toFixed(2);
 
         const productItem = button.closest(selectors.productGridItem);
-        const template = productItem.querySelector('[data-bundle-template]');
+        const template = productItem.querySelector(selectors.template);
         const content = template.innerHTML;
         const placeholder = this.placeholders[emptyIndex];
-        placeholder.classList.add('filled');
-        const filledEl = placeholder.querySelector('.placeholder-filled__container');
+        placeholder.classList.add(classes.filled);
+        const filledEl = placeholder.querySelector(selectors.placeholderFilled);
         filledEl.innerHTML = content;
+        filledEl.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(button.getAttribute(attributes.bundlePrice));
+        filledEl.querySelector(selectors.removeButton).addEventListener('click', () => this.removeProductFromBundle(emptyIndex));
         this.updateUI();
       }
 
       removeProductFromBundle(slot) {
-        const index = parseInt(slot) - 1;
+        const index = parseInt(slot);
         if (index < 0 || index >= this.selectedProducts.length) return;
         this.selectedProducts[index] = null;
         const placeholder = this.placeholders[index];
-        placeholder.classList.remove('filled');
+        placeholder.classList.remove(classes.filled);
         this.updateUI();
+      }
+
+      formatRate(cents) {
+        const price = cents === 0 ? window.theme.strings.free : window.theme.formatMoney(cents, theme.moneyFormat);
+        return price;
       }
 
       disconnectedCallback() {}

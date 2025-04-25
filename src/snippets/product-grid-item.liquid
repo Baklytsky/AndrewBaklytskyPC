@@ -272,7 +272,54 @@
       data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.on_sale' | t }}</span>
   {%- endif -%}
 
-  {%- if settings.quickview_enable and current_variant -%}
+  {%- if bundle_product -%}
+    {%- liquid
+      assign unique = section.id | append: '-' | append: product.id
+    -%}
+
+    <quick-add-product>
+      <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
+        <button class="quick-add__button caps"
+          type="button"
+          aria-label="{{ 'products.general.quick_add' | t }}"
+          data-bundle-product-button="{{ product.id }}"
+          data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
+          data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
+          {% if product.has_only_default_variant == false and product.variants.size > 1 %}
+            data-quick-add-btn
+            data-quick-add-modal-handle="{{ product.handle }}"
+          {% else %}
+
+          {% endif %}
+        >
+          <span class="btn__text">
+            <span class="product-item__button-added">Added to Bundle</span>
+
+            <span class="product-item__button-default">Add to Bundle</span>
+            {% comment %} {{ 'products.general.quick_add' | t }} {% endcomment %}
+          </span>
+          <span class="btn__plus"></span>
+          <span class="btn__added">&nbsp;</span>
+          <span class="btn__loader">
+            <svg height="18" width="18" class="svg-loader">
+              <circle r="7" cx="9" cy="9" />
+              <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+            </svg>
+          </span>
+        </button>
+
+        {%- if product.has_only_default_variant == false and product.variants.size > 1 -%}
+
+        {%- else -%}
+
+        {%- endif -%}
+
+        {%- unless product.has_only_default_variant -%}
+          {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+        {%- endunless -%}
+      </div>
+    </quick-add-product>
+  {%- elsif settings.quickview_enable and current_variant -%}
     {%- liquid
       assign has_preorder_meta = false
       assign has_preorder_tag = false
@@ -596,21 +643,81 @@
                 cover: true
               -%}
               <span>{{ product.title }}</span>
-              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+              <p data-placeholder-price></p>
+              <button data-bundle-remove-button class="btn btn--black btn--small btn--full btn--solid">Remove</button>
             </template>
-            <button
-              class="btn btn--black btn--small btn--full btn--solid product-item__button"
-              data-product-button
-              data-product-id="{{ product.id }}"
-              data-variant-id="{{ product.selected_or_first_available_variant.id }}"
-              data-product-title="{{ product.title }}"
-              data-product-price="{{ product.selected_or_first_available_variant.price | money_without_currency }}"
-              data-product-image="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
-            >
-              <span class="product-item__button-added">Added to Bundle</span>
+            {%- comment -%}
+              <button
+                class="btn btn--black btn--small btn--full btn--solid product-item__button"
+                data-bundle-product-button
+                data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
+              >
+                <span class="product-item__button-added">Added to Bundle</span>
 
-              <span class="product-item__button-default">Add to Bundle</span>
-            </button>
+                <span class="product-item__button-default">Add to Bundle</span>
+              </button>
+            {%- endcomment -%}
+
+            {%- if product.has_only_default_variant == false and product.variants.size > 1 -%}
+              {%- comment -%}
+                {%- assign product_form_id = 'product-item-bundle-'
+                  | append: section.id
+                  | append: '-'
+                  | append: product.id
+                -%}
+                <div class="test2">
+                  {%- render 'product-variant-options',
+                    product: product,
+                    unique: unique,
+                    product_form_id: product_form_id,
+                    enable_size_chart: false,
+                    animation_name: animation_name,
+                    animation_delay: animation_delay,
+                    animation_duration: animation_duration,
+                    quickview: false
+                  -%}
+                </div>
+                  <div class="test">
+                    <select id="variant-{{ product.id }}" class="variant-selector">
+                      {% for variant in product.variants %}
+                        <option
+                          value="{{ variant.id }}"
+                          {% if forloop.first %}
+                            selected
+                          {% endif %}
+                        >
+                          {{ variant.title }}
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                    {%- for option in product.options_with_values -%}
+                      <span>{{ option.name }}</span>
+
+                      <div>
+                        {%- for value in option.values -%}
+                          <input
+                            type="radio"
+                            form="{{ product_form_id }}"
+                            data-single-option-selector
+                            data-index="option{{ option.position }}"
+                            name="options[{{ option.name | escape }}]-{{ uniq_id }}"
+                            value="{{ value | escape }}"
+                            id="{{ input_id }}"
+                            {% if value == current_value %}
+                              checked
+                            {% endif %}
+                          >
+                          <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
+                            <span class="visually-hidden">{{ value }}</span>
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    {%- endfor -%}
+                  </div>
+              {%- endcomment -%}
+            {%- endif -%}
           </div>
         {%- endif -%}
       </div>

@@ -44,6 +44,7 @@ const attributes = {
   modalHandle: 'data-quick-add-modal-handle',
   siblingSwapper: 'data-sibling-swapper',
   quickAddHolder: 'data-quick-add-holder',
+  bundleProductButton: 'data-bundle-product-button',
 };
 
 class QuickAddProduct extends HTMLElement {
@@ -176,6 +177,7 @@ class QuickAddProduct extends HTMLElement {
     document.dispatchEvent(new CustomEvent('theme:quick-add:open', {bubbles: true}));
     document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
     document.addEventListener('theme:product:added', this.modalCloseOnProductAdded, {once: true});
+    document.addEventListener('theme:bundle:added', this.modalCloseOnProductAdded, {once: true});
   }
 
   modalClose() {
@@ -200,7 +202,7 @@ class QuickAddProduct extends HTMLElement {
     this.modal.setAttribute('inert', '');
     this.modal.classList.remove(classes.loading);
 
-    if (this.modalButton) {
+    if (this.modalButton && !this.modalButton.hasAttribute(attributes.bundleProductButton)) {
       this.modalButton.disabled = false;
     }
 
@@ -216,6 +218,7 @@ class QuickAddProduct extends HTMLElement {
     }
 
     document.removeEventListener('theme:product:added', this.modalCloseOnProductAdded);
+    document.removeEventListener('theme:bundle:added', this.modalCloseOnProductAdded);
 
     this.a11y.removeTrapFocus();
     this.a11y.autoFocusLastElement();
@@ -313,7 +316,7 @@ class QuickAddProduct extends HTMLElement {
       this.quickAddHolder.classList.remove(classes.visible, classes.error);
     }
 
-    if (this.buttonQuickAdd) {
+    if (this.buttonQuickAdd && !this.buttonQuickAdd.hasAttribute(attributes.bundleProductButton)) {
       this.buttonQuickAdd.classList.remove(classes.added);
       this.buttonQuickAdd.disabled = false;
     }
@@ -323,8 +326,10 @@ class QuickAddProduct extends HTMLElement {
     if (this.modal) {
       this.modalOpen();
     } else {
+      const apiUrl = this.modalButton.hasAttribute(attributes.bundleProductButton) ? 'api-product-bundle' : 'api-product-upsell';
+
       window
-        .fetch(`${window.theme.routes.root}products/${this.handle}?section_id=api-product-upsell`)
+        .fetch(`${window.theme.routes.root}products/${this.handle}?section_id=${apiUrl}`)
         .then(this.upsellErrorsHandler)
         .then((response) => {
           return response.text();

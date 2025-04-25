@@ -50,6 +50,7 @@ const selectors = {
   optionPosition: '[data-option-position]',
   installment: '[data-product-form-installment]',
   inputId: 'input[name="id"]',
+  bundleModalButton: '[data-bundle-modal-button]',
 };
 
 const classes = {
@@ -75,6 +76,8 @@ const attributes = {
   quickAddButton: 'data-quick-add-btn',
   finalSale: 'data-final-sale',
   variantImageScroll: 'data-variant-image-scroll',
+  bundleModalButton: 'data-bundle-modal-button',
+  bundleProductButton: 'data-bundle-product-button',
 };
 
 class ProductForm extends HTMLElement {
@@ -154,17 +157,39 @@ class ProductForm extends HTMLElement {
     this.buttonATC.addEventListener('click', (e) => {
       e.preventDefault();
 
-      document.dispatchEvent(
-        new CustomEvent('theme:cart:add', {
-          detail: {
-            button: this.buttonATC,
-          },
-          bubbles: false,
-        })
-      );
+      if (this.buttonATC.hasAttribute(attributes.bundleModalButton)) {
+        const bundleButton = document.querySelector(`[${attributes.bundleProductButton}="${this.productJSON.id}"]`);
+        if (bundleButton) {
+          bundleButton.dispatchEvent(
+            new CustomEvent('theme:bundle:button', {
+              detail: {
+                button: bundleButton,
+                variantId: this.productForm.getFormState().variant.id,
+                price: this.productForm.getFormState().variant.price,
+              },
+              bubbles: true,
+            })
+          );
 
-      if (!this.closest(selectors.quickAddModal)) {
-        window.theme.a11y.lastElement = this.buttonATC;
+          document.dispatchEvent(
+            new CustomEvent('theme:bundle:added', {
+              bubbles: true,
+            })
+          );
+        }
+      } else {
+        document.dispatchEvent(
+          new CustomEvent('theme:cart:add', {
+            detail: {
+              button: this.buttonATC,
+            },
+            bubbles: false,
+          })
+        );
+
+        if (!this.closest(selectors.quickAddModal)) {
+          window.theme.a11y.lastElement = this.buttonATC;
+        }
       }
     });
   }
@@ -250,7 +275,9 @@ class ProductForm extends HTMLElement {
     });
 
     addToCartText?.forEach((element) => {
-      let btnText = addText;
+      const bundleButton = element.closest(selectors.bundleModalButton);
+      let btnText = bundleButton && bundleButton.hasAttribute(attributes.bundleModalButton) ? bundleButton.getAttribute(attributes.bundleModalButton) : addText;
+
       if (variant) {
         if (!variant.available) {
           btnText = theme.strings.soldOut;
