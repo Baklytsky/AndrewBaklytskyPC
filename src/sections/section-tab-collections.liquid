@@ -42,7 +42,7 @@
   endcapture
 -%}
 
-{%- capture section_text -%}
+{%- capture text -%}
   {%- if has_content -%}
     <div class="grid__heading-text">
       {%- if title != blank -%}
@@ -367,7 +367,7 @@
           assign show_tabs_navigation = true
         endif
 
-        if section_text != blank
+        if text != blank
           case layout
             when 'inline'
               assign text_layout = ' grid__heading-holder--inline'
@@ -379,11 +379,11 @@
         endif
       -%}
 
-      {%- if show_tabs_navigation or section_text != blank -%}
+      {%- if show_tabs_navigation or text != blank -%}
         <div class="tabs__head tabs-collections__head">
           <div class="grid__heading-holder{{ text_layout }}">
-            {%- if section_text != blank -%}
-              {{ section_text }}
+            {%- if text != blank -%}
+              {{ text }}
             {%- endif -%}
 
             {%- if show_tabs_navigation -%}
@@ -431,9 +431,9 @@
       data-aos-anchor="{{ animation_anchor }}"
       data-aos-order="{{ animation_order }}"
     >
-      {%- if section_text != blank -%}
+      {%- if text != blank -%}
         <div class="grid__heading-holder">
-          {{ section_text }}
+          {{ text }}
         </div>
       {%- endif -%}
 
