@@ -291,7 +291,7 @@ class ProductForm extends HTMLElement {
   }
 
   updateNotificationForm(formState) {
-    if (!this.productNotification) return;
+    if (!this.productNotification || !formState?.variant) return;
 
     const variantTitle = this.productNotification.querySelector(selectors.variantTitle);
     const notificationProduct = this.productNotification.querySelector(selectors.notificationProduct);

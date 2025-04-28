@@ -128,9 +128,17 @@
                 endcapture
               -%}
 
+              {%- capture swatch -%}
+                {%- if swatch_color != blank -%}
+                  var(--{{ swatch_color }})
+                {%- else -%}
+                  var(--swatch-default)
+                {%- endif -%}
+              {%- endcapture -%}
+
               <tooltip-component
                 class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ swatch_color | handle }}"
-                style="--swatch: var(--{{ swatch_color }});"
+                style="--swatch: {{ swatch }};"
                 data-tooltip="{{ sib_color }}"
               >
                 {%- if product_api -%}
