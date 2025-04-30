@@ -3,8 +3,22 @@
 {%- liquid
   assign product_api = product_api | default: false
 
+  assign theme_color = metaobjects.theme_color.values
+  assign color_props_list = theme_color | where: 'product_list'
+
+  assign sibling_color_name = ''
+  for color_props in color_props_list
+    assign product_list = color_props.product_list.value
+    assign found_in_list = product_list | where: 'id', product.id | first
+
+    if found_in_list != null
+      assign sibling_color_name = color_props.name
+      break
+    endif
+  endfor
+
   assign legacy_sibling_color = block.settings.sibling_color | default: product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
-  assign sibling_color = legacy_metafield_color | default: product.title
+  assign sibling_color = sibling_color_name | default: legacy_metafield_color | default: product.title
   assign hide_labels_class = ''
 
   if settings.show_labels == false
@@ -12,7 +26,7 @@
   endif
 -%}
 
-{%- for entry in settings.siblings -%}
+{%- for entry in metaobjects[settings.theme_siblings].values -%}
   {%- assign sibling_products = entry.product_list.value -%}
   {%- assign has_siblings = sibling_products | has: 'id', product.id -%}
 
@@ -80,8 +94,19 @@
                   assign modifier_class = modifier_class | append: ' sibling__link--sold-out'
                 endif
 
+                assign sibling_color_name = ''
+                for color_props in color_props_list
+                  assign product_list = color_props.product_list.value
+                  assign found_in_list = product_list | where: 'id', sib_product.id | first
+
+                  if found_in_list != null
+                    assign sibling_color_name = color_props.name
+                    break
+                  endif
+                endfor
+
                 assign legacy_metafield_color = sib_product.metafields.theme.sibling_color.value | default: sib_product.metafields.theme.sibling_colour.value | default: sib_product.metafields.theme.siblings_color.value | default: sib_product.metafields.theme.siblings_colour.value | default: sib_product.metafields.theme.siblings_colors.value | default: sib_product.metafields.theme.siblings_colours.value
-                assign sib_color = legacy_metafield_color | default: sib_product.title
+                assign sib_color = sibling_color_name | default: legacy_metafield_color | default: sib_product.title
                 assign swatch_color = sib_color | handle
 
                 capture swatch_image
@@ -128,7 +153,6 @@
                     </div>
                   </quick-add-product>
                 {%- else -%}
-
                   <a
                     href="{{ sib_product.url }}"
                     class="sibling__link{{ modifier_class }}"
