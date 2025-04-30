@@ -10,6 +10,7 @@ const selectors = {
              :scope > * > [data-animates],
              :scope > * > * > [data-animates],
              :scope > * > .sliderule-grid  > *`,
+  mobileMenuBlock: '[data-mobile-menu-block]',
 };
 
 const classes = {
@@ -36,6 +37,7 @@ if (!customElements.get('mobile-sliderule')) {
         this.exit = document.querySelectorAll(this.exitSelector);
         this.pane = this.trigger.closest(`[${selectors.sliderulePane}]`);
         this.childrenElements = this.querySelectorAll(selectors.children);
+        this.mobileMenuBlock = this.closest(selectors.mobileMenuBlock);
         this.drawerContent = this.closest(selectors.drawerContent);
         this.cachedButton = null;
         this.a11y = window.theme.a11y;
@@ -90,6 +92,7 @@ if (!customElements.get('mobile-sliderule')) {
         const newPosition = parseInt(this.pane.dataset.sliderulePane, 10) - 1;
         this.pane.setAttribute(selectors.sliderulePane, newPosition);
         this.pane.classList.add(classes.isHiding);
+        this.mobileMenuBlock.style.removeProperty('--menu-height');
         this.sliderule.classList.add(classes.isHiding);
         const hiddenSelector = close ? `[${selectors.animates}].${classes.isHidden}` : `[${selectors.animates}="${newPosition}"]`;
         const hiddenItems = this.pane.querySelectorAll(hiddenSelector);
@@ -164,8 +167,10 @@ if (!customElements.get('mobile-sliderule')) {
 
         const oldPosition = parseInt(this.pane.dataset.sliderulePane, 10);
         const newPosition = oldPosition + 1;
+
         this.sliderule.classList.add(classes.isVisible);
         this.pane.setAttribute(selectors.sliderulePane, newPosition);
+        this.mobileMenuBlock.style.setProperty('--menu-height', this.sliderule.offsetHeight + 'px');
 
         const hiddenItems = this.pane.querySelectorAll(`[${selectors.animates}="${oldPosition}"]`);
         if (hiddenItems.length) {

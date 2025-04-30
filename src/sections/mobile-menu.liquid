@@ -176,7 +176,11 @@
               {%- when 'menu' or 'menu-columns' -%}
                 {%- liquid
                   assign menu = block.settings.mobile_menu_linklist | default: 'main-menu'
+                  assign menu_left = block.settings.mobile_menu_linklist_left | default: 'main-menu'
+                  assign menu_right = block.settings.mobile_menu_linklist_right | default: 'main-menu'
                   assign linklist = linklists[menu].links
+                  assign linklist_left = linklists[menu_left].links
+                  assign linklist_right = linklists[menu_right].links
                   assign highlight_item = block.settings.highlight_item
                   assign highlight_item_color = block.settings.highlight_item_color
 
@@ -195,13 +199,31 @@
                   endcapture
                 -%}
 
-                <nav class="drawer__menu{% if settings.type_nav_caps %} caps{% endif %}" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
-                  <div class="drawer__main-menu {{ block.settings.text_font_size }}">
-                    {%- for link in linklist -%}
-                      {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
-                      {%- render 'nav-item-mobile', block: block,link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
-                    {%- endfor -%}
-                  </div>
+                <nav class="drawer__{{ block.type }}{% if settings.type_nav_caps %} caps{% endif %} {{ block.settings.text_font_size }}" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
+                  {%- if block.type == 'menu' -%}
+                    <div class="drawer__main-menu">
+                      {%- for link in linklist -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if block.type == 'menu-columns' -%}
+                    <div class="drawer__menu-left">
+                      {%- for link in linklist_left -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+
+                    <div class="drawer__menu-right">
+                      {%- for link in linklist_right -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
                 </nav>
 
               {%- when 'image' -%}
@@ -417,7 +439,7 @@
       "max": 250,
       "step": 5,
       "unit": "px",
-      "label": "Logo width",
+      "label": "Width",
       "default": 120
     },
     {
@@ -504,9 +526,15 @@
       "settings": [
         {
           "type": "link_list",
-          "label": "Menu",
-          "info": "This menu won't show dropdown items.",
-          "id": "mobile_menu_linklist"
+          "id": "mobile_menu_linklist_left",
+          "label": "Left menu",
+          "info": "This menu won't show dropdown items."
+        },
+        {
+          "type": "link_list",
+          "id": "mobile_menu_linklist_right",
+          "label": "Right menu",
+          "info": "This menu won't show dropdown items."
         },
         {
           "type": "select",
