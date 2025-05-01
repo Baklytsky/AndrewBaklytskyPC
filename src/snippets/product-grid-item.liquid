@@ -482,44 +482,34 @@
           </div>
 
           {%- if double_img -%}
-            <hover-images class="product-item__bg__under{% if settings.image_hover_disable_mobile %} product-item__bg__under--desktop{% endif %}">
-              <div class="product-item__bg__slider" data-hover-slider>
-                {%- for media in product.media limit: settings.image_hover_limit -%}
-                  <div
-                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}"
-                    {% unless forloop.first %}
-                      data-hover-slide
-                    {% endunless %}
-                    data-hover-slide-touch
-                  >
-                    {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
-                      {%- liquid
-                        case media.media_type
-                          when 'video'
-                            echo media | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
-                          when 'external_video'
-                            if media.host == 'youtube'
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: media.host
-                            else
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: media.host
-                            endif
-                        endcase
-                      -%}
-                    {%- else -%}
-                      {%- render 'image',
-                        image: media.preview_image,
-                        aspect_ratio: aspect_ratio,
-                        sizes: sizes,
-                        widths: widths,
-                        cover: true,
-                        loading: 'lazy',
-                        fetchpriority: 'high'
-                      -%}
-                    {%- endif -%}
-                  </div>
-                {%- endfor -%}
+            <div class="product-item__bg__under{% if settings.image_hover_disable_mobile %} product-item__bg__under--desktop{% endif %}">
+              <div class="product-item__bg__slide {% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
+                {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
+                  {%- liquid
+                    case product.media[1].media_type
+                      when 'video'
+                        echo product.media[1] | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                      when 'external_video'
+                        if product.media[1].host == 'youtube'
+                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: product.media[1].external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: product.media[1].host
+                        else
+                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: product.media[1].host
+                        endif
+                    endcase
+                  -%}
+                {%- else -%}
+                  {%- render 'image',
+                    image: product.media[1].preview_image,
+                    aspect_ratio: aspect_ratio,
+                    sizes: sizes,
+                    widths: widths,
+                    cover: true,
+                    loading: 'lazy',
+                    fetchpriority: 'high'
+                  -%}
+                {%- endif -%}
               </div>
-            </hover-images>
+            </div>
           {%- endif -%}
         {%- else -%}
           {%- comment -%} Show Empty image if product has no media {%- endcomment -%}

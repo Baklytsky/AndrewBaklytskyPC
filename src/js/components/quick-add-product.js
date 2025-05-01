@@ -363,4 +363,6 @@ class QuickAddProduct extends HTMLElement {
   }
 }
 
-export {QuickAddProduct};
+if (!customElements.get('quick-add-product')) {
+  customElements.define('quick-add-product', QuickAddProduct);
+}

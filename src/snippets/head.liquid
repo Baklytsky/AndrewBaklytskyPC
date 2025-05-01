@@ -819,6 +819,11 @@
   {%- render 'swatch-color-list' -%}
 {%- endif %}
 
+{%- if settings.quickview_enable -%}
+  {{ 'product-quick-add-modal.css' | asset_url | stylesheet_tag }}
+  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
 <script>
     document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
 
@@ -897,6 +902,14 @@
 {%- endcomment -%}
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+{%- if settings.quickview_enable -%}
+  <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- if settings.enable_color_swatches -%}
+  <script src="{{ 'swatch.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
 {%- if request.design_mode -%}
   <script

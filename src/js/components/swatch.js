@@ -226,4 +226,6 @@ class GridSwatch extends HTMLElement {
   }
 }
 
-export {GridSwatch};
+if (!customElements.get('grid-swatch')) {
+  customElements.define('grid-swatch', GridSwatch);
+}
