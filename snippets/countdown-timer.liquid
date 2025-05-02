@@ -106,8 +106,10 @@
   endif
 -%}
 
-{{ 'section-countdown-timer.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  render 'vite-tag' with '@/css/components/section-countdown-timer.scss'
+  render 'vite-tag' with '@/js/components/countdown-timer.js'
+%}
 
 <countdown-timer
   data-expiration-behavior="{{ expiration_behaviour }}"

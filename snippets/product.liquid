@@ -153,9 +153,9 @@
     }
   {%- endstyle -%}
 
-  <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+  {% liquid render 'vite-tag' with '@/js/components/product.js' %}
   {%- if product_sticky_enable -%}
-    <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
+    {% liquid render 'vite-tag' with '@/js/components/product-sticky.js' %}
   {%- endif -%}
 
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
@@ -198,8 +198,10 @@
             {%- if section.settings.enable_zoom -%}
               </zoom-images>
 
-              <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
-              <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+              {% liquid
+                render 'vite-tag' with '@/js/components/load-photoswipe.js'
+                render 'vite-tag' with '@/js/components/zoom.js'
+              %}
             {%- else -%}
               </div>
             {%- endif -%}
@@ -246,7 +248,7 @@
                 </div>
               </product-thumbs>
 
-              <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
+              {% liquid render 'vite-tag' with '@/js/components/product-thumbs.js' %}
             {%- endif -%}
 
             {%- comment -%} Thumbnails template for Photoswipe {%- endcomment -%}
@@ -389,7 +391,7 @@
                       {{ block_style }}
                     ></pickup-availability>
 
-                    <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+                    {% liquid render 'vite-tag' with '@/js/components/pickup-availability.js' %}
 
                   {%- when 'code' -%}
                     <div
@@ -462,7 +464,9 @@
                       </complementary-products>
                     </div>
 
-                    <script src="{{ 'complementary-products.js' | asset_url }}" defer="defer"></script>
+                  {% liquid
+                    render 'vite-tag' with '@/js/components/complementary-products.js'
+                  %}
 
                   {%- when 'badges' -%}
                     <div

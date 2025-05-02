@@ -820,8 +820,10 @@
 {%- endif %}
 
 {%- if settings.quickview_enable -%}
-  {{ 'product-quick-add-modal.css' | asset_url | stylesheet_tag }}
-  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+  {% liquid
+    render 'vite-tag' with '@/css/components/product-quick-add-modal.scss'
+    render 'vite-tag' with '@/css/components/quick-add.scss'
+  %}
 {%- endif -%}
 
 <script>
@@ -901,21 +903,16 @@
   Theme JS files
 {%- endcomment -%}
 
-{%- liquid render 'vite-tag' with 'main.js' -%}
+{%- liquid render 'vite-tag' with 'global.js' -%}
 
 {%- if settings.quickview_enable -%}
-  <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
+  {% liquid render 'vite-tag' with '@/js/components/quick-add-product.js' %}
 {%- endif -%}
 
 {%- if settings.enable_color_swatches -%}
-  <script src="{{ 'swatch.js' | asset_url }}" defer="defer"></script>
+  {% liquid render 'vite-tag' with '@/js/components/swatch.js' %}
 {%- endif -%}
 
 {%- if request.design_mode -%}
-  <script
-    src="{{ 'theme-editor.js' | asset_url }}"
-    defer="defer"
-    data-owner-email="{{ shop.email }}"
-    data-owner-id="{{ shop.id }}"
-  ></script>
+  {% liquid render 'vite-tag' with '@/js/components/theme-editor.js' %}
 {%- endif -%}

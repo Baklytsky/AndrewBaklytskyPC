@@ -281,11 +281,11 @@
   {%- endstyle -%}
 {%- endif -%}
 
-{{ 'section-announcement.css' | asset_url | stylesheet_tag }}
-{%- if section.blocks.size > 0 -%}
-  <script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
+{% liquid
+  render 'vite-tag' with '@/css/components/section-announcement.scss'
+  render 'vite-tag' with '@/js/components/announcement.js'
+  render 'vite-tag' with '@/js/components/ticker.js'
+  %}
 
 <div
   id="Announcement--{{ section.id }}"

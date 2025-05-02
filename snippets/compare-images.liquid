@@ -49,8 +49,10 @@
   endcapture
 -%}
 
-{{ 'section-compare-images.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'compare-images.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  render 'vite-tag' with '@/css/components/section-compare-images.scss'
+  render 'vite-tag' with '@/js/components/compare-images.js'
+%}
 
 <compare-images
   style="--aspect-ratio: {{ aspect_ratio }};"

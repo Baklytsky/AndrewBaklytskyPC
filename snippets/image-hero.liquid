@@ -127,8 +127,10 @@
 {%- endcapture -%}
 
 {%- if settings.parallax_enable and parallax_disable == false -%}
-  <script src="{{ 'load-rellax.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'parallax-hero.js' | asset_url }}" defer="defer"></script>
+  {% liquid
+    render 'vite-tag' with '@/js/components/load-rellax.js'
+    render 'vite-tag' with '@/js/components/parallax-hero.js'
+  %}
 {%- endif -%}
 
 <{{ wrapper_tag }} class="{{ wrapper_classes }}" {{ wrapper_attributes }}>

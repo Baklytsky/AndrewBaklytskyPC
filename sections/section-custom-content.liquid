@@ -34,12 +34,14 @@
 -%}
 
 {%- if show_video_background -%}
-  <script src="{{ 'video-background.js' | asset_url }}" defer="defer"></script>
+  {% liquid render 'vite-tag' with '@/js/components/video-background.js' %}
 {%- endif -%}
 
 {%- if show_video_popup -%}
-  <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'video-popup.js' | asset_url }}" defer="defer"></script>
+  {% liquid
+    render 'vite-tag' with '@/js/components/load-photoswipe.js'
+    render 'vite-tag' with '@/js/components/video-popup.js'
+  %}
 {%- endif -%}
 
 {%- style -%}

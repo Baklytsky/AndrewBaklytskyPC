@@ -202,8 +202,10 @@
 </collection-component>
 
 {%- if search.performed and enable_sort or enable_filters -%}
-  <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
+  {% liquid
+    render 'vite-tag' with '@/js/components/collection.js'
+    render 'vite-tag' with '@/js/components/collection-filters-form.js'
+  %}
 {%- endif -%}
 
 {% schema %}
