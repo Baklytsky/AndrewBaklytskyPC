@@ -24,7 +24,7 @@ const copyFile = async (filePath) => {
   }
 };
 
-export const svgToLiquidPlugin = () => ({
+const svgToLiquidPlugin = () => ({
   name: 'svg-to-liquid',
 
   async buildStart() {
@@ -64,3 +64,5 @@ export const svgToLiquidPlugin = () => ({
     });
   }
 });
+
+export default svgToLiquidPlugin;
