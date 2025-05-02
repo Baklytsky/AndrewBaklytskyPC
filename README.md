@@ -1,122 +1,123 @@
-# Carbon
+# Shopify vite theme
 
-### [🏷️ Releases](https://github.com/invisiblethemes/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/carbon/discussions)
+`vite-plugin-shopify` aims to integrate Vite as seamlessly as possible with Shopify themes to optimize your theme development experience.
 
-## Installation
+## Features
 
-#### Clone the repo:
+- ⚡️ [Everything Vite provides](https://vitejs.dev/guide/features.html), plus:
+- 🤖 Automatic entrypoint detection
+- 🏷 Smart tag generation to load your scripts and styles
+- 🌎 Full support for assets served from Shopify's CDN
+- 👌 Zero-Config
+- 🔩 Extensible
 
-```
-git clone git@github.com:invisiblethemes/carbon.git
-```
+## Install
 
-#### Install packages
+```bash
+npm i vite-plugin-shopify -D
 
-```
-yarn install
-```
+# yarn
+yarn add vite-plugin-shopify -D
 
-⚠️ The recommended node version for running carbon is Node v20.9.x
-
-Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
-If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
-
-
-#### Setup Shopify CLI3
-
-Install Shopify CLI with instructions [here](https://shopify.dev/themes/tools/cli/installation#macos)
-
-⚠️ If you have version 3 of the CLI, check [here](https://shopify.dev/themes/tools/cli/migrate) for upgrade instructions
-
-
-
-## Development
-
-Start dev env:
-
-```
-yarn start
+# pnpm
+pnpm add vite-plugin-shopify -D
 ```
 
-This will:
-- Build the app using Gulp/Rollup
-- Start `shopify theme dev` watching the `dist` folder
-- Ask you to login to the specified store
-- Open a browser window pointed to theme URL
-- Watch for changes and rebuild which will trigger shopify CLI to push changes
+## Usage
 
-### Changing environments
+Add the `vite-plugin-shopify` to your `vite.config.js` file and configure it:
 
-During development, it's useful to be able to quickly switch between different combos of themes, stores and settings.
+```js
+import shopify from 'vite-plugin-shopify'
 
-To setup different environments create a `shopify.theme.toml` file and add entries like
-
-```toml
-[my-env-name]
-  theme = 1475471234567890455804
-  store = "my-store.myshopify.com"
-  ignore = [ "some-file.json" ]
-```
-
-
-```toml
-[environments.development]
-  theme = 123456789
-  store = "my-store.myshopify.com"
-  ignore = [
-    "config/settings_data.json", # To avoid resetting theme settings
-    "sections/*.json",
-    "templates/*.json",
-    "templates/*.*.json",
-    "templates/customers/.*.json"
+export default {
+  plugins: [
+    /* Plugin options are not required, defaults shown */
+    shopify({
+      // Root path to your Shopify theme directory (location of snippets, sections, templates, etc.)
+      themeRoot: './',
+      // Front-end source code directory
+      sourceCodeDir: 'frontend',
+      // Front-end entry points directory
+      entrypointsDir: 'frontend/entrypoints',
+      // Additional files to use as entry points (accepts an array of file paths or glob patterns)
+      additionalEntrypoints: [],
+      // Specifies the file name of the snippet that loads your assets
+      snippetFile: 'vite-tag.liquid',
+     // Specifies whether to append version numbers to your production-ready asset URLs in `snippetFile`
+      versionNumbers: false,
+     // Enables the creation of Cloudflare tunnels during dev, allowing previews from any device
+      tunnel: false
+    })
   ]
-
-[environments.bulldoze]
-  theme = 123456789
-  store = "my-store.myshopify.com"
+}
 ```
 
-Then, start your dev environment with `yarn start --env=my-env` or  `yarn start -e my-env`. This will effectively just call `shopify theme dev dist --store=my-store.myshopify.com --theme=12345`
+Volt, a Vite plugin for Shopify development does not require you to specify the entry points for your theme. By default, it treats JavaScript and CSS files (including preprocessed
+languages such as TypeScript, JSX, TSX, and Sass) within the `frontend/entrypoints` folder in the root of your project as entry points for Vite.
 
-Or, you can start multiple shopify processes for multiple dev environments with `yarn start --env=my-env,my-other-env`
-
-
-## Deployment
-
-### Deploying stores
-
-You can To deploy to one or more stores for environment(s) listed in `shopify.theme.toml` simply use the `deploy` command with the `--env` option
-
-`yarn deploy --env my-store1`
-
-The env command has a shorthand version of `-e` and can accept a comma-separated list of entries from `shopify.theme.toml`:
-
-`yarn deploy -e dev,qa,staging`
-
-### Deploying demo stores
-
-When we deploy to a Shopify Theme Store demo, we need to add `<meta name="robots" content="noindex, nofollow">` to the head. This is tedious to add manually. We must add this line of code to prevent the demo stores from being indexed by Google and other search engines.
-
-To make this Shopify requirement easy, our build process has a special command that will add "noindex/nofollow" to the head. You can turn it on by adding `--index=false` to the deploy command.
-
-`yarn deploy -e my-store1 --no-index`
-
-A command to deploy to all the demos might look something like this:
 ```
-"NODE_ENV=production gulp deploy --index=false --env clothing-demo,skin-demo,shoes-demo,swim-demo",
+/
+└── frontend/
+    └── entrypoints/
+        ├── theme.scss
+        └── theme.ts
 ```
 
-🚨 Never use the `--index=false` flag on a merchant store. This command exists strictly for Shopify Theme Store demo stores. This line of code would *destroy* the SEO of a merchant store.
+### Adding scripts and styles to your theme
 
+Volt, a Vite plugin for Shopify development generates a `vite-tag` snippet which includes `<script>` and `<link>` tags, and all the liquid logic needed
+to load your assets.
 
-## Lighthouse
+With your Vite entry points configured, you only need to reference them with the `vite-tag` snippet that you add to the `<head>` of your theme's layout:
 
-### Running lighthouse locally
+```liquid
+{% liquid
+  # Relative to entrypointsDir
+  render 'vite-tag' with 'theme.scss'
+  render 'vite-tag' with 'theme.ts'
+%}
+```
 
-Running the following command will deploy your development theme, run lighthouse on it, then open the report
+During development, the `vite-tag` will load your assets from the Vite development server and inject the Vite client to enable Hot Module Replacement.
+In build mode, the snippet will load your compiled and versioned assets, including any imported CSS, and use the `asset_url` filter to serve your assets
+from the Shopify content delivery network (CDN).
 
-`yarn lighthouse`
+#### Loading `additionalEntrypoints`
 
-### Viewing Lighthouse CI Dashboard
+```liquid
+{% liquid
+  # Relative to sourceCodeDir
+  render 'vite-tag' with '@/foo.ts'
+  render 'vite-tag' with '~/foo.ts'
+%}
+```
 
-Lighthouse is run against every pull request push and merge to master to track scores across time. View the Lighthouse Dashboard at https://invisible-lighthouse-server.herokuapp.com. Username is `abra` password is `cadabra`
+```liquid
+{% liquid
+  # Relative to project root
+  render 'vite-tag' with '/bar.ts' # leading slash is required
+%}
+```
+
+#### Preloading stylesheets
+
+You can pass the `preload_stylesheet` variable to the `vite-tag` snippet to enable the `preload` parameter of the `stylesheet_tag` filter. Use it sparingly. For example, consider preloading only render-blocking stylesheets.
+[Learn more](https://shopify.dev/themes/best-practices/performance#use-resource-hints-to-preload-key-resources).
+
+```liquid
+{% render 'vite-tag' with 'theme.scss', preload_stylesheet: true %}
+```
+
+### Import aliases
+
+For convenience, `~/` and `@/` are aliased to your `frontend` folder, which simplifies imports:
+
+```js
+import App from '@/components/App.vue'
+import '@/styles/my_styles.css'
+```
+
+## Example
+
+See the [vite-shopify-example](https://github.com/barrel/barrel-shopify/tree/main/examples/vite-shopify-example) theme for a basic demonstration of `vite-plugin-shopify` usage.

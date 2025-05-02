@@ -808,7 +808,7 @@
   <link rel="preload" as="font" href="{{ settings.type_subheading_font | font_url }}" type="font/woff2" crossorigin>
 {%- endunless -%}
 
-{{ 'theme.css' | asset_url | stylesheet_tag }}
+{%- liquid render 'vite-tag' with 'main.scss', preload_stylesheet: true -%}
 
 {%- if request.design_mode -%}
   {{ 'design-mode.css' | asset_url | stylesheet_tag }}
@@ -900,8 +900,8 @@
 {%- comment -%}
   Theme JS files
 {%- endcomment -%}
-<script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid render 'vite-tag' with 'main.js' -%}
 
 {%- if settings.quickview_enable -%}
   <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
@@ -919,24 +919,3 @@
     data-owner-id="{{ shop.id }}"
   ></script>
 {%- endif -%}
-
-{%- comment -%}
-  *** DO NOT EDIT theme.js file ***
-
-  If you need to edit Theme JS use theme.dev.js file.
-
-  Replace:
-  <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
-  by
-  <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
-  in order to see your changes.
-{%- endcomment -%}
-
-{%- comment -%}
-  For injecting custom JS code create your own assets/custom.js
-  Add the following line outside that comment in order to call that JS file:
-
-  <script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
-{%- endcomment -%}
-
-<!-- Shopify app scripts =========================================================== -->
