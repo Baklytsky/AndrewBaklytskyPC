@@ -3,6 +3,7 @@ import shopify from 'vite-plugin-shopify'
 import cleanup from '@by-association-only/vite-plugin-shopify-clean'
 import pageReload from 'vite-plugin-page-reload'
 import { svgToLiquidPlugin } from './src/plugins/svg-to-liquid'
+import liquidReloadPlugin from './src/plugins/liquid-reload'
 import autoprefixer from 'autoprefixer'
 import path from 'path'
 
@@ -20,6 +21,7 @@ export default defineConfig({
   plugins: [
     // cleanup(),
     svgToLiquidPlugin(),
+    liquidReloadPlugin(),
     shopify({
       themeRoot: './',
       sourceCodeDir: 'src',
@@ -33,6 +35,7 @@ export default defineConfig({
       tunnel: false
     }),
     pageReload('/tmp/theme.update', {
+      paths: ['**/*.liquid'],
       delay: 2000
     }),
   ],
