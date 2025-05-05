@@ -3,8 +3,6 @@ const selectors = {
   trigger: '[data-collapsible-trigger]',
   body: '[data-collapsible-body]',
   content: '[data-collapsible-content]',
-  shopifySection: '.shopify-section',
-  cartBlock: '.cart-block',
 };
 
 const attributes = {
@@ -22,8 +20,6 @@ class CollapsibleElements extends HTMLElement {
     this.collapsibles = this.querySelectorAll(selectors.collapsible);
     this.single = this.hasAttribute(attributes.single);
     this.toggle = this.toggle.bind(this);
-    this.bindEditorOpen = this.bindEditorOpen.bind(this);
-    this.bindEditorClose = this.bindEditorClose.bind(this);
   }
 
   connectedCallback() {
@@ -49,59 +45,10 @@ class CollapsibleElements extends HTMLElement {
         }
       });
     });
-
-    if (Shopify.designMode) {
-      const section = this.closest(selectors.shopifySection);
-      section.addEventListener('shopify:section:deselect', this.bindEditorClose);
-
-      this.collapsibles.forEach((element) => {
-        const cartBlock = element.closest(selectors.cartBlock);
-        const collapsible = cartBlock ? cartBlock : element;
-
-        collapsible.addEventListener('shopify:block:select', this.bindEditorOpen);
-        collapsible.addEventListener('shopify:block:deselect', this.bindEditorClose);
-      });
-    }
   }
 
   disconnectedCallback() {
     document.removeEventListener('theme:resize:width', this.toggle);
-  }
-
-  bindEditorOpen(event) {
-    // Open accordions on Block select
-    const target = event.target;
-    const targetCollapsible = target.matches(selectors.collapsible) ? target : null;
-    const parentCollapsible = target.closest(selectors.collapsible);
-    const nestedCollapsible = target.querySelector(`:scope > ${selectors.collapsible}`);
-    const collapsible = nestedCollapsible || targetCollapsible || parentCollapsible;
-
-    if (collapsible && !collapsible.hasAttribute(attributes.open)) {
-      const isEligible = !collapsible.hasAttribute(attributes.disabled);
-      if (!isEligible) return;
-      const trigger = collapsible.querySelector(selectors.trigger);
-      trigger?.dispatchEvent(new Event('click'));
-    }
-  }
-
-  bindEditorClose(event) {
-    // Close accordions on Block/Section deselect
-    const target = event.target;
-    const collapsibleSection = target.matches(selectors.shopifySection) ? target : null;
-    const targetCollapsible = target.matches(selectors.collapsible) ? target : null;
-    const nestedCollapsible = target.querySelector(`:scope > ${selectors.collapsible}`);
-    // exclude parent collapsible elements for "Accordion" section
-    let collapsible = nestedCollapsible || targetCollapsible;
-    if (collapsibleSection) {
-      collapsible = collapsibleSection.querySelector(selectors.collapsible);
-    }
-
-    if (collapsible && collapsible.hasAttribute(attributes.open)) {
-      const isEligible = !collapsible.hasAttribute(attributes.disabled);
-      if (!isEligible) return;
-      const trigger = collapsible.querySelector(selectors.trigger);
-      trigger?.dispatchEvent(new Event('click'));
-    }
   }
 
   toggle() {

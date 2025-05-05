@@ -25,7 +25,11 @@
   {% endunless %}
 {%- endstyle -%}
 
-<footer class="site-footer-wrapper section-padding {{ color_scheme }}" data-section-id="{{ section.id }}" data-section-type="footer">
+<footer
+  class="site-footer-wrapper section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="footer"
+>
   <div class="site-footer wrapper--full-padded">
     {%- if logo -%}
       {%- liquid
@@ -37,13 +41,77 @@
         assign logo_alt = logo.alt | default: shop.name | strip_html | escape
       -%}
       <div class="footer__logo__wrapper">
-        <a href="{{ routes.root_url }}" class="footer__logo" style="width: {{ logo_width_px }};" aria-label="{{ 'general.accessibility.footer_logo' | t }}">
-          {%- render 'image' image: logo, width: logo_width_2x, widths: logo_widths, sizes: logo_width_px, alt: logo_alt -%}
+        <a
+          href="{{ routes.root_url }}"
+          class="footer__logo"
+          style="width: {{ logo_width_px }};"
+          aria-label="{{ 'general.accessibility.footer_logo' | t }}"
+        >
+          {%- render 'image',
+            image: logo,
+            width: logo_width_2x,
+            widths: logo_widths,
+            sizes: logo_width_px,
+            alt: logo_alt
+          -%}
         </a>
       </div>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
+      {%- if request.design_mode -%}
+        <script>
+          function findCollapsible(event, mode) {
+            const target = event.target;
+            const collapsibleSection = target.matches('.shopify-section') ? target : null;
+            const targetCollapsible = target.matches('[data-collapsible]') ? target : null;
+            const parentCollapsible = target.closest('[data-collapsible]');
+            const nestedCollapsible = target.querySelector(':scope > [data-collapsible]');
+
+            if (mode === 'open') {
+              // Original open logic: nested || target || parent
+              return nestedCollapsible || targetCollapsible || parentCollapsible;
+            } else {
+              // Original close logic: nested || target, or from section
+              let collapsible = nestedCollapsible || targetCollapsible;
+              if (collapsibleSection) {
+                collapsible = collapsibleSection.querySelector('[data-collapsible]');
+              }
+              return collapsible;
+            }
+          }
+
+          function handleCollapsibleEvent(event, shouldOpen) {
+            const mode = shouldOpen ? 'open' : 'close';
+            const collapsible = findCollapsible(event, mode);
+            if (!collapsible) return;
+            const isOpen = collapsible.hasAttribute('open');
+            const isEligible = !collapsible.hasAttribute('disabled');
+            if (!isEligible) return;
+
+            if ((shouldOpen && !isOpen) || (!shouldOpen && isOpen)) {
+              const trigger = collapsible.querySelector('[data-collapsible-trigger]');
+              trigger?.dispatchEvent(new Event('click'));
+            }
+          }
+
+          document.addEventListener('shopify:block:select', (event) => {
+            // Open accordions on Block select
+            handleCollapsibleEvent(event, true);
+          });
+
+          document.addEventListener('shopify:block:deselect', (event) => {
+            // Close accordions on Block/Section deselect
+            handleCollapsibleEvent(event, false);
+          });
+
+          document.addEventListener('shopify:section:deselect', (event) => {
+            // Close accordions on Block/Section deselect
+            handleCollapsibleEvent(event, false);
+          });
+        </script>
+      {%- endif -%}
+
       <collapsible-elements>
         <div class="footer__blocks">
           {%- for block in section.blocks -%}
@@ -241,7 +309,6 @@
               echo blocks_code | replace: inline_blocks_placeholder, inline_blocks
             endif
           -%}
-
         </div>
       </collapsible-elements>
     {%- endif -%}
@@ -310,7 +377,7 @@
       "default": 30
     }
   ],
-  "blocks" : [
+  "blocks": [
     {
       "type": "linklist",
       "name": "Link list",
@@ -437,10 +504,10 @@
           "default": "btn--secondary",
           "info": "Full width button only",
           "options": [
-            { "value": "btn--black", "label": "Black" },
-            { "value": "btn--white", "label": "White" },
-            { "value": "btn--primary", "label": "Primary" },
-            { "value": "btn--secondary", "label": "Secondary" }
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
           ]
         },
         {
@@ -449,9 +516,9 @@
           "label": "Size",
           "default": "",
           "options": [
-            { "label": "Small", "value": "btn--small" },
-            { "label": "Medium", "value": "" },
-            { "label": "Large", "value": "btn--large" }
+            {"label": "Small", "value": "btn--small"},
+            {"label": "Medium", "value": ""},
+            {"label": "Large", "value": "btn--large"}
           ]
         },
         {
@@ -460,9 +527,9 @@
           "label": "Style",
           "default": "btn--solid",
           "options": [
-            { "label": "Solid", "value": "btn--solid" },
-            { "label": "Outline", "value": "btn--outline" },
-            { "label": "Text", "value": "btn--text" }
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"},
+            {"label": "Text", "value": "btn--text"}
           ]
         },
         {

@@ -15,9 +15,63 @@
   }
 {%- endstyle -%}
 
+{%- if request.design_mode -%}
+  <script>
+    function findCollapsible(event, mode) {
+      const target = event.target;
+      const collapsibleSection = target.matches('.shopify-section') ? target : null;
+      const targetCollapsible = target.matches('[data-collapsible]') ? target : null;
+      const parentCollapsible = target.closest('[data-collapsible]');
+      const nestedCollapsible = target.querySelector(':scope > [data-collapsible]');
+
+      if (mode === 'open') {
+        // Original open logic: nested || target || parent
+        return nestedCollapsible || targetCollapsible || parentCollapsible;
+      } else {
+        // Original close logic: nested || target, or from section
+        let collapsible = nestedCollapsible || targetCollapsible;
+        if (collapsibleSection) {
+          collapsible = collapsibleSection.querySelector('[data-collapsible]');
+        }
+        return collapsible;
+      }
+    }
+
+    function handleCollapsibleEvent(event, shouldOpen) {
+      const mode = shouldOpen ? 'open' : 'close';
+      const collapsible = findCollapsible(event, mode);
+      if (!collapsible) return;
+      const isOpen = collapsible.hasAttribute('open');
+      const isEligible = !collapsible.hasAttribute('disabled');
+      if (!isEligible) return;
+
+      if ((shouldOpen && !isOpen) || (!shouldOpen && isOpen)) {
+        const trigger = collapsible.querySelector('[data-collapsible-trigger]');
+        trigger?.dispatchEvent(new Event('click'));
+      }
+    }
+
+    document.addEventListener('shopify:block:select', (event) => {
+      // Open accordions on Block select
+      handleCollapsibleEvent(event, true);
+    });
+
+    document.addEventListener('shopify:block:deselect', (event) => {
+      // Close accordions on Block/Section deselect
+      handleCollapsibleEvent(event, false);
+    });
+
+    document.addEventListener('shopify:section:deselect', (event) => {
+      // Close accordions on Block/Section deselect
+      handleCollapsibleEvent(event, false);
+    });
+  </script>
+{%- endif -%}
+
 <div id="AccordionGroup--{{ section.id }}" class="accordion-group section-padding {{ color_scheme }}">
   {%- if section.blocks.size > 0 -%}
-    <div class="faq {{ section.settings.width }}"
+    <div
+      class="faq {{ section.settings.width }}"
       data-section-id="{{ section.id }}"
       data-section-type="faq"
     >
@@ -33,7 +87,8 @@
             {%- if block.type == 'heading' and title != blank -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
 
-              <h3 class="accordion__heading {{ section.settings.heading_font_size }}"
+              <h3
+                class="accordion__heading {{ section.settings.heading_font_size }}"
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
@@ -46,7 +101,8 @@
             {%- if block.type == 'question' and title != blank and content != blank -%}
               {%- if title != blank -%}
                 {%- assign animation_order = animation_order | plus: 1 -%}
-                <details class="accordion"
+                <details
+                  class="accordion"
                   data-collapsible
                   {% if default_open %}
                     open="true"
@@ -56,7 +112,10 @@
                   data-aos-order="{{ animation_order }}"
                   {{ block.shopify_attributes }}
                 >
-                  <summary class="accordion__title font-heading {{ section.settings.question_font_size }}" data-collapsible-trigger>
+                  <summary
+                    class="accordion__title font-heading {{ section.settings.question_font_size }}"
+                    data-collapsible-trigger
+                  >
                     {%- if block.settings.show_icon -%}
                       {%- liquid
                         assign icon_size = block.settings.icon_size
@@ -72,7 +131,10 @@
                         endcapture
                       -%}
 
-                      <div class="icon__animated icon__animated--{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}" {{ icon_style }}>
+                      <div
+                        class="icon__animated icon__animated--{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}"
+                        {{ icon_style }}
+                      >
                         {%- liquid
                           if icon_image
                             assign icon_width = icon_size
@@ -80,7 +142,7 @@
                             assign icon_sizes = icon_width | append: 'px'
                             assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-                            render 'image' image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
+                            render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
                           else
                             render 'animated-icon', filename: block.settings.icon_name
                           endif
@@ -94,7 +156,13 @@
                     {%- render 'icon-minus' -%}
                   </summary>
 
-                  <div class="accordion__body rte"{% if default_open != blank %} style="height: auto;"{% endif %} data-collapsible-body>
+                  <div
+                    class="accordion__body rte"
+                    {% if default_open != blank %}
+                      style="height: auto;"
+                    {% endif %}
+                    data-collapsible-body
+                  >
                     <div class="accordion__content" data-collapsible-content>
                       {{ content }}
                     </div>
@@ -110,248 +178,248 @@
 </div>
 
 {% schema %}
-  {
-    "name": "Accordion group",
-    "settings": [
-      {
-        "type": "header",
-        "content": "Typography"
-      },
-      {
-        "type": "select",
-        "id": "heading_font_size",
-        "label": "Heading size",
-        "default": "heading-medium",
-        "options": [
-          {"value": "heading-mini", "label": "Mini"},
-          {"value": "heading-x-small", "label": "Extra small"},
-          {"value": "heading-small", "label": "Small"},
-          {"value": "heading-medium", "label": "Medium"},
-          {"value": "heading-large", "label": "Large"},
-          {"value": "heading-x-large", "label": "Extra large"}
-        ]
-      },
-      {
-        "type": "select",
-        "id": "question_font_size",
-        "label": "Question size",
-        "default": "heading-small",
-        "options": [
-          {"value": "heading-mini", "label": "Mini"},
-          {"value": "heading-x-small", "label": "Extra small"},
-          {"value": "heading-small", "label": "Small"},
-          {"value": "heading-medium", "label": "Medium"},
-          {"value": "heading-large", "label": "Large"},
-          {"value": "heading-x-large", "label": "Extra large"}
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Layout"
-      },
-      {
-        "type": "select",
-        "id": "width",
-        "label": "Width",
-        "default": "wrapper",
-        "options": [
-          { "value": "wrapper", "label": "Normal" },
-          { "value": "wrapper--narrow", "label": "Narrow" }
-        ]
-      },
-      {
-        "type": "select",
-        "id": "columns",
-        "label": "Columns",
-        "default": "1",
-        "options": [
-          { "value": "1", "label": "One" },
-          { "value": "2", "label": "Two" }
-        ]
-      },
-      {
-        "type": "header",
-        "content": "Colors"
-      },
-      {
-        "type": "color_scheme",
-        "id": "color_scheme",
-        "default": "scheme_1",
-        "label": "Color scheme"
-      },
-      {
-        "type": "header",
-        "content": "Padding"
-      },
-      {
-        "type": "range",
-        "id": "padding_top",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Top",
-        "default": 50
-      },
-      {
-        "type": "range",
-        "id": "padding_bottom",
-        "min": 0,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "Bottom",
-        "default": 50
-      }
-    ],
-    "blocks": [
-      {
-        "name": "Heading",
-        "type": "heading",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Heading",
-            "default": "FAQ"
-          }
-        ]
-      },
-      {
-        "name": "Question",
-        "type": "question",
-        "settings": [
-          {
-            "type": "checkbox",
-            "id": "default_open",
-            "label": "Open by default",
-            "default": false
-          },
-          {
-            "type": "header",
-            "content": "Typography"
-          },
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Question",
-            "info": "Block will not be visible if left empty.",
-            "default": "Frequently asked question"
-          },
-          {
-            "type": "richtext",
-            "id": "content",
-            "label": "Answer",
-            "default": "<p>Share details about your shipping policies, item returns, or customer service.<\/p>"
-          },
-          {
-            "type": "header",
-            "content": "Icon"
-          },
-          {
-            "type": "checkbox",
-            "id": "show_icon",
-            "label": "Show icon",
-            "default": false
-          },
-          {
-            "type": "select",
-            "id": "icon_name",
-            "label": "Icon",
-            "default": "icon-award",
-            "options": [
-              { "label": "Award", "value": "icon-award" },
-              { "label": "Box", "value": "icon-box" },
-              { "label": "Chat", "value": "icon-chat" },
-              { "label": "Cloud", "value": "icon-cloud" },
-              { "label": "Diameter", "value": "icon-diameter" },
-              { "label": "Discount", "value": "icon-discount" },
-              { "label": "Donation", "value": "icon-donation" },
-              { "label": "Droplet", "value": "icon-droplet" },
-              { "label": "Info", "value": "icon-info-empty" },
-              { "label": "Email", "value": "icon-email" },
-              { "label": "Fast shipment", "value": "icon-fast-shipment" },
-              { "label": "Flare", "value": "icon-flare" },
-              { "label": "Flower", "value": "icon-flower" },
-              { "label": "Gift", "value": "icon-gift" },
-              { "label": "Green shipment", "value": "icon-green-shipment" },
-              { "label": "Heart", "value": "icon-heart" },
-              { "label": "Leaf", "value": "icon-leaf" },
-              { "label": "Lightning", "value": "icon-lightning" },
-              { "label": "Location", "value": "icon-location" },
-              { "label": "Mail", "value": "icon-mail" },
-              { "label": "Notes", "value": "icon-notes" },
-              { "label": "Pants", "value": "icon-pants" },
-              { "label": "Peace", "value": "icon-peace" },
-              { "label": "Pin", "value": "icon-pin" },
-              { "label": "Planet", "value": "icon-planet" },
-              { "label": "Phone", "value": "icon-phone" },
-              { "label": "Recycle", "value": "icon-recycle" },
-              { "label": "Ruler", "value": "icon-ruler" },
-              { "label": "Shield", "value": "icon-shield" },
-              { "label": "Smile", "value": "icon-smile" },
-              { "label": "Star", "value": "icon-star" },
-              { "label": "Tree", "value": "icon-tree" },
-              { "label": "Trophy", "value": "icon-trophy" },
-              { "label": "Truck", "value": "icon-truck" },
-              { "label": "Vegan", "value": "icon-vegan" },
-              { "label": "Wash", "value": "icon-wash" },
-              { "label": "Washing machine", "value": "icon-washing-machine" }
-            ]
-          },
-          {
-            "type": "image_picker",
-            "id": "icon_image",
-            "label": "Alternative icon/image"
-          },
-          {
-            "type": "range",
-            "id": "icon_size",
-            "label": "Size",
-            "unit": "px",
-            "min": 20,
-            "max": 80,
-            "step": 5,
-            "default": 20
-          },
-          {
-            "type": "header",
-            "content": "Colors"
-          },
-          {
-            "type": "paragraph",
-            "content": "Overrides color scheme. Set to Transparent to revert back to using color schemes."
-          },
-          {
-            "type": "color",
-            "id": "icon_color",
-            "label": "Icon"
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Accordion group",
-        "category": "Text",
-        "blocks": [
-          {
-            "type": "heading"
-          },
-          {
-            "type": "question"
-          },
-          {
-            "type": "question"
-          },
-          {
-            "type": "question"
-          }
-        ]
-      }
-    ],
-    "disabled_on": {
-      "groups": ["header", "aside", "custom.pre_footer", "footer"]
+{
+  "name": "Accordion group",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-medium",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "question_font_size",
+      "label": "Question size",
+      "default": "heading-small",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        {"value": "wrapper", "label": "Normal"},
+        {"value": "wrapper--narrow", "label": "Narrow"}
+      ]
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Columns",
+      "default": "1",
+      "options": [
+        {"value": "1", "label": "One"},
+        {"value": "2", "label": "Two"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
     }
+  ],
+  "blocks": [
+    {
+      "name": "Heading",
+      "type": "heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "FAQ"
+        }
+      ]
+    },
+    {
+      "name": "Question",
+      "type": "question",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "default_open",
+          "label": "Open by default",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Question",
+          "info": "Block will not be visible if left empty.",
+          "default": "Frequently asked question"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Answer",
+          "default": "<p>Share details about your shipping policies, item returns, or customer service.<\/p>"
+        },
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon",
+          "label": "Show icon",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "icon-award",
+          "options": [
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightning", "value": "icon-lightning"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Alternative icon/image"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Size",
+          "unit": "px",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "paragraph",
+          "content": "Overrides color scheme. Set to Transparent to revert back to using color schemes."
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Icon"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Accordion group",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "question"
+        },
+        {
+          "type": "question"
+        },
+        {
+          "type": "question"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "custom.pre_footer", "footer"]
   }
+}
 {% endschema %}
