@@ -20,32 +20,18 @@ if (!customElements.get('collections-hover')) {
         super();
 
         this.buttons = this.querySelectorAll(selectors.button);
-        this.bindEditorMouseenter = this.bindEditorMouseenter.bind(this);
       }
 
       connectedCallback() {
-        this.buttons?.forEach((button) => {
-          button.addEventListener('mouseenter', (e) => {
-            const targetId = e.currentTarget.getAttribute(attributes.target);
+        if (this.buttons.length) {
+          this.buttons.forEach((button) => {
+            button.addEventListener('mouseenter', (e) => {
+              const targetId = e.currentTarget.getAttribute(attributes.target);
 
-            this.updateState(targetId);
+              this.updateState(targetId);
+            });
           });
-        });
-
-        if (Shopify.designMode) {
-          this.addEventListener('shopify:block:select', this.bindEditorMouseenter);
         }
-      }
-
-      bindEditorMouseenter(event) {
-        // Emit mouseenter event on Block select
-        const target = event.target.matches(selectors.image);
-        if (!target) return;
-
-        const targetId = event.target?.id;
-        const parentComponent = event.target.closest('collections-hover');
-        const button = parentComponent?.querySelector(`[${attributes.target}="${targetId}"]`);
-        button?.dispatchEvent(new Event('mouseenter'));
       }
 
       updateState(targetId) {

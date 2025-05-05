@@ -25,6 +25,21 @@
 {%- if block_count > 0 -%}
   <script src="{{ 'collections-hover.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'scroll-spy.js' | asset_url }}" defer="defer"></script>
+
+  {%- if request.design_mode -%}
+    <script>
+      document.addEventListener('shopify:block:select', (event) => {
+        // Emit mouseenter event on Block select
+        const target = event.target.matches('[data-collection-image]');
+        if (!target) return;
+
+        const targetId = event.target?.id;
+        const parentComponent = event.target.closest('collections-hover');
+        const button = parentComponent?.querySelector(`[data-hover-target="${targetId}"]`);
+        button?.dispatchEvent(new Event('mouseenter'));
+      });
+    </script>
+  {%- endif -%}
 {%- endif -%}
 
 {%- if request.visual_preview_mode -%}
