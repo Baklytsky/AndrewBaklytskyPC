@@ -23,6 +23,35 @@
   assign search_block = search_block[0]
 -%}
 
+{%- if request.design_mode -%}
+  <script>
+    function handleMobileMenuEvent(event, shouldOpen) {
+      const mode = shouldOpen ? 'open' : 'close';
+      const target = event.target;
+      const mobileMenu = target.querySelector('mobile-menu') || target.closest('mobile-menu');
+      if (!mobileMenu) return;
+      const drawer = mobileMenu.querySelector('header-drawer');
+      if (!drawer) return;
+      const isOpen = drawer.classList.contains('is-open');
+      if (mode === 'open') {
+        if (!isOpen && typeof drawer.showDrawer === 'function') drawer.showDrawer();
+      } else {
+        if (isOpen && typeof drawer.hideDrawer === 'function') drawer.hideDrawer();
+      }
+    }
+
+    document.addEventListener('shopify:block:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:deselect', (event) => {
+      handleMobileMenuEvent(event, false);
+    });
+  </script>
+{%- endif -%}
+
 <mobile-menu
   class="mobile-menu {{ color_scheme }}"
   data-section-id="{{ section.id }}"

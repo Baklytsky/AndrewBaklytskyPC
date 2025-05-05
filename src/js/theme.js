@@ -27,7 +27,6 @@ import './globals/header-mobile-drawer';
 import './globals/header-mobile-sliderule';
 import './globals/header-search-popdown';
 import './globals/main-search';
-import './globals/mobile-menu';
 import './globals/native-scrollbar';
 import './globals/popout';
 import './globals/popup';
