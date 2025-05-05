@@ -27,8 +27,6 @@ if (!customElements.get('hover-disclosure')) {
         this.grandparent = this.classList.contains('grandparent');
         this.disclosure = document.getElementById(this.key);
         this.transitionTimeout = 0;
-        this.bindEditorShow = this.bindEditorShow.bind(this);
-        this.bindEditorHide = this.bindEditorHide.bind(this);
       }
 
       connectedCallback() {
@@ -39,23 +37,6 @@ if (!customElements.get('hover-disclosure')) {
         this.connectHoverToggle();
         this.handleTablets();
         this.staggerChildAnimations();
-
-        if (Shopify.designMode) {
-          this.addEventListener('shopify:block:select', this.bindEditorShow);
-          this.addEventListener('shopify:block:deselect', this.bindEditorHide);
-        }
-      }
-
-      bindEditorShow(event) {
-        // Show mega menu on block select
-        const hoverDisclosure = event.target.closest('hover-disclosure');
-        hoverDisclosure?.showDisclosure(event);
-      }
-
-      bindEditorHide(event) {
-        // Hide mega menu on block select
-        const hoverDisclosure = event.target.closest('hover-disclosure');
-        hoverDisclosure?.hideDisclosure(event);
       }
 
       showDisclosure(e) {
