@@ -21,6 +21,12 @@
 
   assign animation_anchor = '.collection-' | append: collection.handle
   assign animation_duration = 800
+
+  assign placeholder_columns = 2
+  assign placeholder_columns_check = max_selection | modulo: 3
+  if placeholder_columns_check == 0
+    assign placeholder_columns = 3
+  endif
 -%}
 
 {%- style -%}
@@ -32,6 +38,8 @@
     --COLUMNS-MEDIUM: {{ columns_medium }};
     --COLUMNS-SMALL: {{ columns_small }};
     --COLUMNS-MOBILE: {{ columns_mobile }};
+
+    {%- comment -%}--placeholder-columns: {{ placeholder_columns }};{%- endcomment -%}
 
     {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
       --border-hairline: {{ border_color }};
@@ -47,62 +55,94 @@
     class="bundle {{ color_scheme }} section-padding"
     id="Collection--{{ section.id }}"
     data-bundle-max-selection="{{ max_selection }}"
+    data-bundle-name="{{ collection.title }}"
+    data-bundle-handle="{{ collection.title | handle }}"
+    {% if collection.image %}
+      data-bundle-image="{{ collection.image | image_url: width: 180 }}"
+    {% endif %}
   >
     <div class="wrapper--full-padded">
-      <h3>Your Bundle Selections</h3>
+      <div class="bundle__container">
+        {%- if section.blocks.size > 0 -%}
+          <div class="bundle__aside">
+            <div class="bundle__widget">
+              {%- for block in section.blocks -%}
+                {%- case block.type -%}
+                  {%- when 'bundle_products' -%}
+                    <div class="bundle__placeholders">
+                      {% for i in (1..max_selection) %}
+                        <div data-bundle-placeholder class="bundle-placeholder">
+                          <div class="bundle-placeholder__empty">
+                            <div class="bundle-placeholder__text">Select Product</div>
+                          </div>
+                          <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {%- when 'bundle_price' -%}
+                    <p>
+                      Total: <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                    </p>
+                  {%- when 'bundle_button' -%}
+                    <button
+                      type="button"
+                      class="bundle__button btn btn--large btn--solid btn--primary"
+                      data-bundle-add-to-cart
+                      disabled="disabled"
+                    >
+                      <span class="btn__text">
+                        <span class="bundle__button-add">Add Bundle to Cart</span>
 
-      <p>Select {{ max_selection }} items from this collection to complete your bundle</p>
+                        <span class="bundle__button-default">
+                          Select <small data-bundle-count-left>{{ max_selection }}</small> more products
+                        </span>
+                      </span>
+                      <span class="btn__added">&nbsp;</span>
 
-      <div class="bundle__placeholders">
-        {% for i in (1..max_selection) %}
-          <div data-bundle-placeholder class="bundle-placeholder">
-            <div class="bundle-placeholder__empty">
-              <div class="bundle-placeholder__text">Select an item</div>
+                      <span class="btn__loader">
+                        <svg height="18" width="18" class=" svg-loader">
+                          <circle r="7" cx="9" cy="9" />
+                          <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                        </svg>
+                      </span>
+                    </button>
+                {%- endcase -%}
+              {%- endfor -%}
             </div>
-            <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
           </div>
-        {% endfor %}
+        {%- endif -%}
+
+        <div class="bundle__content">
+          <div class="grid bundle__products">
+            {% for product in collection.products %}
+              {%- render 'product-grid-item',
+                product: product,
+                animation_delay: animation_delay,
+                index: forloop.index,
+                sizes: image_sizes,
+                bundle_product: true,
+                modifier_class: 'product-item--bundle'
+              -%}
+            {% endfor %}
+          </div>
+
+          {%- comment -%}
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endcomment -%}
+        </div>
       </div>
 
-      <div class="bundle__summary">
-        <p>Selected: <span data-bundle-selected-count>0</span> of {{ max_selection }}</p>
-
-        <p>
-          Total: <span data-bundle-total>{{ 'general.money.free' | t }}</span>
-        </p>
-
+      <div class="bundle__actions">
         <button
           type="button"
-          class="btn btn--large btn--solid btn--primary"
-          data-bundle-add-to-cart
-          disabled="disabled"
+          class="btn btn--full btn--large btn--solid btn--primary"
+          data-bundle-scroll-to
         >
-          <span class="btn__text" data-add-to-cart-text>Add Bundle to Cart</span>
-          <span class="btn__added">&nbsp;</span>
-
-          <span class="btn__loader">
-            <svg height="18" width="18" class=" svg-loader">
-              <circle r="7" cx="9" cy="9" />
-              <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-            </svg>
-          </span>
+          Review bundle (<span data-bundle-selected-count>0</span>/
+          {{- max_selection -}}
+          )
         </button>
       </div>
-
-      <div class="grid bundle__products">
-        {% for product in collection.products %}
-          {%- render 'product-grid-item',
-            product: product,
-            animation_delay: animation_delay,
-            index: forloop.index,
-            sizes: image_sizes,
-            bundle_product: true,
-            modifier_class: 'product-item--bundle'
-          -%}
-        {% endfor %}
-      </div>
-
-      {%- render 'pagination', paginate: paginate -%}
     </div>
   </bundle-collection>
 {% endpaginate %}
@@ -120,7 +160,7 @@
       "id": "grid",
       "label": "Products per row on desktop",
       "min": 2,
-      "max": 6,
+      "max": 4,
       "step": 1,
       "default": 3
     },
@@ -171,7 +211,7 @@
       "step": 1,
       "unit": "px",
       "label": "Top",
-      "default": 0
+      "default": 50
     },
     {
       "type": "range",
@@ -181,16 +221,28 @@
       "step": 1,
       "unit": "px",
       "label": "Bottom",
-      "default": 0
+      "default": 50
     }
   ],
-  "presets": [
+  "blocks": [
     {
-      "name": "Bundle mix and match"
+      "type": "bundle_products",
+      "limit": 1,
+      "name": "Bundle products",
+      "settings": []
+    },
+    {
+      "type": "bundle_price",
+      "limit": 1,
+      "name": "Bundle price",
+      "settings": []
+    },
+    {
+      "type": "bundle_button",
+      "limit": 1,
+      "name": "Bundle button",
+      "settings": []
     }
-  ],
-  "disabled_on": {
-    "groups": ["header", "aside", "custom.pre_footer", "footer"]
-  }
+  ]
 }
 {% endschema %}

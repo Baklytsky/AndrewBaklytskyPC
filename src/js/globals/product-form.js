@@ -166,6 +166,7 @@ class ProductForm extends HTMLElement {
                 button: bundleButton,
                 variantId: this.productForm.getFormState().variant.id,
                 price: this.productForm.getFormState().variant.price,
+                options: this.productForm.getFormState().variant.options,
               },
               bubbles: true,
             })

@@ -3,20 +3,50 @@
   assign animation_name = animation_name | default: 'cart-items-fade'
   assign animation_delay_increment = 50
   assign animation_delay = animation_delay | default: 0
+  assign bundle_opened = false
+  assign bundle_price = 0
+  assign bundle_price_compare = 0
 -%}
 
 {%- comment -%}
   Capture line items
 {%- endcomment -%}
 
+<script>
+  console.log({{ cart.items | json }})
+</script>
 {%- for line_item in cart.items -%}
+  <script>
+    console.log({{ line_item | json }})
+  </script>
   {%- liquid
     assign line_item_final_price = line_item.final_price | money
     assign line_item_variant_compare_at_price = line_item.variant.compare_at_price | money
     assign line_item_original_price = line_item.original_price | money
     assign line_item_unit_price = line_item.unit_price | money
     assign cart_products = cart_products | append: line_item.product.id | append: ','
+
+    assign bundle_name = line_item.properties._bundle_title
+    assign bundle_image = line_item.properties._bundle_image
+    assign bundle_unique_id = line_item.properties._bundle_unique_id
+    assign prev_index = forloop.index0 | minus: 1
+    assign next_index = forloop.index0 | plus: 1
+    assign prev_line_item = cart.items[prev_index]
+    assign next_line_item = cart.items[next_index]
+    assign next_line_item_bundle_name = next_line_item.properties._bundle_title
+    assign next_line_item_bundle_unique_id = next_line_item.properties._bundle_unique_id
   -%}
+
+  {%- if bundle_opened == false and bundle_name != blank -%}
+    {%- assign bundle_opened = true -%}
+
+    <div class="test" data-bundle-cart-item="{{ bundle_name | handle }}">
+      <div class="test__body">
+  {%- endif -%}
+
+  {%- if bundle_opened -%}
+    {%- assign bundle_price = bundle_price | plus: line_item.final_price -%}
+  {%- endif -%}
 
   <div
     class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
@@ -156,10 +186,16 @@
         {%- endif -%}
 
         {%- if sale and discounted == false -%}
+          {%- if bundle_opened -%}
+            {%- assign bundle_price_compare = bundle_price_compare | plus: line_item.variant.compare_at_price -%}
+          {%- endif -%}
           <del>{{- line_item_variant_compare_at_price -}}</del>
         {%- endif -%}
 
         {%- if discounted -%}
+          {%- if bundle_opened -%}
+            {%- assign bundle_price_compare = bundle_price_compare | plus: line_item.original_price -%}
+          {%- endif -%}
           <del>{{- line_item_original_price -}}</del>
         {%- endif -%}
 
@@ -250,7 +286,7 @@
 
           <span>
             {{-
-              'cart.general.discount_label'
+              'cart.general.discount_label_html'
               | t: amount: discount_price, title: discount.discount_application.title
             -}}
           </span>
@@ -258,4 +294,71 @@
       {%- endfor -%}
     {%- endif -%}
   </div>
+
+  {%- if bundle_opened
+    and next_line_item_bundle_name == blank
+    or next_line_item_bundle_unique_id != bundle_unique_id
+  -%}
+    {%- assign bundle_opened = false -%}
+    </div>
+
+    <div class="test__head">
+      <div class="cart__item">
+        <div class="cart__item__image{% unless bundle_image %} image--empty{% endunless %}">
+          <a
+            href="{{ line_item.url }}"
+            aria-label="{{ bundle_name | escape }}"
+            {% if settings.show_image_bg != 'none' %}
+              class="show-gray-bg"
+            {% endif %}
+          >
+            {%- if bundle_image -%}
+              {%- liquid
+                capture bundle_srcset
+                  render 'image-srcset', image_url: bundle_image, widths: '90, 180, 270, 360', image_width: 180
+                endcapture
+              -%}
+
+              <div class="lazy-image is-loading">
+                <img
+                  src="{{ bundle_image }}"
+                  class="is-loading"
+                  loading="lazy"
+                  sizes="90px"
+                  srcset="{{ bundle_srcset }}"
+                  alt="{{ bundle_name | strip_html }}"
+                >
+              </div>
+            {%- endif -%}
+          </a>
+        </div>
+
+        <div class="cart__item__content">
+          <div class="cart__item__content-inner">
+            <h4 class="cart__item__title">
+              <a href="{{ line_item.url }}">
+                {{- bundle_name | strip_html -}}
+              </a>
+            </h4>
+
+            <div class="cart__item__meta"></div>
+          </div>
+
+          <p class="cart__price">
+            {%- if bundle_price_compare > bundle_price -%}
+              <ins>{{ bundle_price | money }}</ins>
+
+              <del>{{ bundle_price_compare | money }}</del>
+            {%- else -%}
+              {{ bundle_price | money }}
+            {%- endif -%}
+          </p>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    {%- assign bundle_price = 0 -%}
+    {%- assign bundle_price_compare = 0 -%}
+  {%- endif -%}
 {%- endfor -%}

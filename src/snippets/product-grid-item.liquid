@@ -277,6 +277,49 @@
       assign unique = section.id | append: '-' | append: product.id
     -%}
 
+    <template data-bundle-template>
+      <div class="product-grid-item {{ alignment_class }}">
+        <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+          <button data-bundle-remove-button class="product-item__close">
+            {%- render 'icon-cancel' -%}
+          </button>
+
+          <a
+            class="product-link"
+            href="{{ product_url }}"
+            aria-label="{{ product.title | strip_html | escape }}"
+          >
+            {%- render 'image', image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: 'high', preload: true, attributes: image_animations, cover: true -%}
+          </a>
+        </div>
+
+        <div class="product-information">
+          <div class="product-item__info">
+            <a
+              class="product-link"
+              href="{{ product_url }}"
+            >
+              <p class="product-item__title">
+                {{ product.title }}
+              </p>
+
+              {%- unless product.has_only_default_variant -%}
+                <small data-placeholder-options></small>
+              {%- endunless -%}
+
+              <div class="product-item__price__holder">
+                <div class="product-item__price">
+                  <span class="price">
+                    <span class="new-price" data-placeholder-price></span>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <quick-add-product>
       <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
         <button class="quick-add__button caps"
@@ -285,17 +328,14 @@
           data-bundle-product-button="{{ product.id }}"
           data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
           data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
+          data-bundle-options="{{ product.selected_or_first_available_variant.title }}"
           {% if product.has_only_default_variant == false and product.variants.size > 1 %}
             data-quick-add-btn
             data-quick-add-modal-handle="{{ product.handle }}"
-          {% else %}
-
           {% endif %}
         >
           <span class="btn__text">
-            <span class="product-item__button-added">Added to Bundle</span>
-
-            <span class="product-item__button-default">Add to Bundle</span>
+            Add to Bundle
             {% comment %} {{ 'products.general.quick_add' | t }} {% endcomment %}
           </span>
           <span class="btn__plus"></span>
@@ -625,99 +665,6 @@
             <span class="product-item__swatches__count">
               <span data-swatch-count>&nbsp;</span>
             </span>
-          </div>
-        {%- endif -%}
-
-        {%- if bundle_product -%}
-          <div class="product-item__bundle">
-            <template data-bundle-template>
-              {%- render 'image',
-                image: product.featured_media.preview_image,
-                aspect_ratio: aspect_ratio,
-                sizes: sizes,
-                widths: widths,
-                loading: loading,
-                fetchpriority: fetchpriority,
-                preload: preload,
-                attributes: image_animations,
-                cover: true
-              -%}
-              <span>{{ product.title }}</span>
-              <p data-placeholder-price></p>
-              <button data-bundle-remove-button class="btn btn--black btn--small btn--full btn--solid">Remove</button>
-            </template>
-            {%- comment -%}
-              <button
-                class="btn btn--black btn--small btn--full btn--solid product-item__button"
-                data-bundle-product-button
-                data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
-                data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
-              >
-                <span class="product-item__button-added">Added to Bundle</span>
-
-                <span class="product-item__button-default">Add to Bundle</span>
-              </button>
-            {%- endcomment -%}
-
-            {%- if product.has_only_default_variant == false and product.variants.size > 1 -%}
-              {%- comment -%}
-                {%- assign product_form_id = 'product-item-bundle-'
-                  | append: section.id
-                  | append: '-'
-                  | append: product.id
-                -%}
-                <div class="test2">
-                  {%- render 'product-variant-options',
-                    product: product,
-                    unique: unique,
-                    product_form_id: product_form_id,
-                    enable_size_chart: false,
-                    animation_name: animation_name,
-                    animation_delay: animation_delay,
-                    animation_duration: animation_duration,
-                    quickview: false
-                  -%}
-                </div>
-                  <div class="test">
-                    <select id="variant-{{ product.id }}" class="variant-selector">
-                      {% for variant in product.variants %}
-                        <option
-                          value="{{ variant.id }}"
-                          {% if forloop.first %}
-                            selected
-                          {% endif %}
-                        >
-                          {{ variant.title }}
-                        </option>
-                      {% endfor %}
-                    </select>
-
-                    {%- for option in product.options_with_values -%}
-                      <span>{{ option.name }}</span>
-
-                      <div>
-                        {%- for value in option.values -%}
-                          <input
-                            type="radio"
-                            form="{{ product_form_id }}"
-                            data-single-option-selector
-                            data-index="option{{ option.position }}"
-                            name="options[{{ option.name | escape }}]-{{ uniq_id }}"
-                            value="{{ value | escape }}"
-                            id="{{ input_id }}"
-                            {% if value == current_value %}
-                              checked
-                            {% endif %}
-                          >
-                          <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
-                            <span class="visually-hidden">{{ value }}</span>
-                          </label>
-                        {%- endfor -%}
-                      </div>
-                    {%- endfor -%}
-                  </div>
-              {%- endcomment -%}
-            {%- endif -%}
           </div>
         {%- endif -%}
       </div>
