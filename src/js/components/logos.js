@@ -11,10 +11,6 @@ const classes = {
   flickityEnabled: 'flickity-enabled',
 };
 
-const attributes = {
-  slideData: 'data-slide',
-};
-
 if (!customElements.get('logos-component')) {
   customElements.define(
     'logos-component',
@@ -33,7 +29,6 @@ if (!customElements.get('logos-component')) {
 
         this.initSlideshowText();
         this.initSlideshowNav();
-        this.bindEvents();
 
         this.setSlideshowNavState();
 
@@ -136,35 +131,6 @@ if (!customElements.get('logos-component')) {
               },
             },
           });
-        }
-      }
-
-      onBlockSelect(event) {
-        // Select logos slide on block select
-        if (!this.slideshowNav || !event.target.hasAttribute(attributes.slideData)) return;
-        const slide = this.slideshowNav.querySelector(`[${attributes.slideData}="${event.detail.blockId}"]`);
-        const slideIndex = parseInt(Array.from(slide.parentNode.children).indexOf(slide));
-
-        if (this.flktyNav) {
-          this.flktyNav.select(slideIndex);
-          this.flktyNav.stopPlayer();
-        } else {
-          slide.dispatchEvent(new Event('click'));
-        }
-      }
-
-      onBlockDeselect() {
-        // Resume logos slider on block deselect
-        this.flktyNav?.playPlayer();
-      }
-
-      bindEvents() {
-        if (Shopify.designMode) {
-          this.bindEditorSelect = this.onBlockSelect.bind(this);
-          this.bindEditorDeselect = this.onBlockDeselect.bind(this);
-
-          this.addEventListener('shopify:block:select', this.bindEditorSelect);
-          this.addEventListener('shopify:block:deselect', this.bindEditorDeselect);
         }
       }
 

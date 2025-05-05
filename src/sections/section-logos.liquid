@@ -160,6 +160,44 @@
   </logos-component>
 </div>
 
+{%- if request.design_mode -%}
+  <script>
+    function handleLogosEvent(event, type) {
+      const target = event.target;
+      const logosComponent = target.closest('logos-component');
+      if (!logosComponent) return;
+      const slider = logosComponent.querySelector('[data-slider-logos]');
+      if (!slider) return;
+
+      let flktyNav = window.theme.Flickity ? window.theme.Flickity.data(slider) : null;
+      if (type === 'select') {
+        if (!target.hasAttribute('data-slide')) return;
+        const blockId = event.detail && event.detail.blockId;
+        if (!blockId) return;
+        const slide = slider.querySelector(`[data-slide="${blockId}"]`);
+        if (!slide) return;
+
+        if (flktyNav) {
+          const slideIndex = parseInt(Array.from(slide.parentNode.children).indexOf(slide));
+          flktyNav.select(slideIndex);
+          if (typeof flktyNav.stopPlayer === 'function') flktyNav.stopPlayer();
+        } else {
+          slide.dispatchEvent(new Event('click'));
+        }
+      } else if (type === 'deselect') {
+        if (flktyNav && typeof flktyNav.playPlayer === 'function') flktyNav.playPlayer();
+      }
+    }
+
+    document.addEventListener('shopify:block:select', (event) => {
+      handleLogosEvent(event, 'select');
+    });
+    document.addEventListener('shopify:block:deselect', (event) => {
+      handleLogosEvent(event, 'deselect');
+    });
+  </script>
+{%- endif -%}
+
 {% schema %}
 {
   "name": "Logos",
