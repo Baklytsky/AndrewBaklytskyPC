@@ -1,13 +1,13 @@
 # Carbon
 
-### [🏷️ Releases](https://github.com/invisiblethemes/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/carbon/discussions)
+### [🏷️ Releases](https://github.com/presidiocreative/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/carbon/discussions)
 
 ## Installation
 
 #### Clone the repo:
 
 ```
-git clone git@github.com:invisiblethemes/carbon.git
+git clone git@github.com:presidiocreative/carbon.git
 ```
 
 #### Install packages
