@@ -63,6 +63,25 @@
   >
     <div class="wrapper--full-padded">
       <div class="bundle__container">
+        <div class="bundle__content">
+          <div class="grid bundle__products">
+            {% for product in collection.products %}
+              {%- render 'product-grid-item',
+                product: product,
+                animation_delay: animation_delay,
+                index: forloop.index,
+                sizes: image_sizes,
+                bundle_product: true,
+                modifier_class: 'product-item--bundle'
+              -%}
+            {% endfor %}
+          </div>
+
+          {%- comment -%}
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endcomment -%}
+        </div>
+
         {%- if section.blocks.size > 0 -%}
           <div class="bundle__aside">
             <div class="bundle__widget">
@@ -80,7 +99,7 @@
                       {% endfor %}
                     </div>
                   {%- when 'bundle_price' -%}
-                    <p>
+                    <p class="bundle__price">
                       Total: <span data-bundle-total>{{ 'general.money.free' | t }}</span>
                     </p>
                   {%- when 'bundle_button' -%}
@@ -111,25 +130,6 @@
             </div>
           </div>
         {%- endif -%}
-
-        <div class="bundle__content">
-          <div class="grid bundle__products">
-            {% for product in collection.products %}
-              {%- render 'product-grid-item',
-                product: product,
-                animation_delay: animation_delay,
-                index: forloop.index,
-                sizes: image_sizes,
-                bundle_product: true,
-                modifier_class: 'product-item--bundle'
-              -%}
-            {% endfor %}
-          </div>
-
-          {%- comment -%}
-            {%- render 'pagination', paginate: paginate -%}
-          {%- endcomment -%}
-        </div>
       </div>
 
       <div class="bundle__actions">

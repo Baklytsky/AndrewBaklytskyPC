@@ -14,10 +14,12 @@ const selectors = {
   placeholderPrice: '[data-placeholder-price]',
   placeholderOptions: '[data-placeholder-options]',
   bundleCartItem: '[data-bundle-cart-item]',
+  focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
 };
 
 const attributes = {
   maxSelection: 'data-bundle-max-selection',
+  productId: 'data-bundle-product-button',
   quickAdd: 'data-quick-add-btn',
   bundleName: 'data-bundle-name',
   bundleImage: 'data-bundle-image',
@@ -33,6 +35,7 @@ const classes = {
   filled: 'is-filled',
   disabled: 'is-disabled',
   loading: 'is-loading',
+  focused: 'is-focused',
 };
 
 if (!customElements.get('bundle-collection')) {
@@ -134,6 +137,9 @@ if (!customElements.get('bundle-collection')) {
         }, 0);
         this.bundleTotal.innerHTML = this.formatRate(total);
         this.addButton.disabled = filledCount !== this.maxSelection;
+        if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
+          this.addButton.focus();
+        }
         this.buttons.forEach((button) => {
           button.disabled = filledCount >= this.maxSelection;
         });
@@ -147,6 +153,7 @@ if (!customElements.get('bundle-collection')) {
             _bundle_title: `${this.getAttribute(attributes.bundleName)}`,
           },
           price: button.getAttribute(attributes.bundlePrice),
+          productId: button.getAttribute(attributes.productId),
         };
         if (this.hasAttribute(attributes.bundleImage)) {
           productData.properties._bundle_image = `${this.getAttribute(attributes.bundleImage)}`;
@@ -167,15 +174,37 @@ if (!customElements.get('bundle-collection')) {
         if (button.hasAttribute(attributes.bundleOptions) && filledEl.querySelector(selectors.placeholderOptions)) {
           filledEl.querySelector(selectors.placeholderOptions).textContent = button.getAttribute(attributes.bundleOptions);
         }
+
+        const focusableElements = placeholder.querySelectorAll(selectors.focusable);
+        if (focusableElements.length) {
+          focusableElements.forEach((element) => {
+            element.removeAttribute('tabindex');
+          });
+        }
+
         this.updateUI();
       }
 
       removeProductFromBundle(slot) {
         const index = parseInt(slot);
         if (index < 0 || index >= this.selectedProducts.length) return;
+        const targetFocusButton = this.querySelector(`[${attributes.productId}="${this.selectedProducts[index].productId}"]`);
         this.selectedProducts[index] = null;
         const placeholder = this.placeholders[index];
         placeholder.classList.remove(classes.filled);
+
+        const focusableElements = placeholder.querySelectorAll(selectors.focusable);
+        if (focusableElements.length) {
+          focusableElements.forEach((element) => {
+            element.setAttribute('tabindex', -1);
+          });
+        }
+
+        if (document.body.classList.contains(classes.focused) && targetFocusButton) {
+          targetFocusButton.disabled = false;
+          targetFocusButton.focus();
+        }
+
         this.updateUI();
       }
 

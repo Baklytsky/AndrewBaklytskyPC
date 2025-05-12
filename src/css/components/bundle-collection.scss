@@ -12,17 +12,18 @@ bundle-collection { display: block; }
 
   @include media-query($medium-up) {
     flex-wrap: nowrap;
-    flex-direction: row-reverse;
   }
 }
 
 .bundle__content { flex: 0 1 100%; }
 
 .bundle__aside {
+  order: -1;
   flex: 0 1 100%;
   text-align: center;
 
   @include media-query($medium-up) {
+    order: 0;
     flex: 0 0 33.33%;
     flex-wrap: nowrap;
     flex-direction: row-reverse;
@@ -39,6 +40,15 @@ bundle-collection { display: block; }
       --top: calc(var(--header-height) + var(--padding-top, 0));
     }
   }
+}
+
+.bundle__price,
+.bundle__placeholders,
+.bundle__button {
+  margin-top: 0;
+  margin-bottom: var(--line);
+
+  &:last-child { margin-bottom: 0; }
 }
 
 .bundle__placeholders {
@@ -89,6 +99,8 @@ bundle-collection { display: block; }
 
 .bundle__button-default small { font-size: 100%; }
 
+.bundle__button.is-loading .bundle__button-add,
 .bundle__button:not(:disabled) .bundle__button-add { display: inline; }
 .bundle__button-add,
+.bundle__button.is-loading .bundle__button-add ~ .bundle__button-default,
 .bundle__button:not(:disabled) .bundle__button-add ~ .bundle__button-default { display: none; }
