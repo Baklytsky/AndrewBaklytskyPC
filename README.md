@@ -1,6 +1,6 @@
 # Carbon
 
-### [🏷️ Releases](https://github.com/presidiocreative/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/carbon/discussions)
+### [🏷️ Releases](https://github.com/presidiocreative/carbon/releases)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/carbon/issues)
 
 ## Installation
 

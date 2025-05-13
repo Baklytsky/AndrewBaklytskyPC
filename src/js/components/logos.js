@@ -11,10 +11,6 @@ const classes = {
   flickityEnabled: 'flickity-enabled',
 };
 
-const attributes = {
-  slideData: 'data-slide',
-};
-
 if (!customElements.get('logos-component')) {
   customElements.define(
     'logos-component',
@@ -33,7 +29,6 @@ if (!customElements.get('logos-component')) {
 
         this.initSlideshowText();
         this.initSlideshowNav();
-        this.bindEvents();
 
         this.setSlideshowNavState();
 
@@ -137,28 +132,6 @@ if (!customElements.get('logos-component')) {
             },
           });
         }
-      }
-
-      onBlockSelect(evt) {
-        if (!this.slideshowNav) return;
-        const slide = this.slideshowNav.querySelector(`[${attributes.slideData}="${evt.detail.blockId}"]`);
-        const slideIndex = parseInt(Array.from(slide.parentNode.children).indexOf(slide));
-
-        if (this.flktyNav) {
-          this.flktyNav.select(slideIndex);
-          this.flktyNav.stopPlayer();
-        } else {
-          slide.dispatchEvent(new Event('click'));
-        }
-      }
-
-      onBlockDeselect() {
-        this.flktyNav?.playPlayer();
-      }
-
-      bindEvents() {
-        this.addEventListener('theme:slider-logos:select', (e) => this.onBlockSelect(e.detail.evt));
-        this.addEventListener('theme:slider-logos:deselect', () => this.onBlockDeselect());
       }
 
       disconnectedCallback() {

@@ -18,7 +18,39 @@
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
   assign logo_widths = logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x | append: ',' | append: logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x
+
+  assign search_block = section.blocks | where: 'type', 'search'
+  assign search_block = search_block[0]
 -%}
+
+{%- if request.design_mode -%}
+  <script>
+    function handleMobileMenuEvent(event, shouldOpen) {
+      const mode = shouldOpen ? 'open' : 'close';
+      const target = event.target;
+      const mobileMenu = target.querySelector('mobile-menu') || target.closest('mobile-menu');
+      if (!mobileMenu) return;
+      const drawer = mobileMenu.querySelector('header-drawer');
+      if (!drawer) return;
+      const isOpen = drawer.classList.contains('is-open');
+      if (mode === 'open') {
+        if (!isOpen && typeof drawer.showDrawer === 'function') drawer.showDrawer();
+      } else {
+        if (isOpen && typeof drawer.hideDrawer === 'function') drawer.hideDrawer();
+      }
+    }
+
+    document.addEventListener('shopify:block:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:deselect', (event) => {
+      handleMobileMenuEvent(event, false);
+    });
+  </script>
+{%- endif -%}
 
 <mobile-menu
   class="mobile-menu {{ color_scheme }}"
@@ -26,9 +58,6 @@
   data-section-type="mobile-menu"
   style="{{ section_style }}"
 >
-  {%- assign search_block = section.blocks | where: 'type', 'search' -%}
-  {%- assign search_block = search_block[0] -%}
-
   {%- if search_block -%}
     {%- liquid
       assign animation_delay = block_index_dynamic | times: animation_delay_increment | plus: animation_delay_initial
@@ -40,13 +69,14 @@
     -%}
 
     {%- capture dynamic_blocks -%}
-      <div class="mobile-menu__block block-padding"
+      <div
+        class="mobile-menu__block mobile-menu__block--search block-padding"
         data-animation="{{ animation_name }}"
         data-animation-duration="{{ animation_duration }}"
         data-animation-delay="{{ animation_delay }}"
         style="{{ style }}"
-        {{ block.shopify_attributes }}>
-
+        {{ search_block.shopify_attributes }}
+      >
         <div class="mobile-menu__block-search">
           <header-search-popdown>
             <details>

@@ -93,6 +93,28 @@
   }
 {%- endstyle -%}
 
+{%- if request.design_mode -%}
+  <script>
+    document.addEventListener('shopify:block:select', (event) => {
+      // Show tab content on block select
+      const tabsComponent = event.target.closest('tabs-component');
+      if (tabsComponent) {
+        const tab = event.target.matches('tabs-component') ? event.target.querySelector('[data-tab]') : event.target;
+
+        if (tab.hasAttribute('data-tab')) {
+          tab.dispatchEvent(new Event('click'));
+        }
+
+        tab.parentNode.scrollTo({
+          top: 0,
+          left: tab.offsetLeft - tab.clientWidth,
+          behavior: 'smooth',
+        });
+      }
+    });
+  </script>
+{%- endif -%}
+
 <section
   id="TabCollections--{{ section.id }}"
   class="index-tab-collections section-padding {{ color_scheme }}"
