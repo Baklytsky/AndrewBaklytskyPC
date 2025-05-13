@@ -791,57 +791,6 @@
         {%- endif -%}
       {%- endfor -%}
 
-      {%- if request.design_mode and accordion_blocks.size > 0 -%}
-        <script>
-          function findCollapsible(event, mode) {
-            const target = event.target;
-            const collapsibleSection = target.matches('.shopify-section') ? target : null;
-            const targetCollapsible = target.matches('[data-collapsible]') ? target : null;
-            const parentCollapsible = target.closest('[data-collapsible]');
-            const nestedCollapsible = target.querySelector(':scope > [data-collapsible]');
-
-            if (mode === 'open') {
-              return nestedCollapsible || targetCollapsible || parentCollapsible;
-            } else {
-              let collapsible = nestedCollapsible || targetCollapsible;
-              if (collapsibleSection) {
-                collapsible = collapsibleSection.querySelector('[data-collapsible]');
-              }
-              return collapsible;
-            }
-          }
-
-          function handleCollapsibleEvent(event, shouldOpen) {
-            const mode = shouldOpen ? 'open' : 'close';
-            const collapsible = findCollapsible(event, mode);
-            if (!collapsible) return;
-            const isOpen = collapsible.hasAttribute('open');
-            const isEligible = !collapsible.hasAttribute('disabled');
-            if (!isEligible) return;
-
-            if ((shouldOpen && !isOpen) || (!shouldOpen && isOpen)) {
-              const trigger = collapsible.querySelector('[data-collapsible-trigger]');
-              trigger?.dispatchEvent(new Event('click'));
-            }
-          }
-
-          document.addEventListener('shopify:block:select', (event) => {
-            // Open accordions on Block select
-            handleCollapsibleEvent(event, true);
-          });
-
-          document.addEventListener('shopify:block:deselect', (event) => {
-            // Close accordions on Block/Section deselect
-            handleCollapsibleEvent(event, false);
-          });
-
-          document.addEventListener('shopify:section:deselect', (event) => {
-            // Close accordions on Block/Section deselect
-            handleCollapsibleEvent(event, false);
-          });
-        </script>
-      {%- endif -%}
-
       <div class="brick__section{% if section.settings.layout == 'is-reversed' %} brick__section--reversed{% endif %}{% if section.settings.reverse_blocks %} brick__section--reversed-mobile{% endif %}{% if accordion_blocks.size > 0 %} brick__section--accordion{% endif %} {{ width }} {{ desktop_height }} {{ mobile_height }}">
         {%- liquid
           assign block_images_tag = 'div'
