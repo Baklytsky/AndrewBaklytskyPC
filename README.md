@@ -93,22 +93,6 @@ The env command has a shorthand version of `-e` and can accept a comma-separated
 
 `yarn deploy -e dev,qa,staging`
 
-### Deploying demo stores
-
-When we deploy to a Shopify Theme Store demo, we need to add `<meta name="robots" content="noindex, nofollow">` to the head. This is tedious to add manually. We must add this line of code to prevent the demo stores from being indexed by Google and other search engines.
-
-To make this Shopify requirement easy, our build process has a special command that will add "noindex/nofollow" to the head. You can turn it on by adding `--index=false` to the deploy command.
-
-`yarn deploy -e my-store1 --no-index`
-
-A command to deploy to all the demos might look something like this:
-```
-"NODE_ENV=production gulp deploy --index=false --env clothing-demo,skin-demo,shoes-demo,swim-demo",
-```
-
-🚨 Never use the `--index=false` flag on a merchant store. This command exists strictly for Shopify Theme Store demo stores. This line of code would *destroy* the SEO of a merchant store.
-
-
 ## Lighthouse
 
 ### Running lighthouse locally
