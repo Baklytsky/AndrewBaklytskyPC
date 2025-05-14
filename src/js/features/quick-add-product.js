@@ -32,7 +32,6 @@ const selectors = {
   modalContent: '[data-product-upsell-ajax]',
   modalClose: '[data-quick-add-modal-close]',
   productGridItem: 'data-grid-item',
-  productInformationHolder: '[data-product-information]',
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   quickAddModalTemplate: '[data-quick-add-modal-template]',
@@ -290,7 +289,6 @@ class QuickAddProduct extends HTMLElement {
       if (!parentProduct) return;
 
       const errorMessageHolder = holder.querySelector(selectors.messageError);
-      const productInfo = parentProduct.querySelector(selectors.productInformationHolder);
       const button = holder.querySelector(selectors.buttonAddToCart);
 
       if (button) {

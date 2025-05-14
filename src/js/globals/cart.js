@@ -76,6 +76,7 @@ const attributes = {
   scrollLocked: 'data-scroll-locked',
   name: 'name',
   bundleRemoveButton: 'data-bundle-cart-remove',
+  bundleQuantityField: 'data-bundle-cart-quantity',
 };
 
 class CartItems extends HTMLElement {
@@ -285,37 +286,12 @@ class CartItems extends HTMLElement {
 
     this.disableCartButtons();
 
-    console.log(theme.routes.cart_update_url);
-    console.log(window.Shopify.routes.root + 'cart/update.js');
     fetch(theme.routes.cart_update_url, {
       method: 'POST',
       body: formData,
     })
       .then((response) => response.text())
       .then((state) => {
-        console.log(state);
-        // const parsedState = JSON.parse(state);
-        // console.log(parsedState);
-
-        // if (state.errors) {
-        //   this.cartUpdateFailed = true;
-        //   this.toggleErrorMessage();
-        //   this.enableCartButtons();
-
-        //   if (lineItemKeyArr.length) {
-        //     lineItemKeyArr.forEach((element) => {
-        //       const newItem = this.cart.querySelector(`[${attributes.item}="${element}"]`);
-        //       if (newItem) {
-        //         const itemTitle = newItem.hasAttribute(attributes.itemTitle) ? newItem.getAttribute(attributes.itemTitle) : null;
-        //         this.updateErrorText(itemTitle);
-        //         this.resetLineItem(newItem);
-        //       }
-        //     });
-        //   }
-
-        //   return;
-        // }
-
         this.getCart();
       })
       .catch((error) => {
@@ -641,7 +617,7 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll('input');
+    const inputs = this.cart.querySelectorAll(`input:not([${attributes.bundleQuantityField}])`);
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
     if (inputs.length) {

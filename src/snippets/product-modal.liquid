@@ -102,8 +102,7 @@
         assign animation_delay = animation_delay | plus: animation_delay_increment
       -%}
 
-      {%- if product_bundle -%}
-      {%- else -%}
+      {%- unless product_bundle -%}
         {%- comment -%}
           Add a line item property called 'Preorder' to preorder products
         {%- endcomment -%}
@@ -129,7 +128,7 @@
             {%- render 'gift-card-recipient-form', product: product, form: form, product_form_id: product_form_id -%}
           </div>
         {%- endif -%}
-      {%- endif -%}
+      {%- endunless -%}
 
       {%- render 'product-buttons',
         product: product,
