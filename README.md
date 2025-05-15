@@ -5,9 +5,14 @@
 ## Installation
 
 #### Clone the repo:
-
+SSH
 ```
 git clone git@github.com:presidiocreative/carbon.git
+```
+
+HTTPS
+```
+git clone https://github.com/presidiocreative/carbon.git
 ```
 
 #### Install packages
