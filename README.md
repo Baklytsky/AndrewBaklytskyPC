@@ -15,16 +15,17 @@ HTTPS
 git clone https://github.com/presidiocreative/carbon.git
 ```
 
+#### Check your Node version
+⚠️ The recommended version is Node v20.9.x
+
+Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
+If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
+
 #### Install packages
 
 ```
 yarn install
 ```
-
-⚠️ The recommended node version for running carbon is Node v20.9.x
-
-Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
-If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
 
 
 #### Setup Shopify CLI3
