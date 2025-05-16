@@ -1,4 +1,4 @@
-# Shopify vite theme
+# Carbon theme
 
 [vite-plugin-shopify](https://shopify-vite.barrelny.com/) aims to integrate Vite as seamlessly as possible with Shopify themes to optimize your theme development experience.
 [npm documentation](https://www.npmjs.com/package/vite-plugin-shopify)
@@ -69,14 +69,15 @@ password  = "shptka_0000"
 
 ## Usage
 
-### Comands
+### Commands
 
 - `npm install` - Install the necessary packages and dependencies
 - `npm run build` - Project build
 - `npm run dev` - Launch of development mode
 - `npm run deploy` - Project deployment
 - `npm run pull:settings` - Downloading project JSON settings, such as `config/*.json`, `sections/*.json`, `templates/*.json`
-- `npm run pull:updates` - Download all project files from the theme 
+- `npm run pull:updates` - Download all project files from the theme
+- `npm run zip` - Creates a zip of the theme in uploads folder
 
 ### Structure
 
