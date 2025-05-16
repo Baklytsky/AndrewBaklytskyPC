@@ -1,7 +1,7 @@
 document.addEventListener('shopify:block:select', (event) => {
   // Scroll to a selected block
   const scrollableBlock = event.target.matches('[data-block-scroll]') ? event.target : event.target.querySelector('[data-block-scroll]') || event.target.closest('[data-block-scroll]');
-  if (scrollableBlock && !scrollableBlock.classList.contains('flickity-enabled')) {
+  if (scrollableBlock) {
     const currentElement = event.target;
 
     if (currentElement) {
