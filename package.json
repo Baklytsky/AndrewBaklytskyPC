@@ -1,5 +1,5 @@
 {
-  "name": "carbone-vite",
+  "name": "carbon",
   "author": "Presidio Creative",
   "license": "Copyright Presidio Creative",
   "version": "1.0.0",
@@ -16,7 +16,7 @@
     "deploy": "npm run build && npm run shopify:push",
     "shopify:push": "shopify theme push -e production",
     "build": "vite build",
-    "zip": "npm run build && mkdir -p upload && timestamp=$(date +%Y%m%d%H%M%S) && zip_file=\"upload/theme-${timestamp}.zip\" && rm -f \"$zip_file\" && find layout -type f -name \"*.liquid\" | zip -r \"$zip_file\" assets config locales sections snippets templates -@ -x \"**/.*\" -x \"**/.DS_Store\" && echo \"Theme zip created at $zip_file\""
+    "zip": "npm run build && mkdir -p upload && zip_file=\"upload/${npm_package_name}-${npm_package_version}.zip\" && rm -f \"$zip_file\" && find layout -type f -name \"*.liquid\" | zip -r \"$zip_file\" assets config locales sections snippets templates -@ -x \"**/.*\" -x \"**/.DS_Store\" && echo \"Theme zip created at $zip_file\""
   },
   "keywords": [],
   "devDependencies": {
