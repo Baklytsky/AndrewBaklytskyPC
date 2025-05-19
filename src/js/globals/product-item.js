@@ -50,12 +50,8 @@ if (!customElements.get('product-item')) {
       }
 
       initProductSwapUtility() {
-        this.postProcessHtmlCallbacks.push((newNode) => {
-          if (this.pendingSwapHandle) {
-            const swapHandle = newNode.querySelector(`[${attributes.swapHandle}="${this.pendingSwapHandle}"]`);
-            swapHandle?.focus();
-            this.pendingSwapHandle = null;
-          }
+        this.postProcessHtmlCallbacks.push(() => {
+          document.addEventListener('theme:html:change', this.onHtmlChange);
         });
       }
 
@@ -113,9 +109,6 @@ if (!customElements.get('product-item')) {
           .then((responseText) => {
             const html = new DOMParser().parseFromString(responseText, 'text/html');
             callback(html);
-          })
-          .then(() => {
-            document.addEventListener('theme:html:change', this.onHtmlChange);
           })
           .catch((error) => {
             if (error.name === 'AbortError') {
