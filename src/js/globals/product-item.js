@@ -133,9 +133,7 @@ if (!customElements.get('product-item')) {
         if (nativeScrollbar && typeof nativeScrollbar.move === 'function') {
           const computedStyle = getComputedStyle(swatch);
           const swatchOffset = swatch.offsetLeft + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight);
-          requestAnimationFrame(() => {
-            nativeScrollbar.move(swatchOffset - swatch.clientWidth);
-          });
+          requestAnimationFrame(() => nativeScrollbar.move(swatchOffset - swatch.clientWidth, 'instant'));
         }
         swatch.focus();
 
