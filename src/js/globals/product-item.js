@@ -1,6 +1,7 @@
 const selectors = {
   swapHandle: '[data-swap-handle]',
   nativeScrollbar: 'native-scrollbar',
+  activeSibling: '.sibling__link--current',
 };
 
 const attributes = {
@@ -27,9 +28,12 @@ if (!customElements.get('product-item')) {
       constructor() {
         super();
         this.swapHandles = this.querySelectorAll(selectors.swapHandle);
+        this.activeSibling = [...this.swapHandles].find((el) => el.querySelector(selectors.activeSibling));
       }
 
       connectedCallback() {
+        this.scrollIntoView();
+
         this.swapHandles?.forEach((element) => {
           element.addEventListener('click', this.handleClick);
           element.addEventListener('keyup', this.handleKeyup);
@@ -127,18 +131,27 @@ if (!customElements.get('product-item')) {
 
         const product = event.detail.element;
         const swatch = product.querySelector(`[${attributes.swapHandle}="${this.pendingSwapHandle}"]`);
-        const nativeScrollbar = product.querySelector(selectors.nativeScrollbar);
 
         // Set focus and scroll into view of the last clicked sibling swatch element
-        if (nativeScrollbar && typeof nativeScrollbar.move === 'function') {
-          const computedStyle = getComputedStyle(swatch);
-          const swatchOffset = swatch.offsetLeft + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight);
-          requestAnimationFrame(() => nativeScrollbar.move(swatchOffset - swatch.clientWidth, 'instant'));
-        }
         swatch.focus();
+        this.scrollIntoView({product, swatch});
 
         this.pendingSwapHandle = null;
         document.removeEventListener('theme:html:change', this.onHtmlChange);
+      }
+
+      scrollIntoView(elements = false) {
+        if (!this.activeSibling) return;
+
+        const swatch = elements ? elements.swatch : this.activeSibling;
+        const product = elements ? elements.product : this;
+
+        const nativeScrollbar = product.querySelector(selectors.nativeScrollbar);
+        if (!nativeScrollbar || typeof nativeScrollbar.move !== 'function') return;
+
+        const computedStyle = getComputedStyle(swatch);
+        const swatchOffset = swatch.offsetLeft + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight);
+        requestAnimationFrame(() => nativeScrollbar.move(swatchOffset - swatch.clientWidth, 'instant'));
       }
     }
   );
