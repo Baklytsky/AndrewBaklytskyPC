@@ -1,5 +1,6 @@
 const selectors = {
   swapHandle: '[data-swap-handle]',
+  nativeScrollbar: 'native-scrollbar',
 };
 
 const attributes = {
@@ -21,6 +22,7 @@ if (!customElements.get('product-item')) {
           this.handleChange(event);
         }
       };
+      onHtmlChange = (event) => this.handleHtmlChange(event);
 
       constructor() {
         super();
@@ -112,13 +114,36 @@ if (!customElements.get('product-item')) {
             const html = new DOMParser().parseFromString(responseText, 'text/html');
             callback(html);
           })
+          .then(() => {
+            document.addEventListener('theme:html:change', this.onHtmlChange);
+          })
           .catch((error) => {
             if (error.name === 'AbortError') {
               console.log('Fetch aborted by user');
             } else {
               console.error(error);
             }
+
+            document.removeEventListener('theme:html:change', this.onHtmlChange);
           });
+      }
+
+      handleHtmlChange(event) {
+        if (!event?.detail?.element) return;
+        if (!this.pendingSwapHandle) return;
+
+        const product = event.detail.element;
+        const swatch = product.querySelector(`[${attributes.swapHandle}="${this.pendingSwapHandle}"]`);
+        const nativeScrollbar = product.querySelector(selectors.nativeScrollbar);
+
+        // Set focus and scroll into view of the last clicked sibling swatch element
+        if (nativeScrollbar && typeof nativeScrollbar.move === 'function') {
+          nativeScrollbar.move(swatch.offsetLeft - swatch.clientWidth);
+        }
+        swatch.focus();
+
+        this.pendingSwapHandle = null;
+        document.removeEventListener('theme:html:change', this.onHtmlChange);
       }
     }
   );

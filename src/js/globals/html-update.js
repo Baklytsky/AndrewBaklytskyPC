@@ -36,6 +36,14 @@ const htmlUpdate = {
     this.setInnerHTML(newNodeWrapper, newContent.outerHTML);
     const newNode = newNodeWrapper.firstChild;
 
+    // Dispatch a custom event for the node with a swapped ID to notify about the HTML changes
+    const swappedNode = newNodeWrapper.querySelector('[data-swap-id]');
+    if (swappedNode) {
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent('theme:html:change', {detail: {element: swappedNode}, bubbles: true}));
+      });
+    }
+
     // dedupe IDs in the old node to avoid conflicts during transition
     if (oldNode.dataset.swapId === 'true' && oldNode.id) {
       oldNode.id = `${oldNode.id}-old-${timestamp}`;
