@@ -131,7 +131,11 @@ if (!customElements.get('product-item')) {
 
         // Set focus and scroll into view of the last clicked sibling swatch element
         if (nativeScrollbar && typeof nativeScrollbar.move === 'function') {
-          nativeScrollbar.move(swatch.offsetLeft - swatch.clientWidth);
+          const computedStyle = getComputedStyle(swatch);
+          const swatchOffset = swatch.offsetLeft + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight);
+          requestAnimationFrame(() => {
+            nativeScrollbar.move(swatchOffset - swatch.clientWidth);
+          });
         }
         swatch.focus();
 
