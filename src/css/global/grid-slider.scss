@@ -1,0 +1,117 @@
+@use "@/css/settings/variables" as *;
+@use "@/css/tools/mixins" as *;
+
+grid-slider {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.grid--slider {
+  @include media-query($medium-up) {
+    --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) * 2) * 0.38);
+
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0;
+    padding-left: var(--grid-outer);
+    padding-right: var(--grid-outer);
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--grid-outer);
+
+    @include hide-scrollbar;
+
+    user-select: none;
+    -webkit-user-drag: none;
+
+    &.is-enabled { cursor: grab; }
+    &.is-dragging:active { cursor: grabbing; }
+
+    // Disable links while dragging
+    &.is-dragging a { pointer-events: none; }
+
+    // Enable dragging momentum animation
+    &.is-scrolling { scroll-snap-type: none; }
+
+    .grid-item {
+      scroll-snap-align: start;
+      flex: 0 0 var(--item-width);
+      max-width: var(--item-width);
+      margin-right: var(--grid-gap);
+      &:last-child { margin-right: 0; }
+    }
+  }
+
+  @include media-query ($large-up) {
+    --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) * 2) * 0.28);
+  }
+}
+
+.scroll-snap-disabled { scroll-snap-type: none; }
+.grid--slider:has([data-aos]:not(.aos-animate)) { scroll-snap-type: none; }
+
+.grid--slider-disabled {
+  @include media-query ($large-up) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, calc((100% - var(--grid-gap) * (var(--column-count) - 1)) / var(--column-count)))); // Center align items but limit their size to the column width
+    grid-column-gap: var(--grid-gap);
+    justify-content: center;
+    cursor: auto;
+
+    &:active { cursor: auto; }
+
+    .grid-item {
+      width: auto;
+      margin-right: 0;
+    }
+  }
+}
+
+.grid--mobile-slider {
+  @include media-query ($small) {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
+    padding-left: var(--grid-outer);
+    padding-right: 0;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--grid-outer);
+
+    @include hide-scrollbar;
+
+    &.is-enabled { cursor: grab; }
+    &.is-dragging:active { cursor: grabbing; }
+
+    // Disable links while dragging
+    &.is-dragging a { pointer-events: none; }
+
+    // Enable dragging momentum animation
+    &.is-scrolling { scroll-snap-type: none; }
+
+    &::after {
+      content: "";
+      min-height: 1px;
+      display: block;
+      position: relative;
+      padding-right: var(--grid-outer);
+    }
+
+    .grid-item {
+      flex: 0 0 auto;
+      width: calc(100% - 50px);
+      margin-right: var(--grid-gap);
+      scroll-snap-align: start;
+      &:last-child { margin-right: 0; }
+      &:only-child { flex: 0 1 100%; }
+    }
+  }
+}

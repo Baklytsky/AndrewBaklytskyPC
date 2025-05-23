@@ -8,11 +8,11 @@ const initSingleSwiper = (swiperEl) => {
   try {
     const dataParams = swiperEl.getAttribute("data-init-params");
     const swiperParams = JSON.parse(dataParams);
-    
+
     if (swiperEl.initialized) {
       swiperEl.initialized = false;
     }
-    
+
     Object.assign(swiperEl, swiperParams);
     swiperEl.initialize();
   } catch (error) {
