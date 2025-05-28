@@ -11,6 +11,11 @@
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
   assign is_title_linked = true
+  assign is_bundle = false
+
+  if product.metafields.theme_modules.is_bundle
+    assign is_bundle = true
+  endif
 
   if template.name == 'product'
     assign is_title_linked = false
@@ -354,7 +359,8 @@
                       block: block,
                       block_style: block_style,
                       product_form_id: product_form_id,
-                      enable_size_chart: true
+                      enable_size_chart: true,
+                      is_bundle: is_bundle
                     -%}
 
                   {%- when 'buttons' -%}

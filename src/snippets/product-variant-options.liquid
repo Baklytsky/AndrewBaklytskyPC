@@ -9,6 +9,8 @@
   assign specific_pages = ''
   assign show_size_link_separated = true
   assign has_form_buttons = true
+  assign is_bundle = is_bundle | default: false
+  assign meta_swatches = ''
   assign form_button_blocks = section.blocks | where: 'type', 'buttons'
   if form_button_blocks.size == 0 and quickview == false
     assign has_form_buttons = false
@@ -31,6 +33,67 @@
     endfor
   endif
 -%}
+
+{%- if is_bundle -%}
+  {%- assign product_metafield = product.metafields.theme.product_list.value -%}
+
+  {% comment %}
+    if settings.enable_color_swatches
+      for value in option.values
+        if value.swatch
+          assign is_native_swatch_option = true
+          break
+        endif
+      endfor
+    endif
+  {% endcomment %}
+
+  {% for item in product.metafields.theme.product_list.value -%}
+    {%- if settings.enable_color_swatches -%}
+      {%- for option in item.options_with_values -%}
+        {%- for value in option.values -%}
+          {%- if value.swatch -%}
+            {%- assign option_name_meta = item.title | append: ' (' | append: option.name | append: ')' -%}
+            {%- liquid
+              if value.swatch.image
+                assign image_url = value.swatch.image | image_url: width: 96
+                assign swatch_value = 'url(' | append: image_url | append: ')'
+              elsif value.swatch.color
+                assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+              endif
+            -%}
+
+            {%- assign meta_swatches = meta_swatches
+              | append: '$$$$'
+              | append: option_name_meta
+              | append: '####'
+              | append: value
+              | append: '@@@@'
+              | append: swatch_value
+            -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor %}
+
+  {% comment %} assign swatch_value = meta_swatches | split: option_name_with_value | last | split: '$$$$' | first {% endcomment %}
+  {%- assign test1234 = meta_swatches
+    | split: '$$$$1/2 Liter Stainless Steel Rite Press (Color)####Custom red@@@@'
+    | last
+    | split: '$$$$'
+  -%}
+  {%- assign test2345 = test1234 | first -%}
+  <script>
+    console.log({{ meta_swatches | json }})
+    console.log({{ test1234 | json }})
+    console.log({{ test2345 | json }})
+  </script>
+  <script>
+    console.log({{ '-------' | json }});
+  </script>
+{%- else -%}
+{%- endif -%}
 
 {%- capture size_chart -%}
   {%- if enable_size_chart -%}
@@ -177,7 +240,36 @@
     {%- unless product.has_only_default_variant -%}
       {%- assign selects_counter = 0 -%}
       <div class="product__selectors" data-product-variants>
+        {%- assign option_product_name_last = '' -%}
+        {%- assign is_option_name_visible = true -%}
         {%- for option in product.options_with_values -%}
+          {% comment %} {%- assign option_name_test = '2016 Merlot Reserve (Gift Wrap)' -%} {% endcomment %}
+          {% comment %} {%- assign option_name_test = '20 colors - available (Color)' -%} {% endcomment %}
+          {%- assign option_name_test = 'Ace Jersey Pocket Polo - double variant (Size)' -%}
+          {%- if forloop.index0 == 1 -%}
+            {% comment %} {%- assign option_name_test = '1/2 Liter Stainless Steel Rite Press (Color)' -%} {% endcomment %}
+            {% comment %} {%- assign option_name_test = '1/2 Liter Stainless Steel Rite Press (Color)' -%} {% endcomment %}
+             {%- assign option_name_test = 'Ace Jersey Pocket Polo - double variant (Color)' -%}
+          {%- endif -%}
+
+          {%- if forloop.index0 == 2 -%}
+            {% comment %} {%- assign option_name_test = '1/2 Liter Stainless Steel Rite Press (Color)' -%} {% endcomment %}
+            {%- assign option_name_test = '1/2 Liter Stainless Steel Rite Press (Color)' -%}
+          {%- endif -%}
+
+          {%- assign option_title = option_name_test | split: '(' | last | split: ')' | first -%}
+          {%- assign option_product_name = option_name_test | split: '(' | first | strip -%}
+          {%- assign next_index = forloop.index0 | plus: 1 -%}
+          {%- assign next_option = product.options_with_values[next_index] -%}
+          {%- assign next_option_product_name = next_option.name | split: '(' | first | strip -%}
+
+          {%- if option_product_name_last == '' or option_product_name_last != option_product_name -%}
+            {%- assign option_product_name_last = option_product_name -%}
+            {%- assign is_option_name_visible = true -%}
+          {%- else -%}
+            {%- assign is_option_name_visible = false -%}
+          {%- endif -%}
+
           {%- liquid
             assign option_name_handle_separator = option.name | handle | prepend: ',' | append: ','
 
@@ -207,6 +299,10 @@
                   break
                 endif
               endfor
+
+              if is_bundle and meta_swatches contains option_name_test
+                assign is_native_swatch_option = true
+              endif
             endif
           -%}
 
@@ -234,6 +330,10 @@
                 capture radio_fieldset_class
                   echo 'radio__fieldset'
 
+                  if option_product_name == next_option_product_name
+                    echo ' radio__fieldset--no-border'
+                  endif
+
                   if is_native_swatch_option
                     echo ' radio__fieldset--swatches'
                   endif
@@ -254,14 +354,25 @@
                 <div class="{{ radio_fieldset_class }}">
                   <legend class="radio__legend{% if is_size_option and size_chart_link and show_size_link_separated == false %} radio__legend--size{% endif %}">
                     <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}">
-                      <span class="radio__legend__option-name">{{ option.name }}</span>
+                      <span class="radio__legend__option-name">
+                        {%- if is_bundle -%}
+                          {%- if is_option_name_visible -%}
+                            {{ option_product_name }}
+                          {%- endif -%}
+                        {%- else -%}
+                          {{ option.name }}
+                        {%- endif -%}
+                      </span>
 
                       {%- if is_size_option -%}
                         {{- size_chart_link -}}
                       {%- endif -%}
 
                       {%- if settings.show_labels -%}
-                        <small class="radio__legend__value" data-option-value>{{ current_value }}</small>
+                        <small class="radio__legend__value">
+                          {% if is_bundle %}{{ option_title }}: {% endif %}
+                          <span data-option-value>{{ current_value }}</span>
+                        </small>
                       {%- endif -%}
                     </span>
                   </legend>
@@ -271,7 +382,10 @@
                       {%- capture input_id -%}{{ uniq_id }}-{{ option.name | handle }}-{{ value | strip_html | escape | handle }}-{{ forloop.index }}{%- endcapture -%}
                       {%- if is_native_swatch_option -%}
                         {%- liquid
-                          if is_native_swatch_option
+                          if is_bundle
+                            assign option_name_with_value = option_name_test | append: '####' | append: value | append: '@@@@'
+                            assign swatch_value = meta_swatches | split: option_name_with_value | last | split: '$$$$' | first
+                          else
                             if value.swatch.image
                               assign image_url = value.swatch.image | image_url: width: 96
                               assign swatch_value = 'url(' | append: image_url | append: ')'
@@ -291,7 +405,9 @@
                         <tooltip-component
                           data-tooltip="{{ value | escape | capitalize }}"
                           class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
-                          {% if is_native_swatch_option %}style="--swatch: {{ swatch_value }};"{% endif %}
+                          {%- if swatch_value != blank -%}
+                            style="--swatch: {{ swatch_value }};"
+                          {%- endif -%}
                         >
 
                           <input type="radio"
@@ -306,7 +422,6 @@
                             <span class="visually-hidden">{{ value }}</span>
                           </label>
                         </tooltip-component>
-
                       {%- else -%}
                         {% comment %} radio button {% endcomment %}
                         <span class="radio__button"{% if has_variant_option_image %} data-variant-option-image{% endif %}>
