@@ -47,7 +47,6 @@ const selectors = {
   remainingWrapper: '[data-remaining-wrapper]',
   remainingJSON: '[data-product-remaining-json]',
   optionValue: '[data-option-value]',
-  optionPosition: '[data-option-position]',
   installment: '[data-product-form-installment]',
   inputId: 'input[name="id"]',
   bundleModalButton: '[data-bundle-modal-button]',
@@ -70,7 +69,7 @@ const attributes = {
   notificationPopup: 'data-notification-popup',
   faderDesktop: 'data-fader-desktop',
   faderMobile: 'data-fader-mobile',
-  optionPosition: 'data-option-position',
+  optionValue: 'data-option-value',
   imageId: 'data-image-id',
   mediaId: 'data-media-id',
   quickAddButton: 'data-quick-add-btn',
@@ -715,13 +714,10 @@ class ProductForm extends HTMLElement {
       const optionValues = this.container.querySelectorAll(selectors.optionValue);
       if (optionValues.length) {
         optionValues.forEach((optionValue) => {
-          const selectorWrapper = optionValue.closest(selectors.optionPosition);
-          if (selectorWrapper) {
-            const optionPosition = selectorWrapper.getAttribute(attributes.optionPosition);
-            const optionIndex = parseInt(optionPosition, 10) - 1;
-            const selectedOptionValue = variant.options[optionIndex];
-            optionValue.innerHTML = selectedOptionValue;
-          }
+          const optionPosition = optionValue.getAttribute(attributes.optionValue);
+          const optionIndex = parseInt(optionPosition, 10) - 1;
+          const selectedOptionValue = variant.options[optionIndex];
+          optionValue.innerHTML = selectedOptionValue;
         });
       }
     }
