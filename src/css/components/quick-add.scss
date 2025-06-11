@@ -1,0 +1,229 @@
+/**
+ * Quick add
+ */
+
+@use "@/css/settings/variables" as *;
+@use "@/css/tools/mixins" as *;
+
+.quick-add__holder {
+  --btn-text: var(--accent);
+
+  position: absolute;
+  bottom: 0;
+  z-index: 10;
+  width: 100%;
+  background: var(--TRANSPARENT);
+  border-top: none;
+  text-align: center;
+  pointer-events: auto;
+
+  @include media-query ($medium-up) {
+    backdrop-filter: blur(5px);
+  }
+}
+
+.no-touch {
+  .product-item__image:hover {
+    .quick-add__button {
+      visibility: visible;
+    }
+  }
+
+  @include media-query ($medium-up) {
+    body.is-focused .quick-add__button {
+      visibility: visible;
+      transition: none;
+    }
+
+    .quick-add__holder {
+      opacity: 0;
+      animation: slideOutDown 0.25s ease;
+    }
+
+    .quick-add__button {
+      visibility: hidden;
+      transition: visibility 0.5s;
+
+      &.has-error {
+        animation: slideToggle 3s ease;
+        animation-fill-mode: forwards;
+      }
+    }
+
+    .product-item__image:hover {
+      .quick-add__holder:not(.is-disabled) {
+        animation: slideInUp 0.25s ease;
+        animation-fill-mode: forwards;
+      }
+    }
+
+    body.is-focused .quick-add__holder:focus-within,
+    .quick-add__holder.is-visible,
+    .quick-add__holder.has-error {
+      animation: slideInUp 0.25s ease;
+      animation-fill-mode: forwards;
+    }
+
+    .quick-add__holder.is-disabled {
+      animation: slideOutDown 0.25s ease;
+    }
+
+    .quick-add__holder.is-disabled .quick-add__button {
+      visibility: hidden;
+    }
+
+    .has-error>.quick-add__button {
+      @include media-query($medium-down) {
+        visibility: visible;
+        display: block;
+        max-height: none;
+        padding: 15px;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.quick-add__holder.is-disabled {
+  pointer-events: none;
+}
+
+.quick-add__button {
+  color: var(--COLOR-QUICK-ADD-TEXT);
+
+  &.is-visible,
+  &.is-loading,
+  &.is-added {
+    visibility: visible;
+  }
+
+  &.is-disabled {
+    pointer-events: none;
+  }
+
+  .btn__plus {
+    color: var(--accent);
+  }
+
+  @include media-query($medium-up) {
+    position: relative;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    padding: 15px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: none;
+
+    &::after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      top: 0;
+      left: 0;
+      position: absolute;
+      opacity: 0.7;
+      background: var(--COLOR-QUICK-ADD-BG);
+    }
+
+    .btn__plus {
+      display: none;
+    }
+  }
+
+  @include media-query($small) {
+    --btn-size: 36px;
+    --btn-offset: 5px;
+
+    position: absolute;
+    bottom: var(--btn-offset);
+    left: var(--btn-offset);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    border-radius: var(--radius);
+    // Always use global colors here
+    background: var(--bg);
+    pointer-events: auto;
+    font-size: 0;
+    z-index: 1;
+
+    // Make clickable are bigger
+    &::after {
+      content: "";
+      position: absolute;
+      top: calc(var(--btn-offset) * -1);
+      left: calc(var(--btn-offset) * -1);
+      width: calc(var(--btn-size) + var(--btn-offset) * 2);
+      height: calc(var(--btn-size) + var(--btn-offset) * 2);
+      z-index: -1;
+      opacity: 0;
+    }
+
+    .has-error & {
+      width: auto;
+      right: var(--btn-offset);
+
+      .btn__error {
+        font-size: var(--BTN-FONT-SIZE);
+      }
+    }
+
+    .btn__text {
+      display: none;
+    }
+  }
+}
+
+.quick-add__button>span {
+  pointer-events: none;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideToggle {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}

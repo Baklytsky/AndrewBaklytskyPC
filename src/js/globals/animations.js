@@ -125,7 +125,7 @@ function anchorsIntersectionObserver() {
 }
 
 function initAnchorObservers(anchors) {
-  if (!anchors.length) return;
+  if (!anchors.length || Shopify.visualPreviewMode) return;
 
   anchors.forEach((anchor) => {
     const containerId = anchor.dataset.aosAnchor;

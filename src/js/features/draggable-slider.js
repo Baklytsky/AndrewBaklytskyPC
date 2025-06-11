@@ -1,17 +1,3 @@
-const classes = {
-  dragging: 'is-dragging',
-  enabled: 'is-enabled',
-  scrolling: 'is-scrolling',
-  visible: 'is-visible',
-};
-
-const selectors = {
-  image: 'img, svg',
-  productImage: '[data-product-image]',
-  slide: '[data-grid-item]',
-  slider: '[data-grid-slider]',
-};
-
 export class DraggableSlider {
   constructor(sliderElement) {
     this.slider = sliderElement;
@@ -37,7 +23,7 @@ export class DraggableSlider {
     this.slider.addEventListener('mousemove', this.handleMouseMove);
     this.slider.addEventListener('wheel', this.handleMouseWheel, {passive: true});
 
-    this.slider.classList.add(classes.enabled);
+    this.slider.classList.add('is-enabled');
   }
 
   handleMouseDown(e) {
@@ -69,7 +55,7 @@ export class DraggableSlider {
     const prevScrollLeft = this.slider.scrollLeft;
     const direction = walk > 0 ? 1 : -1;
 
-    this.slider.classList.add(classes.dragging, classes.scrolling);
+    this.slider.classList.add('is-dragging', 'is-scrolling');
     this.slider.scrollLeft = this.scrollLeft - walk;
 
     if (this.slider.scrollLeft !== prevScrollLeft) {
@@ -79,12 +65,12 @@ export class DraggableSlider {
 
   handleMouseWheel() {
     this.cancelMomentumTracking();
-    this.slider.classList.remove(classes.scrolling);
+    this.slider.classList.remove('is-scrolling');
   }
 
   beginMomentumTracking() {
     this.isScrolling = false;
-    this.slider.classList.remove(classes.dragging);
+    this.slider.classList.remove('is-dragging');
     this.cancelMomentumTracking();
     this.scrollToSlide();
   }
@@ -96,7 +82,7 @@ export class DraggableSlider {
   scrollToSlide() {
     if (!this.velX && !this.isScrolling) return;
 
-    const slide = this.slider.querySelector(`${selectors.slide}.${classes.visible}`);
+    const slide = this.slider.querySelector('[data-grid-item].is-visible');
     if (!slide) return;
 
     const gap = parseInt(window.getComputedStyle(slide).marginRight) || 0;
@@ -133,7 +119,7 @@ export class DraggableSlider {
     if (currentTime < this.duration) {
       this.scrollAnimation = requestAnimationFrame(this.scrollStep);
     } else {
-      this.slider.classList.remove(classes.scrolling);
+      this.slider.classList.remove('is-scrolling');
 
       // Reset velocity
       this.velX = 0;
@@ -148,7 +134,7 @@ export class DraggableSlider {
   }
 
   destroy() {
-    this.slider.classList.remove(classes.enabled);
+    this.slider.classList.remove('is-enabled');
     this.slider.removeEventListener('mousedown', this.handleMouseDown);
     this.slider.removeEventListener('mouseleave', this.handleMouseLeave);
     this.slider.removeEventListener('mouseup', this.handleMouseUp);
