@@ -67,6 +67,8 @@ jobs:
             --exclude='.github/' \
             --exclude='.shopify/' \
             --exclude='.vscode/' \
+            --exclude='assets/.vite' \
+            --exclude='assets/.vite/manifest.json' \
             --exclude='dist/' \
             --exclude='lib/' \
             --exclude='node_modules/' \
@@ -112,19 +114,19 @@ jobs:
         git add .
         git commit -m "Update the compiled theme files from (commit $GITHUB_SHA)" || { echo "No changes to commit"; exit 0; }
 
-        # Push to the carbon-dist repository using SSH
-        git push origin $BRANCH_NAME
+        # Push the branch to the repositoryAdd commentMore actions
+        git push -u dist $BRANCH_NAME
 
-        # Create a pull request using the GitHub API
-        PR_RESPONSE=$(curl -X POST \
-          -H "Authorization: token ${{ secrets.GH_PAT }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/presidiocreative/carbon-dist/pulls \
-          -d '{
-            "title": "Update theme files (commit '"$GITHUB_SHA"')",
-            "body": "This PR updates the theme files from the carbon repository (commit '"$GITHUB_SHA"').",
-            "head": "'"$BRANCH_NAME"'",
-            "base": "main"
-          }')
+        # Install GitHub CLI
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
 
-        echo "Pull request created: $(echo $PR_RESPONSE | grep -o '"html_url": "[^"]*' | cut -d'"' -f4)"
+        # Create a pull request
+        gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+        gh pr create --repo presidiocreative/carbon-dist \
+          --base main \
+          --head $BRANCH_NAME \
+          --title "Update theme files (commit $GITHUB_SHA)" \
+          --body "This PR updates the theme files from the carbon repository (commit $GITHUB_SHA)."
