@@ -1,0 +1,96 @@
+name: Deploy theme files to carbon-dist repository
+description: |
+  This workflow builds the theme files and deploys them to the carbon-dist repository.
+  It runs on pushes to the main branch, excluding changes to markdown files and certain directories.
+
+on:
+  push:
+    branches: [main, starter-vite-spike]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.vscode/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - name: Get npm cache directory path
+      id: npm-cache-dir-path
+      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+    - uses: actions/cache@v4
+      id: npm-cache
+      with:
+        path: |
+          ${{ steps.npm-cache-dir-path.outputs.dir }}
+          'node_modules'
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+    - run: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+    - name: "Build assets"
+      run: npm run build
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        pwd
+
+    - name: Remove existing carbon-dist folder if it exists
+      run: |
+        if [ -d "carbon-dist" ]; then
+          rm -rf carbon-dist
+        fi
+
+    - name: Clone target repository
+      run: |
+        cd ~/
+        git clone git@github.com:presidiocreative/carbon-dist.git carbon-dist
+
+    - name: Sync root directory contents to the root of carbon-dist repository
+      run: |
+        # Ensure the carbon directory exists
+        if [ -d ~/work/carbon/carbon ]; then
+          rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.shopify/' \
+            --exclude='.vscode/' \
+            --exclude='dist/' \
+            --exclude='lib/' \
+            --exclude='node_modules/' \
+            --exclude='src/' \
+            --exclude='upload/' \
+            --exclude='.eslintignore' \
+            --exclude='.eslintrc' \
+            --exclude='.gitignore' \
+            --exclude='.nvmrc' \
+            --exclude='.prettierignore' \
+            --exclude='.shopifyignore' \
+            --exclude='.stylelintignore' \
+            --exclude='.stylelintrc' \
+            --exclude='*.js.map' \
+            ~/work/carbon/carbon/ ~/carbon-dist/
+        else
+          echo "Carbon directory not found, skipping sync."
+          exit 1
+        fi
+        # Commit and push changes
+        cd ~/carbon-dist
+        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-dist.git
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Update the compiled theme files from (commit $GITHUB_SHA)" || echo "No changes to commit"
+        git push origin main
