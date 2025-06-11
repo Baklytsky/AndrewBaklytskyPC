@@ -80,18 +80,29 @@ jobs:
             --exclude='.shopifyignore' \
             --exclude='.stylelintignore' \
             --exclude='.stylelintrc' \
+            --exclude='.prettierrc.js' \
+            --exclude='.theme-check.yml' \
+            --exclude='README.md' \
+            --exclude='jsconfig.json' \
+            --exclude='package-lock.json' \
+            --exclude='package.json' \
+            --exclude='postcss.config.js' \
+            --exclude='release-notes.md' \
+            --exclude='rollup.config.js' \
+            --exclude='shopify.theme.toml.example' \
+            --exclude='vite.config.js' \
+            --exclude='yarn.lock' \
             --exclude='*.js.map' \
             ~/work/carbon/carbon/ ~/carbon-dist/
         else
           echo "Carbon directory not found, skipping sync."
           exit 1
         fi
-        # Create a new branch, commit and create PR
+        # Create a new branch and commit changes
         cd ~/carbon-dist
         # Create a unique branch name using the GitHub run ID and timestamp
         BRANCH_NAME="update-theme-files-$GITHUB_RUN_ID-$(date +%s)"
 
-        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-dist.git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -101,19 +112,19 @@ jobs:
         git add .
         git commit -m "Update the compiled theme files from (commit $GITHUB_SHA)" || { echo "No changes to commit"; exit 0; }
 
-        # Push the branch to the repository
-        git push -u dist $BRANCH_NAME
+        # Push to the carbon-dist repository using SSH
+        git push origin $BRANCH_NAME
 
-        # Install GitHub CLI
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        sudo apt update
-        sudo apt install gh
+        # Create a pull request using the GitHub API
+        PR_RESPONSE=$(curl -X POST \
+          -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/presidiocreative/carbon-dist/pulls \
+          -d '{
+            "title": "Update theme files (commit '"$GITHUB_SHA"')",
+            "body": "This PR updates the theme files from the carbon repository (commit '"$GITHUB_SHA"').",
+            "head": "'"$BRANCH_NAME"'",
+            "base": "main"
+          }')
 
-        # Create a pull request
-        gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
-        gh pr create --repo presidiocreative/carbon-dist \
-          --base main \
-          --head $BRANCH_NAME \
-          --title "Update theme files (commit $GITHUB_SHA)" \
-          --body "This PR updates the theme files from the carbon repository (commit $GITHUB_SHA)."
+        echo "Pull request created: $(echo $PR_RESPONSE | grep -o '"html_url": "[^"]*' | cut -d'"' -f4)"
