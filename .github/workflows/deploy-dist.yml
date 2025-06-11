@@ -37,7 +37,7 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
     - name: "Build assets"
-      run: npm run build
+      run: npm run build:assets
 
     - name: Set up SSH
       run: |
@@ -86,11 +86,34 @@ jobs:
           echo "Carbon directory not found, skipping sync."
           exit 1
         fi
-        # Commit and push changes
+        # Create a new branch, commit and create PR
         cd ~/carbon-dist
+        # Create a unique branch name using the GitHub run ID and timestamp
+        BRANCH_NAME="update-theme-files-$GITHUB_RUN_ID-$(date +%s)"
+
         git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-dist.git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Create and checkout a new branch
+        git checkout -b $BRANCH_NAME
+
         git add .
-        git commit -m "Update the compiled theme files from (commit $GITHUB_SHA)" || echo "No changes to commit"
-        git push origin main
+        git commit -m "Update the compiled theme files from (commit $GITHUB_SHA)" || { echo "No changes to commit"; exit 0; }
+
+        # Push the branch to the repository
+        git push -u dist $BRANCH_NAME
+
+        # Install GitHub CLI
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
+
+        # Create a pull request
+        gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+        gh pr create --repo presidiocreative/carbon-dist \
+          --base main \
+          --head $BRANCH_NAME \
+          --title "Update theme files (commit $GITHUB_SHA)" \
+          --body "This PR updates the theme files from the carbon repository (commit $GITHUB_SHA)."
