@@ -1,0 +1,34 @@
+{%- liquid
+  assign discount_codes = ''
+  if cart.cart_level_discount_applications.size > 0
+    for discount in cart.cart_level_discount_applications
+      assign discount_codes = discount_codes | append: ',' | append: discount.title
+    endfor
+  endif
+-%}
+{%- comment -%}
+  <button data-test-button="{{ discount_codes | remove_first: ',' }}">Test</button>
+{%- endcomment -%}
+<div class="cart__widget">
+  <label for="cart-discount">Discount</label>
+
+  <input
+    type="text"
+    id="cart-discount"
+    class="cart__field"
+    placeholder="{{ placeholder_field }}"
+    aria-label="{{ placeholder_field }}"
+    data-cart-discount-field
+  >
+
+  <button
+    class="btn btn--full btn--primary btn--solid"
+    data-cart-discount-button="{{ discount_codes }}"
+  >
+    <span>Apply</span>
+
+    {%- if button_show_arrow or small_newsletter -%}
+      {%- render 'icon-arrow-right' -%}
+    {%- endif -%}
+  </button>
+</div>

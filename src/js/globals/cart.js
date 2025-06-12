@@ -60,6 +60,8 @@ const selectors = {
   qtyInput: 'input[name="updates[]"]',
   termsErrorMessage: '[data-terms-error-message]',
   bundleRemoveButton: '[data-bundle-cart-remove]',
+  discountButton: '[data-cart-discount-button]',
+  discountField: '[data-cart-discount-field]',
   noscript: 'noscript',
 };
 
@@ -77,6 +79,7 @@ const attributes = {
   name: 'name',
   bundleRemoveButton: 'data-bundle-cart-remove',
   bundleQuantityField: 'data-bundle-cart-quantity',
+  discountButton: 'data-cart-discount-button',
 };
 
 class CartItems extends HTMLElement {
@@ -164,6 +167,8 @@ class CartItems extends HTMLElement {
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
     document.addEventListener('theme:cart:refresh', this.getCart.bind(this));
+
+    this.updateDiscount();
   }
 
   disconnectedCallback() {
@@ -292,12 +297,50 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
+        console.log(state);
         this.getCart();
       })
       .catch((error) => {
         console.log(error);
         this.enableCartButtons();
       });
+  }
+
+  /**
+   * Update discount in the cart
+   *
+   * @return  {Void}
+   */
+  updateDiscount() {
+    const discountButton = this.cart.querySelector(selectors.discountButton);
+    const discountField = this.cart.querySelector(selectors.discountField);
+
+    if (discountButton && discountField) {
+      discountButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newDiscountCode = discountField.value;
+
+        if (newDiscountCode !== '') {
+          const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
+          fetch(theme.routes.cart_update_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              discount: `${newDiscountCode}${existingDiscountCodes}`,
+            }),
+          })
+            .then((data) => {
+              this.getCart();
+              discountField.value = '';
+            })
+            .catch((error) => {
+              console.error('Test error:', error);
+            });
+        }
+      });
+    }
   }
 
   /**
