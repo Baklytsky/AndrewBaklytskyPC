@@ -1,3 +1,13 @@
+{% comment %}
+  Renders discount on Cart page and Cart drawer
+
+  Accepts:
+  - block: {Object} Block object (required)
+
+  Usage:
+  {% render 'cart-block-discount', block: block %}
+{% endcomment %}
+
 {%- liquid
   assign discount_codes = ''
   if cart.cart_level_discount_applications.size > 0
@@ -6,29 +16,37 @@
     endfor
   endif
 -%}
-{%- comment -%}
-  <button data-test-button="{{ discount_codes | remove_first: ',' }}">Test</button>
-{%- endcomment -%}
-<div class="cart__widget">
-  <label for="cart-discount">Discount</label>
 
-  <input
-    type="text"
-    id="cart-discount"
-    class="cart__field"
-    placeholder="{{ placeholder_field }}"
-    aria-label="{{ placeholder_field }}"
-    data-cart-discount-field
-  >
+<details
+  class="cart__widget accordion"
+  data-collapsible
+>
+  <summary class="cart__widget__title" data-collapsible-trigger>
+    Discount
 
-  <button
-    class="btn btn--full btn--primary btn--solid"
-    data-cart-discount-button="{{ discount_codes }}"
-  >
-    <span>Apply</span>
+    {%- render 'icon-plus' -%}
+    {%- render 'icon-minus' -%}
+  </summary>
 
-    {%- if button_show_arrow or small_newsletter -%}
-      {%- render 'icon-arrow-right' -%}
-    {%- endif -%}
-  </button>
-</div>
+  <div class="cart__widget__content" data-collapsible-body>
+    <div class="cart__widget__content__inner" data-collapsible-content>
+      <label for="cart-discount">Discount</label>
+
+      <input
+        type="text"
+        id="cart-discount"
+        class="cart__field"
+        placeholder="{{ placeholder_field }}"
+        aria-label="{{ placeholder_field }}"
+        data-cart-discount-field
+      >
+
+      <button
+        class="btn btn--full btn--primary btn--solid"
+        data-cart-discount-button="{{ discount_codes }}"
+      >
+        <span>Apply</span>
+      </button>
+    </div>
+  </div>
+</details>

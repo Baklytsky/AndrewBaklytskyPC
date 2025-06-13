@@ -297,7 +297,6 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
-        console.log(state);
         this.getCart();
       })
       .catch((error) => {
@@ -322,6 +321,7 @@ class CartItems extends HTMLElement {
 
         if (newDiscountCode !== '') {
           const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
+          this.disableCartButtons();
           fetch(theme.routes.cart_update_url, {
             method: 'POST',
             headers: {
@@ -336,7 +336,8 @@ class CartItems extends HTMLElement {
               discountField.value = '';
             })
             .catch((error) => {
-              console.error('Test error:', error);
+              console.log(error);
+              this.enableCartButtons();
             });
         }
       });
