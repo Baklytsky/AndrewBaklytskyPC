@@ -33,7 +33,9 @@
   endfor
 -%}
 
-{% liquid render 'vite-tag' with '@/js/components/quantity-counter.js' %}
+{% liquid
+  render 'vite-tag' with '@/js/components/quantity-counter.js'
+%}
 
 {%- capture cart_title -%}
   <h3 class="cart__title caps">
@@ -66,8 +68,6 @@
         </button>
       </div>
     </div>
-
-    <div class="drawer__items-title">{{ 'cart.general.products_with_count' | t: count: cart.item_count  }}</div>
 
     <cart-items class="drawer__items" data-items-holder style="--base-animation-delay: {{ animation_delay }}ms">
       {%- render 'cart-line-items' -%}
@@ -369,7 +369,9 @@
             {%- endif -%}
 
             {%- if settings.show_recently_viewed_products -%}
-              {% liquid render 'vite-tag' with '@/js/components/recently-viewed.js' %}
+              {% liquid
+                render 'vite-tag' with '@/js/components/recently-viewed.js'
+              %}
 
               <recently-viewed
                 class="drawer__empty__product hidden"
