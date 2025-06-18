@@ -25,7 +25,7 @@
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
   {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
-    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true -%}
+    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -112,7 +112,9 @@
       {%- endif -%}
 
       {%- if settings.show_recently_viewed_products -%}
-        {% liquid render 'vite-tag' with '@/js/components/recently-viewed.js' %}
+        {% liquid
+          render 'vite-tag' with '@/js/components/recently-viewed.js'
+        %}
 
         <recently-viewed
           class="cart__empty__product hidden"
@@ -421,6 +423,17 @@
           "type": "color_background",
           "id": "free_shipping_gradient",
           "label": "Custom progress bar gradient"
+        },
+        {
+          "type": "select",
+          "id": "align_text",
+          "label": "Text alignment",
+          "default": "text-left",
+          "options": [
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"},
+            {"value": "text-right", "label": "Right"}
+          ]
         }
       ]
     },
