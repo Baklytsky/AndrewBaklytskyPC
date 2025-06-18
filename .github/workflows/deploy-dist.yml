@@ -61,7 +61,7 @@ jobs:
     - name: Sync root directory contents to the root of carbon-external repository
       run: |
         # Ensure the carbon directory exists
-        if [ -d ~/work/carbon/carbon ]; then
+        if [ -d ~/work/carbon/carbon-internal ]; then
           rsync -av --delete \
             --exclude='.git/' \
             --exclude='.github/' \
@@ -95,7 +95,7 @@ jobs:
             --exclude='vite.config.js' \
             --exclude='yarn.lock' \
             --exclude='*.js.map' \
-            ~/work/carbon/carbon/ ~/carbon-external/
+            ~/work/carbon/carbon-internal/ ~/carbon-external/
         else
           echo "Carbon directory not found, skipping sync."
           exit 1
