@@ -281,43 +281,11 @@
   {%- endstyle -%}
 {%- endif -%}
 
-<<<<<<< HEAD:src/snippets/announcement.liquid
-{{ 'announcement.css' | asset_url | stylesheet_tag }}
-{%- if section.blocks.size > 0 -%}
-  <script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
-
-  {%- if request.design_mode -%}
-    <script>
-      document.addEventListener('shopify:block:select', (event) => {
-        // Pause ticker on block select
-        const ticker = event.target.matches('ticker-bar')
-          ? event.target
-          : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
-        if (ticker) {
-          ticker.setAttribute('paused', '');
-        }
-      });
-
-      document.addEventListener('shopify:block:deselect', (event) => {
-        // Resume ticker on block deselect
-        const ticker = event.target.matches('ticker-bar')
-          ? event.target
-          : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
-        if (ticker) {
-          ticker.removeAttribute('paused');
-        }
-      });
-    </script>
-  {%- endif -%}
-{%- endif -%}
-=======
 {% liquid
   render 'vite-tag' with '@/css/components/section-announcement.scss'
   render 'vite-tag' with '@/js/components/announcement.js'
   render 'vite-tag' with '@/js/components/ticker.js'
-  %}
->>>>>>> starter-vite-spike:snippets/announcement.liquid
+%}
 
 <div
   id="Announcement--{{ section.id }}"
