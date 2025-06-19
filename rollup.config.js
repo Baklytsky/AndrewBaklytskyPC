@@ -84,7 +84,7 @@ const config = {
           name: 'themeVendor',
           sourcemap: true,
           format: 'iife',
-          plugins: [terser()],
+          plugins: [production && terser()],
         },
       ],
       plugins: [
@@ -163,7 +163,7 @@ const config = {
           name: 'component',
           sourcemap: true,
           format: 'iife',
-          plugins: [],
+          plugins: [production && terser()],
         },
         plugins: [
           resolve({
@@ -213,7 +213,7 @@ const config = {
           sourcemap: false,
           banner: minifiedComment,
           globals: globalPackages,
-          plugins: [],
+          plugins: [production && terser()],
         },
       ],
       plugins: [
@@ -264,7 +264,7 @@ const config = {
           name: 'themeEditor',
           sourcemap: false,
           format: 'iife',
-          plugins: [],
+          plugins: [production && terser()],
         },
       ],
       plugins: [
@@ -323,7 +323,7 @@ const config = {
           name: 'component',
           sourcemap: false,
           format: 'iife',
-          plugins: [],
+          plugins: [production && terser()],
         },
         plugins: [
           resolve({
