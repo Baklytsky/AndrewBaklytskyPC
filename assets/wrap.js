@@ -1,2 +1,0 @@
-const l=(e,a="",s)=>{const r=document.createElement("div");return r.classList.add(a),e.parentNode.insertBefore(r,e),r.appendChild(e)};function c(e){e.querySelectorAll(".rte table").forEach(t=>{l(t,"rte__table-wrapper"),t.setAttribute("data-scroll-lock-scrollable","")}),e.querySelectorAll('.rte iframe[src*="youtube.com/embed"], .rte iframe[src*="player.vimeo"], .rte iframe#admin_bar_iframe').forEach(t=>{l(t,"rte__video-wrapper")})}export{c as w};
-//# sourceMappingURL=wrap.js.map

@@ -1,2 +1,0 @@
-const t={videoPlay:"data-video-play"};customElements.get("video-popup")||customElements.define("video-popup",class extends HTMLElement{constructor(){super()}connectedCallback(){var o;(o=this.querySelectorAll(`[${t.videoPlay}]`))==null||o.forEach(n=>{n.addEventListener("click",i=>{const e=i.currentTarget;if(e.getAttribute(t.videoPlay).trim()!==""){i.preventDefault();const s=[{html:e.getAttribute(t.videoPlay)}],a={mainClass:"pswp--video"};new window.theme.LoadPhotoswipe(s,a),window.theme.a11y.lastElement=e}})})}});
-//# sourceMappingURL=video-popup.js.map

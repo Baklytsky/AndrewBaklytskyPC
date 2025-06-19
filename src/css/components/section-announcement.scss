@@ -1,7 +1,10 @@
-// Announcement
+@use "sass:list";
+@use "sass:map";
+@use "sass:math";
+@use "sass:meta";
 
-@use "@/css/settings/variables" as *;
-@use "@/css/tools/mixins" as *;
+@import "../tools/mixins.scss";
+@import "../settings/variables.scss";
 
 announcement-bar {
   --padding: var(--padding-scrolling, var(--outer));
@@ -71,7 +74,7 @@ announcement-bar {
   padding: 0 var(--outer);
 }
 
-.announcement__slide>div {
+.announcement__slide> div {
   display: flex;
   min-height: var(--announcement-height);
   align-items: center;
@@ -102,7 +105,7 @@ announcement-bar {
   white-space: nowrap;
 }
 
-.announcement__slide:not(.announcement__bar)>* {
+.announcement__slide:not(.announcement__bar)> * {
   width: 100%;
 }
 
@@ -171,11 +174,11 @@ announcement-bar {
   padding: 0 var(--padding);
 }
 
-.announcement__text.ticker--animated>.announcement__slide:first-child {
+.announcement__text.ticker--animated> .announcement__slide:first-child {
   padding-left: 0;
 }
 
-.announcement__text.ticker--animated>.announcement__slide:last-child {
+.announcement__text.ticker--animated> .announcement__slide:last-child {
   padding-right: 0;
 }
 
@@ -187,18 +190,18 @@ announcement-bar {
   min-height: var(--announcement-height);
 }
 
-.announcement__text>div {
+.announcement__text> div {
   display: inline-flex;
   align-items: center;
 }
 
-.announcement__text>.mobile {
+.announcement__text> .mobile {
   @include media-query($medium-up) {
     display: none;
   }
 }
 
-.announcement__text>.desktop {
+.announcement__text> .desktop {
   @include media-query($small) {
     display: none;
   }
@@ -217,7 +220,7 @@ announcement-bar {
   position: relative;
 }
 
-.announcement__text .free-shipping circle+circle {
+.announcement__text .free-shipping circle+ circle {
   stroke: currentcolor;
 }
 
@@ -244,7 +247,7 @@ announcement-bar {
   width: max-content;
 }
 
-.announcement__bar-holder--slider>div {
+.announcement__bar-holder--slider> div {
   justify-content: var(--justify-content, center);
 }
 
@@ -291,6 +294,7 @@ swiper-container.announcement__slider {
   display: flex;
   flex-wrap: nowrap;
   overflow: auto;
+
   @include hide-scrollbar;
 
   swiper-slide {
@@ -335,7 +339,6 @@ swiper-container.announcement__slider {
 }
 
 .announcement__bar-outer:not(:hover) {
-
   .is-selected ticker-bar:not([paused]) .ticker--animated,
   ticker-bar[autoplay]:not([paused]) .ticker--animated,
   ticker-bar[data-slide]:not([paused]) .ticker--animated {
@@ -344,7 +347,6 @@ swiper-container.announcement__slider {
 }
 
 html.supports-touch {
-
   .is-selected ticker-bar:not([paused]) .ticker--animated,
   ticker-bar[autoplay]:not([paused]) .ticker--animated,
   ticker-bar[data-slide]:not([paused]) .ticker--animated {

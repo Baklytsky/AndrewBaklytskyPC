@@ -1,2 +1,0 @@
-customElements.get("parallax-hero")||customElements.define("parallax-hero",class extends HTMLElement{constructor(){super()}connectedCallback(){const e=this.querySelector("[data-parallax-img]"),l=this;e&&(this.rellax=new window.theme.LoadRellax(l,e),window.addEventListener("load",()=>{typeof this.rellax.refresh=="function"&&this.rellax.refresh()}))}disconnectedCallback(){typeof this.rellax.refresh=="function"&&this.rellax.refresh()}});
-//# sourceMappingURL=parallax-hero.js.map

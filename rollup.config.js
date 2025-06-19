@@ -45,12 +45,10 @@ const developmentComment = `
 
 const globalPackages = {
   '@shopify/theme-rte': 'themeVendor.themeRte',
-  flickity: 'themeVendor.Flickity',
-  'flickity-fade': 'themeVendor.FlickityFade',
   'scroll-lock': 'themeVendor.ScrollLock',
 };
 
-const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'flickity', 'flickity-fade', 'scroll-lock'];
+const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'scroll-lock'];
 
 const config = {
   development: [
