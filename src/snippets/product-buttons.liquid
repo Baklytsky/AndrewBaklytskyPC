@@ -1,5 +1,6 @@
 {%- liquid
   assign onboarding_product = onboarding_product | default: false
+  assign featured_product_bundle = featured_product_bundle | default: false
   assign buybutton_setting = false
   assign current_variant = product.selected_or_first_available_variant
   assign gift_card_recipient_feature_active = false
@@ -177,6 +178,12 @@
           {%- if buybutton_setting and onboarding_product == false -%}
             <div class="product__submit__item {{ block.settings.button_type_dynamic }} {{ block.settings.button_size_dynamic }} {{ block.settings.button_style_dynamic }}">
               {{ form | payment_button }}
+            </div>
+          {%- endif -%}
+
+          {%- if featured_product_bundle -%}
+            <div class="product__submit__link text-center">
+              <a href="{{ product.url }}" class="text-link small">{{ 'products.general.bundle_link' | t }}</a>
             </div>
           {%- endif -%}
         </div>

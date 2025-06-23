@@ -1,34 +1,33 @@
 <!-- /sections/section-product-bundle-form.liquid -->
 
-{%- render 'product', bundle_product: true -%}
+{%- render 'product',
+  product: all_products[section.settings.product],
+  featured_product: true,
+  featured_product_bundle: true
+-%}
 
 {% schema %}
 {
   "name": "Product bundle form",
-  "class": "section-overlay-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
     {
       "type": "header",
       "content": "Layout"
     },
     {
       "type": "checkbox",
-      "id": "product_sticky_enable",
-      "label": "Enable sticky form",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "variant_image_scroll",
-      "label": "Enable product image variant scroll",
-      "info": "Clicking a variant scrolls user to assigned image",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_cart_bar",
-      "label": "Enable cart bar",
-      "default": true
+      "id": "reverse_layout",
+      "label": "Reverse layout",
+      "default": false
     },
     {
       "type": "header",
@@ -55,14 +54,11 @@
       "type": "select",
       "id": "image_layout",
       "label": "Product gallery",
-      "default": "stacked",
+      "default": "thumbnails",
       "options": [
         {"value": "thumbnails", "label": "Thumbnails - Bottom"},
         {"value": "thumbnails-left", "label": "Thumbnails - Left"},
-        {"value": "thumbnails-right", "label": "Thumbnails - Right"},
-        {"value": "stacked", "label": "Stacked"},
-        {"value": "grid-1", "label": "Mosaic"},
-        {"value": "grid-2", "label": "Grid"}
+        {"value": "thumbnails-right", "label": "Thumbnails - Right"}
       ],
       "info": "Desktop only"
     },
@@ -144,18 +140,6 @@
   "blocks": [
     {
       "type": "@app"
-    },
-    {
-      "type": "product_bundle",
-      "name": "Product bundle",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "product_list",
-          "id": "product_bundle",
-          "label": "Product bundle"
-        }
-      ]
     },
     {
       "type": "title",
@@ -298,6 +282,12 @@
       "limit": 1,
       "settings": [
         {
+          "type": "checkbox",
+          "id": "show_quantity",
+          "label": "Show quantity selector",
+          "default": true
+        },
+        {
           "type": "header",
           "content": "Add to cart button"
         },
@@ -315,17 +305,6 @@
         },
         {
           "type": "select",
-          "id": "button_size",
-          "label": "Size",
-          "default": "",
-          "options": [
-            {"label": "Small", "value": "btn--small"},
-            {"label": "Medium", "value": ""},
-            {"label": "Large", "value": "btn--large"}
-          ]
-        },
-        {
-          "type": "select",
           "id": "button_style",
           "label": "Style",
           "default": "btn--solid",
@@ -333,6 +312,50 @@
             {"label": "Solid", "value": "btn--solid"},
             {"label": "Outline", "value": "btn--outline"}
           ]
+        },
+        {
+          "type": "header",
+          "content": "Dynamic checkout button"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_payment_button",
+          "label": "Show dynamic checkout buttons",
+          "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https://help.shopify.com/en/manual/online-store/os/dynamic-checkout)",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "button_type_dynamic",
+          "label": "Color",
+          "default": "btn--secondary",
+          "options": [
+            {"value": "btn--black", "label": "Black"},
+            {"value": "btn--white", "label": "White"},
+            {"value": "btn--primary", "label": "Primary"},
+            {"value": "btn--secondary", "label": "Secondary"}
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_style_dynamic",
+          "label": "Style",
+          "default": "btn--solid",
+          "options": [
+            {"label": "Solid", "value": "btn--solid"},
+            {"label": "Outline", "value": "btn--outline"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Gift card"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_gift_card_recipient",
+          "label": "Show recipient information form for gift card products",
+          "default": false,
+          "info": "Gift card products can optionally be sent direct to a recipient along with a personal message."
         },
         {
           "type": "header",
@@ -378,146 +401,15 @@
       ]
     },
     {
-      "type": "tab_richtext",
-      "name": "Tabs",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "checkbox",
-          "id": "show_description",
-          "label": "Show description",
-          "default": true
-        },
-        {
-          "type": "checkbox",
-          "id": "show_read_more",
-          "label": "Show read more button",
-          "default": false
-        },
-        {
-          "type": "text",
-          "id": "title_1",
-          "label": "Tab heading",
-          "default": "Tab"
-        },
-        {
-          "type": "richtext",
-          "id": "raw_content_1",
-          "label": "Tab text",
-          "default": "<p>This content type will accept <strong>rich text</strong> to help with adding styles and links to additional pages or content. Use this to add supplementary information to help your buyers.</p>"
-        },
-        {
-          "type": "text",
-          "id": "title_2",
-          "label": "Tab heading",
-          "default": "Info"
-        },
-        {
-          "type": "richtext",
-          "id": "raw_content_2",
-          "label": "Tab text",
-          "default": "<p>You can use product metafields to assign content to this tab that is unique to an individual product.  Use tabs to highlight unique features, sizing information, or other sales information.</p>"
-        },
-        {
-          "type": "text",
-          "id": "title_3",
-          "label": "Tab heading"
-        },
-        {
-          "type": "richtext",
-          "id": "raw_content_3",
-          "label": "Tab text"
-        },
-        {
-          "type": "text",
-          "id": "title_4",
-          "label": "Tab heading"
-        },
-        {
-          "type": "richtext",
-          "id": "raw_content_4",
-          "label": "Tab text"
-        },
-        {
-          "type": "text",
-          "id": "title_5",
-          "label": "Tab heading"
-        },
-        {
-          "type": "richtext",
-          "id": "raw_content_5",
-          "label": "Tab text"
-        },
-        {
-          "type": "header",
-          "content": "Padding"
-        },
-        {
-          "type": "range",
-          "id": "padding_bottom",
-          "min": 0,
-          "max": 50,
-          "step": 2,
-          "unit": "px",
-          "label": "Bottom",
-          "default": 0
-        }
-      ]
-    },
-    {
-      "type": "accordion",
-      "name": "Accordion",
-      "settings": [
-        {
-          "type": "checkbox",
-          "id": "show_description",
-          "label": "Show description",
-          "default": false
-        },
-        {
-          "type": "checkbox",
-          "id": "show_read_more",
-          "label": "Show read more button",
-          "default": true
-        },
-        {
-          "type": "checkbox",
-          "id": "default_open",
-          "label": "Open by default",
-          "default": false
-        },
-        {
-          "type": "text",
-          "id": "heading",
-          "label": "Heading",
-          "default": "Accordion"
-        },
-        {
-          "type": "richtext",
-          "id": "text",
-          "label": "Text",
-          "default": "<p>This content type will accept <strong>rich text</strong> to help with adding styles and links to additional pages or content. Use this to add supplementary information to help your buyers.</p>"
-        },
-        {
-          "type": "header",
-          "content": "Padding"
-        },
-        {
-          "type": "range",
-          "id": "padding_bottom",
-          "min": 0,
-          "max": 50,
-          "step": 2,
-          "unit": "px",
-          "label": "Bottom",
-          "default": 0
-        }
-      ]
-    },
-    {
       "type": "text",
       "name": "Text",
       "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Have questions?"
+        },
         {
           "type": "richtext",
           "id": "text",
@@ -526,13 +418,19 @@
         },
         {
           "type": "select",
-          "id": "align_text",
-          "label": "Text alignment",
-          "default": "text-left",
+          "id": "layout",
+          "label": "Layout",
           "options": [
-            {"value": "text-left", "label": "Left"},
-            {"value": "text-center", "label": "Centered"}
-          ]
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "inline",
+              "label": "In-line"
+            }
+          ],
+          "default": "left"
         },
         {
           "type": "header",
@@ -557,10 +455,7 @@
       "category": "Product",
       "blocks": [
         {
-          "type": "title",
-          "settings": {
-            "subheading_option": "breadcrumb"
-          }
+          "type": "title"
         },
         {
           "type": "price"
@@ -570,9 +465,6 @@
         },
         {
           "type": "buttons"
-        },
-        {
-          "type": "tab_richtext"
         }
       ]
     }

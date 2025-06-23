@@ -288,6 +288,14 @@
             assign option_product_image = option_product_details | first
             assign option_product_url = option_product_details | last
 
+            if forloop.first
+              assign prev_option_product_name = ''
+            endif
+
+            if forloop.last
+              assign next_option_product_name = ''
+            endif
+
             if is_bundle
               assign option_name = option_title
               if option_product_name != prev_option_product_name
@@ -329,6 +337,20 @@
               endif
             endif
 
+            comment
+              Determine if current option should show images
+            endcomment
+            if settings.show_variant_image
+              assign has_variant_option_image = false
+
+              assign variant_option_image_translation = 'products.product.variant_option_image' | t
+              assign translation_string_variant_option_image = variant_option_image_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+
+              if translation_string_variant_option_image contains option_name_handle_separator
+                assign has_variant_option_image = true
+              endif
+            endif
+
             capture fieldset_class
               if settings.variant_lines or is_native_swatch_option
                 echo 'radio__fieldset'
@@ -350,22 +372,6 @@
                 echo 'select__fieldset'
               endif
             endcapture
-          -%}
-
-          {%- comment -%}
-            Determine if current option should show images
-          {%- endcomment -%}
-          {%- liquid
-            if settings.show_variant_image
-              assign has_variant_option_image = false
-
-              assign variant_option_image_translation = 'products.product.variant_option_image' | t
-              assign translation_string_variant_option_image = variant_option_image_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
-
-              if translation_string_variant_option_image contains option_name_handle_separator
-                assign has_variant_option_image = true
-              endif
-            endif
           -%}
 
           {%- capture options_html -%}
