@@ -10,24 +10,24 @@ jobs:
         node-version-file: '.nvmrc'
         always-auth: true
         registry-url: https://npm.pkg.github.com/
-    - name: Get npm cache directory path
-      id: npm-cache-dir-path
-      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - uses: actions/cache@v4
-      id: npm-cache
+      id: yarn-cache
       with:
         path: |
-          ${{ steps.npm-cache-dir-path.outputs.dir }}
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
           'node_modules'
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-npm-
-    - run: npm install
+          ${{ runner.os }}-yarn-v3-
+    - run: yarn install
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
-    - run: npm run zip
+    - run: yarn zip
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ vars.THEME_NAME }}-zip
-        path: upload/*.zip
+        path: dist/*
         retention-days: 5
