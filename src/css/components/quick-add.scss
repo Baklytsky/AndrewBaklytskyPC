@@ -18,24 +18,22 @@
 }
 
 .no-touch {
-  .product-item__image:hover {
-    .quick-add__button {
-      visibility: visible;
-    }
+  .product-item:not(.product-item--bundle) .product-item__image:hover {
+    .quick-add__button { visibility: visible; }
   }
 
   @include media-query ($medium-up) {
-    body.is-focused .quick-add__button {
+    body.is-focused .product-item:not(.product-item--bundle) .quick-add__button {
       visibility: visible;
       transition: none;
     }
 
-    .quick-add__holder {
+    .product-item:not(.product-item--bundle) .quick-add__holder {
       opacity: 0;
       animation: slideOutDown 0.25s ease;
     }
 
-    .quick-add__button {
+    .product-item:not(.product-item--bundle) .quick-add__button {
       visibility: hidden;
       transition: visibility 0.5s;
 
@@ -45,29 +43,23 @@
       }
     }
 
-    .product-item__image:hover {
+    .product-item:not(.product-item--bundle) .product-item__image:hover {
       .quick-add__holder:not(.is-disabled) {
         animation: slideInUp 0.25s ease;
         animation-fill-mode: forwards;
       }
     }
 
-    body.is-focused .quick-add__holder:focus-within,
-    .quick-add__holder.is-visible,
-    .quick-add__holder.has-error {
+    body.is-focused .product-item:not(.product-item--bundle) .quick-add__holder:focus-within,
+    .product-item:not(.product-item--bundle) .quick-add__holder.is-visible,
+    .product-item:not(.product-item--bundle) .quick-add__holder.has-error {
       animation: slideInUp 0.25s ease;
       animation-fill-mode: forwards;
     }
+    .product-item:not(.product-item--bundle) .quick-add__holder.is-disabled { animation: slideOutDown 0.25s ease; }
+    .product-item:not(.product-item--bundle) .quick-add__holder.is-disabled .quick-add__button { visibility: hidden; }
 
-    .quick-add__holder.is-disabled {
-      animation: slideOutDown 0.25s ease;
-    }
-
-    .quick-add__holder.is-disabled .quick-add__button {
-      visibility: hidden;
-    }
-
-    .has-error>.quick-add__button {
+    .product-item:not(.product-item--bundle) .has-error > .quick-add__button {
       @include media-query($medium-down) {
         visibility: visible;
         display: block;

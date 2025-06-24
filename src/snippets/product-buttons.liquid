@@ -1,5 +1,6 @@
 {%- liquid
   assign onboarding_product = onboarding_product | default: false
+  assign featured_product_bundle = featured_product_bundle | default: false
   assign buybutton_setting = false
   assign current_variant = product.selected_or_first_available_variant
   assign gift_card_recipient_feature_active = false
@@ -7,6 +8,7 @@
   assign is_quickview = quickview | default: false
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign product_bundle = product_bundle | default: false
 
   if quickview
     assign show_newsletter = false
@@ -146,6 +148,9 @@
               id="AddToCart--{{ section.id }}"
               class="btn {{ button_style }} {{ button_size }} {{ button_type }}"
               data-add-to-cart
+              {% if product_bundle %}
+                data-bundle-modal-button="Add to bundle"
+              {% endif %}
               {% unless current_variant.available %}
                 disabled="disabled"
               {% endunless %}
@@ -175,11 +180,17 @@
               {{ form | payment_button }}
             </div>
           {%- endif -%}
+
+          {%- if featured_product_bundle -%}
+            <div class="product__submit__link text-center">
+              <a href="{{ product.url }}" class="text-link small">{{ 'products.general.bundle_link' | t }}</a>
+            </div>
+          {%- endif -%}
         </div>
       </div>
     {%- endcapture -%}
 
-    {%- if onboarding_product -%}
+    {%- if onboarding_product or product_bundle -%}
       {{ product_form_code }}
     {%- else -%}
       {%- form 'product', product, id: product_form_id, class: 'product-form', data-product-form: '' -%}
