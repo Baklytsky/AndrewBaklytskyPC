@@ -288,10 +288,18 @@
                           endif
                         -%}
 
+                        {%- capture swatch -%}
+                          {%- if swatch_value != blank -%}
+                            {{ swatch_value }}
+                          {%- else -%}
+                            var(--swatch-default)
+                          {%- endif -%}
+                        {%- endcapture -%}
+
                         <tooltip-component
                           data-tooltip="{{ value | escape | capitalize }}"
                           class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
-                          {% if is_native_swatch_option %}style="--swatch: {{ swatch_value }};"{% endif %}
+                          {% if is_native_swatch_option %}style="--swatch: {{ swatch }};"{% endif %}
                         >
 
                           <input type="radio"

@@ -1,6 +1,7 @@
 /**
  * Links & Buttons
  */
+@use '../globals' as *;
 
 :root {
   --radius: var(--RADIUS);
@@ -23,6 +24,8 @@ button {
 .btn {
   @include prefix('user-select', none, moz ms webkit spec);
   @include prefix(appearance, none, webkit moz spec);
+
+  --icons: var(--btn-text);
 
   position: relative;
   display: inline-flex;
@@ -68,8 +71,6 @@ button {
 
     &::after { content: none; }
   }
-
-  --icons: var(--btn-text);
 }
 
 @media (hover: hover) {
@@ -232,8 +233,10 @@ button {
   span {
     @include animate-underline-from-center;
 
-    line-height: 2;
-    padding: 5px 0;
+    & {
+      line-height: 2;
+      padding: 5px 0;
+    }
   }
 }
 

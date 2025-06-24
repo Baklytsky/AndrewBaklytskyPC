@@ -56,13 +56,18 @@
 
       echo 'free-shipping'
 
+      if align_text != blank
+        echo ' ' | append: align_text
+      endif
+
       if subtotal_without_currency >= limit and qualified_shipping_message != blank
         echo ' is-success'
       endif
     endcapture
   -%}
 
-  <div class="{{ free_shipping_classes }}"
+  <div
+    class="{{ free_shipping_classes }}"
     data-free-shipping="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
     data-free-shipping-limit="{{ limit }}"
     {% if style != blank %}

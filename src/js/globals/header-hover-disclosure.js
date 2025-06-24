@@ -37,13 +37,6 @@ if (!customElements.get('hover-disclosure')) {
         this.connectHoverToggle();
         this.handleTablets();
         this.staggerChildAnimations();
-
-        this.addEventListener('theme:disclosure:show', (evt) => {
-          this.showDisclosure(evt);
-        });
-        this.addEventListener('theme:disclosure:hide', (evt) => {
-          this.hideDisclosure(evt);
-        });
       }
 
       showDisclosure(e) {

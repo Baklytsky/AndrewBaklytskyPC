@@ -1,6 +1,7 @@
 /**
  * Custom content
  */
+@use '../globals' as *;
 
 .brick__section {
   display: flex;
@@ -11,33 +12,6 @@
     flex-wrap: nowrap;
   }
 }
-
-.js .brick__slider:not(.flickity-enabled) {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  @include hide-scrollbar;
-
-  .brick__section { min-width: 100%; }
-}
-
-.brick__slider {
-  .flickity-page-dots { bottom: 20px; }
-
-  @include media-query($small) {
-    .flickity-page-dots {
-      padding: 0 calc(var(--outer) * 2);
-
-      .text-left & { justify-content: flex-start; }
-    }
-
-    &[data-dots="line"] .hero__content,
-    &[data-dots="circle"] .hero__content { padding-bottom: 20px; }
-  }
-}
-
-.text-left .brick__block__text .flickity-page-dots { justify-content: flex-start; }
 
 .brick__block {
   --bg: var(--COLOR-BG);
@@ -205,7 +179,6 @@
     .look__slider {
       max-width: 500px;
 
-      &:not(.flickity-enabled) .look__slide:not(:first-child) { display: none; }
       &.is-loading .look__slide:not(:first-child) { opacity: 0; visibility: hidden; }
     }
   }
@@ -269,13 +242,6 @@
   @include media-query($small) { display: block; }
 }
 
-.brick__block--images[data-slider]::after {
-  @include media-query($small) {
-    content: "flickity";
-    display: none;
-  }
-}
-
 .brick__section-missing-metafield-image {
   display: flex;
   width: 100%;
@@ -290,27 +256,10 @@
 .brick__block--image-slider { display: block; }
 .brick__block--image-slider .brick__block__image { width: 100%; }
 
-.brick__block--image-slider[data-slider]::after {
-  content: "flickity";
-  display: none;
-}
-
 .brick__block--images .brick__block__image {
   flex: 1;
   display: flex;
   min-height: 100%;
-
-  // Fix issue on resize when flickity is destroyed
-  @include media-query($medium-up) {
-    transform: translateX(0) !important;
-  }
-}
-
-.brick__block--images[data-slider] .brick__block__image {
-  @include media-query($small) {
-    display: block;
-    width: 100%;
-  }
 }
 
 .brick__block--three-quarters {
@@ -341,9 +290,7 @@
 
 .brick__block--pin {
   .brick__block__text,
-  collapsible-elements {
-    flex-wrap: wrap;
-  }
+  collapsible-elements { flex-wrap: wrap;  }
 
   collapsible-elements {
     height: 100%;
@@ -359,15 +306,6 @@
 .brick__block--slider {
   @include media-query($small) {
     .hero__content { flex-direction: row; }
-  }
-}
-
-.js .hero__content:not(.flickity-enabled) .hero__slide:not(:first-child) {
-  @include media-query($medium-up) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    visibility: hidden;
   }
 }
 
@@ -485,25 +423,7 @@
 
     @include hide-scrollbar;
 
-    &.flickity-enabled { overflow: hidden; }
-
-    &::after {
-      content: "flickity";
-      display: none;
-    }
-
     .look__slide { display: block; }
-
-    .flickity-viewport {
-      flex: 1;
-      width: 100%;
-    }
-
-    .flickity-page-dots { left: 0; }
-
-    .flickity-prev-next-button.previous { left: 4px; }
-
-    .flickity-prev-next-button.next { right: 4px; }
   }
 
   @include media-query($medium) {

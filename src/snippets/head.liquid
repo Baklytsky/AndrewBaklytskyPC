@@ -240,7 +240,9 @@
 
   {% for scheme in settings.color_schemes -%}
     {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-
+    {% if forloop.first -%}
+      :root,
+    {%- endif %}
     .color-{{ scheme.id }} {
       {%- liquid
         assign hover_opacity = 0.70
@@ -254,31 +256,31 @@
         endif
       -%}
 
-      --COLOR-TEXT: {{ scheme.settings.section_text }};
-      --COLOR-TEXT-HOVER: {{ scheme.settings.section_text | color_modify: 'alpha', hover_opacity }};
-      --COLOR-TEXT-LIGHT: {{ scheme.settings.section_text | color_mix: scheme.settings.section_bg, 70 }};
-      --COLOR-TEXT-DARK: {{ scheme.settings.section_text | color_saturate: 10 | color_darken: 15 }};
-      --COLOR-TEXT-A5:  {{ scheme.settings.section_text | color_modify: 'alpha', 0.05 }};
-      --COLOR-TEXT-A35: {{ scheme.settings.section_text | color_modify: 'alpha', 0.35 }};
-      --COLOR-TEXT-A50: {{ scheme.settings.section_text | color_modify: 'alpha', 0.50 }};
-      --COLOR-TEXT-A80: {{ scheme.settings.section_text | color_modify: 'alpha', 0.80 }};
+      --COLOR-TEXT: {{ scheme.settings.text }};
+      --COLOR-TEXT-HOVER: {{ scheme.settings.text | color_modify: 'alpha', hover_opacity }};
+      --COLOR-TEXT-LIGHT: {{ scheme.settings.text | color_mix: scheme.settings.bg, 70 }};
+      --COLOR-TEXT-DARK: {{ scheme.settings.text | color_saturate: 10 | color_darken: 15 }};
+      --COLOR-TEXT-A5:  {{ scheme.settings.text | color_modify: 'alpha', 0.05 }};
+      --COLOR-TEXT-A35: {{ scheme.settings.text | color_modify: 'alpha', 0.35 }};
+      --COLOR-TEXT-A50: {{ scheme.settings.text | color_modify: 'alpha', 0.50 }};
+      --COLOR-TEXT-A80: {{ scheme.settings.text | color_modify: 'alpha', 0.80 }};
 
       --COLOR-ACCENT: {{ scheme.settings.accent }};
       --COLOR-ACCENT-HOVER: {{ scheme.settings.accent | color_saturate: 10 | color_darken: 15 }};
       --COLOR-ACCENT-FADE: {{ scheme.settings.accent | color_modify: 'alpha', 0.05 }};
       --COLOR-ACCENT-LIGHT: {{ scheme.settings.accent | color_saturate: 20 | color_lighten: 30 }};
 
-      --COLOR-BG: {{ scheme.settings.section_bg }};
-      --COLOR-BG-RGB: {{ scheme.settings.section_bg | color_extract: 'red' }}, {{ scheme.settings.section_bg | color_extract: 'green' }}, {{ scheme.settings.section_bg | color_extract: 'blue' }};
-      --COLOR-BG-GRADIENT: {{ scheme.settings.section_bg_gradient | default: scheme.settings.section_bg }};
+      --COLOR-BG: {{ scheme.settings.bg }};
+      --COLOR-BG-RGB: {{ scheme.settings.bg | color_extract: 'red' }}, {{ scheme.settings.bg | color_extract: 'green' }}, {{ scheme.settings.bg | color_extract: 'blue' }};
+      --COLOR-BG-GRADIENT: {{ scheme.settings.bg_gradient | default: scheme.settings.bg }};
 
-      --COLOR-BG-ACCENT: {{ scheme.settings.section_bg_light }};
-      --COLOR-BG-ACCENT-LIGHTEN: {{ scheme.settings.section_bg_light | color_lighten: 15 }};
+      --COLOR-BG-ACCENT: {{ scheme.settings.bg_light }};
+      --COLOR-BG-ACCENT-LIGHTEN: {{ scheme.settings.bg_light | color_lighten: 15 }};
 
-      --COLOR-BORDER: {{ scheme.settings.lines_and_border | color_to_rgb }};
-      --COLOR-BORDER-LIGHT: {{ scheme.settings.lines_and_border | color_mix: scheme.settings.section_bg, 60 }};
-      --COLOR-BORDER-DARK: {{ scheme.settings.lines_and_border | color_darken: 20 }};
-      --COLOR-BORDER-HAIRLINE: {{ scheme.settings.section_bg | color_darken: 3 }};
+      --COLOR-BORDER: {{ scheme.settings.border | color_to_rgb }};
+      --COLOR-BORDER-LIGHT: {{ scheme.settings.border | color_mix: scheme.settings.bg, 60 }};
+      --COLOR-BORDER-DARK: {{ scheme.settings.border | color_darken: 20 }};
+      --COLOR-BORDER-HAIRLINE: {{ scheme.settings.bg | color_darken: 3 }};
 
       --COLOR-LINK: {{ scheme.settings.links }};
       --COLOR-LINK-HOVER: {{ scheme.settings.links | color_modify: 'alpha', hover_opacity }};
@@ -310,7 +312,7 @@
       {% endif %}
 
       {%- liquid
-        assign color_body_bg = scheme.settings.section_bg
+        assign color_body_bg = scheme.settings.bg
         assign color_body_bg_brightness = color_body_bg | color_brightness
         if color_body_bg_brightness <= 26
           assign color_bg_brighter = color_body_bg | color_lighten: 10
@@ -322,15 +324,15 @@
       -%}
 
       --COLOR-BG-BRIGHTER: {{ color_bg_brighter }};
-      --COLOR-BG-TRANSPARENT: {{ scheme.settings.section_bg | color_modify: 'alpha', 0 }};
-      --COLOR-BG-ALPHA-25: {{ scheme.settings.section_bg | color_modify: 'alpha', 0.25 }};
+      --COLOR-BG-TRANSPARENT: {{ scheme.settings.bg | color_modify: 'alpha', 0 }};
+      --COLOR-BG-ALPHA-25: {{ scheme.settings.bg | color_modify: 'alpha', 0.25 }};
 
       {%- liquid
-        assign footer_bg_brightness = scheme.settings.section_bg | color_brightness
+        assign footer_bg_brightness = scheme.settings.bg | color_brightness
         if footer_bg_brightness > 100
-          assign footer_bg_hairline = scheme.settings.section_bg | color_darken: 3
+          assign footer_bg_hairline = scheme.settings.bg | color_darken: 3
         else
-          assign footer_bg_hairline = scheme.settings.section_bg | color_lighten: 3
+          assign footer_bg_hairline = scheme.settings.bg | color_lighten: 3
         endif
       -%}
 
@@ -377,8 +379,6 @@
     --COLOR-SALE-BG: {{ settings.sale_bg_color }};
     --COLOR-SALE-TEXT: {{ settings.sale_text_color }};
 
-
-
     /*** Quick Add ***/
     --COLOR-QUICK-ADD-BG: {{ settings.quick_add_bg_color }};
     --COLOR-QUICK-ADD-TEXT: {{ settings.quick_add_text_color }};
@@ -412,6 +412,7 @@
     --COLOR-SUBMENU-BG: {{ settings.submenu_bg_color }};
     --COLOR-SUBMENU-LINK: {{ settings.submenu_link_color }};
     --COLOR-SUBMENU-LINK-HOVER: {{ settings.submenu_link_color | color_modify: 'alpha', hover_opacity }};
+    --COLOR-SUBMENU-OPPOSITE: {{ settings.submenu_link_color | color_modify: 'alpha', hover_opacity }};
     --COLOR-SUBMENU-TEXT-LIGHT: {{ settings.submenu_link_color | color_mix: settings.submenu_bg_color, 70 }};
     --COLOR-MENU-TRANSPARENT: {{ settings.menu_transparent_color }};
     --COLOR-MENU-TRANSPARENT-HOVER: {{ settings.menu_transparent_color }};
@@ -492,7 +493,6 @@
     --LETTER-SPACING-HEADING: {{ settings.heading_letter_spacing | divided_by: 1000.0 | append: 'em' }};
     --LETTER-SPACING-SUBHEADING: {{ settings.sub_letter_spacing | divided_by: 1000.0 | append: 'em' }};
     --LETTER-SPACING-NAV: {{ settings.nav_letter_spacing | divided_by: 1000.0 | append: 'em' }};
-
 
     --FONT-UPPERCASE-HEADING: {{ heading_font_uppercase }};
     --FONT-UPPERCASE-SUBHEADING: {{ subheading_font_uppercase }};
@@ -813,7 +813,13 @@
 
 {%- if settings.enable_color_swatches or settings.siblings != blank -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
+  {%- render 'swatch-color-list' -%}
 {%- endif %}
+
+{%- if settings.quickview_enable -%}
+  {{ 'product-quick-add-modal.css' | asset_url | stylesheet_tag }}
+  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
 
 <script>
     document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
@@ -891,35 +897,17 @@
 {%- comment -%}
   Theme JS files
 {%- endcomment -%}
-<script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
+
 <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
 
-{%- if request.design_mode -%}
-  <script
-    src="{{ 'theme-editor.js' | asset_url }}"
-    defer="defer"
-    data-owner-email="{{ shop.email }}"
-    data-owner-id="{{ shop.id }}"
-  ></script>
+{%- if settings.quickview_enable -%}
+  <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-{%- comment -%}
-  *** DO NOT EDIT theme.js file ***
+{%- if settings.enable_color_swatches -%}
+  <script src="{{ 'swatch.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
-  If you need to edit Theme JS use theme.dev.js file.
-
-  Replace:
-  <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
-  by
-  <script src="{{ 'theme.dev.js' | asset_url }}" defer="defer"></script>
-  in order to see your changes.
-{%- endcomment -%}
-
-{%- comment -%}
-  For injecting custom JS code create your own assets/custom.js
-  Add the following line outside that comment in order to call that JS file:
-
-  <script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
-{%- endcomment -%}
-
-<!-- Shopify app scripts =========================================================== -->
+{%- if request.design_mode -%}
+  <script src="{{ 'theme-editor.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
