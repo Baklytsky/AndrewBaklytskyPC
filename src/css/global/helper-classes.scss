@@ -1,8 +1,7 @@
 /**
  * Helpers
  */
-@use "@/css/settings/variables" as *;
-@use "@/css/tools/mixins" as *;
+@use '../globals' as *;
 
 .clearfix {
   @include clearfix();
@@ -105,7 +104,9 @@
 ==============================================================================*/
 .skip-link:focus {
   --bg: var(--COLOR-BG);
+
   @include visually-shown(absolute);
+
   color: var(--link);
   background: var(--bg);
   padding: 20px;
@@ -114,10 +115,10 @@
 }
 
 // Only show when user is tabbing through the site
-body.is-focused .checkbox input:focus~label:before,
+body.is-focused .checkbox input:focus~ label::before,
 .no-touch body.is-focused .double__image .product-link:focus .product-item__bg__under,
 .no-touch body.is-focused .double__image.is-visible .product-link:focus .product-item__bg__inner.is-visible,
-body.is-focused a.product-link:focus>.product-item__bg,
+body.is-focused a.product-link:focus> .product-item__bg,
 body.is-focused .product__thumb__link:focus img,
 body.is-focused .article__image-link:focus img,
 body.is-focused .article__image-link:focus .image-wrapper,
@@ -134,7 +135,7 @@ body.is-focused *:focus {
   outline-color: var(--accent);
 }
 
-body.is-focused .checkbox input:focus~label:before,
+body.is-focused .checkbox input:focus~ label::before,
 body.is-focused .filter-group__heading:focus,
 body.is-focused a.collection-item__image:focus,
 body.is-focused .product-upsell__image a,
@@ -153,11 +154,11 @@ body.is-focused .product__thumb__link:focus {
   outline: none;
 }
 
-body.is-focused .swatch input[type='radio']:focus+label:after {
+body.is-focused .swatch input[type='radio']:focus+ label::after {
   border-width: 3px;
 }
 
-body.is-focused .variant-input:focus+.variant__button-label {
+body.is-focused .variant-input:focus+ .variant__button-label {
   box-shadow: 0 0 0 4px var(--accent);
 }
 
@@ -176,7 +177,6 @@ body.is-focused .highlights__item:focus {
 }
 
 [data-scroll-locked] {
-
   .js__header__stuck,
   .theme__header,
   .collection__nav,
@@ -206,6 +206,7 @@ body.is-focused .highlights__item:focus {
 
 #challenge .shopify-challenge__button {
   @extend .btn !optional;
+
   --btn-border: var(--BTN-PRIMARY-BG);
   --btn-bg: var(--BTN-PRIMARY-BG);
   --btn-text: var(--BTN-PRIMARY-TEXT);
@@ -241,8 +242,8 @@ body.is-focused .highlights__item:focus {
   visibility: hidden;
 }
 
-.clearfix:before,
-.clearfix:after {
+.clearfix::before,
+.clearfix::after {
   content: "\0020";
   display: block;
   height: 0;
@@ -252,7 +253,7 @@ body.is-focused .highlights__item:focus {
 .clearfix {
   zoom: 1;
 
-  &:after {
+  &::after {
     clear: both;
   }
 }
@@ -352,12 +353,12 @@ body.is-focused .highlights__item:focus {
 /*================ SVG Placeholder ================*/
 
 .svg-placeholder {
-  color: #aaa;
+  color: #AAA;
   background-color: #F7F7F7;
   height: 100%;
   position: relative;
   width: 100%;
-  fill: currentColor;
+  fill: currentcolor;
 
   svg {
     max-height: 100%;

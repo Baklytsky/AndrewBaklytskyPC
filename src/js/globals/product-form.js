@@ -47,9 +47,9 @@ const selectors = {
   remainingWrapper: '[data-remaining-wrapper]',
   remainingJSON: '[data-product-remaining-json]',
   optionValue: '[data-option-value]',
-  optionPosition: '[data-option-position]',
   installment: '[data-product-form-installment]',
   inputId: 'input[name="id"]',
+  bundleModalButton: '[data-bundle-modal-button]',
 };
 
 const classes = {
@@ -69,12 +69,14 @@ const attributes = {
   notificationPopup: 'data-notification-popup',
   faderDesktop: 'data-fader-desktop',
   faderMobile: 'data-fader-mobile',
-  optionPosition: 'data-option-position',
+  optionValue: 'data-option-value',
   imageId: 'data-image-id',
   mediaId: 'data-media-id',
   quickAddButton: 'data-quick-add-btn',
   finalSale: 'data-final-sale',
   variantImageScroll: 'data-variant-image-scroll',
+  bundleModalButton: 'data-bundle-modal-button',
+  bundleProductButton: 'data-bundle-product-button',
 };
 
 class ProductForm extends HTMLElement {
@@ -154,17 +156,40 @@ class ProductForm extends HTMLElement {
     this.buttonATC.addEventListener('click', (e) => {
       e.preventDefault();
 
-      document.dispatchEvent(
-        new CustomEvent('theme:cart:add', {
-          detail: {
-            button: this.buttonATC,
-          },
-          bubbles: false,
-        })
-      );
+      if (this.buttonATC.hasAttribute(attributes.bundleModalButton)) {
+        const bundleButton = document.querySelector(`[${attributes.bundleProductButton}="${this.productJSON.id}"]`);
+        if (bundleButton) {
+          bundleButton.dispatchEvent(
+            new CustomEvent('theme:bundle:button', {
+              detail: {
+                button: bundleButton,
+                variantId: this.productForm.getFormState().variant.id,
+                price: this.productForm.getFormState().variant.price,
+                options: this.productForm.getFormState().variant.options,
+              },
+              bubbles: true,
+            })
+          );
 
-      if (!this.closest(selectors.quickAddModal)) {
-        window.theme.a11y.lastElement = this.buttonATC;
+          document.dispatchEvent(
+            new CustomEvent('theme:bundle:added', {
+              bubbles: true,
+            })
+          );
+        }
+      } else {
+        document.dispatchEvent(
+          new CustomEvent('theme:cart:add', {
+            detail: {
+              button: this.buttonATC,
+            },
+            bubbles: false,
+          })
+        );
+
+        if (!this.closest(selectors.quickAddModal)) {
+          window.theme.a11y.lastElement = this.buttonATC;
+        }
       }
     });
   }
@@ -250,7 +275,9 @@ class ProductForm extends HTMLElement {
     });
 
     addToCartText?.forEach((element) => {
-      let btnText = addText;
+      const bundleButton = element.closest(selectors.bundleModalButton);
+      let btnText = bundleButton && bundleButton.hasAttribute(attributes.bundleModalButton) ? bundleButton.getAttribute(attributes.bundleModalButton) : addText;
+
       if (variant) {
         if (!variant.available) {
           btnText = theme.strings.soldOut;
@@ -687,13 +714,10 @@ class ProductForm extends HTMLElement {
       const optionValues = this.container.querySelectorAll(selectors.optionValue);
       if (optionValues.length) {
         optionValues.forEach((optionValue) => {
-          const selectorWrapper = optionValue.closest(selectors.optionPosition);
-          if (selectorWrapper) {
-            const optionPosition = selectorWrapper.getAttribute(attributes.optionPosition);
-            const optionIndex = parseInt(optionPosition, 10) - 1;
-            const selectedOptionValue = variant.options[optionIndex];
-            optionValue.innerHTML = selectedOptionValue;
-          }
+          const optionPosition = optionValue.getAttribute(attributes.optionValue);
+          const optionIndex = parseInt(optionPosition, 10) - 1;
+          const selectedOptionValue = variant.options[optionIndex];
+          optionValue.innerHTML = selectedOptionValue;
         });
       }
     }

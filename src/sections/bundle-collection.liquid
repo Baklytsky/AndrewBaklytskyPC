@@ -1,0 +1,248 @@
+<!-- /sections/bundle-collection.liquid -->
+
+{% comment %}
+  This snippet demonstrates how to implement a simple "Build Your Own Bundle" interface
+  similar to the example provided, where customers can select a specific number of products.
+{% endcomment %}
+
+{%- liquid
+  assign max_selection = collection.metafields.carbon.max_selection | default: 3
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign product_limit = section.settings.products_per_page
+
+  assign columns_desktop = section.settings.grid | plus: 0
+  assign columns_medium = 3
+  assign columns_small = 2
+  assign columns_mobile = section.settings.grid_mobile | plus: 0
+
+  if columns_desktop == 2 or columns_desktop == 4
+    assign columns_medium = 2
+  endif
+
+  assign animation_anchor = '.collection-' | append: collection.handle
+  assign animation_duration = 800
+
+  assign placeholder_columns = 2
+  assign placeholder_columns_check = max_selection | modulo: 3
+  if placeholder_columns_check == 0
+    assign placeholder_columns = 3
+  endif
+-%}
+
+{%- style -%}
+  #Collection--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+
+    --COLUMNS: {{ columns_desktop }};
+    --COLUMNS-MEDIUM: {{ columns_medium }};
+    --COLUMNS-SMALL: {{ columns_small }};
+    --COLUMNS-MOBILE: {{ columns_mobile }};
+
+    {%- comment -%}--placeholder-columns: {{ placeholder_columns }};{%- endcomment -%}
+
+    {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
+      --border-hairline: {{ border_color }};
+    {% endunless %}
+  }
+{%- endstyle -%}
+
+{{ 'bundle-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'bundle-collection.js' | asset_url }}" defer="defer"></script>
+
+{% paginate collection.products by product_limit %}
+  <bundle-collection
+    class="bundle {{ color_scheme }} section-padding"
+    id="Collection--{{ section.id }}"
+    data-bundle-max-selection="{{ max_selection }}"
+    data-bundle-name="{{ collection.title }}"
+    data-bundle-handle="{{ collection.title | handle }}"
+    {% if collection.image %}
+      data-bundle-image="{{ collection.image | image_url: width: 180 }}"
+    {% endif %}
+  >
+    <div class="wrapper--full-padded">
+      <div class="bundle__container">
+        <div class="bundle__content">
+          <div class="grid bundle__products">
+            {% for product in collection.products %}
+              {%- render 'product-grid-item',
+                product: product,
+                animation_delay: animation_delay,
+                index: forloop.index,
+                sizes: image_sizes,
+                bundle_product: true,
+                modifier_class: 'product-item--bundle'
+              -%}
+            {% endfor %}
+          </div>
+
+          {%- comment -%}
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endcomment -%}
+        </div>
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="bundle__aside">
+            <div class="bundle__widget">
+              {%- for block in section.blocks -%}
+                {%- case block.type -%}
+                  {%- when 'bundle_products' -%}
+                    <div class="bundle__placeholders">
+                      {% for i in (1..max_selection) %}
+                        <div data-bundle-placeholder class="bundle-placeholder">
+                          <div class="bundle-placeholder__empty">
+                            <div class="bundle-placeholder__text">Select Product</div>
+                          </div>
+                          <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {%- when 'bundle_price' -%}
+                    <p class="bundle__price">
+                      Total: <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                    </p>
+                  {%- when 'bundle_button' -%}
+                    <button
+                      type="button"
+                      class="bundle__button btn btn--large btn--solid btn--primary"
+                      data-bundle-add-to-cart
+                      disabled="disabled"
+                    >
+                      <span class="btn__text">
+                        <span class="bundle__button-add">Add Bundle to Cart</span>
+
+                        <span class="bundle__button-default">
+                          Select <small data-bundle-count-left>{{ max_selection }}</small> more products
+                        </span>
+                      </span>
+                      <span class="btn__added">&nbsp;</span>
+
+                      <span class="btn__loader">
+                        <svg height="18" width="18" class=" svg-loader">
+                          <circle r="7" cx="9" cy="9" />
+                          <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                        </svg>
+                      </span>
+                    </button>
+                {%- endcase -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="bundle__actions">
+        <button
+          type="button"
+          class="btn btn--full btn--large btn--solid btn--primary"
+          data-bundle-scroll-to
+        >
+          Review bundle (<span data-bundle-selected-count>0</span>/
+          {{- max_selection -}}
+          )
+        </button>
+      </div>
+    </div>
+  </bundle-collection>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Bundle collection",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product grid"
+    },
+    {
+      "type": "range",
+      "id": "grid",
+      "label": "Products per row on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "radio",
+      "id": "grid_mobile",
+      "label": "Products per row on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "One"
+        },
+        {
+          "value": "2",
+          "label": "Two"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "label": "Products per page",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme_1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bundle_products",
+      "limit": 1,
+      "name": "Bundle products",
+      "settings": []
+    },
+    {
+      "type": "bundle_price",
+      "limit": 1,
+      "name": "Bundle price",
+      "settings": []
+    },
+    {
+      "type": "bundle_button",
+      "limit": 1,
+      "name": "Bundle button",
+      "settings": []
+    }
+  ]
+}
+{% endschema %}

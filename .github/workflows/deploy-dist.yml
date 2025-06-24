@@ -1,11 +1,8 @@
-name: Deploy theme files to carbon-external repository
-description: |
-  This workflow builds the theme files and deploys them to the carbon-external repository.
-  It runs on pushes to the main branch, excluding changes to markdown files and certain directories.
+name: Deploy /dist to carbon-external
 
 on:
   push:
-    branches: [main, starter-vite-spike]
+    branches: [main]
     paths-ignore:
       - '**.md'
       - '.gitignore'
@@ -21,23 +18,23 @@ jobs:
         node-version-file: '.nvmrc'
         always-auth: true
         registry-url: https://npm.pkg.github.com/
-    - name: Get npm cache directory path
-      id: npm-cache-dir-path
-      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
     - uses: actions/cache@v4
-      id: npm-cache
+      id: yarn-cache
       with:
         path: |
-          ${{ steps.npm-cache-dir-path.outputs.dir }}
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
           'node_modules'
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-npm-
-    - run: npm install
+          ${{ runner.os }}-yarn-v3-
+    - run: yarn install
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
-    - name: "Build"
-      run: npm run build
+    - name: "Build external assets"
+      run: yarn build:external
 
     - name: Set up SSH
       run: |
@@ -58,53 +55,20 @@ jobs:
         cd ~/
         git clone git@github.com:presidiocreative/carbon-external.git carbon-external
 
-    - name: Sync root directory contents to the root of carbon-external repository
+    - name: Sync /dist contents to the root of carbon-external repository
       run: |
-        # Ensure the carbon directory exists
-        if [ -d ~/work/carbon-internal/carbon-internal ]; then
-          rsync -av --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='.shopify/' \
-            --exclude='.vscode/' \
-            --exclude='assets/.vite' \
-            --exclude='assets/.vite/manifest.json' \
-            --exclude='dist/' \
-            --exclude='lib/' \
-            --exclude='node_modules/' \
-            --exclude='src/' \
-            --exclude='upload/' \
-            --exclude='.eslintignore' \
-            --exclude='.eslintrc' \
-            --exclude='.gitignore' \
-            --exclude='.nvmrc' \
-            --exclude='.prettierignore' \
-            --exclude='.shopifyignore' \
-            --exclude='.stylelintignore' \
-            --exclude='.stylelintrc' \
-            --exclude='.prettierrc.js' \
-            --exclude='.theme-check.yml' \
-            --exclude='README.md' \
-            --exclude='jsconfig.json' \
-            --exclude='package-lock.json' \
-            --exclude='package.json' \
-            --exclude='postcss.config.js' \
-            --exclude='release-notes.md' \
-            --exclude='rollup.config.js' \
-            --exclude='shopify.theme.toml.example' \
-            --exclude='vite.config.js' \
-            --exclude='yarn.lock' \
-            --exclude='*.js.map' \
-            ~/work/carbon-internal/carbon-internal/ ~/carbon-external/
+        # Ensure the dist folder exists
+        if [ -d ~/work/carbon-internal/carbon-internal/dist ]; then
+          rsync -av --delete --exclude '.git/' ~/work/carbon-internal/carbon-internal/dist/ ~/carbon-external/
         else
-          echo "Carbon directory not found, skipping sync."
+          echo "No dist folder found, skipping sync."
           exit 1
         fi
-        # Create a new branch and commit changes
+        # Commit and push changes
         cd ~/carbon-external
         git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-external.git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .
-        git commit -m "Update compiled files (commit $GITHUB_SHA)" || echo "No changes to commit"
+        git commit -m "Update files from /dist (commit $GITHUB_SHA)" || echo "No changes to commit"
         git push origin main
