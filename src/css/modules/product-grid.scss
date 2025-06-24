@@ -1,6 +1,7 @@
 /**
  * Product grid
  */
+@use '../globals' as *;
 
 .grid .no-results:first-child { grid-column: 1/-1; }
 
@@ -30,7 +31,7 @@
   --left-spacing: 5px;
   --padding-vertical: 0.438rem;
 
-  @extend .caps;
+  @extend .caps !optional;
   font-size: var(--font-body-x-small);
   text-align: center;
   padding: var(--padding-vertical) 15px;
@@ -70,12 +71,6 @@
     min-height: 100%;
   }
   .product-item--full { display: flex; }
-
-  .flickity-enabled .product-item--full,
-  .flickity-enabled .product-item--full .grid__heading-holder {
-    min-height: 0;
-    height: 100%;
-  }
 }
 
 @include media-query($small) {
@@ -243,6 +238,15 @@
     right: 0;
     bottom: 0;
   }
+
+  &.double__image:hover {
+    .product-item__bg__under {
+      opacity: 1;
+    }
+    .product-item__bg {
+      opacity: 0;
+    }
+  }
 }
 
 .product-item--featured-image { color: var(--text); }
@@ -277,12 +281,8 @@
 }
 
 .product-item__image-content .btn {
-  color: inherit;
   margin-top: 1em;
 }
-
-.product-item__image-content .btn--solid,
-.product-item__image-content .btn--outline { border-color: inherit; }
 
 .product-item__image-link {
   position: absolute;
@@ -320,6 +320,7 @@
   overflow: hidden;
   transition: opacity 0.25s ease-in-out;
   height: calc(100% + 2px);
+  opacity: 0;
 
   iframe { pointer-events: none; }
 }
@@ -328,8 +329,6 @@
   width: 100%;
   height: 100%;
 }
-
-.flickity-enabled > .product-item__bg__slide { display: none; }
 
 .product-item__bg__slide.deferred-media { position: absolute; }
 
@@ -572,22 +571,5 @@ hover-images {
 }
 
 .no-touch hover-images {
-  .flickity-viewport { height: 100% !important; } // Height fix on resize
   .product-item__bg__slider { height: 100%; }
-
-  .product-item__bg__slider::after {
-    content: "flickity";
-    display: none;
-  }
-  .product-item__bg__slider:not(.flickity-enabled) .product-item__bg__slide:not([data-hover-slide]) { display: none; }
-
-  .flickity-prev-next-button {
-    --inner: 5px;
-
-    background: none;
-    box-shadow: none;
-  }
-  .flickity-prev-next-button::after { content: none; }
-  .flickity-prev-next-button.previous { left: var(--inner); }
-  .flickity-prev-next-button.next { right: var(--inner); }
 }

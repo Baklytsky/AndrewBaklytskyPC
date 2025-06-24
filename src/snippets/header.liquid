@@ -519,6 +519,7 @@
   </header-drawer>
 {%- endcapture -%}
 
+
 {%- if show_toolbar -%}
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -636,5 +637,52 @@
       },
       "url": {{ shop.url | append: page.url | json }}
     }
+  </script>
+{%- endif -%}
+
+{%- if request.design_mode -%}
+  <script>
+    function handleHoverDisclosureEvent(event, type) {
+      const hoverDisclosure = event.target.closest('hover-disclosure');
+      if (!hoverDisclosure) return;
+      if (type === 'select' && typeof hoverDisclosure.showDisclosure === 'function') {
+        hoverDisclosure.showDisclosure(event);
+      } else if (type === 'deselect' && typeof hoverDisclosure.hideDisclosure === 'function') {
+        hoverDisclosure.hideDisclosure(event);
+      }
+    }
+
+    {%- if toolbar_block -%}
+      function handleTickerEvent(event, type) {
+        const ticker = event.target.matches('ticker-bar')
+          ? event.target
+          : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
+        if (!ticker) return;
+        if (type === 'select') {
+          ticker.setAttribute('paused', '');
+        } else if (type === 'deselect') {
+          ticker.removeAttribute('paused');
+        }
+      }
+    {%- endif -%}
+
+    document.addEventListener('shopify:block:select', (event) => {
+      // Show mega menu on Block select
+      handleHoverDisclosureEvent(event, 'select');
+
+      {%- if toolbar_block -%}
+        // Pause ticker on Block select
+        handleTickerEvent(event, 'select');
+      {%- endif -%}
+    });
+    document.addEventListener('shopify:block:deselect', (event) => {
+      // Hide mega menu on Block select
+      handleHoverDisclosureEvent(event, 'deselect');
+
+      {%- if toolbar_block -%}
+        // Resume ticker on Block deselect
+        handleTickerEvent(event, 'deselect');
+      {%- endif -%}
+    });
   </script>
 {%- endif -%}

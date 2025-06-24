@@ -25,9 +25,12 @@ jobs:
     - run: yarn install
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+    - name: Get version from package.json
+      id: package-version
+      run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
     - run: yarn zip
     - uses: actions/upload-artifact@v4
       with:
-        name: ${{ vars.THEME_NAME }}-zip
+        name: ${{ vars.THEME_NAME }}-${{ steps.package-version.outputs.version }}
         path: dist/*
         retention-days: 5

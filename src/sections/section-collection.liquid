@@ -1,7 +1,6 @@
 {%- liquid
   assign animation_order = 0
   assign animation_anchor = '#Collection--' | append: section.id
-  assign layout_desktop = section.settings.layout_desktop
   assign layout_mobile = section.settings.layout_mobile
   assign heading = section.settings.heading
   assign description = section.settings.description
@@ -23,10 +22,6 @@
   capture product_grid_classes
     echo 'grid'
 
-    if layout_desktop == 'slider'
-      echo ' grid--slider'
-    endif
-
     if layout_mobile == 'slider'
       echo ' grid--mobile-slider'
     else
@@ -43,26 +38,22 @@
     assign columns_medium = 2
   endif
 
-  if layout_desktop == 'grid'
-    assign limit_products = grid_columns | times: grid_rows
-    assign limit_onboarding = limit_products
+  assign limit_products = grid_columns | times: grid_rows
+  assign limit_onboarding = limit_products
 
-    if grid_columns == 2 or grid_columns == 4
-      assign columns_medium = 2
-    endif
+  if grid_columns == 2 or grid_columns == 4
+    assign columns_medium = 2
   endif
 
   assign button_style = section.settings.button_style
   if button_style == 'btn--text' and section.settings.show_arrow
     assign button_style = button_style | append: ' btn--text-no-underline'
   endif
--%}
 
-{%- assign featured_images_array = '' -%}
+  assign featured_images_array = ''
 
-{%- for block in section.blocks -%}
-  {%- capture current_featured_image -%}
-    {%- liquid
+  for block in section.blocks
+    capture current_featured_image
       assign featured_image = block.settings.featured_image
       assign featured_image_position = block.settings.position
       assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
@@ -70,23 +61,15 @@
       if featured_image_position < 10
         assign featured_image_order = featured_image_order | prepend: '0'
       endif
-    -%}
-    {%- render 'collection-featured-image' block: block -%}
-  {%- endcapture -%}
 
-  {%- assign featured_images_array = featured_images_array
-    | append: featured_image_order
-    | append: '#featured_image_position#'
-    | append: featured_image_position
-    | append: '#featured_image_html#'
-    | append: current_featured_image
-    | append: '#featured_image#'
-    | append: featured_image
-    | append: '@@'
-  -%}
-{%- endfor -%}
+      render 'collection-featured-image', block: block
+    endcapture
 
-{%- assign featured_images_array = featured_images_array | split: '@@' | sort -%}
+    assign featured_images_array = featured_images_array | append: featured_image_order | append: '#featured_image_position#' | append: featured_image_position | append: '#featured_image_html#' | append: current_featured_image | append: '#featured_image#' | append: featured_image | append: '@@'
+  endfor
+
+  assign featured_images_array = featured_images_array | split: '@@' | sort
+-%}
 
 {%- style -%}
   #Collection--{{ section.id }} {
@@ -110,7 +93,7 @@
   data-section-id="{{ section.id }}"
   data-section-type="product-grid"
 >
-  <div class="grid-container{% if layout == 'left' %} grid-container--inline{% endif %}{% if layout_desktop == 'grid' %} {{ section.settings.width }}{% endif %}">
+  <div class="grid-container{% if layout == 'left' %} grid-container--inline{% endif %} {{ section.settings.width }}">
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'inline' %} grid__heading-holder--inline{% elsif layout == 'left' %} grid__heading-holder--sticky{% elsif layout == 'center' %} text-center{% endif %}">
         {%- if heading != blank or description != blank -%}
@@ -143,7 +126,7 @@
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
               >
-                {{ description }}
+                {{- description -}}
               </div>
             {%- endif -%}
           </div>
@@ -174,7 +157,7 @@
 
     <div class="grid__items-holder">
       <div class="grid-outer">
-        {%- capture product_items -%}
+        <div class="{{ product_grid_classes }}">
           {%- assign counter_grid = 1 -%}
           {%- assign added_images_index = '' -%}
 
@@ -207,17 +190,17 @@
                   endif
 
                   assign animation_delay = forloop.index0 | times: 1
-                  if layout_desktop == 'grid'
-                    assign grid_int = grid_columns | times: 1
-                    assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
-                  endif
+                  assign grid_int = grid_columns | times: 1
+                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
 
                   render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index
                 endfor
               -%}
             {%- else -%}
               <div class="no-results">
-                <p><strong>{{ 'collections.general.no_matches' | t }}</strong></p>
+                <p>
+                  <strong>{{ 'collections.general.no_matches' | t }}</strong>
+                </p>
               </div>
             {%- endif -%}
           {%- else -%}
@@ -251,19 +234,7 @@
               endfor
             -%}
           {%- endif -%}
-        {%- endcapture -%}
-
-        {%- if layout_desktop == 'slider' -%}
-          <grid-slider align-arrows>
-            <div class="{{ product_grid_classes }}" data-grid-slider>
-              {{ product_items }}
-            </div>
-          </grid-slider>
-        {%- else -%}
-          <div class="{{ product_grid_classes }}">
-            {{ product_items }}
-          </div>
-        {%- endif -%}
+        </div>
       </div>
     </div>
   </div>
@@ -402,28 +373,7 @@
     },
     {
       "type": "header",
-      "content": "Desktop"
-    },
-    {
-      "type": "select",
-      "id": "layout_desktop",
-      "label": "Product grid layout",
-      "options": [
-        {
-          "value": "grid",
-          "label": "Grid"
-        },
-        {
-          "value": "slider",
-          "label": "Slider"
-        }
-      ],
-      "default": "grid"
-    },
-    {
-      "type": "header",
-      "content": "Grid",
-      "info": "Applies only when product grid layout is set to Grid"
+      "content": "Grid"
     },
     {
       "type": "range",
@@ -441,7 +391,7 @@
       "min": 1,
       "max": 8,
       "step": 1,
-      "default": 3
+      "default": 2
     },
     {
       "type": "select",
@@ -449,6 +399,7 @@
       "label": "Width",
       "default": "wrapper",
       "options": [
+        {"value": "wrapper--full", "label": "Full width"},
         {"value": "wrapper--full-padded", "label": "Full width padded"},
         {"value": "wrapper", "label": "Normal"}
       ]
@@ -858,62 +809,11 @@
   "presets": [
     {
       "category": "Collection",
-      "name": "Featured collection columns grid",
+      "name": "Featured collection",
       "settings": {
-        "layout": "left",
-        "layout_desktop": "grid",
         "grid": 3,
         "rows": 4,
         "layout_mobile": "2"
-      }
-    },
-    {
-      "category": "Collection",
-      "name": "Featured collection columns slider",
-      "settings": {
-        "layout": "left",
-        "layout_desktop": "slider",
-        "layout_mobile": "slider"
-      }
-    },
-    {
-      "category": "Collection",
-      "name": "Featured collection grid",
-      "settings": {
-        "layout": "center",
-        "layout_desktop": "grid",
-        "grid": 4,
-        "rows": 2,
-        "layout_mobile": "2"
-      }
-    },
-    {
-      "category": "Collection",
-      "name": "Featured collection slider",
-      "settings": {
-        "layout": "center",
-        "layout_desktop": "slider",
-        "layout_mobile": "slider"
-      }
-    },
-    {
-      "category": "Collection",
-      "name": "Featured collection inline grid",
-      "settings": {
-        "layout": "inline",
-        "layout_desktop": "grid",
-        "grid": 4,
-        "rows": 2,
-        "layout_mobile": "2"
-      }
-    },
-    {
-      "category": "Collection",
-      "name": "Featured collection inline slider",
-      "settings": {
-        "layout": "inline",
-        "layout_desktop": "slider",
-        "layout_mobile": "slider"
       }
     }
   ],

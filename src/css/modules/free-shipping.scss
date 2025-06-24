@@ -1,4 +1,5 @@
 /*====== Free shipping ======*/
+@use '../globals' as *;
 
 .free-shipping {
   display: flex;
@@ -23,6 +24,9 @@
   opacity: 0;
 }
 
+.free-shipping__success-message,
+.free-shipping__default-message { flex: 1; }
+
 .free-shipping__success-message { display: none; }
 
 .is-success .free-shipping__success-message { display: inline; }
@@ -32,6 +36,7 @@
 
 .free-shipping__graph {
   --stroke-dashoffset: 87.96459430051421;
+
   position: relative;
   display: flex;
   margin-right: 8px;
@@ -64,14 +69,15 @@
 .free-shipping__progress-bar {
   --progress-bg: transparent;
   --progress-value-bg: var(--FREE-SHIPPING-GRADIENT);
-  -webkit-appearance: none;
-  -moz-appearance: none;
+
+  appearance: none;
+  appearance: none;
   appearance: none;
   display: block;
   width: 100%;
   height: 8px;
   background: var(--bg-accent);
-  border-radius: 4px;
+  border-radius: var(--btn-radius);
   margin-top: 5px;
   overflow: hidden;
 }
@@ -79,12 +85,10 @@
 @mixin progress-bar {
   width: 100%;
   background: var(--progress-bg);
-  border-radius: 6px;
 }
 
 @mixin progress-value {
   background: var(--progress-value-bg);
-  border-radius: 4px;
   transition: width 1s ease-in-out, transform 1s ease-in-out 0.5s;
   transform-origin: center left;
 }
@@ -111,6 +115,7 @@
   width: 18px;
   height: 18px;
 }
+
 .confetti__dot {
   position: absolute;
   top: 0;
@@ -126,12 +131,13 @@
 .confetti__dot--4 { color: var(--border); }
 .confetti__dot--5 { color: var(--link); }
 .confetti__dot--6 { color: var(--bg-accent); }
+
 .confetti__dot--4,
 .confetti__dot--5,
 .confetti__dot--6 { transform: rotate(205deg); }
 
-.confetti__dot:before,
-.confetti__dot:after {
+.confetti__dot::before,
+.confetti__dot::after {
   content: '';
   position: absolute;
   top: 0;
@@ -140,64 +146,64 @@
   height: 5px;
   border-radius: 50%;
   pointer-events: none;
-  background: currentColor;
+  background: currentcolor;
   transform: scale(0);
 }
 
 .is-success {
   .confetti__dot { transition: top 0.4s; }
 
-  .confetti__dot:before,
-  .confetti__dot:after {
+  .confetti__dot::before,
+  .confetti__dot::after {
     transform: scale(1);
     opacity: 0;
     transition: top 1s, left 1s, transform 1s, opacity 0.6s 0.4s;
   }
 
-  .confetti__dot--1:before {
+  .confetti__dot--1::before {
     top: -35px;
     left: 65px;
   }
 
-  .confetti__dot--4:after,
-  .confetti__dot--1:after {
+  .confetti__dot--4::after,
+  .confetti__dot--1::after {
     top: 5px;
     left: 45px;
   }
 
-  .confetti__dot--2:before {
+  .confetti__dot--2::before {
     top: 35px;
     left: 15px;
   }
 
-  .confetti__dot--5:after,
-  .confetti__dot--2:after {
+  .confetti__dot--5::after,
+  .confetti__dot--2::after {
     top: 5px;
     left: -35px;
   }
 
-  .confetti__dot--3:before {
+  .confetti__dot--3::before {
     top: -25px;
     left: 5px;
   }
 
-  .confetti__dot--6:after,
-  .confetti__dot--3:after {
+  .confetti__dot--6::after,
+  .confetti__dot--3::after {
     top: 45px;
     left: -45px;
   }
 
-  .confetti__dot--4:before {
+  .confetti__dot--4::before {
     top: -35px;
     left: 90px;
   }
 
-  .confetti__dot--5:before {
+  .confetti__dot--5::before {
     top: -70px;
     left: 15px;
   }
 
-  .confetti__dot--6:before {
+  .confetti__dot--6::before {
     top: -50px;
     left: 55px;
   }

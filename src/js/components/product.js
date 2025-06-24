@@ -259,7 +259,7 @@ if (!customElements.get('product-component')) {
       }
 
       bindNotificationPopupEvents() {
-        if (!this.productNotification) return;
+        if (!this.productNotification || !formState?.variant) return;
 
         this.notificationPopupButtons = this.querySelectorAll(selectors.notificationPopupButton);
         this.notificationPopup = this.productNotification.closest(selectors.popupComponent);
