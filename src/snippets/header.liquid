@@ -258,16 +258,6 @@
   </div>
 {%- endcapture -%}
 
-{%- capture cta -%}
-  {%- if section.settings.button_text != blank -%}
-    <div class="header__desktop__button header__desktop__button--cta">
-      <a class="btn btn--small btn--solid {{ section.settings.button_type }}" href="{{ section.settings.button_link }}">
-        <span>{{ section.settings.button_text | escape }}</span>
-      </a>
-    </div>
-  {%- endif -%}
-{%- endcapture -%}
-
 {%- liquid
   assign languages = false
   assign countries = false
@@ -329,10 +319,10 @@
     </div>
 
     {%- if section.settings.enable_search -%}
-      <div class="header__mobile__button{% if settings.type_nav_caps %} caps{% endif %}">
+      <div class="header__mobile__button">
         <header-search-popdown>
           <details>
-            <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
+            <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
               {%- render 'icon-search' -%}
               {%- render 'icon-cancel' -%}
               <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
@@ -350,8 +340,6 @@
   {{ logos }}
 
   <div class="header__mobile__right{% if settings.type_nav_caps %} caps{% endif %}">
-    {{ cta }}
-
     {%- if header_popouts -%}
       {%- assign unique = section.id | append: '-header-mobile-top' -%}
       <div class="header__mobile__button desktop">
@@ -378,8 +366,6 @@
 {%- capture buttons -%}
   <div class="header__desktop__buttons{% if show_icons == false %} header__desktop__buttons--text{% else %} header__desktop__buttons--icons{% endif %}{% if settings.type_nav_caps %} caps{% endif %}">
     {%- if header_style != 'logo_above' -%}
-      {{ cta }}
-
       {%- if show_socials  -%}
         <div class="header__desktop__button">
           {%- render 'social-icons' -%}
@@ -533,6 +519,7 @@
   </header-drawer>
 {%- endcapture -%}
 
+
 {%- if show_toolbar -%}
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -590,8 +577,6 @@
             {%- comment -%} 'logo_above' is default case, this covers migrated settings {%- endcomment -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
               <div data-child-takes-space class="header__desktop__bar__l">
-                {{ cta }}
-
                 {%- if show_socials -%}
                   {%- render 'social-icons' -%}
                 {%- endif -%}
@@ -652,5 +637,52 @@
       },
       "url": {{ shop.url | append: page.url | json }}
     }
+  </script>
+{%- endif -%}
+
+{%- if request.design_mode -%}
+  <script>
+    function handleHoverDisclosureEvent(event, type) {
+      const hoverDisclosure = event.target.closest('hover-disclosure');
+      if (!hoverDisclosure) return;
+      if (type === 'select' && typeof hoverDisclosure.showDisclosure === 'function') {
+        hoverDisclosure.showDisclosure(event);
+      } else if (type === 'deselect' && typeof hoverDisclosure.hideDisclosure === 'function') {
+        hoverDisclosure.hideDisclosure(event);
+      }
+    }
+
+    {%- if toolbar_block -%}
+      function handleTickerEvent(event, type) {
+        const ticker = event.target.matches('ticker-bar')
+          ? event.target
+          : event.target.querySelector('ticker-bar') || event.target.closest('ticker-bar');
+        if (!ticker) return;
+        if (type === 'select') {
+          ticker.setAttribute('paused', '');
+        } else if (type === 'deselect') {
+          ticker.removeAttribute('paused');
+        }
+      }
+    {%- endif -%}
+
+    document.addEventListener('shopify:block:select', (event) => {
+      // Show mega menu on Block select
+      handleHoverDisclosureEvent(event, 'select');
+
+      {%- if toolbar_block -%}
+        // Pause ticker on Block select
+        handleTickerEvent(event, 'select');
+      {%- endif -%}
+    });
+    document.addEventListener('shopify:block:deselect', (event) => {
+      // Hide mega menu on Block select
+      handleHoverDisclosureEvent(event, 'deselect');
+
+      {%- if toolbar_block -%}
+        // Resume ticker on Block deselect
+        handleTickerEvent(event, 'deselect');
+      {%- endif -%}
+    });
   </script>
 {%- endif -%}

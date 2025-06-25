@@ -106,11 +106,11 @@ if (!customElements.get('native-scrollbar')) {
         });
       }
 
-      move(offsetLeft) {
+      move(offsetLeft, behavior = 'smooth') {
         this.scrollbar.scrollTo({
           top: 0,
           left: offsetLeft,
-          behavior: 'smooth',
+          behavior: behavior,
         });
       }
     }

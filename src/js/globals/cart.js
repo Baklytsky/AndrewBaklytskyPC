@@ -59,6 +59,9 @@ const selectors = {
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
   termsErrorMessage: '[data-terms-error-message]',
+  bundleRemoveButton: '[data-bundle-cart-remove]',
+  discountButton: '[data-cart-discount-button]',
+  discountField: '[data-cart-discount-field]',
   noscript: 'noscript',
 };
 
@@ -74,6 +77,9 @@ const attributes = {
   quickAddVariant: 'data-quick-add-variant',
   scrollLocked: 'data-scroll-locked',
   name: 'name',
+  bundleRemoveButton: 'data-bundle-cart-remove',
+  bundleQuantityField: 'data-bundle-cart-quantity',
+  discountButton: 'data-cart-discount-button',
 };
 
 class CartItems extends HTMLElement {
@@ -161,6 +167,8 @@ class CartItems extends HTMLElement {
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
     document.addEventListener('theme:cart:refresh', this.getCart.bind(this));
+
+    this.updateDiscount();
   }
 
   disconnectedCallback() {
@@ -243,11 +251,95 @@ class CartItems extends HTMLElement {
       });
     });
 
+    const cartBundleRemove = document.querySelectorAll(selectors.bundleRemoveButton);
+    if (cartBundleRemove.length) {
+      cartBundleRemove.forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          if (button.hasAttribute(attributes.bundleRemoveButton) && button.getAttribute(attributes.bundleRemoveButton) !== '') {
+            const lineItemKey = button.getAttribute(attributes.bundleRemoveButton);
+            const lineItemKeyArr = lineItemKey.split(',');
+
+            this.removeMultipleProducts(lineItemKeyArr);
+          }
+        });
+      });
+    }
+
     if (this.cartCloseErrorMessage) {
       this.cartCloseErrorMessage.addEventListener('click', (event) => {
         event.preventDefault();
 
         this.cartErrorHolder.classList.remove(classes.expanded);
+      });
+    }
+  }
+
+  /**
+   * Remove bundle product from cart
+   *
+   * @param   {Array}  A list of products
+   *
+   * @return  {Void}
+   */
+  removeMultipleProducts(productsArr) {
+    let formData = new FormData();
+
+    productsArr.forEach((element) => {
+      formData.append(`updates[${element}]`, 0);
+    });
+
+    this.disableCartButtons();
+
+    fetch(theme.routes.cart_update_url, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.text())
+      .then((state) => {
+        this.getCart();
+      })
+      .catch((error) => {
+        console.log(error);
+        this.enableCartButtons();
+      });
+  }
+
+  /**
+   * Update discount in the cart
+   *
+   * @return  {Void}
+   */
+  updateDiscount() {
+    const discountButton = this.cart.querySelector(selectors.discountButton);
+    const discountField = this.cart.querySelector(selectors.discountField);
+
+    if (discountButton && discountField) {
+      discountButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newDiscountCode = discountField.value;
+
+        if (newDiscountCode !== '') {
+          const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
+          this.disableCartButtons();
+          fetch(theme.routes.cart_update_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              discount: `${newDiscountCode}${existingDiscountCodes}`,
+            }),
+          })
+            .then((data) => {
+              this.getCart();
+              discountField.value = '';
+            })
+            .catch((error) => {
+              console.log(error);
+              this.enableCartButtons();
+            });
+        }
       });
     }
   }
@@ -569,7 +661,7 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll('input');
+    const inputs = this.cart.querySelectorAll(`input:not([${attributes.bundleQuantityField}])`);
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
     if (inputs.length) {

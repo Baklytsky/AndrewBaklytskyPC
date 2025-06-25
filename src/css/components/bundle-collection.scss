@@ -1,0 +1,106 @@
+// Timeline
+
+@import "../tools/mixins.scss";
+@import "../settings/variables.scss";
+
+bundle-collection { display: block; }
+
+.bundle__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+
+  @include media-query($medium-up) {
+    flex-wrap: nowrap;
+  }
+}
+
+.bundle__content { flex: 0 1 100%; }
+
+.bundle__aside {
+  order: -1;
+  flex: 0 1 100%;
+  text-align: center;
+
+  @include media-query($medium-up) {
+    order: 0;
+    flex: 0 0 33.33%;
+    flex-wrap: nowrap;
+    flex-direction: row-reverse;
+  }
+}
+
+.bundle__widget {
+  @include media-query($medium-up) {
+    --top: var(--padding-top, 0);
+    position: sticky;
+    top: var(--top);
+
+    .has-header-sticky & {
+      --top: calc(var(--header-height) + var(--padding-top, 0));
+    }
+  }
+}
+
+.bundle__price,
+.bundle__placeholders,
+.bundle__button {
+  margin-top: 0;
+  margin-bottom: var(--line);
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.bundle__placeholders {
+  display: grid;
+  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(var(--placeholder-columns, 2), minmax(0, 1fr));
+  gap: var(--gap);
+  perspective: 1000px;
+}
+
+.bundle-placeholder {
+  display: grid;
+  min-height: 200px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: transform 1s;
+  transform-style: preserve-3d;
+}
+
+.bundle-placeholder__filled,
+.bundle-placeholder.is-filled { transform: rotateY(180deg); }
+
+.bundle-placeholder__empty,
+.bundle-placeholder__filled {
+  grid-row-start: 1;
+  grid-column-start: 1;
+  min-height: 100%;
+  backface-visibility: hidden;
+}
+
+.bundle-placeholder__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.bundle__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin-top: var(--gap);
+
+  @include media-query($medium-up) {
+    display: none;
+  }
+}
+
+.bundle__button-default small { font-size: 100%; }
+
+.bundle__button.is-loading .bundle__button-add,
+.bundle__button:not(:disabled) .bundle__button-add { display: inline; }
+.bundle__button-add,
+.bundle__button.is-loading .bundle__button-add ~ .bundle__button-default,
+.bundle__button:not(:disabled) .bundle__button-add ~ .bundle__button-default { display: none; }

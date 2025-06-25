@@ -107,15 +107,15 @@
 
         --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
 
-        --COLOR-BG-GRADIENT: {{ scheme.settings.section_bg_gradient | default: scheme.settings.section_bg }};
-        --COLOR-BG: {{ scheme.settings.section_bg }};
-        --COLOR-TEXT: {{ scheme.settings.section_text }};
-        --COLOR-TEXT-LIGHT: {{ scheme.settings.section_text | color_mix: scheme.settings.section_bg, 70 }};
+        --COLOR-BG-GRADIENT: {{ scheme.settings.bg_gradient | default: scheme.settings.bg }};
+        --COLOR-BG: {{ scheme.settings.bg }};
+        --COLOR-TEXT: {{ scheme.settings.text }};
+        --COLOR-TEXT-LIGHT: {{ scheme.settings.text | color_mix: scheme.settings.bg, 70 }};
         --COLOR-LINK: {{ scheme.settings.links }};
         --COLOR-LINK-HOVER: {{ scheme.settings.links | color_modify: 'alpha', hover_opacity }};
 
-        --COLOR-BORDER: {{ scheme.settings.lines_and_border | color_to_rgb }};
-        --COLOR-BORDER-HAIRLINE: {{ scheme.settings.section_bg | color_darken: 3 }};
+        --COLOR-BORDER: {{ scheme.settings.border | color_to_rgb }};
+        --COLOR-BORDER-HAIRLINE: {{ scheme.settings.bg | color_darken: 3 }};
 
         --bg: var(--COLOR-BG-GRADIENT, var(--COLOR-BG));
         --text: var(--COLOR-TEXT);
@@ -140,7 +140,7 @@
   </head>
 
   <body class="{% if customer %}customer-logged-in {% endif %}template-{{ template | replace: '/', '-' | split: '.' }}">
-    <div class="container" data-site-container>
+    <div class="container">
       {%- section 'gift-card' -%}
 
       <!-- CONTENT -->

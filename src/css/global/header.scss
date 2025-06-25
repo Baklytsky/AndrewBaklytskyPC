@@ -1,9 +1,10 @@
 // Site Header
+@use '../globals' as *;
 
 header-component,
 hover-disclosure { display: block; }
 
-.header-sections {
+.group-header {
   display: flex;
   flex-direction: column;
 
@@ -59,7 +60,6 @@ hover-disclosure { display: block; }
 }
 
 // Header mobile menu
-
 .header__mobile__bottom {
   --bg: var(--COLOR-MENU-BG);
 
@@ -154,6 +154,12 @@ hover-disclosure { display: block; }
 
   @include media-query($medium-up) {
     --logo-width: var(--logo-width-desktop);
+  }
+}
+
+.header__logo__link--drawer {
+  @include media-query($medium-up) {
+    --logo-width: var(--logo-width-mobile);
   }
 }
 
@@ -335,8 +341,6 @@ hover-disclosure { display: block; }
   transition: opacity 0.5s ease;
 }
 
-html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
-
 .navlink {
   @include nav;
 
@@ -441,7 +445,6 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
 
 .header__desktop__upper--reverse .header__menu { margin-left: -15px; }
 
-/* ================ Header Social Links ================ */
 .theme__header .socials { flex-wrap: nowrap; }
 
 .theme__header .popout__toggle {
@@ -449,8 +452,6 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
   letter-spacing: inherit;
   transition: color 0.25s $ease-out-fast;
 }
-
-/* ================ Sticky header ================ */
 
 .js__header__stuck {
   position: fixed;
@@ -494,8 +495,6 @@ html:not(.no-js) body:not(.is-loaded) .header__desktop { opacity: 0; }
     transition-delay: 0s;
   }
 }
-
-/* ================ Transparent header ================ */
 
 .logo__img {
   position: absolute;
@@ -582,8 +581,6 @@ body.has-first-section-overlay-header {
 }
 .header__menu.caps { letter-spacing: 0.1em; }
 
-/* ================ Large / Small Display Logic ================ */
-
 @include media-query($mobile) {
   .header__mobile { display: grid; }
 
@@ -624,10 +621,6 @@ body.has-first-section-overlay-header {
   }
 }
 
-/* ============================================================================
-  #Site Nav and Dropdowns
-============================================================================== */
-
 .header__dropdown {
   --bg: var(--COLOR-SUBMENU-BG);
   --text: var(--COLOR-SUBMENU-LINK);
@@ -644,7 +637,6 @@ body.has-first-section-overlay-header {
   pointer-events: none;
   transition: opacity 0.2s $ease-out-fast, visibility 0s 0.2s;
 
-  // Add some invisible space above the dropdown to make the hover area covering the header padding bottom space
   &::before {
     content: "";
     position: absolute;
@@ -840,9 +832,7 @@ body.has-first-section-overlay-header {
   flex-basis: 50%;
 }
 
-/* ================ Hover animations ================ */
-
-/* Basic Dropdown */
+// Basic Dropdown
 .menu__item.parent {
   .navlink--child {
     opacity: 0;
@@ -857,7 +847,7 @@ body.has-first-section-overlay-header {
   }
 }
 
-/* Basic Meganav */
+// Basic Meganav
 .menu__item.grandparent {
   .navlink--child {
     opacity: 0;
@@ -878,7 +868,7 @@ body.has-first-section-overlay-header {
   }
 }
 
-/* Image Meganav */
+// Image Meganav
 .header__dropdown:not(.is-visible) .header__dropdown__image,
 .header__dropdown:not(.is-visible) .image-wrapper { transition-delay: 0s !important; }
 
@@ -898,7 +888,7 @@ body.has-first-section-overlay-header {
 .is-visible .header__dropdown__image > div,
 .is-visible .header__dropdown__image .image-wrapper { transition-delay: inherit; }
 
-/* Match hover state of button */
+// Match hover state of button
 .menu__item:not(.grandparent):hover > .header__dropdown,
 .header__dropdown.is-visible {
   opacity: 1;
@@ -906,8 +896,6 @@ body.has-first-section-overlay-header {
   pointer-events: auto;
   transition-delay: 0s;
 }
-
-/* ================ Hover animations ================ */
 
 .parent {
   .header__dropdown__wrapper { padding: 15px; }
@@ -926,8 +914,6 @@ body.has-first-section-overlay-header {
 
 .navlink[href="#"] { cursor: default; }
 
-/* ================ Header cart status ================ */
-
 .navlink__cart__content {
   position: relative;
   display: flex;
@@ -941,10 +927,6 @@ body.has-first-section-overlay-header {
   align-items: center;
 }
 
-/*
-  These circle icons have 1px offset in order to match the account icon
-  That's why we need margin-right: -1px to make them align horizontally with the wrapper
-*/
 .navlink--cart--circle { --icon-size: 21px; }
 .navlink--cart--circle .navlink__cart__content { margin-right: -1px; }
 
@@ -977,9 +959,31 @@ body.has-first-section-overlay-header {
   width: var(--icon-size);
   height: var(--icon-size);
   border-radius: 50%;
-  border: var(--ICON-STROKE-WIDTH) solid currentcolor;
+  border: 1px solid currentcolor;
   transform: translate(-50%, -50%);
   box-sizing: border-box;
+}
+
+.theme__header [data-glyph="cart"] { font-size: calc(1.1875 * var(--FONT-SIZE-NAV)); }
+.theme__header [data-glyph="magnifying-glass"] { font-size: var(--FONT-SIZE-NAV); }
+
+@include media-query ($small) {
+  .navlink--cart--text .header__cart__status[data-cart-count="0"] {
+    display: none;
+  }
+}
+
+@include media-query ($medium-up) {
+  .navlink--cart--text {
+    .navtext {
+      display: inline;
+      white-space: nowrap;
+    }
+
+    .header__cart__status::before {
+      content: attr(data-status-separator);
+    }
+  }
 }
 
 @mixin header-cart-status {
@@ -1007,36 +1011,12 @@ body.has-first-section-overlay-header {
   display: none;
 }
 
-@include media-query ($small) {
-  .navlink--cart--text .header__cart__status[data-cart-count="0"] {
-    display: none;
-  }
-}
-
-.navlink--cart--text .navtext {
-  @include media-query ($medium-up) {
-    display: inline;
-    white-space: nowrap;
-  }
-}
-
-.navlink--cart--text .header__cart__status::before {
-  @include media-query ($medium-up) {
-    content: attr(data-status-separator);
-  }
-}
-
 .navlink--cart--text .header__cart__status {
   @include media-query ($small) {
     @include header-cart-status;
   }
 }
 
-/* ================ Icon sizes ================ */
-.theme__header [data-glyph="cart"] { font-size: calc(1.1875 * var(--FONT-SIZE-NAV)); }
-.theme__header [data-glyph="magnifying-glass"] { font-size: var(--FONT-SIZE-NAV); }
-
-/* ================ No JS ================ */
 .no-js {
   .header__dropdown { transition: opacity 0.2s $ease-out-fast; }
 

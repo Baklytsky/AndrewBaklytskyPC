@@ -25,7 +25,7 @@
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
   {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
-    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true -%}
+    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -181,7 +181,9 @@
             data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
           >
-            {%- render 'cart-line-items', animation_delay: animation_delay, is_cart: true -%}
+            <collapsible-elements>
+              {%- render 'cart-line-items', animation_delay: animation_delay, is_cart: true -%}
+            </collapsible-elements>
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
           </cart-items>
         </div>
@@ -333,6 +335,9 @@
                         {{- 'cart.general.subtotal_note' | t -}}
                       </em>
                     </div>
+
+                  {%- when 'discount' -%}
+                    {%- render 'cart-block-discount', block: block -%}
                 {%- endcase -%}
               </div>
             {%- endfor -%}
@@ -421,6 +426,17 @@
           "type": "color_background",
           "id": "free_shipping_gradient",
           "label": "Custom progress bar gradient"
+        },
+        {
+          "type": "select",
+          "id": "align_text",
+          "label": "Text alignment",
+          "default": "text-left",
+          "options": [
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"},
+            {"value": "text-right", "label": "Right"}
+          ]
         }
       ]
     },
@@ -583,6 +599,12 @@
     {
       "type": "payment-icons",
       "name": "Payment icons",
+      "settings": []
+    },
+    {
+      "type": "discount",
+      "name": "Discount",
+      "limit": 1,
       "settings": []
     },
     {

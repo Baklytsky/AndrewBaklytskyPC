@@ -9,6 +9,7 @@ const classes = {
   loading: 'is-loading',
   open: 'is-open',
   visible: 'is-visible',
+  siblingLinkCurrent: 'sibling__link--current',
 };
 
 const settings = {
@@ -31,7 +32,6 @@ const selectors = {
   modalContent: '[data-product-upsell-ajax]',
   modalClose: '[data-quick-add-modal-close]',
   productGridItem: 'data-grid-item',
-  productInformationHolder: '[data-product-information]',
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   quickAddModalTemplate: '[data-quick-add-modal-template]',
@@ -41,7 +41,9 @@ const attributes = {
   closing: 'closing',
   productId: 'data-product-id',
   modalHandle: 'data-quick-add-modal-handle',
+  siblingSwapper: 'data-sibling-swapper',
   quickAddHolder: 'data-quick-add-holder',
+  bundleProductButton: 'data-bundle-product-button',
 };
 
 class QuickAddProduct extends HTMLElement {
@@ -50,6 +52,7 @@ class QuickAddProduct extends HTMLElement {
 
     this.quickAddHolder = this.querySelector(selectors.quickAddHolder);
     this.modal = null;
+    this.currentModal = null;
     this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
     this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
     this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
@@ -101,8 +104,19 @@ class QuickAddProduct extends HTMLElement {
   modalButtonClickEvent(e) {
     e.preventDefault();
 
+    const isSiblingSwapper = this.modalButton.hasAttribute(attributes.siblingSwapper);
+    const isSiblingLinkCurrent = this.modalButton.classList.contains(classes.siblingLinkCurrent);
+
+    if (isSiblingLinkCurrent) return;
+
     this.modalButton.classList.add(classes.loading);
     this.modalButton.disabled = true;
+
+    // Siblings product modal swapper
+    if (isSiblingSwapper && !isSiblingLinkCurrent) {
+      this.currentModal = e.target.closest(selectors.quickAddModal);
+      this.currentModal.classList.add(classes.loading);
+    }
 
     this.renderModal();
   }
@@ -132,6 +146,10 @@ class QuickAddProduct extends HTMLElement {
   }
 
   modalOpen() {
+    if (this.currentModal) {
+      this.currentModal.dispatchEvent(new CustomEvent('theme:modal:close', {bubbles: false}));
+    }
+
     // Check if browser supports Dialog tags
     if (typeof this.modal.show === 'function') {
       this.modal.show();
@@ -158,6 +176,7 @@ class QuickAddProduct extends HTMLElement {
     document.dispatchEvent(new CustomEvent('theme:quick-add:open', {bubbles: true}));
     document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
     document.addEventListener('theme:product:added', this.modalCloseOnProductAdded, {once: true});
+    document.addEventListener('theme:bundle:added', this.modalCloseOnProductAdded, {once: true});
   }
 
   modalClose() {
@@ -182,7 +201,7 @@ class QuickAddProduct extends HTMLElement {
     this.modal.setAttribute('inert', '');
     this.modal.classList.remove(classes.loading);
 
-    if (this.modalButton) {
+    if (this.modalButton && !this.modalButton.hasAttribute(attributes.bundleProductButton)) {
       this.modalButton.disabled = false;
     }
 
@@ -198,6 +217,7 @@ class QuickAddProduct extends HTMLElement {
     }
 
     document.removeEventListener('theme:product:added', this.modalCloseOnProductAdded);
+    document.removeEventListener('theme:bundle:added', this.modalCloseOnProductAdded);
 
     this.a11y.removeTrapFocus();
     this.a11y.autoFocusLastElement();
@@ -223,6 +243,10 @@ class QuickAddProduct extends HTMLElement {
         event.preventDefault();
         this.modalClose();
       }
+    });
+
+    this.modal.addEventListener('theme:modal:close', () => {
+      this.modalClose();
     });
 
     // Close dialog after animation completes
@@ -265,7 +289,6 @@ class QuickAddProduct extends HTMLElement {
       if (!parentProduct) return;
 
       const errorMessageHolder = holder.querySelector(selectors.messageError);
-      const productInfo = parentProduct.querySelector(selectors.productInformationHolder);
       const button = holder.querySelector(selectors.buttonAddToCart);
 
       if (button) {
@@ -291,7 +314,7 @@ class QuickAddProduct extends HTMLElement {
       this.quickAddHolder.classList.remove(classes.visible, classes.error);
     }
 
-    if (this.buttonQuickAdd) {
+    if (this.buttonQuickAdd && !this.buttonQuickAdd.hasAttribute(attributes.bundleProductButton)) {
       this.buttonQuickAdd.classList.remove(classes.added);
       this.buttonQuickAdd.disabled = false;
     }
@@ -301,8 +324,10 @@ class QuickAddProduct extends HTMLElement {
     if (this.modal) {
       this.modalOpen();
     } else {
+      const apiUrl = this.modalButton.hasAttribute(attributes.bundleProductButton) ? 'api-product-bundle' : 'api-product-upsell';
+
       window
-        .fetch(`${window.theme.routes.root}products/${this.handle}?section_id=api-product-upsell`)
+        .fetch(`${window.theme.routes.root}products/${this.handle}?section_id=${apiUrl}`)
         .then(this.upsellErrorsHandler)
         .then((response) => {
           return response.text();
@@ -341,4 +366,6 @@ class QuickAddProduct extends HTMLElement {
   }
 }
 
-export {QuickAddProduct};
+if (!customElements.get('quick-add-product')) {
+  customElements.define('quick-add-product', QuickAddProduct);
+}

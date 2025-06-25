@@ -1,6 +1,7 @@
 /**
  * Links & Buttons
  */
+@use '../globals' as *;
 
 :root {
   --radius: var(--RADIUS);
@@ -19,10 +20,12 @@ button {
   overflow: visible;
 }
 
-/*=== Button ====*/
+/*** Button ***/
 .btn {
   @include prefix('user-select', none, moz ms webkit spec);
   @include prefix(appearance, none, webkit moz spec);
+
+  --icons: var(--btn-text);
 
   position: relative;
   display: inline-flex;
@@ -68,8 +71,6 @@ button {
 
     &::after { content: none; }
   }
-
-  --icons: var(--btn-text);
 }
 
 @media (hover: hover) {
@@ -89,7 +90,7 @@ button {
   }
 }
 
-/*=== Button with arrow icon ====*/
+/*** Button with arrow icon ***/
 .btn .icon-arrow-left,
 .btn .icon-arrow-right {
   display: inline-block;
@@ -125,7 +126,7 @@ button {
   .btn:hover .icon-arrow-left { transform: translate3d(-5px, 0, 0); }
 }
 
-/*=== Button with bag icon ====*/
+/*** Button with bag icon ***/
 .btn .icon-bag {
   flex: 0 0 auto;
   margin: 0 10px 0 0;
@@ -133,7 +134,7 @@ button {
   --icon-size: 1.25rem;
 }
 
-/*=== Button Primary ====*/
+/*** Button Primary ***/
 .btn--primary {
   --btn-border: var(--BTN-PRIMARY-BORDER);
   --btn-bg: var(--BTN-PRIMARY-BG);
@@ -145,7 +146,7 @@ button {
   --btn-text-hover: var(--BTN-PRIMARY-BORDER);
 }
 
-/*=== Button Secondary ====*/
+/*** Button Secondary ***/
 .btn--secondary {
   --btn-border: var(--BTN-SECONDARY-BORDER);
   --btn-bg: var(--BTN-SECONDARY-BG);
@@ -158,7 +159,7 @@ button {
   --btn-text-hover: var(--BTN-SECONDARY-BORDER);
 }
 
-/*=== Button White ====*/
+/*** Button White ***/
 .btn--white {
   --btn-border: var(--COLOR-TEXT-BTN-BORDER-WHITE);
   --btn-bg: var(--COLOR-TEXT-BTN-BG-WHITE);
@@ -171,7 +172,7 @@ button {
   --btn-text-hover: #FFF;
 }
 
-/*=== Button Black ====*/
+/*** Button Black ***/
 .btn--black {
   --btn-border: var(--COLOR-TEXT-BTN-BORDER-BLACK);
   --btn-bg: var(--COLOR-TEXT-BTN-BG-BLACK);
@@ -193,7 +194,7 @@ button {
 .btn--outline.btn--white { @include btn-outline-white; }
 .btn--outline.btn--black { @include btn-outline-black; }
 
-/*=== Button Sizes ====*/
+/*** Button Sizes ***/
 .btn--large {
   max-width: 100%;
 
@@ -216,7 +217,7 @@ button {
   }
 }
 
-/*=== Button Text ====*/
+/*** Button Text ***/
 .btn--text {
   --btn-top: 0;
   --btn-left: 0;
@@ -232,14 +233,16 @@ button {
   span {
     @include animate-underline-from-center;
 
-    line-height: 2;
-    padding: 5px 0;
+    & {
+      line-height: 2;
+      padding: 5px 0;
+    }
   }
 }
 
 .btn--text-no-underline span { background: none; }
 
-/*=== Button Outline and Button Solid ====*/
+/*** Button Outline and Button Solid ***/
 .btn--outline,
 .btn--solid {
   overflow: hidden;
@@ -283,49 +286,7 @@ button {
 .btn--full {
   width: 100%;
   min-width: 100%;
-  max-width: 100%;
-}
-
-/*=== Scroll to top button ==*/
-.btn--scroll-top {
-  --icon-size: 28px;
-  --btn-size: 40px;
-
-  position: fixed;
-  right: var(--outer);
-  bottom: var(--outer);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  width: var(--btn-size);
-  height: var(--btn-size);
-  padding: 0;
-  overflow: hidden;
-  padding-left: 0;
-  padding-right: 0;
-  box-shadow: 0 0 10px rgb(0 0 0 / 20%);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(100%);
-  transition: opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
-
-  &::after {
-    left: -30%;
-  }
-
-  &.is-visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    transition-delay: 0s;
-  }
-
-  @include media-query($small) {
-    right: 16px;
-    bottom: 16px;
-  }
+  max-width: 400px;
 }
 
 .inline-nav {
@@ -484,7 +445,7 @@ button {
   visibility: visible;
 }
 
-/*================ SVG Loader ================*/
+//*** SVG Loader ***//
 .svg-loader {
   position: absolute;
   top: 50%;

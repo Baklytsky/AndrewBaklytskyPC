@@ -27,6 +27,7 @@
     assign link_columns = 1
   endif
 
+  assign subheading = block.settings.subheading
   assign title = block.settings.title
   assign text = block.settings.link_text
   assign link = block.settings.link
@@ -56,7 +57,7 @@
   {% endif %}
 >
   <div
-    class="header__dropdown__image palette--contrast--dark"
+    class="header__dropdown__image"
     {% unless text_color == 'rgba(0,0,0,0)' or text_color == blank %}
       style="--text: {{ text_color }};"
     {% endunless %}
@@ -70,8 +71,14 @@
 
     <div class="hero__content__wrapper align--bottom-left">
       <div class="hero__content hero__content--transparent backdrop--radial">
+        {%- if subheading != blank -%}
+          <p class="hero__subheading">
+            {{ subheading }}
+          </p>
+        {%- endif -%}
+
         {%- if title != blank -%}
-          <h2 class="hero__title h3">
+          <h2 class="hero__title {{ block.settings.heading_font_size }}">
             {{ title | escape }}
 
             {%- render 'superscript', link_collection: link -%}
@@ -79,7 +86,7 @@
         {%- endif -%}
 
         {%- if text != blank -%}
-          <p class="hero__description">
+          <p class="hero__description {{ block.settings.text_font_size }}">
             {{ text | escape }}
           </p>
         {%- endif -%}
@@ -94,7 +101,7 @@
 
     <div
       class="image-overlay"
-      style="--overlay-bg: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"
+      style="--OVERLAY-BG: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"
     ></div>
 
     {%- render 'image',

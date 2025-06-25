@@ -1,6 +1,8 @@
 /* ============================================================================
   #Search popdown
 ============================================================================== */
+@use '../globals' as *;
+
 header-search-popdown {
   display: block;
   height: 100%;
@@ -10,6 +12,7 @@ header-search-popdown > details { height: 100%; }
 
 .search-popdown {
   @include nav;
+
   --bg: var(--COLOR-SUBMENU-BG);
   --text: var(--COLOR-SUBMENU-LINK);
   --link: var(--COLOR-SUBMENU-LINK);
@@ -22,17 +25,19 @@ header-search-popdown > details { height: 100%; }
   right: 0;
   left: 0;
   width: 100%;
+  text-transform: none;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-100%);
   transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 10px rgb(0 0 0 / 10%);
   background: var(--bg);
 
   .search-form { position: static; }
 
   input[type="search"] {
-    @include nav-bold;
+    @include nav;
+
     width: 100%;
     border: none;
     margin: 0;
@@ -101,20 +106,15 @@ header-search-popdown.is-open .search-popdown {
 
 .search-popdown__close {
   position: relative;
-  width: 80px;
   height: 100%;
   display: flex;
-
-  @include media-query($small) {
-    width: 20px;
-  }
 }
 
 .search-popdown__close__button {
   --icon-size: 24px;
+
   font-size: var(--FONT-SIZE-NAV);
   cursor: pointer;
-  width: 34px;
   padding: 20px 5px;
   height: 100%;
   right: -11px;
@@ -122,6 +122,7 @@ header-search-popdown.is-open .search-popdown {
 
 .search-popdown__submit {
   --icon-size: 24px;
+
   display: flex;
   align-items: center;
   justify-content: center;

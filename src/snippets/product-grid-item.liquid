@@ -24,9 +24,9 @@
   assign aos_duration = 800
   assign layout_desktop = section.settings.layout_desktop
   assign layout_mobile = section.settings.layout_mobile
-  assign product_card_class = ''
   assign modifier_class = modifier_class | default: ''
   assign index = index | default: 1
+  assign bundle_product = bundle_product | default: false
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 2
@@ -43,10 +43,6 @@
 
   if columns_desktop == 2 or columns_desktop == 4
     assign columns_medium = 2
-  endif
-
-  if show_product_card
-    assign product_card_class = 'product-item--card'
   endif
 
   if settings.product_grid_center
@@ -182,6 +178,20 @@
   assign aos_anchor = aos_anchor | default: aos_anchor_default
 -%}
 
+{%- liquid
+  if settings.show_siblings
+    capture siblings_html
+      render 'product-grid-item-siblings', part: 'html', product: product
+    endcapture
+    capture siblings_line_item_props
+      render 'product-grid-item-siblings', part: 'line-item-props', product: product
+    endcapture
+    capture siblings_image
+      render 'product-grid-item-siblings', part: 'image', product: product
+    endcapture
+  endif
+-%}
+
 {%- capture over_image_content -%}
   {%- liquid
     assign product_tags = product.tags | join: ',' | append: ','
@@ -262,7 +272,87 @@
       data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.on_sale' | t }}</span>
   {%- endif -%}
 
-  {%- if settings.quickview_enable and current_variant -%}
+  {%- if bundle_product -%}
+    {%- liquid
+      assign unique = section.id | append: '-' | append: product.id
+    -%}
+
+    <template data-bundle-template>
+      <div class="product-grid-item {{ alignment_class }}">
+        <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+          <button data-bundle-remove-button class="product-item__close">
+            {%- render 'icon-cancel' -%}
+          </button>
+
+          <a
+            class="product-link"
+            href="{{ product_url }}"
+            aria-label="{{ product.title | strip_html | escape }}"
+          >
+            {%- render 'image', image: product.featured_media.preview_image, aspect_ratio: aspect_ratio, sizes: sizes, widths: widths, loading: loading, fetchpriority: 'high', preload: true, attributes: image_animations, cover: true -%}
+          </a>
+        </div>
+
+        <div class="product-information">
+          <div class="product-item__info">
+            <a
+              class="product-link"
+              href="{{ product_url }}"
+            >
+              <p class="product-item__title">
+                {{ product.title }}
+              </p>
+
+              {%- unless product.has_only_default_variant -%}
+                <small data-placeholder-options></small>
+              {%- endunless -%}
+
+              <div class="product-item__price__holder">
+                <div class="product-item__price">
+                  <span class="price">
+                    <span class="new-price" data-placeholder-price></span>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <quick-add-product>
+      <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
+        <button class="quick-add__button caps"
+          type="button"
+          aria-label="{{ 'products.general.quick_add' | t }}"
+          data-bundle-product-button="{{ product.id }}"
+          data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
+          data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
+          data-bundle-options="{{ product.selected_or_first_available_variant.title }}"
+          {% if product.has_only_default_variant == false and product.variants.size > 1 %}
+            data-quick-add-btn
+            data-quick-add-modal-handle="{{ product.handle }}"
+          {% endif %}
+        >
+          <span class="btn__text">
+            Add to Bundle
+          </span>
+          <span class="btn__plus"></span>
+          <span class="btn__added">&nbsp;</span>
+          <span class="btn__loader">
+            <svg height="18" width="18" class="svg-loader">
+              <circle r="7" cx="9" cy="9" />
+              <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+            </svg>
+          </span>
+        </button>
+
+        {%- unless product.has_only_default_variant -%}
+          {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+        {%- endunless -%}
+      </div>
+    </quick-add-product>
+  {%- elsif settings.quickview_enable and current_variant -%}
     {%- liquid
       assign has_preorder_meta = false
       assign has_preorder_tag = false
@@ -289,6 +379,8 @@
           {%- assign product_form_id = 'ProductForm--' | append: unique -%}
           {%- form 'product', product, id: product_form_id -%}
             <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+
+            {{- siblings_line_item_props -}}
 
             {%- if preorder_value != blank -%}
               <input
@@ -376,7 +468,7 @@
   endcapture
 
   capture swatches_class
-    if has_colors
+    if siblings_html != blank or has_colors
       echo 'product-item--swatches'
     endif
   endcapture
@@ -396,10 +488,13 @@
 {%- endcapture -%}
 
 {%- unless hidden_product -%}
-  <div
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }} {{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+  <product-item
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
+    data-url="{{ product.url }}"
+    data-swap-id="true"
+
     {{ attributes }}
   >
     <div
@@ -468,49 +563,41 @@
           </div>
 
           {%- if double_img -%}
-            <hover-images class="product-item__bg__under">
-              <div class="product-item__bg__slider" data-hover-slider>
-                {%- for media in product.media limit: settings.image_hover_limit -%}
-                  <div
-                    class="product-item__bg__slide{% if media.media_type == 'video' or media.media_type == 'external_video' %} deferred-media{% endif %}"
-                    {% unless forloop.first %}
-                      data-hover-slide
-                    {% endunless %}
-                    data-hover-slide-touch
-                  >
-                    {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
-                      {%- liquid
-                        case media.media_type
-                          when 'video'
-                            echo media | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
-                          when 'external_video'
-                            if media.host == 'youtube'
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: media.external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: media.host
-                            else
-                              echo media | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: media.host
-                            endif
-                        endcase
-                      -%}
-                    {%- else -%}
-                      {%- render 'image',
-                        image: media.preview_image,
-                        aspect_ratio: aspect_ratio,
-                        sizes: sizes,
-                        widths: widths,
-                        cover: true,
-                        loading: 'lazy',
-                        fetchpriority: 'high'
-                      -%}
-                    {%- endif -%}
-                  </div>
-                {%- endfor -%}
+            <div class="product-item__bg__under{% if settings.image_hover_disable_mobile %} product-item__bg__under--desktop{% endif %}">
+              <div class="product-item__bg__slide {% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
+                {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
+                  {%- liquid
+                    case product.media[1].media_type
+                      when 'video'
+                        echo product.media[1] | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                      when 'external_video'
+                        if product.media[1].host == 'youtube'
+                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: product.media[1].external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: product.media[1].host
+                        else
+                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: product.media[1].host
+                        endif
+                    endcase
+                  -%}
+                {%- else -%}
+                  {%- render 'image',
+                    image: product.media[1].preview_image,
+                    aspect_ratio: aspect_ratio,
+                    sizes: sizes,
+                    widths: widths,
+                    cover: true,
+                    loading: 'lazy',
+                    fetchpriority: 'high'
+                  -%}
+                {%- endif -%}
               </div>
-            </hover-images>
+            </div>
           {%- endif -%}
         {%- else -%}
           {%- comment -%} Show Empty image if product has no media {%- endcomment -%}
           <div class="product-item__bg image--empty" data-product-image-default></div>
         {%- endif -%}
+
+        {{- siblings_image -}}
       </a>
 
       {{ over_image_content }}
@@ -535,6 +622,9 @@
 
               <span
                 class="product-item__cutline"
+                {%- if siblings_html != blank -%}
+                  data-product-cutline
+                {%- endif -%}
                 {% if style != blank %}
                   style="{{ style }}"
                 {% endif %}
@@ -549,7 +639,9 @@
           </div>
         </a>
 
-        {%- if has_colors -%}
+        {%- if siblings_html != blank -%}
+          {{ siblings_html }}
+        {%- elsif has_colors -%}
           <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
             {{ swatches }}
 
@@ -560,5 +652,5 @@
         {%- endif -%}
       </div>
     </div>
-  </div>
+  </product-item>
 {%- endunless -%}

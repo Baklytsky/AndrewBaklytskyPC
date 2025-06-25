@@ -1,4 +1,14 @@
-{%- render 'button' -%}
+{%- render 'button',
+  text: block.settings.text,
+  link: block.settings.link,
+  type: block.settings.type,
+  size: block.settings.size,
+  style: block.settings.style,
+  show_arrow: block.settings.show_arrow,
+  full_width: block.settings.full_width,
+  margin_bottom: block.settings.padding_bottom,
+  shopify_attributes: block.shopify_attributes
+-%}
 
 {% schema %}
 {
@@ -55,6 +65,26 @@
       "id": "show_arrow",
       "label": "Show arrow",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full-width",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 16
     }
   ],
   "presets": [

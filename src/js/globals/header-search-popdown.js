@@ -61,7 +61,6 @@ class SearchPopdown extends HTMLElement {
     this.onBodyClickEvent = this.onBodyClickEvent || this.onBodyClick.bind(this);
 
     document.body.addEventListener('click', this.onBodyClickEvent);
-    this.mobileMenu?.dispatchEvent(new CustomEvent('theme:search:open'));
 
     if (!document.documentElement.hasAttribute(attributes.scrollLocked)) {
       document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
@@ -74,7 +73,6 @@ class SearchPopdown extends HTMLElement {
 
   close() {
     this.classList.remove(classes.open);
-    this.mobileMenu?.dispatchEvent(new CustomEvent('theme:search:close'));
 
     document.body.removeEventListener('click', this.onBodyClickEvent);
 

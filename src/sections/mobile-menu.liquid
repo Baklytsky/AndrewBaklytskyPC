@@ -18,7 +18,39 @@
   assign logo_width_15x = logo_width | times: 1.5 | round
   assign logo_width_2x = logo_width | times: 2 | round
   assign logo_widths = logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x | append: ',' | append: logo_width | append: ',' | append: logo_width_15x | append: ',' | append: logo_width_2x
+
+  assign search_block = section.blocks | where: 'type', 'search'
+  assign search_block = search_block[0]
 -%}
+
+{%- if request.design_mode -%}
+  <script>
+    function handleMobileMenuEvent(event, shouldOpen) {
+      const mode = shouldOpen ? 'open' : 'close';
+      const target = event.target;
+      const mobileMenu = target.querySelector('mobile-menu') || target.closest('mobile-menu');
+      if (!mobileMenu) return;
+      const drawer = mobileMenu.querySelector('header-drawer');
+      if (!drawer) return;
+      const isOpen = drawer.classList.contains('is-open');
+      if (mode === 'open') {
+        if (!isOpen && typeof drawer.showDrawer === 'function') drawer.showDrawer();
+      } else {
+        if (isOpen && typeof drawer.hideDrawer === 'function') drawer.hideDrawer();
+      }
+    }
+
+    document.addEventListener('shopify:block:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:select', (event) => {
+      handleMobileMenuEvent(event, true);
+    });
+    document.addEventListener('shopify:section:deselect', (event) => {
+      handleMobileMenuEvent(event, false);
+    });
+  </script>
+{%- endif -%}
 
 <mobile-menu
   class="mobile-menu {{ color_scheme }}"
@@ -26,9 +58,6 @@
   data-section-type="mobile-menu"
   style="{{ section_style }}"
 >
-  {%- assign search_block = section.blocks | where: 'type', 'search' -%}
-  {%- assign search_block = search_block[0] -%}
-
   {%- if search_block -%}
     {%- liquid
       assign animation_delay = block_index_dynamic | times: animation_delay_increment | plus: animation_delay_initial
@@ -40,13 +69,14 @@
     -%}
 
     {%- capture dynamic_blocks -%}
-      <div class="mobile-menu__block block-padding"
+      <div
+        class="mobile-menu__block mobile-menu__block--search block-padding"
         data-animation="{{ animation_name }}"
         data-animation-duration="{{ animation_duration }}"
         data-animation-delay="{{ animation_delay }}"
         style="{{ style }}"
-        {{ block.shopify_attributes }}>
-
+        {{ search_block.shopify_attributes }}
+      >
         <div class="mobile-menu__block-search">
           <header-search-popdown>
             <details>
@@ -176,7 +206,11 @@
               {%- when 'menu' or 'menu-columns' -%}
                 {%- liquid
                   assign menu = block.settings.mobile_menu_linklist | default: 'main-menu'
+                  assign menu_left = block.settings.mobile_menu_linklist_left | default: 'main-menu'
+                  assign menu_right = block.settings.mobile_menu_linklist_right | default: 'main-menu'
                   assign linklist = linklists[menu].links
+                  assign linklist_left = linklists[menu_left].links
+                  assign linklist_right = linklists[menu_right].links
                   assign highlight_item = block.settings.highlight_item
                   assign highlight_item_color = block.settings.highlight_item_color
 
@@ -195,13 +229,31 @@
                   endcapture
                 -%}
 
-                <nav class="drawer__menu" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
-                  <div class="drawer__main-menu {{ block.settings.text_font_size }}">
-                    {%- for link in linklist -%}
-                      {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
-                      {%- render 'nav-item-mobile', block: block,link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
-                    {%- endfor -%}
-                  </div>
+                <nav class="drawer__{{ block.type }}{% if settings.type_nav_caps %} caps{% endif %} {{ block.settings.text_font_size }}" data-sliderule-pane="0" data-scroll-lock-scrollable {{ menu_style }}>
+                  {%- if block.type == 'menu' -%}
+                    <div class="drawer__main-menu">
+                      {%- for link in linklist -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if block.type == 'menu-columns' -%}
+                    <div class="drawer__menu-left">
+                      {%- for link in linklist_left -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+
+                    <div class="drawer__menu-right">
+                      {%- for link in linklist_right -%}
+                        {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
+                        {%- render 'nav-item-mobile', block: block, link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'new-mobile-menu--desktop' -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
                 </nav>
 
               {%- when 'image' -%}
@@ -219,11 +271,18 @@
               {%- when 'icon' -%}
                 {%- render 'icon' block: block -%}
 
+              {%- when 'subheading' -%}
+                {%- if block.settings.subheading != '' -%}
+                  <div class="drawer__subheading">
+                    <p class="subheading">{{ block.settings.subheading }}</p>
+                  </div>
+                {%- endif -%}
+
               {%- when 'text' -%}
                 {%- if block.settings.text != '' -%}
-                  <p class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
+                  <div class="drawer__text {{ block.settings.align_text }} {{ block.settings.text_font_size }}">
                     {{ block.settings.text }}
-                  </p>
+                  </div>
                 {%- endif -%}
 
               {%- when 'button' -%}
@@ -337,24 +396,13 @@
   {%- endfor -%}
 
   <header-drawer
-    class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
+    class="drawer drawer--header"
     data-drawer="hamburger-{{ section.id }}"
     aria-label="{{ 'layout.header.menu' | t }}"
     id="mobile-menu-{{ section.id }}"
   >
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
-        <button
-          class="drawer__close"
-          data-drawer-close
-          aria-label="{{ 'general.accessibility.show_menu' | t }}"
-          aria-haspopup="true"
-          aria-expanded="true"
-          aria-controls="mobile-menu-{{ section.id }}"
-        >
-          {%- render 'icon-cancel' -%}
-        </button>
-
         {%- if logo != blank -%}
           <a
             class="header__logo__link header__logo__link--drawer"
@@ -367,6 +415,17 @@
             -%}
           </a>
         {%- endif -%}
+
+        <button
+          class="drawer__close"
+          data-drawer-close
+          aria-label="{{ 'general.accessibility.show_menu' | t }}"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="mobile-menu-{{ section.id }}"
+        >
+          {%- render 'icon-cancel' -%}
+        </button>
       </header>
 
       <div class="drawer__body">
@@ -396,6 +455,7 @@
 {% schema %}
 {
   "name": "Mobile menu",
+  "limit": 1,
   "settings": [
     {
       "type": "image_picker",
@@ -409,7 +469,7 @@
       "max": 250,
       "step": 5,
       "unit": "px",
-      "label": "Logo width",
+      "label": "Width",
       "default": 120
     },
     {
@@ -496,9 +556,15 @@
       "settings": [
         {
           "type": "link_list",
-          "label": "Menu",
-          "info": "This menu won't show dropdown items.",
-          "id": "mobile_menu_linklist"
+          "id": "mobile_menu_linklist_left",
+          "label": "Left menu",
+          "info": "This menu won't show dropdown items."
+        },
+        {
+          "type": "link_list",
+          "id": "mobile_menu_linklist_right",
+          "label": "Right menu",
+          "info": "This menu won't show dropdown items."
         },
         {
           "type": "select",
@@ -737,14 +803,39 @@
       ]
     },
     {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 14
+        }
+      ]
+    },
+    {
       "type": "text",
       "name": "Text",
       "settings": [
         {
-          "type": "textarea",
+          "type": "richtext",
           "id": "text",
           "label": "Text",
-          "default": "Free shipping on orders over $100"
+          "default": "<p>Free shipping on orders over $100</p>"
         },
         {
           "type": "select",

@@ -1,6 +1,7 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign featured_product = featured_product | default: false
+  assign featured_product_bundle = featured_product_bundle | default: false
   assign onboarding_product = false
   assign product_sticky_enable = section.settings.product_sticky_enable
   assign variant_image_scroll = section.settings.variant_image_scroll
@@ -11,6 +12,11 @@
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
   assign is_title_linked = true
+  assign is_bundle = false
+
+  if product.metafields.theme_modules.is_bundle
+    assign is_bundle = true
+  endif
 
   if template.name == 'product'
     assign is_title_linked = false
@@ -74,6 +80,8 @@
   assign show_cart_bar = false
   assign unique = section.id
 
+  assign sibling_color = product.metafields.theme.sibling_color.value | default: product.metafields.theme.sibling_colour.value | default: product.metafields.theme.siblings_color.value | default: product.metafields.theme.siblings_colour.value | default: product.metafields.theme.siblings_colors.value | default: product.metafields.theme.siblings_colours.value
+
   if section.settings.show_cart_bar and featured_product != true
     assign show_cart_bar = true
   endif
@@ -123,30 +131,13 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
-{%- style -%}
-  {%- if show_cart_bar -%}
-    :root { --cart-bar-height: 80px; }
-  {%- endif -%}
-
-  #Product--{{ section.id }} {
-    --PT: {{ section.settings.padding_top }}px;
-    --PB: {{ section.settings.padding_bottom }}px;
-
-    --swatch-size: var(--swatch-size-product);
-  }
-{%- endstyle -%}
-
-<script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
-{%- if product_sticky_enable -%}
-  <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 <product-component
   id="Product--{{ unique }}"
   class="index-product section-padding {{ color_scheme }}"
   data-section-id="{{ unique }}"
   data-section-type="product"
   data-product-handle="{{ product.handle }}"
+  data-url="{{ product.url }}"
   data-enable-history-state="true"
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
@@ -155,6 +146,24 @@
     data-cart-bar-enabled
   {% endif %}
 >
+  {%- style -%}
+    {%- if show_cart_bar -%}
+      :root { --cart-bar-height: 80px; }
+    {%- endif -%}
+
+    #Product--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+
+      --swatch-size: var(--swatch-size-product);
+    }
+  {%- endstyle -%}
+
+  <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+  {%- if product_sticky_enable -%}
+    <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
     <div class="product__wrapper__inner">
       <div class="product__page">
@@ -202,6 +211,7 @@
             {%- endif -%}
 
             {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+            {{ 'model-ui.css' | asset_url | stylesheet_tag }}
             {%- if first_3d_model -%}
               <button
                 class="btn btn--outline btn--black btn--ar product-single__view-in-space"
@@ -351,7 +361,9 @@
                       block: block,
                       block_style: block_style,
                       product_form_id: product_form_id,
-                      enable_size_chart: true
+                      enable_size_chart: true,
+                      is_bundle: is_bundle,
+                      featured_product: featured_product
                     -%}
 
                   {%- when 'buttons' -%}
@@ -363,7 +375,8 @@
                       block_style: block_style,
                       product_form_id: product_form_id,
                       preorder: preorder,
-                      onboarding_product: onboarding_product
+                      onboarding_product: onboarding_product,
+                      featured_product_bundle: featured_product_bundle
                     -%}
 
                   {%- when 'description' -%}
@@ -397,6 +410,16 @@
                       {{ block.settings.code }}
                     </div>
 
+                  {%- when 'siblings' -%}
+                    {%- render 'product-siblings',
+                      product: product,
+                      product_form_id: product_form_id,
+                      current_variant: current_variant,
+                      block: block,
+                      block_style: block_style,
+                      quick_add_product: false
+                    -%}
+
                   {%- when 'text' -%}
                     {%- render 'product-block-text', block: block, block_style: block_style -%}
 
@@ -420,93 +443,6 @@
                       unique: unique,
                       product_form_id: product_form_id
                     -%}
-
-                  {%- when 'features' -%}
-                    {%- liquid
-                      assign block_id = block.id
-                      assign text = block.settings.text
-                      assign title = block.settings.title
-                      assign prev_index = forloop.index0 | minus: 1
-                      assign next_index = forloop.index0 | plus: 1
-                      assign prev_block = section.blocks[prev_index]
-                      assign next_block = section.blocks[next_index]
-                      assign image = block.settings.icon_alt
-                      assign bg_color = block.settings.bg_color
-                      assign text_color = block.settings.color
-
-                      comment
-                        Always force dots style to be "line" except if "Circle" is chosen from the global settings
-                      endcomment
-                      assign dots_style = 'line'
-                      if settings.dots_style == 'circle'
-                        assign dots_style = 'circle'
-                      endif
-
-                      capture style
-                        if bg_color != 'rgba(0,0,0,0)' and bg_color != blank
-                          echo '--bg-accent: ' | append: bg_color | append: ';'
-                        endif
-
-                        if text_color != 'rgba(0,0,0,0)' and text_color != blank
-                          echo '--text: ' | append: text_color | append: ';'
-                        endif
-                      endcapture
-                    -%}
-
-                    {%- if forloop.index0 == 0 or prev_block.type != 'features' -%}
-                      <slider-component
-                        class="product__block product__features block-padding"
-                        {{ block_style }}
-                        data-slider
-                        data-slider-fullwidth
-                        data-dots="{{ dots_style }}"
-                        data-options='{"pageDots": true, "adaptiveHeight": true, "autoPlay": false, "prevNextButtons": false, "fade": false, "draggable": ">1"}'
-                      >
-                    {%- endif -%}
-
-                    <div
-                      class="product__feature"
-                      data-slide="{{ block_id }}"
-                      {% if style != blank %}
-                        style="{{ style }}"
-                      {% endif %}
-                      {{ block.shopify_attributes }}
-                    >
-                      <div class="product__feature__content">
-                        <div class="block__icon__container product__feature__heading">
-                          {%- assign icon_size = block.settings.icon_size -%}
-                          <div class="block__icon" style="--icon-size: {{ icon_size }}px;">
-                            {%- liquid
-                              if image
-                                assign icon_width = icon_size
-                                assign icon_width_retina = icon_width | times: 2
-                                assign icon_sizes = icon_width | append: 'px'
-                                assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
-                                render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
-                              else
-                                render 'animated-icon', filename: block.settings.icon_name
-                              endif
-                            -%}
-                          </div>
-
-                          {%- if title != blank -%}
-                            <div class="block__icon__text {{ block.settings.text_font_size }}">
-                              <p>{{ title }}</p>
-                            </div>
-                          {%- endif -%}
-                        </div>
-
-                        {%- if text != blank -%}
-                          <div class="rte">
-                            {{ text }}
-                          </div>
-                        {%- endif -%}
-                      </div>
-                    </div>
-
-                    {%- if forloop.index == section.blocks.size or next_block.type != 'features' -%}
-                      </slider-component>
-                    {%- endif -%}
 
                   {%- when 'popup' -%}
                     {%- render 'product-popup', block: block -%}
@@ -641,4 +577,8 @@
   {%- if show_cart_bar -%}
     {%- render 'cart-bar', product: product -%}
   {%- endif -%}
+
+  <script type="application/ld+json">
+    {{ product | structured_data }}
+  </script>
 </product-component>

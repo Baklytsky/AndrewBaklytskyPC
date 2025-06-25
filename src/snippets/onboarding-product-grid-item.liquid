@@ -16,7 +16,6 @@
   assign animation_delay = animation_delay | default: 0
   assign aos_duration = 800
   assign aos_delay = animation_delay | times: 150
-  assign product_card_class = ''
   assign modifier_class = modifier_class | default: ''
 
   assign index = index | default: 1
@@ -24,10 +23,6 @@
   assign placeholder_root = placeholder_root | default: 'collection-'
   assign svg_default = placeholder_root | append: index
   assign placeholder = placeholder | default: svg_default
-
-  if show_product_card
-    assign product_card_class = ' product-item--card'
-  endif
 
   if settings.product_grid_center
     assign alignment_class = ' product-item--centered'
@@ -46,7 +41,7 @@
 {%- assign aos_anchor = '.' | append: item_unique -%}
 
 <div
-  class="grid-item product-item{{ alignment_class }}{{ product_card_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+  class="grid-item product-item{{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
   id="{{ item_unique }}"
   data-grid-item
   {{ attributes }}

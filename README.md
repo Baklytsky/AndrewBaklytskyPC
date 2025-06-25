@@ -1,25 +1,31 @@
 # Carbon
 
-### [🏷️ Releases](https://github.com/invisiblethemes/carbon/projects?type=classic)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/invisiblethemes/carbon/discussions)
+### [🏷️ Releases](https://github.com/presidiocreative/carbon-internal/releases)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/carbon-internal/issues)
 
 ## Installation
 
 #### Clone the repo:
+SSH
+```
+git clone git@github.com:presidiocreative/carbon-internal.git
+```
 
+HTTPS
 ```
-git clone git@github.com:invisiblethemes/carbon.git
+git clone https://github.com/presidiocreative/carbon-internal.git
 ```
+
+#### Check your Node version
+⚠️ The recommended version is Node v20.9.x
+
+Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
+If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
 
 #### Install packages
 
 ```
 yarn install
 ```
-
-⚠️ The recommended node version for running carbon is Node v20.9.x
-
-Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
-If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
 
 
 #### Setup Shopify CLI3
@@ -93,22 +99,6 @@ The env command has a shorthand version of `-e` and can accept a comma-separated
 
 `yarn deploy -e dev,qa,staging`
 
-### Deploying demo stores
-
-When we deploy to a Shopify Theme Store demo, we need to add `<meta name="robots" content="noindex, nofollow">` to the head. This is tedious to add manually. We must add this line of code to prevent the demo stores from being indexed by Google and other search engines.
-
-To make this Shopify requirement easy, our build process has a special command that will add "noindex/nofollow" to the head. You can turn it on by adding `--index=false` to the deploy command.
-
-`yarn deploy -e my-store1 --no-index`
-
-A command to deploy to all the demos might look something like this:
-```
-"NODE_ENV=production gulp deploy --index=false --env clothing-demo,skin-demo,shoes-demo,swim-demo",
-```
-
-🚨 Never use the `--index=false` flag on a merchant store. This command exists strictly for Shopify Theme Store demo stores. This line of code would *destroy* the SEO of a merchant store.
-
-
 ## Lighthouse
 
 ### Running lighthouse locally
@@ -116,7 +106,3 @@ A command to deploy to all the demos might look something like this:
 Running the following command will deploy your development theme, run lighthouse on it, then open the report
 
 `yarn lighthouse`
-
-### Viewing Lighthouse CI Dashboard
-
-Lighthouse is run against every pull request push and merge to master to track scores across time. View the Lighthouse Dashboard at https://invisible-lighthouse-server.herokuapp.com. Username is `abra` password is `cadabra`

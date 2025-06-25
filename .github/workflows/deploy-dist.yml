@@ -1,4 +1,4 @@
-name: Deploy /dist to carbon-dist
+name: Deploy /dist to carbon-external
 
 on:
   push:
@@ -33,8 +33,8 @@ jobs:
     - run: yarn install
       env:
         NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
-    - name: "Build assets"
-      run: yarn build:assets
+    - name: "Build external assets"
+      run: yarn build:external
 
     - name: Set up SSH
       run: |
@@ -44,29 +44,29 @@ jobs:
         ssh-keyscan github.com >> ~/.ssh/known_hosts
         pwd
 
-    - name: Remove existing carbon-dist folder if it exists
+    - name: Remove existing carbon-external folder if it exists
       run: |
-        if [ -d "carbon-dist" ]; then
-          rm -rf carbon-dist
+        if [ -d "carbon-external" ]; then
+          rm -rf carbon-external
         fi
 
     - name: Clone target repository
       run: |
         cd ~/
-        git clone git@github.com:invisiblethemes/carbon-dist.git carbon-dist
+        git clone git@github.com:presidiocreative/carbon-external.git carbon-external
 
-    - name: Sync /dist contents to the root of carbon-dist repository
+    - name: Sync /dist contents to the root of carbon-external repository
       run: |
         # Ensure the dist folder exists
-        if [ -d ~/work/carbon/carbon/dist ]; then
-          rsync -av --delete --exclude '.git/' ~/work/carbon/carbon/dist/ ~/carbon-dist/
+        if [ -d ~/work/carbon-internal/carbon-internal/dist ]; then
+          rsync -av --delete --exclude '.git/' ~/work/carbon-internal/carbon-internal/dist/ ~/carbon-external/
         else
           echo "No dist folder found, skipping sync."
           exit 1
         fi
         # Commit and push changes
-        cd ~/carbon-dist
-        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/invisiblethemes/carbon-dist.git
+        cd ~/carbon-external
+        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-external.git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .

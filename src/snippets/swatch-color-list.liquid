@@ -1,0 +1,61 @@
+{%- liquid
+  assign swatch_color_list = settings.swatch_color_list
+  assign lines = swatch_color_list | newline_to_br | split: '<br />'
+  assign image_extensions = 'jpg,jpeg,JPG,JPEG,png,PNG,gif,GIF,webp,WEBP,bmp,BMP,apng,APNG,avif,AVIF,svg,SVG' | split: ','
+
+  capture swatches
+    for line in lines
+      assign style_parts = line | split: ':'
+      assign swatch_class = style_parts[0] | handle
+      assign swatch_style = style_parts[1] | strip
+
+      for image_type in image_extensions
+        assign image_type = image_type | prepend: '.'
+        if swatch_style contains image_type
+          assign swatch_image = swatch_style | file_img_url
+          assign swatch_style = 'url(' | append: swatch_image | append: ')'
+
+          break
+        endif
+      endfor
+
+      if swatch_class != blank and swatch_style != blank
+        echo '--' | append: swatch_class | append: ': ' | append: swatch_style | append: ';'
+      endif
+    endfor
+
+    # Extract color props from the "Theme color" metaobject
+    assign theme_color = metaobjects.theme_color.values
+    assign color_props_names = theme_color | where: 'name'
+    for color_props in color_props_names
+      assign theme_color_name = color_props.name | handle
+      assign theme_color_hex_code = color_props.hex_code
+      assign theme_color_image = color_props.image
+
+      if theme_color_hex_code != blank
+        echo '--'
+        echo theme_color_name
+        echo ': '
+        echo theme_color_hex_code
+        echo '; '
+      endif
+
+      if theme_color_image != blank
+        assign swatch_image = theme_color_image | image_url: width: 50
+        assign swatch_image_url = 'url(' | append: swatch_image | append: ')'
+
+        echo '--'
+        echo theme_color_name
+        echo ': '
+        echo swatch_image_url
+        echo '; '
+      endif
+    endfor
+  endcapture
+-%}
+
+{%- style -%}
+  .swatches {
+    {{ swatches }}
+  }
+{%- endstyle -%}

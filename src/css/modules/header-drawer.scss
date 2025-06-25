@@ -1,9 +1,12 @@
+@use '../globals' as *;
+
 .drawer--header {
   --bg: var(--COLOR-BG);
   --text: var(--text);
   --text-dark: var(--text-dark);
   --text-light: var(--text-light);
-  --link-hover: var(--link-hover);
+  --link: var(--text);
+  --link-hover: var(--text);
 
   position: relative;
   z-index: 5600;
@@ -34,14 +37,15 @@
 
   .drawer__head {
     border: 0;
-  }
 
-  .drawer__close {
-    --icon-size: 24px;
+    .drawer__close {
+      --icon-size: 24px;
 
-    position: relative;
-    left: -10px;
-    right: auto;
+      position: relative;
+      left: auto;
+      right: -10px;
+      margin-left: auto;
+    }
   }
 
   .drawer__underlay { z-index: 2400; }
@@ -132,11 +136,6 @@
 
 // Section mobile menu
 
-.drawer--header {
-  --link: var(--text);
-  --link-hover: var(--text);
-}
-
 .drawer__content__scroll {
   overflow-x: hidden;
   overflow-y: auto;
@@ -161,25 +160,11 @@
 
   .drawer__foot & { flex-basis: 100%; }
 }
-.mobile-menu__block--menu { flex-basis: 100%; }
 
-.mobile-menu__block--menu-columns {
-  padding: 0;
-
-  .drawer__main-menu {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sliderow,
-  .sliderow__title {
-    align-items: flex-start;
-    min-height: 0;
-  }
-
-  .sliderow__title {
-    padding: calc(var(--inner) / 2) var(--inner);
-  }
+.drawer__menu-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--inner);
 }
 
 // Fix language/currency selectors overlapping with the menu items
@@ -188,10 +173,13 @@
   z-index: 2;
 }
 
-.mobile-menu__block--menu {
+.mobile-menu__block--menu,
+.mobile-menu__block--menu-columns {
   padding: 0;
   overflow: hidden;
-  min-height: var(--item-height);
+  min-height: var(--menu-height, var(--item-height));
+  flex-shrink: 0;
+  transition: min-height 0.5s ease-in-out;
 }
 
 .mobile-menu__block-inner {
@@ -201,7 +189,8 @@
   flex-direction: column;
 }
 
-.mobile-menu__block--hidden {
+// Hide other blocks when search is open
+mobile-menu:has(header-search-popdown.is-open) .mobile-menu__block:not(.mobile-menu__block--search) {
   opacity: 0;
   visibility: hidden;
   transform: translateY(50px);

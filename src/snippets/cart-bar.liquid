@@ -23,7 +23,10 @@
   endfor
 -%}
 
-{% if product.selling_plan_groups.size > 0 and blocks_form.size > 0 and blocks_form[0].settings.subscriptions_enable_selectors %}
+{% if product.selling_plan_groups.size > 0
+  and blocks_form.size > 0
+  and blocks_form[0].settings.subscriptions_enable_selectors
+%}
   {%- assign selling_plan_hide = false -%}
 {% endif %}
 
@@ -31,13 +34,21 @@
   {%- assign button_add = true -%}
 {%- endif -%}
 
-<div id="cart-bar" class="cart-bar">
-  <div class="cart-bar__form__wrapper form__wrapper{% if button_add and current_variant.available != true %} variant--soldout{% endif %}{% if settings.show_newsletter %} show-product-notification{% endif %}{% unless any_variant_available %} all-variants--soldout{% endunless %}" data-form-wrapper>
+<div id="cart-bar" class="cart-bar" data-cart-bar>
+  <div
+    class="cart-bar__form__wrapper form__wrapper{% if button_add and current_variant.available != true %} variant--soldout{% endif %}{% if settings.show_newsletter %} show-product-notification{% endif %}{% unless any_variant_available %} all-variants--soldout{% endunless %}"
+    data-form-wrapper
+  >
     <div class="cart-bar__info">
       <h4 class="cart-bar__product__title">{{ product.title | strip_html }}</h4>
 
       <div class="body-small cart-bar__product__price product__price" data-price-wrapper>
-        <span data-product-price {% if current_variant.compare_at_price > current_variant.price %} class="product__price--sale"{% endif %}>
+        <span
+          data-product-price
+          {% if current_variant.compare_at_price > current_variant.price %}
+            class="product__price--sale"
+          {% endif %}
+        >
           {%- if current_variant.price == 0 -%}
             {{ 'general.money.free' | t }}
           {%- else -%}
@@ -58,11 +69,24 @@
 
     <div class="cart-bar__form">
       <div class="cart-bar__submit product__submit product__submit--spb">
-        <button type="button"
+        <button
+          type="button"
           class="btn btn--primary btn--outline product__submit__add{% unless button_add %} product__submit__add--default{% endunless %}"
-          {% if button_add %} data-add-to-cart-bar{% elsif any_variant_available %} data-cart-bar-scroll{% endif %}
-          {% if any_variant_available == false or button_add and current_variant.available != true %} disabled="disabled"{% endif %}>
-          <span class="btn__text"{% if button_add %} data-add-to-cart-text{% endif %}>
+          {% if button_add %}
+            data-add-to-cart-bar
+          {% elsif any_variant_available %}
+            data-cart-bar-scroll
+          {% endif %}
+          {% if any_variant_available == false or button_add and current_variant.available != true %}
+            disabled="disabled"
+          {% endif %}
+        >
+          <span
+            class="btn__text"
+            {% if button_add %}
+              data-add-to-cart-text
+            {% endif %}
+          >
             {%- if button_add -%}
               {%- assign preorder_check = false -%}
 
@@ -102,9 +126,11 @@
           {%- assign newsletter_text = 'general.newsletter_form.newsletter_product_availability' | t -%}
           {%- assign button_text = 'products.product.sold_out' | t | append: ' - ' | append: newsletter_text -%}
 
-          <button type="button"
+          <button
+            type="button"
             class="btn btn--primary btn--outline product__submit__add product__submit__add--default product__cart-bar-notification-button"
-            data-cart-bar-product-notification>
+            data-notification-popup-button
+          >
             <span class="btn__text">{{ button_text }}</span>
           </button>
         {%- endif -%}

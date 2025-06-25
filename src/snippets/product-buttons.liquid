@@ -1,5 +1,6 @@
 {%- liquid
   assign onboarding_product = onboarding_product | default: false
+  assign featured_product_bundle = featured_product_bundle | default: false
   assign buybutton_setting = false
   assign current_variant = product.selected_or_first_available_variant
   assign gift_card_recipient_feature_active = false
@@ -7,6 +8,7 @@
   assign is_quickview = quickview | default: false
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign product_bundle = product_bundle | default: false
 
   if quickview
     assign show_newsletter = false
@@ -34,6 +36,11 @@
   endcomment
   if product.selling_plan_groups.size > 0
     assign buybutton_setting = false
+  endif
+
+  if show_newsletter
+    assign newsletter_text = 'general.newsletter_form.newsletter_product_availability' | t
+    assign newsletter_button_text = 'products.product.sold_out' | t | append: ' - ' | append: newsletter_text
   endif
 -%}
 
@@ -131,6 +138,7 @@
 
             {%- liquid
               assign button_style = block.settings.button_style | default: 'btn--solid'
+              assign button_size = block.settings.button_size | default: 'btn--medium'
               assign button_type = block.settings.button_type | default: 'btn--primary'
             -%}
 
@@ -138,8 +146,11 @@
               type="submit"
               name="add"
               id="AddToCart--{{ section.id }}"
-              class="btn {{ button_style }} {{ button_type }}"
+              class="btn {{ button_style }} {{ button_size }} {{ button_type }}"
               data-add-to-cart
+              {% if product_bundle %}
+                data-bundle-modal-button="Add to bundle"
+              {% endif %}
               {% unless current_variant.available %}
                 disabled="disabled"
               {% endunless %}
@@ -156,52 +167,69 @@
             </button>
 
             {%- if show_newsletter -%}
-              {%- assign newsletter_text = 'general.newsletter_form.newsletter_product_availability' | t -%}
-              {%- assign button_text = 'products.product.sold_out' | t | append: ' - ' | append: newsletter_text -%}
-
-              <popup-component class="product-soldout-notification">
-                <button type="button" class="btn {{ button_style }} {{ button_type }}" data-popup-open>
-                  <span class="btn__text">{{ button_text }}</span>
+              <div class="product-soldout-notification">
+                <button type="button" class="btn {{ button_style }} {{ button_type }}" data-notification-popup-button>
+                  <span class="btn__text">{{ newsletter_button_text }}</span>
                 </button>
-
-                <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
-                  <form method="dialog">
-                    <button class="visually-hidden no-js" aria-label="{{ 'general.accessibility.close' | t }}"></button>
-                  </form>
-
-                  <div class="drawer__inner product-modal__notification">
-                    <div class="product-modal__content small" data-scroll-lock-scrollable>
-                      <button
-                        type="button"
-                        class="product-modal__close"
-                        data-popup-close
-                        aria-label="{{ 'general.accessibility.close' | t }}"
-                      >
-                        {%- render 'icon-cancel' -%}
-                      </button>
-
-                      {%- render 'notification-form', product_title: product.title, current_variant: current_variant -%}
-                    </div>
-                  </div>
-                </dialog>
-              </popup-component>
+              </div>
             {%- endif -%}
           </div>
+
           {%- if buybutton_setting and onboarding_product == false -%}
-            <div class="product__submit__item {{ block.settings.button_type_dynamic }} {{ block.settings.button_style_dynamic }}">
+            <div class="product__submit__item {{ block.settings.button_type_dynamic }} {{ block.settings.button_size_dynamic }} {{ block.settings.button_style_dynamic }}">
               {{ form | payment_button }}
+            </div>
+          {%- endif -%}
+
+          {%- if featured_product_bundle -%}
+            <div class="product__submit__link text-center">
+              <a href="{{ product.url }}" class="text-link small">{{ 'products.general.bundle_link' | t }}</a>
             </div>
           {%- endif -%}
         </div>
       </div>
     {%- endcapture -%}
 
-    {%- if onboarding_product -%}
+    {%- if onboarding_product or product_bundle -%}
       {{ product_form_code }}
     {%- else -%}
       {%- form 'product', product, id: product_form_id, class: 'product-form', data-product-form: '' -%}
         {{ product_form_code }}
       {%- endform -%}
+    {%- endif -%}
+
+    {%- if show_newsletter -%}
+      <popup-component class="product-soldout-notification">
+        <button
+          type="button"
+          class="btn {{ button_style }} {{ button_type }} {{ button_size }} visually-hidden"
+          data-popup-open
+          tabindex="-1"
+        >
+          <span class="btn__text">{{ newsletter_button_text }}</span>
+        </button>
+
+        <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
+          <form method="dialog">
+            <button class="visually-hidden no-js" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+          </form>
+
+          <div class="drawer__inner product-modal__notification">
+            <div class="product-modal__content small" data-scroll-lock-scrollable>
+              <button
+                type="button"
+                class="product-modal__close"
+                data-popup-close
+                aria-label="{{ 'general.accessibility.close' | t }}"
+              >
+                {%- render 'icon-cancel' -%}
+              </button>
+
+              {%- render 'notification-form', product_title: product.title, current_variant: current_variant -%}
+            </div>
+          </div>
+        </dialog>
+      </popup-component>
     {%- endif -%}
   </product-form>
 </div>

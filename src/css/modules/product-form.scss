@@ -1,8 +1,9 @@
+@use '../globals' as *;
+
 :root {
   --form-top: 10px;
   --form-left: 12px;
   --form-margin: 32px;
-  --btn-height: calc(var(--btn-top) * 2 + var(--BTN-FONT-SIZE) * var(--line-height-normal) + 2px);
 }
 
 quantity-counter { display: block; }
@@ -26,8 +27,6 @@ quantity-counter { display: block; }
 
   .form__wrapper--classic & .select__fieldset,
   .form__wrapper--classic & .radio__fieldset { row-gap: 0; }
-
-  .radio__legend__link { margin-left: 0; }
 
   .radio__buttons,
   .select-popout {
@@ -65,17 +64,13 @@ quantity-counter { display: block; }
 .selector-wrapper--size {
   flex-grow: 0;
 
-  .radio__legend__link {
-    margin-left: 4px;
+  .radio__legend__option-name { margin-right: 9px; }
 
+  .radio__legend__link {
     // 5px negative margin to compensate 5px padding
     &.text-link { margin-bottom: -5px; }
-
-    .variant__labels--hide & { margin-left: 0; }
   }
 }
-
-.variant-input-wrap { margin-left: -4px; }
 
 .variant-label {
   display: block;
@@ -253,15 +248,12 @@ input[type="radio"].variant-input {
   grid-template-columns: 1fr;
   gap: 10px;
 }
-.product__submit__buttons .btn { min-height: var(--btn-height); }
 
 .product__submit__buttons--inline {
   @include media-query ($small-up) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
-.product__submit__item { min-height: var(--btn-height); }
 
 .product__submit__item .btn {
   display: block;
@@ -321,11 +313,10 @@ shopify-accelerated-checkout-cart {
 .btn--outline.btn--black .shopify-payment-button__button--unbranded { @include btn-outline-black; }
 
 .shopify-payment-button .shopify-payment-button__button--unbranded {
-  @extend .btn;
+  @extend .btn !optional;
 
   position: relative;
   width: 100%;
-  min-height: var(--btn-height);
   color: var(--btn-text);
   background: var(--btn-bg);
   border-color: var(--btn-border);
@@ -360,6 +351,7 @@ shopify-paypal-button { position: relative; } // fix for dynamic paypal button c
 /*================ Variant styles ================*/
 .form__wrapper--classic .select__fieldset,
 .form__wrapper--classic .radio__fieldset { display: block; }
+.form__wrapper--classic .product__selectors__image,
 .form__wrapper--classic .radio__legend { margin-bottom: 10px; }
 
 /*================ Variant states ================*/

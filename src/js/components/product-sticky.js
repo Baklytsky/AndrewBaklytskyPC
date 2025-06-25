@@ -9,10 +9,6 @@ const classes = {
   sticky: 'is-sticky',
 };
 
-window.theme.variables = {
-  productPageSticky: false,
-};
-
 if (!customElements.get('product-sticky')) {
   customElements.define(
     'product-sticky',
@@ -41,7 +37,7 @@ if (!customElements.get('product-sticky')) {
         this.stickyScrollCheck();
         document.addEventListener('theme:resize', this.resizeEvent);
 
-        if (theme.variables.productPageSticky) {
+        if (theme.settings.productPageSticky) {
           this.requestAnimationSticky = requestAnimationFrame(() => this.calculateStickyPosition());
 
           this.formWrapper.addEventListener('theme:form:sticky', this.stickyFormEvent);
@@ -90,14 +86,14 @@ if (!customElements.get('product-sticky')) {
           // Is the product description and form taller than window space
           // Is also shorter than the window and images
           if (productCopyHeight < productImagesHeight) {
-            theme.variables.productPageSticky = true;
+            theme.settings.productPageSticky = true;
             targetFormWrapper.classList.add(classes.sticky);
           } else {
-            theme.variables.productPageSticky = false;
+            theme.settings.productPageSticky = false;
             targetFormWrapper.classList.remove(classes.sticky);
           }
         } else {
-          theme.variables.productPageSticky = false;
+          theme.settings.productPageSticky = false;
           targetFormWrapper.classList.remove(classes.sticky);
         }
       }
@@ -174,7 +170,7 @@ if (!customElements.get('product-sticky')) {
       disconnectedCallback() {
         document.removeEventListener('theme:resize', this.resizeEvent);
 
-        if (theme.variables.productPageSticky) {
+        if (theme.settings.productPageSticky) {
           document.removeEventListener('theme:scroll', this.scrollEvent);
         }
       }

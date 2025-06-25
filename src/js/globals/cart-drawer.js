@@ -1,5 +1,3 @@
-import appendCartItems from '../globals/append-cart-items';
-
 const classes = {
   open: 'is-open',
   closing: 'is-closing',
@@ -82,8 +80,6 @@ class CartDrawer extends HTMLElement {
     if (document.querySelectorAll(selectors.cartDrawer).length <= 1) {
       window.theme.hasCartDrawer = false;
     }
-
-    appendCartItems();
   }
 
   /**

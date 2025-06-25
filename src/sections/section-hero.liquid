@@ -10,7 +10,7 @@
   assign flex_align_mobile = section.settings.flex_align_mobile
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign selected_color_scheme = section.settings.color_scheme | strip
-  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.section_bg
+  assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.bg
   assign show_text_background = section.settings.show_text_background
   assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
   assign show_overlay_text = section.settings.show_overlay_text
@@ -71,6 +71,7 @@
   #{{ section.id }} {
     --PT: {{ padding_top }}px;
     --PB: {{ padding_bottom }}px;
+    --hero-content-width: {{ section.settings.content_width }}%;
   }
 {%- endstyle -%}
 
@@ -118,11 +119,11 @@
         <div
           class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}"
           {% if show_header_backdrop %}
-            style="--header-overlay-color: var(--overlay-bg); --header-overlay-opacity: {{ overlay_opacity }};"
+            style="--header-overlay-color: var(--OVERLAY-BG); --header-overlay-opacity: {{ overlay_opacity }};"
           {% endif %}
         >
           <div
-            class="hero__content{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
+            class="hero__content hero__content--padding-default{% if hero_transparent %} hero__content--transparent{% endif %}{% if show_overlay_text %} backdrop--radial{% endif %}"
             {% if overlay_opacity != 0.0 %}
               style="--overlay-opacity: {{ overlay_opacity }};"
             {% endif %}
@@ -142,9 +143,11 @@
   "class": "section-overlay-header",
   "blocks": [
     {"type": "heading"},
+    {"type": "subheading"},
     {"type": "text"},
-    {"type": "button-full-width"},
+    {"type": "button"},
     {"type": "code"},
+    {"type": "reviews"},
     {"type": "countdown-timer"},
     {"type": "group-buttons"}
   ],
@@ -215,6 +218,16 @@
         {"value": "align--bottom-center-desktop", "label": "Bottom center"},
         {"value": "align--bottom-right-desktop", "label": "Bottom right"}
       ]
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Content width",
+      "default": 50
     },
     {
       "type": "header",
@@ -346,7 +359,7 @@
           "type": "text"
         },
         {
-          "type": "button-full-width"
+          "type": "group-buttons"
         }
       ]
     }
