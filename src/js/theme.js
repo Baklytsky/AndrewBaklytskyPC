@@ -35,7 +35,6 @@ import './globals/product-form';
 import './globals/product-images';
 import './globals/product-item';
 import './globals/product-item-siblings';
-import './globals/shopify-products';
 import './globals/tabs';
 import './globals/toggle-ellipsis';
 import './globals/tooltip';

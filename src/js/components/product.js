@@ -82,7 +82,6 @@ if (!customElements.get('product-component')) {
         }
 
         // Record recently viewed products when the product page is loading
-        Shopify.Products.recordRecentlyViewed(recentObj);
         if (Shopify.Products && Shopify.Products.recordRecentlyViewed) {
           Shopify.Products.recordRecentlyViewed(recentObj);
         }
