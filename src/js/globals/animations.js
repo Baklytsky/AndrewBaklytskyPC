@@ -130,8 +130,6 @@ function initAnchorObservers(anchors) {
   anchors.forEach((anchor) => {
     const containerId = anchor.dataset.aosAnchor;
 
-    console.log({containerId});
-
     // Avoid adding multiple observers to the same element
     if (containerId && anchorContainers.indexOf(containerId) === -1) {
       const container = document.getElementById(containerId);
@@ -142,8 +140,6 @@ function initAnchorObservers(anchors) {
       }
     }
   });
-
-  console.log({anchorContainers});
 }
 
 function initAnimations() {
