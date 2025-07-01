@@ -77,7 +77,7 @@ const aosAnchorObserver = new IntersectionObserver(
         observer.unobserve(entry.target);
 
         // Remove the container from the anchorContainers array
-        const sectionIndex = anchorContainers.indexOf('#' + entry.target.id);
+        const sectionIndex = anchorContainers.indexOf(entry.target.id);
         if (sectionIndex !== -1) {
           anchorContainers.splice(sectionIndex, 1);
         }
