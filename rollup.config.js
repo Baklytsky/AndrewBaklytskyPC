@@ -48,7 +48,7 @@ const globalPackages = {
   'scroll-lock': 'themeVendor.ScrollLock',
 };
 
-const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'scroll-lock'];
+const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'swiper', 'scroll-lock'];
 
 const config = {
   development: [
