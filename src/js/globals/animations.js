@@ -132,7 +132,7 @@ function initAnchorObservers(anchors) {
 
     // Avoid adding multiple observers to the same element
     if (containerId && anchorContainers.indexOf(containerId) === -1) {
-      const container = document.querySelector(containerId);
+      const container = document.getElementById(containerId);
 
       if (container) {
         aosAnchorObserver.observe(container);
@@ -149,7 +149,7 @@ function initAnimations() {
 
   // Remove unloaded section from the anchors array on section:unload event
   document.addEventListener('shopify:section:unload', (e) => {
-    const sectionId = '#' + e.target.querySelector('[data-section-id]')?.id;
+    const sectionId = e.target.querySelector('[data-section-id]')?.id;
     const sectionIndex = anchorContainers.indexOf(sectionId);
 
     if (sectionIndex !== -1) {
