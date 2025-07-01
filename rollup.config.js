@@ -46,6 +46,7 @@ const developmentComment = `
 const globalPackages = {
   '@shopify/theme-rte': 'themeVendor.themeRte',
   'scroll-lock': 'themeVendor.ScrollLock',
+  swiper: 'themeVendor.swiper',
 };
 
 const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'swiper', 'scroll-lock'];
