@@ -109,6 +109,10 @@ class CartItems extends HTMLElement {
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
     this.subtotal = window.theme.subtotal;
+    this.reward = {
+      toggledReward: false,
+      skipReward: true,
+    };
 
     // Define Cart object depending on if we have cart drawer or cart page
     this.cart = this.cartDrawer || this.cartPage;
@@ -276,7 +280,7 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Remove bundle product from cart
+   * Remove multiple products from cart
    *
    * @param   {Array}  A list of products
    *
@@ -297,11 +301,47 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
+        this.reward.toggledReward = true;
         this.getCart();
       })
       .catch((error) => {
         console.log(error);
         this.enableCartButtons();
+      });
+  }
+
+  /**
+   * Add multiple products to cart
+   *
+   * @param   {Array}  A list of products
+   *
+   * @return  {Void}
+   */
+  addMultipleProducts(productsArr) {
+    fetch(theme.routes.cart_add_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({items: this.selectedProducts}),
+    })
+      .then(() => {
+        if (theme.settings.cartType === 'page') {
+          window.location = theme.routes.cart_url;
+        } else {
+          const cartDrawer = document.querySelector(selectors.cartDrawer);
+          if (cartDrawer) {
+            cartDrawer.dispatchEvent(new CustomEvent('theme:cart:refresh', {bubbles: true}));
+            cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show', {bubbles: true}));
+            window.theme.a11y.lastElement = this.addButton;
+
+            this.addButton.classList.remove(classes.loading);
+            this.addButton.disabled = false;
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
       });
   }
 
@@ -463,6 +503,170 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Converts a user input amount to cents (or the smallest currency unit)
+   * @param {string|number} input - entered value (e.g. 25.99 or "500.000")
+   * @param {string} currencyCode - the currency code, e.g. "USD", "JPY"
+   * @returns {number} - value in cents (or units if it's a zero-decimal currency)
+   */
+  normalizePriceToMinorUnits(input, currencyCode) {
+    const zeroDecimalCurrencies = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
+    const rawValue = parseFloat(input);
+    if (isNaN(rawValue)) {
+      throw new Error(input);
+    }
+
+    const isZeroDecimal = zeroDecimalCurrencies.includes(currencyCode);
+
+    return isZeroDecimal ? Math.round(rawValue) : Math.round(rawValue * 100);
+  }
+
+  checkConditions(condition, data) {
+    const value = condition.value;
+    switch (condition.type) {
+      case 'ORDER_AMOUNT':
+        const operator = condition.operator;
+        const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
+        const price = data.price;
+        const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
+        return match;
+        break;
+
+      case 'PRODUCT_TAG':
+        return data.tags.includes(value);
+        break;
+
+      case 'COLLECTION':
+        const collectionsIds = data.collections.map((item) => item.id.toString());
+        console.log(collectionsIds);
+        const collectionId = value.replace('gid://shopify/Collection/', '');
+        return collectionsIds.includes(collectionId);
+        break;
+
+      case 'SPECIFIC_PRODUCT':
+        const productId = value.replace('gid://shopify/Product/', '');
+        return data.products.includes(productId);
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  toggleReward(response) {
+    return false;
+    const cartJsonScript = response.querySelector('[data-cart-json]');
+    if (cartJsonScript) {
+      this.reward.skipReward = false;
+      const cartJson = JSON.parse(cartJsonScript.innerHTML);
+      const meta = cartJson.meta;
+      const startDateString = meta['promotion-start-date'];
+      const startDate = new Date(startDateString);
+      const endDateString = meta['promotion-end-date'];
+      const endDate = new Date(endDateString);
+      const status = meta['promotion-status'];
+      const timeNow = new Date();
+      const config = meta['function-configuration'];
+      const rewards = config.rewards;
+
+      if (status === 'active' && timeNow > startDate && timeNow < endDate && rewards.length) {
+        const price = cartJson.price;
+        const collections = cartJson.collections;
+        const tags = cartJson.tags;
+        const products = cartJson.products;
+        const conditions = config.conditions;
+        const addedRewards = cartJson.rewards;
+        const variantBold2 = 38054321619135;
+        const variantItalic1 = 38054321389759;
+        let result = false;
+
+        const data = {
+          price: price,
+          tags: tags,
+          collections: collections,
+          products: products,
+        };
+
+        for (let i = 0; i < conditions.length; ) {
+          let groupResult = this.checkConditions(conditions[i], data);
+          i++;
+
+          for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
+            groupResult = groupResult && this.checkConditions(conditions[i], data);
+          }
+
+          result = result || groupResult;
+        }
+
+        if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
+          let items = [];
+          rewards.forEach((reward, idx) => {
+            let test = parseInt(reward.productId.replace('gid://shopify/Product/', ''));
+            if (idx === 0) {
+              test = variantBold2;
+            } else if (idx === 1) {
+              test = variantItalic1;
+            }
+            items.push({
+              id: test,
+              quantity: reward.quantity,
+              properties: {
+                _reward: `reward`,
+              },
+            });
+          });
+
+          if (result && !addedRewards.length) {
+            fetch(theme.routes.cart_add_url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({items}),
+            })
+              .then((response) => {
+                this.reward.toggledReward = true;
+                console.log(response);
+                this.getCart();
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+              });
+          } else {
+            this.removeMultipleProducts(addedRewards);
+          }
+        } else {
+          this.reward.skipReward = true;
+        }
+
+        // let formData = {
+        //   'items': [{
+        //     'id': 36110175633573,
+        //     'quantity': 2
+        //   }]
+        // };
+
+        // fetch(window.Shopify.routes.root + 'cart/add.js', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify(formData)
+        // })
+        // .then(response => {
+        //   return response.json();
+        // })
+        // .catch((error) => {
+        //   console.error('Error:', error);
+        // });
+      } else {
+        this.reward.skipReward = true;
+      }
+    } else {
+      this.reward.skipReward = true;
+    }
+  }
+
+  /**
    * Get response from the cart
    *
    * @return  {Void}
@@ -476,8 +680,20 @@ class CartItems extends HTMLElement {
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        const cleanResponse = element.querySelector(selectors.apiContent);
-        this.build(cleanResponse);
+        // Start
+
+        if (!this.reward.toggledReward) {
+          this.toggleReward(element);
+        }
+
+        // End
+
+        if (this.reward.skipReward || this.reward.toggledReward) {
+          this.reward.toggledReward = false;
+          this.reward.skipReward = true;
+          const cleanResponse = element.querySelector(selectors.apiContent);
+          this.build(cleanResponse);
+        }
       })
       .catch((error) => console.log(error));
   }
