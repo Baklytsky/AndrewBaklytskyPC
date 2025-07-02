@@ -311,41 +311,6 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Add multiple products to cart
-   *
-   * @param   {Array}  A list of products
-   *
-   * @return  {Void}
-   */
-  addMultipleProducts(productsArr) {
-    fetch(theme.routes.cart_add_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({items: this.selectedProducts}),
-    })
-      .then(() => {
-        if (theme.settings.cartType === 'page') {
-          window.location = theme.routes.cart_url;
-        } else {
-          const cartDrawer = document.querySelector(selectors.cartDrawer);
-          if (cartDrawer) {
-            cartDrawer.dispatchEvent(new CustomEvent('theme:cart:refresh', {bubbles: true}));
-            cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show', {bubbles: true}));
-            window.theme.a11y.lastElement = this.addButton;
-
-            this.addButton.classList.remove(classes.loading);
-            this.addButton.disabled = false;
-          }
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  }
-
-  /**
    * Update discount in the cart
    *
    * @return  {Void}
@@ -391,29 +356,34 @@ class CartItems extends HTMLElement {
    */
 
   cartAddEvent(event) {
-    let formData = '';
+    let formData = event.detail.data ? event.detail.data : '';
     let button = event.detail.button;
 
     if (button.hasAttribute('disabled')) return;
+
     const form = button.closest('form');
-    // Validate form
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-    formData = new FormData(form);
+    if (form) {
+      // Validate form
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      formData = new FormData(form);
 
-    const hasInputsInNoScript = [...form.elements].some((el) => el.closest(selectors.noscript));
-    if (hasInputsInNoScript) {
-      formData = this.handleFormDataDuplicates([...form.elements], formData);
+      const hasInputsInNoScript = [...form.elements].some((el) => el.closest(selectors.noscript));
+      if (hasInputsInNoScript) {
+        formData = this.handleFormDataDuplicates([...form.elements], formData);
+      }
+
+      if (form !== null && form.querySelector('[type="file"]')) {
+        return;
+      }
     }
 
-    if (form !== null && form.querySelector('[type="file"]')) {
-      return;
-    }
     if (theme.settings.cartType === 'drawer' && this.cartDrawer) {
       event.preventDefault();
     }
+
     this.addToCart(formData, button);
   }
 
@@ -553,7 +523,6 @@ class CartItems extends HTMLElement {
   }
 
   toggleReward(response) {
-    return false;
     const cartJsonScript = response.querySelector('[data-cart-json]');
     if (cartJsonScript) {
       this.reward.skipReward = false;
@@ -616,48 +585,13 @@ class CartItems extends HTMLElement {
           });
 
           if (result && !addedRewards.length) {
-            fetch(theme.routes.cart_add_url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({items}),
-            })
-              .then((response) => {
-                this.reward.toggledReward = true;
-                console.log(response);
-                this.getCart();
-              })
-              .catch((error) => {
-                console.error('Error:', error);
-              });
+            this.addToCart(items);
           } else {
             this.removeMultipleProducts(addedRewards);
           }
         } else {
           this.reward.skipReward = true;
         }
-
-        // let formData = {
-        //   'items': [{
-        //     'id': 36110175633573,
-        //     'quantity': 2
-        //   }]
-        // };
-
-        // fetch(window.Shopify.routes.root + 'cart/add.js', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(formData)
-        // })
-        // .then(response => {
-        //   return response.json();
-        // })
-        // .catch((error) => {
-        //   console.error('Error:', error);
-        // });
       } else {
         this.reward.skipReward = true;
       }
@@ -708,6 +642,19 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
+    let headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/javascript',
+    };
+
+    if (Array.isArray(formData)) {
+      headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/javascript',
+      };
+      formData = JSON.stringify({items: formData});
+    }
+
     if (this.cart) {
       this.cart.classList.add(classes.loading);
     }
@@ -725,14 +672,12 @@ class CartItems extends HTMLElement {
 
     fetch(theme.routes.cart_add_url, {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        Accept: 'application/javascript',
-      },
+      headers: headers,
       body: formData,
     })
       .then((response) => response.json())
       .then((response) => {
+        this.reward.toggledReward = true;
         if (response.status) {
           this.addToCartError(response, button);
 
@@ -759,9 +704,11 @@ class CartItems extends HTMLElement {
               })
             );
           }
+
           if (theme.settings.cartType === 'page') {
             window.location = theme.routes.cart_url;
           }
+
           this.getCart();
         } else {
           // Redirect to cart page if "Add to cart" is successful

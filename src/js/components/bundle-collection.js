@@ -87,8 +87,6 @@ if (!customElements.get('bundle-collection')) {
         if (this.addButton) {
           this.addButton.addEventListener('click', () => {
             if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
-              this.addButton.classList.add(classes.loading);
-              this.addButton.disabled = true;
               this.selectedProducts.forEach((element) => {
                 if (this.handle !== '') {
                   this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
@@ -96,31 +94,16 @@ if (!customElements.get('bundle-collection')) {
                 }
               });
 
-              fetch(theme.routes.cart_add_url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({items: this.selectedProducts}),
-              })
-                .then(() => {
-                  if (theme.settings.cartType === 'page') {
-                    window.location = theme.routes.cart_url;
-                  } else {
-                    const cartDrawer = document.querySelector(selectors.cartDrawer);
-                    if (cartDrawer) {
-                      cartDrawer.dispatchEvent(new CustomEvent('theme:cart:refresh', {bubbles: true}));
-                      cartDrawer.dispatchEvent(new CustomEvent('theme:cart-drawer:show', {bubbles: true}));
-                      window.theme.a11y.lastElement = this.addButton;
+              window.theme.a11y.lastElement = this.addButton;
 
-                      this.addButton.classList.remove(classes.loading);
-                      this.addButton.disabled = false;
-                    }
-                  }
+              document.dispatchEvent(
+                new CustomEvent('theme:cart:add', {
+                  detail: {
+                    button: this.addButton,
+                    data: this.selectedProducts,
+                  },
                 })
-                .catch((error) => {
-                  console.error('Error:', error);
-                });
+              );
             }
           });
         }
