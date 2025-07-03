@@ -433,14 +433,12 @@
 {%- endfor -%}
 
 {%- if gwp_promo_meta != blank -%}
-  {% assign line_items_collections = line_items_collections | uniq %}
-  {% assign line_items_tags = line_items_tags | uniq %}
-  {% assign line_items_products = line_items_products | remove_first: ',' | split: ',' %}
-  {% assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ',' %}
-
-  <script>
-    console.log({{ gwp_promo_meta | json }})
-  </script>
+  {%- liquid
+    assign line_items_collections = line_items_collections | uniq
+    assign line_items_tags = line_items_tags | uniq
+    assign line_items_products = line_items_products | remove_first: ',' | split: ','
+    assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+  -%}
 
   <script type="application/json" data-cart-json>
     {

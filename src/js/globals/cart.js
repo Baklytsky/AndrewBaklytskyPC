@@ -109,10 +109,7 @@ class CartItems extends HTMLElement {
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
     this.subtotal = window.theme.subtotal;
-    this.reward = {
-      toggledReward: false,
-      skipReward: true,
-    };
+    this.showGetCartResponse = true;
 
     // Define Cart object depending on if we have cart drawer or cart page
     this.cart = this.cartDrawer || this.cartPage;
@@ -301,7 +298,6 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
-        this.reward.toggledReward = true;
         this.getCart();
       })
       .catch((error) => {
@@ -525,7 +521,6 @@ class CartItems extends HTMLElement {
   toggleReward(response) {
     const cartJsonScript = response.querySelector('[data-cart-json]');
     if (cartJsonScript) {
-      this.reward.skipReward = false;
       const cartJson = JSON.parse(cartJsonScript.innerHTML);
       const meta = cartJson.meta;
       const startDateString = meta['promotion-start-date'];
@@ -544,8 +539,6 @@ class CartItems extends HTMLElement {
         const products = cartJson.products;
         const conditions = config.conditions;
         const addedRewards = cartJson.rewards;
-        const variantBold2 = 38054321619135;
-        const variantItalic1 = 38054321389759;
         let result = false;
 
         const data = {
@@ -567,36 +560,26 @@ class CartItems extends HTMLElement {
         }
 
         if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
-          let items = [];
-          rewards.forEach((reward, idx) => {
-            let test = parseInt(reward.productId.replace('gid://shopify/Product/', ''));
-            if (idx === 0) {
-              test = variantBold2;
-            } else if (idx === 1) {
-              test = variantItalic1;
-            }
-            items.push({
-              id: test,
-              quantity: reward.quantity,
-              properties: {
-                _reward: `reward`,
-              },
-            });
-          });
-
+          this.showGetCartResponse = false;
           if (result && !addedRewards.length) {
+            let items = [];
+            rewards.forEach((reward) => {
+              console.log(reward);
+              items.push({
+                id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
+                quantity: reward.quantity,
+                properties: {
+                  _reward: `reward`,
+                },
+              });
+            });
+
             this.addToCart(items);
           } else {
             this.removeMultipleProducts(addedRewards);
           }
-        } else {
-          this.reward.skipReward = true;
         }
-      } else {
-        this.reward.skipReward = true;
       }
-    } else {
-      this.reward.skipReward = true;
     }
   }
 
@@ -611,20 +594,13 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
+        this.showGetCartResponse = true;
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        // Start
+        this.toggleReward(element);
 
-        if (!this.reward.toggledReward) {
-          this.toggleReward(element);
-        }
-
-        // End
-
-        if (this.reward.skipReward || this.reward.toggledReward) {
-          this.reward.toggledReward = false;
-          this.reward.skipReward = true;
+        if (this.showGetCartResponse) {
           const cleanResponse = element.querySelector(selectors.apiContent);
           this.build(cleanResponse);
         }
@@ -677,7 +653,6 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.json())
       .then((response) => {
-        this.reward.toggledReward = true;
         if (response.status) {
           this.addToCartError(response, button);
 
