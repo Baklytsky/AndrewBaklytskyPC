@@ -503,7 +503,6 @@ class CartItems extends HTMLElement {
 
       case 'COLLECTION':
         const collectionsIds = data.collections.map((item) => item.id.toString());
-        console.log(collectionsIds);
         const collectionId = value.replace('gid://shopify/Collection/', '');
         return collectionsIds.includes(collectionId);
         break;
@@ -564,7 +563,6 @@ class CartItems extends HTMLElement {
           if (result && !addedRewards.length) {
             let items = [];
             rewards.forEach((reward) => {
-              console.log(reward);
               items.push({
                 id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
                 quantity: reward.quantity,
