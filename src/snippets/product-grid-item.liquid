@@ -202,22 +202,27 @@
     assign badge = ''
     assign badge_new = ''
     assign badge_soldout = ''
+    assign badge_content = ''
 
-    if product.metafields.theme.badge != blank and product.metafields.theme.badge.type == 'single_line_text_field'
-      assign badge = product.metafields.theme.badge.value
+    if settings.show_custom_badge
+      if product.metafields.theme.badge != blank and product.metafields.theme.badge.type == 'single_line_text_field'
+        assign badge = product.metafields.theme.badge.value
+      endif
+
+      if badge == '' and product_tags contains '_badge_'
+        assign badge = product_tags | split: '_badge_'
+        assign badge = badge[1] | split: ',' | first | replace: '_', ' '
+      endif
     endif
 
-    if badge == '' and product_tags contains '_badge_'
-      assign badge = product_tags | split: '_badge_'
-      assign badge = badge[1] | split: ',' | first | replace: '_', ' '
-    endif
+    if settings.show_preorder_badge
+      if product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
+        assign is_preorder_meta = true
+      endif
 
-    if product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
-      assign is_preorder_meta = true
-    endif
-
-    if product_tags contains '_preorder' or is_preorder_meta
-      assign preorder = true
+      if product_tags contains '_preorder' or is_preorder_meta
+        assign preorder = true
+      endif
     endif
 
     if product.compare_at_price > product.price and settings.sale_tags_enable
@@ -245,31 +250,62 @@
   -%}
 
   {%- if badge != '' or badge_new != '' or badge_soldout != '' -%}
-    <span class="badge-box"
-      data-aos="fade"
-      data-aos-delay="{{ aos_delay }}"
-      data-aos-duration="{{ aos_duration }}"
-      data-aos-anchor="{{ aos_anchor }}">
-      {%- if badge_soldout != '' -%}
-        {{ badge_soldout }}
-      {%- elsif badge_new != '' -%}
-        {{ badge_new }}
-      {%- else -%}
-        {{ badge }}
-      {%- endif -%}
-    </span>
+    {%- capture badge_content -%}
+      <span class="badge-box{% if badge_new != '' %} badge-box--new{% elsif badge_soldout != '' %} badge-box--sold{% endif %}"
+        data-aos="fade"
+        data-aos-delay="{{ aos_delay }}"
+        data-aos-duration="{{ aos_duration }}"
+        data-aos-anchor="{{ aos_anchor }}">
+        {%- if badge_soldout != '' -%}
+          {{ badge_soldout }}
+        {%- elsif badge_new != '' -%}
+          {{ badge_new }}
+        {%- else -%}
+          {{ badge }}
+        {%- endif -%}
+      </span>
+    {%- endcapture -%}
   {%- elsif preorder and sold_out == false -%}
-    <span class="preorder-box"
-      data-aos="fade"
-      data-aos-delay="{{ aos_delay }}"
-      data-aos-duration="{{ aos_duration }}"
-      data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.pre_order' | t }}</span>
+    {%- capture badge_content -%}
+      <span class="badge-box badge-box--preorder"
+        data-aos="fade"
+        data-aos-delay="{{ aos_delay }}"
+        data-aos-duration="{{ aos_duration }}"
+        data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.pre_order' | t }}</span>
+    {%- endcapture -%}
   {%- elsif on_sale and sold_out == false -%}
-    <span class="sale-box"
-      data-aos="fade"
-      data-aos-delay="{{ aos_delay }}"
-      data-aos-duration="{{ aos_duration }}"
-      data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.on_sale' | t }}</span>
+    {%- capture badge_content -%}
+      <span class="badge-box badge-box--sale"
+        data-aos="fade"
+        data-aos-delay="{{ aos_delay }}"
+        data-aos-duration="{{ aos_duration }}"
+        data-aos-anchor="{{ aos_anchor }}">
+        {%- if settings.show_saving_badge -%}
+          {%- liquid
+            assign price_difference = product.compare_at_price | minus: product.price
+            assign discount = price_difference | money_without_trailing_zeros
+
+            if settings.currency_code_enable
+              assign discount = price_difference | money_with_currency
+            endif
+
+            if settings.saving_badge_type == 'percentage'
+              assign percent_off = price_difference | times: 1.00 | divided_by: product.compare_at_price | times: 100
+              assign discount = percent_off | floor | append: '%'
+            endif
+          -%}
+          {{ discount }} {{ 'products.product.off' | t }}
+        {%- else -%}
+          {{ 'products.product.on_sale' | t }}
+        {%- endif -%}
+      </span>
+    {%- endcapture -%}
+  {%- endif -%}
+
+  {%- if badge_content != '' -%}
+    <div class="badge-box-container {{ settings.badge_alignment }}">
+      {{ badge_content }}
+    </div>
   {%- endif -%}
 
   {%- if bundle_product -%}

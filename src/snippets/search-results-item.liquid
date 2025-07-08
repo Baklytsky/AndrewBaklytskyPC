@@ -49,21 +49,23 @@
           data-aos-anchor="{{ animation_anchor }}"
         ></div>
 
-        <span
-          class="badge-box"
-          data-aos="fade"
-          data-aos-delay="{{ animation_delay }}"
-          data-aos-duration="{{ animation_duration }}"
-          data-aos-anchor="{{ animation_anchor }}"
-        >
-          {%- liquid
-            if item.object_type == 'article'
-              echo 'layout.search_page.singular_article' | t
-            else
-              echo 'layout.search_page.singular_page' | t
-            endif
-          -%}
-        </span>
+        <div class="badge-box-container {{ settings.badge_alignment }}">
+          <span
+            class="badge-box"
+            data-aos="fade"
+            data-aos-delay="{{ animation_delay }}"
+            data-aos-duration="{{ animation_duration }}"
+            data-aos-anchor="{{ animation_anchor }}"
+          >
+            {%- liquid
+              if item.object_type == 'article'
+                echo 'layout.search_page.singular_article' | t
+              else
+                echo 'layout.search_page.singular_page' | t
+              endif
+            -%}
+          </span>
+        </div>
       {%- endif -%}
     </a>
   </div>

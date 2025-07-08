@@ -1027,67 +1027,6 @@
       },
       {
         "type": "header",
-        "content": "Sale badges"
-      },
-      {
-        "type": "checkbox",
-        "id": "sale_tags_enable",
-        "label": "Show sale badges",
-        "default": true
-      },
-      {
-        "type": "color",
-        "id": "sale_bg_color",
-        "label": "Background",
-        "default": "#c84242"
-      },
-      {
-        "type": "color",
-        "id": "sale_text_color",
-        "label": "Text",
-        "default": "#ffffff"
-      },
-      {
-        "type": "header",
-        "content": "Product badges",
-        "info": "Add tag '_preorder' or '_badge_with_custom_text' to a product in order to show the badge"
-      },
-      {
-        "type": "color",
-        "id": "badge_bg_color",
-        "label": "Background",
-        "default": "#444444"
-      },
-      {
-        "type": "color",
-        "id": "badge_text_color",
-        "label": "Text",
-        "default": "#ffffff"
-      },
-      {
-        "type": "checkbox",
-        "id": "show_sold_out_badge",
-        "label": "Show sold out badge",
-        "default": false
-      },
-      {
-        "type": "checkbox",
-        "id": "show_automatic_new_badge",
-        "label": "Show automatic new badge",
-        "default": false
-      },
-      {
-        "type": "range",
-        "id": "badge_new_date_limit",
-        "label": "Date limit",
-        "min": 0,
-        "max": 20,
-        "step": 1,
-        "default": 5,
-        "info": "Badge appears if product was created within this many days"
-      },
-      {
-        "type": "header",
         "content": "Quick add"
       },
       {
@@ -1302,6 +1241,165 @@
         "label": "HEX codes and files",
         "default": "Black: #000000\nWhite: #fafafa\nBlank: blank.png",
         "info": "Each rule must be in its own line. HEX codes and [image files](/admin/content/files?selectedView=all&media_type=IMAGE) accepted. [Learn more](https://carbon.presidiocreative.com/products/swatches)"
+      }
+    ]
+  },
+  {
+    "name": "Badges",
+    "settings": [
+      {
+        "type": "select",
+        "id": "badge_alignment",
+        "label": "Alignment",
+        "options": [
+          { "value": "align--top-left", "label": "Top left" },
+          { "value": "align--top-center", "label": "Top center" },
+          { "value": "align--top-right", "label": "Top right" },
+          { "value": "align--bottom-left", "label": "Bottom left" },
+          { "value": "align--bottom-center", "label": "Bottom center" },
+          { "value": "align--bottom-right", "label": "Bottom right" }
+        ],
+        "default": "align--top-left",
+        "info": "Not recommended to use bottom alignment when quick add is enabled"
+      },
+      {
+        "type": "header",
+        "content": "Sale badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "sale_tags_enable",
+        "label": "Show sale badge",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_saving_badge",
+        "label": "Show savings",
+        "default": true
+      },
+      {
+        "type": "select",
+        "id": "saving_badge_type",
+        "visible_if": "{{ settings.show_saving_badge == true }}",
+        "label": "Saving type",
+        "options": [
+          { "value": "percentage", "label": "Percentage" },
+          { "value": "money", "label": "Money" }
+        ],
+        "default": "percentage"
+      },
+      {
+        "type": "color",
+        "id": "sale_bg_color",
+        "label": "Background",
+        "default": "#c84242"
+      },
+      {
+        "type": "color",
+        "id": "sale_text_color",
+        "label": "Text",
+        "default": "#ffffff"
+      },
+      {
+        "type": "header",
+        "content": "Custom badge",
+        "info": "Add tag '_badge_with_custom_text' to a product in order to show the badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_custom_badge",
+        "label": "Show custom badge",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "badge_bg_color",
+        "label": "Background",
+        "default": "#444444"
+      },
+      {
+        "type": "color",
+        "id": "badge_text_color",
+        "label": "Text",
+        "default": "#ffffff"
+      },
+      {
+        "type": "header",
+        "content": "Sold badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_sold_out_badge",
+        "label": "Show sold out badge",
+        "default": false
+      },
+      {
+        "type": "color",
+        "id": "sold_out_bg_color",
+        "label": "Background",
+        "default": "#444444"
+      },
+      {
+        "type": "color",
+        "id": "sold_out_text_color",
+        "label": "Text",
+        "default": "#ffffff"
+      },
+      {
+        "type": "header",
+        "content": "New badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_automatic_new_badge",
+        "label": "Show automatic new badge",
+        "default": false
+      },
+      {
+        "type": "color",
+        "id": "new_badge_bg_color",
+        "label": "Background",
+        "default": "#444444"
+      },
+      {
+        "type": "color",
+        "id": "new_badge_text_color",
+        "label": "Text",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "badge_new_date_limit",
+        "label": "Date limit",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "default": 5,
+        "info": "Badge appears if product was created within this many days"
+      },
+      {
+        "type": "header",
+        "content": "Preorder",
+        "info": "Add tag '_preorder' to a product in order to show the badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_preorder_badge",
+        "label": "Show pre-order badge",
+        "default": false
+      },
+      {
+        "type": "color",
+        "id": "preorder_bg_color",
+        "label": "Background",
+        "default": "#444444"
+      },
+      {
+        "type": "color",
+        "id": "preorder_text_color",
+        "label": "Text",
+        "default": "#ffffff"
       }
     ]
   },
