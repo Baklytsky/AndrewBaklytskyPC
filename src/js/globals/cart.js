@@ -109,6 +109,7 @@ class CartItems extends HTMLElement {
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
     this.subtotal = window.theme.subtotal;
+    this.showGetCartResponse = true;
 
     // Define Cart object depending on if we have cart drawer or cart page
     this.cart = this.cartDrawer || this.cartPage;
@@ -276,7 +277,7 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Remove bundle product from cart
+   * Remove multiple products from cart
    *
    * @param   {Array}  A list of products
    *
@@ -351,29 +352,34 @@ class CartItems extends HTMLElement {
    */
 
   cartAddEvent(event) {
-    let formData = '';
+    let formData = event.detail.data ? event.detail.data : '';
     let button = event.detail.button;
 
     if (button.hasAttribute('disabled')) return;
+
     const form = button.closest('form');
-    // Validate form
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-    formData = new FormData(form);
+    if (form) {
+      // Validate form
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      formData = new FormData(form);
 
-    const hasInputsInNoScript = [...form.elements].some((el) => el.closest(selectors.noscript));
-    if (hasInputsInNoScript) {
-      formData = this.handleFormDataDuplicates([...form.elements], formData);
+      const hasInputsInNoScript = [...form.elements].some((el) => el.closest(selectors.noscript));
+      if (hasInputsInNoScript) {
+        formData = this.handleFormDataDuplicates([...form.elements], formData);
+      }
+
+      if (form !== null && form.querySelector('[type="file"]')) {
+        return;
+      }
     }
 
-    if (form !== null && form.querySelector('[type="file"]')) {
-      return;
-    }
     if (theme.settings.cartType === 'drawer' && this.cartDrawer) {
       event.preventDefault();
     }
+
     this.addToCart(formData, button);
   }
 
@@ -463,6 +469,119 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Converts a user input amount to cents (or the smallest currency unit)
+   * @param {string|number} input - entered value (e.g. 25.99 or "500.000")
+   * @param {string} currencyCode - the currency code, e.g. "USD", "JPY"
+   * @returns {number} - value in cents (or units if it's a zero-decimal currency)
+   */
+  normalizePriceToMinorUnits(input, currencyCode) {
+    const zeroDecimalCurrencies = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
+    const rawValue = parseFloat(input);
+    if (isNaN(rawValue)) {
+      throw new Error(input);
+    }
+
+    const isZeroDecimal = zeroDecimalCurrencies.includes(currencyCode);
+
+    return isZeroDecimal ? Math.round(rawValue) : Math.round(rawValue * 100);
+  }
+
+  checkConditions(condition, data) {
+    const value = condition.value;
+    switch (condition.type) {
+      case 'ORDER_AMOUNT':
+        const operator = condition.operator;
+        const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
+        const price = data.price;
+        const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
+        return match;
+        break;
+
+      case 'PRODUCT_TAG':
+        return data.tags.includes(value);
+        break;
+
+      case 'COLLECTION':
+        const collectionsIds = data.collections.map((item) => item.id.toString());
+        const collectionId = value.replace('gid://shopify/Collection/', '');
+        return collectionsIds.includes(collectionId);
+        break;
+
+      case 'SPECIFIC_PRODUCT':
+        const productId = value.replace('gid://shopify/Product/', '');
+        return data.products.includes(productId);
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  toggleReward(response) {
+    const cartJsonScript = response.querySelector('[data-cart-json]');
+    if (cartJsonScript) {
+      const cartJson = JSON.parse(cartJsonScript.innerHTML);
+      const meta = cartJson.meta;
+      const startDateString = meta['promotion-start-date'];
+      const startDate = new Date(startDateString);
+      const endDateString = meta['promotion-end-date'];
+      const endDate = new Date(endDateString);
+      const status = meta['promotion-status'];
+      const timeNow = new Date();
+      const config = meta['function-configuration'];
+      const rewards = config.rewards;
+
+      if (status === 'active' && timeNow > startDate && timeNow < endDate && rewards.length) {
+        const price = cartJson.price;
+        const collections = cartJson.collections;
+        const tags = cartJson.tags;
+        const products = cartJson.products;
+        const conditions = config.conditions;
+        const addedRewards = cartJson.rewards;
+        let result = false;
+
+        const data = {
+          price: price,
+          tags: tags,
+          collections: collections,
+          products: products,
+        };
+
+        for (let i = 0; i < conditions.length; ) {
+          let groupResult = this.checkConditions(conditions[i], data);
+          i++;
+
+          for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
+            groupResult = groupResult && this.checkConditions(conditions[i], data);
+          }
+
+          result = result || groupResult;
+        }
+
+        if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
+          this.showGetCartResponse = false;
+          if (result && !addedRewards.length) {
+            let items = [];
+            rewards.forEach((reward) => {
+              items.push({
+                id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
+                quantity: reward.quantity,
+                properties: {
+                  _reward: `reward`,
+                },
+              });
+            });
+
+            this.addToCart(items);
+          } else {
+            this.removeMultipleProducts(addedRewards);
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Get response from the cart
    *
    * @return  {Void}
@@ -473,11 +592,16 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
+        this.showGetCartResponse = true;
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        const cleanResponse = element.querySelector(selectors.apiContent);
-        this.build(cleanResponse);
+        this.toggleReward(element);
+
+        if (this.showGetCartResponse) {
+          const cleanResponse = element.querySelector(selectors.apiContent);
+          this.build(cleanResponse);
+        }
       })
       .catch((error) => console.log(error));
   }
@@ -492,6 +616,19 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
+    let headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/javascript',
+    };
+
+    if (Array.isArray(formData)) {
+      headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/javascript',
+      };
+      formData = JSON.stringify({items: formData});
+    }
+
     if (this.cart) {
       this.cart.classList.add(classes.loading);
     }
@@ -509,10 +646,7 @@ class CartItems extends HTMLElement {
 
     fetch(theme.routes.cart_add_url, {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        Accept: 'application/javascript',
-      },
+      headers: headers,
       body: formData,
     })
       .then((response) => response.json())
@@ -543,9 +677,11 @@ class CartItems extends HTMLElement {
               })
             );
           }
+
           if (theme.settings.cartType === 'page') {
             window.location = theme.routes.cart_url;
           }
+
           this.getCart();
         } else {
           // Redirect to cart page if "Add to cart" is successful
