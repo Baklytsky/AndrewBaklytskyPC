@@ -1,5 +1,5 @@
 <div
-  class="hero__reviews{% if block.settings.stars_text_inline %} hero__reviews--inline{% endif %}"
+  class="hero__reviews{% if block.settings.style == 'inline' %} hero__reviews--inline{% endif %}"
   style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
   data-aos="hero"
   data-aos-order="auto"
@@ -65,10 +65,20 @@
       "default": 5
     },
     {
-      "type": "checkbox",
-      "id": "stars_text_inline",
-      "label": "Stars and text go side by side",
-      "default": false
+      "type": "select",
+      "id": "style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "stacked",
+          "label": "Stacked"
+        },
+        {
+          "value": "inline",
+          "label": "Inline"
+        }
+      ],
+      "default": "stacked"
     },
     {
       "type": "header",
