@@ -29,6 +29,10 @@ if (!customElements.get('ticker-bar')) {
       constructor() {
         super();
 
+        this.checkWidthEvent = this.checkWidth.bind(this);
+      }
+
+      connectedCallback() {
         this.autoplay = this.hasAttribute(attributes.autoplay);
         this.scale = this.querySelector(selectors.scale);
         this.text = this.querySelector(selectors.text);
@@ -37,10 +41,7 @@ if (!customElements.get('ticker-bar')) {
         this.comparitor.classList.add(classes.comparitor);
         this.appendChild(this.comparitor);
         this.scale.classList.remove(classes.unloaded);
-        this.checkWidthEvent = this.checkWidth.bind(this);
-      }
 
-      connectedCallback() {
         this.checkWidth();
         this.addEventListener(
           'theme:ticker:refresh',
@@ -84,6 +85,7 @@ if (!customElements.get('ticker-bar')) {
 
           this.scale.style.removeProperty('--animation-time');
           this.scale.style.setProperty('--animation-time', `${animationTimeFrame}s`);
+          this.scale.style.setProperty('--animation-speed', this.speed);
 
           this.scale.querySelectorAll(selectors.text)?.forEach((text) => {
             text.classList.add(classes.animation);

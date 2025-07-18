@@ -270,9 +270,30 @@ html:not(.js) .announcement__scale.ticker--unloaded {
   align-items: center;
   width: max-content;
 
-  &:hover {
-    animation-play-state: paused;
+  & > div { transition: transform 0.5s ease-out; }
+
+  &:hover { animation-play-state: paused; }
+}
+
+.announcement__bar-outer:not(:hover) {
+  .is-selected ticker-bar:not([paused]) .ticker--animated,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
+}
+
+.announcement__bar-outer:hover {
+  .is-selected ticker-bar:not([paused]) .ticker--animated > div,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated > div,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated > div {
+    transform: translateX(calc(-20px / var(--animation-speed, 1)));
+    transition: transform 0.5s ease-out;
   }
+}
+
+html.supports-touch {
+  .is-selected ticker-bar:not([paused]) .ticker--animated,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
 }
 
 // Don't animate hidden content
@@ -288,6 +309,7 @@ swiper-container.announcement__slider {
   display: flex;
   flex-wrap: nowrap;
   overflow: auto;
+  width: 100%;
 
   @include hide-scrollbar;
 
@@ -329,22 +351,6 @@ swiper-container.announcement__slider {
   @include media-query($medium-up) {
     padding-top: 0;
     padding-bottom: 0;
-  }
-}
-
-.announcement__bar-outer:not(:hover) {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
-  ticker-bar[autoplay]:not([paused]) .ticker--animated,
-  ticker-bar[data-slide]:not([paused]) .ticker--animated {
-    animation-play-state: running;
-  }
-}
-
-html.supports-touch {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
-  ticker-bar[autoplay]:not([paused]) .ticker--animated,
-  ticker-bar[data-slide]:not([paused]) .ticker--animated {
-    animation-play-state: running;
   }
 }
 
