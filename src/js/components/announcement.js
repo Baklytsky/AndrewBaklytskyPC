@@ -15,7 +15,14 @@ if (!customElements.get('announcement-bar')) {
         this.slidesCount = this.querySelectorAll('.announcement__slide').length;
 
         if (this.slider) {
-          this.initSliders();
+          this.initSlider();
+
+          document.addEventListener('theme:resize:width', this.initSliderEvent);
+          this.addEventListener('theme:slider:loaded', () => {
+            this.querySelectorAll('ticker-bar')?.forEach((ticker) => {
+              ticker.dispatchEvent(new CustomEvent('theme:ticker:refresh'));
+            });
+          });
         }
 
         this.addEventListener('theme:countdown:hide', (e) => {
@@ -48,22 +55,10 @@ if (!customElements.get('announcement-bar')) {
 
       initSlider() {
         this.swiperContainer = this.querySelector('swiper-container');
-        this.swiperContainer?.initialize();
-      }
 
-      /**
-       * Init slider
-       */
-      initSliders() {
-        this.initSlider();
-        document.addEventListener('theme:resize:width', this.initSliderEvent);
-
-        // TODO:
-        this.addEventListener('theme:slider:loaded', () => {
-          this.querySelectorAll('ticker-bar')?.forEach((ticker) => {
-            ticker.dispatchEvent(new CustomEvent('theme:ticker:refresh'));
-          });
-        });
+        if (this.swiperContainer && typeof this.swiperContainer.initialize === 'function') {
+          this.swiperContainer.initialize();
+        }
       }
 
       // TODO
@@ -85,16 +80,16 @@ if (!customElements.get('announcement-bar')) {
       //   }
       // }
 
-      // removeSlide(slide) {
-      //   this.slider.dispatchEvent(
-      //     new CustomEvent('theme:slider:remove-slide', {
-      //       bubbles: false,
-      //       detail: {
-      //         slide,
-      //       },
-      //     })
-      //   );
-      // }
+      removeSlide(slide) {
+        this.slider.dispatchEvent(
+          new CustomEvent('theme:slider:remove-slide', {
+            bubbles: false,
+            detail: {
+              slide,
+            },
+          })
+        );
+      }
 
       removeTickerText(tickerText) {
         const ticker = tickerText.closest('ticker-bar');

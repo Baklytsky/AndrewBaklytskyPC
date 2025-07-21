@@ -317,45 +317,46 @@
       >
         {%- if layout == 'slider' -%}
           <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
-            <swiper-container
-              class="announcement__slider swiper-wrapper"
-              init="false"
-              loop="true"
-              effect="slide"
-              autoplay="true"
-              autoplay-delay="{{ section.settings.slider_speed | times: 1000 }}"
-              slides-per-view="1"
-              space-between="0"
-              threshold="2"
+            <div class="announcement__slider">
+              <swiper-container
+                init="false"
+                loop="true"
+                effect="slide"
+                autoplay="true"
+                autoplay-delay="{{ section.settings.slider_speed | times: 1000 }}"
+                slides-per-view="1"
+                space-between="0"
+                threshold="2"
+                {% if show_arrows and section.blocks.size > 1 %}
+                  navigation="true"
+                  navigation-next-el=".{{ section.id }}.swiper-button-next"
+                  navigation-prev-el=".{{ section.id }}.swiper-button-prev"
+                {% endif %}
+              >
+                {{ bar_markup }}
+              </swiper-container>
+
               {% if show_arrows and section.blocks.size > 1 %}
-                navigation="true"
-                navigation-next-el=".{{ section.id }}.swiper-button-next"
-                navigation-prev-el=".{{ section.id }}.swiper-button-prev"
+                {%- style -%}
+                  .{{ section.id }}.swiper-button-next,
+                  .{{ section.id }}.swiper-button-prev {
+                    color: var(--text);
+                  }
+
+                  .{{ section.id }}.swiper-button-next:after,
+                  .{{ section.id }}.swiper-button-prev:after {
+                    font-size: 0
+                  }
+                {%- endstyle -%}
+
+                <div class="{{ section.id }} swiper-button-prev">
+                  {{ 'icon-arrow-left.svg' | inline_asset_content }}
+                </div>
+                <div class="{{ section.id }} swiper-button-next">
+                  {{ 'icon-arrow-right.svg' | inline_asset_content }}
+                </div>
               {% endif %}
-            >
-              {{ bar_markup }}
-            </swiper-container>
-
-            {% if show_arrows and section.blocks.size > 1 %}
-              {%- style -%}
-                .{{ section.id }}.swiper-button-next,
-                .{{ section.id }}.swiper-button-prev {
-                  color: var(--text);
-                }
-
-                .{{ section.id }}.swiper-button-next:after,
-                .{{ section.id }}.swiper-button-prev:after {
-                  font-size: 0
-                }
-              {%- endstyle -%}
-
-              <div class="{{ section.id }} swiper-button-prev">
-                {{ 'icon-arrow-left.svg' | inline_asset_content }}
-              </div>
-              <div class="{{ section.id }} swiper-button-next">
-                {{ 'icon-arrow-right.svg' | inline_asset_content }}
-              </div>
-            {% endif %}
+            </div>
           </div>
         {%- endif -%}
 
