@@ -1,26 +1,3 @@
-const selectors = {
-  frame: '[data-ticker-frame]',
-  scale: '[data-ticker-scale]',
-  text: '[data-ticker-text]',
-  clone: 'data-clone',
-};
-
-const attributes = {
-  autoplay: 'autoplay',
-  speed: 'speed',
-};
-
-const classes = {
-  animation: 'ticker--animated',
-  unloaded: 'ticker--unloaded',
-  comparitor: 'ticker__comparitor',
-};
-
-const settings = {
-  speed: 1.63, // 100px going to move for 1.63s
-  space: 100, // 100px
-};
-
 if (!customElements.get('ticker-bar')) {
   customElements.define(
     'ticker-bar',
@@ -30,17 +7,24 @@ if (!customElements.get('ticker-bar')) {
         super();
 
         this.checkWidthEvent = this.checkWidth.bind(this);
+        this.settings = {
+          speed: 1.63, // 100px going to move for 1.63s
+          space: 100, // 100px
+        };
       }
 
       connectedCallback() {
-        this.autoplay = this.hasAttribute(attributes.autoplay);
-        this.scale = this.querySelector(selectors.scale);
-        this.text = this.querySelector(selectors.text);
-        this.speed = this.hasAttribute(attributes.speed) ? this.getAttribute(attributes.speed) : settings.speed;
+        this.autoplay = this.hasAttribute('autoplay');
+        this.scale = this.querySelector('[data-ticker-scale]');
+        this.text = this.querySelector('[data-ticker-text]');
+        this.speed = this.hasAttribute('speed') ? this.getAttribute('speed') : this.settings.speed;
         this.comparitor = this.text.cloneNode(true);
-        this.comparitor.classList.add(classes.comparitor);
-        this.appendChild(this.comparitor);
-        this.scale.classList.remove(classes.unloaded);
+        this.comparitor.classList.add('ticker__comparitor');
+
+        // Append the comparitor only if it doesn't exist
+        // This prevents duplication when the component is re-initialized
+        !this.querySelector('.ticker__comparitor') && this.appendChild(this.comparitor);
+        this.scale.classList.remove('ticker--unloaded');
 
         this.checkWidth();
         this.addEventListener(
@@ -57,49 +41,48 @@ if (!customElements.get('ticker-bar')) {
       }
 
       checkWidth() {
-        this.text = this.querySelector(selectors.text);
+        this.text = this.querySelector('[data-ticker-text]');
 
         const padding = window.getComputedStyle(this).paddingLeft.replace('px', '') * 2;
         const isOverflowing = this.clientWidth - padding < this.comparitor.clientWidth;
+        const limitClones = this.autoplay ? parseInt((window.innerWidth - padding) / this.text.clientWidth) : 2;
 
         if (isOverflowing || this.autoplay) {
-          this.text.classList.remove(classes.animation);
+          this.text.classList.remove('ticker--animated');
 
-          const clones = this.scale.querySelectorAll(`[${selectors.clone}]`);
-          const limitClones = this.autoplay ? parseInt((window.innerWidth - padding) / this.text.clientWidth) : 2;
-
-          // Remove old clones
-          clones?.forEach((item) => {
-            item.remove();
-          });
+          this.removeClones();
 
           if (this.autoplay || isOverflowing) {
             for (let index = 0; index <= limitClones; index++) {
               const cloneSecond = this.text.cloneNode(true);
-              cloneSecond.setAttribute(selectors.clone, '');
+              cloneSecond.setAttribute('data-clone', '');
               this.scale.appendChild(cloneSecond);
             }
           }
 
-          const animationTimeFrame = ((this.text.clientWidth / settings.space) * Number(this.speed)).toFixed(2);
+          const animationTimeFrame = ((this.text.clientWidth / this.settings.space) * Number(this.speed)).toFixed(2);
 
           this.scale.style.removeProperty('--animation-time');
           this.scale.style.setProperty('--animation-time', `${animationTimeFrame}s`);
           this.scale.style.setProperty('--animation-speed', this.speed);
 
-          this.scale.querySelectorAll(selectors.text)?.forEach((text) => {
-            text.classList.add(classes.animation);
+          this.scale.querySelectorAll('[data-ticker-text]')?.forEach((text) => {
+            text.classList.add('ticker--animated');
           });
         } else {
-          this.text.classList.add(classes.animation);
-          const clones = this.scale.querySelectorAll(`[${selectors.clone}]`);
+          this.text.classList.add('ticker--animated');
+          this.removeClones();
 
-          clones.forEach((clone) => {
-            clone.parentNode.removeChild(clone);
-          });
-
-          this.text.classList.remove(classes.animation);
+          this.text.classList.remove('ticker--animated');
         }
+      }
+
+      removeClones() {
+        const clones = this.scale.querySelectorAll('[data-clone]');
+
+        clones.forEach((clone) => {
+          clone.parentNode.removeChild(clone);
+        });
       }
     }
   );
