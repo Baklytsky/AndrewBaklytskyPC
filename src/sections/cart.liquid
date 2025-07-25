@@ -11,7 +11,7 @@
   assign show_empty_cart_menu = settings.show_empty_cart_menu
   assign empty_cart_menu = settings.empty_cart_menu
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign free_shipping_block = section.blocks | where: 'type', 'free-shipping'
+  assign free_shipping_block = section.blocks | where: 'type', 'cart-promotions'
   assign is_free_shipping_first = false
   if section.blocks[0] == free_shipping_block[0]
     assign is_free_shipping_first = true
@@ -25,7 +25,7 @@
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
   {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
-    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
+    {%- render 'free-shipping' block: block, color_scheme: block.settings.color_scheme, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -238,7 +238,7 @@
                   {%- when 'product-list' -%}
                     {%- render 'cart-block-upsell', block: block -%}
 
-                  {%- when 'free-shipping' -%}
+                  {%- when 'cart-promotions' -%}
                     {%- unless is_free_shipping_first -%}
                       {{- free_shipping -}}
                     {%- endunless -%}
@@ -445,25 +445,181 @@
       ]
     },
     {
-      "type": "free-shipping",
-      "name": "Free shipping message",
+      "type": "cart-promotions",
+      "name": "Cart promotions",
       "limit": 1,
       "settings": [
         {
-          "type": "paragraph",
-          "content": "Set a minimum amount for free shipping in [Theme settings](/admin/themes/current/editor?context=theme)"
+          "type": "header",
+          "content": "Promotion 1"
         },
         {
           "type": "textarea",
           "id": "message",
-          "label": "Message",
+          "label": "Text",
           "info": "Use ||amount|| to display progress towards free shipping.",
-          "default": "You are ||amount|| away from free shipping."
+          "default": "You are ||amount|| away from FREE SHIPPING."
         },
         {
-          "type": "color_background",
-          "id": "free_shipping_gradient",
-          "label": "Custom progress bar gradient"
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_icon",
+          "label": "Enable icon",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "icon-award",
+          "options": [
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightning", "value": "icon-lightning"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Alternative icon/image"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Size",
+          "unit": "px",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Promotion 2"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_promotion_2",
+          "label": "Enable promotion 2",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "promotion_text_2",
+          "label": "Text",
+          "info": "Use ||amount|| to display progress towards free shipping.",
+          "default": "You've unlocked FREE SHIPPING. Spend ||amount|| more to get a FREE GIFT."
+        },
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_icon_2",
+          "label": "Enable icon",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon_name_2",
+          "label": "Icon",
+          "default": "icon-award",
+          "options": [
+            {"label": "Award", "value": "icon-award"},
+            {"label": "Box", "value": "icon-box"},
+            {"label": "Chat", "value": "icon-chat"},
+            {"label": "Cloud", "value": "icon-cloud"},
+            {"label": "Diameter", "value": "icon-diameter"},
+            {"label": "Discount", "value": "icon-discount"},
+            {"label": "Donation", "value": "icon-donation"},
+            {"label": "Droplet", "value": "icon-droplet"},
+            {"label": "Info", "value": "icon-info-empty"},
+            {"label": "Email", "value": "icon-email"},
+            {"label": "Fast shipment", "value": "icon-fast-shipment"},
+            {"label": "Flare", "value": "icon-flare"},
+            {"label": "Flower", "value": "icon-flower"},
+            {"label": "Gift", "value": "icon-gift"},
+            {"label": "Green shipment", "value": "icon-green-shipment"},
+            {"label": "Heart", "value": "icon-heart"},
+            {"label": "Leaf", "value": "icon-leaf"},
+            {"label": "Lightning", "value": "icon-lightning"},
+            {"label": "Location", "value": "icon-location"},
+            {"label": "Mail", "value": "icon-mail"},
+            {"label": "Notes", "value": "icon-notes"},
+            {"label": "Pants", "value": "icon-pants"},
+            {"label": "Peace", "value": "icon-peace"},
+            {"label": "Pin", "value": "icon-pin"},
+            {"label": "Planet", "value": "icon-planet"},
+            {"label": "Phone", "value": "icon-phone"},
+            {"label": "Recycle", "value": "icon-recycle"},
+            {"label": "Ruler", "value": "icon-ruler"},
+            {"label": "Shield", "value": "icon-shield"},
+            {"label": "Smile", "value": "icon-smile"},
+            {"label": "Star", "value": "icon-star"},
+            {"label": "Tree", "value": "icon-tree"},
+            {"label": "Trophy", "value": "icon-trophy"},
+            {"label": "Truck", "value": "icon-truck"},
+            {"label": "Vegan", "value": "icon-vegan"},
+            {"label": "Wash", "value": "icon-wash"},
+            {"label": "Washing machine", "value": "icon-washing-machine"}
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_2",
+          "label": "Alternative icon/image"
+        },
+        {
+          "type": "range",
+          "id": "icon_size_2",
+          "label": "Size",
+          "unit": "px",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Typography"
         },
         {
           "type": "select",
@@ -475,6 +631,16 @@
             {"value": "text-center", "label": "Centered"},
             {"value": "text-right", "label": "Right"}
           ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme-2",
+          "label": "Color scheme"
         }
       ]
     },

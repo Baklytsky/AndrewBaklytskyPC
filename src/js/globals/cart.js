@@ -52,6 +52,7 @@ const selectors = {
   item: '[data-item]',
   itemsHolder: '[data-items-holder]',
   leftToSpend: '[data-left-to-spend]',
+  leftToSpendPromo: '[data-left-to-spend-promo]',
   navDrawer: '[data-drawer]',
   outerSection: '[data-section-id]',
   priceHolder: '[data-cart-price-holder]',
@@ -70,6 +71,7 @@ const attributes = {
   disabled: 'disabled',
   freeShipping: 'data-free-shipping',
   freeShippingLimit: 'data-free-shipping-limit',
+  promoCenterLimit: 'data-promo-center-limit',
   item: 'data-item',
   itemIndex: 'data-item-index',
   itemTitle: 'data-item-title',
@@ -133,6 +135,7 @@ class CartItems extends HTMLElement {
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
     this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
+    this.promoCenterLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.promoCenterLimit)) * 100 * window.Shopify.currency.rate : 0;
 
     this.freeShippingMessageHandle(this.subtotal);
     this.updateProgress();
@@ -1114,14 +1117,24 @@ class CartItems extends HTMLElement {
     const percent = Math.min(percentValue * 100, 100);
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
     const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpendPromoMoney = window.theme.formatMoney(this.promoCenterLimit - this.subtotal, theme.moneyFormat);
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
       const progressGraph = item.querySelector(selectors.freeShippingGraph);
       const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
+      const leftToSpendPromo = item.querySelector(selectors.leftToSpendPromo);
 
       if (leftToSpendMessage) {
         leftToSpendMessage.innerHTML = leftToSpend.replace('.00', '');
+      }
+
+      if (leftToSpendPromo) {
+        leftToSpendPromo.innerHTML = leftToSpendPromoMoney.replace('.00', '');
+      }
+
+      if (this.promoCenterLimit > 0) {
+        item.classList.toggle(classes.active, this.subtotal > this.promoCenterLimit);
       }
 
       // Set progress bar value

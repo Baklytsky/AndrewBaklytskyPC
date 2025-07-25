@@ -27,9 +27,12 @@
 .free-shipping__success-message,
 .free-shipping__default-message { flex: 1; }
 
+.free-shipping__promo-message,
 .free-shipping__success-message { display: none; }
 
+.is-active:not(.is-success) .free-shipping__promo-message,
 .is-success .free-shipping__success-message { display: inline; }
+.is-active .free-shipping__default-message,
 .is-success .free-shipping__success-message ~ .free-shipping__default-message { display: none; }
 
 /*====== Free Shipping Graph ======*/
@@ -67,18 +70,14 @@
 
 /* WEBKIT BROWSERS - CHROME, OPERA AND SAFARI */
 .free-shipping__progress-bar {
-  --progress-bg: transparent;
-  --progress-value-bg: var(--FREE-SHIPPING-GRADIENT);
-
   appearance: none;
   appearance: none;
   appearance: none;
   display: block;
-  width: 100%;
-  height: 8px;
+  width: calc(100% - 44px);
+  height: 6px;
+  margin: 0 29px 0 15px;
   background: var(--bg-accent);
-  border-radius: var(--btn-radius);
-  margin-top: 5px;
   overflow: hidden;
 }
 
@@ -95,8 +94,68 @@
 
 .free-shipping__progress-bar::-webkit-progress-bar { @include progress-bar; }
 .free-shipping__progress-bar::-webkit-progress-value { @include progress-value; }
-.free-shipping__progress-bar::-webkit-progress-value { transform: scaleX(0); }
+.free-shipping__progress-bar::-webkit-progress-value {
+  border-radius: 0 var(--btn-radius) var(--btn-radius) 0;
+  transform: scaleX(0);
+}
+.is-success .free-shipping__progress-bar::-webkit-progress-value { border-radius: 0; }
 .is-animated .free-shipping__progress-bar::-webkit-progress-value { transform: scaleX(1); }
+
+.free-shipping__progress-holder {
+  --progress-bg: var(--FREE-SHIPPING-BACKGROUND);
+  --progress-value-bg: var(--FREE-SHIPPING-GRADIENT);
+  --progress-text: var(--FREE-SHIPPING-TEXT);
+
+  position: relative;
+  width: 100%;
+  padding: 12px 0;
+  margin-top: 5px;
+}
+
+.free-shipping__box {
+  --icons: var(--FREE-SHIPPING-GRADIENT);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--progress-bg);
+  transition: background 1s;
+}
+
+.is-active .free-shipping__box--center,
+.is-success .free-shipping__box--right,
+.free-shipping__box--left {
+  --icons: var(--FREE-SHIPPING-TEXT);
+
+  background: var(--progress-value-bg);
+}
+
+.free-shipping__box--left {
+  top: 7px;
+  width: 16px;
+  height: 16px;
+}
+
+.free-shipping__box--center {
+  left: var(--promo-center-position, 50%);
+  border-radius: 50%;
+}
+
+.free-shipping__box--right {
+  left: auto;
+  right: 0;
+}
+
+.free-shipping__box .icon__animated {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
 /* MOZILLA FIREFOX */
 @-moz-document url-prefix() {
