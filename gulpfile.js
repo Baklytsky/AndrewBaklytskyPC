@@ -24,7 +24,7 @@ const sass = require('gulp-sass')(require('sass-embedded'));
 const config = require('./lib/config');
 const {startShopifyDevProcesses, deployShopifyStores} = require('./lib/build/shopify.js');
 const {renderDevelopmentLiquid} = require('./lib/build/liquid.js');
-const {stripDataTestId, insertNoIndexHeader} = require('./lib/build/html.js');
+const {stripDataTestId} = require('./lib/build/html.js');
 
 const configPath = path.join(__dirname, 'rollup.config.js');
 const isProduction = process.env.NODE_ENV === 'production';
@@ -90,7 +90,6 @@ function compileAssets() {
       })
     )
     .pipe(gulpIf(config.stripTestIds, stripDataTestId()))
-    .pipe(gulpIf(config.noIndex, insertNoIndexHeader()))
     .pipe(dest(config.dist.root));
 
   // Render all other assets liquid then copy to to assets/
