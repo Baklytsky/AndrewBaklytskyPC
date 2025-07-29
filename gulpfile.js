@@ -1,5 +1,4 @@
 const path = require('path');
-
 const plumber = require('gulp-plumber');
 const svgmin = require('gulp-svgmin');
 const rename = require('gulp-rename');
@@ -14,9 +13,13 @@ const rollup = require('rollup');
 const log = require('fancy-log');
 const colors = require('ansi-colors');
 const loadConfigFile = require('rollup/loadConfigFile');
-const sass = require('gulp-dart-sass');
 const gulpIf = require('gulp-if');
 const autoprefixer = require('autoprefixer');
+const newer = require('gulp-newer');
+const dependents = require('gulp-dependents');
+
+// Using sass-embedded
+const sass = require('gulp-sass')(require('sass-embedded'));
 
 const config = require('./lib/config');
 const {startShopifyDevProcesses, deployShopifyStores} = require('./lib/build/shopify.js');
@@ -24,12 +27,38 @@ const {renderDevelopmentLiquid} = require('./lib/build/liquid.js');
 const {stripDataTestId, insertNoIndexHeader} = require('./lib/build/html.js');
 
 const configPath = path.join(__dirname, 'rollup.config.js');
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Store cache for Rollup
+let rollupCache = {};
+
+// Sass settings
+const sassOptions = {
+  outputStyle: isProduction ? 'compressed' : 'expanded',
+  includePaths: ['src/css'],
+};
+
+// Dependents settings for tracking SCSS dependencies
+const dependentsOptions = {
+  '.scss': {
+    parserSteps: [
+      // Match all @use and @import
+      /(?:@(?:use|import)\s+['"]([^'"]+)['"]);/g,
+      // Get only file system path part
+      function (match) {
+        return match[1];
+      },
+    ],
+    // Add .scss extension if it's missing
+    postfixes: ['.scss', '/_index.scss', '/index.scss', ''],
+  },
+};
 
 /*
 Command functions
 */
 
-// Compile and outut assets to dist folder
+// Compile and output assets to dist folder
 function compileAssets() {
   log(colors.white('Compiling assets'));
 
@@ -39,6 +68,7 @@ function compileAssets() {
     allowEmpty: true,
   })
     .pipe(plumber(handleError))
+    .pipe(newer(config.dist.root))
     .pipe(size({showFiles: true, pretty: true}))
     .pipe(dest(config.dist.root));
 
@@ -48,6 +78,7 @@ function compileAssets() {
     allowEmpty: true,
   })
     .pipe(plumber(handleError))
+    .pipe(newer(config.dist.root))
     .pipe(size({showFiles: true, pretty: true}))
     .pipe(renderDevelopmentLiquid())
     .pipe(
@@ -65,6 +96,7 @@ function compileAssets() {
   // Render all other assets liquid then copy to to assets/
   return src([config.src.cssTemplates, config.src.jsTemplates, config.src.svgTemplates], {base: config.src.root, allowEmpty: true})
     .pipe(plumber(handleError))
+    .pipe(newer(config.dist.assets))
     .pipe(size({showFiles: true, pretty: true}))
     .pipe(
       rename({
@@ -80,6 +112,12 @@ function compileIcons() {
   log(colors.white('Processing SVGs'));
 
   return src(config.src.icons)
+    .pipe(
+      newer({
+        dest: config.dist.snippets,
+        ext: '.liquid',
+      })
+    )
     .pipe(svgmin(config.plugins.svgmin))
     .pipe(cheerio(config.plugins.cheerio))
     .pipe(
@@ -101,51 +139,86 @@ function compileIcons() {
 function compileJS() {
   log(colors.white('Compiling JS'));
 
-  // load the config file next to the current script;
-  // the provided config object has the same effect as passing "--format es"
-  // on the command line and will override the format of all outputs
   return loadConfigFile(configPath)
     .then(async ({options, warnings}) => {
       log(colors.cyan('Rollup 🍣'), 'Loaded', colors.white('config loaded'), 'from', colors.white(configPath));
 
-      // // "warnings" wraps the default `onwarn` handler passed by the CLI.
-      // // This prints all warnings up to this point:
       log(`We currently have ${warnings.count} warnings`);
-
-      // This prints all deferred warnings
       warnings.flush();
 
-      // options is an array of "inputOptions" objects with an additional "output"
-      // property that contains an array of "outputOptions".
-      // The following will generate all outputs for all inputs, and write them to disk the same
-      // way the CLI does it:
       for (const optionsObj of options) {
+        optionsObj.cache = rollupCache[optionsObj.input];
         const bundle = await rollup.rollup(optionsObj);
+        rollupCache[optionsObj.input] = bundle.cache;
         await Promise.all(optionsObj.output.map(bundle.write));
       }
     })
     .catch(handleError);
 }
 
-// Process CSS with PostCSS and copy to dist/assets
+// Process CSS with sass-embedded and copy to dist/assets
 function compileCss() {
-  return src([config.src.cssTheme, config.src.cssTemplateGiftCard, config.src.cssComponents])
+  log(colors.white('Compiling CSS with sass-embedded'));
+
+  const startTime = Date.now();
+
+  return src([config.src.cssTheme, config.src.cssTemplateGiftCard, config.src.cssComponents], {
+    allowEmpty: true,
+  })
     .pipe(plumber(handleError))
+    .pipe(dependents(dependentsOptions))
     .pipe(
       cssimport({
         extensions: ['scss'],
       })
     )
-    .pipe(sass().on('error', handleError))
+    .pipe(sass(sassOptions).on('error', sass.logError))
     .pipe(postcss([autoprefixer]))
     .pipe(
-      // Move all nested css into toplevel assets folder
       rename((path) => ({
         ...path,
         dirname: '/',
       }))
     )
-    .pipe(dest(config.dist.assets));
+    .pipe(dest(config.dist.assets))
+    .on('end', function () {
+      const endTime = Date.now();
+      log(colors.green(`CSS compilation completed in ${(endTime - startTime) / 1000} seconds`));
+    });
+}
+
+// Separate function for compiling a single SCSS file (used in watchAll)
+function compileSingleScss(file) {
+  if (!file) {
+    log(colors.red('Error: No file specified for compilation'));
+    return Promise.resolve();
+  }
+
+  log(colors.white(`Compiling ${path.basename(file)}`));
+
+  const startTime = Date.now();
+
+  return src(file, {allowEmpty: true})
+    .pipe(plumber(handleError))
+    .pipe(dependents(dependentsOptions))
+    .pipe(
+      cssimport({
+        extensions: ['scss'],
+      })
+    )
+    .pipe(sass(sassOptions).on('error', sass.logError))
+    .pipe(postcss([autoprefixer]))
+    .pipe(
+      rename((path) => ({
+        ...path,
+        dirname: '/',
+      }))
+    )
+    .pipe(dest(config.dist.assets))
+    .on('end', function () {
+      const endTime = Date.now();
+      log(colors.green(`Single SCSS compilation completed in ${(endTime - startTime) / 1000} seconds`));
+    });
 }
 
 // Zip theme and output to dist
@@ -164,6 +237,7 @@ function cleanConfig() {
 
 // Clean dist folder
 function cleanAll() {
+  rollupCache = {};
   return del(path.join(config.dist.root, '**/*'));
 }
 
@@ -174,8 +248,69 @@ async function watchAll(done) {
   // Rebuild JS and hot reload when JS changes
   watch(config.src.js, compileJS);
 
-  // Rebuild CSS and hot reload when JS changes
-  watch(config.src.css, compileCss);
+  // Optimized tracking of SCSS file changes
+  // Main SCSS files
+  watch([config.src.cssTheme, config.src.cssTemplateGiftCard], function (cb) {
+    try {
+      // Check if this.path is not undefined
+      const filePath = this.event === 'change' && this.path ? this.path : config.src.cssTheme;
+
+      // Make sure filePath is a string
+      if (typeof filePath === 'string') {
+        compileSingleScss(filePath);
+      } else if (Array.isArray(filePath) && filePath.length > 0) {
+        compileSingleScss(filePath[0]); // Take the first element if it's an array
+      } else {
+        log(colors.red('Invalid file path for compilation'));
+      }
+    } catch (error) {
+      log(colors.red('Error in watch handler:', error));
+    }
+    cb();
+  });
+
+  // SCSS components
+  if (config.src.cssComponents) {
+    watch(config.src.cssComponents, function (cb) {
+      try {
+        // Check if this.path is not undefined
+        const filePath = this.event === 'change' && this.path ? this.path : config.src.cssComponents;
+
+        // Make sure filePath is a string
+        if (typeof filePath === 'string') {
+          compileSingleScss(filePath);
+        } else if (Array.isArray(filePath) && filePath.length > 0) {
+          compileSingleScss(filePath[0]); // Take the first element if it's an array
+        } else {
+          log(colors.red('Invalid file path for compilation'));
+        }
+      } catch (error) {
+        log(colors.red('Error in watch handler:', error));
+      }
+      cb();
+    });
+  }
+
+  // Other SCSS files (dependencies)
+  watch(['src/css/**/*.scss', '!src/css/theme.scss', '!src/css/gift_card.scss', ...(config.src.cssComponents ? [config.src.cssComponents.toString()] : []).map((p) => `!${p}`)], function (cb) {
+    try {
+      // Check if this.path is not undefined
+      const changedFile = this.path;
+
+      // Check if changedFile is not undefined
+      if (changedFile) {
+        log(colors.yellow(`Dependency changed: ${path.basename(changedFile)}`));
+      } else {
+        log(colors.yellow(`Dependency changed: unknown file`));
+      }
+
+      // Compile main files
+      compileCss();
+    } catch (error) {
+      log(colors.red('Error in dependency watch handler:', error));
+    }
+    cb();
+  });
 
   // Compile assets (.liquid files, etc) when they change
   watch(path.join('environments', '**', '*.json'), series(compileAssets));
@@ -184,6 +319,7 @@ async function watchAll(done) {
   // Process SVGs when they change
   watch(config.src.icons, compileIcons);
 
+  log(colors.green('Watching for changes...'));
   done();
 }
 
@@ -191,8 +327,8 @@ async function watchAll(done) {
 Command configuration
 */
 
-exports.compileCss = series(cleanAll, compileCss);
-exports.compileAssets = series(cleanAll, compileAssets);
+exports.compileCss = series(compileCss);
+exports.compileAssets = series(compileAssets);
 exports.watch = series(cleanAll, buildAll, parallel(watchAll, startShopifyDevProcesses));
 exports.deploy = series(cleanAll, buildAll, deployShopifyStores);
 exports.build = series(cleanAll, buildAll);
@@ -201,5 +337,5 @@ exports.default = series(cleanAll, buildAll);
 
 function handleError(err) {
   log(colors.red(err));
-  throw err;
+  this.emit('end'); // Continue gulp execution after error
 }
