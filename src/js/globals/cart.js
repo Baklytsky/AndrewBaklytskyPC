@@ -261,6 +261,7 @@ class CartItems extends HTMLElement {
         button.addEventListener('click', (event) => {
           event.preventDefault();
           if (button.hasAttribute(attributes.bundleRemoveButton) && button.getAttribute(attributes.bundleRemoveButton) !== '') {
+            event.stopPropagation();
             const lineItemKey = button.getAttribute(attributes.bundleRemoveButton);
             const lineItemKeyArr = lineItemKey.split(',');
 
