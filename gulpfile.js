@@ -102,6 +102,15 @@ function compileAssets() {
   // This ensures binary files like fonts remain intact
   copyFilesRecursively(path.join('src', 'assets'), path.join(config.dist.root, 'assets'));
 
+  // Copy `release-notes.md` and `.shopifyignore` to dist
+  src([config.src.notes, config.src.shopifyIgnore], {
+    base: __dirname,
+    allowEmpty: true,
+  })
+    .pipe(plumber(handleError))
+    .pipe(newer(config.dist.root))
+    .pipe(dest(config.dist.root));
+
   // Render files in "official" shopify folders with liquid and then copy to their respective folders in dist/
   src([config.src.snippets, config.src.blocks, config.src.sections, config.src.templates, config.src.locales, config.src.config, config.src.layout], {
     base: config.src.root,
