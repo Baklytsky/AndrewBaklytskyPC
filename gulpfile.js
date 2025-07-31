@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const plumber = require('gulp-plumber');
 const svgmin = require('gulp-svgmin');
@@ -54,6 +55,41 @@ const dependentsOptions = {
   },
 };
 
+// Creates directories recursively if they don't exist
+function ensureDirectoryExists(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, {recursive: true});
+  }
+}
+
+// Recursively copies files from source to target directory
+function copyFilesRecursively(sourceDir, targetDir, filter = () => true) {
+  // Make sure target directory exists
+  ensureDirectoryExists(targetDir);
+
+  // Get all items in the source directory
+  const items = fs.readdirSync(sourceDir, {withFileTypes: true});
+
+  // Process each item (file or directory)
+  for (const item of items) {
+    const sourcePath = path.join(sourceDir, item.name);
+    const targetPath = path.join(targetDir, item.name);
+
+    if (item.isDirectory()) {
+      // If it's a directory, recurse into it
+      copyFilesRecursively(sourcePath, targetPath, filter);
+    } else if (filter(sourcePath, item.name)) {
+      // If it's a file and passes the filter, copy it directly
+      // First ensure the target directory exists (for nested files)
+      ensureDirectoryExists(path.dirname(targetPath));
+
+      // Direct binary copy of the file using Node.js fs module
+      fs.copyFileSync(sourcePath, targetPath);
+      log(colors.blueBright(`Copied: ${path.relative('src', sourcePath)}`));
+    }
+  }
+}
+
 /*
 Command functions
 */
@@ -62,15 +98,9 @@ Command functions
 function compileAssets() {
   log(colors.white('Compiling assets'));
 
-  // Copy assets to dist
-  src([config.src.nonLiquidAssets, config.src.notes, config.src.shopifyIgnore], {
-    base: config.src.root,
-    allowEmpty: true,
-  })
-    .pipe(plumber(handleError))
-    .pipe(newer(config.dist.root))
-    .pipe(size({showFiles: true, pretty: true}))
-    .pipe(dest(config.dist.root));
+  // Copy assets directory without any transformations
+  // This ensures binary files like fonts remain intact
+  copyFilesRecursively(path.join('src', 'assets'), path.join(config.dist.root, 'assets'));
 
   // Render files in "official" shopify folders with liquid and then copy to their respective folders in dist/
   src([config.src.snippets, config.src.blocks, config.src.sections, config.src.templates, config.src.locales, config.src.config, config.src.layout], {
