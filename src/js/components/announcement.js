@@ -13,7 +13,6 @@ if (!customElements.get('announcement-bar')) {
 
       connectedCallback() {
         this.slider = this.querySelector('swiper-container');
-        this.allSlides = Array.from(this.slider.querySelectorAll('swiper-slide'));
         this.slidesCount = this.querySelectorAll('.announcement__slide').length;
 
         this.initSlider();
@@ -48,6 +47,8 @@ if (!customElements.get('announcement-bar')) {
 
       initSlider() {
         if (!this.slider) return;
+
+        this.allSlides = Array.from(this.slider.querySelectorAll('swiper-slide'));
 
         this.restoreAllSlides();
 
