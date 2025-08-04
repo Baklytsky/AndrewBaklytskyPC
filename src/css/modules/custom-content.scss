@@ -328,6 +328,31 @@
   }
 }
 
+.brick__block--overlap {
+  --image-offset-default: 50px;
+  --image-offset: var(--image-offset-value, var(--image-offset-default));
+  --image-offset-negative: calc(var(--image-offset) * -1);
+
+  align-self: center;
+  display: flex;
+  align-items: flex-start;
+}
+.brick__block--overlap .brick__block__image { flex: 1 0 50%; }
+
+.brick__block--overlap .brick__block__image:not(.brick__block__image--offset):first-child {
+  z-index: 1;
+  margin-top: var(--image-offset);
+  left: calc(var(--image-offset) / 2);
+}
+
+.brick__block--overlap .brick__block__image--offset {
+  @include media-query($medium-up) {
+    margin-top: var(--image-offset);
+    left: calc(var(--image-offset) / 2);
+  }
+}
+.brick__block--overlap .brick__block__image:last-child { left: calc(var(--image-offset-negative) / 2); }
+
 .brick__block--three-quarters {
   @include media-query($medium-up) { flex: 0 0 65%; }
 }
@@ -489,8 +514,18 @@
 
 .look__slider {
   @include media-query($medium-up) {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: calc(25vw + 150px);
+    padding-left: 75px;
+    padding-right: 75px;
     margin-left: auto;
     margin-right: auto;
+
+    @include hide-scrollbar;
 
     .look__slide { display: block; }
 
@@ -500,15 +535,115 @@
     .swiper-button-next { right: 4px; }
   }
 
-  @include media-query($large-up) {
-    max-width: calc(25vw + 150px);
-    padding-left: 75px;
-    padding-right: 75px;
-  }
-
   @include media-query($medium) {
     max-width: calc(25vw + 100px);
     padding-left: 50px;
     padding-right: 50px;
+  }
+
+  @include media-query($small) {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--grid-outer);
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 var(--grid-outer) var(--grid-outer);
+    margin: 0;
+
+    @include hide-scrollbar;
+
+    &::after {
+      content: "";
+      min-height: 1px;
+      display: block;
+      position: relative;
+      padding-right: var(--grid-outer);
+    }
+
+    .product-item {
+      width: 100%;
+      min-height: 100%;
+    }
+  }
+}
+
+.look__slide {
+  flex: 0 0 auto;
+  width: 100%;
+
+  @include media-query($small) {
+    width: calc(100% - 50px);
+    max-width: 80vh; // Prevent huge images on a landscape mobile view
+    margin-right: var(--grid-gap);
+    scroll-snap-align: start;
+
+    &:last-child { margin-right: 0; }
+
+    &:only-child {
+      max-width: 100%;
+      width: calc(100% - var(--grid-gap));
+    }
+  }
+}
+
+.brick__section--mobile-slider {
+  @include media-query ($small) {
+    padding-block: 0;
+    padding-inline: var(--grid-outer) 0;
+    width: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--grid-outer);
+
+    @include hide-scrollbar;
+
+    &::after {
+      content: "";
+      min-height: 1px;
+      display: block;
+      position: relative;
+      padding-right: var(--grid-outer);
+    }
+
+    .brick__block {
+      margin: 0;
+      padding: 0;
+      flex: 0 0 auto;
+      width: calc(100% - 50px);
+      scroll-snap-align: start;
+
+      &:only-child { width: calc(100% - var(--grid-outer)); }
+    }
+
+    &.has-gap {
+      .brick__block { margin-inline-end: var(--gap); }
+      .brick__block:last-child { margin-inline-end: 0; }
+    }
+
+    &.wrapper--full {
+      padding-inline: 0;
+
+      &::after { display: none; }
+      .brick__block:only-child { width: 100%; }
+    }
+
+    // Handle layout cases when one of the blocks should stay hidden in previews but visible in the Theme editor
+    &:has(.brick__block.hidden) .brick__block { width: calc(100% - var(--grid-outer)); }
+    &.has-gap:has(.brick__block.hidden) .brick__block { margin-inline-end: 0; }
+    &.wrapper--full:has(.brick__block.hidden)::after { display: none; }
+    &.wrapper--full:has(.brick__block.hidden) .brick__block { width: 100%; }
+
+    .brick__block:has(.image__hero__missing-metafield-image) .frame {
+      height: 100%;
+      align-content: center;
+    }
   }
 }
