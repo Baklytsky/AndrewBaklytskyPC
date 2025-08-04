@@ -93,7 +93,7 @@
       <div class="cart__item__content">
         <div class="cart__item__content-inner">
           {%- if settings.show_cart_vendor -%}
-            <span class="cart__item__text cart__item__text--vendor">{{ line_item.vendor }}</span>
+            <p class="cart__item__text cart__item__text--vendor">{{ line_item.vendor }}</p>
           {%- endif -%}
 
           <h4 class="cart__item__title">
@@ -194,46 +194,60 @@
         </div>
 
         <div class="cart__item__content-bottom">
-          {%- liquid
-            capture line_item_cutline
-              if settings.show_cart_tagline
-                if line_item.product.metafields.theme.tagline != blank and line_item.product.metafields.theme.tagline.type == 'single_line_text_field'
-                  assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
-                  assign cutline_downcase = line_item.product.metafields.theme.tagline.value | downcase
+          <div class="cart__item__meta">
+            {%- liquid
+              capture line_item_cutline
+                if settings.show_cart_tagline
+                  if line_item.product.metafields.theme.tagline != blank and line_item.product.metafields.theme.tagline.type == 'single_line_text_field'
+                    assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
+                    assign cutline_downcase = line_item.product.metafields.theme.tagline.value | downcase
 
-                  unless line_item_title_downcase contains cutline_downcase
-                    echo line_item.product.metafields.theme.tagline.value
-                  endunless
-                elsif line_item.product.metafields.theme.cutline != blank and line_item.product.metafields.theme.cutline.type == 'single_line_text_field'
-                  assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
-                  assign cutline_downcase = line_item.product.metafields.theme.cutline.value | downcase
+                    unless line_item_title_downcase contains cutline_downcase
+                      echo line_item.product.metafields.theme.tagline.value
+                    endunless
+                  elsif line_item.product.metafields.theme.cutline != blank and line_item.product.metafields.theme.cutline.type == 'single_line_text_field'
+                    assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
+                    assign cutline_downcase = line_item.product.metafields.theme.cutline.value | downcase
 
-                  unless line_item_title_downcase contains cutline_downcase
-                    echo line_item.product.metafields.theme.cutline.value
-                  endunless
+                    unless line_item_title_downcase contains cutline_downcase
+                      echo line_item.product.metafields.theme.cutline.value
+                    endunless
+                  endif
                 endif
-              endif
-            endcapture
-          -%}
+              endcapture
 
-          {%- if line_item_cutline != blank -%}
-            <span class="cart__item__text cart__item__text--cutline">{{ line_item_cutline }}</span>
-          {%- endif -%}
+              assign properties_html = ''
+              assign property_size = line_item.properties | size
+            -%}
 
-          <div class="cart__item__content-actions">
-            <div class="cart__item__meta">
-              {%- assign properties_html = '' -%}
-              {%- assign property_size = line_item.properties | size -%}
+            {%- if line_item_cutline != blank -%}
+              <p class="cart__item__text cart__item__text--cutline">{{ line_item_cutline }}</p>
+            {%- endif -%}
 
-              {%- if property_size > 0 -%}
-                {%- assign sale_type = 'products.product.sale_type' | t -%}
+            {%- if property_size > 0 -%}
+              {%- assign sale_type = 'products.product.sale_type' | t -%}
 
-                {%- for p in line_item.properties -%}
-                  {%- assign property_first_char = p.first | slice: 0 -%}
+              {%- for p in line_item.properties -%}
+                {%- assign property_first_char = p.first | slice: 0 -%}
 
-                  {%- if p.last != blank and property_first_char != '_' -%}
-                    {%- if p.first == sale_type -%}
-                      <p class="cart__item__selected-options">
+                {%- if p.last != blank and property_first_char != '_' -%}
+                  {%- if p.first == sale_type -%}
+                    <p class="cart__item__selected-options">
+                      <span>
+                        {%- if p.last contains '/uploads/' -%}
+                          <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                        {%- else -%}
+                          {{ p.last }}
+                        {%- endif -%}
+                      </span>
+                    </p>
+                  {%- else -%}
+                    {%- capture properties_html -%}
+                      {{ properties_html }}
+
+                      <p class="cart__item__property">
+                        <strong>{{ p.first }}: </strong>
+
                         <span>
                           {%- if p.last contains '/uploads/' -%}
                             <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
@@ -242,111 +256,95 @@
                           {%- endif -%}
                         </span>
                       </p>
-                    {%- else -%}
-                      {%- capture properties_html -%}
-                        {{ properties_html }}
-
-                        <p class="cart__item__property">
-                          <strong>{{ p.first }}: </strong>
-
-                          <span>
-                            {%- if p.last contains '/uploads/' -%}
-                              <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
-                            {%- else -%}
-                              {{ p.last }}
-                            {%- endif -%}
-                          </span>
-                        </p>
-                      {%- endcapture -%}
-                    {%- endif -%}
+                    {%- endcapture -%}
                   {%- endif -%}
-                {%- endfor -%}
-              {%- endif -%}
-
-              {%- unless line_item.product.has_only_default_variant -%}
-                <p class="cart__item__selected-options">
-                  {%- for option in line_item.options_with_values -%}
-                    {%- unless forloop.first -%}
-                      <span> | </span>
-                    {%- endunless -%}
-                    <span>{{ option.value }}</span>
-                  {%- endfor -%}
-                </p>
-              {%- endunless -%}
-
-              {%- if line_item.selling_plan_allocation -%}
-                <p class="cart__item__selling-plan">
-                  <span>{{ line_item.selling_plan_allocation.selling_plan.name }}</span>
-                </p>
-              {%- endif -%}
-
-              {%- if properties_html != '' -%}
-                {{ properties_html }}
-              {%- endif -%}
-            </div>
-
-            <quantity-counter class="cart__quantity-counter">
-              {%- unless bundle_opened -%}
-                <a
-                  class="cart__item__remove"
-                  href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-                  data-item-remove
-                  data-id="{{ line_item.key }}"
-                  title="{{ 'cart.general.remove' | t }}"
-                >
-                  {%- render 'icon-remove' -%}
-                </a>
-              {%- endunless -%}
-
-              <div class="cart__quantity">
-                {%- unless bundle_opened -%}
-                  <button
-                    class="cart__quantity-minus"
-                    type="button"
-                    name="decrease"
-                    title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
-                  >
-                    {%- render 'icon-minus' -%}
-                  </button>
-                {%- endunless -%}
-
-                {%- assign quantity = line_item.quantity -%}
-
-                {%- if line_item.variant.inventory_policy == 'deny'
-                  and line_item.variant.inventory_management != null
-                  and line_item.variant.inventory_quantity < quantity
-                -%}
-                  {%- assign quantity = line_item.variant.inventory_quantity -%}
                 {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
 
-                <input
-                  class="cart__quantity-field"
-                  type="number"
-                  id="updates_{{ line_item.key }}"
-                  name="updates[]"
-                  data-id="{{ line_item.key }}"
-                  value="{{ quantity }}"
-                  title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-                  pattern="[0-9]*"
-                  {% if bundle_opened %}
-                    data-bundle-cart-quantity
-                    disabled
-                  {% endif %}
-                >
+            {%- unless line_item.product.has_only_default_variant -%}
+              <p class="cart__item__selected-options">
+                {%- for option in line_item.options_with_values -%}
+                  {%- unless forloop.first -%}
+                    <span> | </span>
+                  {%- endunless -%}
+                  <span>{{ option.value }}</span>
+                {%- endfor -%}
+              </p>
+            {%- endunless -%}
 
-                {%- unless bundle_opened -%}
-                  <button
-                    class="cart__quantity-plus"
-                    type="button"
-                    name="increase"
-                    title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
-                  >
-                    {%- render 'icon-plus' -%}
-                  </button>
-                {%- endunless -%}
-              </div>
-            </quantity-counter>
+            {%- if line_item.selling_plan_allocation -%}
+              <p class="cart__item__text cart__item__text--selling-plan">
+                <span>{{ line_item.selling_plan_allocation.selling_plan.name }}</span>
+              </p>
+            {%- endif -%}
+
+            {%- if properties_html != '' -%}
+              {{ properties_html }}
+            {%- endif -%}
           </div>
+
+          <quantity-counter class="cart__quantity-counter">
+            {%- unless bundle_opened -%}
+              <a
+                class="cart__item__remove"
+                href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+                data-item-remove
+                data-id="{{ line_item.key }}"
+                title="{{ 'cart.general.remove' | t }}"
+              >
+                {%- render 'icon-remove' -%}
+              </a>
+            {%- endunless -%}
+
+            <div class="cart__quantity">
+              {%- unless bundle_opened -%}
+                <button
+                  class="cart__quantity-minus"
+                  type="button"
+                  name="decrease"
+                  title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+                >
+                  {%- render 'icon-minus' -%}
+                </button>
+              {%- endunless -%}
+
+              {%- assign quantity = line_item.quantity -%}
+
+              {%- if line_item.variant.inventory_policy == 'deny'
+                and line_item.variant.inventory_management != null
+                and line_item.variant.inventory_quantity < quantity
+              -%}
+                {%- assign quantity = line_item.variant.inventory_quantity -%}
+              {%- endif -%}
+
+              <input
+                class="cart__quantity-field"
+                type="number"
+                id="updates_{{ line_item.key }}"
+                name="updates[]"
+                data-id="{{ line_item.key }}"
+                value="{{ quantity }}"
+                title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
+                pattern="[0-9]*"
+                {% if bundle_opened %}
+                  data-bundle-cart-quantity
+                  disabled
+                {% endif %}
+              >
+
+              {%- unless bundle_opened -%}
+                <button
+                  class="cart__quantity-plus"
+                  type="button"
+                  name="increase"
+                  title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+                >
+                  {%- render 'icon-plus' -%}
+                </button>
+              {%- endunless -%}
+            </div>
+          </quantity-counter>
         </div>
       </div>
 

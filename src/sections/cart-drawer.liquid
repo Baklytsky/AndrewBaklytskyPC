@@ -196,8 +196,8 @@
                   {%- when 'product-list' -%}
                     {%- render 'cart-block-upsell', block: block -%}
 
-                  {%- when 'free-shipping' -%}
-                    {%- render 'free-shipping' block: block, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text , is_cart_drawer: true -%}
+                  {%- when 'cart-promotions' -%}
+                    {%- render 'free-shipping' block: block, color_scheme: block.settings.color_scheme, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text , is_cart_drawer: true -%}
 
                   {%- when 'order-note' -%}
                     {%- render 'cart-block-order-note', block: block -%}
@@ -474,14 +474,10 @@
       ]
     },
     {
-      "type": "free-shipping",
-      "name": "Free shipping message",
+      "type": "cart-promotions",
+      "name": "Cart promotions",
       "limit": 1,
       "settings": [
-        {
-          "type": "paragraph",
-          "content": "Set a minimum amount for free shipping in [Theme settings](/admin/themes/current/editor?context=theme)"
-        },
         {
           "type": "textarea",
           "id": "message",
@@ -490,9 +486,8 @@
           "default": "You are ||amount|| away from free shipping."
         },
         {
-          "type": "color_background",
-          "id": "free_shipping_gradient",
-          "label": "Custom progress bar gradient"
+          "type": "header",
+          "content": "Typography"
         },
         {
           "type": "select",
@@ -504,6 +499,16 @@
             {"value": "text-center", "label": "Centered"},
             {"value": "text-right", "label": "Right"}
           ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme-2",
+          "label": "Color scheme"
         },
         {
           "type": "checkbox",
@@ -782,10 +787,9 @@
           "type": "title"
         },
         {
-          "type": "free-shipping",
+          "type": "cart-promotions",
           "settings": {
-            "message": "You are ||amount|| away from free shipping.",
-            "free_shipping_gradient": ""
+            "message": "You are ||amount|| away from free shipping."
           }
         },
         {
