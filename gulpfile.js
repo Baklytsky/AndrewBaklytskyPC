@@ -191,10 +191,11 @@ function compileCss() {
 
   const startTime = Date.now();
 
-  return src([config.src.cssTheme, config.src.cssTemplateGiftCard, config.src.cssComponents], {
+  return src([config.src.cssTheme, config.src.cssComponents], {
     allowEmpty: true,
   })
     .pipe(plumber(handleError))
+    .pipe(newer(config.dist.assets))
     .pipe(dependents(dependentsOptions))
     .pipe(
       cssimport({
@@ -213,40 +214,6 @@ function compileCss() {
     .on('end', function () {
       const endTime = Date.now();
       log(colors.green(`CSS compilation completed in ${(endTime - startTime) / 1000} seconds`));
-    });
-}
-
-// Separate function for compiling a single SCSS file (used in watchAll)
-function compileSingleScss(file) {
-  if (!file) {
-    log(colors.red('Error: No file specified for compilation'));
-    return Promise.resolve();
-  }
-
-  log(colors.white(`Compiling ${path.basename(file)}`));
-
-  const startTime = Date.now();
-
-  return src(file, {allowEmpty: true})
-    .pipe(plumber(handleError))
-    .pipe(dependents(dependentsOptions))
-    .pipe(
-      cssimport({
-        extensions: ['scss'],
-      })
-    )
-    .pipe(sass(sassOptions).on('error', sass.logError))
-    .pipe(postcss([autoprefixer]))
-    .pipe(
-      rename((path) => ({
-        ...path,
-        dirname: '/',
-      }))
-    )
-    .pipe(dest(config.dist.assets))
-    .on('end', function () {
-      const endTime = Date.now();
-      log(colors.green(`Single SCSS compilation completed in ${(endTime - startTime) / 1000} seconds`));
     });
 }
 
@@ -277,69 +244,8 @@ async function watchAll(done) {
   // Rebuild JS and hot reload when JS changes
   watch(config.src.js, compileJS);
 
-  // Optimized tracking of SCSS file changes
-  // Main SCSS files
-  watch([config.src.cssTheme, config.src.cssTemplateGiftCard], function (cb) {
-    try {
-      // Check if this.path is not undefined
-      const filePath = this.event === 'change' && this.path ? this.path : config.src.cssTheme;
-
-      // Make sure filePath is a string
-      if (typeof filePath === 'string') {
-        compileSingleScss(filePath);
-      } else if (Array.isArray(filePath) && filePath.length > 0) {
-        compileSingleScss(filePath[0]); // Take the first element if it's an array
-      } else {
-        log(colors.red('Invalid file path for compilation'));
-      }
-    } catch (error) {
-      log(colors.red('Error in watch handler:', error));
-    }
-    cb();
-  });
-
-  // SCSS components
-  if (config.src.cssComponents) {
-    watch(config.src.cssComponents, function (cb) {
-      try {
-        // Check if this.path is not undefined
-        const filePath = this.event === 'change' && this.path ? this.path : config.src.cssComponents;
-
-        // Make sure filePath is a string
-        if (typeof filePath === 'string') {
-          compileSingleScss(filePath);
-        } else if (Array.isArray(filePath) && filePath.length > 0) {
-          compileSingleScss(filePath[0]); // Take the first element if it's an array
-        } else {
-          log(colors.red('Invalid file path for compilation'));
-        }
-      } catch (error) {
-        log(colors.red('Error in watch handler:', error));
-      }
-      cb();
-    });
-  }
-
-  // Other SCSS files (dependencies)
-  watch(['src/css/**/*.scss', '!src/css/theme.scss', '!src/css/gift_card.scss', ...(config.src.cssComponents ? [config.src.cssComponents.toString()] : []).map((p) => `!${p}`)], function (cb) {
-    try {
-      // Check if this.path is not undefined
-      const changedFile = this.path;
-
-      // Check if changedFile is not undefined
-      if (changedFile) {
-        log(colors.yellow(`Dependency changed: ${path.basename(changedFile)}`));
-      } else {
-        log(colors.yellow(`Dependency changed: unknown file`));
-      }
-
-      // Compile main files
-      compileCss();
-    } catch (error) {
-      log(colors.red('Error in dependency watch handler:', error));
-    }
-    cb();
-  });
+  // Watch all SCSS files (entry points, components, and dependencies)
+  watch(['src/css/**/*.scss'], compileCss);
 
   // Compile assets (.liquid files, etc) when they change
   watch(path.join('environments', '**', '*.json'), series(compileAssets));
