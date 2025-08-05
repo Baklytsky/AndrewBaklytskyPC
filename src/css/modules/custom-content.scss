@@ -95,27 +95,33 @@
 }
 
 .brick__block__text {
+  --text-width: 100%;
+
   display: flex;
   flex-grow: 0;
   flex-shrink: 1;
+  flex-basis: var(--text-width, 100%);
   align-items: center;
   height: 100%;
-  max-width: 100%;
+  max-width: var(--text-width, 100%);
   padding: var(--outer);
   background: var(--bg);
   margin: 0 auto;
 
-  @include media-query ($widescreen) { flex-basis: 76%; }
+  @include media-query ($widescreen) { --text-width: 76%; }
 
-  @include media-query ($large) { flex-basis: 84%; }
+  @include media-query ($large) { --text-width: 84%; }
 
-  @include media-query ($medium) { flex-basis: 90%; }
+  @include media-query ($medium) { --text-width: 90%; }
 
   @include media-query($small) {
     padding-left: 0;
     padding-right: 0;
     width: 100%;
   }
+
+  // Prevent the text from overflowing in the slider
+  .swiper-slide { padding-left: 1px; }
 }
 
 .brick__block__text--column { flex-direction: column; }
