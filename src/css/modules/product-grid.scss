@@ -516,19 +516,10 @@
   width: 100%;
 }
 
-.no-touch .double__image hover-images { opacity: 0; }
-
-.no-touch .double__image:hover hover-images { opacity: 1; }
-
 .no-touch .double__image:hover .product-item__bg__under--desktop {
   @include media-query($small) {
     opacity: 0;
   }
-}
-
-hover-images {
-  --slides-count: 10;
-  --slider-index: 0;
 }
 
 .supports-touch .product-item__bg__under--desktop {
@@ -537,71 +528,3 @@ hover-images {
     visibility: hidden;
   }
 }
-
-.supports-touch hover-images {
-  .product-item__bg__slider {
-    flex-flow: row nowrap;
-    overflow-y: hidden;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    user-select: none;
-    -webkit-user-drag: none;
-    @include hide-scrollbar;
-
-    &::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      z-index: 3;
-      bottom: 1px;
-      width: 100%;
-      height: 2px;
-      background: var(--text);
-      transform: scaleX(calc(1 / var(--slides-count, 1))) translateX(calc(var(--slider-index, 1) * 100%));
-      transform-origin: left center;
-      border-radius: var(--RADIUS);
-
-      @include media-query($medium-up) {
-        bottom: auto;
-        top: 1px;
-      }
-    }
-  }
-
-  swiper-container.swiper-disabled::part(wrapper) {
-    @extend .product-item__bg__slider;
-  }
-
-  .product-item__bg {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .product-item__bg__slide {
-    min-width: 100%;
-    scroll-snap-align: start;
-  }
-}
-
-.no-touch hover-images {
-  .product-item__bg__slider { height: 100%; }
-
-  .product-item__bg__slider:not(.is-initialized) .product-item__bg__slide:not([data-hover-slide]) { display: none; }
-
-  .swiper-button-prev,
-  .swiper-button-next {
-    --inner: 5px;
-    background: none;
-    box-shadow: none;
-
-    &:after,
-    &:after {
-      background: none;
-    }
-  }
-  .swiper-button-prev { left: var(--inner); }
-  .swiper-button-next { right: var(--inner); }
-}
-
-// Fixes visibility issues when a parent Swiper slider of the "hover-images" element has been disabled
-.swiper-disabled hover-images .swiper-slide { width: 100% !important; }
