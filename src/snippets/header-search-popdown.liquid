@@ -1,5 +1,5 @@
 {%- liquid
-  assign animation_anchor = 'details[open] .search-popdown'
+  assign animation_anchor = 'SearchPopdown--' | append: section.id
   assign animation_delay = 100
   assign animation_duration = 800
 
@@ -33,7 +33,12 @@
   endif
 -%}
 
-<div class="search-popdown" aria-label="{{ 'general.search.search' | t }}" data-popdown>
+<div
+  class="search-popdown"
+  id="SearchPopdown--{{ section.id }}"
+  aria-label="{{ 'general.search.search' | t }}"
+  data-popdown
+>
   <div class="wrapper">
     <div class="search-popdown__main">
       {%- if settings.predictive_search_enabled -%}

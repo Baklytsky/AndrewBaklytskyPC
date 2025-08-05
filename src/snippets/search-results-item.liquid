@@ -3,7 +3,7 @@
 {%- liquid
   assign unique = 'item--' | append: section.id | append: '-' | append: item.id
   assign animation_duration = 800
-  assign animation_anchor = unique | prepend: '#'
+  assign animation_anchor = unique
   assign animation_delay_default = animation_delay | times: 150
   assign animation_delay = animation_delay | default: animation_delay_default
   assign tabindex = tabindex | default: true
@@ -49,21 +49,23 @@
           data-aos-anchor="{{ animation_anchor }}"
         ></div>
 
-        <span
-          class="badge-box"
-          data-aos="fade"
-          data-aos-delay="{{ animation_delay }}"
-          data-aos-duration="{{ animation_duration }}"
-          data-aos-anchor="{{ animation_anchor }}"
-        >
-          {%- liquid
-            if item.object_type == 'article'
-              echo 'layout.search_page.singular_article' | t
-            else
-              echo 'layout.search_page.singular_page' | t
-            endif
-          -%}
-        </span>
+        <div class="badge-box-container {{ settings.badge_alignment }} {{ settings.badge_font_size }}">
+          <span
+            class="badge-box"
+            data-aos="fade"
+            data-aos-delay="{{ animation_delay }}"
+            data-aos-duration="{{ animation_duration }}"
+            data-aos-anchor="{{ animation_anchor }}"
+          >
+            {%- liquid
+              if item.object_type == 'article'
+                echo 'layout.search_page.singular_article' | t
+              else
+                echo 'layout.search_page.singular_page' | t
+              endif
+            -%}
+          </span>
+        </div>
       {%- endif -%}
     </a>
   </div>

@@ -192,8 +192,8 @@
           {{ block_content }}
         </div>
       {%- else -%}
-        <swiper-slide>
-          <ticker-bar style="{{ block_style }}" {{ block_attributes }}>
+        <swiper-slide {{ block_attributes }}>
+          <ticker-bar style="{{ block_style }}">
             <div data-ticker-frame class="announcement__message">
               <div data-ticker-scale class="announcement__scale ticker--unloaded">
                 {%- if block.type == 'image' -%}
@@ -282,8 +282,8 @@
 {%- endif -%}
 
 {{ 'section-announcement.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
 
 <div
   id="Announcement--{{ section.id }}"
@@ -317,41 +317,46 @@
       >
         {%- if layout == 'slider' -%}
           <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
-            <swiper-container
-              class="announcement__slider"
-              init="false"
-              loop="true"
-              autoplay-delay="{{ section.settings.slider_speed | times: 1000 }}"
-              slides-per-view="1"
-              space-between="0"
-              threshold="2"
-              {% if show_arrows and section.blocks.size > 1 %} navigation-next-el=".{{ section.id }}.swiper-button-next" {% endif %}
-              {% if show_arrows and section.blocks.size > 1 %} navigation-prev-el=".{{ section.id }}.swiper-button-prev" {% endif %}
-            >
-              {{ bar_markup }}
-            </swiper-container>
+            <div class="announcement__slider">
+              <swiper-container
+                init="false"
+                loop="true"
+                effect="slide"
+                autoplay="true"
+                autoplay-delay="{{ section.settings.slider_speed | times: 1000 }}"
+                slides-per-view="1"
+                space-between="0"
+                threshold="2"
+                {% if show_arrows and section.blocks.size > 1 %}
+                  navigation="true"
+                  navigation-next-el=".{{ section.id }}.swiper-button-next"
+                  navigation-prev-el=".{{ section.id }}.swiper-button-prev"
+                {% endif %}
+              >
+                {{ bar_markup }}
+              </swiper-container>
 
-            {% if show_arrows and section.blocks.size > 1 %}
+              {% if show_arrows and section.blocks.size > 1 %}
+                {%- style -%}
+                  .{{ section.id }}.swiper-button-next,
+                  .{{ section.id }}.swiper-button-prev {
+                    color: var(--text);
+                  }
 
-              {%- style -%}
-                .{{ section.id }}.swiper-button-next,
-                .{{ section.id }}.swiper-button-prev {
-                  color: var(--text);
-                }
+                  .{{ section.id }}.swiper-button-next:after,
+                  .{{ section.id }}.swiper-button-prev:after {
+                    font-size: 0
+                  }
+                {%- endstyle -%}
 
-                .{{ section.id }}.swiper-button-next:after,
-                .{{ section.id }}.swiper-button-prev:after {
-                  font-size: 0
-                }
-              {%- endstyle -%}
-
-              <div class="{{ section.id }} swiper-button-prev">
-                {{ 'icon-arrow-left.svg' | inline_asset_content }}
-              </div>
-              <div class="{{ section.id }} swiper-button-next">
-                {{ 'icon-arrow-right.svg' | inline_asset_content }}
-              </div>
-            {% endif %}
+                <div class="{{ section.id }} swiper-button-prev">
+                  {{ 'icon-arrow-left.svg' | inline_asset_content }}
+                </div>
+                <div class="{{ section.id }} swiper-button-next">
+                  {{ 'icon-arrow-right.svg' | inline_asset_content }}
+                </div>
+              {% endif %}
+            </div>
           </div>
         {%- endif -%}
 

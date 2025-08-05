@@ -8,6 +8,12 @@
   assign bundle_price = 0
   assign bundle_price_compare = 0
   assign bundle_keys = ''
+  assign line_items_collections = null
+  assign line_items_tags = null
+  assign line_items_products = null
+  assign line_items_rewards = null
+  assign gwp_promo_meta_name = 'app--210418761729' | append: '--buy-x-get-y'
+  assign gwp_promo_meta = shop.metafields[gwp_promo_meta_name]
 -%}
 
 {%- comment -%}
@@ -16,6 +22,9 @@
 
 {%- for line_item in cart.items -%}
   {%- liquid
+    assign line_items_products = line_items_products | append: ',' | append: line_item.product_id
+    assign line_items_collections = line_items_collections | concat: line_item.product.collections
+    assign line_items_tags = line_items_tags | concat: line_item.product.tags
     assign line_item_final_price = line_item.final_price | money
     assign line_item_variant_compare_at_price = line_item.variant.compare_at_price | money
     assign line_item_original_price = line_item.original_price | money
@@ -34,6 +43,10 @@
     if bundle_opened == false and bundle_name != blank
       assign bundle_opened = true
       assign animation_delay = animation_delay | plus: animation_delay_increment
+    endif
+
+    if line_item.properties._reward == 'reward'
+      assign line_items_rewards = line_items_rewards | append: ',' | append: line_item.key
     endif
   -%}
 
@@ -418,3 +431,23 @@
     -%}
   {%- endif -%}
 {%- endfor -%}
+
+{%- if gwp_promo_meta != blank -%}
+  {%- liquid
+    assign line_items_collections = line_items_collections | uniq
+    assign line_items_tags = line_items_tags | uniq
+    assign line_items_products = line_items_products | remove_first: ',' | split: ','
+    assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+  -%}
+
+  <script type="application/json" data-cart-json>
+    {
+      "rewards": {{ line_items_rewards | json }},
+      "price": {{ cart.total_price | plus: 0 | json }},
+      "products": {{ line_items_products | json }},
+      "collections": {{ line_items_collections | json }},
+      "tags": {{ line_items_tags | json }},
+      "meta": {{ gwp_promo_meta | json }}
+    }
+  </script>
+{%- endif -%}

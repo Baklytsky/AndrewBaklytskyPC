@@ -82,7 +82,6 @@ if (!customElements.get('product-component')) {
         }
 
         // Record recently viewed products when the product page is loading
-        Shopify.Products.recordRecentlyViewed(recentObj);
         if (Shopify.Products && Shopify.Products.recordRecentlyViewed) {
           Shopify.Products.recordRecentlyViewed(recentObj);
         }
@@ -259,7 +258,7 @@ if (!customElements.get('product-component')) {
       }
 
       bindNotificationPopupEvents() {
-        if (!this.productNotification || !formState?.variant) return;
+        if (!this.productNotification) return;
 
         this.notificationPopupButtons = this.querySelectorAll(selectors.notificationPopupButton);
         this.notificationPopup = this.productNotification.closest(selectors.popupComponent);
