@@ -317,42 +317,42 @@
       >
         {%- if layout == 'slider' -%}
           <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows and section.blocks.size > 1 %} announcement__bar-holder--arrows{% endif %}">
-            <div class="announcement__slider">
+            <div class="announcement__slider swiper">
               <swiper-container
-                init="false"
+                class="swiper-wrapper"
                 loop="true"
-                effect="slide"
+                grab-cursor="true"
+                {%- if show_arrows %}
+                  navigation="true"
+                  navigation-prev-el=".{{ section.id }}--button.swiper-button-prev"
+                  navigation-next-el=".{{ section.id }}--button.swiper-button-next"
+                {% endif -%}
                 autoplay="true"
                 autoplay-delay="{{ section.settings.slider_speed | times: 1000 }}"
-                slides-per-view="1"
-                space-between="0"
-                threshold="2"
-                {% if show_arrows and section.blocks.size > 1 %}
-                  navigation="true"
-                  navigation-next-el=".{{ section.id }}.swiper-button-next"
-                  navigation-prev-el=".{{ section.id }}.swiper-button-prev"
-                {% endif %}
+                autoplay-disable-on-interaction="false"
+                effect="fade"
+                fade-effect-cross-fade="true"
               >
                 {{ bar_markup }}
               </swiper-container>
 
               {% if show_arrows and section.blocks.size > 1 %}
                 {%- style -%}
-                  .{{ section.id }}.swiper-button-next,
-                  .{{ section.id }}.swiper-button-prev {
+                  .{{ section.id }}--button.swiper-button-next,
+                  .{{ section.id }}--button.swiper-button-prev {
                     color: var(--text);
                   }
 
-                  .{{ section.id }}.swiper-button-next:after,
-                  .{{ section.id }}.swiper-button-prev:after {
+                  .{{ section.id }}--button.swiper-button-next:after,
+                  .{{ section.id }}--button.swiper-button-prev:after {
                     font-size: 0
                   }
                 {%- endstyle -%}
 
-                <div class="{{ section.id }} swiper-button-prev">
+                <div class="{{ section.id }}--button swiper-button-prev">
                   {{ 'icon-arrow-left.svg' | inline_asset_content }}
                 </div>
-                <div class="{{ section.id }} swiper-button-next">
+                <div class="{{ section.id }}--button swiper-button-next">
                   {{ 'icon-arrow-right.svg' | inline_asset_content }}
                 </div>
               {% endif %}
