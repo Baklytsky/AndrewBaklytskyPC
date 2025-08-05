@@ -24,7 +24,7 @@
 
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
-  {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
+  {%- if settings.free_shipping_limit != blank -%}
     {%- render 'free-shipping' block: block, color_scheme: block.settings.color_scheme, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
   {%- endif -%}
 {%- endcapture -%}
@@ -449,13 +449,6 @@
       "name": "Cart promotions",
       "limit": 1,
       "settings": [
-        {
-          "type": "textarea",
-          "id": "message",
-          "label": "Text",
-          "info": "Use ||amount|| to display progress towards free shipping.",
-          "default": "You are ||amount|| away from FREE SHIPPING."
-        },
         {
           "type": "header",
           "content": "Typography"
