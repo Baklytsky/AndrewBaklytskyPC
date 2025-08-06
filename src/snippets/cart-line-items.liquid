@@ -25,9 +25,9 @@
     assign line_items_products = line_items_products | append: ',' | append: line_item.product_id
     assign line_items_collections = line_items_collections | concat: line_item.product.collections
     assign line_items_tags = line_items_tags | concat: line_item.product.tags
-    assign line_item_final_price = line_item.final_price | money
-    assign line_item_variant_compare_at_price = line_item.variant.compare_at_price | money
-    assign line_item_original_price = line_item.original_price | money
+    assign line_item_final_price = line_item.final_price
+    assign line_item_variant_compare_at_price = line_item.variant.compare_at_price
+    assign line_item_original_price = line_item.original_price
     assign line_item_unit_price = line_item.unit_price | money
 
     assign bundle_name = line_item.properties._bundle_title
@@ -92,15 +92,137 @@
 
       <div class="cart__item__content">
         <div class="cart__item__content-inner">
+          {%- if settings.show_cart_vendor -%}
+            <p class="cart__item__text cart__item__text--vendor">{{ line_item.vendor }}</p>
+          {%- endif -%}
+
           <h4 class="cart__item__title">
             <a href="{{ line_item.url }}">
               {{- line_item.product.title | strip_html -}}
             </a>
           </h4>
 
+          <p class="cart__price">
+            {%- liquid
+              assign discounted = false
+              assign sale = false
+              assign sale_compared_price = 0
+
+              if line_item_original_price > line_item_final_price
+                assign discounted = true
+              endif
+
+              if line_item_variant_compare_at_price > line_item_final_price
+                assign sale = true
+              endif
+            -%}
+
+            <span class="cart__price__row">
+              <span class="cart__price__inner">
+                {%- if sale or discounted -%}
+                  <ins>
+                    {%- if line_item_final_price == 0 -%}
+                      {{ 'general.money.free' | t }}
+                    {%- else -%}
+                      {{- line_item_final_price | money -}}
+                    {%- endif -%}
+                  </ins>
+                {%- else -%}
+                  {%- if line_item_final_price == 0 -%}
+                    {{ 'general.money.free' | t }}
+                  {%- else -%}
+                    {{- line_item_final_price | money -}}
+                  {%- endif -%}
+                {%- endif -%}
+
+                {%- if sale and discounted == false -%}
+                  {%- liquid
+                    assign sale_compared_price = line_item_variant_compare_at_price
+                    if bundle_opened
+                      assign bundle_price_compare = bundle_price_compare | plus: line_item_variant_compare_at_price
+                    endif
+                  -%}
+                  <del>{{- line_item_variant_compare_at_price | money -}}</del>
+                {%- endif -%}
+
+                {%- if discounted -%}
+                  {%- liquid
+                    assign sale_compared_price = line_item_original_price
+                    if bundle_opened
+                      assign bundle_price_compare = bundle_price_compare | plus: line_item_original_price
+                    endif
+                  -%}
+                  <del>{{- line_item_original_price | money -}}</del>
+                {%- endif -%}
+              </span>
+
+              {%- if sale or discounted -%}
+                <span class="cart__price__save">
+                  <span>{{- 'cart.general.save' | t -}} </span>
+                  {{ sale_compared_price | minus: line_item_final_price | money }}
+                </span>
+              {%- endif -%}
+            </span>
+
+
+            {%- if line_item.unit_price -%}
+              {%- capture unit_price_separator -%}
+                <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+              {%- endcapture -%}
+
+              {%- capture unit_price_base_unit -%}
+                {%- if line_item.unit_price_measurement.reference_value != 1 -%}
+                  {{- line_item.unit_price_measurement.reference_value -}}
+                {%- endif -%}
+
+                {{- line_item.unit_price_measurement.reference_unit -}}
+              {%- endcapture -%}
+
+              <span class="cart__price__row">
+                <span class="line__price line__price--unit">
+                  <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
+
+                  <small>
+                    {{- line_item_unit_price -}}
+                    {{- unit_price_separator -}}
+                    {{- unit_price_base_unit -}}
+                  </small>
+                </span>
+              </span>
+            {%- endif -%}
+          </p>
+        </div>
+
+        <div class="cart__item__content-bottom">
           <div class="cart__item__meta">
-            {%- assign properties_html = '' -%}
-            {%- assign property_size = line_item.properties | size -%}
+            {%- liquid
+              capture line_item_cutline
+                if settings.show_cart_tagline
+                  if line_item.product.metafields.theme.tagline != blank and line_item.product.metafields.theme.tagline.type == 'single_line_text_field'
+                    assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
+                    assign cutline_downcase = line_item.product.metafields.theme.tagline.value | downcase
+
+                    unless line_item_title_downcase contains cutline_downcase
+                      echo line_item.product.metafields.theme.tagline.value
+                    endunless
+                  elsif line_item.product.metafields.theme.cutline != blank and line_item.product.metafields.theme.cutline.type == 'single_line_text_field'
+                    assign line_item_title_downcase = line_item.product.title | strip_html | escape | downcase
+                    assign cutline_downcase = line_item.product.metafields.theme.cutline.value | downcase
+
+                    unless line_item_title_downcase contains cutline_downcase
+                      echo line_item.product.metafields.theme.cutline.value
+                    endunless
+                  endif
+                endif
+              endcapture
+
+              assign properties_html = ''
+              assign property_size = line_item.properties | size
+            -%}
+
+            {%- if line_item_cutline != blank -%}
+              <p class="cart__item__text cart__item__text--cutline">{{ line_item_cutline }}</p>
+            {%- endif -%}
 
             {%- if property_size > 0 -%}
               {%- assign sale_type = 'products.product.sale_type' | t -%}
@@ -121,37 +243,38 @@
                     </p>
                   {%- else -%}
                     {%- capture properties_html -%}
-                        {{ properties_html }}
+                      {{ properties_html }}
 
-                        <p class="cart__item__property">
-                          <strong>{{ p.first }}: </strong>
+                      <p class="cart__item__property">
+                        <strong>{{ p.first }}: </strong>
 
-                          <span>
-                            {%- if p.last contains '/uploads/' -%}
-                              <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
-                            {%- else -%}
-                              {{ p.last }}
-                            {%- endif -%}
-                          </span>
-                        </p>
-                      {%- endcapture -%}
+                        <span>
+                          {%- if p.last contains '/uploads/' -%}
+                            <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                          {%- else -%}
+                            {{ p.last }}
+                          {%- endif -%}
+                        </span>
+                      </p>
+                    {%- endcapture -%}
                   {%- endif -%}
                 {%- endif -%}
               {%- endfor -%}
             {%- endif -%}
 
             {%- unless line_item.product.has_only_default_variant -%}
-              {%- for option in line_item.options_with_values -%}
-                <p class="cart__item__selected-options">
-                  <strong>{{ option.name }}:</strong>
-
+              <p class="cart__item__selected-options">
+                {%- for option in line_item.options_with_values -%}
+                  {%- unless forloop.first -%}
+                    <span> | </span>
+                  {%- endunless -%}
                   <span>{{ option.value }}</span>
-                </p>
-              {%- endfor -%}
+                {%- endfor -%}
+              </p>
             {%- endunless -%}
 
             {%- if line_item.selling_plan_allocation -%}
-              <p class="cart__item__selling-plan">
+              <p class="cart__item__text cart__item__text--selling-plan">
                 <span>{{ line_item.selling_plan_allocation.selling_plan.name }}</span>
               </p>
             {%- endif -%}
@@ -160,141 +283,72 @@
               {{ properties_html }}
             {%- endif -%}
           </div>
-        </div>
 
-        <p class="cart__price">
-          {%- liquid
-            assign discounted = false
-            assign sale = false
+          <quantity-counter class="cart__quantity-counter">
+            {%- unless bundle_opened -%}
+              <a
+                class="cart__item__remove"
+                href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+                data-item-remove
+                data-id="{{ line_item.key }}"
+                title="{{ 'cart.general.remove' | t }}"
+              >
+                {%- render 'icon-remove' -%}
+              </a>
+            {%- endunless -%}
 
-            if line_item.original_price > line_item.final_price
-              assign discounted = true
-            endif
+            <div class="cart__quantity">
+              {%- unless bundle_opened -%}
+                <button
+                  class="cart__quantity-minus"
+                  type="button"
+                  name="decrease"
+                  title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+                >
+                  {%- render 'icon-minus' -%}
+                </button>
+              {%- endunless -%}
 
-            if line_item.variant.compare_at_price > line_item.final_price
-              assign sale = true
-            endif
-          -%}
+              {%- assign quantity = line_item.quantity -%}
 
-          {%- if sale or discounted -%}
-            <ins>
-              {%- if line_item.final_price == 0 -%}
-                {{ 'general.money.free' | t }}
-              {%- else -%}
-                {{- line_item_final_price -}}
+              {%- if line_item.variant.inventory_policy == 'deny'
+                and line_item.variant.inventory_management != null
+                and line_item.variant.inventory_quantity < quantity
+              -%}
+                {%- assign quantity = line_item.variant.inventory_quantity -%}
               {%- endif -%}
-            </ins>
-          {%- else -%}
-            {%- if line_item.final_price == 0 -%}
-              {{ 'general.money.free' | t }}
-            {%- else -%}
-              {{- line_item_final_price -}}
-            {%- endif -%}
-          {%- endif -%}
 
-          {%- if sale and discounted == false -%}
-            {%- if bundle_opened -%}
-              {%- assign bundle_price_compare = bundle_price_compare | plus: line_item.variant.compare_at_price -%}
-            {%- endif -%}
-            <del>{{- line_item_variant_compare_at_price -}}</del>
-          {%- endif -%}
-
-          {%- if discounted -%}
-            {%- if bundle_opened -%}
-              {%- assign bundle_price_compare = bundle_price_compare | plus: line_item.original_price -%}
-            {%- endif -%}
-            <del>{{- line_item_original_price -}}</del>
-          {%- endif -%}
-
-          {%- if line_item.unit_price -%}
-            {%- capture unit_price_separator -%}
-                <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
-              {%- endcapture -%}
-
-            {%- capture unit_price_base_unit -%}
-                {%- if line_item.unit_price_measurement.reference_value != 1 -%}
-                  {{- line_item.unit_price_measurement.reference_value -}}
-                {%- endif -%}
-
-                {{- line_item.unit_price_measurement.reference_unit -}}
-              {%- endcapture -%}
-
-            <span class="line__price">
-              <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
-
-              <small>
-                {{- line_item_unit_price -}}
-                {{- unit_price_separator -}}
-                {{- unit_price_base_unit -}}
-              </small>
-            </span>
-          {%- endif -%}
-        </p>
-
-        <quantity-counter class="cart__quantity-counter">
-          <div class="cart__quantity">
-            {%- unless bundle_opened -%}
-              <button
-                class="cart__quantity-minus"
-                type="button"
-                name="decrease"
-                title="{{ 'cart.general.decrease_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+              <input
+                class="cart__quantity-field"
+                type="number"
+                id="updates_{{ line_item.key }}"
+                name="updates[]"
+                data-id="{{ line_item.key }}"
+                value="{{ quantity }}"
+                title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
+                pattern="[0-9]*"
+                {% if bundle_opened %}
+                  data-bundle-cart-quantity
+                  disabled
+                {% endif %}
               >
-                {%- render 'icon-minus' -%}
-              </button>
-            {%- endunless -%}
 
-            {%- assign quantity = line_item.quantity -%}
-
-            {%- if line_item.variant.inventory_policy == 'deny'
-              and line_item.variant.inventory_management != null
-              and line_item.variant.inventory_quantity < quantity
-            -%}
-              {%- assign quantity = line_item.variant.inventory_quantity -%}
-            {%- endif -%}
-
-            <input
-              class="cart__quantity-field"
-              type="number"
-              id="updates_{{ line_item.key }}"
-              name="updates[]"
-              data-id="{{ line_item.key }}"
-              value="{{ quantity }}"
-              title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-              pattern="[0-9]*"
-              {% if bundle_opened %}
-                data-bundle-cart-quantity
-                disabled
-              {% endif %}
-            >
-
-            {%- unless bundle_opened -%}
-              <button
-                class="cart__quantity-plus"
-                type="button"
-                name="increase"
-                title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
-              >
-                {%- render 'icon-plus' -%}
-              </button>
-            {%- endunless -%}
-          </div>
-
-          {%- unless bundle_opened -%}
-            <a
-              class="cart__item__remove"
-              href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-              data-item-remove
-              data-id="{{ line_item.key }}"
-              title="{{ 'cart.general.remove' | t }}"
-            >
-              {{- 'cart.general.remove' | t -}}
-            </a>
-          {%- endunless -%}
-        </quantity-counter>
+              {%- unless bundle_opened -%}
+                <button
+                  class="cart__quantity-plus"
+                  type="button"
+                  name="increase"
+                  title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+                >
+                  {%- render 'icon-plus' -%}
+                </button>
+              {%- endunless -%}
+            </div>
+          </quantity-counter>
+        </div>
       </div>
 
-      {%- if line_item.original_price > line_item.final_price -%}
+      {%- if line_item_original_price > line_item_final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}
           <p class="cart__discount">
             {%- render 'icon-tags' -%}
@@ -314,7 +368,7 @@
   {%- endcapture -%}
 
   {%- if bundle_opened -%}
-    {%- assign bundle_price = bundle_price | plus: line_item.final_price -%}
+    {%- assign bundle_price = bundle_price | plus: line_item_final_price -%}
     {%- assign bundle_keys = bundle_keys | append: ',' | append: line_item.key -%}
 
     {%- capture line_items_bundle -%}
@@ -382,30 +436,42 @@
               <h4 class="cart__item__title">
                 {{- bundle_name | strip_html -}}
               </h4>
+
+              <p class="cart__price">
+                <span class="cart__price__row">
+                  <span class="cart__price__inner">
+                    {%- if bundle_price_compare > bundle_price -%}
+                      <ins>{{ bundle_price | money }}</ins>
+
+                      <del>{{ bundle_price_compare | money }}</del>
+                    {%- else -%}
+                      {{ bundle_price | money }}
+                    {%- endif -%}
+                  </span>
+
+                  {%- if bundle_price_compare > bundle_price -%}
+                    <span class="cart__price__save">
+                      <span>{{- 'cart.general.save' | t -}}</span>
+                      {{ bundle_price_compare | minus: bundle_price | money }}
+                    </span>
+                  {%- endif -%}
+                </span>
+              </p>
             </div>
-
-            <p class="cart__price">
-              {%- if bundle_price_compare > bundle_price -%}
-                <ins>{{ bundle_price | money }}</ins>
-
-                <del>{{ bundle_price_compare | money }}</del>
-              {%- else -%}
-                {{ bundle_price | money }}
-              {%- endif -%}
-            </p>
-
-            <a
-              class="cart__item__remove"
-              href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-              data-bundle-cart-remove="{{ bundle_keys | remove_first: ',' }}"
-              data-collapsible-prevent
-              data-id="{{ line_item.key }}"
-              title="{{ 'cart.general.remove' | t }}"
-            >
-              {{- 'cart.general.remove' | t -}}
-            </a>
           </div>
         </div>
+
+        <a
+          class="cart__item__remove"
+          href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+          data-bundle-cart-remove="{{ bundle_keys | remove_first: ',' }}"
+          data-collapsible-prevent
+          data-id="{{ line_item.key }}"
+          title="{{ 'cart.general.remove' | t }}"
+        >
+          {%- render 'icon-remove' -%}
+        </a>
+
         {%- render 'icon-plus' -%}
         {%- render 'icon-minus' -%}
       </summary>

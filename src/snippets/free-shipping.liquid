@@ -2,7 +2,7 @@
   Renders Free shipping message
 
   Accepts:
-  - message: {String} Free shipping text (required)
+  - block: {Object} Block object (required)
   - gradient: {String} Progress bar gradient color
   - show_wheel: {Boolean} Show progress wheel
   - show_progress_bar: {Boolean} Show progress bar
@@ -13,37 +13,87 @@
 {% endcomment %}
 
 {%- liquid
-  assign free_shipping_limit = settings.free_shipping_limit
+  assign message = block.settings.message | default: settings.free_shipping_promotion_text_1
   assign show_message = false
   if message != blank
     assign show_message = true
   endif
 
-  if gradient != blank
-    assign style = '--FREE-SHIPPING-GRADIENT: ' | append: gradient | append: ';'
-  endif
+  assign show_wheel = show_wheel | default: block.settings.show_wheel | default: false
+  assign color_scheme = block.settings.color_scheme
+  assign align_text = block.settings.align_text
 -%}
 
 {%- if show_message -%}
   {%- liquid
+    assign promo_2 = settings.free_shipping_promotion_2
+    assign promo_1_value = settings.free_shipping_limit | default: 0
+    assign promo_2_value = settings.free_gift_limit | default: 0
+
+    if promo_2_value <= promo_1_value
+      assign promo_2 = false
+    endif
+
+    if promo_2
+      assign promo_center_limit = promo_1_value
+      assign free_shipping_limit = promo_2_value
+    else
+      assign promo_center_limit = promo_2_value
+      assign free_shipping_limit = promo_1_value
+    endif
+
+    assign limit_promo_center = promo_center_limit | plus: 0
     assign limit = free_shipping_limit | plus: 0
+    assign limit_currency_promo_center = limit_promo_center | times: 100
     assign limit_currency = limit | times: 100
     assign subtotal_without_currency = cart.total_price | plus: 0 | divided_by: 100
     assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
     assign percent = 100 | minus: percent
+    assign percent_promo_center = limit_promo_center | times: 100 | divided_by: limit | at_most: 100
+
+    if gradient != blank
+      assign style = '--FREE-SHIPPING-GRADIENT: ' | append: gradient | append: ';'
+    endif
+
+    if color_scheme != blank
+      assign selected_color_scheme = color_scheme | strip
+      assign selected_color_scheme_settings = settings.color_schemes[selected_color_scheme].settings
+      capture style
+        echo '--FREE-SHIPPING-GRADIENT: ' | append: selected_color_scheme_settings.bg | append: '; '
+        echo '--FREE-SHIPPING-BACKGROUND: ' | append: selected_color_scheme_settings.bg_light | append: '; '
+        echo '--FREE-SHIPPING-TEXT: ' | append: selected_color_scheme_settings.text | append: '; '
+      endcapture
+    endif
 
     if settings.currency_code_enable
+      assign limit_currency_promo_center = limit_currency_promo_center | minus: cart.total_price | money_with_currency
       assign limit_currency = limit_currency | minus: cart.total_price | money_with_currency
     else
+      assign limit_currency_promo_center = limit_currency_promo_center | minus: cart.total_price | money_without_trailing_zeros
       assign limit_currency = limit_currency | minus: cart.total_price | money_without_trailing_zeros
     endif
 
     capture left_to_spend
       echo '<span data-left-to-spend>' | append: limit_currency | append: '</span>'
     endcapture
+    assign left_to_spend_message = left_to_spend
 
-    assign message = message | replace: '||amount||', left_to_spend
-    assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
+    if promo_2
+      capture left_to_spend_promo
+        echo '<span data-left-to-spend-promo>' | append: limit_currency_promo_center | append: '</span>'
+      endcapture
+
+      assign left_to_spend_message = left_to_spend_promo
+    endif
+
+    assign message = message | replace: '||amount||', left_to_spend_message
+    assign qualified_shipping_message = ''
+
+    if promo_2
+      assign qualified_shipping_message = 'cart.general.qualified_shipping_message_promos' | t
+    else
+      assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
+    endif
 
     capture free_shipping_classes
       if is_cart_drawer
@@ -67,9 +117,12 @@
   -%}
 
   <div
-    class="{{ free_shipping_classes }}"
+    class="{{ free_shipping_classes }}{% if promo_2 and percent > percent_promo_center %} is-active{% endif %}"
     data-free-shipping="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
     data-free-shipping-limit="{{ limit }}"
+    {% if promo_2 %}
+      data-promo-center-limit="{{ limit_promo_center }}"
+    {% endif %}
     {% if style != blank %}
       style="{{ style }}"
     {% endif %}
@@ -91,8 +144,104 @@
       {{ message }}
     </span>
 
+    {%- if promo_2 and settings.free_shipping_promotion_text_2 != blank -%}
+      <span class="free-shipping__promo-message">
+        {{ settings.free_shipping_promotion_text_2 | replace: '||amount||', left_to_spend }}
+      </span>
+    {%- endif -%}
+
     {%- if show_progress_bar -%}
-      <progress class="free-shipping__progress-bar" data-progress-bar value="{{ percent }}" max="100"></progress>
+      {%- assign icon_1 = '' -%}
+      {%- if settings.free_shipping_icon_1 -%}
+        {%- capture icon_1 -%}
+          {%- liquid
+            assign icon_size = settings.free_shipping_icon_size_1
+            assign icon_image = settings.free_shipping_icon_image_1
+            capture icon_style
+              echo 'style="'
+              echo '--icon-size: ' | append: icon_size | append: 'px;'
+              echo '"'
+            endcapture
+          -%}
+
+          <div
+            class="icon__animated icon__animated--{{ section.id }}-{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}"
+            {{ icon_style }}
+          >
+            {%- liquid
+              if icon_image
+                assign icon_width = icon_size
+                assign icon_width_retina = icon_width | times: 2
+                assign icon_sizes = icon_width | append: 'px'
+                assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+
+                render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
+              else
+                render 'animated-icon', filename: settings.free_shipping_icon_name_1
+              endif
+            -%}
+          </div>
+        {%- endcapture -%}
+      {%- endif -%}
+
+      <div class="free-shipping__progress-holder{% if promo_2 %} free-shipping__progress-holder--multiple{% endif %}">
+        <div class="free-shipping__box free-shipping__box--left">&nbsp;</div>
+
+        {%- if promo_2 -%}
+          <div
+            class="free-shipping__box free-shipping__box--center"
+            style="--promo-center-position: {{ percent_promo_center }};"
+            data-promo-center
+          >
+            {%- if icon_1 != '' -%}
+              {{ icon_1 }}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="free-shipping__box free-shipping__box--right">
+          {%- if promo_2 -%}
+            {%- if settings.free_shipping_icon_2 -%}
+              {%- liquid
+                assign icon_size_2 = settings.free_shipping_icon_size_2
+                assign icon_image_2 = settings.free_shipping_icon_image_2
+                capture icon_style_2
+                  echo 'style="'
+                  echo '--icon-size: ' | append: icon_size_2 | append: 'px;'
+                  echo '"'
+                endcapture
+              -%}
+
+              <div
+                class="icon__animated icon__animated--{{ section.id }}-{{ block.id }}{% if icon_image_2 != blank %} icon__animated--image{% endif %}"
+                {{ icon_style_2 }}
+              >
+                {%- liquid
+                  if icon_image_2
+                    assign icon_width_2 = icon_size_2
+                    assign icon_width_retina_2 = icon_width_2 | times: 2
+                    assign icon_sizes_2 = icon_width_2 | append: 'px'
+                    assign icon_widths_2 = icon_width_2 | append: ', ' | append: icon_width_retina_2
+
+                    render 'image', image: icon_image_2, width: icon_width_retina_2, sizes: icon_sizes_2, widths: icon_widths_2
+                  else
+                    render 'animated-icon', filename: settings.free_shipping_icon_name_2
+                  endif
+                -%}
+              </div>
+            {%- endif -%}
+          {%- elsif icon_1 != '' -%}
+            {{ icon_1 }}
+          {%- endif -%}
+        </div>
+
+        <progress
+          class="free-shipping__progress-bar"
+          data-progress-bar
+          value="{{ percent }}"
+          max="100"
+        ></progress>
+      </div>
     {%- endif -%}
 
     <div class="confetti">

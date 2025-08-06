@@ -374,6 +374,31 @@ body.has-header-transparent .section-overlay-header:first-of-type .index-image-t
 .hero__content--padding-default > .hero__button,
 .hero__content > .hero__button:only-child { margin-top: 0; }
 
+.hero__content:has(.is-initialized) {
+  @include media-query($medium-up) {
+    .hero__slide {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+
+      &.swiper-slide-active { opacity: 1; }
+    }
+
+    .swiper-pagination-bullets {
+      top: auto;
+      bottom: 0;
+      padding: 0 var(--outer);
+
+      .text-left & {
+        justify-content: flex-start;
+        padding: 0;
+      }
+    }
+
+    &:has([data-dots="line"]) .swiper,
+    &:has([data-dots="circle"]) .swiper { padding-bottom: 20px; }
+  }
+}
+
 .hero__content.grid--mobile-slider {
   @include media-query ($small) {
     flex-direction: row;

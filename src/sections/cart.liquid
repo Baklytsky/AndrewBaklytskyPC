@@ -11,7 +11,7 @@
   assign show_empty_cart_menu = settings.show_empty_cart_menu
   assign empty_cart_menu = settings.empty_cart_menu
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign free_shipping_block = section.blocks | where: 'type', 'free-shipping'
+  assign free_shipping_block = section.blocks | where: 'type', 'cart-promotions'
   assign is_free_shipping_first = false
   if section.blocks[0] == free_shipping_block[0]
     assign is_free_shipping_first = true
@@ -24,8 +24,8 @@
 
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
-  {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
-    {%- render 'free-shipping' message: block.settings.message, gradient: block.settings.free_shipping_gradient, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
+  {%- if settings.free_shipping_limit != blank -%}
+    {%- render 'free-shipping' block: block, show_wheel: false, show_progress_bar: true -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -233,21 +233,12 @@
                     {%- render block -%}
 
                   {%- when 'cart-message' -%}
-                    {%- assign custom_message_color = block.settings.cart_custom_message_color -%}
-                    {%- capture style -%}
-                      {%- unless custom_message_color == 'rgba(0,0,0,0)' or custom_message_color == blank -%}
-                        --text: {{ custom_message_color }};
-                      {%- endunless -%}
-                    {%- endcapture -%}
-
-                    <div class="cart__message cart__message--custom" style="{{ style }}">
-                      {{ block.settings.cart_custom_message_text }}
-                    </div>
+                    {%- render 'cart-block-message', block: block, modifier: 'cart__message--custom' -%}
 
                   {%- when 'product-list' -%}
                     {%- render 'cart-block-upsell', block: block -%}
 
-                  {%- when 'free-shipping' -%}
+                  {%- when 'cart-promotions' -%}
                     {%- unless is_free_shipping_first -%}
                       {{- free_shipping -}}
                     {%- endunless -%}
@@ -400,32 +391,67 @@
           "default": "<p>Use coupon code <strong>WELCOME10</strong> for 10% off your first order.</p>"
         },
         {
-          "type": "color",
-          "id": "cart_custom_message_color",
-          "label": "Text color"
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Applies only when content in Text field is set to Paragraph.",
+          "default": "body-x-small",
+          "options": [
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Link"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Text"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "align_text",
+          "label": "Text alignment",
+          "default": "text-center",
+          "options": [
+            {"value": "text-left", "label": "Left"},
+            {"value": "text-center", "label": "Centered"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme-3",
+          "label": "Color scheme"
         }
       ]
     },
     {
-      "type": "free-shipping",
-      "name": "Free shipping message",
+      "type": "cart-promotions",
+      "name": "Cart promotions",
       "limit": 1,
       "settings": [
         {
-          "type": "paragraph",
-          "content": "Set a minimum amount for free shipping in [Theme settings](/admin/themes/current/editor?context=theme)"
-        },
-        {
-          "type": "textarea",
-          "id": "message",
-          "label": "Message",
-          "info": "Use ||amount|| to display progress towards free shipping.",
-          "default": "You are ||amount|| away from free shipping."
-        },
-        {
-          "type": "color_background",
-          "id": "free_shipping_gradient",
-          "label": "Custom progress bar gradient"
+          "type": "header",
+          "content": "Typography"
         },
         {
           "type": "select",
@@ -437,6 +463,16 @@
             {"value": "text-center", "label": "Centered"},
             {"value": "text-right", "label": "Right"}
           ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme-2",
+          "label": "Color scheme"
         }
       ]
     },

@@ -567,7 +567,8 @@
     --SIDEBAR-WIDTH-MEDIUM: 258px;
 
     {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 380px;
+    --DRAWER-WIDTH: 520px;
+    --DRAWER-WIDTH-MOBILE: 380px;
 
     {%- comment -%} Grid Variables {%- endcomment -%}
 
@@ -799,6 +800,30 @@
     position: relative;
     min-width: 320px;
   }
+
+  {% if settings.dots_style == 'circle' %}
+    swiper-container::part(bullet),
+    swiper-container::part(bullet-active),
+    .swiper-pagination-bullet {
+      --swiper-pagination-bullet-width: 10px;
+      --swiper-pagination-bullet-height: 10px;
+      --swiper-pagination-bullet-radius: 50%;
+      --swiper-pagination-bullet-inactive-opacity: 1;
+    }
+  {% elsif settings.dots_style == 'line' %}
+    swiper-container::part(bullet),
+    swiper-container::part(bullet-active),
+    .swiper-pagination-bullet {
+      --swiper-pagination-bullet-width: 40px;
+      --swiper-pagination-bullet-height: 2px;
+      --swiper-pagination-bullet-radius: initial;
+      --swiper-pagination-bullet-inactive-opacity: 0.25;
+    }
+  {% else %}
+    swiper-container::part(pagination),
+    .swiper-pagination,
+    .swiper-pagination-bullet { display: none; }
+  {% endif %}
 {% endstyle %}
 
 {%- unless settings.type_base_font.system? -%}
