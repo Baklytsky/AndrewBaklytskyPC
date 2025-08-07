@@ -15,7 +15,7 @@ const selectors = {
 const classes = {
   clone: 'js__header__clone',
   firstSectionOverlayHeader: 'has-first-section-overlay-header',
-  headerGroup: 'shopify-section-group-header-group',
+  headerGroup: 'shopify-section-header-group-group',
   showMobileClass: 'js__show__mobile',
   sticky: 'has-header-sticky',
   stuck: 'js__header__stuck',

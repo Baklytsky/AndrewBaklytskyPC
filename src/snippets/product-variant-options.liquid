@@ -168,7 +168,7 @@
 
           <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
             <form method="dialog">
-              <button class="visually-hidden no-js" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+              <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
             </form>
 
             <div class="product-modal__outer">
@@ -639,19 +639,6 @@
           </div>
         </div>
       {%- endif -%}
-
-      <noscript>
-        <select form="{{ product_form_id }}" name="id" class="product__form__select product__form__select--hidden no-js" aria-label="{{ product.options_with_values | map: 'name' | uniq | join: ', ' }}">
-          {%- for variant in product.variants -%}
-            <option
-              {% if variant == current_variant %}selected="selected"{% endif %}
-              {% unless variant.available %}disabled="disabled"{% endunless %}
-              value="{{ variant.id }}">
-                {{ variant.title }}
-            </option>
-          {%- endfor -%}
-        </select>
-      </noscript>
     {%- endunless -%}
   {%- endcapture -%}
 
