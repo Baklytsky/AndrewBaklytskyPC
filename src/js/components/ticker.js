@@ -14,50 +14,43 @@ if (!customElements.get('ticker-bar')) {
       }
 
       connectedCallback() {
+        this.slider = this.closest('swiper-container');
         this.autoplay = this.hasAttribute('autoplay');
         this.scale = this.querySelector('[data-ticker-scale]');
-        this.text = this.querySelector('[data-ticker-text]');
         this.speed = this.hasAttribute('speed') ? this.getAttribute('speed') : this.settings.speed;
-        this.comparitor = this.text.cloneNode(true);
-        this.comparitor.classList.add('ticker__comparitor');
-
-        // Append the comparitor only if it doesn't exist
-        // This prevents duplication when the component is re-initialized
-        !this.querySelector('.ticker__comparitor') && this.appendChild(this.comparitor);
         this.scale.classList.remove('ticker--unloaded');
 
-        this.checkWidth();
-        this.addEventListener(
-          'theme:ticker:refresh',
-          window.theme.debounce(() => this.checkWidthEvent(), 50)
-        );
+        if (!this.slider) this.checkWidth();
+
+        this.addEventListener('theme:ticker:refresh', this.checkWidthEvent);
 
         screen.orientation.addEventListener('change', this.checkWidthEvent);
         document.addEventListener('theme:resize:width', this.checkWidthEvent);
       }
 
       disconnectedCallback() {
+        screen.orientation.removeEventListener('change', this.checkWidthEvent);
         document.removeEventListener('theme:resize:width', this.checkWidthEvent);
+        this.removeEventListener('theme:ticker:refresh', this.checkWidthEvent);
       }
 
       checkWidth() {
         this.text = this.querySelector('[data-ticker-text]');
+        this.text.classList.remove('ticker--animated');
+        this.comparitor && this.comparitor.remove();
+        this.comparitor = this.text.cloneNode(true);
+        this.comparitor.classList.add('ticker__comparitor');
+        this.appendChild(this.comparitor);
+        this.removeClones();
 
-        const padding = window.getComputedStyle(this).paddingLeft.replace('px', '') * 2;
-        const isOverflowing = this.clientWidth - padding < this.comparitor.clientWidth;
-        const limitClones = this.autoplay ? parseInt((window.innerWidth - padding) / this.text.clientWidth) : 2;
+        const isOverflowing = this.clientWidth < this.comparitor.clientWidth;
+        const limitClones = this.autoplay ? parseInt(window.innerWidth / this.text.clientWidth) : 2;
 
         if (isOverflowing || this.autoplay) {
-          this.text.classList.remove('ticker--animated');
-
-          this.removeClones();
-
-          if (this.autoplay || isOverflowing) {
-            for (let index = 0; index <= limitClones; index++) {
-              const cloneSecond = this.text.cloneNode(true);
-              cloneSecond.setAttribute('data-clone', '');
-              this.scale.appendChild(cloneSecond);
-            }
+          for (let index = 0; index <= limitClones; index++) {
+            const cloneSecond = this.text.cloneNode(true);
+            cloneSecond.setAttribute('data-clone', '');
+            this.scale.appendChild(cloneSecond);
           }
 
           const animationTimeFrame = ((this.text.clientWidth / this.settings.space) * Number(this.speed)).toFixed(2);
@@ -69,11 +62,6 @@ if (!customElements.get('ticker-bar')) {
           this.scale.querySelectorAll('[data-ticker-text]')?.forEach((text) => {
             text.classList.add('ticker--animated');
           });
-        } else {
-          this.text.classList.add('ticker--animated');
-          this.removeClones();
-
-          this.text.classList.remove('ticker--animated');
         }
       }
 
@@ -81,7 +69,7 @@ if (!customElements.get('ticker-bar')) {
         const clones = this.scale.querySelectorAll('[data-clone]');
 
         clones.forEach((clone) => {
-          clone.parentNode.removeChild(clone);
+          clone.remove();
         });
       }
     }

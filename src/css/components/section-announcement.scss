@@ -277,13 +277,13 @@ html:not(.js) .announcement__scale.ticker--unloaded {
 }
 
 .announcement__bar-outer:not(:hover) {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated,
   ticker-bar[autoplay]:not([paused]) .ticker--animated,
   ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
 }
 
 .announcement__bar-outer:hover {
-  .is-selected ticker-bar:not([paused]) .ticker--animated > div,
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated > div,
   ticker-bar[autoplay]:not([paused]) .ticker--animated > div,
   ticker-bar[data-slide]:not([paused]) .ticker--animated > div {
     transform: translateX(calc(-20px / var(--animation-speed, 1)));
@@ -292,13 +292,13 @@ html:not(.js) .announcement__scale.ticker--unloaded {
 }
 
 html.supports-touch {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated,
   ticker-bar[autoplay]:not([paused]) .ticker--animated,
   ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
 }
 
 // Don't animate hidden content
-.announcement__slide:not(:only-child):not(.is-selected) .ticker--animated {
+.announcement__slide:not(:only-child):not(.swiper-slide-visible) .ticker--animated {
   animation-play-state: paused;
 }
 
@@ -320,12 +320,12 @@ html.supports-touch {
   }
 
   &::before {
-    left: var(--arrow-space);
+    left: var(--arrow-space-offset);
     background: linear-gradient(90deg, var(--COLOR-BG) 80%, var(--COLOR-BG-TRANSPARENT, rgb(4 2 2 / 0%)) 100%);
   }
 
   &::after {
-    right: var(--arrow-space);
+    right: var(--arrow-space-offset);
     background: linear-gradient(-90deg, var(--COLOR-BG) 80%, var(--COLOR-BG-TRANSPARENT, rgb(255 255 255 / 0%)) 100%);
   }
 
@@ -361,8 +361,8 @@ html.supports-touch {
     svg { display: none; }
   }
 
-  .swiper-button-prev { left: calc(var(--outer) - 5px); }
-  .swiper-button-next { right: calc(var(--outer) - 5px); }
+  .swiper-button-prev { left: var(--arrow-space-offset); }
+  .swiper-button-next { right: var(--arrow-space-offset); }
 
   ticker-bar { width: 100%; }
 }
@@ -371,6 +371,7 @@ html.supports-touch {
   --arrow-space: var(--icon-size);
   --arrow-space-offset: calc(var(--arrow-space) * -1);
 
+  overflow: initial;
   margin-left: calc(var(--outer) + var(--icon-size));
   margin-right: calc(var(--outer) + var(--icon-size));
 
