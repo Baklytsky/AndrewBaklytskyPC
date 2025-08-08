@@ -131,6 +131,9 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
+{{ 'product.css' | assets_url | stylesheet_tag }}
+{{ 'product-variants.css' | assets_url | stylesheet_tag }}
+
 <product-component
   id="Product--{{ unique }}"
   class="index-product section-padding {{ color_scheme }}"
@@ -392,6 +395,8 @@
                     {%- render 'product-inventory', product: product, block: block, block_style: block_style -%}
 
                   {%- when 'pickup' -%}
+                    {{ 'pickup-availability.css' | asset_url | stylesheet_tag }}
+
                     <pickup-availability
                       class="product__block product__pickup block-padding"
                       data-store-availability-container="{{ current_variant.id }}"

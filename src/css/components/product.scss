@@ -539,19 +539,6 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   &:hover { cursor: help; }
 }
 
-script,
-#recently-viewed-product-template,
-[id*="recently-viewed-product-template"] { display: none !important; }
-
-.recent__container { background: var(--bg); }
-
-.recent__content a {
-  opacity: 1;
-  width: auto;
-  height: auto;
-  display: block;
-}
-
 .product__form__errors {
   opacity: 0;
   max-height: 0;
@@ -585,73 +572,6 @@ script,
     min-height: var(--btn-height);
   }
 }
-
-.errors {
-  position: relative;
-  max-width: 100%;
-  margin: 0;
-  padding: 24px 30px;
-  font-size: var(--font-body-small);
-
-  @include media-query($small) {
-    padding: 15px 30px 15px 15px;
-  }
-}
-
-.errors__close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 32px;
-  height: 32px;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-  cursor: pointer;
-}
-.errors__close .icon { transition: transform 0.3s ease; }
-.errors__close:hover .icon { transform: rotate(90deg); }
-
-.product__add__success {
-  display: flex;
-  align-items: stretch;
-  background: var(--bg);
-  border-left: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-
-  @include media-query($small) {
-    border-left: none;
-  }
-}
-
-.product__add__success__image {
-  width: 50%;
-
-  @include media-query($small) {
-    display: none;
-  }
-}
-
-.product__add__success__image-bg {
-  height: 100%;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-.product__add__success__content {
-  width: 50%;
-  padding: 50px;
-
-  @include media-query($small) {
-    width: 100%;
-    padding: 15px 20px;
-  }
-}
-
-.product__add__success--hide { display: none; }
 
 // A11y outline styles
 .is-focused {
@@ -692,19 +612,8 @@ product-modal { display: flex; }
   pointer-events: none;
 }
 
-dialog {
-  &[open] {
-    .product-modal__outer {
-      animation: heroFadeIn 0.5s ease forwards;
-    }
-  }
-
-  &[closing] {
-    .product-modal__outer {
-      animation: heroFadeOut 0.5s ease forwards;
-    }
-  }
-}
+dialog[open] .product-modal__outer { animation: heroFadeIn 0.5s ease forwards; }
+dialog[closing] .product-modal__outer { animation: heroFadeOut 0.5s ease forwards; }
 
 .product-modal__content {
   overflow-x: hidden;
