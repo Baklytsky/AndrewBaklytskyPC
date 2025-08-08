@@ -17,7 +17,6 @@ import './globals/animation-end-promise';
 import './globals/all-animations-end-promise';
 import './globals/cart';
 import './globals/cart-count';
-import './globals/cart-drawer';
 import './globals/collapsible';
 import './globals/deferred-media';
 import './globals/grid-slider';
