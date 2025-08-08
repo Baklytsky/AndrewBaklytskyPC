@@ -19,7 +19,6 @@
   assign collection = collections[block.settings.collection]
   assign collection_title = block.settings.title | default: collection.title
   assign collection_image = block.settings.collection_image | default: collection.image | default: collection.products.first.featured_media.preview_image
-  assign animation_duration = 800
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 3
@@ -74,8 +73,6 @@
       data-aos="img-in"
       data-aos-anchor="{{ animation_anchor }}"
       data-aos-delay="{{ animation_delay | times: 150 }}"
-      data-aos-duration="{{ animation_duration }}"
-      data-aos-easing="ease-out-quart"
     >
       {%- liquid
         capture placeholder
@@ -91,7 +88,6 @@
     data-aos="fade"
     data-aos-anchor="{{ animation_anchor }}"
     data-aos-delay="{{ animation_delay | times: 150 }}"
-    data-aos-duration="{{ animation_duration }}"
   >
     <span>
       {%- if collection_title != blank -%}
