@@ -8,6 +8,8 @@
   {% render 'gift-card-recipient-form', product: product, form: form %}
 {% endcomment %}
 
+{{ 'recipient-form.css' | asset_url | stylesheet_tag }}
+
 <script src="{{ 'recipient-form.js' | asset_url }}" defer="defer"></script>
 
 <div class="customer">
@@ -39,7 +41,9 @@
             type="email"
             placeholder="{{ 'recipient.form.email' | t }}"
             name="properties[Recipient email]"
-            {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+            {% if product_form_id %}
+              form="{{ product_form_id }}"
+            {% endif %}
           >
         </div>
       </div>
@@ -57,7 +61,9 @@
             id="Recipient-name-{{ section.id }}"
             name="properties[Recipient name]"
             placeholder="{{ 'recipient.form.name' | t }}"
-            {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+            {% if product_form_id %}
+              form="{{ product_form_id }}"
+            {% endif %}
           >
         </div>
       </div>
@@ -67,7 +73,10 @@
         {%- assign max_chars_message_rendered = 'recipient.form.max_characters' | t: max_chars: max_chars_message -%}
         {%- assign message_label_rendered = 'recipient.form.message_label' | t -%}
         <div class="field select__fieldset">
-          <label class="form__label field__label select__label select__label--textarea" for="Recipient-message-{{ section.id }}">
+          <label
+            class="form__label field__label select__label select__label--textarea"
+            for="Recipient-message-{{ section.id }}"
+          >
             {{ message_label_rendered }}
           </label>
 
@@ -79,7 +88,9 @@
             maxlength="{{ max_chars_message }}"
             placeholder="{{ 'recipient.form.message' | t }}"
             aria-label="{{ message_label_rendered }} {{ max_chars_message_rendered }}"
-            {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+            {% if product_form_id %}
+              form="{{ product_form_id }}"
+            {% endif %}
           ></textarea>
         </div>
 
@@ -90,11 +101,11 @@
 
       <div class="recipient-fields__field">
         <div class="field select__fieldset">
-          {%- assign current_date = "now" | date: "%Y-%m-%d" -%}
+          {%- assign current_date = 'now' | date: '%Y-%m-%d' -%}
           {%- assign days = 90 -%}
           {%- assign days_in_seconds = days | times: 24 | times: 60 | times: 60 -%}
-          {%- assign current_date_timestamp = "now" | date: '%s' -%}
-          {%- assign end_date = current_date_timestamp | plus: days_in_seconds | date: "%Y-%m-%d" -%}
+          {%- assign current_date_timestamp = 'now' | date: '%s' -%}
+          {%- assign end_date = current_date_timestamp | plus: days_in_seconds | date: '%Y-%m-%d' -%}
 
           <label class="form__label field__label select__label" for="Recipient-send_on-{{ section.id }}">
             {{ 'recipient.form.send_on_label' | t }}
@@ -110,7 +121,9 @@
             pattern="\d{4}-\d{2}-\d{2}"
             min="{{ current_date }}"
             max="{{ end_date }}"
-            {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+            {% if product_form_id %}
+              form="{{ product_form_id }}"
+            {% endif %}
           >
         </div>
       </div>
@@ -120,7 +133,9 @@
       name="{{ gift_card_recipient_control_flag }}"
       value="if_present"
       id="Recipient-Control-{{ section.id }}"
-      {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+      {% if product_form_id %}
+        form="{{ product_form_id }}"
+      {% endif %}
     >
     <input
       type="hidden"
@@ -128,7 +143,9 @@
       value=""
       id="Recipient-Offset-{{ section.id }}"
       disabled
-      {% if product_form_id %} form="{{ product_form_id }}"{% endif %}
+      {% if product_form_id %}
+        form="{{ product_form_id }}"
+      {% endif %}
     >
   </recipient-form>
 </div>
