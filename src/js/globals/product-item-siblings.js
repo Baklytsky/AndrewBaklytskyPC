@@ -1,47 +1,14 @@
 import {getSizedImageUrl} from '@shopify/theme-images';
-
-const selectors = {
-  productCutline: '[data-product-cutline]',
-  productLink: '[data-product-link]',
-  productGridItem: '[data-grid-item]',
-  productInfo: '[data-product-information]',
-  productImage: '[data-product-image-default]',
-  productImageSibling: '[data-product-image-sibling]',
-  productPrice: '[data-product-price]',
-  siblingsInnerHolder: '[data-sibling-inner]',
-  siblingCount: '[data-sibling-count]',
-  siblingFieldset: '[data-sibling-fieldset]',
-  siblingLink: '[data-sibling-link]',
-  siblingLinkCurrent: '.sibling__link--current',
-};
-
-const classes = {
-  visible: 'is-visible',
-  fade: 'is-fade',
-  stopEvents: 'no-events',
-  active: 'is-active',
-  isFocused: 'is-focused',
-};
-
-const attributes = {
-  siblingAddedImage: 'data-sibling-added-image',
-  siblingCutline: 'data-sibling-cutline',
-  siblingImage: 'data-sibling-image',
-  siblingPrice: 'data-sibling-price',
-  siblingCompareAtPrice: 'data-sibling-compare-at-price',
-  productLink: 'data-product-link',
-};
-
 class SiblingSwatches {
   constructor(swatches, product) {
     this.swatches = swatches;
     this.product = product;
-    this.productLinks = this.product.querySelectorAll(selectors.productLink);
-    this.productCutline = this.product.querySelector(selectors.productCutline);
-    this.productPrice = this.product.querySelector(selectors.productPrice);
-    this.productImage = this.product.querySelector(selectors.productImage);
-    this.productImageSibling = this.product.querySelector(selectors.productImageSibling);
-    this.siblingsInnerHolder = this.product.querySelector(selectors.siblingsInnerHolder);
+    this.productLinks = this.product.querySelectorAll('[data-product-link]');
+    this.productCutline = this.product.querySelector('[data-product-cutline]');
+    this.productPrice = this.product.querySelector('[data-product-price]');
+    this.productImage = this.product.querySelector('[data-product-image-default]');
+    this.productImageSibling = this.product.querySelector('[data-product-image-sibling]');
+    this.siblingsInnerHolder = this.product.querySelector('[data-sibling-inner]');
 
     this.init();
   }
@@ -51,22 +18,22 @@ class SiblingSwatches {
 
     this.siblingsInnerHolder.addEventListener('mouseleave', () => this.resetProductValues());
     this.siblingsInnerHolder.addEventListener('focusout', () => {
-      if (document.body.classList.contains(classes.isFocused)) this.resetProductValues();
+      if (document.body.classList.contains('is-focused')) this.resetProductValues();
     });
 
     this.swatches.forEach((swatch) => {
       swatch.addEventListener('mouseenter', (event) => this.showSibling(event));
       swatch.addEventListener('focusin', (event) => {
-        if (document.body.classList.contains(classes.isFocused)) this.showSibling(event);
+        if (document.body.classList.contains('is-focused')) this.showSibling(event);
       });
     });
   }
 
   cacheDefaultValues() {
-    this.activeSibling = this.siblingsInnerHolder.querySelector(selectors.siblingLinkCurrent).closest(selectors.siblingLink);
-    this.productImageSibling.setAttribute(attributes.siblingImage, this.activeSibling.dataset.siblingImage);
+    this.activeSibling = this.siblingsInnerHolder.querySelector('.sibling__link--current')?.closest('[data-sibling-link]');
+    this.productImageSibling.setAttribute('data-sibling-image', this.activeSibling?.dataset.siblingImage);
 
-    this.productLinkValue = this.productLinks[0].hasAttribute(attributes.productLink) ? this.productLinks[0].getAttribute(attributes.productLink) : '';
+    this.productLinkValue = this.productLinks[0].hasAttribute('data-product-link') ? this.productLinks[0].getAttribute('data-product-link') : '';
     this.productPriceValue = this.productPrice.innerHTML;
 
     if (this.productCutline) {
@@ -75,7 +42,7 @@ class SiblingSwatches {
   }
 
   resetProductValues() {
-    this.product.classList.remove(classes.active);
+    this.product.classList.remove('is-active');
 
     if (this.productPrice) {
       this.productPrice.innerHTML = this.productPriceValue;
@@ -91,10 +58,10 @@ class SiblingSwatches {
 
   showSibling(event) {
     const swatch = event.target;
-    const siblingPrice = swatch.hasAttribute(attributes.siblingPrice) ? swatch.getAttribute(attributes.siblingPrice) : '';
-    const siblingCompareAtPrice = swatch.hasAttribute(attributes.siblingCompareAtPrice) ? swatch.getAttribute(attributes.siblingCompareAtPrice) : '';
-    const siblingCutline = swatch.hasAttribute(attributes.siblingCutline) ? swatch.getAttribute(attributes.siblingCutline) : '';
-    const siblingImage = swatch.hasAttribute(attributes.siblingImage) ? swatch.getAttribute(attributes.siblingImage) : '';
+    const siblingPrice = swatch.hasAttribute('data-sibling-price') ? swatch.getAttribute('data-sibling-price') : '';
+    const siblingCompareAtPrice = swatch.hasAttribute('data-sibling-compare-at-price') ? swatch.getAttribute('data-sibling-compare-at-price') : '';
+    const siblingCutline = swatch.hasAttribute('data-sibling-cutline') ? swatch.getAttribute('data-sibling-cutline') : '';
+    const siblingImage = swatch.hasAttribute('data-sibling-image') ? swatch.getAttribute('data-sibling-image') : '';
 
     if (siblingCompareAtPrice) {
       this.productPrice.innerHTML = `<span class="price sale"><span class="new-price">${siblingPrice}</span> <span class="old-price">${siblingCompareAtPrice}</span></span>`;
@@ -127,13 +94,13 @@ class SiblingSwatches {
     const imageSrc = getSizedImageUrl(siblingImage, `${widthRounded}x`);
     const imageExists = this.productImageSibling.querySelector(`[src="${imageSrc}"]`);
     const showCurrentImage = () => {
-      this.productImageSibling.classList.add(classes.visible);
-      this.productImageSibling.querySelector(`[src="${imageSrc}"]`).classList.add(classes.fade);
+      this.productImageSibling.classList.add('is-visible');
+      this.productImageSibling.querySelector(`[src="${imageSrc}"]`).classList.add('is-fade');
     };
     const swapImages = () => {
-      const activeSiblingImage = this.productImageSibling.getAttribute(attributes.siblingImage);
+      const activeSiblingImage = this.productImageSibling.getAttribute('data-sibling-image');
       const swapNewImageOnHover = siblingImage !== activeSiblingImage;
-      const swapActiveSiblingImage = siblingImage === activeSiblingImage && this.productImageSibling.classList.contains(classes.visible);
+      const swapActiveSiblingImage = siblingImage === activeSiblingImage && this.productImageSibling.classList.contains('is-visible');
 
       // Avoid changing the image when hovering over the currently active sibling link, if the featured image remains unchanged.
       const shouldSwap = Boolean(swapActiveSiblingImage || swapNewImageOnHover);
@@ -141,7 +108,7 @@ class SiblingSwatches {
       if (!shouldSwap) return;
 
       this.productImageSibling.querySelectorAll('img').forEach((image) => {
-        image.classList.remove(classes.fade);
+        image.classList.remove('is-fade');
       });
       requestAnimationFrame(showCurrentImage);
     };
@@ -168,9 +135,9 @@ class SiblingSwatches {
   hideSiblingImage() {
     if (!this.productImageSibling) return;
 
-    this.productImageSibling.classList.remove(classes.visible);
+    this.productImageSibling.classList.remove('is-visible');
     this.productImageSibling.querySelectorAll('img').forEach((image) => {
-      image.classList.remove(classes.fade);
+      image.classList.remove('is-fade');
     });
   }
 }
@@ -184,18 +151,18 @@ if (!customElements.get('product-item-siblings')) {
       }
 
       connectedCallback() {
-        this.product = this.closest(selectors.productGridItem);
-        this.siblingCount = this.querySelector(selectors.siblingCount);
-        this.siblingFieldset = this.querySelector(selectors.siblingFieldset);
-        this.siblingLinks = this.querySelectorAll(selectors.siblingLink);
-        this.productInfo = this.closest(selectors.productInfo);
-        this.productLink = this.closest(selectors.link);
+        this.product = this.closest('[data-grid-item]');
+        this.siblingCount = this.querySelector('[data-sibling-count]');
+        this.siblingFieldset = this.querySelector('[data-sibling-fieldset]');
+        this.siblingLinks = this.querySelectorAll('[data-sibling-link]');
+        this.productInfo = this.closest('[data-product-information]');
+        this.productLink = this.closest('[data-product-link]');
         this.hideSwatchesTimer = 0;
         this.swatchesStyle = theme.settings.collectionSwatchStyle;
 
         if (this.siblingFieldset && this.productInfo) {
           if (this.swatchesStyle == 'grid' || this.swatchesStyle == 'slider' || this.swatchesStyle == 'limited') {
-            this.siblingFieldset.classList.add(classes.visible);
+            this.siblingFieldset.classList.add('is-visible');
           }
 
           if (this.siblingCount) {
@@ -215,21 +182,21 @@ if (!customElements.get('product-item-siblings')) {
         if (this.hideSwatchesTimer) clearTimeout(this.hideSwatchesTimer);
 
         if (this.productLink) {
-          this.productLink.classList.add(classes.stopEvents);
+          this.productLink.classList.add('no-events');
         }
 
         if (this.swatchesStyle == 'text') return;
 
-        this.siblingFieldset.classList.add(classes.visible);
+        this.siblingFieldset.classList.add('is-visible');
       }
 
       hideSiblings() {
         this.hideSwatchesTimer = setTimeout(() => {
           if (this.productLink) {
-            this.productLink.classList.remove(classes.stopEvents);
+            this.productLink.classList.remove('no-events');
           }
 
-          this.siblingFieldset.classList.remove(classes.visible);
+          this.siblingFieldset.classList.remove('is-visible');
         }, 100);
       }
     }

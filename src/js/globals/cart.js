@@ -63,7 +63,6 @@ const selectors = {
   bundleRemoveButton: '[data-bundle-cart-remove]',
   discountButton: '[data-cart-discount-button]',
   discountField: '[data-cart-discount-field]',
-  noscript: 'noscript',
 };
 
 const attributes = {
@@ -370,11 +369,6 @@ class CartItems extends HTMLElement {
       }
       formData = new FormData(form);
 
-      const hasInputsInNoScript = [...form.elements].some((el) => el.closest(selectors.noscript));
-      if (hasInputsInNoScript) {
-        formData = this.handleFormDataDuplicates([...form.elements], formData);
-      }
-
       if (form !== null && form.querySelector('[type="file"]')) {
         return;
       }
@@ -385,37 +379,6 @@ class CartItems extends HTMLElement {
     }
 
     this.addToCart(formData, button);
-  }
-
-  /**
-   * Modify the `formData` object in case there are key/value pairs with an overlapping `key`
-   *  - the presence of form input fields inside a `noscript` tag leads to a duplicate `key`, which overwrites the existing `value` when the `FormData` is constructed
-   *  - such key/value pairs discrepancies occur in the Theme editor, when any setting is updated, and right before one presses the "Save" button
-   *
-   * @param   {Array}  A list of all `HTMLFormElement.elements` DOM nodes
-   * @param   {Object}  `FormData` object, created with the `FormData()` constructor
-   *
-   * @return  {Object} Updated `FormData` object that does not contain any duplicate keys
-   */
-  handleFormDataDuplicates(elements, formData) {
-    if (!elements.length || typeof formData !== 'object') return formData;
-
-    elements.forEach((element) => {
-      if (element.closest(selectors.noscript)) {
-        const key = element.getAttribute(attributes.name);
-        const value = element.value;
-
-        if (key) {
-          const values = formData.getAll(key);
-          if (values.length > 1) values.splice(values.indexOf(value), 1);
-
-          formData.delete(key);
-          formData.set(key, values[0]);
-        }
-      }
-    });
-
-    return formData;
   }
 
   /**

@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js no-touch supports-no-cookies" lang="{{ request.locale.iso_code }}">
+<html class="js supports-no-cookies no-touch" lang="{{ request.locale.iso_code }}">
   <head>
     {%- render 'head' -%}
 
@@ -8,41 +8,38 @@
 
   <body
     id="{{ page_title | handle }}"
-    class="template-{{ template.name | handle }}{% if customer %} customer-logged-in{% endif %}{% if settings.animations_enable %} aos-initialized{% endif %}"
-    data-animations="{{ settings.animations_enable }}"
+    class="template-{{ template.name | handle }}{% if settings.animations_enable %} aos-initialized{% endif %}"
   >
-    <a class="in-page-link visually-hidden skip-link" data-skip-content href="#MainContent">
+    <a href="#MainContent" class="skip-link visually-hidden" data-skip-content>
       {{- 'general.accessibility.skip_to_content' | t -}}
     </a>
 
-    <div class="group-header">
-      {% sections 'group-header' %}
+    <div class="header-group">
+      {% sections 'header-group' %}
     </div>
 
-    <div class="group-overlay">
-      {% sections 'group-overlay' %}
+    <div class="overlay-group">
+      {% sections 'overlay-group' %}
     </div>
 
-    <main role="main" id="MainContent" class="main-content">
+    <main id="MainContent" class="main-content" role="main" tabindex="-1">
       {{ content_for_layout }}
     </main>
 
-    <div class="group-pre-footer">
-      {% sections 'group-pre-footer' %}
+    <div class="pre-footer-group">
+      {% sections 'pre-footer-group' %}
     </div>
 
-    <footer class="group-footer">
-      {% sections 'group-footer' %}
+    <footer class="footer-group">
+      {% sections 'footer-group' %}
     </footer>
 
-    {%- if settings.enable_color_swatches -%}
-      {% render 'template-swatch' %}
-    {%- endif -%}
+    {%- liquid
+      if settings.enable_color_swatches
+        render 'template-swatch'
+      endif
 
-    {% render 'zoom-pswp' %}
-
-    <!-- Paste third party scripts or marketing code below this comment line -->
-
-    <!-- And above this comment line ======================================= -->
+      render 'zoom-pswp'
+    -%}
   </body>
 </html>

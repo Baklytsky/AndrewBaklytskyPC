@@ -1,33 +1,3 @@
-const selectors = {
-  buttonArrow: '[data-button-arrow]',
-  deferredMediaButton: '[data-deferred-media-button]',
-  focusedElement: 'model-viewer, video, iframe, button, [href], input, [tabindex]',
-  productMedia: '[data-image-id]',
-  productMediaList: '[data-product-media-list]',
-  section: '[data-section-type]',
-};
-
-const classes = {
-  arrows: 'slider__arrows',
-  dragging: 'is-dragging',
-  hidden: 'hidden',
-  isFocused: 'is-focused',
-  mediaActive: 'media--active',
-  mediaHidden: 'media--hidden',
-  mediaHiding: 'media--hiding',
-};
-
-const attributes = {
-  activeMedia: 'data-active-media',
-  buttonPrev: 'data-button-prev',
-  buttonNext: 'data-button-next',
-  imageId: 'data-image-id',
-  mediaId: 'data-media-id',
-  type: 'data-type',
-  faderDesktop: 'data-fader-desktop',
-  faderMobile: 'data-fader-mobile',
-};
-
 if (!customElements.get('product-images')) {
   customElements.define(
     'product-images',
@@ -42,14 +12,14 @@ if (!customElements.get('product-images')) {
         this.startY = 0;
         this.scrollLeft = 0;
         this.onButtonArrowClick = (e) => this.buttonArrowClickEvent(e);
-        this.container = this.closest(selectors.section);
+        this.container = this.closest('[data-section-type]');
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
-        this.productMediaItems = this.querySelectorAll(selectors.productMedia);
-        this.productMediaList = this.querySelector(selectors.productMediaList);
+        this.productMediaItems = this.querySelectorAll('[data-image-id]');
+        this.productMediaList = this.querySelector('[data-product-media-list]');
         this.setHeight = this.setHeight.bind(this);
         this.toggleEvents = this.toggleEvents.bind(this);
         this.selectMediaEvent = (e) => this.showMediaOnVariantSelect(e);
@@ -83,7 +53,7 @@ if (!customElements.get('product-images')) {
       toggleEvents() {
         const isMobileView = window.theme.isMobile();
 
-        if ((isMobileView && this.hasAttribute(attributes.faderMobile)) || (!isMobileView && this.hasAttribute(attributes.faderDesktop))) {
+        if ((isMobileView && this.hasAttribute('data-fader-mobile')) || (!isMobileView && this.hasAttribute('data-fader-desktop'))) {
           this.bindEventListeners();
         } else {
           this.unbindEventListeners();
@@ -140,7 +110,7 @@ if (!customElements.get('product-images')) {
         const distanceX = x - this.startX;
         const distanceY = y - this.startY;
         const direction = distanceX > 0 ? 1 : -1;
-        const isImage = this.getCurrentMedia().hasAttribute(attributes.type) && this.getCurrentMedia().getAttribute(attributes.type) === 'image';
+        const isImage = this.getCurrentMedia().hasAttribute('data-type') && this.getCurrentMedia().getAttribute('data-type') === 'image';
 
         if (Math.abs(distanceX) > 10 && Math.abs(distanceX) > Math.abs(distanceY) && isImage) {
           direction < 0 ? this.showNextImage() : this.showPreviousImage();
@@ -149,14 +119,14 @@ if (!customElements.get('product-images')) {
         this.isDown = false;
 
         requestAnimationFrame(() => {
-          this.classList.remove(classes.dragging);
+          this.classList.remove('is-dragging');
         });
       }
 
       handleMouseMove() {
         if (!this.isDown) return;
 
-        this.classList.add(classes.dragging);
+        this.classList.add('is-dragging');
       }
 
       handleKeyUp(e) {
@@ -170,15 +140,15 @@ if (!customElements.get('product-images')) {
       }
 
       handleArrowsClickEvent() {
-        this.querySelectorAll(selectors.buttonArrow)?.forEach((button) => {
+        this.querySelectorAll('[data-button-arrow]')?.forEach((button) => {
           button.addEventListener('click', (e) => {
             e.preventDefault();
 
-            if (e.target.hasAttribute(attributes.buttonPrev)) {
+            if (e.target.hasAttribute('data-button-prev')) {
               this.showPreviousImage();
             }
 
-            if (e.target.hasAttribute(attributes.buttonNext)) {
+            if (e.target.hasAttribute('data-button-next')) {
               this.showNextImage();
             }
           });
@@ -196,14 +166,14 @@ if (!customElements.get('product-images')) {
         // Create arrow buttons if don't exist
         if (!this.buttons.length) {
           const buttonsWrap = document.createElement('div');
-          buttonsWrap.classList.add(classes.arrows);
+          buttonsWrap.classList.add('slider__arrows');
           buttonsWrap.innerHTML = theme.sliderArrows.prev + theme.sliderArrows.next;
 
           // Append buttons outside the slider element
           this.productMediaList.append(buttonsWrap);
-          this.buttons = this.querySelectorAll(selectors.buttonArrow);
-          this.buttonPrev = this.querySelector(`[${attributes.buttonPrev}]`);
-          this.buttonNext = this.querySelector(`[${attributes.buttonNext}]`);
+          this.buttons = this.querySelectorAll('[data-button-arrow]');
+          this.buttonPrev = this.querySelector('[data-button-prev]');
+          this.buttonNext = this.querySelector('[data-button-next]');
         }
 
         this.handleArrowsClickEvent();
@@ -211,7 +181,7 @@ if (!customElements.get('product-images')) {
       }
 
       removeArrows() {
-        this.querySelector(`.${classes.arrows}`)?.remove();
+        this.querySelector(`.${'slider__arrows'}`)?.remove();
       }
 
       preloadImageOnArrowHover() {
@@ -227,7 +197,7 @@ if (!customElements.get('product-images')) {
       }
 
       preloadImage(id) {
-        this.querySelector(`[${attributes.mediaId}="${id}"] img`)?.setAttribute('loading', 'eager');
+        this.querySelector(`[data-media-id="${id}"] img`)?.setAttribute('loading', 'eager');
       }
 
       showMediaOnVariantSelect(e) {
@@ -236,14 +206,14 @@ if (!customElements.get('product-images')) {
       }
 
       getCurrentMedia() {
-        return this.querySelector(`${selectors.productMedia}.${classes.mediaActive}`);
+        return this.querySelector('[data-image-id].media--active');
       }
 
       getNextMediaId() {
         const currentMedia = this.getCurrentMedia();
-        const nextMedia = currentMedia?.nextElementSibling.hasAttribute(attributes.imageId) ? currentMedia?.nextElementSibling : this.querySelector(selectors.productMedia);
+        const nextMedia = currentMedia?.nextElementSibling.hasAttribute('data-image-id') ? currentMedia?.nextElementSibling : this.querySelector('[data-image-id]');
 
-        return nextMedia?.getAttribute(attributes.mediaId);
+        return nextMedia?.getAttribute('data-media-id');
       }
 
       getPreviousMediaId() {
@@ -251,7 +221,7 @@ if (!customElements.get('product-images')) {
         const lastIndex = this.productMediaItems.length - 1;
         const previousMedia = currentMedia?.previousElementSibling || this.productMediaItems[lastIndex];
 
-        return previousMedia?.getAttribute(attributes.mediaId);
+        return previousMedia?.getAttribute('data-media-id');
       }
 
       showNextImage() {
@@ -277,29 +247,29 @@ if (!customElements.get('product-images')) {
       setActiveMedia(id) {
         if (!id) return;
 
-        this.setAttribute(attributes.activeMedia, id);
+        this.setAttribute('data-active-media', id);
 
-        const activeImage = this.querySelector(`${selectors.productMedia}.${classes.mediaActive}`);
-        const selectedImage = this.querySelector(`[${attributes.mediaId}="${id}"]`);
-        const selectedImageFocus = selectedImage?.querySelector(selectors.focusedElement);
+        const activeImage = this.querySelector('[data-image-id].media--active');
+        const selectedImage = this.querySelector(`[data-media-id="${id}"]`);
+        const selectedImageFocus = selectedImage?.querySelector('model-viewer, video, iframe, button, [href], input, [tabindex]');
         const deferredMedia = selectedImage.querySelector('deferred-media');
 
-        activeImage?.classList.add(classes.mediaHiding);
-        activeImage?.classList.remove(classes.mediaActive);
+        activeImage?.classList.add('media--hiding');
+        activeImage?.classList.remove('media--active');
 
-        selectedImage?.classList.remove(classes.mediaHiding, classes.mediaHidden);
-        selectedImage?.classList.add(classes.mediaActive);
+        selectedImage?.classList.remove('media--hiding', 'media--hidden');
+        selectedImage?.classList.add('media--active');
 
         // Force media loading if slide becomes visible
         if (deferredMedia && deferredMedia.getAttribute('loaded') !== true) {
-          selectedImage.querySelector(selectors.deferredMediaButton)?.dispatchEvent(new Event('click', {bubbles: false}));
+          selectedImage.querySelector('[data-deferred-media-button]')?.dispatchEvent(new Event('click', {bubbles: false}));
         }
 
         requestAnimationFrame(() => {
           this.setHeight();
 
           // Move focus to the selected media
-          if (document.body.classList.contains(classes.isFocused)) {
+          if (document.body.classList.contains('is-focused')) {
             selectedImageFocus?.focus();
           }
         });
@@ -307,22 +277,22 @@ if (!customElements.get('product-images')) {
 
       // Set current product image height variable to product images container
       setHeight() {
-        const mediaHeight = this.querySelector(`${selectors.productMedia}.${classes.mediaActive}`)?.offsetHeight || this.productMediaItems[0]?.offsetHeight;
+        const mediaHeight = this.querySelector('[data-image-id].media--active')?.offsetHeight || this.productMediaItems[0]?.offsetHeight;
         this.style.setProperty('--height', `${mediaHeight}px`);
       }
 
       productMediaObserver() {
         this.productMediaItems.forEach((media) => {
           media.addEventListener('transitionend', (e) => {
-            if (e.target == media && media.classList.contains(classes.mediaHiding)) {
-              media.classList.remove(classes.mediaHiding);
-              media.classList.add(classes.mediaHidden);
+            if (e.target == media && media.classList.contains('media--hiding')) {
+              media.classList.remove('media--hiding');
+              media.classList.add('media--hidden');
             }
           });
           media.addEventListener('transitioncancel', (e) => {
-            if (e.target == media && media.classList.contains(classes.mediaHiding)) {
-              media.classList.remove(classes.mediaHiding);
-              media.classList.add(classes.mediaHidden);
+            if (e.target == media && media.classList.contains('media--hiding')) {
+              media.classList.remove('media--hiding');
+              media.classList.add('media--hidden');
             }
           });
         });
