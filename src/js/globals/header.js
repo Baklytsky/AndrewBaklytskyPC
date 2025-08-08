@@ -3,9 +3,7 @@ const selectors = {
   cartToggleButton: '[data-cart-toggle]',
   deadLink: '.navlink[href="#"]',
   desktop: '[data-header-desktop]',
-  firstSectionOverlayHeader: '.main-content > .shopify-section.section-overlay-header:first-of-type',
   pageHeader: '.page-header',
-  preventTransparent: '[data-prevent-transparent-header]',
   style: 'data-header-style',
   widthContent: '[data-child-takes-space]',
   widthContentWrapper: '[data-takes-space-wrapper]',
@@ -14,12 +12,10 @@ const selectors = {
 
 const classes = {
   clone: 'js__header__clone',
-  firstSectionOverlayHeader: 'has-first-section-overlay-header',
   headerGroup: 'shopify-section-header-group-group',
   showMobileClass: 'js__show__mobile',
   sticky: 'has-header-sticky',
   stuck: 'js__header__stuck',
-  transparent: 'has-header-transparent',
   headerWrapper: 'header-wrapper',
 };
 
@@ -28,7 +24,6 @@ const attributes = {
   drawerToggle: 'data-drawer-toggle',
   scrollLock: 'data-scroll-locked',
   stickyHeader: 'data-header-sticky',
-  transparent: 'data-header-transparent',
 };
 
 if (!customElements.get('header-component')) {
@@ -46,16 +41,6 @@ if (!customElements.get('header-component')) {
         this.isSticky = this.hasAttribute(attributes.stickyHeader);
 
         document.body.classList.toggle(classes.sticky, this.isSticky);
-
-        // Fallback for CSS :has() selectors
-        let enableTransparentHeader = false;
-        const firstSectionOverlayHeader = document.querySelector(selectors.firstSectionOverlayHeader);
-        if (firstSectionOverlayHeader && !firstSectionOverlayHeader.querySelector(selectors.preventTransparent)) {
-          enableTransparentHeader = true;
-        }
-
-        document.body.classList.toggle(classes.transparent, this.hasAttribute(attributes.transparent));
-        document.body.classList.toggle(classes.firstSectionOverlayHeader, enableTransparentHeader);
       }
 
       connectedCallback() {
