@@ -207,7 +207,7 @@ if (!customElements.get('cart-drawer')) {
 
       observeAdditionalCheckoutButtons() {
         // identify an element to observe
-        const additionalCheckoutButtons = this.querySelector(selectors.additionalCheckoutButtons);
+        const additionalCheckoutButtons = this.querySelector('.additional-checkout-buttons');
         if (additionalCheckoutButtons) {
           // create a new instance of `MutationObserver` named `observer`,
           // passing it a callback function
