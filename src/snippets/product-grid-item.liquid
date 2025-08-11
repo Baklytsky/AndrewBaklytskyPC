@@ -272,10 +272,14 @@
     {%- endcapture -%}
   {%- elsif on_sale and sold_out == false -%}
     {%- capture badge_content -%}
-      <span class="badge-box badge-box--sale"
+      <span
+        class="badge-box badge-box--sale"
         data-aos="fade"
         data-aos-delay="{{ aos_delay }}"
-        data-aos-anchor="{{ aos_anchor }}">
+        data-aos-anchor="{{ aos_anchor }}"
+      >
+        {{ 'products.product.on_sale' | t }}
+
         {%- if settings.show_saving_badge -%}
           {%- liquid
             assign price_difference = product.compare_at_price | minus: product.price
@@ -290,9 +294,7 @@
               assign discount = percent_off | floor | append: '%'
             endif
           -%}
-          {{ discount }} {{ 'products.product.off' | t }}
-        {%- else -%}
-          {{ 'products.product.on_sale' | t }}
+          &bull; {{ discount }} {{ 'products.product.off' | t }}
         {%- endif -%}
       </span>
     {%- endcapture -%}
