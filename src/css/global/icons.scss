@@ -49,3 +49,68 @@
 
   cursor: default;
 }
+
+.hotspot__button {
+  --hotspot-top: 50%;
+  --hotspot-left: 50%;
+  --hotspot-size: 23px;
+  --hotspot-offset: calc(var(--hotspot-size) / -2);
+
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hotspot-size, 23px);
+  height: var(--hotspot-size, 23px);
+  padding: 0;
+  margin-top: var(--hotspot-offset, -12px);
+  margin-left: var(--hotspot-offset, -12px);
+  top: var(--hotspot-top);
+  left: var(--hotspot-left);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .hotspot__button.is-selected .hotspot::before { animation: pulseDot 2.5s linear infinite; }
+  .hotspot__button:hover .hotspot::after { animation: pulseDotHover 1.5s linear infinite; }
+}
+
+.hotspot {
+  --bg: var(--COLOR-BG);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after,
+  &::before {
+    content: "";
+    width: 35px;
+    height: 35px;
+    background-color: inherit;
+    border-radius: inherit;
+    opacity: 0.3;
+    position: absolute;
+    top: -6px;
+    left: -6px;
+  }
+
+  &::before { opacity: 0; }
+}
+
+.hotspot__icon {
+  background-color: var(--accent);
+  mask-image: var(--icon-add-cart);
+  mask-size: contain;
+  width: 75%;
+  height: 75%;
+  display: inline-block;
+}
