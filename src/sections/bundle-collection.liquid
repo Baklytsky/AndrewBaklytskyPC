@@ -38,6 +38,8 @@
 
     {%- comment -%}--placeholder-columns: {{ placeholder_columns }};{%- endcomment -%}
 
+    --bg-light: {{ section.settings.color_scheme.settings.bg_light }}
+
     {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
       --border-hairline: {{ border_color }};
     {% endunless %}
@@ -61,6 +63,16 @@
     <div class="wrapper--full-padded">
       <div class="bundle__container">
         <div class="bundle__content">
+          <div class="bundle__text">
+            <h1 class="bundle__title heading-large">{{ collection.title }}</h1>
+
+            {%- if collection.description -%}
+              <div class="bundle__description">
+                {{ collection.description }}
+              </div>
+            {%- endif -%}
+          </div>
+
           <div class="grid bundle__products">
             {% for product in collection.products %}
               {%- render 'product-grid-item',
@@ -81,24 +93,91 @@
 
         {%- if section.blocks.size > 0 -%}
           <div class="bundle__aside">
-            <div class="bundle__widget">
+            <div class="bundle__widget{% if section.settings.enable_sidebar_background %} bundle__widget--background{% endif %}">
               {%- for block in section.blocks -%}
                 {%- case block.type -%}
+                  {%- when 'heading' -%}
+                    {%- if block.settings.title != blank -%}
+                      {%- liquid
+                        assign animation_order = animation_order | plus: 1
+                        assign heading_tag = 'h2'
+
+                        unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                          assign heading_tag = block.settings.heading_tag
+                        endunless
+                      -%}
+
+                      <{{ heading_tag }}
+                        class="hero__title {{ block.settings.heading_font_size }} block-padding"
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                        {{ block_style }}
+                      >
+                        {{ block.settings.title }}
+                      </{{ heading_tag }}>
+                    {%- endif -%}
+
+                  {%- when 'text' -%}
+                    {%- if block.settings.text != blank -%}
+                      {%- assign animation_order = animation_order | plus: 1 -%}
+                      <div
+                        class="hero__rte {{ block.settings.text_font_size }} block-padding"
+                        data-aos="hero"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-order="{{ animation_order }}"
+                        {{ block.shopify_attributes }}
+                        {{ block_style }}
+                      >
+                        {{ block.settings.text }}
+                      </div>
+                    {%- endif -%}
+
                   {%- when 'bundle_products' -%}
-                    <div class="bundle__placeholders">
-                      {% for i in (1..max_selection) %}
-                        <div data-bundle-placeholder class="bundle-placeholder">
-                          <div class="bundle-placeholder__empty">
-                            <div class="bundle-placeholder__text">Select Product</div>
+                    {%- assign placeholder_product = '' -%}
+                    {% for i in (1..max_selection) %}
+                      {%- capture placeholder_product -%}
+                        {{ placeholder_product }}
+
+                        <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
+                          {% comment %}
+                          {% endcomment %}
+                          <div class="bundle-placeholder__line">&nbsp;</div>
+
+                          <span class="bundle-placeholder__dot">&nbsp;</span>
+
+                          <div class="bundle-placeholder__inner">
+                            <div class="bundle-placeholder__empty">
+                              <div class="bundle-placeholder__text">Select a product</div>
+                            </div>
+                            <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
                           </div>
-                          <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
                         </div>
-                      {% endfor %}
+                      {%- endcapture -%}
+                    {% endfor %}
+
+                    <div class="bundle__placeholders">
+                      {%- comment -%}
+                        <div class="bundle__placeholders__line">
+
+                        </div>
+                      {%- endcomment -%}
+
+                      <div class="bundle__placeholders__products">
+                        {{ placeholder_product }}
+                      </div>
                     </div>
                   {%- when 'bundle_price' -%}
-                    <p class="bundle__price">
-                      Total: <span data-bundle-total>{{ 'general.money.free' | t }}</span>
-                    </p>
+                    <div class="bundle__price">
+                      <p class="bundle__price__row">
+                        <span>Subtotal</span> <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                      </p>
+
+                      <p class="bundle__price__row">
+                        <span>Total savings</span> <span data-bundle-total-savings>{{ 'general.money.free' | t }}</span>
+                      </p>
+                    </div>
                   {%- when 'bundle_button' -%}
                     <button
                       type="button"
@@ -116,7 +195,7 @@
                       <span class="btn__added">&nbsp;</span>
 
                       <span class="btn__loader">
-                        <svg height="18" width="18" class=" svg-loader">
+                        <svg height="18" width="18" class="svg-loader">
                           <circle r="7" cx="9" cy="9" />
                           <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
                         </svg>
@@ -191,6 +270,12 @@
       "content": "Colors"
     },
     {
+      "type": "checkbox",
+      "id": "enable_sidebar_background",
+      "label": "Enable sidebar background",
+      "default": false
+    },
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "default": "scheme_1",
@@ -222,6 +307,105 @@
     }
   ],
   "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your product bundle"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-medium",
+          "options": [
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Padding"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Bottom",
+          "default": 16
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading SEO tag",
+          "default": "automatic",
+          "options": [
+            {"value": "automatic", "label": "Automatic"},
+            {"value": "h1", "label": "H1"},
+            {"value": "h2", "label": "H2"},
+            {"value": "h3", "label": "H3"},
+            {"value": "h4", "label": "H4"},
+            {"value": "h5", "label": "H5"},
+            {"value": "h6", "label": "H6"}
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Save up to 25% when you stock up on your go-to product or mix and match all your favorites. The more you add, the more you save</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Applies only when content in Text field is set to Paragraph.",
+          "default": "body-medium",
+          "options": [
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Padding"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Bottom",
+          "default": 16
+        }
+      ]
+    },
     {
       "type": "bundle_products",
       "limit": 1,

@@ -6,6 +6,7 @@ const selectors = {
   selectedCount: '[data-bundle-selected-count]',
   countLeft: '[data-bundle-count-left]',
   bundleTotal: '[data-bundle-total]',
+  bundleTotalSavings: '[data-bundle-total-savings]',
   addButton: '[data-bundle-add-to-cart]',
   removeButton: '[data-bundle-remove-button]',
   scrollToBundle: '[data-bundle-scroll-to]',
@@ -25,6 +26,7 @@ const attributes = {
   bundleImage: 'data-bundle-image',
   bundleVariantId: 'data-bundle-variant-id',
   bundlePrice: 'data-bundle-price',
+  bundlePriceCompare: 'data-bundle-price-compare',
   bundleOptions: 'data-bundle-options',
   bundleHandle: 'data-bundle-handle',
   bundleCartItem: 'data-bundle-cart-item',
@@ -36,6 +38,11 @@ const classes = {
   disabled: 'is-disabled',
   loading: 'is-loading',
   focused: 'is-focused',
+  lineActive: 'is-line-active',
+  dotActive: 'is-dot-active',
+  animateIn: 'is-animate-in',
+  animateOut: 'is-animate-out',
+  lineAnimateStop: 'is-line-animate-stop',
 };
 
 if (!customElements.get('bundle-collection')) {
@@ -50,12 +57,11 @@ if (!customElements.get('bundle-collection')) {
         this.selectedCount = this.querySelector(selectors.selectedCount);
         this.countLeft = this.querySelector(selectors.countLeft);
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
+        this.bundleTotalSavings = this.querySelector(selectors.bundleTotalSavings);
         this.addButton = this.querySelector(selectors.addButton);
         this.scrollToBundle = this.querySelector(selectors.scrollToBundle);
         this.placeholders = this.querySelectorAll(selectors.placeholder);
-        this.selectedProducts = new Array(this.maxSelection).fill(null);
-        this.bundleUniqueId = 0;
-        this.bundleCounter = 0;
+        this.selectedProducts = [];
         this.bundleCartItems = null;
         this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
       }
@@ -75,6 +81,9 @@ if (!customElements.get('bundle-collection')) {
           const button = e.detail.button;
           button.setAttribute(attributes.bundleVariantId, e.detail.variantId);
           button.setAttribute(attributes.bundleOptions, e.detail.options.join(' / '));
+          button.setAttribute(attributes.bundlePrice, e.detail.price);
+          button.setAttribute(attributes.bundlePriceCompare, e.detail.priceCompare);
+
           this.addProductToBundle(button);
         });
 
@@ -112,13 +121,21 @@ if (!customElements.get('bundle-collection')) {
       }
 
       updateUI() {
-        const filledCount = this.selectedProducts.filter((product) => product !== null).length;
+        const filledCount = this.selectedProducts.length;
         this.selectedCount.textContent = filledCount;
         this.countLeft.textContent = this.maxSelection - filledCount;
-        const total = this.selectedProducts.reduce((sum, product) => {
-          return sum + (product ? parseFloat(product.price) : 0);
-        }, 0);
-        this.bundleTotal.innerHTML = this.formatRate(total);
+        const total = this.selectedProducts.reduce(
+          (sum, product) => {
+            return {
+              price: sum.price + (product ? parseFloat(product.price) : 0),
+              priceCompare: sum.priceCompare + (product ? parseFloat(product.priceCompare) : 0),
+            };
+          },
+          {price: 0, priceCompare: 0}
+        );
+
+        this.bundleTotal.innerHTML = this.formatRate(total.price);
+        this.bundleTotalSavings.innerHTML = this.formatRate(total.priceCompare - total.price);
         this.addButton.disabled = filledCount !== this.maxSelection;
         if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
           this.addButton.focus();
@@ -129,6 +146,8 @@ if (!customElements.get('bundle-collection')) {
       }
 
       addProductToBundle(button) {
+        this.classList.remove(classes.lineAnimateStop);
+
         const productData = {
           id: button.getAttribute(attributes.bundleVariantId),
           quantity: 1,
@@ -136,27 +155,45 @@ if (!customElements.get('bundle-collection')) {
             _bundle_title: `${this.getAttribute(attributes.bundleName)}`,
           },
           price: button.getAttribute(attributes.bundlePrice),
+          priceCompare: button.getAttribute(attributes.bundlePriceCompare),
           productId: button.getAttribute(attributes.productId),
         };
         if (this.hasAttribute(attributes.bundleImage)) {
           productData.properties._bundle_image = `${this.getAttribute(attributes.bundleImage)}`;
         }
-        const emptyIndex = this.selectedProducts.findIndex((product) => product === null);
-        if (emptyIndex === -1) return;
-        this.selectedProducts[emptyIndex] = productData;
+
+        if (this.selectedProducts.length >= this.maxSelection) return;
+
+        this.selectedProducts.push(productData);
 
         const productItem = button.closest(selectors.productGridItem);
         const template = productItem.querySelector(selectors.template);
         const content = template.innerHTML;
-        const placeholder = this.placeholders[emptyIndex];
-        placeholder.classList.add(classes.filled);
+        const placeholder = this.querySelector(`${selectors.placeholder}:not(.${classes.filled})`);
+
+        if (!placeholder) return;
+
         const filledEl = placeholder.querySelector(selectors.placeholderFilled);
         filledEl.innerHTML = content;
         filledEl.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(button.getAttribute(attributes.bundlePrice));
-        filledEl.querySelector(selectors.removeButton).addEventListener('click', () => this.removeProductFromBundle(emptyIndex));
+        filledEl.querySelector(selectors.removeButton).addEventListener('click', (event) => this.removeProductFromBundle(event));
         if (button.hasAttribute(attributes.bundleOptions) && filledEl.querySelector(selectors.placeholderOptions)) {
           filledEl.querySelector(selectors.placeholderOptions).textContent = button.getAttribute(attributes.bundleOptions);
         }
+
+        if (this.selectedProducts.length > 1) {
+          this.placeholders[this.selectedProducts.length - 2].classList.add(classes.lineActive);
+        }
+
+        requestAnimationFrame(() => {
+          placeholder.classList.add(classes.animateIn);
+          placeholder.classList.add(classes.dotActive);
+        });
+
+        setTimeout(() => {
+          placeholder.classList.remove(classes.animateIn);
+          placeholder.classList.add(classes.filled);
+        }, 300);
 
         const focusableElements = placeholder.querySelectorAll(selectors.focusable);
         if (focusableElements.length) {
@@ -168,13 +205,51 @@ if (!customElements.get('bundle-collection')) {
         this.updateUI();
       }
 
-      removeProductFromBundle(slot) {
-        const index = parseInt(slot);
-        if (index < 0 || index >= this.selectedProducts.length) return;
+      removeProductFromBundle(event) {
+        this.classList.remove(classes.lineAnimateStop);
+
+        const placeholder = event.currentTarget.closest(selectors.placeholder);
+        placeholder.classList.add(classes.animateOut);
+        const placeholdersArr = Array.from(this.placeholders);
+        const index = placeholdersArr.indexOf(placeholder);
         const targetFocusButton = this.querySelector(`[${attributes.productId}="${this.selectedProducts[index].productId}"]`);
-        this.selectedProducts[index] = null;
-        const placeholder = this.placeholders[index];
-        placeholder.classList.remove(classes.filled);
+        this.selectedProducts.splice(index, 1);
+
+        let lastFilledPlaceholder = null;
+        if (this.selectedProducts.length) {
+          lastFilledPlaceholder = this.placeholders[this.selectedProducts.length];
+          this.placeholders[this.selectedProducts.length - 1].classList.remove(classes.lineActive);
+          this.placeholders[this.selectedProducts.length].classList.remove(classes.dotActive);
+        } else {
+          this.placeholders[0].classList.remove(classes.dotActive);
+        }
+
+        setTimeout(() => {
+          placeholder.classList.remove(classes.animateOut);
+          placeholder.classList.remove(classes.filled);
+
+          if (lastFilledPlaceholder) {
+            lastFilledPlaceholder.after(placeholder);
+
+            this.placeholders = this.querySelectorAll(selectors.placeholder);
+
+            let lastFilledPlaceholderNew = null;
+            this.placeholders.forEach((element) => {
+              if (element.classList.contains(classes.filled)) {
+                lastFilledPlaceholderNew = element;
+                element.classList.add(classes.lineActive);
+                element.classList.add(classes.dotActive);
+              } else {
+                element.classList.remove(classes.lineActive);
+                element.classList.remove(classes.dotActive);
+              }
+            });
+
+            lastFilledPlaceholderNew.classList.remove(classes.lineActive);
+
+            this.classList.add(classes.lineAnimateStop);
+          }
+        }, 300);
 
         const focusableElements = placeholder.querySelectorAll(selectors.focusable);
         if (focusableElements.length) {
