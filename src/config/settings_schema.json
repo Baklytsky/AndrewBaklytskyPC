@@ -1479,6 +1479,10 @@
         "default": false
       },
       {
+        "type": "header",
+        "content": "Product card"
+      },
+      {
         "type": "checkbox",
         "id": "show_cart_vendor",
         "label": "Show vendor",
@@ -1492,7 +1496,7 @@
       },
       {
         "type": "header",
-        "content": "Promotion 1"
+        "content": "Primary promotion"
       },
       {
         "type": "text",
@@ -1573,17 +1577,18 @@
       },
       {
         "type": "header",
-        "content": "Promotion 2"
+        "content": "Secondary promotion"
       },
       {
         "type": "checkbox",
         "id": "free_shipping_promotion_2",
-        "label": "Enable promotion 2",
+        "label": "Enable promotion",
         "default": false
       },
       {
         "type": "text",
         "id": "free_gift_limit",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true }}",
         "label": "Minimum spend for free gift",
         "default": "100",
         "info": "Use round numbers. Exclude currency, symbols, and letters. [More info](https://help.shopify.com/en/manual/shipping/setting-up-and-managing-your-shipping/free-shipping-rates#free-shipping-over-a-certain-value)"
@@ -1591,23 +1596,22 @@
       {
         "type": "textarea",
         "id": "free_shipping_promotion_text_2",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true }}",
         "label": "Text",
         "info": "Use ||amount|| to display progress towards free shipping.",
         "default": "You've unlocked FREE SHIPPING. Spend ||amount|| more to get a FREE GIFT."
       },
       {
-        "type": "header",
-        "content": "Icon"
-      },
-      {
         "type": "checkbox",
         "id": "free_shipping_icon_2",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true }}",
         "label": "Enable icon",
         "default": false
       },
       {
         "type": "select",
         "id": "free_shipping_icon_name_2",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true and settings.free_shipping_icon_2 == true }}",
         "label": "Icon",
         "default": "icon-award",
         "options": [
@@ -1653,11 +1657,13 @@
       {
         "type": "image_picker",
         "id": "free_shipping_icon_image_2",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true and settings.free_shipping_icon_2 == true }}",
         "label": "Alternative icon/image"
       },
       {
         "type": "range",
         "id": "free_shipping_icon_size_2",
+        "visible_if": "{{ settings.free_shipping_promotion_2 == true and settings.free_shipping_icon_2 == true }}",
         "label": "Size",
         "unit": "px",
         "min": 20,

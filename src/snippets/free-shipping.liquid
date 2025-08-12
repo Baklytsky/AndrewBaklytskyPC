@@ -3,7 +3,6 @@
 
   Accepts:
   - block: {Object} Block object (required)
-  - gradient: {String} Progress bar gradient color
   - show_wheel: {Boolean} Show progress wheel
   - show_progress_bar: {Boolean} Show progress bar
   - is_cart_drawer: {Boolean} Is cart drawer
@@ -33,20 +32,6 @@
     assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
     assign percent = 100 | minus: percent
     assign percent_promo_center = limit_promo_center | times: 100 | divided_by: limit
-
-    if gradient != blank
-      assign style = '--FREE-SHIPPING-GRADIENT: ' | append: gradient | append: ';'
-    endif
-
-    if color_scheme != blank
-      assign selected_color_scheme = color_scheme | strip
-      assign selected_color_scheme_settings = settings.color_schemes[selected_color_scheme].settings
-      capture style
-        echo '--FREE-SHIPPING-GRADIENT: ' | append: selected_color_scheme_settings.bg | append: '; '
-        echo '--FREE-SHIPPING-BACKGROUND: ' | append: selected_color_scheme_settings.bg_light | append: '; '
-        echo '--FREE-SHIPPING-TEXT: ' | append: selected_color_scheme_settings.text | append: '; '
-      endcapture
-    endif
 
     if settings.currency_code_enable
       assign limit_currency_promo_center = limit_currency_promo_center | minus: cart.total_price | money_with_currency
@@ -105,9 +90,6 @@
     data-free-shipping-limit="{{ limit }}"
     {% if promo_2 %}
       data-promo-center-limit="{{ limit_promo_center }}"
-    {% endif %}
-    {% if style != blank %}
-      style="{{ style }}"
     {% endif %}
   >
     {%- if show_wheel -%}
