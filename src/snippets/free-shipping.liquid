@@ -26,12 +26,12 @@
     assign free_shipping_limit = settings.free_shipping_limit
     assign limit_promo_center = promo_center_limit | plus: 0
     assign limit = free_shipping_limit | plus: 0
-    assign limit_currency_promo_center = limit_promo_center | times: 100
+    assign limit_currency_promo_center = limit_promo_center | times: 100.0
     assign limit_currency = limit | times: 100
     assign subtotal_without_currency = cart.total_price | plus: 0 | divided_by: 100
-    assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
+    assign percent = limit | minus: subtotal_without_currency | times: 100.0 | divided_by: limit
     assign percent = 100 | minus: percent
-    assign percent_promo_center = limit_promo_center | times: 100 | divided_by: limit
+    assign percent_promo_center = limit_promo_center | times: 100.0 | divided_by: limit
 
     if settings.currency_code_enable
       assign limit_currency_promo_center = limit_currency_promo_center | minus: cart.total_price | money_with_currency
@@ -116,22 +116,19 @@
     {%- endif -%}
 
     {%- if show_progress_bar -%}
-      {%- assign icon_1 = '' -%}
       {%- if settings.free_shipping_icon_1 -%}
-        {%- capture icon_1 -%}
-          {%- liquid
-            assign icon_size = settings.free_shipping_icon_size_1
-            assign icon_image = settings.free_shipping_icon_image_1
-            capture icon_style
-              echo 'style="'
-              echo '--icon-size: ' | append: icon_size | append: 'px;'
-              echo '"'
-            endcapture
-          -%}
+        {%- liquid
+          assign icon_1 = ''
+          assign icon_size = settings.free_shipping_icon_size_1
+          assign icon_image = settings.free_shipping_icon_image_1
+          capture icon_style
+            echo '--icon-size: ' | append: icon_size | append: 'px;'
+          endcapture
+        -%}
 
+        {%- capture icon_1 -%}
           <div
             class="icon__animated icon__animated--{{ section.id }}-{{ block.id }}{% if icon_image != blank %} icon__animated--image{% endif %}"
-            {{ icon_style }}
           >
             {%- liquid
               if icon_image
@@ -149,13 +146,43 @@
         {%- endcapture -%}
       {%- endif -%}
 
+      {%- if settings.free_shipping_icon_2 -%}
+        {%- liquid
+          assign icon_2 = ''
+          assign icon_size_2 = settings.free_shipping_icon_size_2
+          assign icon_image_2 = settings.free_shipping_icon_image_2
+          capture icon_style_2
+            echo '--icon-size: ' | append: icon_size_2 | append: 'px;'
+          endcapture
+        -%}
+
+        {%- capture icon_2 -%}
+          <div
+            class="icon__animated icon__animated--{{ section.id }}-{{ block.id }}{% if icon_image_2 != blank %} icon__animated--image{% endif %}"
+          >
+            {%- liquid
+              if icon_image_2
+                assign icon_width_2 = icon_size_2
+                assign icon_width_retina_2 = icon_width_2 | times: 2
+                assign icon_sizes_2 = icon_width_2 | append: 'px'
+                assign icon_widths_2 = icon_width_2 | append: ', ' | append: icon_width_retina_2
+
+                render 'image', image: icon_image_2, width: icon_width_retina_2, sizes: icon_sizes_2, widths: icon_widths_2
+              else
+                render 'animated-icon', filename: settings.free_shipping_icon_name_2
+              endif
+            -%}
+          </div>
+        {%- endcapture -%}
+      {%- endif -%}
+
       <div class="free-shipping__progress-holder{% if promo_2 %} free-shipping__progress-holder--multiple{% endif %}">
         <div class="free-shipping__box free-shipping__box--left">&nbsp;</div>
 
         {%- if promo_2 -%}
           <div
             class="free-shipping__box free-shipping__box--center"
-            style="--promo-center-position: {{ percent_promo_center }}%;"
+            style="--promo-center-position: {{ percent_promo_center }}%;{% if icon_style != '' %} {{ icon_style }}{% endif %}"
             data-promo-center
           >
             {%- if icon_1 != '' -%}
@@ -164,37 +191,14 @@
           </div>
         {%- endif -%}
 
-        <div class="free-shipping__box free-shipping__box--right">
+        <div
+          class="free-shipping__box free-shipping__box--right"
+          {% if icon_style_2 != '' %}
+            style="{{ icon_style_2 }}"
+          {% endif %}
+        >
           {%- if promo_2 -%}
-            {%- if settings.free_shipping_icon_2 -%}
-              {%- liquid
-                assign icon_size_2 = settings.free_shipping_icon_size_2
-                assign icon_image_2 = settings.free_shipping_icon_image_2
-                capture icon_style_2
-                  echo 'style="'
-                  echo '--icon-size: ' | append: icon_size_2 | append: 'px;'
-                  echo '"'
-                endcapture
-              -%}
-
-              <div
-                class="icon__animated icon__animated--{{ section.id }}-{{ block.id }}{% if icon_image_2 != blank %} icon__animated--image{% endif %}"
-                {{ icon_style_2 }}
-              >
-                {%- liquid
-                  if icon_image_2
-                    assign icon_width_2 = icon_size_2
-                    assign icon_width_retina_2 = icon_width_2 | times: 2
-                    assign icon_sizes_2 = icon_width_2 | append: 'px'
-                    assign icon_widths_2 = icon_width_2 | append: ', ' | append: icon_width_retina_2
-
-                    render 'image', image: icon_image_2, width: icon_width_retina_2, sizes: icon_sizes_2, widths: icon_widths_2
-                  else
-                    render 'animated-icon', filename: settings.free_shipping_icon_name_2
-                  endif
-                -%}
-              </div>
-            {%- endif -%}
+            {{ icon_2 }}
           {%- elsif icon_1 != '' -%}
             {{ icon_1 }}
           {%- endif -%}
