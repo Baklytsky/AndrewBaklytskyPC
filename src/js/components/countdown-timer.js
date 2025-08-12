@@ -1,28 +1,3 @@
-const selectors = {
-  time: 'time',
-  days: '[data-days]',
-  hours: '[data-hours]',
-  minutes: '[data-minutes]',
-  seconds: '[data-seconds]',
-  shopifySection: '.shopify-section',
-  countdownBlock: '[data-countdown-block]',
-};
-
-const attributes = {
-  expirationBehavior: 'data-expiration-behavior',
-  clone: 'data-clone',
-};
-
-const classes = {
-  showMessage: 'show-message',
-  hideCountdown: 'hidden',
-};
-
-const settings = {
-  hideSection: 'hide-section',
-  showMessage: 'show-message',
-};
-
 if (!customElements.get('countdown-timer')) {
   customElements.define(
     'countdown-timer',
@@ -30,15 +5,15 @@ if (!customElements.get('countdown-timer')) {
       constructor() {
         super();
 
-        this.section = this.closest(selectors.shopifySection);
-        this.countdownParent = this.closest(selectors.countdownBlock) || this.section;
-        this.expirationBehavior = this.getAttribute(attributes.expirationBehavior);
+        this.section = this.closest('.shopify-section');
+        this.countdownParent = this.closest('[data-countdown-block]') || this.section;
+        this.expirationBehavior = this.getAttribute('data-expiration-behavior');
 
-        this.time = this.querySelector(selectors.time);
-        this.days = this.querySelector(selectors.days);
-        this.hours = this.querySelector(selectors.hours);
-        this.minutes = this.querySelector(selectors.minutes);
-        this.seconds = this.querySelector(selectors.seconds);
+        this.time = this.querySelector('time');
+        this.days = this.querySelector('[data-days]');
+        this.hours = this.querySelector('[data-hours]');
+        this.minutes = this.querySelector('[data-minutes]');
+        this.seconds = this.querySelector('[data-seconds]');
 
         // Get the current and expiration dates in Unix timestamp format (milliseconds)
         this.endDate = Date.parse(this.time.dateTime);
@@ -47,8 +22,8 @@ if (!customElements.get('countdown-timer')) {
         this.minutesInMs = this.hoursInMs / 60;
         this.secondsInMs = this.minutesInMs / 60;
 
-        this.shouldHideOnComplete = this.expirationBehavior === settings.hideSection;
-        this.shouldShowMessage = this.expirationBehavior === settings.showMessage;
+        this.shouldHideOnComplete = this.expirationBehavior === 'hide-section';
+        this.shouldShowMessage = this.expirationBehavior === 'show-message';
 
         this.update = this.update.bind(this);
       }
@@ -119,7 +94,7 @@ if (!customElements.get('countdown-timer')) {
         });
 
         if (this.shouldHideOnComplete) {
-          this.countdownParent?.classList.add(classes.hideCountdown);
+          this.countdownParent?.classList.add('hidden');
           this.countdownParent?.dispatchEvent(
             new CustomEvent('theme:countdown:hide', {
               detail: {
@@ -131,7 +106,7 @@ if (!customElements.get('countdown-timer')) {
         }
 
         if (this.shouldShowMessage) {
-          this.classList?.add(classes.showMessage);
+          this.classList?.add('show-message');
 
           this.countdownParent?.dispatchEvent(
             new CustomEvent('theme:countdown:expire', {

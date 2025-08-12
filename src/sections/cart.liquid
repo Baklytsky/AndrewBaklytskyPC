@@ -1,7 +1,6 @@
 <!-- /templates/cart.liquid -->
 {%- liquid
   assign animation_name = 'cart-items-fade'
-  assign animation_duration = 500
   assign animation_delay = 100
   assign animation_delay_initial = 100
   assign animation_delay_increment = 50
@@ -24,8 +23,8 @@
 
 {%- capture free_shipping -%}
   {%- assign block = free_shipping_block[0] -%}
-  {%- if settings.free_shipping_limit != blank and block.settings.message != blank -%}
-    {%- render 'free-shipping' block: block, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text -%}
+  {%- if settings.free_shipping_limit != blank -%}
+    {%- render 'free-shipping' block: block, show_wheel: false, show_progress_bar: true -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -46,7 +45,6 @@
       <h1
         class="cart__title"
         data-animation="{{ animation_name }}"
-        data-animation-duration="{{ animation_duration }}"
         data-animation-delay="{{ animation_cart_empty_delay }}"
         {%- assign animation_cart_empty_delay = animation_cart_empty_delay | plus: animation_delay_increment -%}
       >
@@ -55,7 +53,6 @@
 
       <p
         data-animation="{{ animation_name }}"
-        data-animation-duration="{{ animation_duration }}"
         data-animation-delay="{{ animation_cart_empty_delay }}"
         {%- assign animation_cart_empty_delay = animation_cart_empty_delay | plus: animation_delay_increment -%}
       >
@@ -68,7 +65,6 @@
             <div
               class="cart__empty__item"
               data-animation="{{ animation_name }}"
-              data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_cart_empty_delay }}"
               {%- assign animation_cart_empty_delay = animation_cart_empty_delay | plus: animation_delay_increment -%}
             >
@@ -82,7 +78,6 @@
         <div
           class="cart__empty__item"
           data-animation="{{ animation_name }}"
-          data-animation-duration="{{ animation_duration }}"
           data-animation-delay="{{ animation_cart_empty_delay }}"
           {%- assign animation_cart_empty_delay = animation_cart_empty_delay | plus: animation_delay_increment -%}
         >
@@ -96,7 +91,6 @@
         <div
           class="cart__empty__product"
           data-animation="{{ animation_name }}"
-          data-animation-duration="{{ animation_duration }}"
           data-animation-delay="{{ animation_cart_empty_delay }}"
         >
           {%- liquid
@@ -120,7 +114,6 @@
           data-limit="3"
           data-target="api-upsell-product"
           data-animation="{{ animation_name }}"
-          data-animation-duration="{{ animation_duration }}"
           data-animation-delay="{{ animation_cart_empty_delay }}"
         ></recently-viewed>
       {%- endif -%}
@@ -134,7 +127,6 @@
           <h1
             class="cart__title"
             data-animation="{{ animation_name }}"
-            data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
           >
@@ -148,7 +140,6 @@
           <div
             class="cart__button-continue"
             data-animation="{{ animation_name }}"
-            data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
           >
@@ -178,7 +169,6 @@
             class="cart__items"
             data-items-holder
             data-animation="{{ animation_name }}"
-            data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
           >
             <collapsible-elements>
@@ -194,7 +184,6 @@
             <div
               class="cart-block"
               data-animation="{{ animation_name }}"
-              data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_delay }}"
               {{ free_shipping_block[0].shopify_attributes }}
             >
@@ -207,7 +196,6 @@
             class="cart__price__holder"
             data-cart-price-holder
             data-animation="{{ animation_name }}"
-            data-animation-duration="{{ animation_duration }}"
             data-animation-delay="{{ animation_delay }}"
           >
             {%- render 'cart-price' -%}
@@ -224,7 +212,6 @@
               <div
                 class="cart-block"
                 data-animation="{{ animation_name }}"
-                data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ animation_delay }}"
                 {{ block.shopify_attributes }}
               >
@@ -274,7 +261,7 @@
                       <button
                         type="submit"
                         name="update"
-                        class="btn btn--full btn--outline btn--primary cart__checkout no-js"
+                        class="btn btn--full btn--outline btn--primary cart__checkout"
                       >
                         {{- 'cart.general.update' | t -}}
                       </button>
@@ -450,13 +437,6 @@
       "limit": 1,
       "settings": [
         {
-          "type": "textarea",
-          "id": "message",
-          "label": "Text",
-          "info": "Use ||amount|| to display progress towards free shipping.",
-          "default": "You are ||amount|| away from FREE SHIPPING."
-        },
-        {
           "type": "header",
           "content": "Typography"
         },
@@ -553,7 +533,8 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Alternative icon/image"
+          "label": "Alternative icon/image",
+          "info": "160 x 160px .svg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
         },
         {
           "type": "range",

@@ -1,4 +1,3 @@
-/*=============== Sections Helpers ===============*/
 @use '../globals' as *;
 
 .rte--homepage {
@@ -36,7 +35,7 @@
   overflow: hidden;
 }
 
-/*=============== Overlays ===============*/
+.index-newsletter { position: relative; }
 
 .image-overlay {
   position: absolute;
@@ -49,7 +48,6 @@
   opacity: var(--overlay-opacity);
 }
 
-/*=============== Alignment ===============*/
 [class*="align--"] {
   --alignment-align-items: flex-start;
   --alignment-justify-content: flex-start;
@@ -286,7 +284,7 @@ a ~ .hero__content__wrapper {
 }
 
 @include media-query($large-up) {
-  //Limits content wrapper width for hero sections
+  // Limits content wrapper width for hero sections
   .hero__aside__wrapper.frame__item,
   .index-hero .hero__content { max-width: var(--hero-content-width, 50%); }
 
@@ -334,17 +332,6 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 body:has([data-header-transparent]):not(:has([data-prevent-transparent-header])) .section-overlay-header:first-of-type .hero__content__wrapper { padding-top: var(--header-height); }
 body:has([data-header-transparent]):not(:has([data-prevent-transparent-header])) .section-overlay-header:first-of-type .index-image-text .brick__block--text { padding: var(--header-height) 0; }
 
-// Fallback for browsers that don't support :has() selector
-body.has-header-transparent.has-first-section-overlay-header .header__backfill { display: none; }
-
-body.has-header-transparent.has-first-section-overlay-header.template-product .header__backfill {
-  @include media-query($small) {
-    display: block;
-  }
-}
-body.has-header-transparent .section-overlay-header:first-of-type .hero__content__wrapper { padding-top: var(--header-height); }
-body.has-header-transparent .section-overlay-header:first-of-type .index-image-text .brick__block--text { padding: var(--header-height) 0; }
-
 .hero__slide { width: 100%; }
 
 .hero__content {
@@ -373,6 +360,31 @@ body.has-header-transparent .section-overlay-header:first-of-type .index-image-t
 
 .hero__content--padding-default > .hero__button,
 .hero__content > .hero__button:only-child { margin-top: 0; }
+
+.hero__content:has(.is-initialized) {
+  @include media-query($medium-up) {
+    .hero__slide {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+
+      &.swiper-slide-active { opacity: 1; }
+    }
+
+    .swiper-pagination-bullets {
+      top: auto;
+      bottom: 0;
+      padding: 0 var(--outer);
+
+      .text-left & {
+        justify-content: flex-start;
+        padding: 0;
+      }
+    }
+
+    &:has([data-dots="line"]) .swiper,
+    &:has([data-dots="circle"]) .swiper { padding-bottom: 20px; }
+  }
+}
 
 .hero__content.grid--mobile-slider {
   @include media-query ($small) {
@@ -679,21 +691,6 @@ p a {
 
 .index-newsletter .hero__content__wrapper { z-index: 11; }
 
-.no-js {
-  .loading,
-  .popout__toggle { display: none; }
-
-  .grid__heading-image img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
-}
-
 //=============== Use this for hero section that have height settings ===============//
 .frame {
   display: grid;
@@ -708,11 +705,6 @@ p a {
   &:has(.image__hero__missing-metafield-image) {
     display: flex;
     align-items: center;
-  }
-
-  .no-js & {
-    grid-row-start: unset;
-    grid-column-start: unset;
   }
 }
 
@@ -755,54 +747,73 @@ p a {
   object-fit: cover;
 }
 
-.index-hero--scrolling {
-  .hero__content__wrapper {
-    display: grid;
-    grid-template-rows: max-content;
-    text-align: center;
+// Deferred Media
+
+.deferred-media {
+  display: block;
+  position: relative;
+
+  img,
+  video,
+  iframe,
+  model-viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
-  .hero__content {
-    margin-left: auto;
-    margin-right: auto;
+  img { object-fit: contain; }
+  video { object-fit: cover; }
+}
+
+.deferred-media:not([loaded]) template { z-index: -1; }
+.deferred-media[loaded] > .deferred-media__poster { display: none; }
+
+.deferred-media__poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+
+  // reset button styles
+  padding: 0;
+  letter-spacing: normal;
+  line-height: initial;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  transition: none;
+
+  &:hover {
+    .no-touch & { opacity: initial; }
   }
+}
 
-  .hero__button,
-  .hero__button-group { justify-content: center; }
+.deferred-media__poster-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -30px 0 0 -30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--text-a5);
+  z-index: 1;
+  cursor: pointer;
 
-  .announcement__bar-outer {
-    min-width: 0;
-    padding: calc(var(--outer) / 2) 0;
-  }
+  .icon-media-video-outline,
+  .icon-media-model-outline { stroke: none; }
+}
 
-  .content-align--middle-center.scrolling-align--middle-center { align-content: center; }
-
-  .content-align--bottom-center.scrolling-align--bottom-center { align-content: flex-end; }
-
-  .content-align--top-center.scrolling-align--bottom-center,
-  .content-align--bottom-center.scrolling-align--top-center { align-content: space-between; }
-
-  .content-align--bottom-center.scrolling-align--middle-center,
-  .content-align--middle-center.scrolling-align--bottom-center,
-  .content-align--top-center.scrolling-align--middle-center,
-  .content-align--middle-center.scrolling-align--top-center { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); }
-
-  .content-align--top-center.scrolling-align--bottom-center .hero__content,
-  .content-align--top-center.scrolling-align--middle-center .hero__content { grid-row-start: 1; }
-
-  .content-align--bottom-center.scrolling-align--middle-center .announcement__bar-outer,
-  .content-align--middle-center.scrolling-align--bottom-center .hero__content,
-  .content-align--middle-center.scrolling-align--top-center .hero__content,
-  .content-align--top-center.scrolling-align--middle-center .announcement__bar-outer { align-self: center; }
-
-  .content-align--bottom-center.scrolling-align--middle-center .announcement__bar-outer,
-  .content-align--middle-center.scrolling-align--bottom-center .hero__content { grid-row-start: 2; }
-
-  .content-align--middle-center.scrolling-align--bottom-center .announcement__bar-outer,
-  .content-align--bottom-center.scrolling-align--middle-center .hero__content {
-    align-self: flex-end;
-    grid-row-start: 3;
-  }
-
-  .content-align--middle-center.scrolling-align--middle-center .announcement__bar-outer + .hero__content--transparent { padding-top: 0; }
+.deferred-media__poster-button .icon {
+  width: 100%;
+  height: 100%;
 }

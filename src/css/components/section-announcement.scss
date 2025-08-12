@@ -6,9 +6,17 @@ announcement-bar {
   display: block;
 }
 
+ticker-bar {
+  display: block;
+
+  @include media-query($medium-up) {
+    width: 100%;
+  }
+}
+
 .announcement__wrapper {
   --icon-offset: 0.2;
-  --icon-size: max(var(--text-size) * 0.8, 18px);
+  --icon-size: max(var(--text-size) * 0.8, 22px);
   --btn-size: var(--icon-size);
 
   position: relative;
@@ -241,8 +249,9 @@ announcement-bar {
   width: max-content;
 }
 
-.announcement__bar-holder--slider> div {
-  justify-content: var(--justify-content, center);
+.announcement__bar-holder--slider {
+  > div { justify-content: var(--justify-content, center); }
+  .is-initialized .announcement__scale.ticker--unloaded { position: static; }
 }
 
 .announcement__image {
@@ -252,12 +261,6 @@ announcement-bar {
   &.svg-placeholder {
     background-color: transparent;
   }
-}
-
-html:not(.js) .announcement__scale.ticker--unloaded {
-  opacity: 1;
-  position: static;
-  width: auto;
 }
 
 .ticker--animated {
@@ -270,13 +273,34 @@ html:not(.js) .announcement__scale.ticker--unloaded {
   align-items: center;
   width: max-content;
 
-  &:hover {
-    animation-play-state: paused;
+  & > div { transition: transform 0.5s ease-out; }
+
+  &:hover { animation-play-state: paused; }
+}
+
+.announcement__bar-outer:not(:hover) {
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
+}
+
+.announcement__bar-outer:hover {
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated > div,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated > div,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated > div {
+    transform: translateX(calc(-20px / var(--animation-speed, 1)));
+    transition: transform 0.5s ease-out;
   }
 }
 
+html.supports-touch {
+  .swiper-slide-visible ticker-bar:not([paused]) .ticker--animated,
+  ticker-bar[autoplay]:not([paused]) .ticker--animated,
+  ticker-bar[data-slide]:not([paused]) .ticker--animated { animation-play-state: running; }
+}
+
 // Don't animate hidden content
-.announcement__slide:not(:only-child):not(.is-selected) .ticker--animated {
+.announcement__slide:not(:only-child):not(.swiper-slide-visible) .ticker--animated {
   animation-play-state: paused;
 }
 
@@ -284,34 +308,78 @@ html:not(.js) .announcement__scale.ticker--unloaded {
   position: relative;
 }
 
-swiper-container.announcement__slider {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow: auto;
+.announcement__slider {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    width: calc(var(--arrow-space) + 20px);
+    pointer-events: none;
+    transition: transform 0.2s ease-in-out;
+  }
 
-  @include hide-scrollbar;
+  &::before {
+    left: var(--arrow-space-offset);
+    background: linear-gradient(90deg, var(--COLOR-BG) 80%, var(--COLOR-BG-TRANSPARENT, rgb(4 2 2 / 0%)) 100%);
+  }
+
+  &::after {
+    right: var(--arrow-space-offset);
+    background: linear-gradient(-90deg, var(--COLOR-BG) 80%, var(--COLOR-BG-TRANSPARENT, rgb(255 255 255 / 0%)) 100%);
+  }
+
+  swiper-container {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: auto;
+    width: 100%;
+
+    @include hide-scrollbar;
+  }
 
   swiper-slide {
     width: 100%;
     flex-shrink: 0;
   }
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    --icon-size: inherit;
+    --btn-size: inherit;
+
+    display: flex;
+    opacity: 1;
+    transform: none;
+    margin-top: calc(var(--btn-size) * -0.5);
+    box-shadow: none;
+    z-index: 3;
+
+    &::before { background: var(--text); }
+    &::after { content: none; }
+
+    svg { display: none; }
+  }
+
+  .swiper-button-prev { left: var(--arrow-space-offset); }
+  .swiper-button-next { right: var(--arrow-space-offset); }
+
+  ticker-bar { width: 100%; }
 }
 
 .announcement__bar-holder--arrows .announcement__slider:not(.single-slide) {
   --arrow-space: var(--icon-size);
   --arrow-space-offset: calc(var(--arrow-space) * -1);
 
+  overflow: initial;
   margin-left: calc(var(--outer) + var(--icon-size));
   margin-right: calc(var(--outer) + var(--icon-size));
 
   .announcement__slide.announcement__bar {
     padding: 0 20px;
   }
-}
-
-.no-js .announcement__bar-holder--slider .announcement__bar {
-  top: 0;
-  transform: none;
 }
 
 .announcement__bar-outer {
@@ -329,22 +397,6 @@ swiper-container.announcement__slider {
   @include media-query($medium-up) {
     padding-top: 0;
     padding-bottom: 0;
-  }
-}
-
-.announcement__bar-outer:not(:hover) {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
-  ticker-bar[autoplay]:not([paused]) .ticker--animated,
-  ticker-bar[data-slide]:not([paused]) .ticker--animated {
-    animation-play-state: running;
-  }
-}
-
-html.supports-touch {
-  .is-selected ticker-bar:not([paused]) .ticker--animated,
-  ticker-bar[autoplay]:not([paused]) .ticker--animated,
-  ticker-bar[data-slide]:not([paused]) .ticker--animated {
-    animation-play-state: running;
   }
 }
 

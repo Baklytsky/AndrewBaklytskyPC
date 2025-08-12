@@ -21,7 +21,6 @@
   assign animation_delay = animation_delay | default: 0
   assign aos_delay_default = animation_delay | times: 100
   assign aos_delay = aos_delay | default: aos_delay_default
-  assign aos_duration = 800
   assign layout_desktop = section.settings.layout_desktop
   assign layout_mobile = section.settings.layout_mobile
   assign modifier_class = modifier_class | default: ''
@@ -254,7 +253,6 @@
       <span class="badge-box{% if badge_new != '' %} badge-box--new{% elsif badge_soldout != '' %} badge-box--sold{% endif %}"
         data-aos="fade"
         data-aos-delay="{{ aos_delay }}"
-        data-aos-duration="{{ aos_duration }}"
         data-aos-anchor="{{ aos_anchor }}">
         {%- if badge_soldout != '' -%}
           {{ badge_soldout }}
@@ -270,7 +268,6 @@
       <span class="badge-box badge-box--preorder"
         data-aos="fade"
         data-aos-delay="{{ aos_delay }}"
-        data-aos-duration="{{ aos_duration }}"
         data-aos-anchor="{{ aos_anchor }}">{{ 'products.product.pre_order' | t }}</span>
     {%- endcapture -%}
   {%- elsif on_sale and sold_out == false -%}
@@ -278,7 +275,6 @@
       <span class="badge-box badge-box--sale"
         data-aos="fade"
         data-aos-delay="{{ aos_delay }}"
-        data-aos-duration="{{ aos_duration }}"
         data-aos-anchor="{{ aos_anchor }}">
         {%- if settings.show_saving_badge -%}
           {%- liquid
@@ -518,9 +514,7 @@
 {%- capture image_animations -%}
   data-aos="img-in"
   data-aos-delay="{{ aos_delay }}"
-  data-aos-duration="{{ aos_duration }}"
   data-aos-anchor="{{ aos_anchor }}"
-  data-aos-easing="ease-out-quart"
 {%- endcapture -%}
 
 {%- unless hidden_product -%}

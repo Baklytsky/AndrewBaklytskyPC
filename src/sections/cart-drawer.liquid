@@ -1,6 +1,5 @@
 {%- liquid
   assign animation_name = 'cart-items-fade'
-  assign animation_duration = 500
   assign animation_delay_initial = 200
   assign animation_delay_increment = 50
   assign block_index_pinned = 1
@@ -33,6 +32,12 @@
   endfor
 -%}
 
+{{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
+
+{%- if template.name != 'cart' -%}
+  <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <script src="{{ 'quantity-counter.js' | asset_url }}" defer="defer"></script>
 
 {%- capture cart_title -%}
@@ -54,7 +59,6 @@
     <div class="cart__errors drawer__errors"
       data-cart-errors
       data-animation="{{ animation_name }}"
-      data-animation-duration="{{ animation_duration }}"
       data-animation-delay="{{ animation_delay }}">
       <div class="cart__errors__inner">
         <h5 class="cart__errors__heading">{{ 'cart.general.limit_message' | t }}</h5>
@@ -148,7 +152,6 @@
             <div
               class="cart-block cart-block--top drawer__head"
               data-animation="{{ animation_name }}"
-              data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_delay }}"
             >
               {{ cart_title }}
@@ -179,7 +182,6 @@
             {%- capture block_content -%}
               <div class="{{ cart_block_class }}"
                 data-animation="{{ animation_name }}"
-                data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ animation_delay }}"
                 {{ block.shopify_attributes }}
               >
@@ -197,7 +199,7 @@
                     {%- render 'cart-block-upsell', block: block -%}
 
                   {%- when 'cart-promotions' -%}
-                    {%- render 'free-shipping' block: block, show_wheel: false, show_progress_bar: true, align_text: block.settings.align_text , is_cart_drawer: true -%}
+                    {%- render 'free-shipping' block: block, show_wheel: false, show_progress_bar: true, is_cart_drawer: true -%}
 
                   {%- when 'order-note' -%}
                     {%- render 'cart-block-order-note', block: block -%}
@@ -260,7 +262,6 @@
             <div
               class="cart-block"
               data-animation="{{ animation_name }}"
-              data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_delay }}"
             >
               {{ cart_items }}
@@ -281,7 +282,6 @@
             {%- unless has_checkout_buttons -%}
               <div
                 data-animation="{{ animation_name }}"
-                data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ block_index_pinned | times: animation_delay_increment | plus: animation_delay_initial }}"
               >
                 {{ checkout_buttons }}
@@ -300,7 +300,6 @@
             <p
               class="drawer__empty__message"
               data-animation="{{ animation_name }}"
-              data-animation-duration="{{ animation_duration }}"
               data-animation-delay="{{ animation_delay_initial }}"
             >
               {{- 'cart.general.empty' | t -}}
@@ -324,7 +323,6 @@
                   <div
                     class="drawer__empty__item{% if is_odd_last %} drawer__empty__item--odd--last{% endif %}"
                     data-animation="{{ animation_name }}"
-                    data-animation-duration="{{ animation_duration }}"
                     data-animation-delay="{{ animation_delay }}"
                     {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
                   >
@@ -340,7 +338,6 @@
               <div
                 class="drawer__empty__product"
                 data-animation="{{ animation_name }}"
-                data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ animation_delay }}"
               >
                 {%- liquid
@@ -363,7 +360,6 @@
                 data-limit="3"
                 data-target="api-upsell-product"
                 data-animation="{{ animation_name }}"
-                data-animation-duration="{{ animation_duration }}"
                 data-animation-delay="{{ animation_delay }}"
               ></recently-viewed>
             {%- endif -%}
@@ -478,13 +474,6 @@
       "name": "Cart promotions",
       "limit": 1,
       "settings": [
-        {
-          "type": "textarea",
-          "id": "message",
-          "label": "Message",
-          "info": "Use ||amount|| to display progress towards free shipping.",
-          "default": "You are ||amount|| away from free shipping."
-        },
         {
           "type": "header",
           "content": "Typography"
@@ -612,7 +601,8 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Alternative icon/image"
+          "label": "Alternative icon/image",
+          "info": "160 x 160px .svg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
         },
         {
           "type": "range",
@@ -777,10 +767,7 @@
           "type": "title"
         },
         {
-          "type": "cart-promotions",
-          "settings": {
-            "message": "You are ||amount|| away from free shipping."
-          }
+          "type": "cart-promotions"
         },
         {
           "type": "order-note",

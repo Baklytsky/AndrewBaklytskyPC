@@ -163,12 +163,17 @@
       {%- endcapture -%}
 
       {%- capture size_chart_link -%}
+        {{ 'tabs.css' | asset_url | stylesheet_tag }}
+
         <popup-component>
-          $@$@
+          {% comment %}
+            $@$@size-button-options$@$@ will be replaced by size_button_options markup
+          {% endcomment %}
+          $@$@size-button-options$@$@
 
           <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
             <form method="dialog">
-              <button class="visually-hidden no-js" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+              <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
             </form>
 
             <div class="product-modal__outer">
@@ -597,7 +602,7 @@
               {%- endif -%}
 
               {%- if is_size_option -%}
-                {{- size_chart_link | replace: '$@$@', size_button_options -}}
+                {{- size_chart_link | replace: '$@$@size-button-options$@$@', size_button_options -}}
               {%- endif -%}
 
               {%- if settings.show_labels -%}
@@ -639,19 +644,6 @@
           </div>
         </div>
       {%- endif -%}
-
-      <noscript>
-        <select form="{{ product_form_id }}" name="id" class="product__form__select product__form__select--hidden no-js" aria-label="{{ product.options_with_values | map: 'name' | uniq | join: ', ' }}">
-          {%- for variant in product.variants -%}
-            <option
-              {% if variant == current_variant %}selected="selected"{% endif %}
-              {% unless variant.available %}disabled="disabled"{% endunless %}
-              value="{{ variant.id }}">
-                {{ variant.title }}
-            </option>
-          {%- endfor -%}
-        </select>
-      </noscript>
     {%- endunless -%}
   {%- endcapture -%}
 
@@ -678,7 +670,6 @@
     {{ block.shopify_attributes }}
     {% if animation_name %}
       data-animation="{{ animation_name }}"
-      data-animation-duration="{{ animation_duration }}"
       data-animation-delay="{{ animation_delay }}"
     {% endif %}
   >

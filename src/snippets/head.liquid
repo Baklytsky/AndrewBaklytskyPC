@@ -799,6 +799,30 @@
     position: relative;
     min-width: 320px;
   }
+
+  {% if settings.dots_style == 'circle' %}
+    swiper-container::part(bullet),
+    swiper-container::part(bullet-active),
+    .swiper-pagination-bullet {
+      --swiper-pagination-bullet-width: 10px;
+      --swiper-pagination-bullet-height: 10px;
+      --swiper-pagination-bullet-radius: 50%;
+      --swiper-pagination-bullet-inactive-opacity: 1;
+    }
+  {% elsif settings.dots_style == 'line' %}
+    swiper-container::part(bullet),
+    swiper-container::part(bullet-active),
+    .swiper-pagination-bullet {
+      --swiper-pagination-bullet-width: 40px;
+      --swiper-pagination-bullet-height: 2px;
+      --swiper-pagination-bullet-radius: initial;
+      --swiper-pagination-bullet-inactive-opacity: 0.25;
+    }
+  {% else %}
+    swiper-container::part(pagination),
+    .swiper-pagination,
+    .swiper-pagination-bullet { display: none; }
+  {% endif %}
 {% endstyle %}
 
 {%- unless settings.type_base_font.system? -%}
@@ -834,8 +858,6 @@
 {%- endif -%}
 
 <script>
-    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-
     document.documentElement.style.setProperty('--full-height', `${window.innerHeight}px`);
     document.documentElement.style.setProperty('--three-quarters', `${window.innerHeight * 0.75}px`);
     document.documentElement.style.setProperty('--two-thirds', `${window.innerHeight * 0.66}px`);
