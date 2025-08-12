@@ -32,6 +32,10 @@
     assign percent = limit | minus: subtotal_without_currency | times: 100.0 | divided_by: limit
     assign percent = 100 | minus: percent
     assign percent_promo_center = limit_promo_center | times: 100.0 | divided_by: limit
+    assign promo_fraction = 0
+    if limit > 0
+      assign promo_fraction = limit_promo_center | times: 1.0 | divided_by: limit
+    endif
 
     if settings.currency_code_enable
       assign limit_currency_promo_center = limit_currency_promo_center | minus: cart.total_price | money_with_currency
@@ -176,13 +180,33 @@
         {%- endcapture -%}
       {%- endif -%}
 
-      <div class="free-shipping__progress-holder{% if promo_2 %} free-shipping__progress-holder--multiple{% endif %}">
+      {% liquid
+        assign right_size = 30
+        if promo_2
+          if icon_size_2 != blank
+            assign right_size = icon_size_2
+          endif
+        else
+          if icon_size != blank
+            assign right_size = icon_size
+          endif
+        endif
+        assign track_left_px = 8
+        assign track_right_px = right_size | times: 1.0 | divided_by: 2.0
+      %}
+
+      <div
+        class="free-shipping__progress-holder{% if promo_2 %} free-shipping__progress-holder--multiple{% endif %}"
+        style="--track-left: {{ track_left_px }}px; --track-right: {{ track_right_px }}px; --promo-center-fraction: {{ promo_fraction }};"
+      >
         <div class="free-shipping__box free-shipping__box--left">&nbsp;</div>
 
         {%- if promo_2 -%}
           <div
             class="free-shipping__box free-shipping__box--center"
-            style="--promo-center-position: {{ percent_promo_center }}%;{% if icon_style != '' %} {{ icon_style }}{% endif %}"
+            {% if icon_style != '' %}
+              style="{{ icon_style }}"
+            {% endif %}
             data-promo-center
           >
             {%- if icon_1 != '' -%}

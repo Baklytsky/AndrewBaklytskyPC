@@ -71,13 +71,16 @@
 
 /* WEBKIT BROWSERS - CHROME, OPERA AND SAFARI */
 .free-shipping__progress-bar {
-  appearance: none;
-  appearance: none;
+  position: absolute;
+  top: 50%;
+  left: var(--track-left, 15px);
+  right: var(--track-right, 29px);
+  transform: translateY(-50%);
+  z-index: 1;
   appearance: none;
   display: block;
-  width: calc(100% - 44px);
+  width: auto;
   height: 6px;
-  margin: 0 29px 0 15px;
   background: var(--bg-accent);
   overflow: hidden;
 }
@@ -93,10 +96,13 @@
   transform-origin: center left;
 }
 
-.free-shipping__progress-bar::-webkit-progress-bar { @include progress-bar; }
-.free-shipping__progress-bar::-webkit-progress-value { @include progress-value; }
+.free-shipping__progress-bar::-webkit-progress-bar {
+  @include progress-bar;
+}
 
 .free-shipping__progress-bar::-webkit-progress-value {
+  @include progress-value;
+
   border-radius: 0 var(--btn-radius) var(--btn-radius) 0;
   transform: scaleX(0);
 }
@@ -111,17 +117,17 @@
   width: 100%;
   padding: 12px 0;
   margin-top: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .free-shipping__box {
   --icons: var(--progress-value-bg);
 
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   z-index: 2;
-  width: 30px;
-  height: 30px;
+  width: var(--icon-size, 30px);
+  height: var(--icon-size, 30px);
   border-radius: 50%;
   background: var(--progress-bg);
   transition: background 1s;
@@ -136,19 +142,21 @@
 }
 
 .free-shipping__box--left {
-  top: 7px;
   width: 16px;
   height: 16px;
 }
 
 .free-shipping__box--center {
-  left: var(--promo-center-position, 50%);
+  --track-left-offset: var(--track-left, 15px);
+  --track-width-fraction: calc(var(--promo-center-fraction, 0) * (100% - var(--track-left, 15px) - var(--track-right, 29px)));
+  --center-marker-half-width: calc(var(--icon-size, 30px) / 2);
+
+  margin-left: calc(var(--track-left-offset) + var(--track-width-fraction) - var(--center-marker-half-width));
   border-radius: 50%;
 }
 
 .free-shipping__box--right {
-  left: auto;
-  right: 0;
+  margin-left: auto;
 }
 
 .free-shipping__box .icon__animated {
@@ -160,9 +168,11 @@
 
 /* MOZILLA FIREFOX */
 @-moz-document url-prefix() {
-  .free-shipping__progress-bar::-moz-progress-bar { @include progress-value; }
+  .free-shipping__progress-bar::-moz-progress-bar {
+    @include progress-value;
 
-  .free-shipping__progress-bar::-moz-progress-bar { transform: scaleX(0); }
+    transform: scaleX(0);
+  }
   .is-animated .free-shipping__progress-bar::-moz-progress-bar { transform: scaleX(1); }
 }
 
