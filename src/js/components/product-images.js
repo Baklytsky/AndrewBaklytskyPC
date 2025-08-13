@@ -12,7 +12,6 @@ if (!customElements.get('product-images')) {
         this.startY = 0;
         this.scrollLeft = 0;
         this.onButtonArrowClick = (e) => this.buttonArrowClickEvent(e);
-        this.container = this.closest('[data-section-type]');
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
@@ -26,6 +25,8 @@ if (!customElements.get('product-images')) {
       }
 
       connectedCallback() {
+        this.container = this.closest('[data-section-type]');
+
         if (Object.keys(this.productMediaItems).length <= 1) return;
 
         this.productMediaObserver();
