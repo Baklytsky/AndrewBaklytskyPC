@@ -139,7 +139,6 @@ class CartItems extends HTMLElement {
     this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
     this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
     this.updateProgress();
-    this.freeShippingMessageHandle(this.subtotal);
 
     this.build = this.build.bind(this);
     this.updateCart = this.updateCart.bind(this);
@@ -1021,7 +1020,6 @@ class CartItems extends HTMLElement {
     this.toggleErrorMessage();
     this.enableCartButtons();
     this.updateProgress();
-    this.freeShippingMessageHandle(this.subtotal);
     this.animateItems();
 
     document.dispatchEvent(
@@ -1052,36 +1050,6 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Show/hide free shipping message
-   *
-   * @param   {Number}  total
-   *
-   * @return  {Void}
-   */
-
-  freeShippingMessageHandle(total) {
-    if (!this.freeShipping.length) return;
-
-    this.freeShipping.forEach((message) => {
-      const hasReachedLimit = this.freeShippingLimit > 0 && total >= this.freeShippingLimit;
-      const hasReachedCenterLimit = this.promoCenterLimit > 0 && total >= this.promoCenterLimit;
-
-      // Clear all state classes first
-      message.classList.remove(classes.success, classes.active);
-
-      // Apply appropriate state class
-      if (hasReachedLimit) {
-        // Final goal reached - show success
-        message.classList.add(classes.success);
-      } else if (this.promoCenterLimit > 0 && hasReachedCenterLimit && !hasReachedLimit) {
-        // Center goal reached but not final goal - show active (dual promo)
-        message.classList.add(classes.active);
-      }
-      // If neither condition is met, no class is added (shows default state)
-    });
-  }
-
-  /**
    * Update progress when update cart
    *
    * @return  {Void}
@@ -1099,6 +1067,8 @@ class CartItems extends HTMLElement {
     const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
     const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
     const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
+    const hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
+    const hasReachedCenterLimit = this.promoCenterLimit > 0 && this.subtotal >= this.promoCenterLimit;
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
@@ -1124,10 +1094,19 @@ class CartItems extends HTMLElement {
       if (progressGraph) {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
-    });
 
-    // Update state classes after progress updates
-    this.freeShippingMessageHandle(this.subtotal);
+      // Clear all state classes first
+      item.classList.remove(classes.success, classes.active);
+
+      // Apply appropriate state class
+      if (hasReachedLimit) {
+        // Final goal reached - show success
+        item.classList.add(classes.success);
+      } else if (this.promoCenterLimit > 0 && hasReachedCenterLimit && !hasReachedLimit) {
+        // Center goal reached but not final goal - show active (dual promo)
+        item.classList.add(classes.active);
+      }
+    });
   }
 
   /**
