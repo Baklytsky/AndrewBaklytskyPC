@@ -70,6 +70,7 @@ if (!customElements.get('bundle-collection')) {
         this.selectedProducts = [];
         this.bundleCartItems = null;
         this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
+        this.bundleProducts = JSON.parse(localStorage.getItem('bundleProducts')) || [];
       }
 
       connectedCallback() {
@@ -125,7 +126,34 @@ if (!customElements.get('bundle-collection')) {
           });
         }
 
+        if (this.bundleProducts.length) {
+          this.loadLocalStorage();
+        }
+
         this.updateUI();
+      }
+
+      loadLocalStorage() {
+        this.bundleProducts.forEach((bundleProduct, index) => {
+          const placeholder = this.placeholders[index];
+          const content = bundleProduct.html;
+          const button = this.querySelector(`[${attributes.productId}="${bundleProduct.productId}"]`);
+
+          this.setProductToPlaceholder(placeholder, content, button);
+        });
+
+        this.placeholders[this.bundleProducts.length - 1].classList.remove(classes.lineActive);
+        this.selectedProducts = this.bundleProducts;
+      }
+
+      setProductToPlaceholder(placeholder, content, button) {
+        const filledEl = placeholder.querySelector(selectors.placeholderFilled);
+        filledEl.innerHTML = content;
+        placeholder.classList.add(classes.filled);
+        placeholder.classList.add(classes.dotActive);
+        placeholder.classList.add(classes.lineActive);
+
+        filledEl.querySelector(selectors.removeButton).addEventListener('click', (event) => this.removeProductFromBundle(event));
       }
 
       updateUI() {
@@ -176,12 +204,14 @@ if (!customElements.get('bundle-collection')) {
 
         if (this.selectedProducts.length >= this.maxSelection) return;
 
-        this.selectedProducts.push(productData);
-
         const productItem = button.closest(selectors.productGridItem);
         const template = productItem.querySelector(selectors.template);
         const content = template.innerHTML;
         const placeholder = this.querySelector(`${selectors.placeholder}:not(.${classes.filled})`);
+        productData.html = content;
+        this.selectedProducts.push(productData);
+
+        localStorage.setItem('bundleProducts', JSON.stringify(this.selectedProducts));
 
         if (!placeholder) return;
 
@@ -233,6 +263,7 @@ if (!customElements.get('bundle-collection')) {
         const index = placeholdersArr.indexOf(placeholder);
         const targetFocusButton = this.querySelector(`[${attributes.productId}="${this.selectedProducts[index].productId}"]`);
         this.selectedProducts.splice(index, 1);
+        localStorage.setItem('bundleProducts', JSON.stringify(this.selectedProducts));
 
         let lastFilledPlaceholder = null;
         if (this.selectedProducts.length) {
