@@ -106,53 +106,66 @@
   {%- capture swatches -%}
     {%- for label in swatch_labels -%}
       {%- assign sanitized_label = label | lstrip | rstrip -%}
+      {%- assign option = product.options_by_name[sanitized_label] -%}
 
-      {%- capture swatch_values -%}
-        {%- for value in product.options_by_name[sanitized_label].values -%}
-          {%- if value.swatch -%}
-            {%- assign has_colors = value -%}
-          {%- endif -%}
-
-          {%- liquid
-            if value.swatch.image
-              assign image_url = value.swatch.image | image_url: width: 48
-              assign swatch_value = 'url(' | append: image_url | append: ')'
-            elsif value.swatch.color
-              assign swatch_value = value.swatch.color
-            else
+      {%- if option and option.values.size > 0 -%}
+        {%- assign has_colors = true -%}
+        {%- capture swatch_values -%}
+          {%- for value in option.values -%}
+            {%- liquid
               assign swatch_value = nil
-            endif
-          -%}
-          {{- value -}}: {{- swatch_value -}}
-          {%- unless forloop.last -%}, {%- endunless -%}
-        {%- endfor -%}
-      {%- endcapture -%}
+              if value.swatch
+                if value.swatch.image
+                  assign image_url = value.swatch.image | image_url: width: 48
+                  assign swatch_value = 'url(' | append: image_url | append: ')'
+                elsif value.swatch.color
+                  assign swatch_value = value.swatch.color
+                endif
+              endif
+              if swatch_value == nil
+                assign swatch_value = value | handle
+              endif
+            -%}
+            {{- value -}}: {{- swatch_value -}}
+            {%- unless forloop.last -%}, {%- endunless -%}
+          {%- endfor -%}
+        {%- endcapture -%}
 
-      {%- if has_colors -%}
-        <form class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-grid-swatch-form data-fieldset>
-          <native-scrollbar>
-            <grid-swatch
-              class="selector-wrapper__scrollbar"
-              data-scrollbar
-              data-swatch-handle="{{ product.handle }}"
-              data-swatch-label="{{ label }}"
-              data-swatch-values="{{ swatch_values | strip_html | escape }}">
-            </grid-swatch>
+        {%- if swatch_values != blank -%}
+          <form class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-grid-swatch-form data-fieldset>
+            <native-scrollbar>
+              <grid-swatch
+                class="selector-wrapper__scrollbar"
+                data-scrollbar
+                data-swatch-handle="{{ product.handle }}"
+                data-swatch-label="{{ label }}"
+                data-swatch-values="{{ swatch_values | strip_html | escape }}"
+              >
+              </grid-swatch>
 
-            {%- if settings.collection_swatch_style == 'text-slider' or settings.collection_swatch_style == 'slider' -%}
-              <div class="selector-wrapper__actions">
-                <button type="button" class="radio__fieldset__arrow radio__fieldset__arrow--prev is-hidden" data-scrollbar-arrow-prev>
-                  {%- render 'icon-nav-arrow-left' -%}
-                  <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
-                </button>
-                <button type="button" class="radio__fieldset__arrow radio__fieldset__arrow--next is-hidden" data-scrollbar-arrow-next>
-                  {% render 'icon-nav-arrow-right' %}
-                  <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
-                </button>
-              </div>
-            {%- endif -%}
-          </native-scrollbar>
-        </form>
+              {%- if settings.collection_swatch_style == 'text-slider' or settings.collection_swatch_style == 'slider' -%}
+                <div class="selector-wrapper__actions">
+                  <button
+                    type="button"
+                    class="radio__fieldset__arrow radio__fieldset__arrow--prev is-hidden"
+                    data-scrollbar-arrow-prev
+                  >
+                    {%- render 'icon-nav-arrow-left' -%}
+                    <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="radio__fieldset__arrow radio__fieldset__arrow--next is-hidden"
+                    data-scrollbar-arrow-next
+                  >
+                    {% render 'icon-nav-arrow-right' %}
+                    <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                  </button>
+                </div>
+              {%- endif -%}
+            </native-scrollbar>
+          </form>
+        {%- endif -%}
 
         {%- break -%}
       {%- endif -%}
