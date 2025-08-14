@@ -115,13 +115,14 @@
     endif
 
     # Set success message
+    assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message' | t
+    if show_dual_promotion
+      assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message_promos' | t
+    endif
+
     assign qualified_shipping_message = ''
     if subtotal_without_currency >= active_limit
-      if show_dual_promotion
-        assign qualified_shipping_message = 'cart.general.qualified_shipping_message_promos' | t
-      else
-        assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
-      endif
+      assign qualified_shipping_message = qualified_shipping_message_text
     endif
 
     # CSS classes
@@ -140,13 +141,13 @@
         echo ' ' | append: align_text
       endif
 
-      if subtotal_without_currency >= active_limit and qualified_shipping_message != blank
-        echo ' is-success'
-      endif
+      # if subtotal_without_currency >= active_limit and qualified_shipping_message != blank
+      #   echo ' is-success'
+      # endif
 
-      if show_dual_promotion and subtotal_without_currency >= center_limit and subtotal_without_currency < active_limit
-        echo ' is-active'
-      endif
+      # if show_dual_promotion and subtotal_without_currency >= center_limit and subtotal_without_currency < active_limit
+      #   echo ' is-active'
+      # endif
     endcapture
   -%}
 
@@ -167,9 +168,7 @@
       </div>
     {%- endif -%}
 
-    {%- if qualified_shipping_message != blank -%}
-      <span class="free-shipping__success-message">{{ qualified_shipping_message }}</span>
-    {%- endif -%}
+    <span class="free-shipping__success-message">{{ qualified_shipping_message_text }}</span>
 
     <span class="free-shipping__default-message">
       {{ display_message }}

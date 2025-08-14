@@ -133,11 +133,13 @@ class CartItems extends HTMLElement {
 
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
-    this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
-    this.promoCenterLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.promoCenterLimit)) * 100 * window.Shopify.currency.rate : 0;
-
-    this.freeShippingMessageHandle(this.subtotal);
+    const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
+    const limitAttr = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) : 0;
+    const centerLimitAttr = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.promoCenterLimit)) : 0;
+    this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
+    this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
     this.updateProgress();
+    this.freeShippingMessageHandle(this.subtotal);
 
     this.build = this.build.bind(this);
     this.updateCart = this.updateCart.bind(this);
@@ -1014,12 +1016,12 @@ class CartItems extends HTMLElement {
       });
     }
 
-    this.freeShippingMessageHandle(this.subtotal);
     this.cartRemoveEvents();
     this.cartUpdateEvents();
     this.toggleErrorMessage();
     this.enableCartButtons();
     this.updateProgress();
+    this.freeShippingMessageHandle(this.subtotal);
     this.animateItems();
 
     document.dispatchEvent(
@@ -1061,8 +1063,21 @@ class CartItems extends HTMLElement {
     if (!this.freeShipping.length) return;
 
     this.freeShipping.forEach((message) => {
-      const hasQualifiedShippingMessage = message.hasAttribute(attributes.freeShipping) && message.getAttribute(attributes.freeShipping) === 'true' && total >= 0;
-      message.classList.toggle(classes.success, hasQualifiedShippingMessage && total >= this.freeShippingLimit);
+      const hasReachedLimit = this.freeShippingLimit > 0 && total >= this.freeShippingLimit;
+      const hasReachedCenterLimit = this.promoCenterLimit > 0 && total >= this.promoCenterLimit;
+
+      // Clear all state classes first
+      message.classList.remove(classes.success, classes.active);
+
+      // Apply appropriate state class
+      if (hasReachedLimit) {
+        // Final goal reached - show success
+        message.classList.add(classes.success);
+      } else if (this.promoCenterLimit > 0 && hasReachedCenterLimit && !hasReachedLimit) {
+        // Center goal reached but not final goal - show active (dual promo)
+        message.classList.add(classes.active);
+      }
+      // If neither condition is met, no class is added (shows default state)
     });
   }
 
@@ -1077,11 +1092,13 @@ class CartItems extends HTMLElement {
 
     if (!this.freeShipping.length) return;
 
-    const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
-    const percent = Math.min(percentValue * 100, 100);
+    const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;
+    const percent = Math.max(0, Math.min(percentValue * 100, 100));
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
-    const leftToSpendPromoMoney = window.theme.formatMoney(this.promoCenterLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpendCents = Math.max(0, this.freeShippingLimit - this.subtotal);
+    const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
+    const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
+    const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
@@ -1089,6 +1106,7 @@ class CartItems extends HTMLElement {
       const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
       const leftToSpendPromo = item.querySelector(selectors.leftToSpendPromo);
 
+      // Update "left to spend" messages
       if (leftToSpendMessage) {
         leftToSpendMessage.innerHTML = leftToSpend.replace('.00', '');
       }
@@ -1097,11 +1115,7 @@ class CartItems extends HTMLElement {
         leftToSpendPromo.innerHTML = leftToSpendPromoMoney.replace('.00', '');
       }
 
-      if (this.promoCenterLimit > 0) {
-        item.classList.toggle(classes.active, this.subtotal > this.promoCenterLimit);
-      }
-
-      // Set progress bar value
+      // Set progress bar value and add animation class
       if (progressBar) {
         progressBar.value = percent;
       }
@@ -1111,6 +1125,9 @@ class CartItems extends HTMLElement {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
     });
+
+    // Update state classes after progress updates
+    this.freeShippingMessageHandle(this.subtotal);
   }
 
   /**

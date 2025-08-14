@@ -24,16 +24,37 @@
 }
 
 .free-shipping__success-message,
-.free-shipping__default-message { flex: 1; }
+.free-shipping__default-message {
+  flex: 1;
+}
 
 .free-shipping__promo-message,
-.free-shipping__success-message { display: none; }
+.free-shipping__success-message {
+  display: none;
+}
 
-.is-active:not(.is-success) .free-shipping__promo-message,
-.is-success .free-shipping__success-message { display: inline; }
+// When the first promo is active, show the message for the next promo
+.is-active:not(.is-success) {
+  .free-shipping__default-message {
+    display: none;
+  }
 
-.is-active .free-shipping__default-message,
-.is-success .free-shipping__success-message ~ .free-shipping__default-message { display: none; }
+  .free-shipping__promo-message {
+    display: inline;
+  }
+}
+
+// When the final promo is reached, show the success message
+.is-success {
+  .free-shipping__default-message,
+  .free-shipping__promo-message {
+    display: none;
+  }
+
+  .free-shipping__success-message {
+    display: inline;
+  }
+}
 
 .free-shipping__graph {
   --stroke-dashoffset: 87.96459430051421;
@@ -130,7 +151,7 @@
 .is-active .free-shipping__box--center,
 .is-success .free-shipping__box--right,
 .free-shipping__box--left {
-  --icons: var(--progress-value-bg);
+  --icons: var(--progress-bg);
 
   background: var(--progress-value-bg);
 }
