@@ -9,6 +9,9 @@
   assign max_selection = collection.metafields.carbon.max_selection | default: 3
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign product_limit = section.settings.products_per_page
+  assign bundle_product = true
+  assign modifier_class = 'product-item--bundle'
+  assign bundle_animation_timing = 1000
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 3
@@ -19,11 +22,10 @@
     assign columns_medium = 2
   endif
 
-  assign placeholder_columns = 2
-  assign placeholder_columns_check = max_selection | modulo: 3
-  if placeholder_columns_check == 0
-    assign placeholder_columns = 3
-  endif
+  unless section.blocks.size > 0
+    assign bundle_product = false
+    assign modifier_class = ''
+  endunless
 -%}
 
 {%- style -%}
@@ -36,9 +38,8 @@
     --COLUMNS-SMALL: {{ columns_small }};
     --COLUMNS-MOBILE: {{ columns_mobile }};
 
-    {%- comment -%}--placeholder-columns: {{ placeholder_columns }};{%- endcomment -%}
-
-    --bg-light: {{ section.settings.color_scheme.settings.bg_light }}
+    --bg-light: {{ section.settings.color_scheme.settings.bg_light }};
+    --animation-timing: {{ bundle_animation_timing }};
 
     {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
       --border-hairline: {{ border_color }};
@@ -53,7 +54,9 @@
   <bundle-collection
     class="bundle {{ color_scheme }} section-padding"
     id="Collection--{{ section.id }}"
+    data-bundle="{{ bundle_product }}"
     data-bundle-max-selection="{{ max_selection }}"
+    data-bundle-animation-timing="{{ bundle_animation_timing }}"
     data-bundle-name="{{ collection.title }}"
     data-bundle-handle="{{ collection.title | handle }}"
     {% if collection.image %}
@@ -64,10 +67,10 @@
       <div class="bundle__container">
         <div class="bundle__content">
           <div class="bundle__text">
-            <h1 class="bundle__title heading-large">{{ collection.title }}</h1>
+            <h1 class="bundle__title hero__title heading-large">{{ collection.title }}</h1>
 
             {%- if collection.description -%}
-              <div class="bundle__description">
+              <div class="bundle__description hero__rte">
                 {{ collection.description }}
               </div>
             {%- endif -%}
@@ -80,15 +83,13 @@
                 animation_delay: animation_delay,
                 index: forloop.index,
                 sizes: image_sizes,
-                bundle_product: true,
-                modifier_class: 'product-item--bundle'
+                bundle_product: bundle_product,
+                modifier_class: modifier_class
               -%}
             {% endfor %}
           </div>
 
-          {%- comment -%}
-            {%- render 'pagination', paginate: paginate -%}
-          {%- endcomment -%}
+          {%- render 'pagination', paginate: paginate -%}
         </div>
 
         {%- if section.blocks.size > 0 -%}
@@ -135,47 +136,45 @@
                     {%- endif -%}
 
                   {%- when 'bundle_products' -%}
-                    {%- assign placeholder_product = '' -%}
-                    {% for i in (1..max_selection) %}
-                      {%- capture placeholder_product -%}
-                        {{ placeholder_product }}
-
-                        <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
-                          {% comment %}
-                          {% endcomment %}
-                          <div class="bundle-placeholder__line">&nbsp;</div>
-
-                          <span class="bundle-placeholder__dot">&nbsp;</span>
-
-                          <div class="bundle-placeholder__inner">
-                            <div class="bundle-placeholder__empty">
-                              <div class="bundle-placeholder__text">Select a product</div>
-                            </div>
-                            <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
-                          </div>
-                        </div>
-                      {%- endcapture -%}
-                    {% endfor %}
-
                     <div class="bundle__placeholders">
-                      {%- comment -%}
-                        <div class="bundle__placeholders__line">
-
-                        </div>
-                      {%- endcomment -%}
-
                       <div class="bundle__placeholders__products">
-                        {{ placeholder_product }}
+                        {% for i in (1..max_selection) %}
+                          <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
+                            <div class="bundle-placeholder__line">&nbsp;</div>
+
+                            <span class="bundle-placeholder__dot">
+                              {%- render 'icon-case' -%}
+                            </span>
+
+                            <div class="bundle-placeholder__inner">
+                              <div class="bundle-placeholder__empty">
+                                {%- render 'icon-cart-placeholder' -%}
+
+                                <div class="bundle-placeholder__text">
+                                  <strong>{{ 'collections.bundle.select_product' | t }}</strong>
+
+                                  {%- assign unlock_text = 'collections.bundle.unlock' | t -%}
+                                  {%- if unlock_text != blank -%}
+                                    <p>{{ unlock_text }}</p>
+                                  {%- endif -%}
+                                </div>
+                              </div>
+                              <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
+                            </div>
+                          </div>
+                        {% endfor %}
                       </div>
                     </div>
                   {%- when 'bundle_price' -%}
                     <div class="bundle__price">
-                      <p class="bundle__price__row">
-                        <span>Subtotal</span> <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                      <p class="bundle__price__row bundle__price__row--subtotal">
+                        <span>{{ 'collections.bundle.subtotal' | t }}</span>
+                        <span data-bundle-total>{{ 'general.money.free' | t }}</span>
                       </p>
 
                       <p class="bundle__price__row">
-                        <span>Total savings</span> <span data-bundle-total-savings>{{ 'general.money.free' | t }}</span>
+                        <span>{{ 'collections.bundle.total_savings' | t }}</span>
+                        <span data-bundle-total-savings>{{ 'general.money.free' | t }}</span>
                       </p>
                     </div>
                   {%- when 'bundle_button' -%}
@@ -186,10 +185,14 @@
                       disabled="disabled"
                     >
                       <span class="btn__text">
-                        <span class="bundle__button-add">Add Bundle to Cart</span>
+                        <span class="bundle__button-add">{{ 'collections.bundle.button_text' | t }}</span>
 
                         <span class="bundle__button-default">
-                          Select <small data-bundle-count-left>{{ max_selection }}</small> more products
+                          {%- assign button_text_select = '<small data-bundle-count-left>'
+                            | append: max_selection
+                            | append: '</small>'
+                          -%}
+                          {{ 'collections.bundle.button_text_select_html' | t: number: button_text_select }}
                         </span>
                       </span>
                       <span class="btn__added">&nbsp;</span>
@@ -214,9 +217,11 @@
           class="btn btn--full btn--large btn--solid btn--primary"
           data-bundle-scroll-to
         >
-          Review bundle (<span data-bundle-selected-count>0</span>/
-          {{- max_selection -}}
-          )
+          {%- assign sticky_button_text = '(<span data-bundle-selected-count>0</span>/'
+            | append: max_selection
+            | append: ')'
+          -%}
+          {{ 'collections.bundle.sticky_button_text_html' | t: number: sticky_button_text }}
         </button>
       </div>
     </div>

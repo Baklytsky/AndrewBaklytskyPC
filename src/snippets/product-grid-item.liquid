@@ -334,16 +334,18 @@
               <p class="product-inline__text product-inline__text--vendor">{{ product.vendor }}</p>
 
               <p class="product-inline__title">
-                {{ product.title }}
+                <strong>{{ product.title }}</strong>
               </p>
 
               {%- unless product.has_only_default_variant -%}
-                <small data-placeholder-options></small>
+                <p class="product-inline__text product-inline__text--options" data-placeholder-options></p>
               {%- endunless -%}
 
               <div class="product-inline__price">
                 <span class="price">
                   <span class="new-price" data-placeholder-price></span>
+
+                  <span class="old-price" data-placeholder-price-compare></span>
                 </span>
               </div>
             </a>
@@ -366,7 +368,7 @@
           data-bundle-product-button="{{ product.id }}"
           data-bundle-variant-id="{{ product.selected_or_first_available_variant.id }}"
           data-bundle-price="{{ product.selected_or_first_available_variant.price }}"
-          data-bundle-price-compare="{{ product.selected_or_first_available_variant.compare_at_price }}"
+          data-bundle-price-compare="{{ product.selected_or_first_available_variant.compare_at_price | default: 0 }}"
           data-bundle-options="{{ product.selected_or_first_available_variant.title }}"
           {% if product.has_only_default_variant == false and product.variants.size > 1 %}
             data-quick-add-btn

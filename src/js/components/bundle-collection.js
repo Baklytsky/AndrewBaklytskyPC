@@ -13,13 +13,16 @@ const selectors = {
   placeholder: '[data-bundle-placeholder]',
   placeholderFilled: '[data-bundle-placeholder-filled]',
   placeholderPrice: '[data-placeholder-price]',
+  placeholderPriceCompare: '[data-placeholder-price-compare]',
   placeholderOptions: '[data-placeholder-options]',
   bundleCartItem: '[data-bundle-cart-item]',
   focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
 };
 
 const attributes = {
+  bundle: 'data-bundle',
   maxSelection: 'data-bundle-max-selection',
+  animationTiming: 'data-bundle-animation-timing',
   productId: 'data-bundle-product-button',
   quickAdd: 'data-quick-add-btn',
   bundleName: 'data-bundle-name',
@@ -42,7 +45,8 @@ const classes = {
   dotActive: 'is-dot-active',
   animateIn: 'is-animate-in',
   animateOut: 'is-animate-out',
-  lineAnimateStop: 'is-line-animate-stop',
+  adding: 'is-adding',
+  removing: 'is-removing',
 };
 
 if (!customElements.get('bundle-collection')) {
@@ -52,8 +56,10 @@ if (!customElements.get('bundle-collection')) {
       constructor() {
         super();
 
+        this.bundle = this.getAttribute(attributes.bundle) === 'true';
         this.buttons = this.querySelectorAll(selectors.button);
         this.maxSelection = parseInt(this.getAttribute(attributes.maxSelection));
+        this.animationTiming = parseInt(this.getAttribute(attributes.animationTiming));
         this.selectedCount = this.querySelector(selectors.selectedCount);
         this.countLeft = this.querySelector(selectors.countLeft);
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
@@ -67,6 +73,8 @@ if (!customElements.get('bundle-collection')) {
       }
 
       connectedCallback() {
+        if (!this.bundle) return;
+
         if (this.buttons.length) {
           this.buttons.forEach((button) => {
             button.addEventListener('click', () => {
@@ -134,8 +142,9 @@ if (!customElements.get('bundle-collection')) {
           {price: 0, priceCompare: 0}
         );
 
+        const totalSavings = total.priceCompare - total.price < 0 ? 0 : total.priceCompare - total.price;
         this.bundleTotal.innerHTML = this.formatRate(total.price);
-        this.bundleTotalSavings.innerHTML = this.formatRate(total.priceCompare - total.price);
+        this.bundleTotalSavings.innerHTML = this.formatRate(totalSavings);
         this.addButton.disabled = filledCount !== this.maxSelection;
         if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
           this.addButton.focus();
@@ -146,7 +155,9 @@ if (!customElements.get('bundle-collection')) {
       }
 
       addProductToBundle(button) {
-        this.classList.remove(classes.lineAnimateStop);
+        if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing)) return;
+
+        this.classList.add(classes.adding);
 
         const productData = {
           id: button.getAttribute(attributes.bundleVariantId),
@@ -158,6 +169,7 @@ if (!customElements.get('bundle-collection')) {
           priceCompare: button.getAttribute(attributes.bundlePriceCompare),
           productId: button.getAttribute(attributes.productId),
         };
+
         if (this.hasAttribute(attributes.bundleImage)) {
           productData.properties._bundle_image = `${this.getAttribute(attributes.bundleImage)}`;
         }
@@ -175,6 +187,10 @@ if (!customElements.get('bundle-collection')) {
 
         const filledEl = placeholder.querySelector(selectors.placeholderFilled);
         filledEl.innerHTML = content;
+
+        if (button.hasAttribute(attributes.bundlePriceCompare) && parseFloat(button.getAttribute(attributes.bundlePriceCompare)) > 0) {
+          filledEl.querySelector(selectors.placeholderPriceCompare).innerHTML = this.formatRate(button.getAttribute(attributes.bundlePriceCompare));
+        }
         filledEl.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(button.getAttribute(attributes.bundlePrice));
         filledEl.querySelector(selectors.removeButton).addEventListener('click', (event) => this.removeProductFromBundle(event));
         if (button.hasAttribute(attributes.bundleOptions) && filledEl.querySelector(selectors.placeholderOptions)) {
@@ -193,7 +209,8 @@ if (!customElements.get('bundle-collection')) {
         setTimeout(() => {
           placeholder.classList.remove(classes.animateIn);
           placeholder.classList.add(classes.filled);
-        }, 300);
+          this.classList.remove(classes.adding);
+        }, this.animationTiming);
 
         const focusableElements = placeholder.querySelectorAll(selectors.focusable);
         if (focusableElements.length) {
@@ -206,7 +223,9 @@ if (!customElements.get('bundle-collection')) {
       }
 
       removeProductFromBundle(event) {
-        this.classList.remove(classes.lineAnimateStop);
+        if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing)) return;
+
+        this.classList.add(classes.removing);
 
         const placeholder = event.currentTarget.closest(selectors.placeholder);
         placeholder.classList.add(classes.animateOut);
@@ -224,9 +243,10 @@ if (!customElements.get('bundle-collection')) {
           this.placeholders[0].classList.remove(classes.dotActive);
         }
 
+        placeholder.classList.remove(classes.filled);
+
         setTimeout(() => {
           placeholder.classList.remove(classes.animateOut);
-          placeholder.classList.remove(classes.filled);
 
           if (lastFilledPlaceholder) {
             lastFilledPlaceholder.after(placeholder);
@@ -246,10 +266,10 @@ if (!customElements.get('bundle-collection')) {
             });
 
             lastFilledPlaceholderNew.classList.remove(classes.lineActive);
-
-            this.classList.add(classes.lineAnimateStop);
           }
-        }, 300);
+
+          this.classList.remove(classes.removing);
+        }, this.animationTiming);
 
         const focusableElements = placeholder.querySelectorAll(selectors.focusable);
         if (focusableElements.length) {
