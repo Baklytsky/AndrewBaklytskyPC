@@ -1,12 +1,3 @@
-const classes = {
-  focus: 'is-focused',
-};
-
-const selectors = {
-  inPageLink: '[data-skip-content]',
-  linkesWithOnlyHash: 'a[href="#"]',
-};
-
 class Accessibility {
   constructor() {
     this.init();
@@ -16,10 +7,8 @@ class Accessibility {
     this.a11y = window.theme.a11y;
 
     // DOM Elements
-    this.html = document.documentElement;
-    this.body = document.body;
-    this.inPageLink = document.querySelector(selectors.inPageLink);
-    this.linkesWithOnlyHash = document.querySelectorAll(selectors.linkesWithOnlyHash);
+    this.inPageLink = document.querySelector('[data-skip-content]');
+    this.linkesWithOnlyHash = document.querySelectorAll('a[href="#"]');
 
     // A11Y init methods
     this.a11y.focusHash();
@@ -60,7 +49,7 @@ class Accessibility {
 
   focusEvents() {
     document.addEventListener('mousedown', () => {
-      this.body.classList.remove(classes.focus);
+      document.body.classList.remove('is-focused');
     });
 
     document.addEventListener('keyup', (event) => {
@@ -68,7 +57,7 @@ class Accessibility {
         return;
       }
 
-      this.body.classList.add(classes.focus);
+      document.body.classList.add('is-focused');
     });
   }
 }

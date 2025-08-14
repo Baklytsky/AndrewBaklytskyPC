@@ -29,7 +29,6 @@ const a11y = {
 
     function callback(event) {
       event.target.removeEventListener(event.type, callback);
-
       element.tabIndex = savedTabIndex;
       delete element.dataset.tabIndex;
       if (typeof options.className !== 'undefined') {

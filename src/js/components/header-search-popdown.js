@@ -28,12 +28,13 @@ if (!customElements.get('header-search-popdown')) {
       }
 
       popdownTransitionCallback(event) {
-        if (event.target !== this.popdown) return;
+        const isValidTransition = event.propertyName === 'opacity';
+        if (event.target !== this.popdown || !isValidTransition) return;
 
         if (!this.classList.contains('is-open')) {
           this.popdownContainer.removeAttribute('open');
           this.a11y.removeTrapFocus();
-        } else if (event.propertyName === 'transform' || event.propertyName === 'opacity') {
+        } else {
           // Wait for the 'transform' transition to complete in order to prevent jumping content issues because of the trapFocus
           this.a11y.trapFocus(this.popdown, {
             elementToFocus: this.popdown.querySelector('input:not([type="hidden"])'),
