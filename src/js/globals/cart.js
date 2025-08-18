@@ -69,8 +69,6 @@ const attributes = {
   cartTotal: 'data-cart-total',
   disabled: 'disabled',
   freeShipping: 'data-free-shipping',
-  freeShippingLimit: 'data-free-shipping-limit',
-  promoCenterLimit: 'data-promo-center-limit',
   item: 'data-item',
   itemIndex: 'data-item-index',
   itemTitle: 'data-item-title',
@@ -134,8 +132,15 @@ class CartItems extends HTMLElement {
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
     const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
-    const limitAttr = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) : 0;
-    const centerLimitAttr = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.promoCenterLimit)) : 0;
+    const promotion1Limit = Number(this.freeShipping[0]?.getAttribute('data-free-shipping-limit'));
+    const promotion2Limit = Number(this.freeShipping[0]?.getAttribute('data-promo-center-limit'));
+    this.promotion1Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-primary-promo') === 'true' : false;
+    this.promotion2Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-secondary-promo') === 'true' : false;
+    const limitAttr = this.freeShipping.length ? promotion1Limit : 0;
+    let centerLimitAttr = this.promotion1Enabled ? promotion2Limit : 0;
+    if (!this.promotion1Enabled && this.promotion2Enabled && promotion2Limit > 0) {
+      centerLimitAttr = promotion2Limit;
+    }
     this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
     this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
     this.updateProgress();
@@ -1060,14 +1065,27 @@ class CartItems extends HTMLElement {
 
     if (!this.freeShipping.length) return;
 
+    let hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
+    let forceSuccess = false;
+
+    if (!this.promotion1Enabled && !this.promotion2Enabled) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (this.promotion1Enabled && !this.promotion2Enabled && this.freeShippingLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (!this.promotion1Enabled && this.promotion2Enabled && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    }
+
     const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;
-    const percent = Math.max(0, Math.min(percentValue * 100, 100));
+    const percent = forceSuccess ? 100 : Math.max(0, Math.min(percentValue * 100, 100));
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
     const leftToSpendCents = Math.max(0, this.freeShippingLimit - this.subtotal);
     const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
     const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
     const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
-    const hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
     const hasReachedCenterLimit = this.promoCenterLimit > 0 && this.subtotal >= this.promoCenterLimit;
 
     this.freeShipping.forEach((item) => {

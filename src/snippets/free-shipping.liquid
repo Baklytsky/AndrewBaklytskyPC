@@ -12,10 +12,25 @@
 {% endcomment %}
 
 {%- liquid
-  assign message = block.settings.message | default: settings.free_shipping_promotion_text_1
+  assign promo_1_enabled = settings.free_shipping_promotion_1
+  assign promo_2_enabled = settings.free_shipping_promotion_2
+  assign promo_1_text = settings.free_shipping_promotion_text_1
+  assign promo_2_text = settings.free_shipping_promotion_text_2
+  assign block_message = section.blocks | where: 'type', 'message'
+  assign enable_promos = promo_1_enabled | default: promo_2_enabled
+  assign message = block.settings.message | default: promo_1_text | default: promo_2_text
   assign show_message = false
-  if message != blank
+
+  # Cart promo messages
+  if enable_promos and message != blank
     assign show_message = true
+  endif
+
+  # Announcement bar "Free shipping message" block
+  if block_message.size > 0
+    if message != blank
+      assign show_message = true
+    endif
   endif
 
   assign show_wheel = show_wheel | default: block.settings.show_wheel | default: false
@@ -24,10 +39,6 @@
 
 {%- if show_message -%}
   {%- liquid
-    # Check if promotions are enabled
-    assign promo_1_enabled = settings.free_shipping_promotion_1
-    assign promo_2_enabled = settings.free_shipping_promotion_2
-
     # Get promotion values
     assign promo_1_value = settings.free_shipping_limit | default: 0 | plus: 0
     assign promo_2_value = settings.free_gift_limit | default: 0 | plus: 0
@@ -35,14 +46,14 @@
     # Determine which promotion to show
     assign show_promo_1 = false
     assign show_promo_2 = false
-    if promo_1_enabled and promo_1_value > 0
+    if promo_1_enabled
       assign show_promo_1 = true
     endif
     assign promo_2_only = false
-    if promo_1_enabled == false or promo_2_value > promo_1_value
+    if promo_1_enabled == false and promo_2_enabled and promo_2_value > 0
       assign promo_2_only = true
     endif
-    if promo_2_enabled and promo_2_only and promo_2_value > 0
+    if promo_2_enabled
       assign show_promo_2 = true
     endif
 
@@ -62,7 +73,7 @@
       # Single primary promotion: only free shipping
       assign active_promo = 1
       assign active_limit = promo_1_value
-    elsif show_promo_2
+    elsif show_promo_2 or promo_2_only
       # Single secondary promotion: only free gift
       assign active_promo = 2
       assign active_limit = promo_2_value
@@ -78,6 +89,9 @@
       assign percent = active_limit | minus: subtotal_without_currency | times: 100.0 | divided_by: active_limit
       assign percent = 100 | minus: percent
       assign percent = percent | at_least: 0 | at_most: 100
+    endif
+    if promo_2_only
+      assign center_limit = promo_2_value
     endif
 
     if show_dual_promotion and center_limit > 0
@@ -108,10 +122,16 @@
 
     # Set the appropriate message based on active promotion
     assign display_message = message
+    if show_promo_1 and show_promo_2 == false
+      assign display_message = promo_1_text
+    elsif show_promo_2 and show_promo_1 == false
+      assign display_message = promo_2_text
+    endif
+
     if show_dual_promotion
-      assign display_message = message | replace: '||amount||', left_to_spend_center
+      assign display_message = display_message | replace: '||amount||', left_to_spend_center
     else
-      assign display_message = message | replace: '||amount||', left_to_spend
+      assign display_message = display_message | replace: '||amount||', left_to_spend
     endif
 
     # Set success message
@@ -155,7 +175,9 @@
     class="{{ free_shipping_classes }}"
     data-free-shipping="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
     data-free-shipping-limit="{{ active_limit }}"
-    {% if show_dual_promotion %}
+    data-free-shipping-primary-promo="{{ settings.free_shipping_promotion_1 }}"
+    data-free-shipping-secondary-promo="{{ settings.free_shipping_promotion_2 }}"
+    {% if show_dual_promotion or promo_2_only %}
       data-promo-center-limit="{{ center_limit }}"
     {% endif %}
   >
@@ -174,9 +196,9 @@
       {{ display_message }}
     </span>
 
-    {%- if show_dual_promotion and settings.free_shipping_promotion_text_2 != blank -%}
+    {%- if show_dual_promotion and promo_2_text != blank -%}
       <span class="free-shipping__promo-message">
-        {{ settings.free_shipping_promotion_text_2 | replace: '||amount||', left_to_spend }}
+        {{ promo_2_text | replace: '||amount||', left_to_spend }}
       </span>
     {%- endif -%}
 
