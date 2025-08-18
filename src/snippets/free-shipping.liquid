@@ -43,6 +43,11 @@
     assign promo_1_value = settings.free_shipping_limit | default: 0 | plus: 0
     assign promo_2_value = settings.free_gift_limit | default: 0 | plus: 0
 
+    assign swap_promos = false
+    if promo_1_enabled and promo_2_enabled and promo_2_value == 0 and promo_1_value > promo_2_value
+      assign swap_promos = true
+    endif
+
     # Determine which promotion to show
     assign show_promo_1 = false
     assign show_promo_2 = false
@@ -166,14 +171,6 @@
       if align_text != blank
         echo ' ' | append: align_text
       endif
-
-      # if subtotal_without_currency >= active_limit and qualified_shipping_message != blank
-      #   echo ' is-success'
-      # endif
-
-      # if show_dual_promotion and subtotal_without_currency >= center_limit and subtotal_without_currency < active_limit
-      #   echo ' is-active'
-      # endif
     endcapture
   -%}
 
@@ -278,6 +275,18 @@
       {%- endif -%}
 
       {%- liquid
+        if swap_promos
+          assign icon_1_final = icon_2
+          assign icon_2_final = icon_1
+          assign icon_style_final_1 = icon_style_2
+          assign icon_style_final_2 = icon_style
+        else
+          assign icon_1_final = icon_1
+          assign icon_2_final = icon_2
+          assign icon_style_final_1 = icon_style
+          assign icon_style_final_2 = icon_style_2
+        endif
+
         # Determine right icon size for progress bar positioning
         assign right_size = 30
         if show_dual_promotion and icon_size_2 != blank
@@ -301,13 +310,13 @@
         {%- if show_dual_promotion and center_limit < active_limit -%}
           <div
             class="free-shipping__box free-shipping__box--center"
-            {% if icon_style != '' %}
-              style="{{ icon_style }}"
+            {% if icon_style_final_1 != '' %}
+              style="{{ icon_style_final_1 }}"
             {% endif %}
             data-promo-center
           >
-            {%- if icon_1 != '' -%}
-              {{ icon_1 }}
+            {%- if icon_1_final != '' -%}
+              {{ icon_1_final }}
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -315,26 +324,26 @@
         {%- liquid
           capture icon_styles
             assign secondary_only_icon = false
-            if show_dual_promotion or icon_1 == ''
+            if show_dual_promotion or icon_1_final == ''
               assign secondary_only_icon = true
             endif
 
             echo 'style="'
-            if icon_style_2 != '' and secondary_only_icon
-              echo icon_style_2
-            elsif icon_style != ''
-              echo icon_style
+            if icon_style_final_2 != '' and secondary_only_icon
+              echo icon_style_final_2
+            elsif icon_style_final_1 != ''
+              echo icon_style_final_1
             endif
             echo '"'
           endcapture
 
           capture icon_markup
             if show_dual_promotion
-              echo icon_2
-            elsif icon_1 != ''
-              echo icon_1
-            elsif icon_2 != ''
-              echo icon_2
+              echo icon_2_final
+            elsif icon_1_final != ''
+              echo icon_1_final
+            elsif icon_2_final != ''
+              echo icon_2_final
             endif
           endcapture
         -%}
