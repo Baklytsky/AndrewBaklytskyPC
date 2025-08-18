@@ -1114,22 +1114,17 @@ class CartItems extends HTMLElement {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
 
+      const isCenterActive = (promoCenter && this.promoCenterLimit === 0) || hasReachedCenterLimit;
+
       // Clear all state classes first
       item.classList.remove(classes.success, classes.active);
-      if (promoCenter) {
-        item.classList.remove(classes.active);
-      }
 
       // Apply appropriate state class
       if (hasReachedLimit) {
         // Final goal reached - show success
         item.classList.add(classes.success);
-      } else if (this.promoCenterLimit > 0 && hasReachedCenterLimit && !hasReachedLimit) {
+      } else if (isCenterActive && !hasReachedLimit) {
         // Center goal reached but not final goal - show active (dual promo)
-        item.classList.add(classes.active);
-      }
-
-      if (promoCenter && hasReachedCenterLimit) {
         item.classList.add(classes.active);
       }
     });

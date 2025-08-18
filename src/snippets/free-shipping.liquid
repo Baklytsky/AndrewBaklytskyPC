@@ -66,9 +66,15 @@
     if show_promo_1 and show_promo_2
       # Dual promotion: promo 1 (free shipping) at center, promo 2 (free gift) at end
       assign active_promo = 2
-      assign active_limit = promo_2_value
-      assign center_limit = promo_1_value
       assign show_dual_promotion = true
+
+      if promo_1_value > promo_2_value
+        assign active_limit = promo_1_value
+        assign center_limit = promo_2_value
+      else
+        assign active_limit = promo_2_value
+        assign center_limit = promo_1_value
+      endif
     elsif show_promo_1
       # Single primary promotion: only free shipping
       assign active_promo = 1
@@ -292,7 +298,7 @@
       >
         <div class="free-shipping__box free-shipping__box--left">&nbsp;</div>
 
-        {%- if show_dual_promotion -%}
+        {%- if show_dual_promotion and center_limit < active_limit -%}
           <div
             class="free-shipping__box free-shipping__box--center"
             {% if icon_style != '' %}
