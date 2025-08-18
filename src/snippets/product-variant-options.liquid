@@ -328,6 +328,7 @@
               Determine if current option matches swatch handle translations
             endcomment
             assign is_native_swatch_option = false
+            assign is_swatch_option = false
 
             if settings.enable_color_swatches
               for value in option.values
@@ -339,6 +340,12 @@
 
               if is_bundle and meta_swatches contains option.name
                 assign is_native_swatch_option = true
+              endif
+
+              assign swatch_translation = 'general.swatches.color' | t
+              assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+              if translation_string contains option_name_handle_separator
+                assign is_swatch_option = true
               endif
             endif
 
@@ -357,10 +364,10 @@
             endif
 
             capture fieldset_class
-              if settings.variant_lines or is_native_swatch_option
+              if settings.variant_lines or is_native_swatch_option or is_swatch_option
                 echo 'radio__fieldset'
 
-                if is_native_swatch_option
+                if is_native_swatch_option or is_swatch_option
                   echo ' radio__fieldset--swatches'
                 endif
 
@@ -382,7 +389,7 @@
           {%- capture options_html -%}
             {{ options_html }}
 
-            {%- if settings.variant_lines or is_native_swatch_option -%}
+            {%- if settings.variant_lines or is_native_swatch_option or is_swatch_option -%}
               <div class="radio__buttons radio__buttons--top{% if is_bundle and option_product_name == prev_option_product_name %} radio__buttons--swatches{% endif %}"
                 data-variant-buttons
                 {% if is_bundle %}
@@ -391,33 +398,41 @@
               >
                 {%- for value in option.values -%}
                   {%- capture input_id -%}{{ uniq_id }}-{{ option.name | handle }}-{{ value | strip_html | escape | handle }}-{{ forloop.index }}{%- endcapture -%}
-                  {%- if is_native_swatch_option -%}
+                  {%- if is_native_swatch_option or is_swatch_option -%}
                     {%- liquid
+                      assign swatch_value = nil
+
                       if is_bundle
                         assign option_name_with_value = option.name | append: '####' | append: value | append: '@@@@'
                         assign swatch_value = meta_swatches | split: option_name_with_value | last | split: '$$$$' | first
                       else
-                        if value.swatch.image
-                          assign image_url = value.swatch.image | image_url: width: 96
-                          assign swatch_value = 'url(' | append: image_url | append: ')'
-                        elsif value.swatch.color
-                          assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                        if value.swatch
+                          if value.swatch.image
+                            assign image_url = value.swatch.image | image_url: width: 96
+                            assign swatch_value = 'url(' | append: image_url | append: ')'
+                          elsif value.swatch.color
+                            assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                          endif
                         else
-                          assign swatch_value = nil
+                          assign swatch_value = value | handle
                         endif
                       endif
 
-                      assign is_white = false
-                      if swatch_value == 'rgb(255 255 255)' and value.swatch.image == blank
-                        assign is_white = true
-                      endif
+                      capture swatch_style
+                        if is_swatch_option
+                          assign swatch_handle = value | handle
+                          echo '--swatch: var(--' | append: swatch_handle | append: ');'
+                        elsif is_native_swatch_option and swatch_value != nil and swatch_value != ''
+                          echo '--swatch: ' | append: swatch_value | append: ';'
+                        endif
+                      endcapture
                     -%}
 
                     <tooltip-component
                       data-tooltip="{{ value | escape | capitalize }}"
-                      class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}{% if is_white %} swatch__button--white{% endif %}"
-                      {%- if swatch_value != blank -%}
-                        style="--swatch: {{ swatch_value }};"
+                      class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch__button swatch-{{ value | handle }}"
+                      {%- if swatch_style != '' -%}
+                        style="{{ swatch_style }}"
                       {%- endif -%}
                     >
 
