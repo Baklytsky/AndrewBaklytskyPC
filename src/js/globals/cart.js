@@ -1093,6 +1093,7 @@ class CartItems extends HTMLElement {
       const progressGraph = item.querySelector(selectors.freeShippingGraph);
       const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
       const leftToSpendPromo = item.querySelector(selectors.leftToSpendPromo);
+      const promoCenter = item.querySelector('[data-promo-center]');
 
       // Update "left to spend" messages
       if (leftToSpendMessage) {
@@ -1115,6 +1116,9 @@ class CartItems extends HTMLElement {
 
       // Clear all state classes first
       item.classList.remove(classes.success, classes.active);
+      if (promoCenter) {
+        item.classList.remove(classes.active);
+      }
 
       // Apply appropriate state class
       if (hasReachedLimit) {
@@ -1122,6 +1126,10 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.success);
       } else if (this.promoCenterLimit > 0 && hasReachedCenterLimit && !hasReachedLimit) {
         // Center goal reached but not final goal - show active (dual promo)
+        item.classList.add(classes.active);
+      }
+
+      if (promoCenter && hasReachedCenterLimit) {
         item.classList.add(classes.active);
       }
     });
