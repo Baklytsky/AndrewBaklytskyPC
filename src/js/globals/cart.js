@@ -1077,6 +1077,9 @@ class CartItems extends HTMLElement {
     } else if (!this.promotion1Enabled && this.promotion2Enabled && this.promoCenterLimit === 0) {
       hasReachedLimit = true;
       forceSuccess = true;
+    } else if (this.promotion1Enabled && this.promotion2Enabled && this.freeShippingLimit === 0 && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
     }
 
     const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;

@@ -69,16 +69,22 @@
     assign show_dual_promotion = false
 
     if show_promo_1 and show_promo_2
-      # Dual promotion: promo 1 (free shipping) at center, promo 2 (free gift) at end
-      assign active_promo = 2
-      assign show_dual_promotion = true
-
       if promo_1_value > promo_2_value
+        # Dual promotion: promo 1 (free shipping) at center, promo 2 (free gift) at end
+        assign active_promo = 2
+        assign show_dual_promotion = true
         assign active_limit = promo_1_value
         assign center_limit = promo_2_value
-      else
+      elsif promo_2_value > promo_1_value
+        # Dual promotion: reversed values
+        assign active_promo = 2
+        assign show_dual_promotion = true
         assign active_limit = promo_2_value
         assign center_limit = promo_1_value
+      else
+        # Equal values, treat as single promotion
+        assign active_promo = 1
+        assign active_limit = promo_1_value
       endif
     elsif show_promo_1
       # Single primary promotion: only free shipping
@@ -133,9 +139,9 @@
 
     # Set the appropriate message based on active promotion
     assign display_message = message
-    if show_promo_1 and show_promo_2 == false
+    if active_promo == 1
       assign display_message = promo_1_text
-    elsif show_promo_2 and show_promo_1 == false
+    elsif active_promo == 2 and show_dual_promotion == false
       assign display_message = promo_2_text
     endif
 
@@ -145,10 +151,17 @@
       assign display_message = display_message | replace: '||amount||', left_to_spend
     endif
 
+    assign both_promos_zero = false
+    if promo_1_enabled and promo_2_enabled and promo_1_value == 0 and promo_2_value == 0
+      assign both_promos_zero = true
+    endif
+
     # Set success message
     assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message' | t
-    if show_dual_promotion
+    if show_dual_promotion or both_promos_zero
       assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message_promos' | t
+    elsif active_promo == 2
+      assign qualified_shipping_message_text = 'cart.general.qualified_gift_message' | t
     endif
 
     assign qualified_shipping_message = ''
