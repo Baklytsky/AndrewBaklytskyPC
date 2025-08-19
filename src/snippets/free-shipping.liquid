@@ -18,18 +18,23 @@
   assign promo_2_text = settings.free_shipping_promotion_text_2
   assign block_message = section.blocks | where: 'type', 'message'
   assign enable_promos = promo_1_enabled | default: promo_2_enabled
-  assign message = block.settings.message | default: promo_1_text | default: promo_2_text
   assign show_message = false
-
-  # Cart promo messages
-  if enable_promos and message != blank
-    assign show_message = true
-  endif
+  assign is_message_block = false
 
   # Announcement bar "Free shipping message" block
   if block_message.size > 0
-    if message != blank
+    assign message = block.settings.message
+    if message != blank and enable_promos
       assign show_message = true
+      assign is_message_block = true
+    endif
+  else
+    # Cart promo messages
+    if enable_promos
+      assign message = promo_1_text | default: promo_2_text
+      if message != blank
+        assign show_message = true
+      endif
     endif
   endif
 
@@ -139,11 +144,14 @@
 
     # Set the appropriate message based on active promotion
     assign display_message = message
-    if active_promo == 1
-      assign display_message = promo_1_text
-    elsif active_promo == 2 and show_dual_promotion == false
-      assign display_message = promo_2_text
-    endif
+
+    unless is_message_block
+      if active_promo == 1
+        assign display_message = promo_1_text
+      elsif active_promo == 2 and show_dual_promotion == false
+        assign display_message = promo_2_text
+      endif
+    endunless
 
     if show_dual_promotion
       assign display_message = display_message | replace: '||amount||', left_to_spend_center
