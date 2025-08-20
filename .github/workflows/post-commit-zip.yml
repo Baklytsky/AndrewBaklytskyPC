@@ -1,58 +1,58 @@
-name: Create and Upload Zip on Push
+# name: Create and Upload Zip on Push
 
-on:
-  push:
-    branches:
-      - main  # You can change this to your default branch if different
-      - staging
+# on:
+#   push:
+#     branches:
+#       - main  # You can change this to your default branch if different
+#       - staging
 
-    paths-ignore:
-      - 'upload/**'  # Prevent infinite loop by ignoring changes to the upload directory
+#     paths-ignore:
+#       - 'upload/**'  # Prevent infinite loop by ignoring changes to the upload directory
 
-jobs:
-  zip-and-upload:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Needed for proper versioning
+# jobs:
+#   zip-and-upload:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0  # Needed for proper versioning
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          always-auth: true
-          registry-url: https://npm.pkg.github.com/
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version-file: '.nvmrc'
+#           always-auth: true
+#           registry-url: https://npm.pkg.github.com/
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+#       - name: Get yarn cache directory path
+#         id: yarn-cache-dir-path
+#         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v4
-        id: yarn-cache
-        with:
-          path: |
-            ${{ steps.yarn-cache-dir-path.outputs.dir }}
-            'node_modules'
-          key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-v3-
+#       - uses: actions/cache@v4
+#         id: yarn-cache
+#         with:
+#           path: |
+#             ${{ steps.yarn-cache-dir-path.outputs.dir }}
+#             'node_modules'
+#           key: ${{ runner.os }}-yarn-v3-${{ hashFiles('**/yarn.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-yarn-v3-
 
-      - name: Install dependencies
-        run: yarn install
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
+#       - name: Install dependencies
+#         run: yarn install
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.ORG_PKG_READ}}
 
-      - name: Get version from package.json
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+#       - name: Get version from package.json
+#         id: package-version
+#         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Create zip file
-        run: yarn zip
+#       - name: Create zip file
+#         run: yarn zip
 
-      - name: Commit and push zip file
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -f upload/*.zip
-          git commit -m "[Automated] Add zip file for version ${{ steps.package-version.outputs.version }}" || echo "No changes to commit"
-          git push -f
+#       - name: Commit and push zip file
+#         run: |
+#           git config --local user.email "action@github.com"
+#           git config --local user.name "GitHub Action"
+#           git add -f upload/*.zip
+#           git commit -m "[Automated] Add zip file for version ${{ steps.package-version.outputs.version }}" || echo "No changes to commit"
+#           git push -f

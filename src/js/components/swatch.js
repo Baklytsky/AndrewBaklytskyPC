@@ -115,7 +115,7 @@ class GridSwatch extends HTMLElement {
         swatchButton.dataset.swatchVariantName = variantTitle;
         swatchButton.dataset.swatchImage = image;
         swatchButton.dataset.variant = variant.id;
-        swatchButton.style.setProperty('--swatch', swatchHandle);
+        swatchButton.style.setProperty('--swatch', `var(--${swatchHandle})`);
         swatchLink.href = getUrlWithVariant(this.product.url, variant.id);
         swatchLink.dataset.swatch = swatch;
         swatchLink.disabled = !variantAvailable;

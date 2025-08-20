@@ -12,7 +12,7 @@
   assign line_items_tags = null
   assign line_items_products = null
   assign line_items_rewards = null
-  assign gwp_promo_meta_name = 'app--210418761729' | append: '--buy-x-get-y'
+  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
   assign gwp_promo_meta = shop.metafields[gwp_promo_meta_name]
 -%}
 
@@ -29,6 +29,7 @@
     assign line_item_variant_compare_at_price = line_item.variant.compare_at_price
     assign line_item_original_price = line_item.original_price
     assign line_item_unit_price = line_item.unit_price | money
+    assign line_item_reward = false
 
     assign bundle_name = line_item.properties._bundle_title
     assign bundle_image = line_item.properties._bundle_image
@@ -46,6 +47,7 @@
     endif
 
     if line_item.properties._reward == 'reward'
+      assign line_item_reward = true
       assign line_items_rewards = line_items_rewards | append: ',' | append: line_item.key
     endif
   -%}
@@ -284,7 +286,7 @@
           </div>
 
           <quantity-counter class="cart__quantity-counter">
-            {%- unless bundle_opened -%}
+            {%- unless bundle_opened or line_item_reward -%}
               <a
                 class="cart__item__remove"
                 href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
@@ -297,7 +299,7 @@
             {%- endunless -%}
 
             <div class="cart__quantity">
-              {%- unless bundle_opened -%}
+              {%- unless bundle_opened or line_item_reward -%}
                 <button
                   class="cart__quantity-minus"
                   type="button"
@@ -326,13 +328,13 @@
                 value="{{ quantity }}"
                 title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
                 pattern="[0-9]*"
-                {% if bundle_opened %}
+                {% if bundle_opened or line_item_reward %}
                   data-bundle-cart-quantity
                   disabled
                 {% endif %}
               >
 
-              {%- unless bundle_opened -%}
+              {%- unless bundle_opened or line_item_reward -%}
                 <button
                   class="cart__quantity-plus"
                   type="button"
