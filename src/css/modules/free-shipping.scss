@@ -23,17 +23,42 @@
   opacity: 0;
 }
 
+.free-shipping__default-message:empty + .free-shipping__progress-holder {
+  margin-top: 0;
+}
+
 .free-shipping__success-message,
-.free-shipping__default-message { flex: 1; }
+.free-shipping__default-message {
+  flex: 1;
+}
 
 .free-shipping__promo-message,
-.free-shipping__success-message { display: none; }
+.free-shipping__success-message {
+  display: none;
+}
 
-.is-active:not(.is-success) .free-shipping__promo-message,
-.is-success .free-shipping__success-message { display: inline; }
+// When the first promo is active, show the message for the next promo
+.is-active:not(.is-success) {
+  .free-shipping__default-message {
+    display: none;
+  }
 
-.is-active .free-shipping__default-message,
-.is-success .free-shipping__success-message ~ .free-shipping__default-message { display: none; }
+  .free-shipping__promo-message {
+    display: inline;
+  }
+}
+
+// When the final promo is reached, show the success message
+.is-success {
+  .free-shipping__default-message,
+  .free-shipping__promo-message {
+    display: none;
+  }
+
+  .free-shipping__success-message {
+    display: inline;
+  }
+}
 
 .free-shipping__graph {
   --stroke-dashoffset: 87.96459430051421;
@@ -65,11 +90,16 @@
 }
 
 .free-shipping__progress-bar {
+  position: absolute;
+  top: 50%;
+  left: var(--track-left, 15px);
+  right: var(--track-right, 29px);
+  transform: translateY(-50%);
+  z-index: 1;
   appearance: none;
   display: block;
-  width: calc(100% - (var(--margin-left) + var(--margin-right)));
+  width: auto;
   height: 6px;
-  margin: 0 var(--margin-right) 0 var(--margin-left);
   background: var(--bg-accent);
   overflow: hidden;
 }
@@ -85,10 +115,13 @@
   transform-origin: center left;
 }
 
-.free-shipping__progress-bar::-webkit-progress-bar { @include progress-bar; }
-.free-shipping__progress-bar::-webkit-progress-value { @include progress-value; }
+.free-shipping__progress-bar::-webkit-progress-bar {
+  @include progress-bar;
+}
 
 .free-shipping__progress-bar::-webkit-progress-value {
+  @include progress-value;
+
   border-radius: 0 var(--btn-radius) var(--btn-radius) 0;
   transform: scaleX(0);
 }
@@ -96,58 +129,54 @@
 .is-animated .free-shipping__progress-bar::-webkit-progress-value { transform: scaleX(1); }
 
 .free-shipping__progress-holder {
-  --progress-bg: var(--FREE-SHIPPING-BACKGROUND);
-  --progress-value-bg: var(--FREE-SHIPPING-GRADIENT);
-  --progress-text: var(--FREE-SHIPPING-TEXT);
-  --margin-left: 15px;
-  --margin-right: 29px;
+  --progress-bg: var(--COLOR-BG-ACCENT);
+  --progress-value-bg: var(--COLOR-TEXT);
 
   position: relative;
   width: 100%;
   padding: 12px 0;
   margin-top: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .free-shipping__box {
-  --icons: var(--FREE-SHIPPING-GRADIENT);
+  --icons: var(--progress-value-bg);
 
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   z-index: 2;
-  width: 30px;
-  height: 30px;
+  width: calc(var(--icon-size, 30px) + 10px);
+  height: calc(var(--icon-size, 30px) + 10px);
   border-radius: 50%;
   background: var(--progress-bg);
   transition: background 1s;
 }
 
 .is-active .free-shipping__box--center,
+.is-success .free-shipping__box--center,
 .is-success .free-shipping__box--right,
 .free-shipping__box--left {
-  --icons: var(--FREE-SHIPPING-TEXT);
+  --icons: var(--progress-bg);
 
   background: var(--progress-value-bg);
 }
 
 .free-shipping__box--left {
-  top: 7px;
   width: 16px;
   height: 16px;
 }
 
 .free-shipping__box--center {
-  --promo-center-position-percent: calc(var(--promo-center-position) * 1%);
+  --track-left-offset: var(--track-left, 15px);
+  --track-width-fraction: calc(var(--promo-center-fraction, 0) * (100% - var(--track-left, 15px) - var(--track-right, 29px)));
+  --center-marker-half-width: calc((var(--icon-size, 30px) + 10px) / 2 + 1px);
 
-  left: var(--promo-center-position-percent);
+  margin-left: calc(var(--track-left-offset) + var(--track-width-fraction) - var(--center-marker-half-width));
   border-radius: 50%;
-  /* Progress bar margins compensation */
-  margin-left: calc(var(--margin-left) + var(--promo-center-position) * (100% - (var(--margin-right) + var(--margin-left))) / 100 - var(--promo-center-position-percent));
 }
 
 .free-shipping__box--right {
-  left: auto;
-  right: 0;
+  margin-left: auto;
 }
 
 .free-shipping__box .icon__animated {
@@ -159,9 +188,11 @@
 
 /* MOZILLA FIREFOX */
 @-moz-document url-prefix() {
-  .free-shipping__progress-bar::-moz-progress-bar { @include progress-value; }
+  .free-shipping__progress-bar::-moz-progress-bar {
+    @include progress-value;
 
-  .free-shipping__progress-bar::-moz-progress-bar { transform: scaleX(0); }
+    transform: scaleX(0);
+  }
   .is-animated .free-shipping__progress-bar::-moz-progress-bar { transform: scaleX(1); }
 }
 

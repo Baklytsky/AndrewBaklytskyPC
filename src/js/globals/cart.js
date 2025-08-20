@@ -69,8 +69,6 @@ const attributes = {
   cartTotal: 'data-cart-total',
   disabled: 'disabled',
   freeShipping: 'data-free-shipping',
-  freeShippingLimit: 'data-free-shipping-limit',
-  promoCenterLimit: 'data-promo-center-limit',
   item: 'data-item',
   itemIndex: 'data-item-index',
   itemTitle: 'data-item-title',
@@ -133,10 +131,18 @@ class CartItems extends HTMLElement {
 
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
-    this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
-    this.promoCenterLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.promoCenterLimit)) * 100 * window.Shopify.currency.rate : 0;
-
-    this.freeShippingMessageHandle(this.subtotal);
+    const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
+    const promotion1Limit = Number(this.freeShipping[0]?.getAttribute('data-free-shipping-limit'));
+    const promotion2Limit = Number(this.freeShipping[0]?.getAttribute('data-promo-center-limit'));
+    this.promotion1Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-primary-promo') === 'true' : false;
+    this.promotion2Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-secondary-promo') === 'true' : false;
+    const limitAttr = this.freeShipping.length ? promotion1Limit : 0;
+    let centerLimitAttr = this.promotion1Enabled ? promotion2Limit : 0;
+    if (!this.promotion1Enabled && this.promotion2Enabled && promotion2Limit > 0) {
+      centerLimitAttr = promotion2Limit;
+    }
+    this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
+    this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
     this.updateProgress();
 
     this.build = this.build.bind(this);
@@ -1014,7 +1020,6 @@ class CartItems extends HTMLElement {
       });
     }
 
-    this.freeShippingMessageHandle(this.subtotal);
     this.cartRemoveEvents();
     this.cartUpdateEvents();
     this.toggleErrorMessage();
@@ -1050,23 +1055,6 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Show/hide free shipping message
-   *
-   * @param   {Number}  total
-   *
-   * @return  {Void}
-   */
-
-  freeShippingMessageHandle(total) {
-    if (!this.freeShipping.length) return;
-
-    this.freeShipping.forEach((message) => {
-      const hasQualifiedShippingMessage = message.hasAttribute(attributes.freeShipping) && message.getAttribute(attributes.freeShipping) === 'true' && total >= 0;
-      message.classList.toggle(classes.success, hasQualifiedShippingMessage && total >= this.freeShippingLimit);
-    });
-  }
-
-  /**
    * Update progress when update cart
    *
    * @return  {Void}
@@ -1077,18 +1065,40 @@ class CartItems extends HTMLElement {
 
     if (!this.freeShipping.length) return;
 
-    const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
-    const percent = Math.min(percentValue * 100, 100);
+    let hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
+    let forceSuccess = false;
+
+    if (!this.promotion1Enabled && !this.promotion2Enabled) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (this.promotion1Enabled && !this.promotion2Enabled && this.freeShippingLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (!this.promotion1Enabled && this.promotion2Enabled && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (this.promotion1Enabled && this.promotion2Enabled && this.freeShippingLimit === 0 && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    }
+
+    const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;
+    const percent = forceSuccess ? 100 : Math.max(0, Math.min(percentValue * 100, 100));
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
-    const leftToSpendPromoMoney = window.theme.formatMoney(this.promoCenterLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpendCents = Math.max(0, this.freeShippingLimit - this.subtotal);
+    const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
+    const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
+    const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
+    const hasReachedCenterLimit = this.promoCenterLimit > 0 && this.subtotal >= this.promoCenterLimit;
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
       const progressGraph = item.querySelector(selectors.freeShippingGraph);
       const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
       const leftToSpendPromo = item.querySelector(selectors.leftToSpendPromo);
+      const promoCenter = item.querySelector('[data-promo-center]');
 
+      // Update "left to spend" messages
       if (leftToSpendMessage) {
         leftToSpendMessage.innerHTML = leftToSpend.replace('.00', '');
       }
@@ -1097,11 +1107,7 @@ class CartItems extends HTMLElement {
         leftToSpendPromo.innerHTML = leftToSpendPromoMoney.replace('.00', '');
       }
 
-      if (this.promoCenterLimit > 0) {
-        item.classList.toggle(classes.active, this.subtotal > this.promoCenterLimit);
-      }
-
-      // Set progress bar value
+      // Set progress bar value and add animation class
       if (progressBar) {
         progressBar.value = percent;
       }
@@ -1109,6 +1115,20 @@ class CartItems extends HTMLElement {
       // Set circle progress
       if (progressGraph) {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
+      }
+
+      const isCenterActive = (promoCenter && this.promoCenterLimit === 0) || hasReachedCenterLimit;
+
+      // Clear all state classes first
+      item.classList.remove(classes.success, classes.active);
+
+      // Apply appropriate state class
+      if (hasReachedLimit) {
+        // Final goal reached - show success
+        item.classList.add(classes.success);
+      } else if (isCenterActive && !hasReachedLimit) {
+        // Center goal reached but not final goal - show active (dual promo)
+        item.classList.add(classes.active);
       }
     });
   }
