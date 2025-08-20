@@ -1,3 +1,5 @@
+import {getSizedImageUrl} from '@shopify/theme-images';
+
 const selectors = {
   cartDrawer: 'cart-drawer',
   bundleJson: '[data-bundle-json]',
@@ -19,6 +21,7 @@ const selectors = {
   placeholderTitle: '[data-placeholder-title]',
   placeholderUrl: '[data-placeholder-url]',
   placeholderOptions: '[data-placeholder-options]',
+  placeholderImage: '[data-placeholder-image]',
   bundleCartItem: '[data-bundle-cart-item]',
   focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
 };
@@ -33,6 +36,7 @@ const attributes = {
   bundleImage: 'data-bundle-image',
   bundleHandle: 'data-bundle-handle',
   bundleCartItem: 'data-bundle-cart-item',
+  placeholderImage: 'data-placeholder-image',
 };
 
 const classes = {
@@ -158,9 +162,11 @@ if (!customElements.get('bundle-collection')) {
         cloneTemplate.querySelector(selectors.placeholderTitle).innerHTML = data.title;
         cloneTemplate.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(data.price);
 
-        cloneTemplate.querySelectorAll(selectors.placeholderUrl).forEach((element) => {
-          element.href = data.url;
-        });
+        // console.log(cloneTemplate.querySelectorAll(selectors.placeholderUrl));
+        // console.log(data.url);
+        // cloneTemplate.querySelectorAll(selectors.placeholderUrl).forEach((element) => {
+        //   element.href = data.url;
+        // });
 
         if (parseFloat(data.priceCompare) > 0) {
           cloneTemplate.querySelector(selectors.placeholderPriceCompare).innerHTML = this.formatRate(data.priceCompare);
@@ -168,6 +174,19 @@ if (!customElements.get('bundle-collection')) {
 
         if (data.options > 1) {
           cloneTemplate.querySelector(selectors.placeholderOptions).textContent = data.optionsText;
+        }
+
+        if (data.image) {
+          const placeholderImage = cloneTemplate.querySelector(selectors.placeholderImage);
+          const imageTag = document.createElement('img');
+          const imageWidth = placeholderImage.hasAttribute(attributes.placeholderImage) ? parseInt(placeholderImage.getAttribute(attributes.placeholderImage)) : 0;
+
+          imageTag.src = getSizedImageUrl(data.image, `${imageWidth * 2}x`);
+          imageTag.alt = data.title || '';
+
+          imageTag.addEventListener('load', () => {
+            placeholderImage.appendChild(imageTag);
+          });
         }
 
         filledEl.innerHTML = '';
@@ -191,7 +210,7 @@ if (!customElements.get('bundle-collection')) {
 
         const totalSavings = total.priceCompare - total.price < 0 ? 0 : total.priceCompare - total.price;
         this.bundleTotal.innerHTML = this.formatRate(total.price);
-        this.bundleTotalSavings.innerHTML = this.formatRate(totalSavings);
+        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(totalSavings, theme.moneyFormat);
         this.addButton.disabled = filledCount !== this.maxSelection;
         if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
           this.addButton.focus();
@@ -221,6 +240,7 @@ if (!customElements.get('bundle-collection')) {
           vendor: product.vendor,
           title: product.title,
           url: `${product.url}?variant=${variant.id}`,
+          image: variant.featured_image?.src || product.featured_image || null,
         };
 
         if (this.hasAttribute(attributes.bundleImage)) {
@@ -286,6 +306,7 @@ if (!customElements.get('bundle-collection')) {
 
         setTimeout(() => {
           placeholder.classList.remove(classes.animateOut);
+          placeholder.querySelector(selectors.placeholderFilled).innerHTML = '';
 
           if (lastFilledPlaceholder) {
             lastFilledPlaceholder.after(placeholder);

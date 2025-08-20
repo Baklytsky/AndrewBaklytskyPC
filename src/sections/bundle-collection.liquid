@@ -142,21 +142,9 @@
                           <a
                             class="product-inline__link"
                             href="#"
-                            aria-label="{{ product.title | strip_html | escape }}"
                             data-placeholder-url
-                          >
-                            {%- render 'image',
-                              image: product.featured_media.preview_image,
-                              aspect_ratio: aspect_ratio,
-                              sizes: sizes,
-                              widths: widths,
-                              loading: loading,
-                              fetchpriority: 'high',
-                              preload: true,
-                              attributes: image_animations,
-                              cover: true
-                            -%}
-                          </a>
+                            data-placeholder-image="44"
+                          ></a>
                         </div>
 
                         <div class="product-inline__content">
@@ -176,10 +164,6 @@
                                 class="product-inline__text product-inline__text--options"
                                 data-placeholder-options
                               ></p>
-                              {% comment %}
-                                {%- unless product.has_only_default_variant -%}
-                                {%- endunless -%}
-                              {% endcomment %}
 
                               <div class="product-inline__price">
                                 <span class="price">
@@ -236,7 +220,7 @@
 
                       <p class="bundle__price__row">
                         <span>{{ 'collections.bundle.total_savings' | t }}</span>
-                        <span data-bundle-total-savings>{{ 'general.money.free' | t }}</span>
+                        <span data-bundle-total-savings>{{ 0 | money }}</span>
                       </p>
                     </div>
                   {%- when 'bundle_button' -%}
