@@ -136,34 +136,96 @@
                     {%- endif -%}
 
                   {%- when 'bundle_products' -%}
-                    <div class="bundle__placeholders">
-                      <div class="bundle__placeholders__products">
-                        {% for i in (1..max_selection) %}
-                          <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
-                            <div class="bundle-placeholder__line">&nbsp;</div>
+                    <template data-bundle-template>
+                      <div class="product-inline">
+                        <div class="product-inline__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+                          <a
+                            class="product-inline__link"
+                            href="#"
+                            aria-label="{{ product.title | strip_html | escape }}"
+                            data-placeholder-url
+                          >
+                            {%- render 'image',
+                              image: product.featured_media.preview_image,
+                              aspect_ratio: aspect_ratio,
+                              sizes: sizes,
+                              widths: widths,
+                              loading: loading,
+                              fetchpriority: 'high',
+                              preload: true,
+                              attributes: image_animations,
+                              cover: true
+                            -%}
+                          </a>
+                        </div>
 
-                            <span class="bundle-placeholder__dot">
-                              {%- render 'icon-case' -%}
-                            </span>
+                        <div class="product-inline__content">
+                          <div class="product-inline__info">
+                            <a
+                              class="product-inline__link"
+                              href="#"
+                              data-placeholder-url
+                            >
+                              <p class="product-inline__text product-inline__text--vendor" data-placeholder-vendor></p>
 
-                            <div class="bundle-placeholder__inner">
-                              <div class="bundle-placeholder__empty">
-                                {%- render 'icon-cart-placeholder' -%}
+                              <p class="product-inline__title">
+                                <strong data-placeholder-title></strong>
+                              </p>
 
-                                <div class="bundle-placeholder__text">
-                                  <strong>{{ 'collections.bundle.select_product' | t }}</strong>
+                              <p
+                                class="product-inline__text product-inline__text--options"
+                                data-placeholder-options
+                              ></p>
+                              {% comment %}
+                                {%- unless product.has_only_default_variant -%}
+                                {%- endunless -%}
+                              {% endcomment %}
 
-                                  {%- assign unlock_text = 'collections.bundle.unlock' | t -%}
-                                  {%- if unlock_text != blank -%}
-                                    <p>{{ unlock_text }}</p>
-                                  {%- endif -%}
-                                </div>
+                              <div class="product-inline__price">
+                                <span class="price">
+                                  <span class="new-price" data-placeholder-price></span>
+
+                                  <span class="old-price" data-placeholder-price-compare></span>
+                                </span>
                               </div>
-                              <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
-                            </div>
+                            </a>
                           </div>
-                        {% endfor %}
+
+                          <div class="product-inline__actions">
+                            <button data-bundle-remove-button class="product-inline__remove">
+                              {%- render 'icon-remove' -%}
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    </template>
+
+                    <div class="bundle__placeholders">
+                      {% for i in (1..max_selection) %}
+                        <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
+                          <div class="bundle-placeholder__line">&nbsp;</div>
+
+                          <span class="bundle-placeholder__dot">
+                            {%- render 'icon-case' -%}
+                          </span>
+
+                          <div class="bundle-placeholder__inner">
+                            <div class="bundle-placeholder__empty">
+                              {%- render 'icon-cart-placeholder' -%}
+
+                              <div class="bundle-placeholder__text">
+                                <strong>{{ 'collections.bundle.select_product' | t }}</strong>
+
+                                {%- assign unlock_text = 'collections.bundle.unlock' | t -%}
+                                {%- if unlock_text != blank -%}
+                                  <p>{{ unlock_text }}</p>
+                                {%- endif -%}
+                              </div>
+                            </div>
+                            <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
+                          </div>
+                        </div>
+                      {% endfor %}
                     </div>
                   {%- when 'bundle_price' -%}
                     <div class="bundle__price">
@@ -278,7 +340,7 @@
       "type": "checkbox",
       "id": "enable_sidebar_background",
       "label": "Enable sidebar background",
-      "default": false
+      "default": true
     },
     {
       "type": "color_scheme",
