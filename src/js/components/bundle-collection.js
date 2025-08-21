@@ -1,7 +1,6 @@
 import {getSizedImageUrl} from '@shopify/theme-images';
 
 const selectors = {
-  cartDrawer: 'cart-drawer',
   bundleJson: '[data-bundle-json]',
   template: '[data-bundle-template]',
   productGridItem: '[data-grid-item]',
@@ -21,7 +20,6 @@ const selectors = {
   placeholderUrl: '[data-placeholder-url]',
   placeholderOptions: '[data-placeholder-options]',
   placeholderImage: '[data-placeholder-image]',
-  bundleCartItem: '[data-bundle-cart-item]',
   focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
 };
 
@@ -40,10 +38,7 @@ const attributes = {
 };
 
 const classes = {
-  selected: 'is-selected',
   filled: 'is-filled',
-  disabled: 'is-disabled',
-  loading: 'is-loading',
   focused: 'is-focused',
   lineActive: 'is-line-active',
   dotActive: 'is-dot-active',
@@ -260,8 +255,7 @@ if (!customElements.get('bundle-collection')) {
         this.classList.add(classes.adding);
 
         requestAnimationFrame(() => {
-          placeholder.classList.add(classes.animateIn);
-          placeholder.classList.add(classes.dotActive);
+          placeholder.classList.add(classes.animateIn, classes.dotActive);
         });
 
         setTimeout(() => {
@@ -317,11 +311,9 @@ if (!customElements.get('bundle-collection')) {
             this.placeholders.forEach((element) => {
               if (element.classList.contains(classes.filled)) {
                 lastFilledPlaceholderNew = element;
-                element.classList.add(classes.lineActive);
-                element.classList.add(classes.dotActive);
+                element.classList.add(classes.lineActive, classes.dotActive);
               } else {
-                element.classList.remove(classes.lineActive);
-                element.classList.remove(classes.dotActive);
+                element.classList.remove(classes.lineActive, classes.dotActive);
               }
             });
 
