@@ -319,7 +319,7 @@
     </div>
   {%- endif -%}
 
-  {%- if bundle_product -%}
+  {%- if bundle_product and current_variant -%}
     {%- liquid
       assign unique = section.id | append: '-' | append: product.id
     -%}
@@ -337,6 +337,7 @@
           type="button"
           aria-label="{{ 'products.general.quick_add' | t }}"
           data-bundle-product-button="{{ product.id }}"
+          data-bundle-product-url="{{ product.url }}"
           {% if product.has_only_default_variant == false and product.variants.size > 1 %}
             data-quick-add-btn
             data-quick-add-modal-handle="{{ product.handle }}"

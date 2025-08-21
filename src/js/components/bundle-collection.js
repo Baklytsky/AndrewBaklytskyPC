@@ -7,7 +7,6 @@ const selectors = {
   productGridItem: '[data-grid-item]',
   button: '[data-bundle-product-button]',
   selectedCount: '[data-bundle-selected-count]',
-  countLeft: '[data-bundle-count-left]',
   bundleTotal: '[data-bundle-total]',
   bundleTotalSavings: '[data-bundle-total-savings]',
   addButton: '[data-bundle-add-to-cart]',
@@ -37,6 +36,7 @@ const attributes = {
   bundleHandle: 'data-bundle-handle',
   bundleCartItem: 'data-bundle-cart-item',
   placeholderImage: 'data-placeholder-image',
+  bundleProductUrl: 'data-bundle-product-url',
 };
 
 const classes = {
@@ -65,7 +65,6 @@ if (!customElements.get('bundle-collection')) {
         this.maxSelection = parseInt(this.getAttribute(attributes.maxSelection));
         this.animationTiming = parseInt(this.getAttribute(attributes.animationTiming));
         this.selectedCount = this.querySelector(selectors.selectedCount);
-        this.countLeft = this.querySelector(selectors.countLeft);
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
         this.bundleTotalSavings = this.querySelector(selectors.bundleTotalSavings);
         this.addButton = this.querySelector(selectors.addButton);
@@ -157,22 +156,22 @@ if (!customElements.get('bundle-collection')) {
         const template = this.querySelector(selectors.template);
         const cloneTemplate = template.content.cloneNode(true);
         const filledEl = placeholder.querySelector(selectors.placeholderFilled);
+        const button = this.querySelector(`[${attributes.productId}="${data.productId}"]`);
+        const productUrl = button?.hasAttribute(attributes.bundleProductUrl) ? button.getAttribute(attributes.bundleProductUrl) : null;
 
         cloneTemplate.querySelector(selectors.placeholderVendor).textContent = data.vendor;
         cloneTemplate.querySelector(selectors.placeholderTitle).innerHTML = data.title;
         cloneTemplate.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(data.price);
 
-        // console.log(cloneTemplate.querySelectorAll(selectors.placeholderUrl));
-        // console.log(data.url);
-        // cloneTemplate.querySelectorAll(selectors.placeholderUrl).forEach((element) => {
-        //   element.href = data.url;
-        // });
+        cloneTemplate.querySelectorAll(selectors.placeholderUrl).forEach((element) => {
+          element.href = `${productUrl}?variant=${data.id}`;
+        });
 
         if (parseFloat(data.priceCompare) > 0) {
           cloneTemplate.querySelector(selectors.placeholderPriceCompare).innerHTML = this.formatRate(data.priceCompare);
         }
 
-        if (data.options > 1) {
+        if (data.variants > 1) {
           cloneTemplate.querySelector(selectors.placeholderOptions).textContent = data.optionsText;
         }
 
@@ -197,20 +196,22 @@ if (!customElements.get('bundle-collection')) {
       updateUI() {
         const filledCount = this.selectedProducts.length;
         this.selectedCount.textContent = filledCount;
-        this.countLeft.textContent = this.maxSelection - filledCount;
         const total = this.selectedProducts.reduce(
           (sum, product) => {
+            const price = product ? parseFloat(product.price) : 0;
+            const priceCompare = product ? parseFloat(product.priceCompare) : 0;
+            const difference = Math.max(0, priceCompare - price);
+
             return {
-              price: sum.price + (product ? parseFloat(product.price) : 0),
-              priceCompare: sum.priceCompare + (product ? parseFloat(product.priceCompare) : 0),
+              price: sum.price + price,
+              priceCompare: sum.priceCompare + difference,
             };
           },
           {price: 0, priceCompare: 0}
         );
 
-        const totalSavings = total.priceCompare - total.price < 0 ? 0 : total.priceCompare - total.price;
         this.bundleTotal.innerHTML = this.formatRate(total.price);
-        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(totalSavings, theme.moneyFormat);
+        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(total.priceCompare, theme.moneyFormat);
         this.addButton.disabled = filledCount !== this.maxSelection;
         if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
           this.addButton.focus();
@@ -235,12 +236,11 @@ if (!customElements.get('bundle-collection')) {
           price: variant.price,
           priceCompare: variant.compare_at_price ? variant.compare_at_price : 0,
           productId: product.id,
-          options: product.options.length,
           optionsText: variant.options.join(' / '),
           vendor: product.vendor,
           title: product.title,
-          url: `${product.url}?variant=${variant.id}`,
           image: variant.featured_image?.src || product.featured_image || null,
+          variants: product.variants.length,
         };
 
         if (this.hasAttribute(attributes.bundleImage)) {

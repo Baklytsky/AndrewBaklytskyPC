@@ -214,7 +214,7 @@ bundle-collection {
 
 .bundle__price__row--subtotal { font-weight: bold; }
 
-.bundle__actions {
+.bundle__sticky {
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -234,6 +234,46 @@ bundle-collection {
 .bundle__button-add,
 .bundle__button.is-loading .bundle__button-add ~ .bundle__button-default,
 .bundle__button:not(:disabled) .bundle__button-add ~ .bundle__button-default { display: none; }
+
+.bundle__error {
+  opacity: 0;
+  max-height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out 0.2s, max-height 0.5s cubic-bezier(0, 0.75, 0.25, 1), visibility 0.5s;
+  transform: translate3d(0, -20px, 0);
+
+  &.is-visible {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.5s ease, transform 0.5s ease, max-height 0.5s cubic-bezier(0, 0, 0.75, 0), visibility 0.5s;
+  }
+
+  .errors {
+    padding: var(--inner);
+    margin-bottom: 10px;
+    border: 1px solid var(--COLOR-ERROR-BORDER);
+    border-radius: var(--RADIUS-SELECT);
+    background-color: var(--COLOR-ERROR-BG);
+    color: var(--COLOR-ERROR);
+
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      color: inherit;
+    }
+
+    li:last-child { margin-bottom: 0; }
+  }
+
+  .errors__close {
+    top: -1px; // 1px border top
+    min-height: var(--btn-height);
+  }
+}
 
 /* Product inline */
 .product-inline {

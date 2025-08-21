@@ -54,6 +54,7 @@
   <bundle-collection
     class="bundle {{ color_scheme }} section-padding"
     id="Collection--{{ section.id }}"
+    data-section-id="{{ section.id }}"
     data-bundle="{{ bundle_product }}"
     data-bundle-max-selection="{{ max_selection }}"
     data-bundle-animation-timing="{{ bundle_animation_timing }}"
@@ -136,6 +137,8 @@
                     {%- endif -%}
 
                   {%- when 'bundle_products' -%}
+                    {%- assign animation_order = animation_order | plus: 1 -%}
+
                     <template data-bundle-template>
                       <div class="product-inline">
                         <div class="product-inline__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
@@ -184,7 +187,13 @@
                       </div>
                     </template>
 
-                    <div class="bundle__placeholders">
+                    <div
+                      class="bundle__placeholders"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                      {{ block.shopify_attributes }}
+                    >
                       {% for i in (1..max_selection) %}
                         <div data-bundle-placeholder="{{ forloop.index0 }}" class="bundle-placeholder">
                           <div class="bundle-placeholder__line">&nbsp;</div>
@@ -212,7 +221,14 @@
                       {% endfor %}
                     </div>
                   {%- when 'bundle_price' -%}
-                    <div class="bundle__price">
+                    {%- assign animation_order = animation_order | plus: 1 -%}
+
+                    <div
+                      class="bundle__price"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
+                    >
                       <p class="bundle__price__row bundle__price__row--subtotal">
                         <span>{{ 'collections.bundle.subtotal' | t }}</span>
                         <span data-bundle-total>{{ 'general.money.free' | t }}</span>
@@ -224,32 +240,39 @@
                       </p>
                     </div>
                   {%- when 'bundle_button' -%}
-                    <button
-                      type="button"
-                      class="bundle__button btn btn--large btn--solid btn--primary"
-                      data-bundle-add-to-cart
-                      disabled="disabled"
+                    {%- assign animation_order = animation_order | plus: 1 -%}
+
+                    <div
+                      class="bundle__actions"
+                      data-aos="hero"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-order="{{ animation_order }}"
                     >
-                      <span class="btn__text">
-                        <span class="bundle__button-add">{{ 'collections.bundle.button_text' | t }}</span>
+                      <div class="bundle__error" data-cart-errors-container></div>
 
-                        <span class="bundle__button-default">
-                          {%- assign button_text_select = '<small data-bundle-count-left>'
-                            | append: max_selection
-                            | append: '</small>'
-                          -%}
-                          {{ 'collections.bundle.button_text_select_html' | t: number: button_text_select }}
+                      <button
+                        type="button"
+                        class="bundle__button btn btn--large btn--solid btn--primary"
+                        data-bundle-add-to-cart
+                        disabled="disabled"
+                      >
+                        <span class="btn__text">
+                          <span class="bundle__button-add">{{ 'collections.bundle.button_text' | t }}</span>
+
+                          <span class="bundle__button-default">
+                            {{ 'collections.bundle.button_text_select' | t }}
+                          </span>
                         </span>
-                      </span>
-                      <span class="btn__added">&nbsp;</span>
+                        <span class="btn__added">&nbsp;</span>
 
-                      <span class="btn__loader">
-                        <svg height="18" width="18" class="svg-loader">
-                          <circle r="7" cx="9" cy="9" />
-                          <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                        </svg>
-                      </span>
-                    </button>
+                        <span class="btn__loader">
+                          <svg height="18" width="18" class="svg-loader">
+                            <circle r="7" cx="9" cy="9" />
+                            <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                          </svg>
+                        </span>
+                      </button>
+                    </div>
                 {%- endcase -%}
               {%- endfor -%}
             </div>
@@ -257,7 +280,7 @@
         {%- endif -%}
       </div>
 
-      <div class="bundle__actions">
+      <div class="bundle__sticky">
         <button
           type="button"
           class="btn btn--full btn--large btn--solid btn--primary"
