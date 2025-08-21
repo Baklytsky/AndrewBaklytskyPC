@@ -177,6 +177,12 @@
       assign qualified_shipping_message = qualified_message_html
     endif
 
+    if is_message_block
+      assign display_message = display_message | replace: '<br />', '' | replace: '<br>', ''
+      assign promo_2_text = promo_2_text | replace: '<br />', '' | replace: '<br>', ''
+      assign qualified_message_html = qualified_message_html | replace: '<br />', '' | replace: '<br>', ''
+    endif
+
     # CSS classes
     capture free_shipping_classes
       if is_cart_drawer
@@ -218,14 +224,14 @@
       </div>
     {%- endif -%}
 
-    <span class="free-shipping__success-message">{{ qualified_message_html }}</span>
+    <span class="free-shipping__text free-shipping__text--success">{{ qualified_message_html }}</span>
 
-    <span class="free-shipping__default-message">
+    <span class="free-shipping__text free-shipping__text--default">
       {{- display_message -}}
     </span>
 
     {%- if show_dual_promotion and promo_2_text != blank -%}
-      <span class="free-shipping__promo-message">
+      <span class="free-shipping__text free-shipping__text--dual-promos">
         {{ promo_2_text | replace: '||amount||', left_to_spend }}
       </span>
     {%- endif -%}
