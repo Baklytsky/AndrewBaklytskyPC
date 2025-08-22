@@ -1,8 +1,10 @@
 @use '../globals' as *;
 
 .drawer {
-  --inner: 15px;
-  --inner-offset: -15px;
+  --inline-start: 20px;
+  --block-start: 16px;
+  --inner: var(--inline-start);
+  --inner-offset: calc(var(--inline-start) * -1);
 
   // Prevent children elements of hidden element to be focused
   .is-hidden a,
@@ -19,13 +21,15 @@
   width: 100%;
   padding: var(--inner);
   border-bottom: 1px solid var(--border);
+}
 
-  h3 {
-    margin: 0 0 -3px;
-    font-size: var(--font-body-medium);
-    font-weight: var(--FONT-WEIGHT-BODY-BOLD);
-    line-height: 1.3;
-  }
+.drawer__title {
+  @include heading;
+
+  margin: 0;
+  display: flex;
+  font-size: var(--font-heading-small);
+  line-height: 1.3;
 }
 
 .drawer__close {
@@ -33,7 +37,7 @@
 
   position: absolute;
   top: 50%;
-  right: 4px;
+  right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,7 +89,6 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  border-left: 1px solid var(--border);
   background: var(--bg);
 
   .is-open & {
@@ -112,3 +115,9 @@
 }
 
 .drawer__underlay { z-index: 6000; }
+
+.drawer__message { padding: var(--block-start) var(--inline-start); }
+
+.drawer__message--custom {
+  p { margin: 0; }
+}
