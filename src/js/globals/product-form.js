@@ -162,11 +162,10 @@ class ProductForm extends HTMLElement {
           bundleButton.dispatchEvent(
             new CustomEvent('theme:bundle:button', {
               detail: {
-                button: bundleButton,
-                variantId: this.productForm.getFormState().variant.id,
-                price: this.productForm.getFormState().variant.price,
-                priceCompare: this.productForm.getFormState().variant.compare_at_price,
-                options: this.productForm.getFormState().variant.options,
+                data: {
+                  product: this.productJSON,
+                  variant: this.productForm.getFormState().variant,
+                },
               },
               bubbles: true,
             })
