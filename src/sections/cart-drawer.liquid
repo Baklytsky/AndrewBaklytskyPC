@@ -82,39 +82,35 @@
   <form id="cartForm" class="cart__form" action="{{ routes.cart_url }}" method="post" novalidate data-cart-form>
 
     <div class="cart__foot__inner">
-
       <div class="cart__price__holder" data-cart-price-holder>
         {%- render 'cart-price' -%}
       </div>
 
-      <div class="cart__buttons-all">
+      <div class="cart__buttons-wrapper">
+        {%- if settings.enable_accept_terms -%}
+          <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes"/>
+          <input type="checkbox" class="cart__acceptance__input" name="acceptance" id="acceptance" data-cart-acceptance-checkbox>
+          <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>{{ settings.accept_terms_text }}</label>
 
-        <div class="cart__buttons-wrapper">
-          {%- if settings.enable_accept_terms -%}
-            <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes"/>
-            <input type="checkbox" class="cart__acceptance__input" name="acceptance" id="acceptance" data-cart-acceptance-checkbox>
-            <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>{{ settings.accept_terms_text }}</label>
+          <p class="cart__terms cart__errors__content" data-terms-error-message></p>
+        {%- endif -%}
 
-            <p class="cart__terms cart__errors__content" data-terms-error-message></p>
-          {%- endif -%}
-
-          <div class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}" data-cart-checkout-buttons>
-            <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
-              <button type="submit" name="checkout" class="btn btn--primary btn--solid btn--full cart__checkout">
-                {%- if settings.show_lock_icon -%}
-                  {%- render 'animated-icon', filename: 'icon-lock' -%}
-                {%- endif -%}
-
-                {{- 'cart.general.checkout' | t -}}
-              </button>
-
-              {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
-                <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
-                  {{- content_for_additional_checkout_buttons -}}
-                </div>
+        <div class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}" data-cart-checkout-buttons>
+          <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
+            <button type="submit" name="checkout" class="btn btn--primary btn--solid btn--full cart__checkout">
+              {%- if settings.show_lock_icon -%}
+                {%- render 'animated-icon', filename: 'icon-lock' -%}
               {%- endif -%}
-            </fieldset>
-          </div>
+
+              {{- 'cart.general.checkout' | t -}}
+            </button>
+
+            {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
+              <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+                {{- content_for_additional_checkout_buttons -}}
+              </div>
+            {%- endif -%}
+          </fieldset>
         </div>
 
         {%- if checkout_buttons_block[0].settings.show_view_cart_button -%}
