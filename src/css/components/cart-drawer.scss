@@ -6,18 +6,16 @@
 }
 
 .drawer--cart {
+  --inner: var(--SPACING-SMALL); // leave for backward compatibility for now (until we check whether none of the elements in cart and cart-drawer need this custom prop)
+  --gap: var(--SPACING-SMALL);
+
   .cart__widget + .cart__form { margin-top: -1px; }
   .cart__widget + .cart__foot__inner { border-top: 0; }
 
   .cart__foot__inner { --sp-block: 20px; }
-  .cart__widget__title { padding-left: var(--inner); }
 
-  .cart__widget__content__inner {
-    padding-left: var(--inner);
-    padding-right: var(--inner);
-  }
   .product-upsell__errors .errors { margin-top: 0; }
-  .cart__payment-icons { padding: var(--inner); }
+  .cart__payment-icons { padding-inline: var(--sp-inline); }
 
   .cart__note { padding-block-end: var(--SPACING-TINY); }
 }
@@ -57,17 +55,17 @@
 .drawer__empty__inner {
   flex: 0 1 100%;
   width: 100%;
-  padding: var(--inner);
+  padding: var(--sp-block) var(--sp-inline);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--inner);
+  gap: var(--gap);
 }
 
 .drawer__empty__message {
   text-align: center;
   transition: all 0.3s;
-  margin: var(--inner) auto;
+  margin: var(--sp-block) auto;
 
   .is-hidden & { padding: 0; }
 }
@@ -75,9 +73,9 @@
 .drawer__empty__buttons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--inner);
+  gap: var(--gap);
   justify-items: center;
-  margin: 0 0 var(--inner);
+  margin: 0 0 var(--sp-block);
 }
 
 .drawer__empty__item { width: 100%; }
@@ -100,7 +98,6 @@
 }
 
 .drawer__errors .cart__errors__inner {
-  padding: calc(var(--inner) / 2) var(--inner);
   margin: 0;
   border-left: none;
   border-right: none;
@@ -135,12 +132,16 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: flex-start;
-  padding: var(--inner);
+  padding: var(--SPACING-LARGE) 0 calc(var(--SPACING-LARGE) / 2);
   border-bottom: 1px solid var(--border);
 
   a {
     --link: var(--text);
     --link-hover: var(--text-hover);
+  }
+
+  cart-items.drawer__items & {
+    padding-inline: var(--SPACING-MEDIUM);
   }
 }
 .cart__item--no-border { border-bottom: none; }
@@ -268,6 +269,6 @@
   flex-flow: column;
 }
 
-.drawer__inner .block__icon__container { padding: var(--inner); }
+.drawer__inner .block__icon__container { padding: var(--sp-block) var(--sp-inline); }
 
-.cart__custom-code { padding: var(--inner); }
+.cart__custom-code { padding: var(--sp-block) var(--sp-inline); }
