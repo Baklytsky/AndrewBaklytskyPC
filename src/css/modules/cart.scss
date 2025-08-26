@@ -269,15 +269,16 @@
 }
 
 .cart__total {
+  @include heading;
+
   position: relative;
+  margin: 0 0 var(--SPACING-TINY);
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
   align-items: center;
-  font-size: var(--font-body-x-small);
+  font-size: var(--font-heading-small);
   line-height: 1.33;
-  margin: var(--inner) 0;
-  font-weight: var(--FONT-WEIGHT-BODY-BOLD);
 }
 .cart__total.is-hidden { margin: 0; }
 
@@ -293,13 +294,12 @@
 }
 
 .cart__total__label {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  padding-right: 10px;
+  @include subheading;
+
+  padding-inline-end: var(--SPACING-TINY);
 }
 
 .cart__total__price {
-  font-size: var(--font-body-x-large);
   transition: opacity 0.5s ease-in-out;
 }
 
@@ -356,15 +356,23 @@
 }
 
 input.cart__acceptance__input {
-  width: 13px;
-  height: 13px;
-  margin: calc(var(--font-body-small) - 5px) 7px 5px 0;
+  --label-height: calc(var(--font-body-medium) * var(--line-height-normal) + 2 * var(--SPACING-MICRO));
+  --input-offset: calc(var(--label-height) / 2 - var(--font-body-medium) / 2);
+
+  width: var(--font-body-medium);
+  height: var(--font-body-medium);
+  margin: var(--input-offset) 4px var(--input-offset) 0;
 }
 
 .cart__acceptance__label {
   cursor: pointer;
   flex: 1;
-  font-size: var(--font-body-small);
+  line-height: var(--line-height-normal);
+  font-size: var(--font-body-medium);
+
+  p {
+    margin: var(--SPACING-MICRO) 0;
+  }
 }
 
 .cart__acceptance__input:checked ~ .cart__buttons--disabled::after {
@@ -387,7 +395,7 @@ input.cart__acceptance__input {
     opacity: 1;
     visibility: visible;
     max-height: 300px;
-    margin: calc(var(--inner) / 2) 0;
+    margin: var(--SPACING-MICRO) 0;
     transition: opacity 0.5s ease, margin 0.5s ease, max-height 0.5s cubic-bezier(0, 0, 1, 0), visibility 0.5s;
   }
 }
