@@ -1,8 +1,8 @@
 @use '../globals' as *;
 
 .cart {
-  --inner: var(--sp-inline);
-  --inner-offset: var(--sp-inline-offset);
+  --inner: var(--SPACING-SMALL); // leave for backward compatibility for now (until we check whether none of the elements in cart and cart-drawer need this custom prop)
+  --gap: var(--SPACING-SMALL);
 
   width: auto;
   padding-left: 20px;
@@ -19,7 +19,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
-  gap: var(--inner);
+  gap: var(--gap);
   text-align: center;
   width: 100%;
   max-width: var(--DRAWER-WIDTH-MOBILE);
@@ -60,8 +60,8 @@
 .cart__empty__buttons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--inner);
-  margin: var(--inner) 0;
+  gap: var(--gap);
+  margin: var(--sp-block) 0;
 }
 
 .cart__empty__item .btn { display: block; }
@@ -107,18 +107,15 @@
 .cart__items {
   width: 100%;
   border-top: 1px solid var(--border);
-  margin-top: var(--inner);
+  margin-top: var(--sp-block);
 
   .cart__item {
-    padding: var(--inner) 0;
-    border-bottom: 1px solid var(--border);
-
     &:last-child { border-bottom: 1px solid var(--border); }
   }
 
   .cart__item__content {
     @include media-query($medium) {
-      padding-left: var(--inner);
+      padding-left: var(--SPACING-SMALL);
     }
   }
 
@@ -173,6 +170,10 @@
 .cart__field { color: var(--text); }
 
 .cart__widget {
+  --sp-inline: var(--SPACING-MEDIUM);
+  --sp-inline-icon: calc(var(--SPACING-MEDIUM) + 16px);
+  --sp-block: calc(var(--SPACING-SMALL) - 1px);
+
   position: relative;
   display: block;
   margin-bottom: -1px;
@@ -184,23 +185,23 @@
 
 .cart__widget__title {
   position: relative;
-  padding: calc(var(--inner) - 2px) calc(var(--inner) + 30px) calc(var(--inner) - 2px) 0;
+  padding: var(--sp-block) var(--sp-inline-icon) var(--sp-block) var(--sp-inline);
   margin: 0;
   display: block;
-  font-size: var(--font-body-x-small);
+  font-size: var(--font-body-medium);
   line-height: 1.16;
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
 
   .icon {
     --icon-size: 16px;
 
-    right: var(--inner);
+    right: var(--sp-inline);
   }
 }
 
 .cart__widget label {
-  font-size: var(--font-body-x-small);
-  line-height: 1.36;
+  font-size: var(--font-body-medium);
+  line-height: 1.3125;
   color: inherit;
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
 }
@@ -208,12 +209,12 @@
 .cart__widget .cart__field {
   display: block;
   width: 100%;
-  font-size: var(--font-body-x-small);
-  line-height: 1.4;
+  font-size: var(--font-body-medium);
+  line-height: 1.3125;
 
   // Make font size at least 16px on mobile devices to prevent page auto zoom in
   @supports (-webkit-touch-callout: none) {
-    font-size: max(var(--font-body-x-small), 16px);
+    font-size: max(var(--font-body-medium), 16px);
   }
 }
 
@@ -224,7 +225,6 @@
 
 .cart__widget select.cart__field {
   appearance: none;
-  background-position: right center;
   background-image: var(--ICON-SELECT);
   background-repeat: no-repeat;
   background-position: right 10px center;
@@ -239,7 +239,7 @@
 // Show border bottom on cart page only
 .cart__widget--products p.cart__widget__title {
   border-bottom: 1px solid var(--border);
-  margin-bottom: var(--inner);
+  margin-bottom: var(--sp-block);
 }
 
 // Hide "Pair with" if no products available
@@ -251,7 +251,7 @@
   gap: 16px;
 }
 
-.cart__widget__content__inner { padding: calc(var(--inner) + 5px) 0; }
+.cart__widget__content__inner { padding: 0 var(--sp-inline) var(--sp-block); }
 
 .cart__foot__inner {
   --sp-block: 10px;
@@ -493,9 +493,9 @@ input.cart__acceptance__input {
   --icons: var(--accent);
 
   width: 100%;
-  padding: 5px var(--inner);
+  padding: 5px var(--sp-inline);
   border-radius: 3px;
-  margin-top: calc(var(--inner) - 2px);
+  margin-top: calc(var(--sp-block) - 2px);
   background-color: var(--accent-fade);
   font-size: var(--font-body-small);
   color: var(--text);
@@ -614,7 +614,7 @@ input.cart__acceptance__input {
 
 .cart__errors__inner {
   position: relative;
-  padding: calc(var(--inner) / 2) var(--inner);
+  padding: var(--SPACING-TINY) var(--sp-inline);
   border: 1px solid var(--COLOR-ERROR-BORDER);
   background-color: var(--COLOR-ERROR-BG);
   color: var(--COLOR-ERROR);
@@ -655,7 +655,7 @@ input.cart__acceptance__input {
 }
 
 .cart__message--custom {
-  padding: var(--inner);
+  padding: var(--sp-block) var(--sp-inline);
   margin: 15px 0 0;
 
   p { margin: 0 auto; }
@@ -685,17 +685,15 @@ input.cart__acceptance__input {
   &::after { content: '\0029'; }
 }
 
-.cart__form .block__icon__container { padding: var(--inner) 0; }
+.cart__form .block__icon__container { padding: var(--sp-block) 0; }
 
 .cart__payment-icons {
-  --gap: 10px;
-
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--SPACING-TINY);
   list-style: none;
   margin: 0;
-  padding: var(--inner) 0;
+  padding: var(--sp-block) 0;
 
   li {
     display: flex;
@@ -714,4 +712,4 @@ input.cart__acceptance__input {
   pointer-events: auto;
 }
 
-.cart__bundle__products .cart__item { padding-left: calc(var(--inner) * 2); }
+.cart__bundle__products .cart__item { padding-left: calc(var(--SPACING-SMALL) * 2); }
