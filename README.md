@@ -98,11 +98,3 @@ You can To deploy to one or more stores for environment(s) listed in `shopify.th
 The env command has a shorthand version of `-e` and can accept a comma-separated list of entries from `shopify.theme.toml`:
 
 `yarn deploy -e dev,qa,staging`
-
-## Lighthouse
-
-### Running lighthouse locally
-
-Running the following command will deploy your development theme, run lighthouse on it, then open the report
-
-`yarn lighthouse`

@@ -27,15 +27,10 @@
   data-section-type="blog"
 >
   <div class="wrapper--full-padded">
-    {%- if section.settings.show_title or section.settings.show_rss -%}
+    {%- if section.settings.show_title -%}
       <h1 class="blog__title h2">
         {%- if section.settings.show_title -%}
           {{ blog.title }}
-        {%- endif -%}
-        {%- if section.settings.show_rss -%}
-          <a class="icon-rss" href="{{ blog.title }}.atom" rel="noopener" target="_blank">
-            {%- render 'icon-rss' -%}
-          </a>
         {%- endif -%}
       </h1>
     {%- endif -%}
@@ -44,7 +39,7 @@
       <h2 class="blog__nav h5">
         <a href="{{ blog.url }}" title="{{ 'blogs.article.all' | t }}" class="btn btn--black">
           {{ current_tags.first }}
-          {%- render 'icon-cancel' -%}
+          {%- render 'icon-close' -%}
         </a>
       </h2>
     {%- endif -%}
@@ -93,12 +88,6 @@
       "id": "show_title",
       "label": "Show title",
       "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_rss",
-      "label": "Show RSS icon",
-      "default": false
     },
     {
       "type": "checkbox",
