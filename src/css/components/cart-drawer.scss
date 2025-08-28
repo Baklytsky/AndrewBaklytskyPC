@@ -10,7 +10,6 @@
   --gap: var(--SPACING-SMALL);
 
   .cart__widget + .cart__form { margin-top: -1px; }
-  .cart__widget + .cart__foot__inner { border-top: 0; }
 
   .cart__foot__inner { --sp-block: 20px; }
 
@@ -18,6 +17,30 @@
   .cart__payment-icons { padding-inline: var(--sp-inline); }
 
   .cart__note { padding-block-end: var(--SPACING-TINY); }
+
+  // Border conflicts between pinned blocks and cart foot inner
+  .drawer__foot {
+    .cart-block .accordion {
+      border-bottom: none;
+    }
+
+    .cart-block:last-child .accordion {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cart-block:first-child .accordion {
+      border-top: 1px solid var(--border);
+    }
+
+    // .cart__foot__inner {
+    //   border-top: none;
+    // }
+  }
+
+  // when cart foot inner is directly after a cart widget (non-pinned)
+  .cart-block:has(.cart__widget) + .cart-block:has(.cart__foot__inner) .cart__foot__inner {
+    // border-top: 0;
+  }
 }
 
 .drawer__empty {
