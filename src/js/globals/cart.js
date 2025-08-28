@@ -466,6 +466,11 @@ class CartItems extends HTMLElement {
         const operator = condition.operator;
         const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
         const price = data.price;
+        console.log(22222);
+        console.log(operator);
+        console.log(amount);
+        console.log(price);
+        console.log(data);
         const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
         return match;
         break;
@@ -502,7 +507,10 @@ class CartItems extends HTMLElement {
       const status = meta['promotion-status'];
       const timeNow = new Date();
       const config = meta['function-configuration'];
-      const rewards = config.rewards;
+      let rewards = config.rewards || config.tiers;
+
+      console.log(meta);
+      console.log(rewards);
 
       if (status === 'active' && timeNow > startDate && timeNow < endDate && rewards.length) {
         const price = cartJson.price;
@@ -511,6 +519,8 @@ class CartItems extends HTMLElement {
         const products = cartJson.products;
         const conditions = config.conditions;
         const addedRewards = cartJson.rewards;
+        const tierMode = config.cumulative;
+        const tierVariants = config.tiers;
         let result = false;
 
         const data = {
@@ -520,34 +530,205 @@ class CartItems extends HTMLElement {
           products: products,
         };
 
-        for (let i = 0; i < conditions.length; ) {
-          let groupResult = this.checkConditions(conditions[i], data);
-          i++;
+        // console.log(conditions);
+        // console.log('-----');
 
-          for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
-            groupResult = groupResult && this.checkConditions(conditions[i], data);
+        if (conditions?.length) {
+          for (let i = 0; i < conditions.length; ) {
+            let groupResult = this.checkConditions(conditions[i], data);
+            i++;
+
+            for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
+              groupResult = groupResult && this.checkConditions(conditions[i], data);
+            }
+
+            result = result || groupResult;
           }
 
-          result = result || groupResult;
-        }
-
-        if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
-          this.showGetCartResponse = false;
-          if (result && !addedRewards.length) {
-            let items = [];
-            rewards.forEach((reward) => {
-              items.push({
-                id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
-                quantity: reward.quantity,
-                properties: {
-                  _reward: `reward`,
-                },
+          if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
+            this.showGetCartResponse = false;
+            if (result && !addedRewards.length) {
+              let items = [];
+              rewards.forEach((reward) => {
+                items.push({
+                  id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
+                  quantity: reward.quantity ?? 1,
+                  properties: {
+                    _reward: `reward`,
+                  },
+                });
               });
+
+              this.addToCart(items);
+            } else {
+              this.removeMultipleProducts(addedRewards);
+            }
+          }
+        } else if (tierVariants.length) {
+          // console.log(tierVariants);
+          if (tierMode) {
+            let resultVariants = [];
+            let resultVariantsUnder = [];
+            tierVariants.forEach((tier) => {
+              const condition = {
+                type: 'ORDER_AMOUNT',
+                value: tier.threshold,
+                operator: 'greater_than_or_equal',
+              };
+              const resultCondition = this.checkConditions(condition, data);
+
+              if (resultCondition) {
+                resultVariants.push(tier);
+              } else {
+                resultVariantsUnder.push(tier);
+              }
             });
 
-            this.addToCart(items);
+            console.log(11111);
+            console.log(addedRewards);
+            console.log(resultVariants);
+            console.log(resultVariantsUnder);
+
+            let items1 = [];
+            let items2 = [];
+            let test3 = [];
+            resultVariants.forEach((resultVariant) => {
+              const variantId = resultVariant.variantId.replace('gid://shopify/ProductVariant/', '');
+              let flag = true;
+              if (addedRewards.length) {
+                addedRewards.forEach((addedReward) => {
+                  const addedRewardVariantId = addedReward.split(':')[0];
+
+                  if (addedRewardVariantId === variantId) {
+                    flag = false;
+                  }
+                });
+              }
+
+              if (flag) {
+                items1.push({
+                  id: variantId,
+                  quantity: 1,
+                  properties: {
+                    _reward: `reward`,
+                  },
+                });
+              }
+            });
+
+            resultVariantsUnder.forEach((resultVariant) => {
+              const variantId = resultVariant.variantId.replace('gid://shopify/ProductVariant/', '');
+
+              if (addedRewards.length) {
+                addedRewards.forEach((addedReward) => {
+                  const addedRewardVariantId = addedReward.split(':')[0];
+
+                  if (addedRewardVariantId === variantId) {
+                    items2.push(addedReward);
+                  }
+                });
+              }
+            });
+
+            console.log(items1);
+            console.log(items2);
+            console.log('--------');
+
+            if (items1.length || items2.length) {
+              this.showGetCartResponse = false;
+              let test6 = true;
+
+              if (items2.length) {
+                this.removeMultipleProducts(items2);
+                test6 = false;
+              }
+
+              if (items1.length && test6) {
+                this.addToCart(items1);
+              }
+            }
           } else {
-            this.removeMultipleProducts(addedRewards);
+            console.log('else');
+            let resultVariants = [];
+            let resultVariantsUnder = [];
+            tierVariants.forEach((tier) => {
+              const condition = {
+                type: 'ORDER_AMOUNT',
+                value: tier.threshold,
+                operator: 'greater_than_or_equal',
+              };
+              const resultCondition = this.checkConditions(condition, data);
+
+              if (resultCondition) {
+                resultVariants.push(tier);
+              } else {
+                resultVariantsUnder.push(tier);
+              }
+            });
+
+            console.log(11111);
+            console.log(addedRewards);
+            console.log(resultVariants);
+            console.log(resultVariantsUnder);
+
+            let items1 = [];
+            let items2 = [];
+            let test3 = [];
+            resultVariants.forEach((resultVariant) => {
+              const variantId = resultVariant.variantId.replace('gid://shopify/ProductVariant/', '');
+              let flag = true;
+              if (addedRewards.length) {
+                addedRewards.forEach((addedReward) => {
+                  const addedRewardVariantId = addedReward.split(':')[0];
+
+                  if (addedRewardVariantId === variantId) {
+                    flag = false;
+                  }
+                });
+              }
+
+              if (flag) {
+                items1.push({
+                  id: variantId,
+                  quantity: 1,
+                  properties: {
+                    _reward: `reward`,
+                  },
+                });
+              }
+            });
+
+            resultVariantsUnder.forEach((resultVariant) => {
+              const variantId = resultVariant.variantId.replace('gid://shopify/ProductVariant/', '');
+
+              if (addedRewards.length) {
+                addedRewards.forEach((addedReward) => {
+                  const addedRewardVariantId = addedReward.split(':')[0];
+
+                  if (addedRewardVariantId === variantId) {
+                    items2.push(addedReward);
+                  }
+                });
+              }
+            });
+
+            console.log(items1);
+            console.log(items2);
+            console.log('--------');
+
+            if (items1.length || items2.length) {
+              this.showGetCartResponse = false;
+              let test6 = true;
+
+              if (items2.length) {
+                this.removeMultipleProducts(items2);
+                test6 = false;
+              }
+
+              if (items1.length && test6) {
+                this.addToCart(items1);
+              }
+            }
           }
         }
       }

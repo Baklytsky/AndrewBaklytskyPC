@@ -12,7 +12,9 @@
   assign line_items_tags = null
   assign line_items_products = null
   assign line_items_rewards = null
-  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
+  assign buy_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
+  assign buy_promo_meta = shop.metafields[buy_promo_meta_name]
+  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--gwp-tiers'
   assign gwp_promo_meta = shop.metafields[gwp_promo_meta_name]
 -%}
 
@@ -95,6 +97,12 @@
         <div class="cart__item__content-inner">
           {%- if settings.show_cart_vendor -%}
             <p class="cart__item__text cart__item__text--vendor">{{ line_item.vendor }}</p>
+          {%- endif -%}
+
+          {%- if line_item.properties._reward == 'reward' -%}
+            <div class="heading-large">
+              {{ line_item.properties._reward }}
+            </div>
           {%- endif -%}
 
           <h4 class="cart__item__title">
@@ -498,22 +506,48 @@
   {%- endif -%}
 {%- endfor -%}
 
-{%- if gwp_promo_meta != blank -%}
-  {%- liquid
-    assign line_items_collections = line_items_collections | uniq
-    assign line_items_tags = line_items_tags | uniq
-    assign line_items_products = line_items_products | remove_first: ',' | split: ','
-    assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
-  -%}
-
-  <script type="application/json" data-cart-json>
-    {
-      "rewards": {{ line_items_rewards | json }},
-      "price": {{ cart.total_price | plus: 0 | json }},
-      "products": {{ line_items_products | json }},
-      "collections": {{ line_items_collections | json }},
-      "tags": {{ line_items_tags | json }},
-      "meta": {{ gwp_promo_meta | json }}
-    }
+{%- if buy_promo_meta != blank or gwp_promo_meta != blank -%}
+  <script>
+    console.log({{ buy_promo_meta | json }})
   </script>
+  <script>
+    console.log({{ gwp_promo_meta | json }})
+  </script>
+  {%- if gwp_promo_meta != blank -%}
+    {%- liquid
+      assign line_items_collections = line_items_collections | uniq
+      assign line_items_tags = line_items_tags | uniq
+      assign line_items_products = line_items_products | remove_first: ',' | split: ','
+      assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+    -%}
+
+    <script type="application/json" data-cart-json>
+      {
+        "rewards": {{ line_items_rewards | json }},
+        "price": {{ cart.total_price | plus: 0 | json }},
+        "products": {{ line_items_products | json }},
+        "collections": {{ line_items_collections | json }},
+        "tags": {{ line_items_tags | json }},
+        "meta": {{ gwp_promo_meta | json }}
+      }
+    </script>
+  {%- elsif buy_promo_meta != blank -%}
+    {%- liquid
+      assign line_items_collections = line_items_collections | uniq
+      assign line_items_tags = line_items_tags | uniq
+      assign line_items_products = line_items_products | remove_first: ',' | split: ','
+      assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+    -%}
+
+    <script type="application/json" data-cart-json>
+      {
+        "rewards": {{ line_items_rewards | json }},
+        "price": {{ cart.total_price | plus: 0 | json }},
+        "products": {{ line_items_products | json }},
+        "collections": {{ line_items_collections | json }},
+        "tags": {{ line_items_tags | json }},
+        "meta": {{ buy_promo_meta | json }}
+      }
+    </script>
+  {%- endif -%}
 {%- endif -%}
