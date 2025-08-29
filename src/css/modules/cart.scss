@@ -12,7 +12,7 @@
   overflow: visible;
   display: block;
   text-align: left;
-  max-width: 1250px;
+  max-width: 1380px;
 }
 
 .cart__empty {
@@ -87,7 +87,7 @@
 
   @include media-query($medium-up) {
     flex: 1 1 auto;
-    margin-right: var(--outer);
+    margin-right: calc(var(--gap) * 2);
   }
 
   @include media-query($small) {
@@ -99,6 +99,7 @@
 .cart__title {
   @include heading;
 
+  margin: 0;
   display: flex;
   line-height: 1.3;
   font-size: var(--font-heading-small);
@@ -155,10 +156,11 @@
 .cart__aside {
   position: sticky;
   top: 10px;
-  flex: 0 0 300px;
+  flex: 0 0 32%;
+  flex: 0 0 31.8%;
 
   @include media-query($medium) {
-    flex-basis: 280px;
+    flex-basis: 30%;
   }
 
   @include media-query($small) {
@@ -361,7 +363,8 @@
 }
 
 input.cart__acceptance__input {
-  --label-height: calc(var(--font-body-medium) * var(--line-height-normal) + 2 * var(--SPACING-MICRO));
+  --sp-block: 3px;
+  --label-height: calc(var(--font-body-medium) * var(--line-height-normal) + 2 * var(--sp-block));
   --input-offset: calc(var(--label-height) / 2 - var(--font-body-medium) / 2);
 
   width: var(--font-body-medium);
@@ -370,13 +373,15 @@ input.cart__acceptance__input {
 }
 
 .cart__acceptance__label {
+  --sp-block: 3px;
+
   cursor: pointer;
   flex: 1;
   line-height: var(--line-height-normal);
   font-size: var(--font-body-medium);
 
   p {
-    margin: var(--SPACING-MICRO) 0;
+    margin: var(--sp-block) 0;
   }
 }
 
@@ -667,8 +672,9 @@ input.cart__acceptance__input {
 }
 
 .cart__message--custom {
+  --sp-block: 13px;
+
   padding: var(--sp-block) var(--sp-inline);
-  margin: var(--sp-block) 0 0;
 
   p { margin: 0 auto; }
 }
