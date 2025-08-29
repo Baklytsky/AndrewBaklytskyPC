@@ -18,8 +18,20 @@
 
   .cart__note { padding-block-end: var(--SPACING-TINY); }
 
+  // Border conflicts between non-pinned blocks and cart title
+  .drawer__body {
+    .cart-block .accordion {
+      border-top: none;
+    }
+
+    .cart__item--no-border {
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
   // Border conflicts between pinned blocks and cart foot inner
   .drawer__foot {
+    .free-shipping,
     .cart-block .accordion {
       border-bottom: none;
     }
@@ -28,18 +40,11 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .free-shipping,
+    .cart__item:first-child,
     .cart-block:first-child .accordion {
       border-top: 1px solid var(--border);
     }
-
-    // .cart__foot__inner {
-    //   border-top: none;
-    // }
-  }
-
-  // when cart foot inner is directly after a cart widget (non-pinned)
-  .cart-block:has(.cart__widget) + .cart-block:has(.cart__foot__inner) .cart__foot__inner {
-    // border-top: 0;
   }
 }
 

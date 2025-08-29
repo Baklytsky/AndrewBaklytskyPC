@@ -200,7 +200,7 @@
 }
 
 .cart__widget label {
-  font-size: var(--font-body-medium);
+  font-size: var(--font-body-x-small);
   line-height: 1.3125;
   color: inherit;
   font-weight: var(--FONT-WEIGHT-BODY-BOLD);
@@ -248,7 +248,6 @@
 .cart__widget__products {
   position: relative;
   display: grid;
-  gap: 16px;
 }
 
 .cart__widget__content__inner { padding: 0 var(--sp-inline) var(--sp-block); }
@@ -271,13 +270,15 @@
 .cart__total {
   @include heading;
 
+  --font-size: var(--font-heading-small);
+
   position: relative;
   margin: 0 0 var(--SPACING-MICRO);
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
   align-items: center;
-  font-size: var(--font-heading-small);
+  font-size: var(--font-size);
   line-height: 1.33;
 
   .cart-block:has(.cart__acceptance__input) & {
@@ -487,29 +488,42 @@ input.cart__acceptance__input {
 .cart__discount {
   --text: var(--accent);
   --icons: var(--accent);
+  --font-size: var(--font-body-x-small);
 
   width: 100%;
   padding: 5px var(--sp-inline);
   border-radius: 3px;
   margin-top: calc(var(--sp-block) - 2px);
   background-color: var(--accent-fade);
-  font-size: var(--font-body-small);
+  font-size: var(--font-size);
   color: var(--text);
 }
 
 .cart__discount .icon,
 .cart__total__discount .icon {
-  --icon-size: 0.875rem;
+  --icon-size: calc(var(--font-size) + 5px);
 
+  position: relative;
+  top: -1px;
   fill: none;
-  margin-right: 5px;
+  flex: 0 0 var(--icon-size);
 }
 
 .cart__total__discount {
-  font-size: var(--font-body-x-small);
   color: var(--accent);
+
+  .cart__total {
+    --font-size: max(var(--font-heading-mini), 12px);
+
+    margin: 0;
+  }
 }
-.cart__total__discount .cart__total { margin: 0; }
+
+.cart__total__discount-label {
+  display: flex;
+  align-items: center;
+  gap: var(--SPACING-MICRO);
+}
 
 .cart__price {
   margin-bottom: 8px;
