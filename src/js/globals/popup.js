@@ -65,6 +65,7 @@ if (!customElements.get('popup-component')) {
 
         this.popup.addEventListener('close', () => this.popupCloseActions());
         document.addEventListener('theme:quick-add:open', this.popupCloseEvent);
+        document.addEventListener('theme:product:added', this.popupCloseEvent);
       }
 
       popupOpen() {
@@ -165,6 +166,7 @@ if (!customElements.get('popup-component')) {
 
       disconnectedCallback() {
         document.removeEventListener('theme:quick-add:open', this.popupCloseEvent);
+        document.removeEventListener('theme:product:added', this.popupCloseEvent);
       }
     }
   );
