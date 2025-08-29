@@ -12,6 +12,7 @@
   assign line_items_tags = null
   assign line_items_products = null
   assign line_items_rewards = null
+  assign line_items_gifts = null
   assign buy_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
   assign buy_promo_meta = shop.metafields[buy_promo_meta_name]
   assign gwp_promo_meta_name = settings.carbon_app_id | append: '--gwp-tiers'
@@ -32,6 +33,7 @@
     assign line_item_original_price = line_item.original_price
     assign line_item_unit_price = line_item.unit_price | money
     assign line_item_reward = false
+    assign line_item_gift = false
 
     assign bundle_name = line_item.properties._bundle_title
     assign bundle_image = line_item.properties._bundle_image
@@ -51,6 +53,11 @@
     if line_item.properties._reward == 'reward'
       assign line_item_reward = true
       assign line_items_rewards = line_items_rewards | append: ',' | append: line_item.key
+    endif
+
+    if line_item.properties._gift == 'gift'
+      assign line_item_gift = true
+      assign line_items_gifts = line_items_gifts | append: ',' | append: line_item.key
     endif
   -%}
 
@@ -102,6 +109,12 @@
           {%- if line_item.properties._reward == 'reward' -%}
             <div class="heading-large">
               {{ line_item.properties._reward }}
+            </div>
+          {%- endif -%}
+
+          {%- if line_item.properties._gift == 'gift' -%}
+            <div class="heading-large">
+              {{ line_item.properties._gift }}
             </div>
           {%- endif -%}
 
@@ -294,7 +307,7 @@
           </div>
 
           <quantity-counter class="cart__quantity-counter">
-            {%- unless bundle_opened or line_item_reward -%}
+            {%- unless bundle_opened or line_item_reward or line_item_gift -%}
               <a
                 class="cart__item__remove"
                 href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
@@ -307,7 +320,7 @@
             {%- endunless -%}
 
             <div class="cart__quantity">
-              {%- unless bundle_opened or line_item_reward -%}
+              {%- unless bundle_opened or line_item_reward or line_item_gift -%}
                 <button
                   class="cart__quantity-minus"
                   type="button"
@@ -336,13 +349,13 @@
                 value="{{ quantity }}"
                 title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
                 pattern="[0-9]*"
-                {% if bundle_opened or line_item_reward %}
+                {% if bundle_opened or line_item_reward or line_item_gift %}
                   data-bundle-cart-quantity
                   disabled
                 {% endif %}
               >
 
-              {%- unless bundle_opened or line_item_reward -%}
+              {%- unless bundle_opened or line_item_reward or line_item_gift -%}
                 <button
                   class="cart__quantity-plus"
                   type="button"
@@ -507,47 +520,41 @@
 {%- endfor -%}
 
 {%- if buy_promo_meta != blank or gwp_promo_meta != blank -%}
+  {%- liquid
+    assign line_items_collections = line_items_collections | uniq
+    assign line_items_tags = line_items_tags | uniq
+    assign line_items_products = line_items_products | remove_first: ',' | split: ','
+    assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+    assign line_items_gifts = line_items_gifts | remove_first: ',' | split: ','
+  -%}
+
   <script>
     console.log({{ buy_promo_meta | json }})
   </script>
   <script>
     console.log({{ gwp_promo_meta | json }})
   </script>
-  {%- if gwp_promo_meta != blank -%}
-    {%- liquid
-      assign line_items_collections = line_items_collections | uniq
-      assign line_items_tags = line_items_tags | uniq
-      assign line_items_products = line_items_products | remove_first: ',' | split: ','
-      assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
-    -%}
 
-    <script type="application/json" data-cart-json>
-      {
-        "rewards": {{ line_items_rewards | json }},
-        "price": {{ cart.total_price | plus: 0 | json }},
-        "products": {{ line_items_products | json }},
-        "collections": {{ line_items_collections | json }},
-        "tags": {{ line_items_tags | json }},
-        "meta": {{ gwp_promo_meta | json }}
+  <script type="application/json" data-cart-json>
+    {
+      "price": {{ cart.total_price | plus: 0 | json }},
+      "products": {{ line_items_products | json }},
+      "collections": {{ line_items_collections | json }},
+      "tags": {{ line_items_tags | json }},
+      "meta": {
+        {%- if buy_promo_meta != blank -%}
+          "reward": {
+            "rewards": {{ line_items_rewards | json }},
+            "config": {{ buy_promo_meta | json }}
+          }{%- if gwp_promo_meta != blank -%},{%- endif -%}
+        {%- endif -%}
+        {%- if gwp_promo_meta != blank -%}
+          "gift": {
+            "gifts": {{ line_items_gifts | json }},
+            "config": {{ gwp_promo_meta | json }}
+          }
+        {%- endif -%}
       }
-    </script>
-  {%- elsif buy_promo_meta != blank -%}
-    {%- liquid
-      assign line_items_collections = line_items_collections | uniq
-      assign line_items_tags = line_items_tags | uniq
-      assign line_items_products = line_items_products | remove_first: ',' | split: ','
-      assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
-    -%}
-
-    <script type="application/json" data-cart-json>
-      {
-        "rewards": {{ line_items_rewards | json }},
-        "price": {{ cart.total_price | plus: 0 | json }},
-        "products": {{ line_items_products | json }},
-        "collections": {{ line_items_collections | json }},
-        "tags": {{ line_items_tags | json }},
-        "meta": {{ buy_promo_meta | json }}
-      }
-    </script>
-  {%- endif -%}
+    }
+  </script>
 {%- endif -%}
