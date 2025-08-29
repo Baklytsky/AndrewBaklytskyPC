@@ -16,6 +16,7 @@ if (!customElements.get('popup-component')) {
         this.a11y = window.theme.a11y;
         this.isAnimating = false;
 
+        this.popupCloseEvent = this.popupClose.bind(this);
         this.bindListeners();
       }
 
@@ -63,6 +64,7 @@ if (!customElements.get('popup-component')) {
         });
 
         this.popup.addEventListener('close', () => this.popupCloseActions());
+        document.addEventListener('theme:quick-add:open', this.popupCloseEvent);
       }
 
       popupOpen() {
@@ -159,6 +161,10 @@ if (!customElements.get('popup-component')) {
         if (this.popup.hasAttribute('open') && this.popup.getAttribute('open') == true) {
           this.popupOpen();
         }
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('theme:quick-add:open', this.popupCloseEvent);
       }
     }
   );
