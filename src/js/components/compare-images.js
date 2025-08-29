@@ -1,11 +1,3 @@
-const selectors = {
-  imagesContainer: '[data-images-container]',
-  imageHolder: '[data-image-holder]',
-  imageElement: '[data-image-element]',
-  rangeButton: '[data-range-button]',
-  rangeInput: '[data-range-input]',
-};
-
 if (!customElements.get('compare-images')) {
   customElements.define(
     'compare-images',
@@ -13,10 +5,10 @@ if (!customElements.get('compare-images')) {
       constructor() {
         super();
 
-        this.imageHolder = this.querySelector(selectors.imageHolder);
-        this.imageElement = this.querySelector(selectors.imageElement);
-        this.rangeButton = this.querySelector(selectors.rangeButton);
-        this.rangeInput = this.querySelector(selectors.rangeInput);
+        this.imageHolder = this.querySelector('[data-image-holder]');
+        this.imageElement = this.querySelector('[data-image-element]');
+        this.rangeButton = this.querySelector('[data-range-button]');
+        this.rangeInput = this.querySelector('[data-range-input]');
         this.setOverlapImageSize = this.setOverlapImageSize.bind(this);
       }
 

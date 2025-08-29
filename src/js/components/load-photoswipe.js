@@ -2,38 +2,14 @@ import loadScript from '../util/loader';
 
 window.theme.LoadPhotoswipe = window.theme.LoadPhotoswipe || null;
 
-const selectors = {
-  popupContainer: '.pswp',
-  popupCloseBtn: '.pswp__custom-close',
-  popupIframe: 'iframe, video',
-  popupThumbs: '.pswp__thumbs',
-  popupButtons: '.pswp__button, .pswp__caption-close',
-};
-
-const classes = {
-  current: 'is-current',
-  customLoader: 'pswp--custom-loader',
-  customOpen: 'pswp--custom-opening',
-  loader: 'pswp__loader',
-  popupCloseButton: 'pswp__button--close',
-  isFocused: 'is-focused',
-};
-
-const attributes = {
-  dataOptionClasses: 'data-pswp-option-classes',
-  ariaCurrent: 'aria-current',
-};
-
-const loaderHTML = `<div class="${classes.loader}"><div class="loader pswp__loader-line"><div class="loader-indeterminate"></div></div></div>`;
-
 class LoadPhotoswipe {
   constructor(items, options = '') {
     this.items = items;
-    this.pswpElement = document.querySelectorAll(selectors.popupContainer)[0];
+    this.pswpElement = document.querySelectorAll('.pswp')[0];
     this.popup = null;
     this.popupThumbs = null;
-    this.popupThumbsContainer = this.pswpElement.querySelector(selectors.popupThumbs);
-    this.closeBtn = this.pswpElement.querySelector(selectors.popupCloseBtn);
+    this.popupThumbsContainer = this.pswpElement.querySelector('.pswp__thumbs');
+    this.closeBtn = this.pswpElement.querySelector('.pswp__custom-close');
     this.keyupCloseEvent = (e) => this.keyupClose(e);
     this.a11y = window.theme.a11y;
 
@@ -48,7 +24,7 @@ class LoadPhotoswipe {
   }
 
   init() {
-    this.pswpElement.classList.add(classes.customOpen);
+    this.pswpElement.classList.add('pswp--custom-opening');
 
     this.initLoader();
 
@@ -58,14 +34,14 @@ class LoadPhotoswipe {
   }
 
   initLoader() {
-    if (this.pswpElement.classList.contains(classes.customLoader) && this.options !== '' && this.options.mainClass) {
-      this.pswpElement.setAttribute(attributes.dataOptionClasses, this.options.mainClass);
+    if (this.pswpElement.classList.contains('pswp--custom-loader') && this.options !== '' && this.options.mainClass) {
+      this.pswpElement.setAttribute('data-pswp-option-classes', this.options.mainClass);
       let loaderElem = document.createElement('div');
-      loaderElem.innerHTML = loaderHTML;
+      loaderElem.innerHTML = `<div class="pswp__loader"><div class="loader pswp__loader-line"><div class="loader-indeterminate"></div></div></div>`;
       loaderElem = loaderElem.firstChild;
       this.pswpElement.appendChild(loaderElem);
     } else {
-      this.pswpElement.setAttribute(attributes.dataOptionClasses, '');
+      this.pswpElement.setAttribute('data-pswp-option-classes', '');
     }
   }
 
@@ -73,18 +49,18 @@ class LoadPhotoswipe {
     const PhotoSwipe = window.themePhotoswipe.PhotoSwipe.default;
     const PhotoSwipeUI = window.themePhotoswipe.PhotoSwipeUI.default;
 
-    if (this.pswpElement.classList.contains(classes.customLoader)) {
-      this.pswpElement.classList.remove(classes.customLoader);
+    if (this.pswpElement.classList.contains('pswp--custom-loader')) {
+      this.pswpElement.classList.remove('pswp--custom-loader');
     }
 
-    this.pswpElement.classList.remove(classes.customOpen);
+    this.pswpElement.classList.remove('pswp--custom-opening');
 
     this.popup = new PhotoSwipe(this.pswpElement, PhotoSwipeUI, this.items, this.options);
     this.popup.init();
 
     this.thumbsActions();
 
-    if (document.body.classList.contains(classes.isFocused)) {
+    if (document.body.classList.contains('is-focused')) {
       setTimeout(() => {
         this.a11y.trapFocus(this.pswpElement, {
           elementToFocus: this.closeBtn,
@@ -111,15 +87,15 @@ class LoadPhotoswipe {
     this.popupThumbsContainer.addEventListener('mousewheel', (e) => this.stopDisabledScroll(e));
     this.popupThumbsContainer.addEventListener('DOMMouseScroll', (e) => this.stopDisabledScroll(e));
 
-    this.popupThumbs = this.pswpElement.querySelectorAll(`${selectors.popupThumbs} > *`);
+    this.popupThumbs = this.pswpElement.querySelectorAll('.pswp__thumbs > *');
     this.popupThumbs.forEach((element, i) => {
       element.addEventListener('click', (e) => {
         e.preventDefault();
-        const lastCurrentElement = element.parentElement.querySelector(`.${classes.current}`);
-        lastCurrentElement.classList.remove(classes.current);
-        lastCurrentElement.setAttribute(attributes.ariaCurrent, false);
-        element.classList.add(classes.current);
-        element.setAttribute(attributes.ariaCurrent, true);
+        const lastCurrentElement = element.parentElement.querySelector('is-current');
+        lastCurrentElement.classList.remove('is-current');
+        lastCurrentElement.setAttribute('aria-current', false);
+        element.classList.add('is-current');
+        element.setAttribute('aria-current', true);
         this.popup.goTo(i);
       });
     });
@@ -139,7 +115,7 @@ class LoadPhotoswipe {
   }
 
   onClose() {
-    const popupIframe = this.pswpElement.querySelector(selectors.popupIframe);
+    const popupIframe = this.pswpElement.querySelector('iframe, video');
     if (popupIframe) {
       popupIframe.parentNode.removeChild(popupIframe);
     }
@@ -148,8 +124,8 @@ class LoadPhotoswipe {
       while (this.popupThumbsContainer.firstChild) this.popupThumbsContainer.removeChild(this.popupThumbsContainer.firstChild);
     }
 
-    this.pswpElement.setAttribute(attributes.dataOptionClasses, '');
-    const loaderElem = this.pswpElement.querySelector(`.${classes.loader}`);
+    this.pswpElement.setAttribute('data-pswp-option-classes', '');
+    const loaderElem = this.pswpElement.querySelector('.pswp__loader');
     if (loaderElem) {
       this.pswpElement.removeChild(loaderElem);
     }
@@ -168,16 +144,16 @@ class LoadPhotoswipe {
   }
 
   setCurrentThumb() {
-    const lastCurrentThumb = this.pswpElement.querySelector(`${selectors.popupThumbs} > .${classes.current}`);
+    const lastCurrentThumb = this.pswpElement.querySelector('.pswp__thumbs > .is-current');
     if (lastCurrentThumb) {
-      lastCurrentThumb.classList.remove(classes.current);
-      lastCurrentThumb.setAttribute(attributes.ariaCurrent, false);
+      lastCurrentThumb.classList.remove('is-current');
+      lastCurrentThumb.setAttribute('aria-current', false);
     }
 
     if (!this.popupThumbs) return;
     const currentThumb = this.popupThumbs[this.popup.getCurrentIndex()];
-    currentThumb.classList.add(classes.current);
-    currentThumb.setAttribute(attributes.ariaCurrent, true);
+    currentThumb.classList.add('is-current');
+    currentThumb.setAttribute('aria-current', true);
     this.scrollThumbs(currentThumb);
   }
 

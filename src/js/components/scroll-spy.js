@@ -4,22 +4,6 @@
     "top", "middle", "bottom"
 */
 
-const selectors = {
-  scrollSpy: '[data-scroll-spy]',
-};
-
-const classes = {
-  selected: 'is-selected',
-};
-
-const attributes = {
-  scrollSpyContainer: 'data-scroll-spy-container',
-  scrollSpy: 'data-scroll-spy',
-  mobile: 'data-scroll-spy-mobile',
-  desktop: 'data-scroll-spy-desktop',
-  triggerPoint: 'data-scroll-trigger-point',
-};
-
 if (!customElements.get('scroll-spy')) {
   customElements.define(
     'scroll-spy',
@@ -27,17 +11,17 @@ if (!customElements.get('scroll-spy')) {
       constructor() {
         super();
 
-        this.container = this?.closest(this?.getAttribute(attributes.scrollSpyContainer)) || document;
-        this.scrollSpyButton = this.querySelector(selectors.scrollSpy);
-        this.elementToSpy = this.container.querySelector(this.scrollSpyButton.getAttribute(attributes.scrollSpy));
-        this.anchorSelector = `[${attributes.scrollSpy}="#${this.elementToSpy.id}"]`;
+        this.container = this?.closest(this?.getAttribute('data-scroll-spy-container')) || document;
+        this.scrollSpyButton = this.querySelector('[data-scroll-spy]');
+        this.elementToSpy = this.container.querySelector(this.scrollSpyButton.getAttribute('data-scroll-spy'));
+        this.anchorSelector = `[data-scroll-spy="#${this.elementToSpy.id}"]`;
         this.anchor = this.container.querySelector(this.anchorSelector);
-        this.anchorSiblings = this.container.querySelectorAll(`[${attributes.scrollSpy}]`);
+        this.anchorSiblings = this.container.querySelectorAll('[data-scroll-spy]');
         this.initialized = false;
 
         if (!this.anchor) return;
 
-        this.triggerPoint = this.anchor.getAttribute(attributes.triggerPoint);
+        this.triggerPoint = this.anchor.getAttribute('data-scroll-trigger-point');
 
         this.scrollCallback = () => this.onScroll();
         this.toggleScrollObserver = this.toggleScrollObserver.bind(this);
@@ -64,9 +48,9 @@ if (!customElements.get('scroll-spy')) {
         const isDesktopView = !window.theme.isMobile();
         const isMobileView = !isDesktopView;
         return (
-          (isMobileView && this.anchor.hasAttribute(attributes.mobile)) ||
-          (isDesktopView && this.anchor.hasAttribute(attributes.desktop)) ||
-          (!this.anchor.hasAttribute(attributes.desktop) && !this.anchor.hasAttribute(attributes.mobile))
+          (isMobileView && this.anchor.hasAttribute('data-scroll-spy-mobile')) ||
+          (isDesktopView && this.anchor.hasAttribute('data-scroll-spy-desktop')) ||
+          (!this.anchor.hasAttribute('data-scroll-spy-desktop') && !this.anchor.hasAttribute('data-scroll-spy-mobile'))
         );
       }
 
@@ -90,11 +74,11 @@ if (!customElements.get('scroll-spy')) {
         // Update active classes
         this.anchorSiblings.forEach((anchor) => {
           if (!anchor.matches(this.anchorSelector)) {
-            anchor.classList.remove(classes.selected);
+            anchor.classList.remove('is-selected');
           }
         });
 
-        this.anchor.classList.add(classes.selected);
+        this.anchor.classList.add('is-selected');
       }
 
       triggerPointReached() {

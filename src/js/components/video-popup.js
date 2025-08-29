@@ -1,7 +1,3 @@
-const attributes = {
-  videoPlay: 'data-video-play',
-};
-
 if (!customElements.get('video-popup')) {
   customElements.define(
     'video-popup',
@@ -12,15 +8,15 @@ if (!customElements.get('video-popup')) {
       }
 
       connectedCallback() {
-        this.querySelectorAll(`[${attributes.videoPlay}]`)?.forEach((button) => {
+        this.querySelectorAll('[data-video-play]')?.forEach((button) => {
           button.addEventListener('click', (e) => {
             const button = e.currentTarget;
-            if (button.getAttribute(attributes.videoPlay).trim() !== '') {
+            if (button.getAttribute('data-video-play').trim() !== '') {
               e.preventDefault();
 
               const items = [
                 {
-                  html: button.getAttribute(attributes.videoPlay),
+                  html: button.dataset.videoPlay,
                 },
               ];
 
