@@ -1,0 +1,78 @@
+{%- doc -%}
+  Renders block content for all blocks that extend the "brick-group" block.
+
+  @param {string} children - The DOM content of the brick-group block.
+  @param {object} settings - The settings of the brick-group block.
+  @param {string} shopify_attributes - String with Shopify attributes for the editor.
+  @param {string} [class] - Optional classes for the brick-group block.
+  @param {string} [style] - Optional inline styles for the brick-group block.
+
+  @example
+  {% render 'brick-group', children: children, settings: block.settings, shopify_attributes: block.shopify_attributes %}
+{%- enddoc -%}
+
+{%- liquid
+  capture main_classes
+    unless settings.inherit_color_scheme
+      echo ' color-' | append: settings.color_scheme
+    endunless
+
+    if class != blank
+      echo ' ' | append: class
+    endif
+  endcapture
+
+  capture main_styles
+    echo 'padding-bottom: ' | append: settings.padding_bottom | append: 'px;'
+
+    if style != blank
+      echo ' ' | append: style
+    endif
+  endcapture
+
+  capture layout_classes
+    assign content_direction = settings.content_direction | default: 'column'
+    echo ' flex-layout-' | append: content_direction
+    if settings.stacked_on_mobile and content_direction == 'row'
+      echo ' flex-layout-row--column-mobile'
+    endif
+    echo ' size-style'
+    if settings.width == 'custom'
+      echo ' size-style--custom'
+    endif
+  endcapture
+
+  capture layout_styles
+    assign horizontal_alignment = settings.horizontal_alignment | default: 'flex-start'
+    assign vertical_alignment = settings.vertical_alignment | default: 'center'
+
+    if settings.content_direction == 'column'
+      assign horizontal_alignment = settings.horizontal_alignment_column | default: 'flex-start'
+      assign vertical_alignment = settings.vertical_alignment_column | default: 'center'
+    endif
+
+    assign vertical_alignment_mobile = vertical_alignment
+    if settings.stacked_on_mobile and vertical_alignment == 'flex-end'
+      assign vertical_alignment_mobile = 'flex-end'
+    endif
+    echo '--gap: ' | append: settings.gap | append: 'px; '
+    echo '--horizontal-alignment: ' | append: horizontal_alignment | append: '; '
+    echo '--vertical-alignment: ' | append: vertical_alignment | append: ';'
+    echo '--vertical-alignment-mobile: ' | append: vertical_alignment_mobile | append: '; '
+    if settings.width == 'custom'
+      echo '--size-style-width: ' | append: settings.custom_width | append: '%; '
+    elsif settings.width == 'fit-content'
+      echo '--size-style-width: fit-content; '
+    elsif settings.width == 'fill'
+      echo '--size-style-width: 100%; '
+    endif
+  endcapture
+-%}
+
+<div
+  class="brick-group{{ main_classes }} {{ layout_classes }}"
+  style="{{ main_styles }} {{ layout_styles }}"
+  {{ shopify_attributes }}
+>
+  {{- children -}}
+</div>
