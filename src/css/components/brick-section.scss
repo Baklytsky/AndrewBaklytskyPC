@@ -1,0 +1,82 @@
+@use '../globals' as *;
+
+// Layout styles: Column
+.brick-layout-column {
+  display: flex;
+  flex-flow: column var(--brick-wrap, wrap);
+  align-items: var(--horizontal-alignment, flex-start);
+  justify-content: var(--vertical-alignment, center);
+  gap: var(--brick-gap, 0);
+
+  @include media-query($small) {
+    align-items: var(--horizontal-alignment-mobile, center);
+    justify-content: var(--vertical-alignment-mobile, center);
+  }
+}
+
+// Layout styles: Row
+.brick-layout-row {
+  display: flex;
+  flex-flow: row var(--brick-wrap, wrap);
+  justify-content: var(--horizontal-alignment, flex-start);
+  align-items: var(--vertical-alignment, center);
+  gap: var(--brick-gap, 0);
+}
+
+.brick-layout-row--column-mobile {
+  @include media-query($small) {
+    flex-direction: column;
+    align-items: var(--horizontal-alignment-mobile, center);
+    justify-content: var(--vertical-alignment-mobile, center);
+  }
+}
+
+// Size styles: Row
+.brick-group--size-style > .brick-group__content > * {
+  width: var(--brick-width, 100%);
+}
+
+.brick-group--size-style > .brick-layout-row--column-mobile > * {
+  @include media-query($small) {
+    width: 100%;
+  }
+}
+
+.brick-group--fill > .brick-group__content > * {
+  flex: 1;
+}
+
+.brick-group--fit-content > .brick-group__content {
+  --brick-wrap: nowrap;
+}
+
+// Alignment styles
+.brick-group__content[style*='--horizontal-alignment: center'] > * {
+  text-align: center;
+}
+
+.brick-group__content[style*='--horizontal-alignment: flex-end'] > * {
+  text-align: right;
+}
+
+.brick-group__content[style*='--horizontal-alignment: flex-start'] > * {
+  text-align: left;
+}
+
+.brick-group__content[style*='--horizontal-alignment-mobile: center'] > * {
+  @include media-query($small) {
+    text-align: center;
+  }
+}
+
+.brick-group__content[style*='--horizontal-alignment-mobile: flex-end'] > * {
+  @include media-query($small) {
+    text-align: right;
+  }
+}
+
+.brick-group__content[style*='--horizontal-alignment-mobile: flex-start'] > * {
+  @include media-query($small) {
+    text-align: left;
+  }
+}

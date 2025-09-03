@@ -40,13 +40,6 @@
       "default": "column"
     },
     {
-      "type": "checkbox",
-      "id": "stacked_on_mobile",
-      "label": "Stacked on mobile",
-      "default": true,
-      "visible_if": "{{ block.settings.content_direction == 'row' }}"
-    },
-    {
       "type": "select",
       "id": "horizontal_alignment",
       "label": "Alignment",
@@ -91,6 +84,38 @@
       ],
       "default": "center",
       "visible_if": "{{ block.settings.content_direction == 'row' }}"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "Fit content"
+        },
+        {
+          "value": "fill",
+          "label": "Fill"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "fit-content",
+      "visible_if": "{{ block.settings.content_direction == 'row' }}"
+    },
+    {
+      "type": "range",
+      "id": "columns_count",
+      "label": "Columns count",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2,
+      "info": "Desktop only",
+      "visible_if": "{{ block.settings.content_direction == 'row' and block.settings.width == 'custom' }}"
     },
     {
       "type": "select",
@@ -150,38 +175,62 @@
     },
     {
       "type": "header",
-      "content": "Size"
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "stacked_on_mobile",
+      "label": "Stacked on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.content_direction == 'row' }}"
     },
     {
       "type": "select",
-      "id": "width",
-      "label": "Width",
+      "id": "horizontal_alignment_mobile",
+      "label": "Alignment",
       "options": [
         {
-          "value": "fit-content",
-          "label": "Fit content"
+          "value": "flex-start",
+          "label": "Left"
         },
         {
-          "value": "fill",
-          "label": "Fill"
+          "value": "center",
+          "label": "Center"
         },
         {
-          "value": "custom",
-          "label": "Custom"
+          "value": "flex-end",
+          "label": "Right"
+        },
+        {
+          "value": "space-between",
+          "label": "Space between"
         }
       ],
-      "default": "fill"
+      "default": "center"
     },
     {
-      "type": "range",
-      "id": "custom_width",
-      "label": "Custom width",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "%",
-      "default": 100,
-      "visible_if": "{{ block.settings.width == 'custom' }}"
+      "type": "select",
+      "id": "vertical_alignment_mobile",
+      "label": "Position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Bottom"
+        },
+        {
+          "value": "space-between",
+          "label": "Space between"
+        }
+      ],
+      "default": "center"
     },
     {
       "type": "header",
