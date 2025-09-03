@@ -137,7 +137,7 @@ hover-disclosure { display: block; }
 }
 
 .header__mobile__hamburger {
-  --icon-size: 32px;
+  --icon-size: 44px;
 
   position: relative;
   display: flex;
@@ -145,8 +145,8 @@ hover-disclosure { display: block; }
   justify-content: center;
   height: 100%;
   left: 0;
-  padding: 0 5px;
-  margin-left: -10px;
+  padding: 0;
+  margin-left: -12px;
   cursor: pointer;
 }
 
@@ -371,6 +371,8 @@ hover-disclosure { display: block; }
 .header__desktop__button .popout-header { margin: 0; }
 
 .navlink {
+  --icon-size: 32px;
+
   @include nav;
 
   line-height: 1.2;
@@ -380,12 +382,6 @@ hover-disclosure { display: block; }
   color: var(--link);
 
   &:hover { color: var(--link-hover); }
-
-  .icon {
-    --icon-size: 32px;
-
-    fill: none;
-  }
 }
 
 .navlink--search {
@@ -711,12 +707,11 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   line-height: var(--FONT-SIZE-NAV);
 }
 
-.navlink--cart--icon .header__cart__status {
-  @include header-cart-status;
-}
+.navlink--cart--icon {
+  --icon-size: 28px;
 
-.navlink--cart--icon .header__cart__status[data-cart-count="0"] {
-  display: none;
+  .header__cart__status { @include header-cart-status; }
+  .header__cart__status[data-cart-count="0"] { display: none; }
 }
 
 .navlink--cart--text .header__cart__status {
