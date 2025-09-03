@@ -147,6 +147,10 @@ if (!customElements.get('bundle-collection')) {
         this.selectedProducts = this.bundleProducts;
       }
 
+      isSupportedByGetSizedImageUrl(src, size = '100x') {
+        return getSizedImageUrl(src, size) !== null;
+      }
+
       setProductToPlaceholder(data, placeholder) {
         const template = this.querySelector(selectors.template);
         const cloneTemplate = template.content.cloneNode(true);
@@ -170,12 +174,23 @@ if (!customElements.get('bundle-collection')) {
           cloneTemplate.querySelector(selectors.placeholderOptions).textContent = data.optionsText;
         }
 
-        if (data.image) {
+        if (data.image.variant?.src || data.image.product?.src) {
           const placeholderImage = cloneTemplate.querySelector(selectors.placeholderImage);
           const imageTag = document.createElement('img');
           const imageWidth = placeholderImage.hasAttribute(attributes.placeholderImage) ? parseInt(placeholderImage.getAttribute(attributes.placeholderImage)) : 0;
+          const imageWidthRetina = imageWidth * 2;
+          let dataImageSrc = data.image.product?.src || null;
+          let dataImageAspectRatio = data.image.product?.aspect_ratio || null;
 
-          imageTag.src = getSizedImageUrl(data.image, `${imageWidth * 2}x`);
+          if (data.image.variant?.src) {
+            dataImageSrc = data.image.variant?.src;
+            dataImageAspectRatio = data.image.variant?.aspect_ratio;
+          }
+
+          const imageSrc = this.isSupportedByGetSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) ? getSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) : dataImageSrc;
+          imageTag.src = imageSrc;
+          imageTag.width = imageWidthRetina;
+          imageTag.height = imageWidthRetina / dataImageAspectRatio;
           imageTag.alt = data.title || '';
 
           imageTag.addEventListener('load', () => {
@@ -221,6 +236,7 @@ if (!customElements.get('bundle-collection')) {
         if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing) || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
         const variant = data.variant;
         const product = data.product;
+        const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {
           id: variant.id,
@@ -234,7 +250,15 @@ if (!customElements.get('bundle-collection')) {
           optionsText: variant.options.join(' / '),
           vendor: product.vendor,
           title: product.title,
-          image: variant.featured_image?.src || product.featured_image || null,
+          image: {
+            variant: {
+              src: variant.featured_image?.src,
+              width: variant.featured_image?.width,
+              height: variant.featured_image?.height,
+              aspect_ratio: variant.featured_image?.width / variant.featured_image?.height,
+            },
+            product: imageMediaItems[0]?.preview_image,
+          },
           variants: product.variants.length,
         };
 
