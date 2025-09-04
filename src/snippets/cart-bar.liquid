@@ -43,8 +43,10 @@
   >
     <div class="cart-bar__info">
       <h4 class="cart-bar__product__title">{{ product.title | strip_html }}</h4>
+    </div>
 
-      <div class="body-small cart-bar__product__price product__price" data-price-wrapper>
+    <div class="cart-bar__form">
+      <div class="cart-bar__product__price product__price body-small" data-price-wrapper>
         <span
           data-product-price
           {% if current_variant.compare_at_price > current_variant.price %}
@@ -67,13 +69,10 @@
           </s>
         {% endif %}
       </div>
-    </div>
-
-    <div class="cart-bar__form">
       <div class="cart-bar__submit product__submit product__submit--spb">
         <button
           type="button"
-          class="btn btn--primary btn--outline product__submit__add{% unless button_add %} product__submit__add--default{% endunless %}"
+          class="btn btn--primary btn--solid product__submit__add{% unless button_add %} product__submit__add--default{% endunless %}"
           {% if button_add %}
             data-add-to-cart-bar
           {% elsif any_variant_available %}
