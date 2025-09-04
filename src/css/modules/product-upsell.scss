@@ -8,6 +8,8 @@
 }
 
 .product-upsell {
+  --sp-inline: calc(var(--SPACING-SMALL) / 2);
+  --sp-block: calc(var(--SPACING-SMALL) / 2);
   --bg: var(--bg-accent);
   --text: var(--text-dark);
 
@@ -20,7 +22,10 @@
   color: var(--text);
 }
 
-.product-upsell__image { width: 120px; }
+.product-upsell__image {
+  padding: var(--sp-block) var(--sp-inline);
+  width: 120px;
+}
 
 .product-upsell__image__link {
   display: block;
@@ -41,14 +46,16 @@
 }
 
 .product-upsell__content {
-  --inner: 16px;
-
+  padding: var(--sp-block) var(--sp-inline) var(--sp-block) 0;
   width: calc(100% - 120px);
-  padding: var(--inner);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
 
-  @include media-query($large-up) {
-    --inner: 24px;
-  }
+.product-upsell__actions {
+  align-self: flex-end;
 }
 
 .product-upsell__link {
@@ -60,14 +67,15 @@
   @include body;
 
   font-size: var(--font-body-medium);
-  margin-top: 0;
+  margin: 0 0 2px;
 }
 
 .product-upsell__variant-title {
   @include body;
 
+  margin: 0 0 2px;
   font-size: var(--font-body-x-small);
-  color: var(--text-light);
+  font-style: italic;
 }
 
 .product-upsell__variant-title span {
@@ -84,75 +92,28 @@
 .product-upsell__price {
   @include body;
 
-  font-size: var(--font-body-small);
+  margin: 0 0 2px;
+  font-size: var(--font-body-x-small);
+  line-height: 1.33;
 }
 
 .product-upsell__price .unit {
   @include body;
 
   display: block;
-  margin-top: 5px;
-  color: var(--text-light);
-}
-
-.btn__outer {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  display: inline-grid;
-
-  @include media-query($mobile) {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin: 10px 0 0;
-  }
+  margin-block-start: 2px;
+  color: var(--text);
+  opacity: 0.6;
 }
 
 .product-upsell__btn {
-  --bg: var(--COLOR-BG);
-  --btn-size: 32px;
-  --icon-size: 24px;
-
-  position: relative;
-  overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: end;
-  min-width: var(--btn-size);
-  min-height: var(--btn-size);
-  padding: 0;
-  width: var(--btn-size);
-  border: none;
-  border-radius: var(--radius);
-  font-size: var(--font-body-small);
-  line-height: 32px;
-  color: var(--accent);
-  background: var(--bg);
-  transition: width 0.3s ease;
-
-  @include media-query($mobile) {
-    justify-self: flex-start;
-  }
+  min-width: 52px;
+  min-height: 30px;
+  padding: 7px 12px;
 
   .btn__text {
-    display: block;
-    opacity: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    transition: opacity 0.3s ease, padding 0.3s ease, visibility 0.3s;
-  }
-
-  .btn__plus {
-    position: relative;
     transition: opacity 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    align-self: center;
-    flex: 0 0 var(--icon-size);
-    margin: 0 4px;
   }
 
   .btn__loading {
@@ -174,30 +135,7 @@
 
   &.is-loading,
   &.is-added {
-    .btn__inner { width: var(--btn-size); }
-
-    .btn__plus,
     .btn__text { opacity: 0; }
-  }
-}
-
-@media (hover: hover) {
-  .btn__outer:hover {
-    .product-upsell__btn { width: 100%; }
-
-    .btn__text {
-      padding-right: 10px;
-      opacity: 1;
-    }
-
-    .is-added,
-    .is-loading { width: var(--btn-size); }
-
-    .is-added .btn__text,
-    .is-loading .btn__text {
-      opacity: 0;
-      visibility: hidden;
-    }
   }
 }
 
@@ -230,24 +168,15 @@
   }
 }
 
-quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc(var(--gap) / 2); }
+quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc(var(--SPACING-SMALL) / 2); }
 
 .product-upsell__holder--compact {
   .product-upsell,
   .product-upsell__errors.is-visible { margin-bottom: 0; }
-
-  .product-upsell__content { padding-right: 30px; }
 
   .product-upsell__image__link,
   .product-upsell__image__thumb { height: 100%; }
   .product-upsell__image__thumb { background: var(--COLOR-BG); }
 
   .product-upsell__btn:not(.btn) { justify-self: flex-start; }
-
-  .btn__outer {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    display: inline-grid;
-  }
 }

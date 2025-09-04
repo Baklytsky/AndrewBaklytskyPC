@@ -165,16 +165,22 @@
     endif
 
     # Set success message
-    assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message' | t
+    assign qualified_message_html = 'cart.general.primary_promo_qualified_message_html' | t
     if show_dual_promotion or both_promos_zero
-      assign qualified_shipping_message_text = 'cart.general.qualified_shipping_message_promos' | t
+      assign qualified_message_html = 'cart.general.dual_promos_qualified_message_html' | t
     elsif active_promo == 2
-      assign qualified_shipping_message_text = 'cart.general.qualified_gift_message' | t
+      assign qualified_message_html = 'cart.general.secondary_promo_qualified_message_html' | t
     endif
 
     assign qualified_shipping_message = ''
     if subtotal_without_currency >= active_limit
-      assign qualified_shipping_message = qualified_shipping_message_text
+      assign qualified_shipping_message = qualified_message_html
+    endif
+
+    if is_message_block
+      assign display_message = display_message | replace: '<br />', '' | replace: '<br>', ''
+      assign promo_2_text = promo_2_text | replace: '<br />', '' | replace: '<br>', ''
+      assign qualified_message_html = qualified_message_html | replace: '<br />', '' | replace: '<br>', ''
     endif
 
     # CSS classes
@@ -191,6 +197,10 @@
 
       if align_text != blank
         echo ' ' | append: align_text
+      endif
+
+      if block.settings.text_font_size != blank
+        echo ' ' | append: block.settings.text_font_size
       endif
     endcapture
   -%}
@@ -214,14 +224,14 @@
       </div>
     {%- endif -%}
 
-    <span class="free-shipping__success-message">{{ qualified_shipping_message_text }}</span>
+    <span class="free-shipping__text free-shipping__text--success">{{ qualified_message_html }}</span>
 
-    <span class="free-shipping__default-message">
+    <span class="free-shipping__text free-shipping__text--default">
       {{- display_message -}}
     </span>
 
     {%- if show_dual_promotion and promo_2_text != blank -%}
-      <span class="free-shipping__promo-message">
+      <span class="free-shipping__text free-shipping__text--dual-promos">
         {{ promo_2_text | replace: '||amount||', left_to_spend }}
       </span>
     {%- endif -%}

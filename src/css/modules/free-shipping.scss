@@ -9,9 +9,28 @@
   padding-bottom: var(--inner);
   border-bottom: 1px solid var(--border);
   margin: 0;
-  font-size: max(0.6875rem, var(--font-body-x-small));
-  line-height: 1.3;
+  line-height: 1.2;
   transition: max-height 0.3s, padding 0.3s, border 0.3s, opacity 0.3s, visibility 0.3s;
+
+  &:has(.free-shipping__progress-holder) .free-shipping__text {
+    margin-block-end: 10px;
+  }
+
+  &.text-center {
+    justify-content: center;
+  }
+
+  &.text-right {
+    justify-content: flex-end;
+  }
+
+  &.drawer__message {
+    padding: var(--sp-block) var(--sp-inline);
+  }
+
+  &.cart__message {
+    border: none;
+  }
 }
 
 .free-shipping.is-hidden {
@@ -23,39 +42,39 @@
   opacity: 0;
 }
 
-.free-shipping__default-message:empty + .free-shipping__progress-holder {
+.free-shipping__text--default:empty + .free-shipping__progress-holder {
   margin-top: 0;
 }
 
-.free-shipping__success-message,
-.free-shipping__default-message {
+.free-shipping__text--success,
+.free-shipping__text--default {
   flex: 1;
 }
 
-.free-shipping__promo-message,
-.free-shipping__success-message {
+.free-shipping__text--dual-promos,
+.free-shipping__text--success {
   display: none;
 }
 
 // When the first promo is active, show the message for the next promo
 .is-active:not(.is-success) {
-  .free-shipping__default-message {
+  .free-shipping__text--default {
     display: none;
   }
 
-  .free-shipping__promo-message {
+  .free-shipping__text--dual-promos {
     display: inline;
   }
 }
 
 // When the final promo is reached, show the success message
 .is-success {
-  .free-shipping__default-message,
-  .free-shipping__promo-message {
+  .free-shipping__text--default,
+  .free-shipping__text--dual-promos {
     display: none;
   }
 
-  .free-shipping__success-message {
+  .free-shipping__text--success {
     display: inline;
   }
 }
@@ -134,8 +153,6 @@
 
   position: relative;
   width: 100%;
-  padding: 12px 0;
-  margin-top: 5px;
   display: flex;
   align-items: center;
 }
