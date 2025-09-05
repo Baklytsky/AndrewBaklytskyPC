@@ -1,26 +1,47 @@
 @use '../globals' as *;
 
+.brick-row {
+  width: 100%;
+}
+
+.brick-column {
+  --sp-block: var(--padding-block);
+  --sp-inline: var(--padding-inline);
+
+  padding-block: var(--sp-block, 0);
+  padding-inline: var(--sp-inline, 0);
+  width: 100%;
+
+  @include media-query($medium) {
+    --sp-block: calc(var(--padding-block) * 0.8);
+    --sp-inline: calc(var(--padding-inline) * 0.8);
+  }
+
+  @include media-query($small) {
+    --sp-block: calc(var(--padding-block) * 0.6);
+    --sp-inline: calc(var(--padding-inline) * 0.6);
+  }
+}
+
 // Layout styles: Column
 .brick-column-layout {
   display: flex;
-  flex-flow: column var(--brick-wrap, wrap);
-  align-items: var(--horizontal-alignment, flex-start);
-  justify-content: var(--vertical-alignment, center);
+  flex-flow: column wrap;
   gap: var(--brick-gap, 0);
-
-  @include media-query($small) {
-    align-items: var(--horizontal-alignment-mobile, center);
-    justify-content: var(--vertical-alignment-mobile, center);
-  }
 }
 
 // Layout styles: Row
 .brick-row-layout {
   display: flex;
-  flex-flow: row var(--brick-wrap, wrap);
+  flex-flow: row wrap;
   justify-content: var(--horizontal-alignment, flex-start);
   align-items: var(--vertical-alignment, center);
   gap: var(--brick-gap, 0);
+
+  @include media-query($small) {
+    justify-content: var(--horizontal-alignment-mobile, center);
+    align-items: var(--vertical-alignment-mobile, center);
+  }
 }
 
 .brick-row-layout--column-mobile {
@@ -42,52 +63,8 @@
   }
 }
 
-// Alignment styles
-.brick-alignment[style*='--horizontal-alignment: center'] > * {
-  text-align: center;
-}
-
-.brick-alignment[style*='--horizontal-alignment: flex-end'] > * {
-  text-align: right;
-}
-
-.brick-alignment[style*='--horizontal-alignment: flex-start'] > * {
-  text-align: left;
-}
-
-.brick-alignment[style*='--horizontal-alignment-mobile: center'] > * {
-  @include media-query($small) {
-    text-align: center;
-  }
-}
-
-.brick-alignment[style*='--horizontal-alignment-mobile: flex-end'] > * {
-  @include media-query($small) {
-    text-align: right;
-  }
-}
-
-.brick-alignment[style*='--horizontal-alignment-mobile: flex-start'] > * {
-  @include media-query($small) {
-    text-align: left;
-  }
-}
-
-// Content styles
+// Content styles: Column & Row
 .brick-content {
-  .hero__title,
-  .hero__subheading,
-  .hero__reviews,
-  .hero__description,
-  .hero__button,
-  .hero__button-group,
-  .hero__collections,
-  .hero__products,
-  .hero__countdown,
-  .hero__custom-code {
-    margin-bottom: 0;
-  }
-
   .hero__custom-code,
   .hero__description {
     p:first-child { margin-top: 0; }

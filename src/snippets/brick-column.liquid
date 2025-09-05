@@ -23,7 +23,9 @@
   endcapture
 
   capture block_styles
-    echo 'padding-bottom: ' | append: settings.padding_bottom | append: 'px; '
+    echo '--padding-block: ' | append: settings.padding_block | append: 'px; '
+    echo '--padding-inline: ' | append: settings.padding_inline | append: 'px; '
+
     if style != blank
       echo style | append: ' '
     endif
@@ -31,15 +33,12 @@
 
   capture layout_classes
     echo ' brick-column-layout'
+    echo ' ' | append: settings.horizontal_alignment
+    echo ' ' | append: settings.horizontal_alignment_mobile
   endcapture
 
   capture layout_styles
-    assign horizontal_alignment = settings.horizontal_alignment | default: 'flex-start'
-    assign horizontal_alignment_mobile = settings.horizontal_alignment_mobile | default: 'center'
-
     echo '--brick-gap: ' | append: settings.gap | append: 'px; '
-    echo '--horizontal-alignment: ' | append: horizontal_alignment | append: '; '
-    echo '--horizontal-alignment-mobile: ' | append: horizontal_alignment_mobile | append: '; '
   endcapture
 -%}
 
@@ -48,7 +47,10 @@
   style="{{ block_styles }}"
   {{ shopify_attributes }}
 >
-  <div class="brick-column__content brick-alignment brick-content{{ layout_classes }}" style="{{ layout_styles }}">
+  <div
+    class="brick-column__content brick-content{{ layout_classes }}"
+    style="{{ layout_styles }}"
+  >
     {{- children -}}
   </div>
 </div>
