@@ -1,0 +1,54 @@
+{%- doc -%}
+  Renders block content for all blocks that extend the "brick-column" block.
+
+  @param {string} children - The DOM content of the brick-column block.
+  @param {object} settings - The settings of the brick-column block.
+  @param {string} shopify_attributes - String with Shopify attributes for the editor.
+  @param {string} [class] - Optional classes for the brick-column block.
+  @param {string} [style] - Optional inline styles for the brick-column block.
+
+  @example
+  {% render 'brick-column', children: children, settings: block.settings, shopify_attributes: block.shopify_attributes %}
+{%- enddoc -%}
+
+{%- liquid
+  capture block_classes
+    unless settings.inherit_color_scheme
+      echo ' color-' | append: settings.color_scheme
+    endunless
+
+    if class != blank
+      echo ' ' | append: class
+    endif
+  endcapture
+
+  capture block_styles
+    echo 'padding-bottom: ' | append: settings.padding_bottom | append: 'px; '
+    if style != blank
+      echo style | append: ' '
+    endif
+  endcapture
+
+  capture layout_classes
+    echo ' brick-column-layout'
+  endcapture
+
+  capture layout_styles
+    assign horizontal_alignment = settings.horizontal_alignment | default: 'flex-start'
+    assign horizontal_alignment_mobile = settings.horizontal_alignment_mobile | default: 'center'
+
+    echo '--brick-gap: ' | append: settings.gap | append: 'px; '
+    echo '--horizontal-alignment: ' | append: horizontal_alignment | append: '; '
+    echo '--horizontal-alignment-mobile: ' | append: horizontal_alignment_mobile | append: '; '
+  endcapture
+-%}
+
+<div
+  class="brick-column{{ block_classes }}"
+  style="{{ block_styles }}"
+  {{ shopify_attributes }}
+>
+  <div class="brick-column__content brick-alignment brick-content{{ layout_classes }}" style="{{ layout_styles }}">
+    {{- children -}}
+  </div>
+</div>
