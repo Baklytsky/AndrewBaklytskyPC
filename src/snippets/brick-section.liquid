@@ -26,22 +26,7 @@
   endcapture
 
   capture sizes
-    if image
-      echo '(min-width: 750px) 50vw, 100vw'
-    else
-      echo '(min-width: 750px) 50vw, 100vw'
-    endif
-  endcapture
-
-  assign item_sizes_padding_desktop = '100px'
-  assign item_sizes_padding_tablet = '60px'
-  if settings.grid_style == 'compact'
-    assign item_sizes_padding_desktop = '64px'
-    assign item_sizes_padding_tablet = '44px'
-  endif
-
-  capture alignment
-    echo ' align--middle-center'
+    echo '(min-width: 750px) 50vw, 100vw'
   endcapture
 -%}
 
@@ -53,9 +38,7 @@
   -%}
 
   {%- if image != blank -%}
-    <div class="brick__block__image"
-      data-slide="1"
-    >
+    <div class="brick__block__image">
       {%- render 'image-hero', aspect_ratio: image_aspect_ratio, image: image, sizes: sizes, desktop_height: image_desktop_height, mobile_height: image_mobile_height -%}
     </div>
   {%- endif -%}
@@ -73,7 +56,7 @@
   id="brickSection--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="brick-section"
-  class="brick-section section-padding{{ alignment }} {{ color_scheme }}"
+  class="brick-section section-padding {{ color_scheme }}"
 >
   <div class="brick__section{% if layout == 'is-reversed' %} brick__section--reversed{% endif %}{% if reverse_blocks %} brick__section--reversed-mobile{% endif %} {{ width }} {{ height }} {{ mobile_height }}">
     <div class="brick__block brick__block--images">
@@ -88,7 +71,7 @@
 
     {%- if children != blank -%}
       <div class="brick__block brick__block--text">
-        <div class="brick__block__text brick-layout-column">
+        <div class="brick__block__text brick-column-layout">
           {{ children }}
         </div>
       </div>
