@@ -25,8 +25,60 @@
     echo '--PB: ' | append: padding_bottom | append: 'px;'
   endcapture
 
+  unless settings.grid_override
+    assign width_normal = '1100px'
+    assign width_normal_wide = '80vw'
+
+    if settings.grid_style == 'compact'
+      assign layout_outer = '32px'
+      assign layout_outer_medium = '22px'
+      assign layout_outer_small = '16px'
+    elsif settings.grid_style == 'classic'
+      assign layout_outer = '50px'
+      assign layout_outer_medium = '30px'
+      assign layout_outer_small = '16px'
+    elsif settings.grid_style == 'tight'
+      assign layout_outer = '16px'
+      assign layout_outer_medium = '16px'
+      assign layout_outer_small = '16px'
+    elsif settings.grid_style == 'wide'
+      assign layout_outer = '80px'
+      assign layout_outer_medium = '60px'
+      assign layout_outer_small = '30px'
+    endif
+  else
+    assign width_normal = settings.page_width | times: settings.section_width_normal | divided_by: 100 | append: 'px'
+    assign width_normal_wide = width_normal
+
+    assign layout_outer = '50px'
+    assign layout_outer_medium = '30px'
+    assign layout_outer_small = '16px'
+
+    if settings.grid_gap_horizontal == 0
+      assign layout_outer = '32px'
+      assign layout_outer_medium = '22px'
+      assign layout_outer_small = '16px'
+    endif
+  endunless
+
   capture sizes
-    echo '(min-width: 750px) 50vw, 100vw'
+    if children != blank
+      if width == 'wrapper--full-padded'
+        echo '(min-width: 990px) calc(50vw - ' | append: layout_outer | append: ' * 2), (min-width: 750px) calc(50vw - ' | append: layout_outer_medium | append: ' * 2), calc(100vw - ' | append: layout_outer_small | append: ' * 2)'
+      elsif width == 'wrapper'
+        echo '(min-width: 1400px) calc(min(50vw, ' | append: width_normal_wide | append: ' / 2) - ' | append: layout_outer | append: ' * 2), (min-width: 750px) calc(min(50vw, ' | append: width_normal | append: ' / 2) - ' | append: layout_outer_medium | append: ' * 2), calc(100vw - ' | append: layout_outer_small | append: ' * 2)'
+      else
+        echo '(min-width: 750px) 50vw, 100vw'
+      endif
+    else
+      if width == 'wrapper--full-padded'
+        echo '(min-width: 990px) calc(100vw - ' | append: layout_outer | append: ' * 2), (min-width: 750px) calc(100vw - ' | append: layout_outer_medium | append: ' * 2), calc(100vw - ' | append: layout_outer_small | append: ' * 2)'
+      elsif width == 'wrapper'
+        echo '(min-width: 1400px) calc(min(100vw, ' | append: width_normal_wide | append: ') - ' | append: layout_outer | append: ' * 2), (min-width: 750px) calc(min(100vw, ' | append: width_normal | append: ') - ' | append: layout_outer_medium | append: ' * 2), calc(100vw - ' | append: layout_outer_small | append: ' * 2)'
+      else
+        echo '100vw'
+      endif
+    endif
   endcapture
 -%}
 
