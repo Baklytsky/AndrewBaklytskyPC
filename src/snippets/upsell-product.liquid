@@ -132,15 +132,12 @@
 
             {%- if onboarding and upsell_quick_add_hide == false -%}
               <div class="product-upsell__actions">
-                <div class="btn__outer">
-                  <button
-                    class="product-upsell__btn"
-                    type="button"
-                  >
-                    <span class="btn__plus"></span>
-                    <span class="btn__text">{{ upsell_button_text }}</span>
-                  </button>
-                </div>
+                <button
+                  class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                  type="button"
+                >
+                  <span class="btn__text">{{ upsell_button_text }}</span>
+                </button>
               </div>
             {%- endif -%}
           {%- else -%}
@@ -222,40 +219,16 @@
                       value="{{ sibling_color }}"
                     >
 
-                    <div class="btn__outer">
-                      <button
-                        class="product-upsell__btn"
-                        type="submit"
-                        name="add"
-                        data-quick-add-btn
-                        data-add-to-cart
-                        {% unless upsell_variant.available %}
-                          disabled="disabled"
-                        {% endunless %}
-                      >
-                        <span class="btn__plus"></span>
-                        <span class="btn__text">{{ upsell_button_text }}</span>
-
-                        <span class="btn__loader">
-                          <svg height="18" width="18" class="svg-loader">
-                            <circle r="7" cx="9" cy="9" />
-                            <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                          </svg>
-                        </span>
-
-                        <span class="btn__added">&nbsp;</span>
-                      </button>
-                    </div>
-                  {%- endform -%}
-                {%- else -%}
-                  <div class="btn__outer">
                     <button
-                      class="product-upsell__btn"
-                      type="button"
+                      class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                      type="submit"
+                      name="add"
                       data-quick-add-btn
-                      data-quick-add-modal-handle="{{ upsell_product.handle }}"
+                      data-add-to-cart
+                      {% unless upsell_variant.available %}
+                        disabled="disabled"
+                      {% endunless %}
                     >
-                      <span class="btn__plus"></span>
                       <span class="btn__text">{{ upsell_button_text }}</span>
 
                       <span class="btn__loader">
@@ -267,7 +240,25 @@
 
                       <span class="btn__added">&nbsp;</span>
                     </button>
-                  </div>
+                  {%- endform -%}
+                {%- else -%}
+                  <button
+                    class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                    type="button"
+                    data-quick-add-btn
+                    data-quick-add-modal-handle="{{ upsell_product.handle }}"
+                  >
+                    <span class="btn__text">{{ upsell_button_text }}</span>
+
+                    <span class="btn__loader">
+                      <svg height="18" width="18" class="svg-loader">
+                        <circle r="7" cx="9" cy="9" />
+                        <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                      </svg>
+                    </span>
+
+                    <span class="btn__added">&nbsp;</span>
+                  </button>
                 {%- endif -%}
               </div>
             {%- endunless -%}
