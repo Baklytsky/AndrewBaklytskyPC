@@ -344,7 +344,7 @@
           <span class="btn__text">
             {{ 'products.general.add_bundle' | t }}
           </span>
-          <span class="btn__plus"></span>
+          <span class="btn__bag"></span>
           <span class="btn__added">&nbsp;</span>
           <span class="btn__loader">
             <svg height="18" width="18" class="svg-loader">
@@ -409,7 +409,7 @@
                   {{ 'products.general.quick_add' | t }}
                 {%- endif -%}
               </span>
-              <span class="btn__plus"></span>
+              <span class="btn__bag"></span>
               <span class="btn__added">&nbsp;</span>
               <span class="btn__loader">
                 <svg height="18" width="18" class="svg-loader">
@@ -434,7 +434,7 @@
                 {{ 'products.general.quick_add' | t }}
               {%- endif -%}
             </span>
-            <span class="btn__plus"></span>
+            <span class="btn__bag"></span>
             <span class="btn__added">&nbsp;</span>
             <span class="btn__loader">
               <svg height="18" width="18" class="svg-loader">
@@ -568,33 +568,31 @@
           </div>
 
           {%- if double_img -%}
-            <div class="product-item__bg__under{% if settings.image_hover_disable_mobile %} product-item__bg__under--desktop{% endif %}">
-              <div class="product-item__bg__slide {% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
-                {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
-                  {%- liquid
-                    case product.media[1].media_type
-                      when 'video'
-                        echo product.media[1] | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
-                      when 'external_video'
-                        if product.media[1].host == 'youtube'
-                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: product.media[1].external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: product.media[1].host
-                        else
-                          echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: product.media[1].host
-                        endif
-                    endcase
-                  -%}
-                {%- else -%}
-                  {%- render 'image',
-                    image: product.media[1].preview_image,
-                    aspect_ratio: aspect_ratio,
-                    sizes: sizes,
-                    widths: widths,
-                    cover: true,
-                    loading: 'lazy',
-                    fetchpriority: 'high'
-                  -%}
-                {%- endif -%}
-              </div>
+            <div class="product-item__bg__under{% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
+              {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
+                {%- liquid
+                  case product.media[1].media_type
+                    when 'video'
+                      echo product.media[1] | media_tag: image_size: '1024x1024', class: 'media-video', autoplay: true, loop: true, controls: false, preload: 'none', muted: true
+                    when 'external_video'
+                      if product.media[1].host == 'youtube'
+                        echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, playlist: product.media[1].external_id, controls: false, mute: true, showinfo: false | external_video_tag: loading: 'lazy', data-host: product.media[1].host
+                      else
+                        echo product.media[1] | external_video_url: autoplay: true, playsinline: true, loop: true, controls: false, muted: true | external_video_tag: data-host: product.media[1].host
+                      endif
+                  endcase
+                -%}
+              {%- else -%}
+                {%- render 'image',
+                  image: product.media[1].preview_image,
+                  aspect_ratio: aspect_ratio,
+                  sizes: sizes,
+                  widths: widths,
+                  cover: true,
+                  loading: 'lazy',
+                  fetchpriority: 'high'
+                -%}
+              {%- endif -%}
             </div>
           {%- endif -%}
         {%- else -%}
