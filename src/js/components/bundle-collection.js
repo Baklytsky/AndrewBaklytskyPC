@@ -10,7 +10,7 @@ const selectors = {
   bundleTotalSavings: '[data-bundle-total-savings]',
   addButton: '[data-bundle-add-to-cart]',
   removeButton: '[data-bundle-remove-button]',
-  scrollToBundle: '[data-bundle-scroll-to]',
+  scrollToBundleButton: '[data-bundle-scroll-button]',
   placeholder: '[data-bundle-placeholder]',
   placeholderFilled: '[data-bundle-placeholder-filled]',
   placeholderPrice: '[data-placeholder-price]',
@@ -63,13 +63,18 @@ if (!customElements.get('bundle-collection')) {
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
         this.bundleTotalSavings = this.querySelector(selectors.bundleTotalSavings);
         this.addButton = this.querySelector(selectors.addButton);
-        this.scrollToBundle = this.querySelector(selectors.scrollToBundle);
+        this.scrollToBundleButton = this.querySelector(selectors.scrollToBundleButton);
         this.placeholders = this.querySelectorAll(selectors.placeholder);
         this.selectedProducts = [];
         this.bundleCartItems = null;
         this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
+        this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
+        this.bundleButtonChangeEvent = (event) => this.bundleButtonChange(event);
+        this.addProductsToCartEvent = (event) => this.addProductsToCart(event);
+        this.addProductToBundleModalEvent = (event) => this.addProductToBundleModal(event);
+        this.scrollToBundleEvent = (event) => this.scrollToBundle(event);
       }
 
       connectedCallback() {
@@ -77,54 +82,20 @@ if (!customElements.get('bundle-collection')) {
 
         if (this.buttons.length) {
           this.buttons.forEach((button) => {
-            button.addEventListener('click', () => {
-              if (!button.hasAttribute(attributes.quickAdd)) {
-                const productItem = button.closest(selectors.productGridItem);
-                const dataSelector = productItem.querySelector(selectors.bundleJson);
-                if ((dataSelector && !dataSelector.innerHTML) || !dataSelector) {
-                  return;
-                }
-
-                const data = JSON.parse(dataSelector.innerHTML);
-
-                this.addProductToBundle(data);
-              }
-            });
+            button.addEventListener('click', this.bundleButtonAddEvent);
           });
         }
 
-        this.addEventListener('theme:bundle:button', (e) => {
-          this.addProductToBundle(e.detail.data);
-        });
+        this.addEventListener('theme:bundle:change', this.bundleButtonChangeEvent);
 
-        if (this.scrollToBundle) {
-          this.scrollToBundle.addEventListener('click', () => {
-            window.theme.scrollTo(this.getBoundingClientRect().top);
-          });
+        this.addEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
+
+        if (this.scrollToBundleButton) {
+          this.scrollToBundleButton.addEventListener('click', this.scrollToBundleEvent);
         }
 
         if (this.addButton) {
-          this.addButton.addEventListener('click', () => {
-            if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
-              this.selectedProducts.forEach((element) => {
-                if (this.handle !== '') {
-                  this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
-                  element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
-                }
-              });
-
-              window.theme.a11y.lastElement = this.addButton;
-
-              document.dispatchEvent(
-                new CustomEvent('theme:cart:add', {
-                  detail: {
-                    button: this.addButton,
-                    data: this.selectedProducts,
-                  },
-                })
-              );
-            }
-          });
+          this.addButton.addEventListener('click', this.addProductsToCartEvent);
         }
 
         if (this.bundleProducts.length) {
@@ -132,6 +103,55 @@ if (!customElements.get('bundle-collection')) {
         }
 
         this.updateUI();
+      }
+
+      scrollToBundle() {
+        window.theme.scrollTo(this.getBoundingClientRect().top);
+      }
+
+      addProductToBundleModal(event) {
+        this.addProductToBundle(event.detail.data);
+      }
+
+      addProductsToCart() {
+        if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
+          this.selectedProducts.forEach((element) => {
+            if (this.handle !== '') {
+              this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
+              element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
+            }
+          });
+
+          window.theme.a11y.lastElement = this.addButton;
+
+          document.dispatchEvent(
+            new CustomEvent('theme:cart:add', {
+              detail: {
+                button: this.addButton,
+                data: this.selectedProducts,
+              },
+            })
+          );
+        }
+      }
+
+      bundleButtonChange(event) {
+        event.target.querySelector(selectors.button)?.addEventListener('click', this.bundleButtonAddEvent);
+      }
+
+      bundleButtonAdd(event) {
+        const target = event.currentTarget;
+        if (!target.hasAttribute(attributes.quickAdd)) {
+          const productItem = target.closest(selectors.productGridItem);
+          const dataSelector = productItem.querySelector(selectors.bundleJson);
+          if ((dataSelector && !dataSelector.innerHTML) || !dataSelector) {
+            return;
+          }
+
+          const data = JSON.parse(dataSelector.innerHTML);
+
+          this.addProductToBundle(data);
+        }
       }
 
       loadLocalStorage() {
@@ -367,7 +387,27 @@ if (!customElements.get('bundle-collection')) {
         return price;
       }
 
-      disconnectedCallback() {}
+      disconnectedCallback() {
+        if (!this.bundle) return;
+
+        if (this.buttons.length) {
+          this.buttons.forEach((button) => {
+            button.removeEventListener('click', this.bundleButtonAddEvent);
+          });
+        }
+
+        this.removeEventListener('theme:bundle:change', this.bundleButtonChangeEvent);
+
+        this.removeEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
+
+        if (this.scrollToBundleButton) {
+          this.scrollToBundleButton.removeEventListener('click', this.scrollToBundleEvent);
+        }
+
+        if (this.addButton) {
+          this.addButton.removeEventListener('click', this.addProductsToCartEvent);
+        }
+      }
     }
   );
 }

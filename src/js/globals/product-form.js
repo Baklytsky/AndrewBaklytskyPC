@@ -160,7 +160,7 @@ class ProductForm extends HTMLElement {
         const bundleButton = document.querySelector(`[${attributes.bundleProductButton}="${this.productJSON.id}"]`);
         if (bundleButton) {
           bundleButton.dispatchEvent(
-            new CustomEvent('theme:bundle:button', {
+            new CustomEvent('theme:bundle:button-modal', {
               detail: {
                 data: {
                   product: this.productJSON,

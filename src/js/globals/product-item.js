@@ -2,11 +2,20 @@ const selectors = {
   swapHandle: '[data-swap-handle]',
   nativeScrollbar: 'native-scrollbar',
   activeSibling: '.sibling__link--current',
+  bundleContainer: '[data-bundle]',
+  bundleTemplate: '[data-bundle-item-template]',
+  bundleReplaceTarget: '[data-bundle-item-replace]',
+  bundleImage: '[data-product-image]',
 };
 
 const attributes = {
   swapHandle: 'data-swap-handle',
   swapUrl: 'data-swap-url',
+  bundle: 'data-bundle',
+};
+
+const classes = {
+  bundle: 'is-bundle',
 };
 
 if (!customElements.get('product-item')) {
@@ -86,6 +95,21 @@ if (!customElements.get('product-item')) {
           const productItem = html.querySelector('product-item');
           const aosAnchor = productItem.id ? `#${productItem.id}` : '';
 
+          // Add bundle template to DOM
+          if (this.closest(selectors.bundleContainer)?.getAttribute(attributes.bundle) === 'true') {
+            productItem.classList.add(classes.bundle);
+            const template = productItem.querySelector(selectors.bundleTemplate);
+            const cloneTemplate = template.content.cloneNode(true);
+            const replaceTarget = productItem.querySelector(selectors.bundleReplaceTarget);
+            const productItemImage = productItem.querySelector(selectors.bundleImage);
+
+            if (replaceTarget) {
+              replaceTarget.replaceWith(cloneTemplate);
+            } else if (productItemImage) {
+              productItemImage.appendChild(cloneTemplate);
+            }
+          }
+
           // Get the raw HTML and replace animation placeholder strings
           let productHTML = productItem.outerHTML;
           productHTML = productHTML.includes('||itemAnimationDelay||') ? productHTML.replaceAll('||itemAnimationDelay||', aosDelay) : productHTML;
@@ -138,6 +162,8 @@ if (!customElements.get('product-item')) {
 
         this.pendingSwapHandle = null;
         document.removeEventListener('theme:html:change', this.onHtmlChange);
+
+        product.dispatchEvent(new CustomEvent('theme:bundle:change', {bubbles: true}));
       }
 
       scrollIntoView(elements = false) {
