@@ -254,6 +254,12 @@
         if contrast_white < contrast_limit and contrast_black > contrast_white
           assign link_opposite = '#000000'
         endif
+
+        assign color_bg_accent_opposite = scheme.settings.bg_light | color_lighten: 100
+        assign color_bg_accent_contrast = scheme.settings.bg_light | color_contrast: color_bg_accent_opposite
+        if color_bg_accent_contrast < contrast_limit
+          assign color_bg_accent_opposite = scheme.settings.bg_light | color_darken: 100
+        endif
       -%}
 
       --COLOR-TEXT: {{ scheme.settings.text }};
@@ -275,6 +281,8 @@
       --COLOR-BG-GRADIENT: {{ scheme.settings.bg_gradient | default: scheme.settings.bg }};
 
       --COLOR-BG-ACCENT: {{ scheme.settings.bg_light }};
+      --COLOR-BG-ACCENT-OPPOSITE: {{ color_bg_accent_opposite }};
+      --COLOR-BG-ACCENT-OPPOSITE-A50: {{ color_bg_accent_opposite | color_modify: 'alpha', 0.50 }};
       --COLOR-BG-ACCENT-LIGHTEN: {{ scheme.settings.bg_light | color_lighten: 15 }};
 
       --COLOR-BORDER: {{ scheme.settings.border | color_to_rgb }};
@@ -346,6 +354,8 @@
       --border-hairline: var(--COLOR-BORDER-HAIRLINE);
       --bg: var(--COLOR-BG-GRADIENT, var(--COLOR-BG));
       --bg-accent: var(--COLOR-BG-ACCENT);
+      --bg-accent-opposite: var(--COLOR-BG-ACCENT-OPPOSITE);
+      --bg-accent-opposite-a50: var(--COLOR-BG-ACCENT-OPPOSITE-A50);
       --bg-accent-lighten: var(--COLOR-BG-ACCENT-LIGHTEN);
       --icons: var(--COLOR-TEXT);
       --link: var(--COLOR-LINK);

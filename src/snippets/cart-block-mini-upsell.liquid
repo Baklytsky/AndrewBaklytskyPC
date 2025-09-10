@@ -14,6 +14,8 @@
   if product_count > 1
     assign show_slider = true
   endif
+
+  assign color_scheme = 'color-' | append: block.settings.color_scheme
 -%}
 
 {%- capture product_list -%}
@@ -31,7 +33,7 @@
 {%- endcapture -%}
 
 {%- if request.design_mode or product_count > 0 and product_list != blank -%}
-  <div class="cart__widget cart__widget--mini-upsell">
+  <div class="cart__widget cart__widget--mini-upsell {{ color_scheme }}">
     {%- if block.settings.title != blank -%}
       <div class="cart__widget__title">
         <span>{{ block.settings.title }}</span>
