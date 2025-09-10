@@ -88,13 +88,15 @@
 }
 
 .swiper-navigation-static {
+  position: relative;
+  right: -5px; // visual alignment with the padding of the container (not exact)
   display: flex;
   align-items: center;
-  gap: var(--SPACING-MICRO);
+  gap: 0;
 
   .swiper-button-prev,
   .swiper-button-next {
-    --btn-size: 26px;
+    --btn-size: 24px;
 
     margin: 0;
     box-shadow: none;
@@ -105,6 +107,23 @@
     display: flex;
     opacity: 1;
     transform: none;
+
+    svg {
+      --icon-size: 20px; // not affecting, but added for consistency
+
+      right: auto;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &::after {
+      display: none;
+    }
+
+    @media (hover: hover) {
+      &:hover svg {
+        transform: scale(1.4);
+      }
+    }
   }
 }
 
