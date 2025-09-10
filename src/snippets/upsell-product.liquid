@@ -9,6 +9,7 @@
   - upsell_modifier: {String} Modifier class
   - upsell_button_text: {String} Button text
   - is_compact: {Boolean} Is compact - used on Cart/Cart drawer and Article Sidebar
+  - is_mini_upsell: {Boolean} Is mini upsell - used for mini product upsell blocks
   - show_available_upsell_only: {Boolean} Show available upsell only
   - onboarding: {Boolean} Onboarding mode
 
@@ -21,6 +22,7 @@
     upsell_modifier: 'product-upsell--modifier',
     upsell_button_text: 'Add to cart',
     is_compact: false,
+    is_mini_upsell: false,
     show_available_upsell_only: false,
     onboarding: false
   %}
@@ -33,6 +35,7 @@
   assign upsell_description = upsell_description | default: ''
   assign upsell_description_font_size = upsell_description_font_size | default: ''
   assign is_compact = is_compact | default: false
+  assign is_mini_upsell = is_mini_upsell | default: false
 
   if upsell_product == blank
     assign show_upsell = false
@@ -87,7 +90,7 @@
 {%- if show_upsell -%}
   <quick-add-product>
     <div
-      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}"
+      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}{% if is_mini_upsell %} product-upsell__holder--mini{% endif %}"
       data-quick-add-holder="{{ upsell_product.id }}"
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>

@@ -1,0 +1,78 @@
+{% comment %}
+  Renders mini product upsell block with slider functionality for Cart drawer
+
+  Accepts:
+  - block: {Object} Block object (required)
+
+  Usage:
+  {% render 'cart-block-mini-upsell', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign product_count = block.settings.product_list.count
+  assign show_slider = false
+  if product_count > 1
+    assign show_slider = true
+  endif
+-%}
+
+{%- capture product_list -%}
+  {%- for product in block.settings.product_list limit: 3 -%}
+    {%- if show_slider -%}
+      <swiper-slide class="cart__widget__mini-upsell-slide">
+    {%- endif -%}
+
+      {%- render 'upsell-product', upsell_product: product, is_compact: true, is_mini_upsell: true -%}
+
+    {%- if show_slider -%}
+      </swiper-slide>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if request.design_mode or product_count > 0 and product_list != blank -%}
+  <div class="cart__widget cart__widget--mini-upsell">
+    {%- if block.settings.title != blank -%}
+      <div class="cart__widget__title">
+        <span>{{ block.settings.title }}</span>
+
+        {%- if product_count > 1 -%}
+          <div class="cart__widget__title__arrows">
+            <div class="{{ block.id }}--button swiper-button-prev">
+              {{ 'icon-nav-arrow-left.svg' | inline_asset_content }}
+            </div>
+            <div class="{{ block.id }}--button swiper-button-next">
+              {{ 'icon-nav-arrow-right.svg' | inline_asset_content }}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="cart__widget__content">
+      <div class="cart__widget__content__inner">
+        {%- if show_slider -%}
+          <div class="cart__widget__mini-upsell-slider swiper">
+            <swiper-container
+              class="swiper-wrapper"
+              loop="true"
+              grab-cursor="true"
+              autoplay="false"
+              {%- if product_count > 1 %}
+                navigation="true"
+                navigation-prev-el=".{{ block.id }}--button.swiper-button-prev"
+                navigation-next-el=".{{ block.id }}--button.swiper-button-next"
+              {% endif -%}
+            >
+              {{- product_list -}}
+            </swiper-container>
+          </div>
+        {%- else -%}
+          <div class="cart__widget__products">
+            {{- product_list -}}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
