@@ -35,6 +35,11 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   quickAddModalTemplate: '[data-quick-add-modal-template]',
+  instantAddForm: '.product-upsell__form--instant-add',
+  variantIdInput: '[data-variant-id]',
+  swatchInput: '.product-upsell__swatch input[type="radio"]',
+  dropdownOption: '.product-upsell__dropdown [data-popout-option]',
+  popoutInput: '.product-upsell__dropdown [data-popout-input]',
 };
 
 const attributes = {
@@ -66,6 +71,7 @@ class QuickAddProduct extends HTMLElement {
 
     this.modalButtonClickEvent = this.modalButtonClickEvent.bind(this);
     this.quickAddLoadingToggle = this.quickAddLoadingToggle.bind(this);
+    this.handleInstantAddVariantChange = this.handleInstantAddVariantChange.bind(this);
   }
 
   connectedCallback() {
@@ -98,6 +104,7 @@ class QuickAddProduct extends HTMLElement {
     if (this.quickAddHolder) {
       this.quickAddHolder.addEventListener('animationend', this.quickAddLoadingToggle);
       this.errorHandler();
+      this.initInstantAdd();
     }
   }
 
@@ -357,6 +364,110 @@ class QuickAddProduct extends HTMLElement {
       });
     }
     return response;
+  }
+
+  /**
+   * Initialize instant add functionality for single option products
+   */
+  initInstantAdd() {
+    const instantAddForm = this.quickAddHolder.querySelector(selectors.instantAddForm);
+    if (!instantAddForm) return;
+
+    // Handle swatch selection
+    const swatchInputs = instantAddForm.querySelectorAll(selectors.swatchInput);
+    swatchInputs.forEach((input) => {
+      input.addEventListener('change', this.handleInstantAddVariantChange);
+    });
+
+    // Handle dropdown selection
+    const dropdownOptions = instantAddForm.querySelectorAll(selectors.dropdownOption);
+    dropdownOptions.forEach((option) => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.handleDropdownSelection(option, instantAddForm);
+      });
+    });
+
+    // Handle dropdown toggle
+    const toggleButton = instantAddForm.querySelector('.select-popout__toggle');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.toggleDropdown(toggleButton, instantAddForm);
+      });
+    }
+  }
+
+  /**
+   * Handle variant change for instant add (swatches)
+   */
+  handleInstantAddVariantChange(e) {
+    const variantId = e.target.getAttribute('data-variant-id');
+    const instantAddForm = e.target.closest(selectors.instantAddForm);
+
+    if (variantId && instantAddForm) {
+      const variantIdInput = instantAddForm.querySelector(selectors.variantIdInput);
+      if (variantIdInput) {
+        variantIdInput.value = variantId;
+        variantIdInput.dispatchEvent(new Event('change'));
+      }
+    }
+  }
+
+  /**
+   * Toggle dropdown open/close state
+   */
+  toggleDropdown(toggleButton, instantAddForm) {
+    const popoutList = instantAddForm.querySelector('.select-popout__list');
+    const isOpen = popoutList.classList.contains('is-open');
+
+    if (isOpen) {
+      popoutList.classList.remove('is-open');
+      toggleButton.setAttribute('aria-expanded', 'false');
+    } else {
+      popoutList.classList.add('is-open');
+      toggleButton.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  /**
+   * Handle dropdown selection for instant add
+   */
+  handleDropdownSelection(selectedOption, instantAddForm) {
+    const variantId = selectedOption.getAttribute('data-variant-id');
+    const value = selectedOption.getAttribute('data-value');
+    const popoutInput = instantAddForm.querySelector(selectors.popoutInput);
+    const toggleButton = instantAddForm.querySelector('.select-popout__toggle');
+    const toggleText = toggleButton.querySelector('[data-popout-toggle-text]');
+    const popoutList = instantAddForm.querySelector('.select-popout__list');
+
+    if (variantId && popoutInput) {
+      // Update the hidden input value
+      popoutInput.value = value;
+      popoutInput.dispatchEvent(new Event('change'));
+
+      // Update the variant ID
+      const variantIdInput = instantAddForm.querySelector(selectors.variantIdInput);
+      if (variantIdInput) {
+        variantIdInput.value = variantId;
+        variantIdInput.dispatchEvent(new Event('change'));
+      }
+
+      // Update the toggle button text
+      if (toggleText) {
+        toggleText.textContent = value;
+      }
+
+      // Update active state
+      popoutList.querySelectorAll('.select-popout__item').forEach((item) => {
+        item.classList.remove('is-active');
+      });
+      selectedOption.closest('.select-popout__item').classList.add('is-active');
+
+      // Close the dropdown
+      popoutList.classList.remove('is-open');
+      toggleButton.setAttribute('aria-expanded', 'false');
+    }
   }
 
   resetAnimatedItems() {
