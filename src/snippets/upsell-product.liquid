@@ -251,51 +251,107 @@
               </div>
             {%- endif -%}
 
-            {%- unless upsell_quick_add_hide -%}
-              <div class="product-upsell__actions">
-                {%- if enable_instant_add -%}
-                  {%- comment -%} Instant add: display a variant selector {%- endcomment -%}
-                  {%- form 'product',
-                    upsell_product,
-                    id: product_form_id,
-                    class: 'product-upsell__form product-upsell__form--instant-add'
-                  -%}
-                    <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
+            {%- if enable_instant_add -%}
+              {%- comment -%} Instant add: display a variant selector after price {%- endcomment -%}
+              {%- form 'product',
+                upsell_product,
+                id: product_form_id,
+                class: 'product-upsell__form product-upsell__form--instant-add'
+              -%}
+                <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
 
-                    {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
-                    <input
-                      type="hidden"
-                      form="{{ product_form_id }}"
-                      name="properties[{{ 'general.siblings.label' | t }}]"
-                      value="{{ sibling_color }}"
-                    >
+                {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
+                <input
+                  type="hidden"
+                  form="{{ product_form_id }}"
+                  name="properties[{{ 'general.siblings.label' | t }}]"
+                  value="{{ sibling_color }}"
+                >
 
-                    {%- comment -%} Variant selector {%- endcomment -%}
-                    <div class="product-upsell__variant-selector">
-                      {%- if is_color_option -%}
-                        {%- comment -%} Color swatches {%- endcomment -%}
-                        <div class="radio__buttons radio__buttons--top" data-variant-buttons>
+                {%- comment -%} Variant selector {%- endcomment -%}
+                <div class="product-upsell__variant-selector">
+                  {%- if is_color_option -%}
+                    {%- comment -%} Color swatches {%- endcomment -%}
+                    <div class="radio__buttons radio__buttons--top" data-variant-buttons>
+                      {%- for value in single_option.values -%}
+                        {%- liquid
+                          assign swatch_value = null
+                          if value.swatch
+                            if value.swatch.image
+                              assign image_url = value.swatch.image | image_url: width: 96
+                              assign swatch_value = 'url(' | append: image_url | append: ')'
+                            elsif value.swatch.color
+                              assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                            endif
+                          else
+                            assign swatch_value = value | handle
+                          endif
+
+                          capture swatch_style
+                            if swatch_value != null and swatch_value != ''
+                              echo '--swatch: ' | append: swatch_value | append: ';'
+                            endif
+                          endcapture
+
+                          assign input_id = product_form_id | append: '-swatch-' | append: value | handle
+                          assign variant_for_value = null
+                          for variant in upsell_product.variants
+                            if variant.options[0] == value
+                              assign variant_for_value = variant
+                              break
+                            endif
+                          endfor
+                        -%}
+
+                        <tooltip-component
+                          data-tooltip="{{ value | escape | capitalize }}"
+                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ value | handle }}"
+                          {%- if swatch_style != '' -%}
+                            style="{{ swatch_style }}"
+                          {%- endif -%}
+                        >
+                          <input
+                            type="radio"
+                            form="{{ product_form_id }}"
+                            data-single-option-selector
+                            data-index="option1"
+                            name="options[{{ single_option.name | escape }}]-{{ unique }}"
+                            value="{{ value | escape }}"
+                            id="{{ input_id }}"
+                            data-variant-id="{{ variant_for_value.id }}"
+                            {% if value == upsell_variant.options[0] %}
+                              checked
+                            {% endif %}
+                          >
+                          <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
+                            <span class="visually-hidden">{{ value }}</span>
+                          </label>
+                        </tooltip-component>
+                      {%- endfor -%}
+                    </div>
+                  {%- else -%}
+                    {%- comment -%} Dropdown selector {%- endcomment -%}
+                    <div class="product-upsell__dropdown">
+                      <popout-select class="select-popout">
+                        <button
+                          type="button"
+                          class="select-popout__toggle"
+                          aria-expanded="false"
+                          aria-controls="{{ product_form_id }}-select-{{ single_option.name | handle }}"
+                          aria-labelledby="{{ product_form_id }}-select-{{ single_option.name | handle }}-label"
+                          data-popout-toggle
+                        >
+                          <span data-popout-toggle-text>{{ upsell_variant.options[0] }}</span>
+                          {%- render 'icon-nav-arrow-down' -%}
+                        </button>
+
+                        <ul
+                          id="{{ product_form_id }}-select-{{ single_option.name | handle }}"
+                          class="select-popout__list"
+                          data-popout-list
+                        >
                           {%- for value in single_option.values -%}
                             {%- liquid
-                              assign swatch_value = null
-                              if value.swatch
-                                if value.swatch.image
-                                  assign image_url = value.swatch.image | image_url: width: 96
-                                  assign swatch_value = 'url(' | append: image_url | append: ')'
-                                elsif value.swatch.color
-                                  assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
-                                endif
-                              else
-                                assign swatch_value = value | handle
-                              endif
-
-                              capture swatch_style
-                                if swatch_value != null and swatch_value != ''
-                                  echo '--swatch: ' | append: swatch_value | append: ';'
-                                endif
-                              endcapture
-
-                              assign input_id = product_form_id | append: '-swatch-' | append: value | handle
                               assign variant_for_value = null
                               for variant in upsell_product.variants
                                 if variant.options[0] == value
@@ -304,118 +360,66 @@
                                 endif
                               endfor
                             -%}
-
-                            <tooltip-component
-                              data-tooltip="{{ value | escape | capitalize }}"
-                              class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ value | handle }}"
-                              {%- if swatch_style != '' -%}
-                                style="{{ swatch_style }}"
-                              {%- endif -%}
-                            >
-                              <input
-                                type="radio"
-                                form="{{ product_form_id }}"
-                                data-single-option-selector
-                                data-index="option1"
-                                name="options[{{ single_option.name | escape }}]-{{ unique }}"
-                                value="{{ value | escape }}"
-                                id="{{ input_id }}"
-                                data-variant-id="{{ variant_for_value.id }}"
-                                {% if value == upsell_variant.options[0] %}
-                                  checked
+                            <li class="select-popout__item{% if upsell_variant.options[0] == value %} is-active{% endif %}">
+                              <a
+                                class="select-popout__option"
+                                href="#"
+                                {% if upsell_variant.options[0] == value %}
+                                  aria-current="true"
                                 {% endif %}
+                                data-value="{{ value | escape }}"
+                                data-variant-id="{{ variant_for_value.id }}"
+                                data-popout-option
                               >
-                              <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
-                                <span class="visually-hidden">{{ value }}</span>
-                              </label>
-                            </tooltip-component>
+                                <span>{{ value }}</span>
+                              </a>
+                            </li>
                           {%- endfor -%}
-                        </div>
-                      {%- else -%}
-                        {%- comment -%} Dropdown selector {%- endcomment -%}
-                        <div class="product-upsell__dropdown">
-                          <popout-select class="select-popout">
-                            <button
-                              type="button"
-                              class="select-popout__toggle"
-                              aria-expanded="false"
-                              aria-controls="{{ product_form_id }}-select-{{ single_option.name | handle }}"
-                              aria-labelledby="{{ product_form_id }}-select-{{ single_option.name | handle }}-label"
-                              data-popout-toggle
-                            >
-                              <span data-popout-toggle-text>{{ upsell_variant.options[0] }}</span>
-                              {%- render 'icon-nav-arrow-down' -%}
-                            </button>
+                        </ul>
 
-                            <ul
-                              id="{{ product_form_id }}-select-{{ single_option.name | handle }}"
-                              class="select-popout__list"
-                              data-popout-list
-                            >
-                              {%- for value in single_option.values -%}
-                                {%- liquid
-                                  assign variant_for_value = null
-                                  for variant in upsell_product.variants
-                                    if variant.options[0] == value
-                                      assign variant_for_value = variant
-                                      break
-                                    endif
-                                  endfor
-                                -%}
-                                <li class="select-popout__item{% if upsell_variant.options[0] == value %} is-active{% endif %}">
-                                  <a
-                                    class="select-popout__option"
-                                    href="#"
-                                    {% if upsell_variant.options[0] == value %}
-                                      aria-current="true"
-                                    {% endif %}
-                                    data-value="{{ value | escape }}"
-                                    data-variant-id="{{ variant_for_value.id }}"
-                                    data-popout-option
-                                  >
-                                    <span>{{ value }}</span>
-                                  </a>
-                                </li>
-                              {%- endfor -%}
-                            </ul>
-
-                            <input
-                              form="{{ product_form_id }}"
-                              type="hidden"
-                              name="options[{{ single_option.name | escape }}]-{{ unique }}"
-                              value="{{ upsell_variant.options[0] | escape }}"
-                              data-popout-input
-                              data-single-option-selector
-                              data-index="option1"
-                            >
-                          </popout-select>
-                        </div>
-                      {%- endif -%}
+                        <input
+                          form="{{ product_form_id }}"
+                          type="hidden"
+                          name="options[{{ single_option.name | escape }}]-{{ unique }}"
+                          value="{{ upsell_variant.options[0] | escape }}"
+                          data-popout-input
+                          data-single-option-selector
+                          data-index="option1"
+                        >
+                      </popout-select>
                     </div>
+                  {%- endif -%}
+                </div>
 
-                    <button
-                      class="product-upsell__btn btn btn--medium btn--primary btn--outline"
-                      type="submit"
-                      name="add"
-                      data-quick-add-btn
-                      data-add-to-cart
-                      {% unless upsell_variant.available %}
-                        disabled="disabled"
-                      {% endunless %}
-                    >
-                      <span class="btn__text">{{ upsell_button_text }}</span>
+                <div class="product-upsell__actions">
+                  <button
+                    class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                    type="submit"
+                    name="add"
+                    data-quick-add-btn
+                    data-add-to-cart
+                    {% unless upsell_variant.available %}
+                      disabled="disabled"
+                    {% endunless %}
+                  >
+                    <span class="btn__text">{{ upsell_button_text }}</span>
 
-                      <span class="btn__loader">
-                        <svg height="18" width="18" class="svg-loader">
-                          <circle r="7" cx="9" cy="9" />
-                          <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                        </svg>
-                      </span>
+                    <span class="btn__loader">
+                      <svg height="18" width="18" class="svg-loader">
+                        <circle r="7" cx="9" cy="9" />
+                        <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                      </svg>
+                    </span>
 
-                      <span class="btn__added">&nbsp;</span>
-                    </button>
-                  {%- endform -%}
-                {%- elsif upsell_product.variants.size == 1 -%}
+                    <span class="btn__added">&nbsp;</span>
+                  </button>
+                </div>
+              {%- endform -%}
+            {%- endif -%}
+
+            {%- unless upsell_quick_add_hide or enable_instant_add -%}
+              <div class="product-upsell__actions">
+                {%- if upsell_product.variants.size == 1 -%}
                   {%- comment -%} Single variant: direct add to cart {%- endcomment -%}
                   {%- form 'product', upsell_product, id: product_form_id, class: 'product-upsell__form' -%}
                     <input type="hidden" name="id" value="{{ upsell_variant.id }}">

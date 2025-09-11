@@ -37,7 +37,7 @@ const selectors = {
   quickAddModalTemplate: '[data-quick-add-modal-template]',
   instantAddForm: '.product-upsell__form--instant-add',
   variantIdInput: '[data-variant-id]',
-  swatchInput: '.product-upsell__swatch input[type="radio"]',
+  swatchInput: '.product-upsell__variant-selector input[type="radio"]',
   dropdownOption: '.product-upsell__dropdown [data-popout-option]',
   popoutInput: '.product-upsell__dropdown [data-popout-input]',
 };
