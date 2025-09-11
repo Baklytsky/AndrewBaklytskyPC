@@ -1,0 +1,31 @@
+{% comment %}
+  Renders product list or upsell products on Cart page and Cart drawer
+
+  Accepts:
+  - block: {Object} Block object (required)
+
+  Usage:
+  {% render 'cart-block-horizontal-upsell', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign product_count = block.settings.product_list.count
+
+  capture product_list
+    for product in block.settings.product_list
+      render 'upsell-product', upsell_product: product, is_compact: true, instant_add: true
+    endfor
+  endcapture
+-%}
+
+{%- if request.design_mode or product_count > 0 and product_list != blank -%}
+  <div class="cart__widget cart__widget--horizontal-upsell {{ color_scheme }}">
+    <div class="cart__widget__content">
+      <div class="cart__widget__content__inner">
+        <div class="cart__widget__products">
+          {{- product_list -}}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
