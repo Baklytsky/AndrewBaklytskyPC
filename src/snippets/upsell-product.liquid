@@ -66,13 +66,15 @@
   assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
 
   assign show_available_upsell_only = show_available_upsell_only | default: false
-
   assign all_variants_soldout = true
-  for variant in upsell_product.variants
-    if variant.available
-      assign all_variants_soldout = false
-      break
-    endif
+
+  for option in upsell_product.options_with_values
+    for option_value in option.values
+      if option_value.available
+        assign all_variants_soldout = false
+        break
+      endif
+    endfor
   endfor
 
   if all_variants_soldout
@@ -254,7 +256,7 @@
               </div>
             {%- endif -%}
 
-            {%- if enable_instant_add -%}
+            {%- if enable_instant_add and upsell_quick_add_hide == false -%}
               {%- comment -%} Instant add: display a variant selector after price {%- endcomment -%}
               {%- form 'product',
                 upsell_product,
