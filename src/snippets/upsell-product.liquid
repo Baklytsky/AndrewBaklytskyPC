@@ -358,28 +358,19 @@
                           class="select-popout__list"
                           data-popout-list
                         >
-                          {%- for value in single_option.values -%}
-                            {%- liquid
-                              assign variant_for_value = null
-                              for variant in upsell_product.variants
-                                if variant.options[0] == value
-                                  assign variant_for_value = variant
-                                  break
-                                endif
-                              endfor
-                            -%}
-                            <li class="select-popout__item{% if upsell_variant.options[0] == value %} is-active{% endif %}">
+                          {%- for option_value in single_option.values -%}
+                            <li class="select-popout__item{% if option_value.selected %} is-active{% endif %}">
                               <a
                                 class="select-popout__option"
                                 href="#"
-                                {% if upsell_variant.options[0] == value %}
+                                {% if option_value.selected %}
                                   aria-current="true"
                                 {% endif %}
-                                data-value="{{ value | escape }}"
-                                data-variant-id="{{ variant_for_value.id }}"
+                                data-value="{{ option_value | escape }}"
+                                data-variant-id="{{ option_value.variant.id }}"
                                 data-popout-option
                               >
-                                <span>{{ value }}</span>
+                                <span>{{ option_value }}</span>
                               </a>
                             </li>
                           {%- endfor -%}
