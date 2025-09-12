@@ -97,6 +97,8 @@
   endcomment
   assign enable_instant_add = false
   assign is_color_option = false
+  assign is_native_swatch_option = false
+  assign is_swatch_option = false
   assign single_option = null
 
   if instant_add and upsell_product.variants.size > 1 and upsell_product.options.size == 1
@@ -109,7 +111,7 @@
     if settings.enable_color_swatches
       for value in single_option.values
         if value.swatch
-          assign is_color_option = true
+          assign is_native_swatch_option = true
           break
         endif
       endfor
@@ -117,15 +119,16 @@
       comment
         Also check if option name matches color translations
       endcomment
-      unless is_color_option
-        assign swatch_translation = 'general.swatches.color' | t
-        assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
-        assign option_name_handle_separator = single_option.name | handle | prepend: ',' | append: ','
+      assign swatch_translation = 'general.swatches.color' | t
+      assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+      assign option_name_handle_separator = single_option.name | handle | prepend: ',' | append: ','
+      if translation_string contains option_name_handle_separator
+        assign is_swatch_option = true
+      endif
 
-        if translation_string contains option_name_handle_separator
-          assign is_color_option = true
-        endif
-      endunless
+      if is_native_swatch_option or is_swatch_option
+        assign is_color_option = true
+      endif
     endif
   endif
 -%}
@@ -278,7 +281,7 @@
                           assign swatch_value = null
                           if value.swatch
                             if value.swatch.image
-                              assign image_url = value.swatch.image | image_url: width: 96
+                              assign image_url = value.swatch.image | image_url: width: 40
                               assign swatch_value = 'url(' | append: image_url | append: ')'
                             elsif value.swatch.color
                               assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
@@ -288,7 +291,10 @@
                           endif
 
                           capture swatch_style
-                            if swatch_value != null and swatch_value != ''
+                            if is_swatch_option
+                              assign swatch_handle = value | handle
+                              echo '--swatch: var(--' | append: swatch_handle | append: ');'
+                            elsif is_native_swatch_option and swatch_value != null and swatch_value != ''
                               echo '--swatch: ' | append: swatch_value | append: ';'
                             endif
                           endcapture
