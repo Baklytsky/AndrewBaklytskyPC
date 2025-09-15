@@ -91,6 +91,8 @@ class QuickAddProduct extends HTMLElement {
 
         window.theme.a11y.lastElement = this.buttonATC;
 
+        this.closeAllErrorContainers(this.parentElement);
+
         document.dispatchEvent(
           new CustomEvent('theme:cart:add', {
             detail: {
@@ -106,6 +108,9 @@ class QuickAddProduct extends HTMLElement {
       this.errorHandler();
       this.initInstantAdd();
     }
+
+    // Initialize upsell error handling
+    this.setupMiniUpsellErrorHandling();
   }
 
   modalButtonClickEvent(e) {
@@ -411,6 +416,8 @@ class QuickAddProduct extends HTMLElement {
         variantIdInput.value = variantId;
         variantIdInput.dispatchEvent(new Event('change'));
       }
+
+      this.closeAllErrorContainers(this.parentElement);
     }
   }
 
@@ -467,12 +474,42 @@ class QuickAddProduct extends HTMLElement {
       // Close the dropdown
       popoutList.classList.remove('is-open');
       toggleButton.setAttribute('aria-expanded', 'false');
+
+      this.closeAllErrorContainers(this.parentElement);
     }
   }
 
   resetAnimatedItems() {
     this.modal?.querySelectorAll(selectors.animation).forEach((item) => {
       item.classList.remove(classes.animated);
+    });
+  }
+
+  /**
+   * Close all visible error containers in a given container
+   * @param {HTMLElement} container - The container to search for error containers
+   */
+  closeAllErrorContainers(container) {
+    const errorContainers = container.querySelectorAll('[data-cart-errors-container].is-visible');
+    errorContainers.forEach((errorContainer) => {
+      errorContainer.classList.remove('is-visible');
+    });
+  }
+
+  /**
+   * Setup error handling for mini upsell widgets with swiper
+   */
+  setupMiniUpsellErrorHandling() {
+    const swiperContainer = this.closest('swiper-container');
+    if (!swiperContainer) return;
+
+    // Check if listener has already been added to prevent duplicates
+    if (swiperContainer.hasAttribute('data-swiper-listener-added')) return;
+
+    swiperContainer.setAttribute('data-swiper-listener-added', 'true');
+
+    swiperContainer.addEventListener('swiperslidechangetransitionend', () => {
+      this.closeAllErrorContainers(swiperContainer);
     });
   }
 }
