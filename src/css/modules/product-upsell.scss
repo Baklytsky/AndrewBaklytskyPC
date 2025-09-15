@@ -239,6 +239,10 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 .product-upsell__variant-selector {
   --swatch-size: 16px;
 
+  position: relative;
+  width: 100%;
+  max-width: var(--selector-width, 100%);
+
   .radio__buttons {
     display: flex;
     align-items: center;
@@ -252,6 +256,82 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
     margin: 0;
     padding: 0;
   }
+}
+
+.product-upsell__variant-selector--text-slider,
+.product-upsell__variant-selector--slider {
+  --selector-width: max(70%, 186px);
+  --bg-arrow: var(--bg-accent);
+  --offset: var(--swatch-outline-offset, 3px);
+  --negative-offset: calc(var(--offset) * -1);
+
+  native-scrollbar {
+    padding: var(--offset);
+  }
+
+  .radio__buttons {
+    margin: var(--negative-offset);
+    padding: var(--offset);
+    width: calc(100% + var(--offset) * 2);
+    flex-wrap: nowrap;
+  }
+
+  .radio__fieldset__arrow--next { right: var(--negative-offset); }
+  .radio__fieldset__arrow--prev::before { left: 0; }
+}
+
+.product-upsell__variant-selector--text-slider {
+  .product-upsell__swatches-count {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: block;
+    font-size: var(--font-body-x-small);
+    font-style: italic;
+    transition: opacity 0.3s;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: calc(2 * var(--SPACING-MICRO) * -1);
+      display: block;
+      height: 100%;
+    }
+  }
+
+  @media (hover: hover) {
+    native-scrollbar {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    &:focus-within,
+    &:hover {
+      .product-upsell__swatches-count {
+        opacity: 0;
+      }
+
+      native-scrollbar {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.product-upsell__variant-selector--grid {
+  --selector-width: max(80%, 200px);
+
+  .radio__buttons {
+    margin-left: -2px;
+  }
+}
+
+.cart-block:has(native-scrollbar) .product-upsell__content {
+  overflow: hidden;
 }
 
 .cart-block:has(.product-upsell__dropdown) {

@@ -275,69 +275,130 @@
                 >
 
                 {%- comment -%} Variant selector {%- endcomment -%}
-                <div class="product-upsell__variant-selector" data-variant-selector>
+                <div
+                  class="product-upsell__variant-selector product-upsell__variant-selector--{{ settings.collection_swatch_style }}"
+                  data-variant-selector
+                >
                   {%- if is_color_option -%}
                     {%- comment -%} Color swatches {%- endcomment -%}
-                    <div class="radio__buttons radio__buttons--top" data-variant-buttons>
-                      {%- for value in single_option.values -%}
-                        {%- liquid
-                          assign swatch_value = null
-                          if value.swatch
-                            if value.swatch.image
-                              assign image_url = value.swatch.image | image_url: width: 40
-                              assign swatch_value = 'url(' | append: image_url | append: ')'
-                            elsif value.swatch.color
-                              assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
-                            endif
-                          else
-                            assign swatch_value = value | handle
-                          endif
+                    {%- liquid
+                      assign total_swatches = single_option.values.size
+                      assign limited_count = 5
+                      assign swatches_left = total_swatches | minus: limited_count
+                    -%}
 
-                          capture swatch_style
-                            if is_swatch_option
-                              assign swatch_handle = value | handle
-                              echo '--swatch: var(--' | append: swatch_handle | append: ');'
-                            elsif is_native_swatch_option and swatch_value != null and swatch_value != ''
-                              echo '--swatch: ' | append: swatch_value | append: ';'
+                    {%- if settings.collection_swatch_style == 'text'
+                      or settings.collection_swatch_style == 'text-slider'
+                    -%}
+                      <span class="product-upsell__swatches-count">
+                        <span>
+                          {%- liquid
+                            assign count_text = 'collections.general.colors_with_count.other' | t
+                            if total_swatches == 1
+                              assign count_text = 'collections.general.colors_with_count.one' | t
                             endif
-                          endcapture
+                          -%}
+                          {{ total_swatches }}
+                          {{ count_text }}
+                        </span>
+                      </span>
+                    {%- endif -%}
 
-                          assign input_id = product_form_id | append: '-swatch-' | append: value | handle
-                          assign variant_for_value = null
-                          for variant in upsell_product.variants
-                            if variant.options[0] == value
-                              assign variant_for_value = variant
-                              break
-                            endif
-                          endfor
-                        -%}
+                    {%- unless settings.collection_swatch_style == 'text' -%}
+                      <native-scrollbar>
+                        <div class="selector-wrapper__scrollbar radio__buttons radio__buttons--top" data-scrollbar>
+                          {%- for value in single_option.values -%}
+                            {%- liquid
+                              assign swatch_value = null
+                              if value.swatch
+                                if value.swatch.image
+                                  assign image_url = value.swatch.image | image_url: width: 40
+                                  assign swatch_value = 'url(' | append: image_url | append: ')'
+                                elsif value.swatch.color
+                                  assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                                endif
+                              else
+                                assign swatch_value = value | handle
+                              endif
 
-                        <tooltip-component
-                          data-tooltip="{{ value | escape | capitalize }}"
-                          class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ value | handle }}"
-                          {%- if swatch_style != '' -%}
-                            style="{{ swatch_style }}"
+                              capture swatch_style
+                                if is_swatch_option
+                                  assign swatch_handle = value | handle
+                                  echo '--swatch: var(--' | append: swatch_handle | append: ');'
+                                elsif is_native_swatch_option and swatch_value != null and swatch_value != ''
+                                  echo '--swatch: ' | append: swatch_value | append: ';'
+                                endif
+                              endcapture
+
+                              assign input_id = product_form_id | append: '-swatch-' | append: value | handle
+                              assign variant_for_value = null
+                              for variant in upsell_product.variants
+                                if variant.options[0] == value
+                                  assign variant_for_value = variant
+                                  break
+                                endif
+                              endfor
+                            -%}
+
+                            {%- unless settings.collection_swatch_style == 'limited'
+                              and forloop.index > limited_count
+                            -%}
+                              <tooltip-component
+                                data-tooltip="{{ value | escape | capitalize }}"
+                                class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ value | handle }}"
+                                {%- if swatch_style != '' -%}
+                                  style="{{ swatch_style }}"
+                                {%- endif -%}
+                              >
+                                <input
+                                  type="radio"
+                                  form="{{ product_form_id }}"
+                                  data-single-option-selector
+                                  data-index="option1"
+                                  name="options[{{ single_option.name | escape }}]-{{ unique }}"
+                                  value="{{ value | escape }}"
+                                  id="{{ input_id }}"
+                                  data-variant-id="{{ variant_for_value.id }}"
+                                  {% if value == upsell_variant.options[0] %}
+                                    checked
+                                  {% endif %}
+                                >
+                                <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
+                                  <span class="visually-hidden">{{ value }}</span>
+                                </label>
+                              </tooltip-component>
+                            {%- endunless -%}
+                          {%- endfor -%}
+
+                          {%- if settings.collection_swatch_style == 'limited' and swatches_left > 0 -%}
+                            <div class="swatch-limited">+{{ swatches_left }}</div>
                           {%- endif -%}
-                        >
-                          <input
-                            type="radio"
-                            form="{{ product_form_id }}"
-                            data-single-option-selector
-                            data-index="option1"
-                            name="options[{{ single_option.name | escape }}]-{{ unique }}"
-                            value="{{ value | escape }}"
-                            id="{{ input_id }}"
-                            data-variant-id="{{ variant_for_value.id }}"
-                            {% if value == upsell_variant.options[0] %}
-                              checked
-                            {% endif %}
-                          >
-                          <label for="{{ input_id }}" data-swatch="{{ value | escape }}">
-                            <span class="visually-hidden">{{ value }}</span>
-                          </label>
-                        </tooltip-component>
-                      {%- endfor -%}
-                    </div>
+                        </div>
+
+                        {%- if settings.collection_swatch_style == 'text-slider'
+                          or settings.collection_swatch_style == 'slider'
+                        -%}
+                          <div class="selector-wrapper__actions">
+                            <button
+                              type="button"
+                              class="radio__fieldset__arrow radio__fieldset__arrow--prev is-hidden"
+                              data-scrollbar-arrow-prev
+                            >
+                              {%- render 'icon-nav-arrow-left' -%}
+                              <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                            </button>
+                            <button
+                              type="button"
+                              class="radio__fieldset__arrow radio__fieldset__arrow--next is-hidden"
+                              data-scrollbar-arrow-next
+                            >
+                              {% render 'icon-nav-arrow-right' %}
+                              <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                            </button>
+                          </div>
+                        {%- endif -%}
+                      </native-scrollbar>
+                    {%- endunless -%}
                   {%- else -%}
                     {%- comment -%} Dropdown selector {%- endcomment -%}
                     <div class="product-upsell__dropdown" data-dropdown>
