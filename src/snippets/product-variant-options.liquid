@@ -349,19 +349,6 @@
               endif
             endif
 
-            comment
-              Determine if current option should show images
-            endcomment
-            if settings.show_variant_image
-              assign has_variant_option_image = false
-
-              assign variant_option_image_translation = 'products.product.variant_option_image' | t
-              assign translation_string_variant_option_image = variant_option_image_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
-
-              if translation_string_variant_option_image contains option_name_handle_separator
-                assign has_variant_option_image = true
-              endif
-            endif
 
             capture fieldset_class
               if settings.variant_lines or is_native_swatch_option or is_swatch_option
@@ -369,16 +356,6 @@
 
                 if is_native_swatch_option or is_swatch_option
                   echo ' radio__fieldset--swatches'
-                endif
-
-                if has_variant_option_image
-                  echo ' radio__fieldset--variant-option-image'
-
-                  if settings.variant_image_style == 'stacked'
-                    echo ' radio__fieldset--variant-option-image-stacked'
-                  else
-                    echo ' radio__fieldset--variant-option-image-inline'
-                  endif
                 endif
               else
                 echo 'select__fieldset'
@@ -450,7 +427,7 @@
                     </tooltip-component>
                   {%- else -%}
                     {% comment %} radio button {% endcomment %}
-                    <span class="radio__button"{% if has_variant_option_image %} data-variant-option-image{% endif %}>
+                    <span class="radio__button">
                       <input
                         type="radio"
                         form="{{ product_form_id }}"
@@ -461,52 +438,6 @@
                         {% if value == current_value %}checked{% endif %}>
 
                       <label for="{{ input_id }}">
-                        {%- if has_variant_option_image -%}
-                          {% liquid
-                            if settings.btn_border_style == 'pill'
-                              capture option_image_border_radius
-                                echo ' style="--radius: 10px;"'
-                              endcapture
-                            endif
-                          %}
-
-                          <div class="option-image"{{ option_image_border_radius }}>
-                            {%- assign variant_option_image_translation = 'products.product.variant_option_image' | t -%}
-
-                            {%- if option_name == variant_option_image_translation -%}
-                              {%- assign option_image_found = false -%}
-
-                              {%- for variant in product.variants -%}
-                                {%- for option in variant.options -%}
-                                  {%- if option == value -%}
-                                    {%- assign variant_option_image = variant.featured_media.preview_image -%}
-
-                                    {% if variant_option_image  %}
-                                      {%- capture srcset -%}
-                                        {%- render 'image-srcset', image: variant_option_image, widths: '60, 90, 120, 150, 180' -%}
-                                      {%- endcapture -%}
-
-                                      {{ variant_option_image | image_url: height: 60 | image_tag: sizes: '60px', srcset: srcset }}
-                                    {%- else -%}
-                                      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-                                    {% endif %}
-
-                                    {%- assign option_image_found = true -%}
-                                  {%- endif -%}
-
-                                  {%- if option_image_found -%}
-                                    {%- break -%}
-                                  {%- endif -%}
-                                {%- endfor -%}
-
-                                {%- if option_image_found -%}
-                                  {%- break -%}
-                                {%- endif -%}
-                              {%- endfor -%}
-                            {%- endif -%}
-                          </div>
-                        {%- endif -%}
-
                         <span class="option-title">{{ value }}</span>
                       </label>
                     </span>
