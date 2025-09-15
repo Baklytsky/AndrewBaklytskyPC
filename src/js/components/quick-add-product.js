@@ -389,7 +389,7 @@ class QuickAddProduct extends HTMLElement {
     });
 
     // Handle dropdown toggle
-    const toggleButton = instantAddForm.querySelector('.select-popout__toggle');
+    const toggleButton = instantAddForm.querySelector('[data-popout-toggle]');
     if (toggleButton) {
       toggleButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -420,7 +420,7 @@ class QuickAddProduct extends HTMLElement {
    * Toggle dropdown open/close state
    */
   toggleDropdown(toggleButton, instantAddForm) {
-    const popoutList = instantAddForm.querySelector('.select-popout__list');
+    const popoutList = instantAddForm.querySelector('[data-popout-list]');
     const isOpen = popoutList.classList.contains('is-open');
 
     if (isOpen) {
@@ -439,9 +439,9 @@ class QuickAddProduct extends HTMLElement {
     const variantId = selectedOption.getAttribute('data-variant-id');
     const value = selectedOption.getAttribute('data-value');
     const popoutInput = instantAddForm.querySelector('[data-dropdown] [data-popout-input]');
-    const toggleButton = instantAddForm.querySelector('.select-popout__toggle');
+    const toggleButton = instantAddForm.querySelector('[data-popout-toggle]');
     const toggleText = toggleButton.querySelector('[data-popout-toggle-text]');
-    const popoutList = instantAddForm.querySelector('.select-popout__list');
+    const popoutList = instantAddForm.querySelector('[data-popout-list]');
 
     if (variantId && popoutInput) {
       // Update the hidden input value
@@ -461,10 +461,10 @@ class QuickAddProduct extends HTMLElement {
       }
 
       // Update active state
-      popoutList.querySelectorAll('.select-popout__item').forEach((item) => {
+      popoutList.querySelectorAll('[data-popout-item]').forEach((item) => {
         item.classList.remove('is-active');
       });
-      selectedOption.closest('.select-popout__item').classList.add('is-active');
+      selectedOption.closest('[data-popout-item]').classList.add('is-active');
 
       // Close the dropdown
       popoutList.classList.remove('is-open');
