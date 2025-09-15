@@ -35,11 +35,6 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   quickAddModalTemplate: '[data-quick-add-modal-template]',
-  instantAddForm: '.product-upsell__form--instant-add',
-  variantIdInput: '[data-variant-id]',
-  swatchInput: '.product-upsell__variant-selector input[type="radio"]',
-  dropdownOption: '.product-upsell__dropdown [data-popout-option]',
-  popoutInput: '.product-upsell__dropdown [data-popout-input]',
 };
 
 const attributes = {
@@ -375,17 +370,17 @@ class QuickAddProduct extends HTMLElement {
    * Initialize instant add functionality for single option products
    */
   initInstantAdd() {
-    const instantAddForm = this.quickAddHolder.querySelector(selectors.instantAddForm);
+    const instantAddForm = this.quickAddHolder.querySelector('[data-instant-add-form]');
     if (!instantAddForm) return;
 
     // Handle swatch selection
-    const swatchInputs = instantAddForm.querySelectorAll(selectors.swatchInput);
+    const swatchInputs = instantAddForm.querySelectorAll('[data-variant-selector] input[type="radio"]');
     swatchInputs.forEach((input) => {
       input.addEventListener('change', this.handleInstantAddVariantChange);
     });
 
     // Handle dropdown selection
-    const dropdownOptions = instantAddForm.querySelectorAll(selectors.dropdownOption);
+    const dropdownOptions = instantAddForm.querySelectorAll('[data-dropdown] [data-popout-option]');
     dropdownOptions.forEach((option) => {
       option.addEventListener('click', (e) => {
         e.preventDefault();
@@ -408,10 +403,10 @@ class QuickAddProduct extends HTMLElement {
    */
   handleInstantAddVariantChange(e) {
     const variantId = e.target.getAttribute('data-variant-id');
-    const instantAddForm = e.target.closest(selectors.instantAddForm);
+    const instantAddForm = e.target.closest('[data-instant-add-form]');
 
     if (variantId && instantAddForm) {
-      const variantIdInput = instantAddForm.querySelector(selectors.variantIdInput);
+      const variantIdInput = instantAddForm.querySelector('[data-variant-id]');
       if (variantIdInput) {
         variantIdInput.value = variantId;
         variantIdInput.dispatchEvent(new Event('change'));
@@ -443,7 +438,7 @@ class QuickAddProduct extends HTMLElement {
   handleDropdownSelection(selectedOption, instantAddForm) {
     const variantId = selectedOption.getAttribute('data-variant-id');
     const value = selectedOption.getAttribute('data-value');
-    const popoutInput = instantAddForm.querySelector(selectors.popoutInput);
+    const popoutInput = instantAddForm.querySelector('[data-dropdown] [data-popout-input]');
     const toggleButton = instantAddForm.querySelector('.select-popout__toggle');
     const toggleText = toggleButton.querySelector('[data-popout-toggle-text]');
     const popoutList = instantAddForm.querySelector('.select-popout__list');
@@ -454,7 +449,7 @@ class QuickAddProduct extends HTMLElement {
       popoutInput.dispatchEvent(new Event('change'));
 
       // Update the variant ID
-      const variantIdInput = instantAddForm.querySelector(selectors.variantIdInput);
+      const variantIdInput = instantAddForm.querySelector('[data-variant-id]');
       if (variantIdInput) {
         variantIdInput.value = variantId;
         variantIdInput.dispatchEvent(new Event('change'));
