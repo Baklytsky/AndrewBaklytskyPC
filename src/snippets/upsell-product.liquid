@@ -12,6 +12,7 @@
 
   @param {boolean} [is_compact=false] - Is compact - used on Cart/Cart drawer and Article Sidebar
   @param {boolean} [is_mini_upsell=false] - Is mini upsell - used for mini product upsell blocks
+  @param {boolean} [is_vertical=false] - Is vertical layout - used for vertical product upsell blocks
   @param {boolean} [show_available_upsell_only=false] - Show available upsell only
   @param {boolean} [instant_add=false] - Enable instant add for single option products
   @param {boolean} [onboarding=false] - Onboarding mode
@@ -26,6 +27,7 @@
     upsell_button_text: 'Add to cart',
     is_compact: false,
     is_mini_upsell: false,
+    is_vertical: false,
     show_available_upsell_only: false,
     instant_add: false,
     onboarding: false
@@ -40,6 +42,7 @@
   assign upsell_description_font_size = upsell_description_font_size | default: ''
   assign is_compact = is_compact | default: false
   assign is_mini_upsell = is_mini_upsell | default: false
+  assign is_vertical = is_vertical | default: false
   assign instant_add = instant_add | default: false
   assign render_quick_add_template = false
 
@@ -161,7 +164,7 @@
 
   <quick-add-product>
     <div
-      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}{% if is_mini_upsell %} product-upsell__holder--mini{% endif %}"
+      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}{% if is_mini_upsell %} product-upsell__holder--mini{% endif %}{% if is_vertical %} product-upsell__holder--vertical{% endif %}"
       data-quick-add-holder="{{ upsell_product.id }}"
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
