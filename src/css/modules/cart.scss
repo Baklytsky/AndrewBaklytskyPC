@@ -5,8 +5,7 @@
   --gap: var(--SPACING-SMALL);
 
   width: auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-inline: var(--SPACING-MEDIUM);
   position: relative;
   margin: 0 auto;
   overflow: visible;
@@ -137,6 +136,7 @@
 
 .cart__aside {
   --aside-width: max(32%, 425px);
+  --negative-offset: calc(var(--sp-inline) * -1);
 
   position: sticky;
   top: 0;
@@ -150,6 +150,11 @@
   @include media-query($small) {
     width: 100%;
     padding-top: 0;
+
+    .cart__widget,
+    .cart__foot__inner {
+      margin-inline: var(--negative-offset);
+    }
   }
 }
 
@@ -236,7 +241,9 @@
   display: grid;
 }
 
-.cart__widget__content__inner { padding: 0 var(--sp-inline) var(--sp-block); }
+.cart__widget__content__inner {
+  padding: 0 var(--sp-inline) var(--sp-block);
+}
 
 // Mini upsell widget
 .cart__widget--mini-upsell {
@@ -259,6 +266,12 @@
 
   swiper-slide {
     width: 100% !important;
+  }
+}
+
+.cart__widget--horizontal-upsell {
+  .cart__widget__content__inner {
+    padding-block-start: var(--sp-block);
   }
 }
 
