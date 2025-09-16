@@ -63,6 +63,49 @@ if (!customElements.get('popup-component')) {
           }
         });
 
+        if (this.buttonPrev || this.buttonNext) {
+          let touchStartX = 0;
+          let touchStartY = 0;
+          let touchEndX = 0;
+          let touchEndY = 0;
+          const horizontalThreshold = 40; // px
+
+          const onTouchStart = (e) => {
+            if (!e.touches || e.touches.length === 0) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchEndX = touchStartX;
+            touchEndY = touchStartY;
+          };
+
+          const onTouchMove = (e) => {
+            if (!e.touches || e.touches.length === 0) return;
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+          };
+
+          const onTouchEnd = () => {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            // Only act on mostly-horizontal swipes
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > horizontalThreshold) {
+              if (deltaX < 0) {
+                // Swipe left -> go to next
+                this.buttonNext?.dispatchEvent(new Event('click'));
+              } else {
+                // Swipe right -> go to prev
+                this.buttonPrev?.dispatchEvent(new Event('click'));
+              }
+            }
+          };
+
+          // Attach to the dialog for swipe interactions
+          this.popup.addEventListener('touchstart', onTouchStart, {passive: true});
+          this.popup.addEventListener('touchmove', onTouchMove, {passive: true});
+          this.popup.addEventListener('touchend', onTouchEnd);
+        }
+
         this.popup.addEventListener('close', () => this.popupCloseActions());
         document.addEventListener('theme:quick-add:open', this.popupCloseEvent);
         document.addEventListener('theme:product:added', this.popupCloseEvent);
