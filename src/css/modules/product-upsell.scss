@@ -224,7 +224,7 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 
 // Instant add
 .product-upsell__form--instant-add {
-  padding-block-start: var(--SPACING-MICRO);
+  padding-block-start: calc(var(--SPACING-MICRO) / 2);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -234,10 +234,16 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
   @include media-query($medium-down) {
     gap: var(--SPACING-MICRO);
   }
+
+  &:has(.select-popout) {
+    padding-block-start: var(--SPACING-MICRO);
+  }
 }
 
 .product-upsell__variant-selector {
-  --swatch-size: 16px;
+  --swatch-size: var(--swatch-size-upsell);
+  --offset: var(--swatch-outline-offset, 3px);
+  --negative-offset: calc(var(--offset) * -1);
 
   position: relative;
   width: 100%;
@@ -249,6 +255,7 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
     gap: var(--SPACING-MICRO);
     flex-wrap: wrap;
     margin: 0;
+    padding: var(--offset);
   }
 
   .swatch__button {
@@ -260,6 +267,7 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
   .swatch-limited {
     position: relative;
     padding-inline: calc(var(--SPACING-MICRO) / 2);
+    line-height: 1;
   }
 }
 
@@ -267,8 +275,6 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 .product-upsell__variant-selector--slider {
   --selector-width: max(70%, 186px);
   --bg-arrow: var(--bg-accent);
-  --offset: var(--swatch-outline-offset, 3px);
-  --negative-offset: calc(var(--offset) * -1);
 
   native-scrollbar {
     padding: var(--offset);
@@ -276,7 +282,6 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 
   .radio__buttons {
     margin: var(--negative-offset);
-    padding: var(--offset);
     width: calc(100% + var(--offset) * 2);
     flex-wrap: nowrap;
   }
@@ -329,9 +334,12 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 
 .product-upsell__variant-selector--grid {
   --selector-width: max(80%, 200px);
+}
 
-  .radio__buttons {
-    margin-left: -2px;
+.product-upsell__variant-selector--text {
+  .product-upsell__swatches-count {
+    padding-block: var(--offset);
+    display: block;
   }
 }
 
