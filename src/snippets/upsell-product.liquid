@@ -415,7 +415,23 @@
                           {%- endfor -%}
 
                           {%- if settings.collection_swatch_style == 'limited' and swatches_left > 0 -%}
-                            <div class="swatch-limited">+{{ swatches_left }}</div>
+                            <a
+                              href="#"
+                              class="swatch-limited"
+                              data-quick-add-btn
+                              data-quick-add-modal-handle="{{ upsell_product.handle }}"
+                            >
+                              <span class="btn__text">+{{ swatches_left }}</span>
+
+                              <span class="btn__loader">
+                                <svg height="18" width="18" class="svg-loader">
+                                  <circle r="7" cx="9" cy="9" />
+                                  <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                                </svg>
+                              </span>
+                            </a>
+
+                            {%- assign render_quick_add_template = true -%}
                           {%- endif -%}
                         </div>
 
