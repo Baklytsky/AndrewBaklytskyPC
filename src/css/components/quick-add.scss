@@ -85,10 +85,6 @@
     pointer-events: none;
   }
 
-  .btn__bag {
-    color: var(--accent);
-  }
-
   @include media-query($medium-up) {
     position: relative;
     display: flex;
@@ -99,19 +95,20 @@
     text-decoration: none;
 
     .btn__bag {
-      position: static;
+      position: absolute;
+      margin: 0 10px 0 auto;
       display: block;
       align-self: center;
-      width: 0;
-      height: 32px;
-      margin: -10px 0;
+      width: 24px;
+      height: 24px;
       transform: scale(0);
-      transition: width .3s ease, transform .3s ease;
+      transition: transform .3s ease;
     }
+    .btn__text { transition: padding .3s ease; }
 
-    &:hover:not(.is-loading, .is-added) .btn__bag {
-      width: 32px;
-      transform: none;
+    &:hover:not(.is-loading, .is-added) {
+      .btn__bag { transform: none; }
+      .btn__text { padding-inline-end: 24px; }
     }
   }
 
