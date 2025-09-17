@@ -370,32 +370,18 @@ class QuickAddProduct extends HTMLElement {
    * Initialize instant add functionality for single option products
    */
   initInstantAdd() {
-    const instantAddForm = this.quickAddHolder.querySelector('[data-instant-add-form]');
-    if (!instantAddForm) return;
+    this.instantAddForm = this.quickAddHolder.querySelector('[data-instant-add-form]');
+    if (!this.instantAddForm) return;
+
+    // Prevent duplicate initialization
+    if (this.hasAttribute('data-initialized')) return;
+    this.setAttribute('data-initialized', 'true');
 
     // Handle swatch selection
-    const swatchInputs = instantAddForm.querySelectorAll('[data-variant-selector] input[type="radio"]');
+    const swatchInputs = this.instantAddForm.querySelectorAll('[data-variant-selector] input[type="radio"]');
     swatchInputs.forEach((input) => {
       input.addEventListener('change', this.handleInstantAddVariantChange);
     });
-
-    // Handle dropdown selection
-    const dropdownOptions = instantAddForm.querySelectorAll('[data-dropdown] [data-popout-option]');
-    dropdownOptions.forEach((option) => {
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.handleDropdownSelection(option, instantAddForm);
-      });
-    });
-
-    // Handle dropdown toggle
-    const toggleButton = instantAddForm.querySelector('[data-popout-toggle]');
-    if (toggleButton) {
-      toggleButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.toggleDropdown(toggleButton, instantAddForm);
-      });
-    }
   }
 
   /**
@@ -403,74 +389,14 @@ class QuickAddProduct extends HTMLElement {
    */
   handleInstantAddVariantChange(e) {
     const variantId = e.target.getAttribute('data-variant-id');
-    const instantAddForm = e.target.closest('[data-instant-add-form]');
 
-    if (variantId && instantAddForm) {
-      const variantIdInput = instantAddForm.querySelector('[data-variant-id]');
+    if (variantId && this.instantAddForm) {
+      const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
       if (variantIdInput) {
         variantIdInput.value = variantId;
         variantIdInput.dispatchEvent(new Event('change'));
+        this.closeAllErrorContainers(this.parentElement);
       }
-
-      this.closeAllErrorContainers(this.parentElement);
-    }
-  }
-
-  /**
-   * Toggle dropdown open/close state
-   */
-  toggleDropdown(toggleButton, instantAddForm) {
-    const popoutList = instantAddForm.querySelector('[data-popout-list]');
-    const isOpen = popoutList.classList.contains('is-open');
-
-    if (isOpen) {
-      popoutList.classList.remove('is-open');
-      toggleButton.setAttribute('aria-expanded', 'false');
-    } else {
-      popoutList.classList.add('is-open');
-      toggleButton.setAttribute('aria-expanded', 'true');
-    }
-  }
-
-  /**
-   * Handle dropdown selection for instant add
-   */
-  handleDropdownSelection(selectedOption, instantAddForm) {
-    const variantId = selectedOption.getAttribute('data-variant-id');
-    const value = selectedOption.getAttribute('data-value');
-    const popoutInput = instantAddForm.querySelector('[data-dropdown] [data-popout-input]');
-    const toggleButton = instantAddForm.querySelector('[data-popout-toggle]');
-    const toggleText = toggleButton.querySelector('[data-popout-toggle-text]');
-    const popoutList = instantAddForm.querySelector('[data-popout-list]');
-
-    if (variantId && popoutInput) {
-      // Update the hidden input value
-      popoutInput.value = value;
-      popoutInput.dispatchEvent(new Event('change'));
-
-      // Update the variant ID
-      const variantIdInput = instantAddForm.querySelector('[data-variant-id]');
-      if (variantIdInput) {
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
-      }
-
-      // Update the toggle button text
-      if (toggleText) {
-        toggleText.textContent = value;
-      }
-
-      // Update active state
-      popoutList.querySelectorAll('[data-popout-item]').forEach((item) => {
-        item.classList.remove('is-active');
-      });
-      selectedOption.closest('[data-popout-item]').classList.add('is-active');
-
-      // Close the dropdown
-      popoutList.classList.remove('is-open');
-      toggleButton.setAttribute('aria-expanded', 'false');
-
-      this.closeAllErrorContainers(this.parentElement);
     }
   }
 
