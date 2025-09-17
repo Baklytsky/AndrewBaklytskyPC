@@ -9,6 +9,7 @@
   @param {string} [upsell_description_font_size] - Font size for description
   @param {string} [upsell_modifier] - Modifier class
   @param {string} [upsell_button_text] - Button text
+  @param {string} [unique_id] - Unique ID for the product upsell
 
   @param {boolean} [is_compact=false] - Is compact - used on Cart/Cart drawer and Article Sidebar
   @param {boolean} [is_mini_upsell=false] - Is mini upsell - used for mini product upsell blocks
@@ -66,8 +67,9 @@
     assign upsell_variant_compare_at_price = upsell_variant.compare_at_price | money
   endif
 
-  assign unique = section.id | append: '-' | append: upsell_product.id
-  assign product_form_id = 'ProductFormUpsell--' | append: unique
+  assign unique_id = unique_id | default: section.id
+  assign unique = unique_id | append: '-' | append: upsell_product.id
+  assign product_form_id = 'productFormUpsell--' | append: unique
 
   assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
 
@@ -378,7 +380,8 @@
                                 endif
                               endcapture
 
-                              assign input_id = product_form_id | append: '-swatch-' | append: value | handle
+                              assign value_handle = value | strip_html | escape | handle | append: '-' | append: forloop.index
+                              assign input_id = product_form_id | append: '-swatch-' | append: value_handle
                               assign variant_for_value = null
                               for variant in upsell_product.variants
                                 if variant.options[0] == value
