@@ -417,6 +417,19 @@ class QuickAddProduct extends HTMLElement {
   }
 
   /**
+   * Close all open dropdowns in a given container
+   * @param {HTMLElement} container - The container to search for open dropdowns
+   */
+  closeAllOpenDropdowns(container) {
+    const openDropdowns = container.querySelectorAll('popout-select');
+    openDropdowns.forEach((dropdown) => {
+      if (typeof dropdown._hideList === 'function') {
+        dropdown._hideList();
+      }
+    });
+  }
+
+  /**
    * Setup error handling for mini upsell widgets with swiper
    */
   setupMiniUpsellErrorHandling() {
@@ -430,6 +443,7 @@ class QuickAddProduct extends HTMLElement {
 
     swiperContainer.addEventListener('swiperslidechangetransitionend', () => {
       this.closeAllErrorContainers(swiperContainer);
+      this.closeAllOpenDropdowns(swiperContainer);
     });
   }
 }
