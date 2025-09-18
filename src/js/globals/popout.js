@@ -62,14 +62,17 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupToggleFocusout(evt) {
-        const popoutLostFocus = this.contains(evt.relatedTarget);
+        if (!document.body.classList.contains('is-focused')) return;
 
+        const popoutLostFocus = this.contains(evt.relatedTarget);
         if (!popoutLostFocus) {
           this._hideList();
         }
       }
 
       onPopupListFocusout(evt) {
+        if (!document.body.classList.contains('is-focused')) return;
+
         const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
         const isVisible = this.popoutList.classList.contains(classes.listVisible);
 
@@ -152,8 +155,9 @@ if (!customElements.get('popout-select')) {
                 this.popoutToggleText.setAttribute(attributes.popoutToggleText, attrValue);
               }
             }
-            this.onPopupToggleFocusout(evt);
-            this.onPopupListFocusout(evt);
+
+            // Close the dropdown after selection
+            this._hideList();
           }
         }
       }
