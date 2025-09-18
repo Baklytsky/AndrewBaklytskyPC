@@ -20,7 +20,7 @@
 {%- capture product_list -%}
   {%- for product in block.settings.product_list limit: 3 -%}
     {%- if show_slider -%}
-      <swiper-slide class="cart__widget__mini-upsell-slide">
+      <swiper-slide>
     {%- endif -%}
 
       {%- render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, is_mini_upsell: true -%}
@@ -32,7 +32,7 @@
 {%- endcapture -%}
 
 {%- if request.design_mode or product_count > 0 and product_list != blank -%}
-  <div class="cart__widget cart__widget--mini-upsell {{ color_scheme }}">
+  <div class="cart__widget cart__widget--upsell cart__widget--upsell-mini {{ color_scheme }}">
     {%- if block.settings.title != blank -%}
       <div class="cart__widget__title">
         <span>{{ block.settings.title }}</span>
@@ -53,7 +53,7 @@
     <div class="cart__widget__content">
       <div class="cart__widget__content__inner">
         {%- if show_slider -%}
-          <div class="cart__widget__mini-upsell-slider swiper">
+          <div class="swiper">
             <swiper-container
               class="swiper-wrapper"
               loop="true"

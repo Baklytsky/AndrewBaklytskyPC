@@ -141,6 +141,24 @@
       endif
     endif
   endif
+
+  capture holder_classes
+    echo 'product-upsell__holder'
+    if upsell_error
+      echo ' product-upsell__holder--onboarding'
+    endif
+    if is_compact
+      echo ' product-upsell__holder--compact'
+    elsif upsell_quick_add_hide == false
+      echo ' product-upsell__holder--button'
+    endif
+    if is_mini_upsell
+      echo ' product-upsell__holder--mini'
+    endif
+    if is_vertical
+      echo ' product-upsell__holder--vertical'
+    endif
+  endcapture
 -%}
 
 {%- if show_upsell -%}
@@ -166,7 +184,7 @@
 
   <quick-add-product>
     <div
-      class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}{% if is_compact %} product-upsell__holder--compact{% elsif upsell_quick_add_hide == false %} product-upsell__holder--button{% endif %}{% if is_mini_upsell %} product-upsell__holder--mini{% endif %}{% if is_vertical %} product-upsell__holder--vertical{% endif %}"
+      class="{{ holder_classes }}"
       data-quick-add-holder="{{ upsell_product.id }}"
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
