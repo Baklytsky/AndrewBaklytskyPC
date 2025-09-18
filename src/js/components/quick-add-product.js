@@ -1,63 +1,18 @@
 import FetchError from '../util/fetch-error';
 import wrapElements from '../globals/wrap';
 
-const classes = {
-  added: 'is-added',
-  animated: 'is-animated',
-  disabled: 'is-disabled',
-  error: 'has-error',
-  loading: 'is-loading',
-  open: 'is-open',
-  visible: 'is-visible',
-  siblingLinkCurrent: 'sibling__link--current',
-};
-
-const settings = {
-  errorDelay: 3000,
-};
-
-const selectors = {
-  animation: '[data-animation]',
-  apiContent: '[data-api-content]',
-  buttonQuickAdd: '[data-quick-add-btn]',
-  buttonAddToCart: '[data-add-to-cart]',
-  cartDrawer: 'cart-drawer',
-  cartPage: '[data-cart-page]',
-  cartLineItems: '[data-line-items]',
-  dialog: 'dialog',
-  focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
-  messageError: '[data-message-error]',
-  modalButton: '[data-quick-add-modal-handle]',
-  modalContainer: '[data-product-upsell-container]',
-  modalContent: '[data-product-upsell-ajax]',
-  modalClose: '[data-quick-add-modal-close]',
-  productGridItem: 'data-grid-item',
-  quickAddHolder: '[data-quick-add-holder]',
-  quickAddModal: '[data-quick-add-modal]',
-  quickAddModalTemplate: '[data-quick-add-modal-template]',
-};
-
-const attributes = {
-  closing: 'closing',
-  productId: 'data-product-id',
-  modalHandle: 'data-quick-add-modal-handle',
-  siblingSwapper: 'data-sibling-swapper',
-  quickAddHolder: 'data-quick-add-holder',
-  bundleProductButton: 'data-bundle-product-button',
-};
-
 class QuickAddProduct extends HTMLElement {
   constructor() {
     super();
 
-    this.quickAddHolder = this.querySelector(selectors.quickAddHolder);
+    this.quickAddHolder = this.querySelector('[data-quick-add-holder]');
     this.modal = null;
     this.currentModal = null;
-    this.productId = this.quickAddHolder.getAttribute(attributes.quickAddHolder);
-    this.modalButton = this.quickAddHolder.querySelector(selectors.modalButton);
-    this.handle = this.modalButton?.getAttribute(attributes.modalHandle);
-    this.buttonQuickAdd = this.quickAddHolder.querySelector(selectors.buttonQuickAdd);
-    this.buttonATC = this.quickAddHolder.querySelector(selectors.buttonAddToCart);
+    this.productId = this.quickAddHolder.getAttribute('data-quick-add-holder');
+    this.modalButton = this.quickAddHolder.querySelector('[data-quick-add-modal-handle]');
+    this.handle = this.modalButton?.getAttribute('data-quick-add-modal-handle');
+    this.buttonQuickAdd = this.quickAddHolder.querySelector('[data-quick-add-btn]');
+    this.buttonATC = this.quickAddHolder.querySelector('[data-add-to-cart]');
     this.button = this.modalButton || this.buttonATC;
     this.modalClose = this.modalClose.bind(this);
     this.modalCloseOnProductAdded = this.modalCloseOnProductAdded.bind(this);
@@ -111,18 +66,18 @@ class QuickAddProduct extends HTMLElement {
   modalButtonClickEvent(e) {
     e.preventDefault();
 
-    const isSiblingSwapper = this.modalButton.hasAttribute(attributes.siblingSwapper);
-    const isSiblingLinkCurrent = this.modalButton.classList.contains(classes.siblingLinkCurrent);
+    const isSiblingSwapper = this.modalButton.hasAttribute('data-sibling-swapper');
+    const isSiblingLinkCurrent = this.modalButton.classList.contains('sibling__link--current');
 
     if (isSiblingLinkCurrent) return;
 
-    this.modalButton.classList.add(classes.loading);
+    this.modalButton.classList.add('is-loading');
     this.modalButton.disabled = true;
 
     // Siblings product modal swapper
     if (isSiblingSwapper && !isSiblingLinkCurrent) {
-      this.currentModal = e.target.closest(selectors.quickAddModal);
-      this.currentModal.classList.add(classes.loading);
+      this.currentModal = e.target.closest('[data-quick-add-modal]');
+      this.currentModal.classList.add('is-loading');
     }
 
     this.closeAllErrorContainers(this.parentElement);
@@ -130,24 +85,24 @@ class QuickAddProduct extends HTMLElement {
   }
 
   modalCreate(response) {
-    const cachedModal = document.querySelector(`${selectors.quickAddModal}[${attributes.productId}="${this.productId}"]`);
+    const cachedModal = document.querySelector(`[data-quick-add-modal][data-product-id="${this.productId}"]`);
 
     if (cachedModal) {
       this.modal = cachedModal;
       this.modalOpen();
     } else {
-      const modalTemplate = this.quickAddHolder.querySelector(selectors.quickAddModalTemplate);
+      const modalTemplate = this.quickAddHolder.querySelector('[data-quick-add-modal-template]');
       if (!modalTemplate) return;
 
       const htmlObject = document.createElement('div');
       htmlObject.innerHTML = modalTemplate.innerHTML;
 
       // Add dialog to the body
-      document.body.appendChild(htmlObject.querySelector(selectors.quickAddModal));
+      document.body.appendChild(htmlObject.querySelector('[data-quick-add-modal]'));
       modalTemplate.remove();
 
-      this.modal = document.querySelector(`${selectors.quickAddModal}[${attributes.productId}="${this.productId}"]`);
-      this.modal.querySelector(selectors.modalContent).innerHTML = new DOMParser().parseFromString(response, 'text/html').querySelector(selectors.apiContent).innerHTML;
+      this.modal = document.querySelector(`[data-quick-add-modal][data-product-id="${this.productId}"]`);
+      this.modal.querySelector('[data-product-upsell-ajax]').innerHTML = new DOMParser().parseFromString(response, 'text/html').querySelector('[data-api-content]').innerHTML;
 
       this.modalCreatedCallback();
     }
@@ -166,18 +121,18 @@ class QuickAddProduct extends HTMLElement {
     this.modal.setAttribute('open', true);
     this.modal.removeAttribute('inert');
 
-    this.quickAddHolder.classList.add(classes.disabled);
+    this.quickAddHolder.classList.add('is-disabled');
 
     if (this.modalButton) {
-      this.modalButton.classList.remove(classes.loading);
+      this.modalButton.classList.remove('is-loading');
       this.modalButton.disabled = false;
       window.theme.a11y.lastElement = this.modalButton;
     }
 
     // Animate items
     requestAnimationFrame(() => {
-      this.modal.querySelectorAll(selectors.animation).forEach((item) => {
-        item.classList.add(classes.animated);
+      this.modal.querySelectorAll('[data-animation]').forEach((item) => {
+        item.classList.add('is-animated');
       });
     });
 
@@ -192,8 +147,8 @@ class QuickAddProduct extends HTMLElement {
       return;
     }
 
-    if (!this.modal.hasAttribute(attributes.closing)) {
-      this.modal.setAttribute(attributes.closing, '');
+    if (!this.modal.hasAttribute('closing')) {
+      this.modal.setAttribute('closing', '');
       this.isAnimating = true;
       return;
     }
@@ -205,16 +160,16 @@ class QuickAddProduct extends HTMLElement {
       this.modal.removeAttribute('open');
     }
 
-    this.modal.removeAttribute(attributes.closing);
+    this.modal.removeAttribute('closing');
     this.modal.setAttribute('inert', '');
-    this.modal.classList.remove(classes.loading);
+    this.modal.classList.remove('is-loading');
 
-    if (this.modalButton && !this.modalButton.hasAttribute(attributes.bundleProductButton)) {
+    if (this.modalButton && !this.modalButton.hasAttribute('data-bundle-product-button')) {
       this.modalButton.disabled = false;
     }
 
-    if (this.quickAddHolder && this.quickAddHolder.classList.contains(classes.disabled)) {
-      this.quickAddHolder.classList.remove(classes.disabled);
+    if (this.quickAddHolder && this.quickAddHolder.classList.contains('is-disabled')) {
+      this.quickAddHolder.classList.remove('is-disabled');
     }
 
     this.resetAnimatedItems();
@@ -233,7 +188,7 @@ class QuickAddProduct extends HTMLElement {
 
   modalEvents() {
     // Close button click event
-    this.modal.querySelector(selectors.modalClose)?.addEventListener('click', (e) => {
+    this.modal.querySelector('[data-quick-add-modal-close]')?.addEventListener('click', (e) => {
       e.preventDefault();
       this.modalClose();
     });
@@ -262,12 +217,12 @@ class QuickAddProduct extends HTMLElement {
       if (event.target !== this.modal) return;
       this.isAnimating = false;
 
-      if (this.modal.hasAttribute(attributes.closing)) {
+      if (this.modal.hasAttribute('closing')) {
         this.modalClose();
       } else {
         setTimeout(() => {
           this.a11y.trapFocus(this.modal);
-          const focusTarget = this.modal.querySelector('[autofocus]') || this.modal.querySelector(selectors.focusable);
+          const focusTarget = this.modal.querySelector('[autofocus]') || this.modal.querySelector('button, [href], select, textarea, [tabindex]:not([tabindex="-1"])');
           focusTarget?.focus();
         }, 50);
       }
@@ -293,15 +248,15 @@ class QuickAddProduct extends HTMLElement {
   errorHandler() {
     this.quickAddHolder.addEventListener('theme:cart:error', (event) => {
       const holder = event.detail.holder;
-      const parentProduct = holder.closest(`[${selectors.productGridItem}]`);
+      const parentProduct = holder.closest('[data-grid-item]');
       if (!parentProduct) return;
 
-      const errorMessageHolder = holder.querySelector(selectors.messageError);
-      const button = holder.querySelector(selectors.buttonAddToCart);
+      const errorMessageHolder = holder.querySelector('[data-message-error]');
+      const button = holder.querySelector('[data-add-to-cart]');
 
       if (button) {
-        button.classList.remove(classes.added, classes.loading);
-        holder.classList.add(classes.error);
+        button.classList.remove('is-added', 'is-loading');
+        holder.classList.add('has-error');
       }
 
       if (errorMessageHolder) {
@@ -310,7 +265,7 @@ class QuickAddProduct extends HTMLElement {
 
       setTimeout(() => {
         this.resetQuickAddButtons();
-      }, settings.errorDelay);
+      }, 3000);
     });
   }
 
@@ -319,11 +274,11 @@ class QuickAddProduct extends HTMLElement {
    */
   resetQuickAddButtons() {
     if (this.quickAddHolder) {
-      this.quickAddHolder.classList.remove(classes.visible, classes.error);
+      this.quickAddHolder.classList.remove('is-visible', 'has-error');
     }
 
-    if (this.buttonQuickAdd && !this.buttonQuickAdd.hasAttribute(attributes.bundleProductButton)) {
-      this.buttonQuickAdd.classList.remove(classes.added);
+    if (this.buttonQuickAdd && !this.buttonQuickAdd.hasAttribute('data-bundle-product-button')) {
+      this.buttonQuickAdd.classList.remove('is-added');
       this.buttonQuickAdd.disabled = false;
     }
   }
@@ -332,7 +287,7 @@ class QuickAddProduct extends HTMLElement {
     if (this.modal) {
       this.modalOpen();
     } else {
-      const apiUrl = this.modalButton.hasAttribute(attributes.bundleProductButton) ? 'api-product-bundle' : 'api-product-upsell';
+      const apiUrl = this.modalButton.hasAttribute('data-bundle-product-button') ? 'api-product-bundle' : 'api-product-upsell';
 
       window
         .fetch(`${window.theme.routes.root}products/${this.handle}?section_id=${apiUrl}`)
@@ -407,8 +362,8 @@ class QuickAddProduct extends HTMLElement {
   }
 
   resetAnimatedItems() {
-    this.modal?.querySelectorAll(selectors.animation).forEach((item) => {
-      item.classList.remove(classes.animated);
+    this.modal?.querySelectorAll('[data-animation]').forEach((item) => {
+      item.classList.remove('is-animated');
     });
   }
 
