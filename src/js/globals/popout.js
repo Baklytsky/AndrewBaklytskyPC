@@ -1,26 +1,3 @@
-const selectors = {
-  popoutList: '[data-popout-list]',
-  popoutToggle: '[data-popout-toggle]',
-  popoutToggleText: '[data-popout-toggle-text]',
-  popoutInput: '[data-popout-input]',
-  popoutOptions: '[data-popout-option]',
-  section: '[data-section-type]',
-};
-
-const classes = {
-  listVisible: 'popout-list--visible',
-  active: 'is-active',
-  popoutListTop: 'popout-list--top',
-};
-
-const attributes = {
-  ariaExpanded: 'aria-expanded',
-  ariaCurrent: 'aria-current',
-  dataValue: 'data-value',
-  popoutToggleText: 'data-popout-toggle-text',
-  submit: 'submit',
-};
-
 if (!customElements.get('popout-select')) {
   customElements.define(
     'popout-select',
@@ -34,12 +11,12 @@ if (!customElements.get('popout-select')) {
         if (this.hasAttribute('data-popout-initialized')) return;
         this.setAttribute('data-popout-initialized', 'true');
 
-        this.popoutList = this.querySelector(selectors.popoutList);
-        this.popoutToggle = this.querySelector(selectors.popoutToggle);
-        this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
-        this.popoutInput = this.querySelector(selectors.popoutInput) || this.parentNode.querySelector(selectors.popoutInput);
-        this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
-        this.fireSubmitEvent = this.hasAttribute(attributes.submit);
+        this.popoutList = this.querySelector('[data-popout-list]');
+        this.popoutToggle = this.querySelector('[data-popout-toggle]');
+        this.popoutToggleText = this.querySelector('[data-popout-toggle-text]');
+        this.popoutInput = this.querySelector('[data-popout-input]') || this.parentNode.querySelector('[data-popout-input]');
+        this.popoutOptions = this.querySelectorAll('[data-popout-option]');
+        this.fireSubmitEvent = this.hasAttribute('submit');
         this.shouldChangeVariant = this.hasAttribute('data-variant-change');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
@@ -56,10 +33,10 @@ if (!customElements.get('popout-select')) {
 
       onPopupToggleClick(evt) {
         const button = evt.currentTarget;
-        const ariaExpanded = button.getAttribute(attributes.ariaExpanded) === 'true';
+        const ariaExpanded = button.getAttribute('aria-expanded') === 'true';
 
-        evt.currentTarget.setAttribute(attributes.ariaExpanded, !ariaExpanded);
-        this.popoutList.classList.toggle(classes.listVisible);
+        evt.currentTarget.setAttribute('aria-expanded', !ariaExpanded);
+        this.popoutList.classList.toggle('popout-list--visible');
         this.popupListSetDimensions();
         this.toggleListPosition();
 
@@ -79,7 +56,7 @@ if (!customElements.get('popout-select')) {
         if (!document.body.classList.contains('is-focused')) return;
 
         const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
-        const isVisible = this.popoutList.classList.contains(classes.listVisible);
+        const isVisible = this.popoutList.classList.contains('popout-list--visible');
 
         if (isVisible && !childInFocus) {
           this._hideList();
@@ -87,20 +64,20 @@ if (!customElements.get('popout-select')) {
       }
 
       toggleListPosition() {
-        const button = this.querySelector(selectors.popoutToggle);
+        const button = this.querySelector('[data-popout-toggle]');
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
 
         const removeTopClass = () => {
-          if (button.getAttribute(attributes.ariaExpanded) !== 'true') {
-            this.popoutList.classList.remove(classes.popoutListTop);
+          if (button.getAttribute('aria-expanded') !== 'true') {
+            this.popoutList.classList.remove('popout-list--top');
           }
 
           this.popoutList.removeEventListener('transitionend', removeTopClass);
         };
 
-        if (button.getAttribute(attributes.ariaExpanded) === 'true') {
+        if (button.getAttribute('aria-expanded') === 'true') {
           if (window.innerHeight / 2 < popoutTop) {
-            this.popoutList.classList.add(classes.popoutListTop);
+            this.popoutList.classList.add('popout-list--top');
           }
         } else {
           this.popoutList.addEventListener('transitionend', removeTopClass);
@@ -118,12 +95,12 @@ if (!customElements.get('popout-select')) {
       }
 
       popupOptionsClick(evt) {
-        const link = evt.target.closest(selectors.popoutOptions);
+        const link = evt.target.closest('[data-popout-option]');
 
         if (link && link.attributes.href.value === '#') {
           evt.preventDefault();
 
-          const attrValue = link.hasAttribute(attributes.dataValue) ? link.getAttribute(attributes.dataValue) : '';
+          const attrValue = link.hasAttribute('data-value') ? link.getAttribute('data-value') : '';
           this.popoutInput.value = attrValue;
 
           if (this.popoutInput.disabled) {
@@ -134,32 +111,32 @@ if (!customElements.get('popout-select')) {
             this._submitForm(attrValue);
           } else {
             const currentTarget = link.parentElement; // <li class="select-popout__item">
-            const listTargetElement = this.popoutList.querySelector(`.${classes.active}`);
-            const targetAttribute = this.popoutList.querySelector(`[${attributes.ariaCurrent}]`);
+            const listTargetElement = this.popoutList.querySelector('.is-active');
+            const targetAttribute = this.popoutList.querySelector('[aria-current]');
 
             this.popoutInput.dispatchEvent(new Event('change'));
             if (this.shouldChangeVariant) this.triggerVariantChange(link);
 
             // Update active state
-            if (listTargetElement) listTargetElement.classList.remove(classes.active);
-            if (currentTarget) currentTarget.classList.add(classes.active);
+            if (listTargetElement) listTargetElement.classList.remove('is-active');
+            if (currentTarget) currentTarget.classList.add('is-active');
 
             if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
-              this.classList.add(classes.active);
+              this.classList.add('is-active');
             }
 
             // Update aria-current attribute
-            link.setAttribute(`${attributes.ariaCurrent}`, 'true');
-            if (targetAttribute && targetAttribute.hasAttribute(`${attributes.ariaCurrent}`)) {
-              targetAttribute.removeAttribute(`${attributes.ariaCurrent}`);
+            link.setAttribute('aria-current', 'true');
+            if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
+              targetAttribute.removeAttribute('aria-current');
             }
 
             // Update toggle text
             if (attrValue !== '') {
               this.popoutToggleText.innerHTML = attrValue;
 
-              if (this.popoutToggleText.hasAttribute(attributes.popoutToggleText) && this.popoutToggleText.getAttribute(attributes.popoutToggleText) !== '') {
-                this.popoutToggleText.setAttribute(attributes.popoutToggleText, attrValue);
+              if (this.popoutToggleText.hasAttribute('data-popout-toggle-text') && this.popoutToggleText.getAttribute('data-popout-toggle-text') !== '') {
+                this.popoutToggleText.setAttribute('data-popout-toggle-text', attrValue);
               }
             }
 
@@ -195,7 +172,7 @@ if (!customElements.get('popout-select')) {
 
       onBodyClick(evt) {
         const isOption = this.contains(evt.target);
-        const isVisible = this.popoutList.classList.contains(classes.listVisible);
+        const isVisible = this.popoutList.classList.contains('popout-list--visible');
 
         if (isVisible && !isOption) {
           this._hideList();
@@ -228,8 +205,8 @@ if (!customElements.get('popout-select')) {
       }
 
       _hideList() {
-        this.popoutList.classList.remove(classes.listVisible);
-        this.popoutToggle.setAttribute(attributes.ariaExpanded, false);
+        this.popoutList.classList.remove('popout-list--visible');
+        this.popoutToggle.setAttribute('aria-expanded', false);
         this.toggleListPosition();
         document.body.removeEventListener('click', this.bodyClickEvent);
       }
