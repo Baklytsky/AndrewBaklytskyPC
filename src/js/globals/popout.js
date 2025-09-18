@@ -40,6 +40,7 @@ if (!customElements.get('popout-select')) {
         this.popoutInput = this.querySelector(selectors.popoutInput) || this.parentNode.querySelector(selectors.popoutInput);
         this.popoutOptions = this.querySelectorAll(selectors.popoutOptions);
         this.fireSubmitEvent = this.hasAttribute(attributes.submit);
+        this.shouldChangeVariant = this.hasAttribute('data-variant-change');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -119,10 +120,10 @@ if (!customElements.get('popout-select')) {
       popupOptionsClick(evt) {
         const link = evt.target.closest(selectors.popoutOptions);
 
-        if (link.attributes.href.value === '#') {
+        if (link && link.attributes.href.value === '#') {
           evt.preventDefault();
 
-          const attrValue = evt.currentTarget.hasAttribute(attributes.dataValue) ? evt.currentTarget.getAttribute(attributes.dataValue) : '';
+          const attrValue = link.hasAttribute(attributes.dataValue) ? link.getAttribute(attributes.dataValue) : '';
           this.popoutInput.value = attrValue;
 
           if (this.popoutInput.disabled) {
@@ -132,26 +133,28 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
-            const currentTarget = evt.currentTarget.parentElement;
+            const currentTarget = link.parentElement; // <li class="select-popout__item">
             const listTargetElement = this.popoutList.querySelector(`.${classes.active}`);
             const targetAttribute = this.popoutList.querySelector(`[${attributes.ariaCurrent}]`);
 
             this.popoutInput.dispatchEvent(new Event('change'));
+            if (this.shouldChangeVariant) this.triggerVariantChange(link);
 
-            if (listTargetElement) {
-              listTargetElement.classList.remove(classes.active);
-              currentTarget.classList.add(classes.active);
-            }
+            // Update active state
+            if (listTargetElement) listTargetElement.classList.remove(classes.active);
+            if (currentTarget) currentTarget.classList.add(classes.active);
 
             if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
               this.classList.add(classes.active);
             }
 
+            // Update aria-current attribute
+            link.setAttribute(`${attributes.ariaCurrent}`, 'true');
             if (targetAttribute && targetAttribute.hasAttribute(`${attributes.ariaCurrent}`)) {
               targetAttribute.removeAttribute(`${attributes.ariaCurrent}`);
-              evt.currentTarget.setAttribute(`${attributes.ariaCurrent}`, 'true');
             }
 
+            // Update toggle text
             if (attrValue !== '') {
               this.popoutToggleText.innerHTML = attrValue;
 
@@ -164,6 +167,22 @@ if (!customElements.get('popout-select')) {
             this._hideList();
           }
         }
+      }
+
+      /**
+       * Trigger variant change for popout select
+       * @param {HTMLElement} link - The link that was clicked
+       */
+      triggerVariantChange(link) {
+        if (!link) return;
+        const variantId = link.getAttribute('data-variant-id');
+        const form = this.closest('form');
+        if (!variantId || !form) return;
+        const variantIdInput = form.querySelector('[data-variant-id]');
+        if (!variantIdInput) return;
+
+        variantIdInput.value = variantId;
+        variantIdInput.dispatchEvent(new Event('change'));
       }
 
       onKeyUp(evt) {

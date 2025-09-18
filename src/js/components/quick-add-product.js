@@ -389,15 +389,14 @@ class QuickAddProduct extends HTMLElement {
    */
   handleInstantAddVariantChange(e) {
     const variantId = e.target.getAttribute('data-variant-id');
+    if (!variantId) return;
 
-    if (variantId && this.instantAddForm) {
-      const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
-      if (variantIdInput) {
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
-        this.closeAllErrorContainers(this.parentElement);
-      }
-    }
+    const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
+    if (!variantIdInput) return;
+
+    variantIdInput.value = variantId;
+    variantIdInput.dispatchEvent(new Event('change'));
+    this.closeAllErrorContainers(this.parentElement);
   }
 
   resetAnimatedItems() {
