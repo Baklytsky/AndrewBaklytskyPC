@@ -1,18 +1,3 @@
-const selectors = {
-  scrollbar: '[data-scrollbar]',
-  scrollbarArrowPrev: '[data-scrollbar-arrow-prev]',
-  scrollbarArrowNext: '[data-scrollbar-arrow-next]',
-};
-
-const classes = {
-  hidden: 'is-hidden',
-};
-
-const attributes = {
-  scrollbarSlider: 'data-scrollbar-slider',
-  scrollbarSlideFullWidth: 'data-scrollbar-slide-fullwidth',
-};
-
 if (!customElements.get('native-scrollbar')) {
   customElements.define(
     'native-scrollbar',
@@ -20,16 +5,16 @@ if (!customElements.get('native-scrollbar')) {
       constructor() {
         super();
 
-        this.scrollbar = this.querySelector(selectors.scrollbar);
-        this.arrowNext = this.querySelector(selectors.scrollbarArrowNext);
-        this.arrowPrev = this.querySelector(selectors.scrollbarArrowPrev);
+        this.scrollbar = this.querySelector('[data-scrollbar]');
+        this.arrowNext = this.querySelector('[data-scrollbar-arrow-prev]');
+        this.arrowPrev = this.querySelector('[data-scrollbar-arrow-next]');
         this.toggleNextArrow = this.toggleNextArrow.bind(this);
       }
 
       connectedCallback() {
         document.addEventListener('theme:resize', this.toggleNextArrow);
 
-        if (this.scrollbar.hasAttribute(attributes.scrollbarSlider)) {
+        if (this.scrollbar.hasAttribute('data-scrollbar-slider')) {
           this.scrollToVisibleElement();
         }
 
@@ -63,36 +48,36 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       goToNext() {
-        const moveWith = this.scrollbar.hasAttribute(attributes.scrollbarSlideFullWidth) ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
+        const moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
         const position = moveWith + this.scrollbar.scrollLeft;
 
         this.move(position);
 
-        this.arrowPrev.classList.remove(classes.hidden);
+        this.arrowPrev.classList.remove('is-hidden');
 
         this.toggleNextArrow();
       }
 
       goToPrev() {
-        const moveWith = this.scrollbar.hasAttribute(attributes.scrollbarSlideFullWidth) ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
+        const moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
         const position = this.scrollbar.scrollLeft - moveWith;
 
         this.move(position);
 
-        this.arrowNext.classList.remove(classes.hidden);
+        this.arrowNext.classList.remove('is-hidden');
 
         this.togglePrevArrow();
       }
 
       toggleNextArrow() {
         requestAnimationFrame(() => {
-          this.arrowNext?.classList.toggle(classes.hidden, Math.round(this.scrollbar.scrollLeft + this.scrollbar.getBoundingClientRect().width + 1) >= this.scrollbar.scrollWidth);
+          this.arrowNext?.classList.toggle('is-hidden', Math.round(this.scrollbar.scrollLeft + this.scrollbar.getBoundingClientRect().width + 1) >= this.scrollbar.scrollWidth);
         });
       }
 
       togglePrevArrow() {
         requestAnimationFrame(() => {
-          this.arrowPrev.classList.toggle(classes.hidden, this.scrollbar.scrollLeft <= 0);
+          this.arrowPrev.classList.toggle('is-hidden', this.scrollbar.scrollLeft <= 0);
         });
       }
 
