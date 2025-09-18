@@ -41,7 +41,7 @@
 <script src="{{ 'quantity-counter.js' | asset_url }}" defer="defer"></script>
 
 {%- capture cart_title -%}
-  <h3 class="cart__title caps">
+  <h3 class="cart__title drawer__title">
     {{ title_block[0].settings.title | default: cart_title_default }}
 
     <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">{{ cart_item_count }}</cart-count>
@@ -82,39 +82,31 @@
   <form id="cartForm" class="cart__form" action="{{ routes.cart_url }}" method="post" novalidate data-cart-form>
 
     <div class="cart__foot__inner">
-
       <div class="cart__price__holder" data-cart-price-holder>
         {%- render 'cart-price' -%}
       </div>
 
-      <div class="cart__buttons-all">
+      <div class="cart__buttons-wrapper">
+        {%- if settings.enable_accept_terms -%}
+          <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes"/>
+          <input type="checkbox" class="cart__acceptance__input" name="acceptance" id="acceptance" data-cart-acceptance-checkbox>
+          <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>{{ settings.accept_terms_text }}</label>
 
-        <div class="cart__buttons-wrapper">
-          {%- if settings.enable_accept_terms -%}
-            <input type="hidden" name="attributes[{{ 'cart.general.accepted_terms' | t }}]" value="Yes"/>
-            <input type="checkbox" class="cart__acceptance__input" name="acceptance" id="acceptance" data-cart-acceptance-checkbox>
-            <label for="acceptance" class="cart__acceptance__label" data-cart-acceptance-label>{{ settings.accept_terms_text }}</label>
+          <p class="cart__terms cart__errors__content" data-terms-error-message></p>
+        {%- endif -%}
 
-            <p class="cart__terms cart__errors__content" data-terms-error-message></p>
-          {%- endif -%}
+        <div class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}" data-cart-checkout-buttons>
+          <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
+            <button type="submit" name="checkout" class="btn btn--primary btn--solid btn--full cart__checkout">
+              {{- 'cart.general.checkout' | t -}}
+            </button>
 
-          <div class="cart__buttons{% if settings.enable_accept_terms %} cart__buttons--disabled{% endif %}" data-cart-checkout-buttons>
-            <fieldset class="cart__buttons__fieldset" data-cart-checkout-button>
-              <button type="submit" name="checkout" class="btn btn--primary btn--solid btn--full cart__checkout">
-                {%- if settings.show_lock_icon -%}
-                  {%- render 'animated-icon', filename: 'icon-lock' -%}
-                {%- endif -%}
-
-                {{- 'cart.general.checkout' | t -}}
-              </button>
-
-              {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
-                <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
-                  {{- content_for_additional_checkout_buttons -}}
-                </div>
-              {%- endif -%}
-            </fieldset>
-          </div>
+            {%- if checkout_buttons_block[0].settings.enable_additional_buttons and additional_checkout_buttons -%}
+              <div class="additional-checkout-buttons additional-checkout-buttons--vertical">
+                {{- content_for_additional_checkout_buttons -}}
+              </div>
+            {%- endif -%}
+          </fieldset>
         </div>
 
         {%- if checkout_buttons_block[0].settings.show_view_cart_button -%}
@@ -407,14 +399,14 @@
           "type": "richtext",
           "id": "cart_custom_message_text",
           "label": "Text",
-          "default": "<p>Use coupon code <strong>WELCOME10</strong> for 10% off your first order.</p>"
+          "default": "<p>Earn points for every $1 spent.</p>"
         },
         {
           "type": "select",
           "id": "text_font_size",
           "label": "Text size",
           "info": "Applies only when content in Text field is set to Paragraph.",
-          "default": "body-x-small",
+          "default": "body-medium",
           "options": [
             {"value": "body-x-small", "label": "Extra small"},
             {"value": "body-small", "label": "Small"},
@@ -430,7 +422,8 @@
         {
           "type": "text",
           "id": "link_text",
-          "label": "Text"
+          "label": "Text",
+          "default": "Learn more"
         },
         {
           "type": "url",
@@ -458,7 +451,7 @@
         {
           "type": "color_scheme",
           "id": "color_scheme",
-          "default": "scheme_1",
+          "default": "scheme-3",
           "label": "Color scheme"
         },
         {
@@ -480,9 +473,22 @@
         },
         {
           "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "default": "body-medium",
+          "options": [
+            {"value": "body-x-small", "label": "Extra small"},
+            {"value": "body-small", "label": "Small"},
+            {"value": "body-medium", "label": "Medium"},
+            {"value": "body-large", "label": "Large"},
+            {"value": "body-x-large", "label": "Extra large"}
+          ]
+        },
+        {
+          "type": "select",
           "id": "align_text",
           "label": "Text alignment",
-          "default": "text-left",
+          "default": "text-center",
           "options": [
             {"value": "text-left", "label": "Left"},
             {"value": "text-center", "label": "Centered"},
@@ -767,7 +773,7 @@
           "type": "checkbox",
           "id": "show_view_cart_button",
           "label": "Show 'View cart' button",
-          "default": false
+          "default": true
         },
         {
           "type": "checkbox",
@@ -781,7 +787,20 @@
       "type": "discount",
       "name": "Discount",
       "limit": 1,
-      "settings": []
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Add a promo code"
+        },
+        {
+          "type": "checkbox",
+          "id": "pin_to_bottom",
+          "label": "Pin to bottom",
+          "default": false
+        }
+      ]
     }
   ],
   "presets": [

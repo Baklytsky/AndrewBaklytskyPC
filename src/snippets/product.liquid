@@ -233,29 +233,52 @@
 
             {%- if show_thumbnails -%}
               <product-thumbs class="product__thumbs">
-                <div class="product__thumbs__holder" data-thumbs-slider>
-                  {%- for media in product.media -%}
-                    <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
-                      <a
-                        class="product__thumb__link{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
-                        href="{{ media.preview_image.src | image_url }}"
-                        aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
-                        data-media-id="{{ section.id }}-{{ media.id }}"
-                        data-thumb-link
-                      >
-                        {%- liquid
-                          render 'image', image: media.preview_image, width: 150, height: 150, sizes: '75px', widths: '75, 100, 150, 225, 300', aspect_ratio: 1
+                <native-scrollbar>
+                  <div
+                    class="product__thumbs__holder"
+                    data-scrollbar
+                    data-scroll-lock-scrollable
+                    data-thumbs-slider
+                  >
+                    {%- for media in product.media -%}
+                      <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
+                        <a
+                          class="product__thumb__link{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
+                          href="{{ media.preview_image.src | image_url }}"
+                          aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+                          data-media-id="{{ section.id }}-{{ media.id }}"
+                          data-thumb-link
+                        >
+                          {%- liquid
+                            render 'image', image: media.preview_image, width: 150, height: 150, sizes: '75px', widths: '75, 100, 150, 225, 300', aspect_ratio: 1
 
-                          if media.media_type == 'video' or media.media_type == 'external_video'
-                            render 'icon-media-video'
-                          elsif media.media_type == 'model'
-                            render 'icon-media-model'
-                          endif
-                        -%}
-                      </a>
-                    </div>
-                  {%- endfor -%}
-                </div>
+                            if media.media_type == 'video' or media.media_type == 'external_video'
+                              render 'icon-media-video'
+                            elsif media.media_type == 'model'
+                              render 'icon-media-model'
+                            endif
+                          -%}
+                        </a>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+
+                  <button
+                    type="button"
+                    class="slider__button slider__button--prev is-hidden"
+                    data-scrollbar-arrow-prev
+                  >
+                    <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="slider__button slider__button--next is-hidden"
+                    data-scrollbar-arrow-next
+                  >
+                    <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
+                  </button>
+                </native-scrollbar>
               </product-thumbs>
 
               <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>

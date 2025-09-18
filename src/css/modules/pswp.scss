@@ -58,30 +58,21 @@
   height: 100%;
 }
 
-.pswp__custom-close .icon {
-  --icon-size: 16px;
-
-  position: absolute;
-  margin-left: -7px;
-  pointer-events: none;
-  transform: translateY(-50%);
-  transition: transform 0.3s;
-}
-
 .pswp__custom-close {
   --bg: var(--COLOR-BG);
+  --icon-size: 28px;
 
   position: absolute;
   top: 34px;
   right: 40px;
   z-index: 4;
-  width: 50px;
-  height: 50px;
-  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
   background: var(--bg);
   color: var(--accent);
-  text-align: center;
-  transition: all 0.4s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   @include media-query($small) {
     top: 50px;
@@ -95,13 +86,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-  }
-
-  &:hover {
-    border-color: var(--border-dark);
-    transform: scale(1.1);
-
-    .icon { transform: translateY(-50%) rotate(90deg); }
   }
 }
 
@@ -188,29 +172,20 @@
     top: 50%;
     left: 40px;
     z-index: 3;
-    width: 50px;
-    height: 50px;
-    border: 1px solid var(--border);
+    width: 40px;
+    height: 40px;
+    border: none;
     margin-top: -25px;
     background: var(--bg);
     color: currentcolor;
-    transition: all 0.3s $ease-out-fast;
+    transition: transform 0.3s $ease-out-fast, border 0.3s $ease-out-fast;
 
     @include media-query($small) {
       left: 10px;
       transform: translateY(0);
     }
 
-    &:hover {
-      transform: scale(1.1);
-      border-color: var(--border-dark);
-    }
-
-    .icon {
-      stroke: var(--accent);
-      fill: none;
-      pointer-events: none;
-    }
+    .icon { pointer-events: none; }
   }
 
   .pswp__button--arrow--right {
@@ -247,7 +222,6 @@
     display: inline-block;
     width: 80px;
     height: 80px;
-    border-radius: 50%;
     overflow: hidden;
     margin: 10px;
     padding-top: 0;
@@ -268,7 +242,6 @@
       z-index: 6;
       display: block;
       border: 1px solid transparent;
-      border-radius: 50%;
       pointer-events: none;
       transition: border-color 0.2s ease-in-out;
       content: "";
@@ -291,8 +264,8 @@
 
     position: absolute;
     z-index: 1;
-    top: 30px;
-    left: 30px;
+    top: var(--outer);
+    left: var(--outer);
     max-width: 50vw;
     padding: 10px 20px 10px 50px;
     background: var(--bg);
@@ -307,31 +280,26 @@
     }
 
     .pswp__caption-close {
+      --icon-size: 28px;
+
       position: absolute;
-      top: 50%;
+      top: var(--outer);
       left: 0;
       width: 40px;
       height: 40px;
       margin-top: -20px;
       color: currentcolor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      &:hover { color: var(--accent-hover); }
 
       body.is-focused &:focus {
         outline: initial !important;
         box-shadow: 0 0 0 2px var(--accent);
       }
 
-      .icon {
-        --icon-size: 28px;
-
-        position: absolute;
-        top: 7px;
-        left: 14px;
-        stroke: currentcolor;
-        fill: none;
-        pointer-events: none;
-      }
+      .icon { pointer-events: none; }
 
       @include media-query($small) { display: none; }
     }
