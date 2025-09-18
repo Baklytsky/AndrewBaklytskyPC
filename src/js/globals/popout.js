@@ -30,6 +30,10 @@ if (!customElements.get('popout-select')) {
       }
 
       connectedCallback() {
+        // Prevent duplicate initialization
+        if (this.hasAttribute('data-popout-initialized')) return;
+        this.setAttribute('data-popout-initialized', 'true');
+
         this.popoutList = this.querySelector(selectors.popoutList);
         this.popoutToggle = this.querySelector(selectors.popoutToggle);
         this.popoutToggleText = this.querySelector(selectors.popoutToggleText);
