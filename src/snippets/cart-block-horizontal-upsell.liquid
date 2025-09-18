@@ -1,5 +1,5 @@
 {%- doc -%}
-  Renders product list or upsell products on Cart page and Cart drawer
+  Renders vertical product upsell block with slider functionality for Cart page and Cart drawer
 
   @param {object} block - Block object (required)
 
@@ -9,23 +9,71 @@
 
 {%- liquid
   assign product_count = block.settings.product_list.count
-
-  capture product_list
-    for product in block.settings.product_list
-      render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, instant_add: true
-    endfor
-  endcapture
+  assign show_slider = false
+  if product_count > 1
+    assign show_slider = true
+  endif
 
   assign color_scheme = 'color-' | append: block.settings.color_scheme
 -%}
+
+{%- capture product_list -%}
+  {%- for product in block.settings.product_list limit: 3 -%}
+    {%- if show_slider -%}
+      <swiper-slide class="cart__widget__vertical-upsell-slide">
+    {%- endif -%}
+
+      {%- render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, instant_add: true -%}
+
+    {%- if show_slider -%}
+      </swiper-slide>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
 
 {%- if request.design_mode or product_count > 0 and product_list != blank -%}
   {{ 'product-variants.css' | asset_url | stylesheet_tag }}
 
   <div class="cart__widget cart__widget--horizontal-upsell {{ color_scheme }}">
+    {%- if block.settings.title != blank -%}
+      <div class="cart__widget__title">
+        <span>{{ block.settings.title }}</span>
+
+        {%- if product_count > 1 -%}
+          <div class="swiper-navigation-static">
+            <div class="{{ block.id }}--button swiper-button-prev">
+              {{ 'icon-nav-arrow-left.svg' | inline_asset_content }}
+            </div>
+            <div class="{{ block.id }}--button swiper-button-next">
+              {{ 'icon-nav-arrow-right.svg' | inline_asset_content }}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
     <div class="cart__widget__content">
       <div class="cart__widget__content__inner">
-        {{- product_list -}}
+        {%- if show_slider -%}
+          <div class="swiper">
+            <swiper-container
+              class="swiper-wrapper"
+              loop="true"
+              grab-cursor="true"
+              autoplay="false"
+              space-between="10px"
+              {%- if product_count > 1 %}
+                navigation="true"
+                navigation-prev-el=".{{ block.id }}--button.swiper-button-prev"
+                navigation-next-el=".{{ block.id }}--button.swiper-button-next"
+              {% endif -%}
+            >
+              {{- product_list -}}
+            </swiper-container>
+          </div>
+        {%- else -%}
+          {{- product_list -}}
+        {%- endif -%}
       </div>
     </div>
   </div>
