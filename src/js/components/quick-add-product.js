@@ -105,7 +105,7 @@ class QuickAddProduct extends HTMLElement {
     }
 
     // Initialize upsell error handling
-    this.setupMiniUpsellErrorHandling();
+    this.setupUpsellErrorHandling();
   }
 
   modalButtonClickEvent(e) {
@@ -125,6 +125,7 @@ class QuickAddProduct extends HTMLElement {
       this.currentModal.classList.add(classes.loading);
     }
 
+    this.closeAllErrorContainers(this.parentElement);
     this.renderModal();
   }
 
@@ -382,6 +383,12 @@ class QuickAddProduct extends HTMLElement {
     swatchInputs.forEach((input) => {
       input.addEventListener('change', this.handleInstantAddVariantChange);
     });
+
+    // Close error containers on dropdown selection
+    const dropdownOptions = this.instantAddForm.querySelectorAll('[data-dropdown] [data-popout-option]');
+    dropdownOptions.forEach((option) => {
+      option.addEventListener('click', () => this.closeAllErrorContainers(this.parentElement));
+    });
   }
 
   /**
@@ -430,15 +437,14 @@ class QuickAddProduct extends HTMLElement {
   }
 
   /**
-   * Setup error handling for mini upsell widgets with swiper
+   * Setup error handling for upsell widgets with swiper
    */
-  setupMiniUpsellErrorHandling() {
+  setupUpsellErrorHandling() {
     const swiperContainer = this.closest('swiper-container');
     if (!swiperContainer) return;
 
     // Check if listener has already been added to prevent duplicates
     if (swiperContainer.hasAttribute('data-swiper-listener-added')) return;
-
     swiperContainer.setAttribute('data-swiper-listener-added', 'true');
 
     swiperContainer.addEventListener('swiperslidechangetransitionend', () => {
