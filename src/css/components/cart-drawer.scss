@@ -191,6 +191,11 @@
   cart-items.drawer__items & {
     padding-inline: var(--SPACING-MEDIUM);
   }
+
+  &:has(.popout-list--visible) {
+    position: relative;
+    z-index: 2;
+  }
 }
 .cart__item--no-border { border-bottom: none; }
 
@@ -262,9 +267,17 @@
 .cart__item__content-bottom .cart__quantity-counter { margin-left: auto; }
 
 .cart__quantity-counter {
+  --min-w: 76px;
+  --min-h: 32px;
+  --border: var(--BTN-PRIMARY-BORDER);
+
   display: flex;
   align-items: center;
   gap: 2px;
+
+  @include media-query($mobile) {
+    --min-w: 90px;
+  }
 }
 
 .cart__item__remove {
