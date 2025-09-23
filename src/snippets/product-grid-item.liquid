@@ -26,6 +26,7 @@
   assign modifier_class = modifier_class | default: ''
   assign index = index | default: 1
   assign bundle_product = bundle_product | default: false
+  assign bundle_template = bundle_template | default: false
 
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 2
@@ -54,11 +55,6 @@
     endif
 
     assign alignment_class = 'product-item--left' | append: no_padding_class
-  endif
-
-  assign quickview_class = ''
-  if settings.quickview_enable and product.first_available_variant
-    assign quickview_class = 'product-item--has-quickbuy'
   endif
 
   if sizes == blank
@@ -319,88 +315,126 @@
     </div>
   {%- endif -%}
 
-  {%- if bundle_product and current_variant -%}
-    {%- assign unique = section.id | append: '-' | append: product.id -%}
+  {%- if current_variant -%}
+    {%- if bundle_product or bundle_template -%}
+      {%- capture bundle_code -%}
+        {%- assign unique = section.id | append: '-' | append: product.id -%}
 
-    <script type="application/json" data-bundle-json>
-      {
-        "product": {{ product | json }},
-        "variant": {{ product.selected_or_first_available_variant | json }}
-      }
-    </script>
+        <script type="application/json" data-bundle-json>
+          {
+            "product": {{ product | json }},
+            "variant": {{ product.selected_or_first_available_variant | json }}
+          }
+        </script>
 
-    <quick-add-product>
-      <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
-        <button class="quick-add__button caps"
-          type="button"
-          aria-label="{{ 'products.general.quick_add' | t }}"
-          data-bundle-product-button="{{ product.id }}"
-          data-bundle-product-url="{{ product.url }}"
-          {% if product.has_only_default_variant == false and product.variants.size > 1 %}
-            data-quick-add-btn
-            data-quick-add-modal-handle="{{ product.handle }}"
-          {% endif %}
-        >
-          <span class="btn__text">
-            {{ 'products.general.add_bundle' | t }}
-          </span>
-          <span class="btn__bag"></span>
-          <span class="btn__added">&nbsp;</span>
-          <span class="btn__loader">
-            <svg height="18" width="18" class="svg-loader">
-              <circle r="7" cx="9" cy="9" />
-              <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-            </svg>
-          </span>
-        </button>
-
-        {%- unless product.has_only_default_variant -%}
-          {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
-        {%- endunless -%}
-      </div>
-    </quick-add-product>
-  {%- elsif settings.quickview_enable and current_variant -%}
-    {%- liquid
-      assign has_preorder_meta = false
-      assign has_preorder_tag = false
-
-      if current_variant.available and product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
-        assign has_preorder_meta = true
-      endif
-
-      if current_variant.available and product.tags contains '_preorder'
-        assign has_preorder_tag = true
-      endif
-
-      if has_preorder_meta or has_preorder_tag
-        assign preorder_name = 'products.product.sale_type' | t | strip_html | escape
-        assign preorder_value = 'products.product.pre_order' | t | strip_html | escape
-      endif
-
-      assign unique = section.id | append: '-' | append: product.id
-    -%}
-
-    <quick-add-product>
-      <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
-        {%- if product.variants.size == 1 -%}
-          {%- assign product_form_id = 'ProductForm--' | append: unique -%}
-          {%- form 'product', product, id: product_form_id -%}
-            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-
-            {{- siblings_line_item_props -}}
-
-            {%- if preorder_value != blank -%}
-              <input
-                type="hidden"
-                name="properties[{{ preorder_name }}]"
-                value="{{ preorder_value }}">
-            {%- endif -%}
-
+        <quick-add-product>
+          <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
             <button class="quick-add__button caps"
-              type="submit"
-              name="add"
+              type="button"
               aria-label="{{ 'products.general.quick_add' | t }}"
-              data-add-to-cart
+              data-bundle-product-button="{{ product.id }}"
+              data-bundle-product-url="{{ product.url }}"
+              {% if product.has_only_default_variant == false and product.variants.size > 1 %}
+                data-quick-add-btn
+                data-quick-add-modal-handle="{{ product.handle }}"
+              {% endif %}
+            >
+              <span class="btn__text">
+                {{ 'products.general.add_bundle' | t }}
+              </span>
+              <span class="btn__plus"></span>
+              <span class="btn__added">&nbsp;</span>
+              <span class="btn__loader">
+                <svg height="18" width="18" class="svg-loader">
+                  <circle r="7" cx="9" cy="9" />
+                  <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                </svg>
+              </span>
+            </button>
+
+            {%- unless product.has_only_default_variant -%}
+              {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+            {%- endunless -%}
+          </div>
+        </quick-add-product>
+      {%- endcapture -%}
+    {%- endif -%}
+
+    {%- if bundle_template -%}
+      <template data-bundle-item-template>
+        {{ bundle_code }}
+      </template>
+    {%- endif -%}
+
+    {%- if bundle_product -%}
+      {{ bundle_code }}
+    {%- elsif settings.quickview_enable -%}
+      {%- liquid
+        assign has_preorder_meta = false
+        assign has_preorder_tag = false
+
+        if current_variant.available and product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
+          assign has_preorder_meta = true
+        endif
+
+        if current_variant.available and product.tags contains '_preorder'
+          assign has_preorder_tag = true
+        endif
+
+        if has_preorder_meta or has_preorder_tag
+          assign preorder_name = 'products.product.sale_type' | t | strip_html | escape
+          assign preorder_value = 'products.product.pre_order' | t | strip_html | escape
+        endif
+
+        assign unique = section.id | append: '-' | append: product.id
+      -%}
+
+      <quick-add-product data-bundle-item-replace>
+        <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
+          {%- if product.variants.size == 1 -%}
+            {%- assign product_form_id = 'ProductForm--' | append: unique -%}
+            {%- form 'product', product, id: product_form_id -%}
+              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+
+              {{- siblings_line_item_props -}}
+
+              {%- if preorder_value != blank -%}
+                <input
+                  type="hidden"
+                  name="properties[{{ preorder_name }}]"
+                  value="{{ preorder_value }}">
+              {%- endif -%}
+
+              <button class="quick-add__button caps"
+                type="submit"
+                name="add"
+                aria-label="{{ 'products.general.quick_add' | t }}"
+                data-add-to-cart
+              >
+                <span class="btn__text">
+                  {%- if preorder -%}
+                    {{ 'products.product.pre_order' | t }}
+                  {%- else -%}
+                    {{ 'products.general.quick_add' | t }}
+                  {%- endif -%}
+                </span>
+                <span class="btn__plus"></span>
+                <span class="btn__added">&nbsp;</span>
+                <span class="btn__loader">
+                  <svg height="18" width="18" class="svg-loader">
+                    <circle r="7" cx="9" cy="9" />
+                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                  </svg>
+                </span>
+                <span class="btn__error" data-message-error>&nbsp;</span>
+              </button>
+            {%- endform -%}
+          {%- else -%}
+            <button class="quick-add__button caps"
+              type="button"
+              aria-label="{{ 'products.general.quick_add' | t }}"
+              data-quick-add-btn
+              data-quick-add-modal-handle="{{ product.handle }}"
             >
               <span class="btn__text">
                 {%- if preorder -%}
@@ -417,39 +451,15 @@
                   <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
                 </svg>
               </span>
-              <span class="btn__error" data-message-error>&nbsp;</span>
             </button>
-          {%- endform -%}
-        {%- else -%}
-          <button class="quick-add__button caps"
-            type="button"
-            aria-label="{{ 'products.general.quick_add' | t }}"
-            data-quick-add-btn
-            data-quick-add-modal-handle="{{ product.handle }}"
-          >
-            <span class="btn__text">
-              {%- if preorder -%}
-                {{ 'products.product.pre_order' | t }}
-              {%- else -%}
-                {{ 'products.general.quick_add' | t }}
-              {%- endif -%}
-            </span>
-            <span class="btn__bag"></span>
-            <span class="btn__added">&nbsp;</span>
-            <span class="btn__loader">
-              <svg height="18" width="18" class="svg-loader">
-                <circle r="7" cx="9" cy="9" />
-                <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-              </svg>
-            </span>
-          </button>
-        {%- endif -%}
+          {%- endif -%}
 
-        {%- unless product.has_only_default_variant -%}
-          {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
-        {%- endunless -%}
-      </div>
-    </quick-add-product>
+          {%- unless product.has_only_default_variant -%}
+            {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+          {%- endunless -%}
+        </div>
+      </quick-add-product>
+    {%- endif -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -494,7 +504,7 @@
 
 {%- unless hidden_product -%}
   <product-item
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }} {{ quickview_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    class="grid-item product-item {{ swatches_class }} {{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     data-url="{{ product.url }}"

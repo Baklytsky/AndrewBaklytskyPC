@@ -264,14 +264,88 @@
             {%- endif -%}
 
             {%- unless line_item.product.has_only_default_variant -%}
-              <p class="cart__item__selected-options">
-                {%- for option in line_item.options_with_values -%}
-                  {%- unless forloop.first -%}
-                    <span> | </span>
-                  {%- endunless -%}
-                  <span>{{ option.value }}</span>
-                {%- endfor -%}
-              </p>
+              {%- if line_item.product.metafields.theme_modules.is_bundle -%}
+                <div class="cart__item__subs">
+                  {%- for bundle_sub in line_item.product.metafields.theme_modules.bundle_products.value -%}
+                    {%- liquid
+                      assign bundle_sub_variants_string = ''
+                      assign bundle_sub_image = bundle_sub.featured_image
+                      assign bundle_sub_selected_options = ''
+                      assign bundle_separator_open = '('
+                      assign bundle_separator_close = ')'
+
+                      for line_item_option in line_item.options_with_values
+                        for bundle_sub_option in bundle_sub.options_with_values
+                          assign bundle_sub_option_name = bundle_sub.title | append: ' ' | append: bundle_separator_open | append: bundle_sub_option.name | append: bundle_separator_close
+
+                          if line_item_option.name == bundle_sub_option_name
+                            assign bundle_sub_variants_string = bundle_sub_variants_string | append: '@@@@' | append: line_item_option.value
+                            break
+                          endif
+                        endfor
+                      endfor
+
+                      if bundle_sub_variants_string != ''
+                        assign bundle_sub_variants = bundle_sub_variants_string | remove_first: '@@@@' | split: '@@@@' | join: ' / '
+                        assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants
+                        assign bundle_sub_selected_options = bundle_sub_variants | replace: ' / ', ' | '
+
+                        if bundle_sub_variant[0].featured_image != blank
+                          assign bundle_sub_image = bundle_sub_variant[0].featured_image
+                        endif
+                      endif
+                    -%}
+
+                    <div class="cart__item__sub">
+                      <div class="cart__item__sub__image{% unless bundle_sub_image %} image--empty{% endunless %}">
+                        <a
+                          href="{{ bundle_sub.url }}"
+                          aria-label="{{ bundle_sub.title | escape }}"
+                          {% if settings.show_image_bg != 'none' %}
+                            class="show-gray-bg"
+                          {% endif %}
+                        >
+                          {%- if bundle_sub_image -%}
+                            <div class="lazy-image is-loading">
+                              {{
+                                bundle_sub_image
+                                | image_url: width: 60
+                                | image_tag:
+                                  widths: '30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360',
+                                  sizes: '30px',
+                                  class: 'is-loading',
+                                  loading: 'lazy',
+                                  fetchpriority: fetchpriority
+                              }}
+                            </div>
+                          {%- endif -%}
+                        </a>
+                      </div>
+
+                      <div class="cart__item__sub__content">
+                        <h5 class="cart__item__sub__title">
+                          <a href="{{ bundle_sub.url }}">
+                            {{- bundle_sub.title | strip_html -}}
+                          </a>
+                        </h5>
+
+                        {%- if bundle_sub_selected_options != '' -%}
+                          <p class="cart__item__sub__options">{{ bundle_sub_selected_options }}</p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {%- else -%}
+                <p class="cart__item__selected-options">
+                  {%- for option in line_item.options_with_values -%}
+                    {%- unless forloop.first -%}
+                      <span> | </span>
+                    {%- endunless -%}
+                    <span>{{ option.value }}</span>
+                  {%- endfor -%}
+                </p>
+              {%- endif -%}
             {%- endunless -%}
 
             {%- if line_item.selling_plan_allocation -%}

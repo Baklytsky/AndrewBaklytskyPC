@@ -10,7 +10,7 @@ const selectors = {
   bundleTotalSavings: '[data-bundle-total-savings]',
   addButton: '[data-bundle-add-to-cart]',
   removeButton: '[data-bundle-remove-button]',
-  scrollToBundle: '[data-bundle-scroll-to]',
+  scrollToBundleButton: '[data-bundle-scroll-button]',
   placeholder: '[data-bundle-placeholder]',
   placeholderFilled: '[data-bundle-placeholder-filled]',
   placeholderPrice: '[data-placeholder-price]',
@@ -63,13 +63,18 @@ if (!customElements.get('bundle-collection')) {
         this.bundleTotal = this.querySelector(selectors.bundleTotal);
         this.bundleTotalSavings = this.querySelector(selectors.bundleTotalSavings);
         this.addButton = this.querySelector(selectors.addButton);
-        this.scrollToBundle = this.querySelector(selectors.scrollToBundle);
+        this.scrollToBundleButton = this.querySelector(selectors.scrollToBundleButton);
         this.placeholders = this.querySelectorAll(selectors.placeholder);
         this.selectedProducts = [];
         this.bundleCartItems = null;
         this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
+        this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
+        this.bundleButtonChangeEvent = (event) => this.bundleButtonChange(event);
+        this.addProductsToCartEvent = (event) => this.addProductsToCart(event);
+        this.addProductToBundleModalEvent = (event) => this.addProductToBundleModal(event);
+        this.scrollToBundleEvent = (event) => this.scrollToBundle(event);
       }
 
       connectedCallback() {
@@ -77,54 +82,20 @@ if (!customElements.get('bundle-collection')) {
 
         if (this.buttons.length) {
           this.buttons.forEach((button) => {
-            button.addEventListener('click', () => {
-              if (!button.hasAttribute(attributes.quickAdd)) {
-                const productItem = button.closest(selectors.productGridItem);
-                const dataSelector = productItem.querySelector(selectors.bundleJson);
-                if ((dataSelector && !dataSelector.innerHTML) || !dataSelector) {
-                  return;
-                }
-
-                const data = JSON.parse(dataSelector.innerHTML);
-
-                this.addProductToBundle(data);
-              }
-            });
+            button.addEventListener('click', this.bundleButtonAddEvent);
           });
         }
 
-        this.addEventListener('theme:bundle:button', (e) => {
-          this.addProductToBundle(e.detail.data);
-        });
+        this.addEventListener('theme:bundle:change', this.bundleButtonChangeEvent);
 
-        if (this.scrollToBundle) {
-          this.scrollToBundle.addEventListener('click', () => {
-            window.theme.scrollTo(this.getBoundingClientRect().top);
-          });
+        this.addEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
+
+        if (this.scrollToBundleButton) {
+          this.scrollToBundleButton.addEventListener('click', this.scrollToBundleEvent);
         }
 
         if (this.addButton) {
-          this.addButton.addEventListener('click', () => {
-            if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
-              this.selectedProducts.forEach((element) => {
-                if (this.handle !== '') {
-                  this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
-                  element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
-                }
-              });
-
-              window.theme.a11y.lastElement = this.addButton;
-
-              document.dispatchEvent(
-                new CustomEvent('theme:cart:add', {
-                  detail: {
-                    button: this.addButton,
-                    data: this.selectedProducts,
-                  },
-                })
-              );
-            }
-          });
+          this.addButton.addEventListener('click', this.addProductsToCartEvent);
         }
 
         if (this.bundleProducts.length) {
@@ -132,6 +103,55 @@ if (!customElements.get('bundle-collection')) {
         }
 
         this.updateUI();
+      }
+
+      scrollToBundle() {
+        window.theme.scrollTo(this.getBoundingClientRect().top);
+      }
+
+      addProductToBundleModal(event) {
+        this.addProductToBundle(event.detail.data);
+      }
+
+      addProductsToCart() {
+        if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
+          this.selectedProducts.forEach((element) => {
+            if (this.handle !== '') {
+              this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
+              element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
+            }
+          });
+
+          window.theme.a11y.lastElement = this.addButton;
+
+          document.dispatchEvent(
+            new CustomEvent('theme:cart:add', {
+              detail: {
+                button: this.addButton,
+                data: this.selectedProducts,
+              },
+            })
+          );
+        }
+      }
+
+      bundleButtonChange(event) {
+        event.target.querySelector(selectors.button)?.addEventListener('click', this.bundleButtonAddEvent);
+      }
+
+      bundleButtonAdd(event) {
+        const target = event.currentTarget;
+        if (!target.hasAttribute(attributes.quickAdd)) {
+          const productItem = target.closest(selectors.productGridItem);
+          const dataSelector = productItem.querySelector(selectors.bundleJson);
+          if ((dataSelector && !dataSelector.innerHTML) || !dataSelector) {
+            return;
+          }
+
+          const data = JSON.parse(dataSelector.innerHTML);
+
+          this.addProductToBundle(data);
+        }
       }
 
       loadLocalStorage() {
@@ -145,6 +165,10 @@ if (!customElements.get('bundle-collection')) {
 
         this.placeholders[this.bundleProducts.length - 1].classList.remove(classes.lineActive);
         this.selectedProducts = this.bundleProducts;
+      }
+
+      isSupportedByGetSizedImageUrl(src, size = '100x') {
+        return getSizedImageUrl(src, size) !== null;
       }
 
       setProductToPlaceholder(data, placeholder) {
@@ -170,12 +194,23 @@ if (!customElements.get('bundle-collection')) {
           cloneTemplate.querySelector(selectors.placeholderOptions).textContent = data.optionsText;
         }
 
-        if (data.image) {
+        if (data.image.variant?.src || data.image.product?.src) {
           const placeholderImage = cloneTemplate.querySelector(selectors.placeholderImage);
           const imageTag = document.createElement('img');
           const imageWidth = placeholderImage.hasAttribute(attributes.placeholderImage) ? parseInt(placeholderImage.getAttribute(attributes.placeholderImage)) : 0;
+          const imageWidthRetina = imageWidth * 2;
+          let dataImageSrc = data.image.product?.src || null;
+          let dataImageAspectRatio = data.image.product?.aspect_ratio || null;
 
-          imageTag.src = getSizedImageUrl(data.image, `${imageWidth * 2}x`);
+          if (data.image.variant?.src) {
+            dataImageSrc = data.image.variant?.src;
+            dataImageAspectRatio = data.image.variant?.aspect_ratio;
+          }
+
+          const imageSrc = this.isSupportedByGetSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) ? getSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) : dataImageSrc;
+          imageTag.src = imageSrc;
+          imageTag.width = imageWidthRetina;
+          imageTag.height = imageWidthRetina / dataImageAspectRatio;
           imageTag.alt = data.title || '';
 
           imageTag.addEventListener('load', () => {
@@ -221,6 +256,7 @@ if (!customElements.get('bundle-collection')) {
         if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing) || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
         const variant = data.variant;
         const product = data.product;
+        const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {
           id: variant.id,
@@ -234,7 +270,15 @@ if (!customElements.get('bundle-collection')) {
           optionsText: variant.options.join(' / '),
           vendor: product.vendor,
           title: product.title,
-          image: variant.featured_image?.src || product.featured_image || null,
+          image: {
+            variant: {
+              src: variant.featured_image?.src,
+              width: variant.featured_image?.width,
+              height: variant.featured_image?.height,
+              aspect_ratio: variant.featured_image?.width / variant.featured_image?.height,
+            },
+            product: imageMediaItems[0]?.preview_image,
+          },
           variants: product.variants.length,
         };
 
@@ -343,7 +387,27 @@ if (!customElements.get('bundle-collection')) {
         return price;
       }
 
-      disconnectedCallback() {}
+      disconnectedCallback() {
+        if (!this.bundle) return;
+
+        if (this.buttons.length) {
+          this.buttons.forEach((button) => {
+            button.removeEventListener('click', this.bundleButtonAddEvent);
+          });
+        }
+
+        this.removeEventListener('theme:bundle:change', this.bundleButtonChangeEvent);
+
+        this.removeEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
+
+        if (this.scrollToBundleButton) {
+          this.scrollToBundleButton.removeEventListener('click', this.scrollToBundleEvent);
+        }
+
+        if (this.addButton) {
+          this.addButton.removeEventListener('click', this.addProductsToCartEvent);
+        }
+      }
     }
   );
 }
