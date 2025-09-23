@@ -132,7 +132,7 @@ if (!customElements.get('popout-select')) {
             if (currentTarget) currentTarget.classList.add('is-active');
 
             if (shouldReplaceDropdown) {
-              this.classList.add('is-active');
+              this.classList.add('is-replaced');
             }
 
             // Update aria-current attribute
