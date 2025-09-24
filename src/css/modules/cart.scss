@@ -47,7 +47,6 @@
 .cart__empty,
 .cart__form {
   transition: opacity 0.3s ease, visibility 0.3s;
-  overflow: hidden;
 }
 
 .is-empty {
@@ -76,30 +75,42 @@
 .cart__empty__product:empty { display: none; }
 
 .cart__inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  --aside-width: max(32%, 425px);
+
+  position: relative;
+  display: grid;
+  grid-template-areas: "content pinned" "content aside";
+  grid-template-columns: 1fr var(--aside-width);
+  grid-template-rows: auto max-content;
+  column-gap: calc(var(--gap) * 2);
+  align-items: start;
+
+  @include media-query($medium) {
+    --aside-width: max(45%, 300px);
+  }
 
   @include media-query($small) {
-    display: block;
+    --aside-width: 100%;
+
+    grid-template-areas: "pinned" "content" "aside";
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--SPACING-MEDIUM);
+    overflow: hidden;
   }
 }
 
 .cart__content {
+  position: sticky;
+  top: var(--SPACING-MEDIUM);
+  grid-area: content;
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;
   align-items: center;
   overflow: hidden; // Item removal animation is visible outside the container
-
-  @include media-query($medium-up) {
-    flex: 1 1 auto;
-    margin-right: calc(var(--gap) * 2);
-  }
+  min-width: 0;
 
   @include media-query($small) {
-    width: 100%;
-    margin-bottom: var(--SPACING-MEDIUM);
     padding-inline: var(--SPACING-MEDIUM);
   }
 }
@@ -150,21 +161,24 @@
 }
 
 .cart__aside {
-  --aside-width: max(32%, 425px);
-
-  position: sticky;
-  top: 0;
-  width: var(--aside-width);
+  grid-area: aside;
   flex-shrink: 0;
   contain: paint;
 
-  @include media-query($medium) {
-    --aside-width: max(45%, 300px);
+  @include media-query($small) {
+    position: static;
+    padding: 0;
+
+    .cart-block:has(.free-shipping) {
+      padding-inline: var(--sp-inline);
+    }
   }
+}
+
+.cart__aside--pinned {
+  grid-area: pinned;
 
   @include media-query($small) {
-    --aside-width: 100%;
-
     padding: 0;
 
     .cart-block:has(.free-shipping) {
