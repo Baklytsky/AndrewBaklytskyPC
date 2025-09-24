@@ -101,7 +101,17 @@ if (!customElements.get('popout-select')) {
           evt.preventDefault();
 
           const attrValue = link.hasAttribute('data-value') ? link.getAttribute('data-value') : '';
-          this.popoutInput.value = attrValue;
+          const currentTarget = link.parentElement; // <li class="select-popout__item">
+          const isLastOption = !currentTarget.nextSibling;
+          const isLineItemQty = this.popoutInput.name === 'updates[]';
+          const isProductFormQty = this.popoutInput.name === 'quantity';
+          // Don't change the input value for "10+" in cart - just switch to input mode
+          const shouldChangeInputValue = isLastOption && isLineItemQty ? false : true;
+          const shouldReplaceDropdown = (isProductFormQty && isLastOption) || (isLastOption && isLineItemQty);
+
+          if (shouldChangeInputValue) {
+            this.popoutInput.value = attrValue;
+          }
 
           if (this.popoutInput.disabled) {
             this.popoutInput.removeAttribute('disabled');
@@ -110,22 +120,25 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
-            const currentTarget = link.parentElement; // <li class="select-popout__item">
-            const listTargetElement = this.popoutList.querySelector('.is-active');
-            const targetAttribute = this.popoutList.querySelector('[aria-current]');
 
-            this.popoutInput.dispatchEvent(new Event('change'));
+            // Only dispatch change event if we actually changed the value
+            if (shouldChangeInputValue) {
+              this.popoutInput.dispatchEvent(new Event('change'));
+            }
             if (this.shouldChangeVariant) this.triggerVariantChange(link);
 
             // Update active state
+            const listTargetElement = this.popoutList.querySelector('.is-active');
             if (listTargetElement) listTargetElement.classList.remove('is-active');
             if (currentTarget) currentTarget.classList.add('is-active');
 
-            if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
-              this.classList.add('is-active');
+            if (shouldReplaceDropdown) {
+              this.classList.add('is-replaced');
             }
 
             // Update aria-current attribute
+            const targetAttribute = this.popoutList.querySelector('[aria-current]');
+
             link.setAttribute('aria-current', 'true');
             if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
               targetAttribute.removeAttribute('aria-current');
