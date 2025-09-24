@@ -358,6 +358,45 @@
 }
 
 // Vertical upsell widget
+.cart__widget--upsell-vertical {
+  .cart__widget__content__inner {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--SPACING-TINY);
+    align-items: start;
+
+    @include media-query($small) {
+      margin-inline: calc(var(--sp-inline) * -1);
+      padding-inline: var(--sp-inline);
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scroll-padding: var(--sp-inline);
+
+      @include hide-scrollbar;
+
+      quick-add-product {
+        width: calc(50% - var(--SPACING-TINY) / 2);
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+      }
+
+      &:has(quick-add-product:nth-child(3)) {
+        quick-add-product {
+          width: 45%;
+        }
+      }
+    }
+  }
+
+  .product-upsell__holder {
+    margin: 0;
+  }
+}
 
 .cart__foot__inner {
   --sp-block: 10px;
