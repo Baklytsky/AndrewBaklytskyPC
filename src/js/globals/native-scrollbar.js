@@ -6,16 +6,16 @@ if (!customElements.get('native-scrollbar')) {
         super();
 
         this.scrollbar = this.querySelector('[data-scrollbar]');
-        this.arrowNext = this.querySelector('[data-scrollbar-arrow-prev]');
-        this.arrowPrev = this.querySelector('[data-scrollbar-arrow-next]');
-        this.togglePrevArrow = this.togglePrevArrow.bind(this);
-        this.toggleNextArrow = this.toggleNextArrow.bind(this);
+        this.arrowNext = this.querySelector('[data-scrollbar-arrow-next]');
+        this.arrowPrev = this.querySelector('[data-scrollbar-arrow-prev]');
+        this.scrollbarWidth = 0;
+        this.scrollbarHeight = 0;
+        this.resizeEvents = this.resizeEvents.bind(this);
         this.scrollDirection = null;
       }
 
       connectedCallback() {
-        document.addEventListener('theme:resize', this.toggleNextArrow);
-        document.addEventListener('theme:resize', this.togglePrevArrow);
+        document.addEventListener('theme:resize', this.resizeEvents);
 
         // Detect scroll direction
         this.detectScrollDirection();
@@ -24,19 +24,29 @@ if (!customElements.get('native-scrollbar')) {
           this.scrollToVisibleElement();
         }
 
+        this.scrollbar.addEventListener(
+          'scroll',
+          window.theme.debounce(() => this.updateArrows(), 16)
+        );
+
         if (this.arrowNext && this.arrowPrev) {
-          this.togglePrevArrow();
-          this.toggleNextArrow();
-          this.events();
+          this.resizeEvents();
+          this.clickEvents();
         }
       }
 
       disconnectedCallback() {
-        document.removeEventListener('theme:resize', this.toggleNextArrow);
-        document.removeEventListener('theme:resize', this.togglePrevArrow);
+        document.removeEventListener('theme:resize', this.resizeEvents);
       }
 
-      events() {
+      resizeEvents() {
+        this.detectScrollDirection();
+        this.scrollbarWidth = this.scrollbar.clientWidth;
+        this.scrollbarHeight = this.scrollbar.clientHeight;
+        this.updateArrows();
+      }
+
+      clickEvents() {
         this.arrowNext.addEventListener('click', (event) => {
           event.preventDefault();
 
@@ -48,79 +58,60 @@ if (!customElements.get('native-scrollbar')) {
 
           this.goToPrev();
         });
-
-        this.scrollbar.addEventListener('scroll', () => {
-          this.togglePrevArrow();
-          this.toggleNextArrow();
-        });
       }
 
       goToNext() {
         let moveWith, position;
 
         if (this.scrollDirection === 'horizontal') {
-          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
-          position = moveWith + this.scrollbar.scrollLeft;
+          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbarWidth : this.scrollbarWidth / 2;
+          position = this.scrollbar.scrollLeft + moveWith;
         } else if (this.scrollDirection === 'vertical') {
-          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().height : this.scrollbar.getBoundingClientRect().height / 2;
-          position = moveWith + this.scrollbar.scrollTop;
+          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbarHeight : this.scrollbarHeight / 2;
+          position = this.scrollbar.scrollTop + moveWith;
         } else {
           return; // No scroll direction detected
         }
 
+        this.arrowPrev.removeAttribute('disabled');
         this.move(position);
-
-        this.arrowPrev.classList.remove('is-hidden');
-
-        this.toggleNextArrow();
       }
 
       goToPrev() {
         let moveWith, position;
 
         if (this.scrollDirection === 'horizontal') {
-          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().width : this.scrollbar.getBoundingClientRect().width / 2;
+          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbarWidth : this.scrollbarWidth / 2;
           position = this.scrollbar.scrollLeft - moveWith;
         } else if (this.scrollDirection === 'vertical') {
-          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbar.getBoundingClientRect().height : this.scrollbar.getBoundingClientRect().height / 2;
+          moveWith = this.scrollbar.hasAttribute('data-scrollbar-slide-fullwidth') ? this.scrollbarHeight : this.scrollbarHeight / 2;
           position = this.scrollbar.scrollTop - moveWith;
         } else {
           return; // No scroll direction detected
         }
 
+        this.arrowNext.removeAttribute('disabled');
         this.move(position);
-
-        this.arrowNext.classList.remove('is-hidden');
-
-        this.togglePrevArrow();
       }
 
-      toggleNextArrow() {
-        requestAnimationFrame(() => {
-          let isAtEnd = false;
+      updateArrows() {
+        if (!this.scrollDirection) {
+          this.arrowPrev?.toggleAttribute('disabled', true);
+          this.arrowNext?.toggleAttribute('disabled', true);
+          return;
+        }
 
-          if (this.scrollDirection === 'horizontal') {
-            isAtEnd = Math.round(this.scrollbar.scrollLeft + this.scrollbar.getBoundingClientRect().width + 1) >= this.scrollbar.scrollWidth;
-          } else if (this.scrollDirection === 'vertical') {
-            isAtEnd = Math.round(this.scrollbar.scrollTop + this.scrollbar.getBoundingClientRect().height + 1) >= this.scrollbar.scrollHeight;
-          }
+        const EPS = 1;
+        const sb = this.scrollbar;
 
-          this.arrowNext?.classList.toggle('is-hidden', !isAtEnd);
-        });
-      }
+        const need = this.scrollDirection === 'horizontal' ? sb.scrollWidth > sb.clientWidth : sb.scrollHeight > sb.clientHeight;
+        const atStart = this.scrollDirection === 'horizontal' ? sb.scrollLeft <= EPS : sb.scrollTop <= EPS;
+        const atEnd = this.scrollDirection === 'horizontal' ? Math.ceil(sb.scrollLeft + sb.clientWidth) >= sb.scrollWidth - EPS : Math.ceil(sb.scrollTop + sb.clientHeight) >= sb.scrollHeight - EPS;
 
-      togglePrevArrow() {
-        requestAnimationFrame(() => {
-          let isAtStart = false;
-
-          if (this.scrollDirection === 'horizontal') {
-            isAtStart = this.scrollbar.scrollLeft <= 0;
-          } else if (this.scrollDirection === 'vertical') {
-            isAtStart = this.scrollbar.scrollTop <= 0;
-          }
-
-          this.arrowPrev?.classList.toggle('is-hidden', !isAtStart);
-        });
+        // Prev е disabled в началото или когато не е нужен скрол
+        this.arrowPrev?.toggleAttribute('disabled', atStart || !need);
+        // Next е disabled в края или когато не е нужен скрол
+        this.arrowNext?.toggleAttribute('disabled', atEnd || !need);
       }
 
       scrollToVisibleElement() {
@@ -170,6 +161,8 @@ if (!customElements.get('native-scrollbar')) {
         } else {
           this.scrollDirection = null;
         }
+
+        this.setAttribute('data-direction', this.scrollDirection);
       }
     }
   );
