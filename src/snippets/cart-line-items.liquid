@@ -360,6 +360,15 @@
           </div>
 
           <quantity-counter class="cart__quantity-counter">
+            {%- assign quantity = line_item.quantity -%}
+
+            {%- if line_item.variant.inventory_policy == 'deny'
+              and line_item.variant.inventory_management != null
+              and line_item.variant.inventory_quantity < quantity
+            -%}
+              {%- assign quantity = line_item.variant.inventory_quantity -%}
+            {%- endif -%}
+
             {%- unless bundle_opened or line_item_reward -%}
               <a
                 class="cart__item__remove"
@@ -370,10 +379,32 @@
               >
                 {%- render 'icon-trash' -%}
               </a>
-            {%- endunless -%}
 
-            <div class="cart__quantity">
-              {%- unless bundle_opened or line_item_reward -%}
+              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-replaced{% endif %}">
+                <button type="button"
+                  class="select-popout__toggle"
+                  aria-expanded="false"
+                  aria-controls="{{ line_item.key }}-select-quantity"
+                  aria-labelledby="{{ line_item.key }}-select-quantity-label"
+                  data-popout-toggle>
+                  <span data-popout-toggle-text>{{ quantity }}</span>
+                  {%- render 'icon-nav-arrow-down' -%}
+                </button>
+
+                <ul id="{{ line_item.key }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable>
+                  {%- for idx in (1..10) -%}
+                    <li class="select-popout__item{% if forloop.index == quantity %} is-active{% endif %}">
+                      <a class="select-popout__option" href="#" {% if forloop.index == quantity %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                        <span>
+                          {{ forloop.index }} {% if forloop.last %}+{% endif %}
+                        </span>
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </popout-select>
+
+              <div class="cart__quantity">
                 <button
                   class="cart__quantity-minus"
                   type="button"
@@ -382,17 +413,29 @@
                 >
                   {%- render 'icon-minus' -%}
                 </button>
-              {%- endunless -%}
 
-              {%- assign quantity = line_item.quantity -%}
+                <input
+                  class="cart__quantity-field"
+                  type="number"
+                  id="updates_{{ line_item.key }}"
+                  name="updates[]"
+                  data-id="{{ line_item.key }}"
+                  value="{{ quantity }}"
+                  title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
+                  pattern="[0-9]*"
+                  data-popout-input
+                >
 
-              {%- if line_item.variant.inventory_policy == 'deny'
-                and line_item.variant.inventory_management != null
-                and line_item.variant.inventory_quantity < quantity
-              -%}
-                {%- assign quantity = line_item.variant.inventory_quantity -%}
-              {%- endif -%}
-
+                <button
+                  class="cart__quantity-plus"
+                  type="button"
+                  name="increase"
+                  title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
+                >
+                  {%- render 'icon-plus' -%}
+                </button>
+              </div>
+            {%- else -%}
               <input
                 class="cart__quantity-field"
                 type="number"
@@ -402,23 +445,10 @@
                 value="{{ quantity }}"
                 title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
                 pattern="[0-9]*"
-                {% if bundle_opened or line_item_reward %}
-                  data-bundle-cart-quantity
-                  disabled
-                {% endif %}
+                data-bundle-cart-quantity
+                disabled
               >
-
-              {%- unless bundle_opened or line_item_reward -%}
-                <button
-                  class="cart__quantity-plus"
-                  type="button"
-                  name="increase"
-                  title="{{ 'cart.general.increase_quantity_label' | t }} - {{ line_item.product.title | strip_html }}"
-                >
-                  {%- render 'icon-plus' -%}
-                </button>
-              {%- endunless -%}
-            </div>
+            {%- endunless -%}
           </quantity-counter>
         </div>
       </div>
