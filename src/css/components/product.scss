@@ -221,31 +221,13 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   @include media-query ($small) {
     min-height: 85px; // Prevent CLS
   }
-
-  @include media-query ($medium-up) {
-    .slider__button {
-      --btn-size: 28px;
-
-      opacity: 1;
-      transform: none;
-      box-shadow: none;
-
-      &.is-hidden {
-        opacity: 0.3;
-        visibility: unset;
-        max-height: none;
-        cursor: default;
-      }
-    }
-  }
 }
 
 @include media-query ($medium-up) {
-  .product__wrapper--thumbnails {
-    .slider__button--prev { left: 0; }
-    .slider__button--next { right: 0; }
+  .product__wrapper--thumbnails .product__thumbs {
+    .product__thumbs__holder { padding: 0 5px; }
 
-    .product__thumbs native-scrollbar {
+    native-scrollbar {
       position: relative;
       padding: 0 28px;
       min-height: 100%;
@@ -254,27 +236,29 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 
   .product__wrapper--thumbnails-left,
   .product__wrapper--thumbnails-right {
+    .product__thumbs__holder { padding: 5px 0; }
+
     .product__thumbs native-scrollbar {
       position: absolute;
       inset: 0;
       padding: 28px 0;
       min-height: 100%;
 
-      .slider__button {
-        top: auto;
-        left: 50%;
-        right: auto;
-        transform: rotate(90deg);
-        margin: 0 0 0 calc(var(--btn-size) / -2 - 5px);
+      .scroll-arrow {
+        padding-right: 10px;
+
+        .icon { transform: rotate(90deg); }
       }
-      .slider__button--prev { top: 0; }
-      .slider__button--next { bottom: 0; }
+
+      .scroll-arrow--prev { top: 0; }
+      .scroll-arrow--next { bottom: 0; }
     }
   }
 
-  .product__thumbs:has(native-scrollbar > .slider__button--prev.is-hidden):has(native-scrollbar > .slider__button--next.is-hidden) {
+  .product__thumbs:has(native-scrollbar > .scroll-arrow--prev[disabled]):has(native-scrollbar > .scroll-arrow--next[disabled]) {
+    .product__thumbs__holder,
     native-scrollbar { padding: 0; }
-    native-scrollbar .slider__button { display: none; }
+    native-scrollbar .scroll-arrow { display: none; }
   }
 }
 
@@ -672,7 +656,7 @@ dialog[closing] .product-modal__outer { animation: heroFadeOut 0.5s ease forward
   .tab-content { padding: 0; }
 
   .product-tabs__head {
-    padding: 16px 13px;
+    padding: 13px;
     margin: 0 -13px -13px;
   }
 }

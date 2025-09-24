@@ -7,10 +7,20 @@
     @include media-query($small) {
       padding-block: calc(var(--outer) * 2);
     }
+
+    > .brick-column-layout { width: 100%; }
   }
 
   .brick__block--images:empty {
     display: none;
+  }
+
+  .brick__block--text {
+    flex: 0 0 100%;
+
+    @include media-query($medium-up) {
+      flex: 0 0 50%;
+    }
   }
 
   :has(.brick__block--images:empty) {
@@ -18,7 +28,13 @@
 
     .brick__block--text {
       max-width: 100%;
+      flex: 0 0 100%;
     }
+  }
+
+  .hero__title,
+  .hero__description {
+    overflow-wrap: anywhere;
   }
 }
 
@@ -56,13 +72,13 @@
 .brick-row-layout {
   display: flex;
   flex-flow: row wrap;
-  justify-content: var(--horizontal-alignment, flex-start);
-  align-items: var(--vertical-alignment, center);
+  justify-content: var(--horizontal-alignment-mobile, center);
+  align-items: var(--vertical-alignment-mobile, center);
   gap: var(--brick-gap, 0);
 
   @include media-query($small) {
-    justify-content: var(--horizontal-alignment-mobile, center);
-    align-items: var(--vertical-alignment-mobile, center);
+    justify-content: var(--horizontal-alignment, flex-start);
+    align-items: var(--vertical-alignment, center);
   }
 }
 

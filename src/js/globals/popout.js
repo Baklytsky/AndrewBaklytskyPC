@@ -120,6 +120,7 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
+
             // Only dispatch change event if we actually changed the value
             if (shouldChangeInputValue) {
               this.popoutInput.dispatchEvent(new Event('change'));
@@ -137,6 +138,7 @@ if (!customElements.get('popout-select')) {
 
             // Update aria-current attribute
             const targetAttribute = this.popoutList.querySelector('[aria-current]');
+
             link.setAttribute('aria-current', 'true');
             if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
               targetAttribute.removeAttribute('aria-current');
