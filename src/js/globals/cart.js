@@ -26,7 +26,6 @@ const selectors = {
   apiLineItems: '[data-api-line-items]',
   apiCartPrice: '[data-api-cart-price]',
   animation: '[data-animation]',
-  additionalCheckoutButtons: '.additional-checkout-buttons',
   cartBarAdd: '[data-add-to-cart-bar]',
   cartCloseError: '[data-cart-error-close]',
   cartDrawer: 'cart-drawer',
@@ -40,7 +39,6 @@ const selectors = {
   cartCheckoutButtonWrapper: '[data-cart-checkout-buttons]',
   cartCheckoutButton: '[data-cart-checkout-button]',
   cartTotal: '[data-cart-total]',
-  checkoutButtons: '[data-checkout-buttons]',
   errorMessage: '[data-error-message]',
   formCloseError: '[data-close-error]',
   formErrorsContainer: '[data-cart-errors-container]',
@@ -97,7 +95,6 @@ class CartItems extends HTMLElement {
     this.cartTermsCheckbox = document.querySelector(selectors.cartTermsCheckbox);
     this.cartCheckoutButtonWrapper = document.querySelector(selectors.cartCheckoutButtonWrapper);
     this.cartCheckoutButton = document.querySelector(selectors.cartCheckoutButton);
-    this.checkoutButtons = document.querySelector(selectors.checkoutButtons);
     this.itemsHolder = document.querySelector(selectors.itemsHolder);
     this.priceHolder = document.querySelector(selectors.priceHolder);
     this.items = document.querySelectorAll(selectors.item);
