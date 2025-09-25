@@ -19,14 +19,18 @@
 
 {%- capture product_list -%}
   {%- for product in block.settings.product_list limit: 3 -%}
-    {%- if show_slider -%}
-      <swiper-slide>
-    {%- endif -%}
-
+    {%- capture upsell_product -%}
       {%- render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, is_mini_upsell: true, show_available_upsell_only: true -%}
+    {%- endcapture -%}
 
-    {%- if show_slider -%}
-      </swiper-slide>
+    {%- if upsell_product != blank -%}
+      {%- if show_slider -%}
+        <swiper-slide>
+          {{- upsell_product -}}
+        </swiper-slide>
+      {%- else -%}
+        {{- upsell_product -}}
+      {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
 {%- endcapture -%}
