@@ -1,0 +1,37 @@
+{% liquid
+  assign product = closest.product
+-%}
+
+{% capture children %}
+  {% content_for 'blocks' %}
+{% endcapture %}
+
+{% render 'product-card-content', product: product, children: children, shopify_attributes: block.shopify_attributes %}
+
+{% schema %}
+{
+  "name": "Product card content",
+  "tag": null,
+  "settings": [],
+  "blocks": [
+    {
+      "type": "_product-card-title"
+    },
+    {
+      "type": "_product-card-price"
+    },
+    {
+      "type": "_product-card-swatches"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product card content",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

@@ -1,12 +1,16 @@
 {% liquid
   assign product = closest.product
+
+  capture item_unique
+    echo 'product-item--' | append: section.id | append: '-' | append: product.id
+  endcapture
 -%}
 
 {% capture children %}
   {% content_for 'blocks', closest.product: product %}
 {% endcapture %}
 
-{% render 'product-card', children: children, product: product %}
+{% render 'product-card', children: children, product: product, item_unique: item_unique %}
 
 {% schema %}
 {

@@ -1,0 +1,51 @@
+{%- doc -%}
+  Renders a product card in grid layout
+  When the product object is null, renders placeholders.
+
+  @param {object} product - The product object
+  @param {object} children - The children of the product card
+{%- enddoc -%}
+
+{%- liquid
+  # assign attributes = attributes | default: ''
+  # TODO: modifier_class?
+  assign modifier_class = modifier_class | default: ''
+
+  if settings.product_grid_center
+    assign alignment_class = 'product-item--centered'
+  else
+    assign no_padding_class = ' product-item--no-padding'
+
+    if settings.grid_style == 'compact' or settings.grid_override and settings.grid_gap_horizontal < 1
+      assign no_padding_class = ''
+    endif
+
+    assign alignment_class = 'product-item--left' | append: no_padding_class
+  endif
+-%}
+
+{%- liquid
+  assign hidden_product = false
+  if product.tags contains 'hide'
+    assign hidden_product = true
+  endif
+-%}
+
+{%- unless hidden_product -%}
+  <product-item
+    class="grid-item product-item {{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    id="{{ item_unique }}"
+    data-grid-item
+    data-url="{{ product.url }}"
+    data-swap-id="true"
+    {% comment %}
+      TODO: passing attributes for sections in App-components:
+      - src/sections/section-multicolumn/section-multicolumn.liquid
+      - src/sections/section-text-row/section-text-row.liquid
+      - src/snippets/multicolumn.liquid
+    {% endcomment %}
+    {% comment %} {{ attributes }} {% endcomment %}
+  >
+    {{- children -}}
+  </product-item>
+{%- endunless -%}
