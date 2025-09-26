@@ -486,12 +486,6 @@
     endif
   endcapture
 
-  capture swatches_class
-    if siblings_html != blank or has_colors
-      echo 'product-item--swatches'
-    endif
-  endcapture
-
   assign hidden_product = false
   if product.tags contains 'hide'
     assign hidden_product = true
@@ -506,7 +500,7 @@
 
 {%- unless hidden_product -%}
   <product-item
-    class="grid-item product-item {{ swatches_class }} {{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    class="grid-item product-item {{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     data-url="{{ product.url }}"
