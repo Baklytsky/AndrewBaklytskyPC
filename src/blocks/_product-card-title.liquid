@@ -1,0 +1,31 @@
+{% liquid
+  assign product = closest.product
+  assign product_url = product.url | within: collection
+-%}
+
+<p
+  class="product-item__title"
+  {{ block.shopify_attributes }}
+>
+  <a
+    href="{{ product_url }}"
+    class="product-link"
+    data-product-link="{{ product_url }}"
+  >
+    {{ product.title | strip_html | escape }}
+  </a>
+</p>
+
+{% schema %}
+{
+  "name": "Product card title",
+  "tag": null,
+  "settings": [],
+  "presets": [
+    {
+      "name": "Product card title",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
