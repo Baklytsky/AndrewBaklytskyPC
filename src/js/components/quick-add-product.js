@@ -242,7 +242,7 @@ if (!customElements.get('quick-add-product')) {
       quickAddLoadingToggle(e) {
         if (e.target != this.quickAddHolder) return;
 
-        this.quickAddHolder.classList.remove(classes.disabled);
+        this.quickAddHolder.classList.remove('is-disabled');
       }
 
       /**
