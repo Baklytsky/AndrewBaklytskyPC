@@ -20,7 +20,7 @@
         <p class="product-item__title">{{ product.title | strip_html | escape }}</p>
 
         <div class="product-item__price__holder">
-          {% render 'product-card-cutline', product: product, render_siblings: render_siblings %}
+          {% render 'product-card-cutline', product: product %}
 
           <div class="product-item__price" data-product-price>
             {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
@@ -28,13 +28,7 @@
         </div>
       </a>
 
-      {%- if render_siblings or render_swatches -%}
-        {% render 'product-card-siblings-and-swatches',
-          product: product,
-          render_siblings: render_siblings,
-          render_swatches: render_swatches
-        %}
-      {%- endif -%}
+      {% render 'product-card-siblings-and-swatches', product: product, part: 'html' %}
     {% endif %}
   </div>
 </div>

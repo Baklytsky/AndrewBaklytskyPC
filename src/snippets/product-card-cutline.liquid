@@ -1,5 +1,8 @@
 {% liquid
   assign siblings = siblings | default: false
+  capture has_siblings
+    render 'product-card-siblings-and-swatches', product: product, part: 'check-siblings'
+  endcapture
 
   capture product_item_cutline
     if settings.show_tagline
@@ -32,7 +35,7 @@
 {%- if product_item_cutline != blank -%}
   <span
     class="product-item__cutline"
-    {%- if siblings -%}
+    {%- if has_siblings -%}
       data-product-cutline
     {%- endif -%}
     {% if style != blank %}
