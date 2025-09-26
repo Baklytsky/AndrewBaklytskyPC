@@ -611,54 +611,6 @@
       {{ over_image_content }}
     </div>
 
-    <div
-      class="product-information"
-      style="--swatch-size: var(--swatch-size-filters);"
-      data-product-information
-    >
-      <div class="product-item__info grid-item__content {{ settings.product_grid_font_size }}">
-        <a class="product-link" href="{{ product_url }}" data-product-link="{{ product_url }}">
-          <p class="product-item__title">{{ product.title | strip_html | escape }}</p>
-
-          <div class="product-item__price__holder">
-            {%- if product_item_cutline != blank -%}
-              {%- assign tagline_color = settings.tagline_color -%}
-
-              {%- unless tagline_color == 'rgba(0,0,0,0)' or tagline_color == blank -%}
-                {%- assign style = '--text-light:' | append: tagline_color -%}
-              {%- endunless -%}
-
-              <span
-                class="product-item__cutline"
-                {%- if siblings_html != blank -%}
-                  data-product-cutline
-                {%- endif -%}
-                {% if style != blank %}
-                  style="{{ style }}"
-                {% endif %}
-              >
-                {{- product_item_cutline -}}
-              </span>
-            {%- endif -%}
-
-            <div class="product-item__price" data-product-price>
-              {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
-            </div>
-          </div>
-        </a>
-
-        {%- if siblings_html != blank -%}
-          {{ siblings_html }}
-        {%- elsif has_colors -%}
-          <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
-            {{ swatches }}
-
-            <span class="product-item__swatches__count">
-              <span data-swatch-count>&nbsp;</span>
-            </span>
-          </div>
-        {%- endif -%}
-      </div>
-    </div>
+    {% render 'product-card-content', product: product %}
   </product-item>
 {%- endunless -%}
