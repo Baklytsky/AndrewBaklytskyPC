@@ -1,11 +1,90 @@
 {%- liquid
+  assign current_variant = product.first_available_variant
+  assign product_url = product.url | within: collection
+
   assign double_img = false
   if product.media[1].preview_image and settings.image_hover_enable
     assign double_img = true
   endif
--%}
 
-{%- liquid
+  # TODO: passing animation_delay?
+  assign animation_delay = animation_delay | default: 0
+  assign aos_delay_default = animation_delay | times: 100
+  assign aos_delay = aos_delay | default: aos_delay_default
+
+  capture item_unique
+    echo 'product-item--' | append: section.id | append: '-' | append: product.id
+  endcapture
+  assign aos_anchor = item_unique
+
+  assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio
+
+  # TODO: passing index?
+  assign index = index | default: 1
+
+  # TODO: bundle_product and bundle_template?
+  assign bundle_product = bundle_product | default: false
+  assign bundle_template = bundle_template | default: false
+
+  # TODO: passing sizes?
+  assign layout_desktop = section.settings.layout_desktop
+  assign columns_desktop = section.settings.grid | plus: 0
+  assign columns_medium = 2
+  assign columns_small = 2
+  assign columns_mobile = section.settings.grid_mobile | plus: 0
+
+  if columns_desktop == 0
+    assign columns_desktop = 4
+  endif
+
+  if columns_mobile == 0
+    assign columns_mobile = 1
+  endif
+
+  if columns_desktop == 2 or columns_desktop == 4
+    assign columns_medium = 2
+  endif
+
+  if sizes == blank
+    case layout_desktop
+      when 'grid'
+        if section.settings.width == 'wrapper'
+          assign sizes = '(min-width: 1400px) calc(80vw / ' | append: columns_desktop | append: '), (min-width: 750px) calc(100vw / ' | append: columns_medium | append: '), (min-width: 480px) calc(100vw / ' | append: columns_small | append: '), calc(100vw / ' | append: columns_mobile | append: ')'
+        else
+          assign sizes = '(min-width: 1400px) calc(100vw / ' | append: columns_desktop | append: '), (min-width: 750px) calc(100vw / ' | append: columns_medium | append: '), (min-width: 480px) calc(100vw / ' | append: columns_small | append: '), calc(100vw / ' | append: columns_mobile | append: ')'
+        endif
+
+      when 'slider'
+        assign sizes = '(min-width: 990px) calc(100vw * 0.28), (min-width: 750px) calc(100vw * 0.38), calc(100% - 50px )'
+      else
+        assign sizes = '500px'
+    endcase
+  endif
+
+  assign loading = 'eager'
+  if columns_desktop <= 3
+    assign eager_images_limit = columns_desktop
+  else
+    assign eager_images_limit = columns_desktop | times: 2
+  endif
+
+  if layout_desktop == 'slider' and index > 3
+    assign loading = 'lazy'
+  elsif index > eager_images_limit
+    assign loading = 'lazy'
+  endif
+
+  # TODO: "block_index" used in sections in App-components:
+  # - src/sections/section-tab-collections/section-tab-collections.liquid
+  # if block_index > 1
+  #   assign loading = 'lazy'
+  # endif
+  # End of sizes and images loading logic
+
+  assign widths = '136, 160, 180, 220, 254, 284, 292, 320, 480, 528, 640, 720, 960, 1080, 1296, 1512, 1728, 1950'
+
+  assign siblings_line_item_props = ''
+  assign siblings_image = ''
   if settings.show_siblings
     capture siblings_line_item_props
       render 'product-grid-item-siblings', part: 'line-item-props', product: product
