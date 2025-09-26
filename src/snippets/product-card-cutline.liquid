@@ -1,0 +1,44 @@
+{% liquid
+  assign siblings = siblings | default: false
+
+  capture product_item_cutline
+    if settings.show_tagline
+      if product.metafields.theme.tagline != blank and product.metafields.theme.tagline.type == 'single_line_text_field'
+        assign product_title_downcase = product.title | strip_html | escape | downcase
+        assign cutline_downcase = product.metafields.theme.tagline.value | downcase
+
+        unless product_title_downcase contains cutline_downcase
+          echo product.metafields.theme.tagline.value
+        endunless
+      elsif product.metafields.theme.cutline != blank and product.metafields.theme.cutline.type == 'single_line_text_field'
+        assign product_title_downcase = product.title | strip_html | escape | downcase
+        assign cutline_downcase = product.metafields.theme.cutline.value | downcase
+
+        unless product_title_downcase contains cutline_downcase
+          echo product.metafields.theme.cutline.value
+        endunless
+      endif
+    endif
+  endcapture
+
+  capture style
+    assign tagline_color = settings.tagline_color
+    unless tagline_color == 'rgba(0,0,0,0)' or tagline_color == blank
+      echo '--text-light:' | append: tagline_color
+    endunless
+  endcapture
+%}
+
+{%- if product_item_cutline != blank -%}
+  <span
+    class="product-item__cutline"
+    {%- if siblings -%}
+      data-product-cutline
+    {%- endif -%}
+    {% if style != blank %}
+      style="{{ style }}"
+    {% endif %}
+  >
+    {{- product_item_cutline -}}
+  </span>
+{%- endif -%}
