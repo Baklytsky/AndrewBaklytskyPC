@@ -1,0 +1,27 @@
+{% liquid
+  assign product = closest.product
+  assign current_variant = product.first_available_variant
+-%}
+
+<div
+  class="product-item__price__holder"
+  {{ block.shopify_attributes }}
+>
+  <div class="product-item__price" data-product-price>
+    {%- render 'product-grid-price', product: product, current_variant: current_variant -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product card price",
+  "tag": null,
+  "settings": [],
+  "presets": [
+    {
+      "name": "Product card price",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
