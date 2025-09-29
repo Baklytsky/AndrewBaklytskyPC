@@ -46,8 +46,8 @@
   assign bundle_template = bundle_template | default: false
   assign sizes = sizes | default: ''
   assign block_index = block_index | default: 1
-  # define "item_unique"
-  capture item_unique
+  # define "unique_id"
+  capture unique_id
     echo 'product-card--' | append: section.id | append: '-' | append: product.id
   endcapture
 -%}
@@ -55,7 +55,7 @@
 {%- unless hidden_product -%}
   <product-card
     class="{{ product_item_classes }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
-    id="{{ item_unique }}"
+    id="{{ unique_id }}"
     data-grid-item
     data-url="{{ product.url }}"
     data-swap-id="true"
@@ -64,7 +64,7 @@
   >
     {% render 'product-card-media',
       product: product,
-      item_unique: item_unique,
+      unique_id: unique_id,
       animation_delay: animation_delay,
       index: index,
       block_index: block_index,

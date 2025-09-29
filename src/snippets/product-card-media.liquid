@@ -11,12 +11,12 @@
   assign aos_delay_default = animation_delay | times: 100
   assign aos_delay = aos_delay | default: aos_delay_default
 
-  if item_unique == blank
-    capture item_unique
+  if unique_id == blank
+    capture unique_id
       echo 'product-card--' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
-  assign aos_anchor = item_unique
+  assign aos_anchor = unique_id
 
   assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio
   assign index = index | default: 1

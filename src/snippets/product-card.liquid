@@ -7,7 +7,16 @@
 {%- enddoc -%}
 
 {%- liquid
-  # 'product-card' element classes
+  assign product = product | default: empty
+  assign children = children | default: ''
+
+  # Early return if product is missing
+  unless product != empty
+    echo '<!-- Error: product object is required for the "product-card" snippet -->'
+    break
+  endunless
+
+  # Build 'product-card' element CSS classes
   capture product_item_classes
     echo 'grid-item product-card'
     if settings.product_grid_center
@@ -21,28 +30,60 @@
     endif
   endcapture
 
-  # conditional rendering
+  # Conditional rendering
   assign hidden_product = false
   if product.tags contains 'hide'
     assign hidden_product = true
   endif
 
-  # define item_unique if it is not passed
-  if item_unique == blank
-    capture item_unique
+  # Define "unique_id" if it is not passed
+  if unique_id == blank
+    capture unique_id
       echo 'product-card--' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
+
+  # Passed attributes and modifiers for the 'product-card' element
+  assign attributes = attributes | default: ''
+  assign modifier_class = modifier_class | default: ''
+  if modifier_class != ''
+    assign product_item_classes = product_item_classes | append: ' ' | append: modifier_class
+  endif
+  # Variables needed for "product-card-media" snippet
+  assign animation_delay = animation_delay | default: 0
+  assign aos_delay_default = animation_delay | times: 100
+  assign index = index | default: 1
+  assign bundle_product = bundle_product | default: false
+  assign bundle_template = bundle_template | default: false
+  assign sizes = sizes | default: ''
+  assign block_index = block_index | default: 1
 -%}
 
 {%- unless hidden_product -%}
   <product-card
     class="{{ product_item_classes }}"
-    id="{{ item_unique }}"
+    id="{{ unique_id }}"
     data-grid-item
     data-url="{{ product.url }}"
     data-swap-id="true"
+    {{ attributes }}
   >
-    {{- children -}}
+    {% if children != blank %}
+      {%- comment -%} Theme blocks {%- endcomment -%}
+      {{ children }}
+    {% else %}
+      {%- comment -%} Section blocks {%- endcomment -%}
+      {% render 'product-card-media',
+        product: product,
+        unique_id: unique_id,
+        index: index,
+        block_index: block_index,
+        sizes: sizes,
+        animation_delay: animation_delay,
+        bundle_product: bundle_product,
+        bundle_template: bundle_template
+      %}
+      {% render 'product-card-content', product: product %}
+    {% endif %}
   </product-card>
 {%- endunless -%}
