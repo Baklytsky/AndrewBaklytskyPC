@@ -13,7 +13,7 @@
 
   if item_unique == blank
     capture item_unique
-      echo 'product-item--' | append: section.id | append: '-' | append: product.id
+      echo 'product-card--' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
   assign aos_anchor = item_unique
@@ -364,7 +364,7 @@
 {%- endcapture -%}
 
 <div
-  class="product-item__image{% if double_img %} double__image{% endif %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
+  class="product-card__image{% if double_img %} double__image{% endif %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
   data-product-image
 >
   <a
@@ -374,7 +374,7 @@
     data-product-link="{{ product_url }}"
   >
     {%- if product.media.size > 0 -%}
-      <div class="product-item__bg" data-product-image-default>
+      <div class="product-card__bg" data-product-image-default>
         {%- liquid
           assign fetchpriority = 'auto'
           assign preload = false
@@ -405,7 +405,7 @@
                   assign variant_title = variant.title | replace: '"', "'"
                 -%}
 
-                <div class="product-item__bg__inner" data-variant-title="{{ variant_title }}">
+                <div class="product-card__bg__inner" data-variant-title="{{ variant_title }}">
                   {%- render 'image',
                     image: variant.featured_image,
                     aspect_ratio: aspect_ratio,
@@ -429,7 +429,7 @@
       </div>
 
       {%- if double_img -%}
-        <div class="product-item__bg__under{% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
+        <div class="product-card__bg__under{% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
           {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
             {%- liquid
               case product.media[1].media_type
@@ -458,7 +458,7 @@
       {%- endif -%}
     {%- else -%}
       {%- comment -%} Show Empty image if product has no media {%- endcomment -%}
-      <div class="product-item__bg image--empty" data-product-image-default></div>
+      <div class="product-card__bg image--empty" data-product-image-default></div>
     {%- endif -%}
 
     {{- siblings_image -}}

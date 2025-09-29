@@ -24,9 +24,9 @@
   assign placeholder = placeholder | default: svg_default
 
   if settings.product_grid_center
-    assign alignment_class = ' product-item--centered'
+    assign alignment_class = ' product-card--centered'
   else
-    assign alignment_class = ' product-item--left'
+    assign alignment_class = ' product-card--left'
   endif
 
   if settings.currency_code_enable
@@ -36,17 +36,17 @@
   endif
 -%}
 
-{%- capture item_unique -%}product-item--{{ section.id }}-{{ index }}{%- endcapture -%}
+{%- capture item_unique -%}product-card--{{ section.id }}-{{ index }}{%- endcapture -%}
 {%- assign aos_anchor = item_unique -%}
 
 <div
-  class="grid-item product-item{{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+  class="grid-item product-card{{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
   id="{{ item_unique }}"
   data-grid-item
   {{ attributes }}
 >
   <div
-    class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
+    class="product-card__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
     data-product-image
   >
     <div
@@ -60,14 +60,14 @@
   </div>
   <div class="product-information">
     <a
-      class="product-link product-item__info grid-item__content {{ settings.product_grid_font_size }}"
+      class="product-link product-card__info grid-item__content {{ settings.product_grid_font_size }}"
       href="#"
       data-aos="fade"
       data-aos-delay="{{ animation_delay }}"
       data-aos-anchor="{{ aos_anchor }}"
     >
       {%- assign default_title = 'home_page.onboarding.product_title' | t -%}
-      <p class="product-item__title">{{ title | default: default_title }}</p>
+      <p class="product-card__title">{{ title | default: default_title }}</p>
       <span class="price">{{ onboarding_price }}</span>
     </a>
   </div>

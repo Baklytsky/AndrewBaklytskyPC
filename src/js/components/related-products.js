@@ -59,7 +59,7 @@ if (!customElements.get('related-products')) {
 
       handleRecentlyViewedResponse() {
         const minimumNumberProducts = parseInt(this.recentlyViewed.dataset.minimum);
-        const recentProducts = this.recentlyViewed.querySelectorAll('.product-item');
+        const recentProducts = this.recentlyViewed.querySelectorAll('.product-card');
         const slider = this.recentlyViewed.querySelector('grid-slider');
         const checkRecentInRelated = !this.wrapper && recentProducts.length > 0;
         const checkRecentOutsideRelated = this.wrapper && recentProducts.length >= minimumNumberProducts;

@@ -9,7 +9,7 @@
   - focusable: {Boolean} Default: false
 
   Usage:
-  {% render 'search-product-item', product: product, animation_delay: animation_delay, animation_anchor: animation_anchor, product_item_classes: product_item_classes %}
+  {% render 'search-product-card', product: product, animation_delay: animation_delay, animation_anchor: animation_anchor, product_item_classes: product_item_classes %}
 {% endcomment %}
 
 {%- liquid
@@ -39,7 +39,7 @@
 
 {%- unless hidden_product -%}
   <div
-    class="predictive-search__grid-item product-item product-item grid-item{{ product_item_classes }}"
+    class="predictive-search__grid-item product-card product-card grid-item{{ product_item_classes }}"
     role="option"
     aria-selected="false"
     data-aos="fade"
@@ -55,7 +55,7 @@
       {% endunless %}
       data-product-link
     >
-      <div class="product-item__image{{ product_double_class }}{% unless featured_image %} image--empty{% endunless %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+      <div class="product-card__image{{ product_double_class }}{% unless featured_image %} image--empty{% endunless %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
         {%- if featured_image -%}
           {%- liquid
             capture featured_image
@@ -63,12 +63,12 @@
             endcapture
           -%}
 
-          <div class="product-item__bg">
+          <div class="product-card__bg">
             {{ featured_image }}
           </div>
 
           {%- if show_second_image -%}
-            <div class="product-item__bg__under{% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
+            <div class="product-card__bg__under{% if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' %} deferred-media{% endif %}">
               {%- if product.media[1].media_type == 'video' or product.media[1].media_type == 'external_video' -%}
                 {%- liquid
                   case product.media[1].media_type
@@ -99,8 +99,8 @@
       </div>
 
       <div class="product-information">
-        <div class="product-item__info grid-item__content {{ settings.product_grid_font_size }}">
-          <p class="product-item__title">
+        <div class="product-card__info grid-item__content {{ settings.product_grid_font_size }}">
+          <p class="product-card__title">
             {{ product.title | strip_html }}
           </p>
 
