@@ -10,11 +10,11 @@
   assign product = product | default: empty
   assign children = children | default: ''
 
-  # Early return if product is missing
-  unless product != empty
+  # Early return if product is missing or hidden
+  if product == empty or product.tags contains 'hide'
     echo '<!-- Error: product object is required for the "product-card" snippet -->'
     break
-  endunless
+  endif
 
   # Build 'product-card' element CSS classes
   capture product_item_classes
@@ -29,12 +29,6 @@
       echo ' product-card--left' | append: no_padding_class
     endif
   endcapture
-
-  # Conditional rendering
-  assign hidden_product = false
-  if product.tags contains 'hide'
-    assign hidden_product = true
-  endif
 
   # Define "unique_id" if it is not passed
   if unique_id == blank
@@ -59,31 +53,29 @@
   assign block_index = block_index | default: 1
 -%}
 
-{%- unless hidden_product -%}
-  <product-card
-    class="{{ product_item_classes }}"
-    id="{{ unique_id }}"
-    data-grid-item
-    data-url="{{ product.url }}"
-    data-swap-id="true"
-    {{ attributes }}
-  >
-    {% if children != blank %}
-      {%- comment -%} Theme blocks {%- endcomment -%}
-      {{ children }}
-    {% else %}
-      {%- comment -%} Section blocks {%- endcomment -%}
-      {% render 'product-card-media',
-        product: product,
-        unique_id: unique_id,
-        index: index,
-        block_index: block_index,
-        sizes: sizes,
-        animation_delay: animation_delay,
-        bundle_product: bundle_product,
-        bundle_template: bundle_template
-      %}
-      {% render 'product-card-content', product: product %}
-    {% endif %}
-  </product-card>
-{%- endunless -%}
+<product-card
+  class="{{ product_item_classes }}"
+  id="{{ unique_id }}"
+  data-grid-item
+  data-url="{{ product.url }}"
+  data-swap-id="true"
+  {{ attributes }}
+>
+  {% if children != blank %}
+    {%- comment -%} Theme blocks {%- endcomment -%}
+    {{ children }}
+  {% else %}
+    {%- comment -%} Section blocks {%- endcomment -%}
+    {% render 'product-card-media',
+      product: product,
+      unique_id: unique_id,
+      index: index,
+      block_index: block_index,
+      sizes: sizes,
+      animation_delay: animation_delay,
+      bundle_product: bundle_product,
+      bundle_template: bundle_template
+    %}
+    {% render 'product-card-content', product: product %}
+  {% endif %}
+</product-card>
