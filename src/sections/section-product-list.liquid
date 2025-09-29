@@ -134,14 +134,29 @@
           {%- if featured_collection != blank -%}
             {%- if featured_collection.products_count > 0 -%}
               {%- liquid
-                for product in featured_collection.products limit: limit_products
-                  assign animation_delay = forloop.index0 | times: 1
-                  assign grid_int = grid_columns | times: 1
-                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+                assign products_rendered = 0
 
-                  # theme-check-disable UniqueStaticBlockId
-                  content_for 'block', type: '_product-card', id: 'product-card-block', closest.product: product
-                  # theme-check-enable UniqueStaticBlockId
+                for product in featured_collection.products
+                  # Skip hidden products
+                  unless product.tags contains 'hide'
+                    # Only render up to the limit
+                    if products_rendered < limit_products
+                      assign animation_delay = products_rendered | times: 1
+                      assign grid_int = grid_columns | times: 1
+                      assign animation_delay = products_rendered | modulo: grid_int | times: 1
+
+                      # theme-check-disable UniqueStaticBlockId
+                      content_for 'block', type: '_product-card', id: 'product-card-block', closest.product: product
+                      # theme-check-enable UniqueStaticBlockId
+
+                      assign products_rendered = products_rendered | plus: 1
+                    endif
+                  endunless
+
+                  # Break if we've rendered enough products
+                  if products_rendered >= limit_products
+                    break
+                  endif
                 endfor
               -%}
             {%- else -%}
