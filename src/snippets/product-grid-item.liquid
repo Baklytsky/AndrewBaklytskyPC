@@ -16,17 +16,18 @@
 
 {%- liquid
   # 'product-item' element classes
-  if settings.product_grid_center
-    assign alignment_class = 'product-item--centered'
-  else
-    assign no_padding_class = ' product-item--no-padding'
-
-    if settings.grid_style == 'compact' or settings.grid_override and settings.grid_gap_horizontal < 1
-      assign no_padding_class = ''
+  capture product_item_classes
+    echo 'grid-item product-item'
+    if settings.product_grid_center
+      echo ' product-item--centered'
+    else
+      assign no_padding_class = ' product-item--no-padding'
+      if settings.grid_style == 'compact' or settings.grid_override and settings.grid_gap_horizontal < 1
+        assign no_padding_class = ''
+      endif
+      echo ' product-item--left' | append: no_padding_class
     endif
-
-    assign alignment_class = 'product-item--left' | append: no_padding_class
-  endif
+  endcapture
 
   # conditional rendering
   assign hidden_product = false
@@ -53,7 +54,7 @@
 
 {%- unless hidden_product -%}
   <product-item
-    class="grid-item product-item {{ alignment_class }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
+    class="{{ product_item_classes }}{% if modifier_class != '' %} {{ modifier_class }}{% endif %}"
     id="{{ item_unique }}"
     data-grid-item
     data-url="{{ product.url }}"
@@ -71,6 +72,7 @@
       bundle_template: bundle_template,
       sizes: sizes
     %}
+
     {% render 'product-card-content', product: product %}
   </product-item>
 {%- endunless -%}
