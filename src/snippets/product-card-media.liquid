@@ -7,26 +7,24 @@
     assign double_img = true
   endif
 
-  # TODO: passing animation_delay?
   assign animation_delay = animation_delay | default: 0
   assign aos_delay_default = animation_delay | times: 100
   assign aos_delay = aos_delay | default: aos_delay_default
 
-  capture item_unique
-    echo 'product-item--' | append: section.id | append: '-' | append: product.id
-  endcapture
+  if item_unique == blank
+    capture item_unique
+      echo 'product-item--' | append: section.id | append: '-' | append: product.id
+    endcapture
+  endif
   assign aos_anchor = item_unique
 
   assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio
-
-  # TODO: passing index?
   assign index = index | default: 1
 
   # TODO: bundle_product and bundle_template?
   assign bundle_product = bundle_product | default: false
   assign bundle_template = bundle_template | default: false
 
-  # TODO: passing sizes?
   assign layout_desktop = section.settings.layout_desktop
   assign columns_desktop = section.settings.grid | plus: 0
   assign columns_medium = 2
@@ -74,11 +72,12 @@
     assign loading = 'lazy'
   endif
 
-  # TODO: "block_index" used in sections in App-components:
-  # - src/sections/section-tab-collections/section-tab-collections.liquid
-  # if block_index > 1
-  #   assign loading = 'lazy'
-  # endif
+  # "block_index" used in:
+  # - section-tab-collections.liquid
+  assign block_index = block_index | default: 1
+  if block_index > 1
+    assign loading = 'lazy'
+  endif
   # End of sizes and images loading logic
 
   assign widths = '136, 160, 180, 220, 254, 284, 292, 320, 480, 528, 640, 720, 960, 1080, 1296, 1512, 1728, 1950'

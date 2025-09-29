@@ -7,10 +7,14 @@
 {%- enddoc -%}
 
 {%- liquid
-  # assign attributes = attributes | default: ''
-  # TODO: modifier_class?
-  assign modifier_class = modifier_class | default: ''
+  # define item_unique if it is not passed
+  if item_unique == blank
+    capture item_unique
+      echo 'product-item--' | append: section.id | append: '-' | append: product.id
+    endcapture
+  endif
 
+  # 'product-item' element classes
   if settings.product_grid_center
     assign alignment_class = 'product-item--centered'
   else
@@ -22,9 +26,8 @@
 
     assign alignment_class = 'product-item--left' | append: no_padding_class
   endif
--%}
 
-{%- liquid
+  # conditional rendering
   assign hidden_product = false
   if product.tags contains 'hide'
     assign hidden_product = true
@@ -38,13 +41,6 @@
     data-grid-item
     data-url="{{ product.url }}"
     data-swap-id="true"
-    {% comment %}
-      TODO: passing attributes for sections in App-components:
-      - src/sections/section-multicolumn/section-multicolumn.liquid
-      - src/sections/section-text-row/section-text-row.liquid
-      - src/snippets/multicolumn.liquid
-    {% endcomment %}
-    {% comment %} {{ attributes }} {% endcomment %}
   >
     {{- children -}}
   </product-item>

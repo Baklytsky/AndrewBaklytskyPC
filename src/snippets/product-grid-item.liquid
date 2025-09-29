@@ -15,6 +15,7 @@
 {% endcomment %}
 
 {%- liquid
+  # 'product-item' element classes
   if settings.product_grid_center
     assign alignment_class = 'product-item--centered'
   else
@@ -27,6 +28,7 @@
     assign alignment_class = 'product-item--left' | append: no_padding_class
   endif
 
+  # conditional rendering
   assign hidden_product = false
   if product.tags contains 'hide'
     assign hidden_product = true
@@ -61,6 +63,7 @@
   >
     {% render 'product-card-media',
       product: product,
+      item_unique: item_unique,
       animation_delay: animation_delay,
       index: index,
       block_index: block_index,
