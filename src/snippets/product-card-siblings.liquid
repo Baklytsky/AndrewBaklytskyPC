@@ -1,4 +1,5 @@
 {%- liquid
+  assign shopify_attributes = shopify_attributes | default: ''
   assign theme_color = metaobjects[settings.theme_color].values
   assign color_props_list = theme_color | where: 'product_list'
 -%}
@@ -21,7 +22,10 @@
           endif
         -%}
 
-        <product-card-siblings class="product-card__siblings product-card__swatches__holder product-card__swatches__holder--{{ settings.swatch_style }} product-card__swatches__holder--{{ settings.collection_swatch_style }}">
+        <product-card-siblings
+          class="product-card__siblings product-card__swatches__holder product-card__swatches__holder--{{ settings.swatch_style }} product-card__swatches__holder--{{ settings.collection_swatch_style }}"
+          {{ shopify_attributes }}
+        >
           <native-scrollbar
             class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi"
             data-sibling-fieldset

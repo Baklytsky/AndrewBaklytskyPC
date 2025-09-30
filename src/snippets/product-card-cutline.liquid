@@ -1,5 +1,6 @@
 {% liquid
   assign siblings = siblings | default: false
+  assign shopify_attributes = shopify_attributes | default: ''
   capture has_siblings
     render 'product-card-siblings-and-swatches', product: product, part: 'check-siblings'
   endcapture
@@ -41,6 +42,7 @@
     {% if style != blank %}
       style="{{ style }}"
     {% endif %}
+    {{ shopify_attributes }}
   >
     {{- product_card_cutline -}}
   </div>

@@ -1,29 +1,30 @@
 {%- liquid
   assign current_variant = product.first_available_variant
   assign product_url = product.url | within: collection
+  assign shopify_attributes = shopify_attributes | default: ''
+  assign unique_id = unique_id | default: ''
+  assign index = index | default: 1
+  assign block_index = block_index | default: 1
+  assign sizes = sizes | default: ''
+  assign animation_delay = animation_delay | default: 0
+  assign bundle_product = bundle_product | default: false
+  assign bundle_template = bundle_template | default: false
 
   assign double_img = false
   if product.media[1].preview_image and settings.image_hover_enable
     assign double_img = true
   endif
 
-  assign animation_delay = animation_delay | default: 0
-  assign aos_delay_default = animation_delay | times: 100
-  assign aos_delay = aos_delay | default: aos_delay_default
-
   if unique_id == blank
     capture unique_id
       echo 'product-card--' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
+  assign aos_delay_default = animation_delay | times: 100
+  assign aos_delay = aos_delay | default: aos_delay_default
   assign aos_anchor = unique_id
 
   assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio
-  assign index = index | default: 1
-
-  # TODO: bundle_product and bundle_template?
-  assign bundle_product = bundle_product | default: false
-  assign bundle_template = bundle_template | default: false
 
   assign layout_desktop = section.settings.layout_desktop
   assign columns_desktop = section.settings.grid | plus: 0
@@ -74,7 +75,6 @@
 
   # "block_index" used in:
   # - section-tab-collections.liquid
-  assign block_index = block_index | default: 1
   if block_index > 1
     assign loading = 'lazy'
   endif
@@ -366,6 +366,7 @@
 <div
   class="product-card__image{% if double_img %} double__image{% endif %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
   data-product-image
+  {{ shopify_attributes }}
 >
   <a
     class="product-card__link"

@@ -1,4 +1,8 @@
 {%- comment -%} Color swatches {%- endcomment -%}
+{% liquid
+  assign shopify_attributes = shopify_attributes | default: ''
+-%}
+
 {%- if settings.enable_color_swatches and settings.show_grid_swatches -%}
   {%- assign has_colors = false -%}
   {%- assign swatch_translation = 'general.swatches.color' | t -%}
@@ -80,7 +84,7 @@
 {% liquid
   if settings.show_siblings
     capture siblings_html
-      render 'product-card-siblings', part: 'html', product: product
+      render 'product-card-siblings', part: 'html', product: product, shopify_attributes: shopify_attributes
     endcapture
   endif
 -%}
@@ -102,7 +106,10 @@
     {%- if render_siblings -%}
       {{ siblings_html }}
     {%- elsif render_swatches -%}
-      <div class="product-card__swatches__holder product-card__swatches__holder--{{ settings.swatch_style }} product-card__swatches__holder--{{ settings.collection_swatch_style }}">
+      <div
+        class="product-card__swatches__holder product-card__swatches__holder--{{ settings.swatch_style }} product-card__swatches__holder--{{ settings.collection_swatch_style }}"
+        {{ shopify_attributes }}
+      >
         {{ swatches }}
 
         <span class="product-card__swatches__count">

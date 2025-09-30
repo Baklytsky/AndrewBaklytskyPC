@@ -1,5 +1,5 @@
 {%- doc -%}
-  Renders a product card in grid layout
+  Renders a product card in grid layouts
   When the product object is null, renders placeholders.
 
   @param {object} product - The product object
@@ -9,6 +9,7 @@
 {%- liquid
   assign product = product | default: empty
   assign children = children | default: ''
+  assign shopify_attributes = shopify_attributes | default: ''
 
   # Early return if product is missing or hidden
   if product == empty or product.tags contains 'hide'
@@ -24,7 +25,7 @@
 
   # Build 'product-card' element CSS classes
   capture product_card_classes
-    echo 'grid-item product-card'
+    echo 'product-card grid-item'
     if settings.product_grid_center
       echo ' product-card--centered'
     else
@@ -66,6 +67,7 @@
   data-url="{{ product.url }}"
   data-swap-id="true"
   {{ attributes }}
+  {{ shopify_attributes }}
 >
   {% if children != blank %}
     {%- comment -%} Theme blocks {%- endcomment -%}

@@ -1,5 +1,6 @@
 {% liquid
   assign children = children | default: ''
+  assign shopify_attributes = shopify_attributes | default: ''
   assign current_variant = product.first_available_variant
   assign product_url = product.url | within: collection
 %}
@@ -8,6 +9,7 @@
   class="product-card__content grid-item__content {{ settings.product_grid_font_size }}"
   style="--swatch-size: var(--swatch-size-filters);"
   data-product-information
+  {{ shopify_attributes }}
 >
   {% if children != blank %}
     {{ children }}
