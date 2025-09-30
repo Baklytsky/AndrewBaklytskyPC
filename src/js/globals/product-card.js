@@ -82,7 +82,7 @@ if (!customElements.get('product-card')) {
 
         this.renderProductItem({
           // Fetch the new product's HTML with section rendering API
-          requestUrl: `${productUrl}?section_id=api-product-grid-item`,
+          requestUrl: `${productUrl}?section_id=api-product-card`,
           // Returns a function that will process and swap the HTML after fetch completes
           callback: this.handleSwapProduct(),
         });

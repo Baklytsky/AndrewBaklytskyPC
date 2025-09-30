@@ -1,12 +1,12 @@
 {% comment %}
-    Renders products block for Products with image section
+  Renders products block for Products with image section
 
-    Accepts:
-    - block: {Object} Block object
-    - animation_anchor: {String} ID of the element that will trigger animations
+  Accepts:
+  - block: {Object} Block object
+  - animation_anchor: {String} ID of the element that will trigger animations
 
-    Usage:
-    {% render 'brick-products', block: block, animation_anchor: animation_anchor %}
+  Usage:
+  {% render 'brick-products', block: block, animation_anchor: animation_anchor %}
 {% endcomment %}
 
 {%- liquid
@@ -39,11 +39,11 @@
       {%- liquid
         if block.settings.product_list.count > 0
           for product in block.settings.product_list
-            render 'product-grid-item', product: product
+            render 'product-card', product: product
           endfor
         else
           for i in (1..4)
-            render 'onboarding-product-grid-item'
+            render 'onboarding-product-card'
           endfor
         endif
       -%}

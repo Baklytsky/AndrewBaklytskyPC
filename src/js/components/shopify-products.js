@@ -14,7 +14,7 @@ Shopify.Products = (function () {
     howManyToStoreInMemory: 10,
     wrapperId: 'recently-viewed-products',
     section: null,
-    target: 'api-product-grid-item',
+    target: 'api-product-card',
     onComplete: null,
   };
 
