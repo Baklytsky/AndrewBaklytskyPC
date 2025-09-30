@@ -12,7 +12,13 @@
 
   # Early return if product is missing or hidden
   if product == empty or product.tags contains 'hide'
-    echo '<!-- Error: product object is required for the "product-card" snippet -->'
+    if product == empty
+      echo '<!-- Error: product object is required for the "product-card" snippet -->'
+    endif
+    if product.tags contains 'hide'
+      echo '<!-- Info: product is hidden by tag -->'
+    endif
+
     break
   endif
 
