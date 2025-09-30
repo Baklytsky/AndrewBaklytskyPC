@@ -4,7 +4,7 @@
     render 'product-card-siblings-and-swatches', product: product, part: 'check-siblings'
   endcapture
 
-  capture product_item_cutline
+  capture product_card_cutline
     if settings.show_tagline
       if product.metafields.theme.tagline != blank and product.metafields.theme.tagline.type == 'single_line_text_field'
         assign product_title_downcase = product.title | strip_html | escape | downcase
@@ -32,7 +32,7 @@
   endcapture
 %}
 
-{%- if product_item_cutline != blank -%}
+{%- if product_card_cutline != blank -%}
   <div
     class="product-card__cutline"
     {%- if has_siblings == 'true' -%}
@@ -42,6 +42,6 @@
       style="{{ style }}"
     {% endif %}
   >
-    {{- product_item_cutline -}}
+    {{- product_card_cutline -}}
   </div>
 {%- endif -%}

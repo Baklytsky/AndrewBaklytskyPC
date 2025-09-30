@@ -17,7 +17,7 @@
   endif
 
   # Build 'product-card' element CSS classes
-  capture product_item_classes
+  capture product_card_classes
     echo 'grid-item product-card'
     if settings.product_grid_center
       echo ' product-card--centered'
@@ -41,7 +41,7 @@
   assign attributes = attributes | default: ''
   assign modifier_class = modifier_class | default: ''
   if modifier_class != ''
-    assign product_item_classes = product_item_classes | append: ' ' | append: modifier_class
+    assign product_card_classes = product_card_classes | append: ' ' | append: modifier_class
   endif
   # Variables needed for "product-card-media" snippet
   assign animation_delay = animation_delay | default: 0
@@ -54,7 +54,7 @@
 -%}
 
 <product-card
-  class="{{ product_item_classes }}"
+  class="{{ product_card_classes }}"
   id="{{ unique_id }}"
   data-grid-item
   data-url="{{ product.url }}"
