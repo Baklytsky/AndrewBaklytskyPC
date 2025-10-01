@@ -35,17 +35,13 @@
     endif
 
     assign price = 9900
-    for i in (1..product_card_index)
-      assign odd_check = i | modulo: 2
-      assign mod_price = i | times: 50
-      if i == product_card_index
-        if odd_check == 0
-          assign price = price | plus: mod_price | at_most: 20000
-        else
-          assign price = price | minus: mod_price | at_least: 6000
-        endif
-      endif
-    endfor
+    assign odd_check = product_card_index | modulo: 2
+    assign mod_price = product_card_index | times: 50
+    if odd_check == 0
+      assign price = price | plus: mod_price | at_most: 20000
+    else
+      assign price = price | minus: mod_price | at_least: 6000
+    endif
 
     assign onboarding_price = price | money
     if settings.currency_code_enable
