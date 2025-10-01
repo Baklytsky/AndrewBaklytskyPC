@@ -21,22 +21,32 @@
 
   case remainder
     when 1, 5
-      assign badge = onboarding_badges[0]
-      assign badge_class = 'badge-box--new'
+      if settings.show_automatic_new_badge
+        assign badge = onboarding_badges[0]
+        assign badge_class = 'badge-box--new'
+      endif
     when 2, 7
-      assign badge = onboarding_badges[1]
-      assign badge_class = 'badge-box--sale'
+      if settings.sale_tags_enable
+        assign badge = onboarding_badges[1]
+        assign badge_class = 'badge-box--sale'
+      endif
     when 8
-      assign badge = onboarding_badges[2]
-      assign badge_class = 'badge-box--sold'
-      assign sold_out = true
+      if settings.show_sold_out_badge
+        assign badge = onboarding_badges[2]
+        assign badge_class = 'badge-box--sold'
+        assign sold_out = true
+      endif
     when 4
-      assign badge = onboarding_badges[3]
-      assign badge_class = 'badge-box--sale'
+      if settings.sale_tags_enable
+        assign badge = onboarding_badges[3]
+        assign badge_class = 'badge-box--sale'
+      endif
     when 0, 9
-      assign badge = onboarding_badges[4]
-      assign badge_class = 'badge-box--preorder'
-      assign preorder = true
+      if settings.show_preorder_badge
+        assign badge = onboarding_badges[4]
+        assign badge_class = 'badge-box--preorder'
+        assign preorder = true
+      endif
   endcase
 
   assign placeholder_index = product_card_index | modulo: 6 | plus: 1
