@@ -1,7 +1,18 @@
 {%- comment -%} Color swatches {%- endcomment -%}
 {% liquid
   assign shopify_attributes = shopify_attributes | default: ''
+
+  assign is_onboarding = false
+  if product == empty
+    assign is_onboarding = true
+  endif
 -%}
+
+{%- if is_onboarding -%}
+  {%- render 'product-card-swatches-onboarding', index: index -%}
+
+  {%- break -%}
+{%- endif -%}
 
 {%- if settings.enable_color_swatches and settings.show_grid_swatches -%}
   {%- assign has_colors = false -%}
