@@ -92,7 +92,18 @@
       render 'product-card-siblings', part: 'image', product: product
     endcapture
   endif
+
+  assign is_onboarding = false
+  if product == empty
+    assign is_onboarding = true
+  endif
 -%}
+
+{%- if is_onboarding -%}
+  {%- render 'product-card-media-onboarding', index: index, animation_delay: animation_delay, aos_anchor: aos_anchor -%}
+
+  {%- break -%}
+{%- endif -%}
 
 {%- capture over_image_content -%}
   {%- liquid

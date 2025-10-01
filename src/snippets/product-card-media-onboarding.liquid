@@ -1,0 +1,103 @@
+{%- liquid
+  assign animation_delay = animation_delay | default: 0
+  assign index = index | default: 1
+  assign block_index = block.id | split: '-' | last | plus: 0 | default: 0
+  assign product_card_index = block_index
+  if block.id == blank
+    assign product_card_index = index | plus: 0 | default: 0
+  endif
+
+  assign badge_0 = 'products.product.new' | t
+  assign badge_1 = 'products.product.on_sale' | t
+  assign badge_2 = 'products.product.sold_out' | t
+  assign badge_3 = 'products.product.final_sale' | t
+  assign badge_4 = 'products.product.pre_order' | t
+  assign onboarding_badges = badge_0 | append: ',' | append: badge_1 | append: ',' | append: badge_2 | append: ',' | append: badge_3 | append: ',' | append: badge_4 | split: ','
+
+  assign badge = ''
+  assign sold_out = false
+  assign preorder = false
+  assign remainder = product_card_index | modulo: 12
+
+  case remainder
+    when 1, 5
+      assign badge = onboarding_badges[0]
+      assign badge_class = 'badge-box--new'
+    when 2, 7
+      assign badge = onboarding_badges[1]
+      assign badge_class = 'badge-box--sale'
+    when 8
+      assign badge = onboarding_badges[2]
+      assign badge_class = 'badge-box--sold'
+      assign sold_out = true
+    when 4
+      assign badge = onboarding_badges[3]
+      assign badge_class = 'badge-box--sale'
+    when 0, 9
+      assign badge = onboarding_badges[4]
+      assign badge_class = 'badge-box--preorder'
+      assign preorder = true
+  endcase
+
+  assign placeholder_index = product_card_index | modulo: 6 | plus: 1
+-%}
+
+<div
+  class="product-card__image{% if settings.image_hover_enable %} double__image{% endif %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
+>
+  <a
+    class="product-card__link"
+    href="#"
+  >
+    <div class="product-card__bg">
+      <div
+        class="svg-placeholder"
+        data-aos="img-in"
+        data-aos-delay="{{ animation_delay }}"
+        data-aos-anchor="{{ aos_anchor }}"
+      >
+        {{ placeholder_index | prepend: 'product-' | placeholder_svg_tag }}
+      </div>
+    </div>
+
+    {%- if settings.image_hover_enable -%}
+      <div class="product-card__bg__under color-scheme-3">
+        <div
+          class="svg-placeholder"
+          data-aos="img-in"
+          data-aos-delay="{{ animation_delay }}"
+          data-aos-anchor="{{ aos_anchor }}"
+        >
+          {{ placeholder_index | prepend: 'collection-' | placeholder_svg_tag }}
+        </div>
+      </div>
+    {%- endif -%}
+  </a>
+
+  {%- if badge != '' -%}
+    <div class="badge-box-container {{ settings.badge_alignment }} {{ settings.badge_font_size }}">
+      <span class="badge-box {{ badge_class }}">
+        {{ badge }}
+      </span>
+    </div>
+  {%- endif -%}
+
+  {%- if settings.quickview_enable and sold_out == false -%}
+    <div class="quick-add__holder">
+      <button
+        class="quick-add__button caps"
+        type="button"
+        aria-label="{{ 'products.general.quick_add' | t }}"
+      >
+        <span class="btn__text">
+          {%- if preorder -%}
+            {{ 'products.product.pre_order' | t }}
+          {%- else -%}
+            {{ 'products.general.quick_add' | t }}
+          {%- endif -%}
+        </span>
+        <span class="btn__bag"></span>
+      </button>
+    </div>
+  {%- endif -%}
+</div>
