@@ -15,17 +15,15 @@
   {% if children != blank %}
     {{ children }}
   {% else %}
-    <a class="product-card__link" href="{{ product_url }}" data-product-link="{{ product_url }}">
-      <p class="product-card__title">{{ product.title | strip_html | escape }}</p>
+    {% render 'product-card-title', product: product %}
 
-      <div class="product-card__price__holder">
-        {% render 'product-card-cutline', product: product %}
+    <div class="product-card__price__holder">
+      {% render 'product-card-cutline', product: product %}
 
-        <div class="product-card__price" data-product-price>
-          {%- render 'product-card-price', product: product, current_variant: current_variant, index: index -%}
-        </div>
+      <div class="product-card__price" data-product-price>
+        {%- render 'product-card-price', product: product, current_variant: current_variant, index: index -%}
       </div>
-    </a>
+    </div>
 
     {% render 'product-card-siblings-and-swatches', product: product, part: 'html' %}
   {% endif %}
