@@ -1,6 +1,11 @@
 {% liquid
   assign product = closest.product
   assign current_variant = product.first_available_variant
+
+  assign is_onboarding = false
+  if product == empty
+    assign is_onboarding = true
+  endif
 -%}
 
 <div
@@ -8,7 +13,36 @@
   {{ block.shopify_attributes }}
 >
   <div class="product-card__price" data-product-price>
-    {%- render 'product-card-price', product: product, current_variant: current_variant -%}
+    {% unless is_onboarding %}
+      {%- render 'product-card-price', product: product, current_variant: current_variant -%}
+    {% else %}
+      {%- liquid
+        # Get block index from the ID (e.g., "product_card_price-3" -> "3")
+        assign block_index = block.id | split: '-' | last | plus: 0 | default: 0
+
+        assign price = 9900
+        for i in (1..block_index)
+          assign odd_check = i | modulo: 2
+          assign mod_price = i | times: 50
+          if i == block_index
+            if odd_check == 0
+              assign price = price | plus: mod_price | at_most: 20000
+            else
+              assign price = price | minus: mod_price | at_least: 6000
+            endif
+          endif
+        endfor
+
+        assign onboarding_price = price | money
+        if settings.currency_code_enable
+          assign onboarding_price = price | money_with_currency
+        endif
+      -%}
+
+      <div class="price">
+        {{ onboarding_price }}
+      </div>
+    {% endunless %}
   </div>
 </div>
 
