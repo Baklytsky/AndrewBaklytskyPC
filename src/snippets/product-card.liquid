@@ -11,14 +11,9 @@
   assign children = children | default: ''
   assign shopify_attributes = shopify_attributes | default: ''
 
-  # Early return if product is missing or hidden
-  if product == empty or product.tags contains 'hide'
-    if product == empty
-      echo '<!-- Error: product object is required for the "product-card" snippet -->'
-    endif
-    if product.tags contains 'hide'
-      echo '<!-- Info: product is hidden by tag -->'
-    endif
+  # Early return if product is hidden
+  if product.tags contains 'hide'
+    echo '<!-- Info: product is hidden by tag -->'
 
     break
   endif
@@ -84,6 +79,6 @@
       bundle_product: bundle_product,
       bundle_template: bundle_template
     %}
-    {% render 'product-card-content', product: product %}
+    {% render 'product-card-content', product: product, index: index %}
   {% endif %}
 </product-card>
