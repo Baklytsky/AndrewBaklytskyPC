@@ -1,26 +1,36 @@
 {% liquid
   assign siblings = siblings | default: false
   assign shopify_attributes = shopify_attributes | default: ''
+
+  assign is_onboarding = false
+  if product == empty
+    assign is_onboarding = true
+  endif
+
   capture has_siblings
     render 'product-card-siblings-and-swatches', product: product, part: 'check-siblings'
   endcapture
 
   capture product_card_cutline
     if settings.show_tagline
-      if product.metafields.theme.tagline != blank and product.metafields.theme.tagline.type == 'single_line_text_field'
-        assign product_title_downcase = product.title | strip_html | escape | downcase
-        assign cutline_downcase = product.metafields.theme.tagline.value | downcase
+      if is_onboarding
+        echo 'products.general.cutline' | t
+      else
+        if product.metafields.theme.tagline != blank and product.metafields.theme.tagline.type == 'single_line_text_field'
+          assign product_title_downcase = product.title | strip_html | escape | downcase
+          assign cutline_downcase = product.metafields.theme.tagline.value | downcase
 
-        unless product_title_downcase contains cutline_downcase
-          echo product.metafields.theme.tagline.value
-        endunless
-      elsif product.metafields.theme.cutline != blank and product.metafields.theme.cutline.type == 'single_line_text_field'
-        assign product_title_downcase = product.title | strip_html | escape | downcase
-        assign cutline_downcase = product.metafields.theme.cutline.value | downcase
+          unless product_title_downcase contains cutline_downcase
+            echo product.metafields.theme.tagline.value
+          endunless
+        elsif product.metafields.theme.cutline != blank and product.metafields.theme.cutline.type == 'single_line_text_field'
+          assign product_title_downcase = product.title | strip_html | escape | downcase
+          assign cutline_downcase = product.metafields.theme.cutline.value | downcase
 
-        unless product_title_downcase contains cutline_downcase
-          echo product.metafields.theme.cutline.value
-        endunless
+          unless product_title_downcase contains cutline_downcase
+            echo product.metafields.theme.cutline.value
+          endunless
+        endif
       endif
     endif
   endcapture
