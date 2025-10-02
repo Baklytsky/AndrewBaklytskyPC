@@ -20,9 +20,12 @@
       echo 'product-card--' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
-  assign aos_delay_default = animation_delay | times: 100
-  assign aos_delay = aos_delay | default: aos_delay_default
-  assign aos_anchor = unique_id
+
+  # Section blocks: aos_delay is passed and should be the result of section blocks forloop.index0 multiplied by 100
+  if aos_delay == blank
+    # Theme blocks: aos_delay is blank and should be calculated from block index
+  endif
+  assign aos_anchor = aos_anchor | default: unique_id
 
   assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio
 
@@ -100,7 +103,7 @@
 -%}
 
 {%- if is_onboarding -%}
-  {%- render 'product-card-media-onboarding', index: index, animation_delay: animation_delay, aos_anchor: aos_anchor -%}
+  {%- render 'product-card-media-onboarding', index: index, aos_delay: aos_delay, aos_anchor: aos_anchor -%}
 
   {%- break -%}
 {%- endif -%}

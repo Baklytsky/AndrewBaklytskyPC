@@ -48,6 +48,9 @@
   # Variables needed for "product-card-media" snippet
   assign animation_delay = animation_delay | default: 0
   assign aos_delay_default = animation_delay | times: 100
+  assign aos_delay = aos_delay | default: aos_delay_default
+  assign animation_anchor = animation_anchor | default: unique_id
+  assign aos_anchor = aos_anchor | default: animation_anchor
   assign index = index | default: 1
   assign bundle_product = bundle_product | default: false
   assign bundle_template = bundle_template | default: false
@@ -75,7 +78,8 @@
       index: index,
       block_index: block_index,
       sizes: sizes,
-      animation_delay: animation_delay,
+      aos_delay: aos_delay,
+      aos_anchor: aos_anchor,
       bundle_product: bundle_product,
       bundle_template: bundle_template
     %}
