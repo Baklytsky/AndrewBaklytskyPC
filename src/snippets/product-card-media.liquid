@@ -24,6 +24,11 @@
   # Section blocks: aos_delay is passed and should be the result of section blocks forloop.index0 multiplied by 100
   if aos_delay == blank
     # Theme blocks: aos_delay is blank and should be calculated from block index
+    assign product_card_index = block.id | split: '-' | last | plus: 0 | default: 0
+    if block.id == blank
+      assign product_card_index = index | plus: 0 | default: 0
+    endif
+    assign aos_delay = product_card_index | times: 100
   endif
   assign aos_anchor = aos_anchor | default: unique_id
 
