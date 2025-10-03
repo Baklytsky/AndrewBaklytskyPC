@@ -105,7 +105,7 @@ class GridSwatch extends HTMLElement {
         const swatchButton = swatchTemplate.querySelector(selectors.swatchButton);
         const swatchLink = swatchTemplate.querySelector(selectors.swatchLink);
         const swatchText = swatchTemplate.querySelector(selectors.swatchText);
-        const swatchHandle = this.swatchesJSON[swatch];
+        const swatchHandle = this.swatchesJSON[swatch] || swatch.toLowerCase().replace(/\s+/g, '-');
         const variantTitle = variant.title.replaceAll('"', "'");
 
         swatchButton.style = `--animation-delay: ${(100 * this.count) / 1250}s`;
@@ -115,7 +115,22 @@ class GridSwatch extends HTMLElement {
         swatchButton.dataset.swatchVariantName = variantTitle;
         swatchButton.dataset.swatchImage = image;
         swatchButton.dataset.variant = variant.id;
-        swatchButton.style.setProperty('--swatch', `var(--${swatchHandle})`);
+
+        // Set the --swatch CSS variable with proper fallback
+        if (this.swatchesJSON[swatch]) {
+          const swatchValue = this.swatchesJSON[swatch];
+          // If the swatch value is a hex color, use it directly
+          if (swatchValue.startsWith('#')) {
+            swatchButton.style.setProperty('--swatch', swatchValue);
+          } else {
+            // If it's a CSS variable name, use var() syntax
+            swatchButton.style.setProperty('--swatch', `var(--${swatchValue})`);
+          }
+        } else {
+          // Use the swatch name as fallback
+          const fallbackHandle = swatch.toLowerCase().replace(/\s+/g, '-');
+          swatchButton.style.setProperty('--swatch', `var(--${fallbackHandle})`);
+        }
         swatchLink.href = getUrlWithVariant(this.product.url, variant.id);
         swatchLink.dataset.swatch = swatch;
         swatchLink.disabled = !variantAvailable;
@@ -219,7 +234,9 @@ class GridSwatch extends HTMLElement {
     // Iterating through the pairs and constructing the JSON object
     pairs?.forEach((pair) => {
       const [key, value] = pair.split(':');
-      jsonObject[key.trim()] = value.trim();
+      if (key && value) {
+        jsonObject[key.trim()] = value.trim();
+      }
     });
 
     return jsonObject;
