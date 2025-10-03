@@ -1,6 +1,8 @@
 {%- comment -%} Color swatches {%- endcomment -%}
 {% liquid
   assign shopify_attributes = shopify_attributes | default: ''
+  assign index = index | default: 1
+  assign block_index = block_index | default: 1
 
   assign is_onboarding = false
   if product == empty
@@ -9,7 +11,7 @@
 -%}
 
 {%- if is_onboarding -%}
-  {%- render 'product-card-swatches-onboarding', index: index -%}
+  {%- render 'product-card-swatches-onboarding', index: index, block_index: block_index -%}
 
   {%- break -%}
 {%- endif -%}

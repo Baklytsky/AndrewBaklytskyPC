@@ -4,6 +4,7 @@
   assign current_variant = product.first_available_variant
   assign product_url = product.url | within: collection
   assign index = index | default: 1
+  assign block_index = block_index | default: 1
 %}
 
 <div
@@ -25,6 +26,11 @@
       </div>
     </div>
 
-    {% render 'product-card-siblings-and-swatches', product: product, part: 'html', index: index %}
+    {% render 'product-card-siblings-and-swatches',
+      product: product,
+      part: 'html',
+      index: index,
+      block_index: block_index
+    %}
   {% endif %}
 </div>

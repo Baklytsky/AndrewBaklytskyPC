@@ -1,7 +1,8 @@
 {%- liquid
   assign index = index | default: 1
-  assign block_index = block.id | split: '-' | last | plus: 0 | default: 0
-  assign product_card_index = block_index
+  assign block_index = block_index | default: 1
+  assign block_id_index = block.id | split: '-' | last | plus: 0 | default: 0
+  assign product_card_index = block_id_index
   if block.id == blank
     assign product_card_index = index | plus: 0 | default: 0
   endif
@@ -63,7 +64,7 @@
               endcapture
 
               assign unique_id = unique_id | default: section.id
-              assign unique = unique_id | append: '-' | append: product_card_index
+              assign unique = unique_id | append: '-' | append: product_card_index | append: '-' | append: block_index
               assign input_id = unique | append: '-swatch-' | append: forloop.index
             -%}
 
