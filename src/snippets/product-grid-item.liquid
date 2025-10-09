@@ -128,41 +128,39 @@
         {%- endcapture -%}
 
         {%- if swatch_values != blank -%}
-          <form class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-grid-swatch-form data-fieldset>
-            <native-scrollbar>
-              <grid-swatch
-                class="selector-wrapper__scrollbar"
-                data-scrollbar
-                data-swatch-handle="{{ product.handle }}"
-                data-swatch-label="{{ label }}"
-                data-swatch-values="{{ swatch_values | strip_html | escape }}"
-              >
-              </grid-swatch>
+          <native-scrollbar class="radio__fieldset radio__fieldset--swatches radio__fieldset--pgi" data-grid-swatch-form>
+            <grid-swatch
+              class="selector-wrapper__scrollbar"
+              data-scrollbar
+              data-swatch-handle="{{ product.handle }}"
+              data-swatch-label="{{ label }}"
+              data-swatch-values="{{ swatch_values | strip_html | escape }}"
+            >
+            </grid-swatch>
 
-              {%- if settings.collection_swatch_style == 'text-slider' or settings.collection_swatch_style == 'slider' -%}
-                <div class="selector-wrapper__actions">
-                  <button
-                    type="button"
-                    class="radio__fieldset__arrow radio__fieldset__arrow--prev"
-                    disabled
-                    data-scrollbar-arrow-prev
-                  >
-                    {%- render 'icon-nav-arrow-left' -%}
-                    <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="radio__fieldset__arrow radio__fieldset__arrow--next"
-                    disabled
-                    data-scrollbar-arrow-next
-                  >
-                    {% render 'icon-nav-arrow-right' %}
-                    <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
-                  </button>
-                </div>
-              {%- endif -%}
-            </native-scrollbar>
-          </form>
+            {%- if settings.collection_swatch_style == 'text-slider' or settings.collection_swatch_style == 'slider' -%}
+              <div class="selector-wrapper__actions">
+                <button
+                  type="button"
+                  class="radio__fieldset__arrow radio__fieldset__arrow--prev"
+                  disabled
+                  data-scrollbar-arrow-prev
+                >
+                  {%- render 'icon-nav-arrow-left' -%}
+                  <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="radio__fieldset__arrow radio__fieldset__arrow--next"
+                  disabled
+                  data-scrollbar-arrow-next
+                >
+                  {% render 'icon-nav-arrow-right' %}
+                  <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
+                </button>
+              </div>
+            {%- endif -%}
+          </native-scrollbar>
         {%- endif -%}
 
         {%- break -%}
@@ -657,13 +655,13 @@
         {%- if siblings_html != blank -%}
           {{ siblings_html }}
         {%- elsif has_colors -%}
-          <div class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
+          <form class="product-item__swatches__holder product-item__swatches__holder--{{ settings.swatch_style }} product-item__swatches__holder--{{ settings.collection_swatch_style }}">
             {{ swatches }}
 
             <span class="product-item__swatches__count">
               <span data-swatch-count>&nbsp;</span>
             </span>
-          </div>
+          </form>
         {%- endif -%}
       </div>
     </div>
