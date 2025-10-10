@@ -15,6 +15,7 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       connectedCallback() {
+        this.addEventListener('theme:swatches:loaded', this.resizeEvents);
         document.addEventListener('theme:resize', this.resizeEvents);
 
         // Detect scroll direction
@@ -36,6 +37,7 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       disconnectedCallback() {
+        this.removeEventListener('theme:swatches:loaded', this.resizeEvents);
         document.removeEventListener('theme:resize', this.resizeEvents);
       }
 
