@@ -1,4 +1,5 @@
 import FetchError from '../util/fetch-error';
+import getScript from '../util/get-script';
 import wrapElements from '../globals/wrap';
 
 if (!customElements.get('quick-add-product')) {
@@ -104,8 +105,27 @@ if (!customElements.get('quick-add-product')) {
           document.body.appendChild(htmlObject.querySelector('[data-quick-add-modal]'));
           modalTemplate.remove();
 
+          const apiContent = new DOMParser().parseFromString(response, 'text/html').querySelector('[data-api-content]');
+
+          // Load scripts from the parsed html
+          const scriptTags = apiContent.querySelectorAll('script[src]');
+          if (scriptTags.length) {
+            scriptTags.forEach((script) => {
+              const scriptUrl = script.getAttribute('src');
+              getScript(
+                scriptUrl,
+                () => {
+                  console.log('success');
+                },
+                () => {
+                  console.log('error');
+                }
+              );
+            });
+          }
+
           this.modal = document.querySelector(`[data-quick-add-modal][data-product-id="${this.productId}"]`);
-          this.modal.querySelector('[data-product-upsell-ajax]').innerHTML = new DOMParser().parseFromString(response, 'text/html').querySelector('[data-api-content]').innerHTML;
+          this.modal.querySelector('[data-product-upsell-ajax]').innerHTML = apiContent.innerHTML;
 
           this.modalCreatedCallback();
         }

@@ -32,7 +32,9 @@ if (!customElements.get('product-images')) {
         this.productMediaObserver();
         this.toggleEvents();
         this.listen();
-        this.setHeight();
+        requestAnimationFrame(() => {
+          this.setHeight();
+        });
       }
 
       disconnectedCallback() {
