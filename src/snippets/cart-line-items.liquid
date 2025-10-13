@@ -106,18 +106,6 @@
             <p class="cart__item__text cart__item__text--vendor">{{ line_item.vendor }}</p>
           {%- endif -%}
 
-          {%- if line_item.properties._reward == 'reward' -%}
-            <div class="heading-large">
-              {{ line_item.properties._reward }}
-            </div>
-          {%- endif -%}
-
-          {%- if line_item.properties._gift == 'gift' -%}
-            <div class="heading-large">
-              {{ line_item.properties._gift }}
-            </div>
-          {%- endif -%}
-
           <h4 class="cart__item__title">
             <a href="{{ line_item.url }}">
               {{- line_item.product.title | strip_html -}}
@@ -285,14 +273,88 @@
             {%- endif -%}
 
             {%- unless line_item.product.has_only_default_variant -%}
-              <p class="cart__item__selected-options">
-                {%- for option in line_item.options_with_values -%}
-                  {%- unless forloop.first -%}
-                    <span> | </span>
-                  {%- endunless -%}
-                  <span>{{ option.value }}</span>
-                {%- endfor -%}
-              </p>
+              {%- if line_item.product.metafields.theme_modules.is_bundle -%}
+                <div class="cart__item__subs">
+                  {%- for bundle_sub in line_item.product.metafields.theme_modules.bundle_products.value -%}
+                    {%- liquid
+                      assign bundle_sub_variants_string = ''
+                      assign bundle_sub_image = bundle_sub.featured_image
+                      assign bundle_sub_selected_options = ''
+                      assign bundle_separator_open = '('
+                      assign bundle_separator_close = ')'
+
+                      for line_item_option in line_item.options_with_values
+                        for bundle_sub_option in bundle_sub.options_with_values
+                          assign bundle_sub_option_name = bundle_sub.title | append: ' ' | append: bundle_separator_open | append: bundle_sub_option.name | append: bundle_separator_close
+
+                          if line_item_option.name == bundle_sub_option_name
+                            assign bundle_sub_variants_string = bundle_sub_variants_string | append: '@@@@' | append: line_item_option.value
+                            break
+                          endif
+                        endfor
+                      endfor
+
+                      if bundle_sub_variants_string != ''
+                        assign bundle_sub_variants = bundle_sub_variants_string | remove_first: '@@@@' | split: '@@@@' | join: ' / '
+                        assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants
+                        assign bundle_sub_selected_options = bundle_sub_variants | replace: ' / ', ' | '
+
+                        if bundle_sub_variant[0].featured_image != blank
+                          assign bundle_sub_image = bundle_sub_variant[0].featured_image
+                        endif
+                      endif
+                    -%}
+
+                    <div class="cart__item__sub">
+                      <div class="cart__item__sub__image{% unless bundle_sub_image %} image--empty{% endunless %}">
+                        <a
+                          href="{{ bundle_sub.url }}"
+                          aria-label="{{ bundle_sub.title | escape }}"
+                          {% if settings.show_image_bg != 'none' %}
+                            class="show-gray-bg"
+                          {% endif %}
+                        >
+                          {%- if bundle_sub_image -%}
+                            <div class="lazy-image is-loading">
+                              {{
+                                bundle_sub_image
+                                | image_url: width: 60
+                                | image_tag:
+                                  widths: '30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360',
+                                  sizes: '30px',
+                                  class: 'is-loading',
+                                  loading: 'lazy',
+                                  fetchpriority: fetchpriority
+                              }}
+                            </div>
+                          {%- endif -%}
+                        </a>
+                      </div>
+
+                      <div class="cart__item__sub__content">
+                        <h5 class="cart__item__sub__title">
+                          <a href="{{ bundle_sub.url }}">
+                            {{- bundle_sub.title | strip_html -}}
+                          </a>
+                        </h5>
+
+                        {%- if bundle_sub_selected_options != '' -%}
+                          <p class="cart__item__sub__options">{{ bundle_sub_selected_options }}</p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {%- else -%}
+                <p class="cart__item__selected-options">
+                  {%- for option in line_item.options_with_values -%}
+                    {%- unless forloop.first -%}
+                      <span> | </span>
+                    {%- endunless -%}
+                    <span>{{ option.value }}</span>
+                  {%- endfor -%}
+                </p>
+              {%- endif -%}
             {%- endunless -%}
 
             {%- if line_item.selling_plan_allocation -%}
@@ -307,6 +369,15 @@
           </div>
 
           <quantity-counter class="cart__quantity-counter">
+            {%- assign quantity = line_item.quantity -%}
+
+            {%- if line_item.variant.inventory_policy == 'deny'
+              and line_item.variant.inventory_management != null
+              and line_item.variant.inventory_quantity < quantity
+            -%}
+              {%- assign quantity = line_item.variant.inventory_quantity -%}
+            {%- endif -%}
+
             {%- unless bundle_opened or line_item_reward or line_item_gift -%}
               <a
                 class="cart__item__remove"
@@ -315,12 +386,34 @@
                 data-id="{{ line_item.key }}"
                 title="{{ 'cart.general.remove' | t }}"
               >
-                {%- render 'icon-remove' -%}
+                {%- render 'icon-trash' -%}
               </a>
-            {%- endunless -%}
 
-            <div class="cart__quantity">
-              {%- unless bundle_opened or line_item_reward or line_item_gift -%}
+              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-replaced{% endif %}">
+                <button type="button"
+                  class="select-popout__toggle"
+                  aria-expanded="false"
+                  aria-controls="{{ line_item.key }}-select-quantity"
+                  aria-labelledby="{{ line_item.key }}-select-quantity-label"
+                  data-popout-toggle>
+                  <span data-popout-toggle-text>{{ quantity }}</span>
+                  {%- render 'icon-nav-arrow-down' -%}
+                </button>
+
+                <ul id="{{ line_item.key }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable>
+                  {%- for idx in (1..10) -%}
+                    <li class="select-popout__item{% if forloop.index == quantity %} is-active{% endif %}">
+                      <a class="select-popout__option" href="#" {% if forloop.index == quantity %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                        <span>
+                          {{ forloop.index }} {% if forloop.last %}+{% endif %}
+                        </span>
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </popout-select>
+
+              <div class="cart__quantity">
                 <button
                   class="cart__quantity-minus"
                   type="button"
@@ -329,33 +422,19 @@
                 >
                   {%- render 'icon-minus' -%}
                 </button>
-              {%- endunless -%}
 
-              {%- assign quantity = line_item.quantity -%}
+                <input
+                  class="cart__quantity-field"
+                  type="number"
+                  id="updates_{{ line_item.key }}"
+                  name="updates[]"
+                  data-id="{{ line_item.key }}"
+                  value="{{ quantity }}"
+                  title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
+                  pattern="[0-9]*"
+                  data-popout-input
+                >
 
-              {%- if line_item.variant.inventory_policy == 'deny'
-                and line_item.variant.inventory_management != null
-                and line_item.variant.inventory_quantity < quantity
-              -%}
-                {%- assign quantity = line_item.variant.inventory_quantity -%}
-              {%- endif -%}
-
-              <input
-                class="cart__quantity-field"
-                type="number"
-                id="updates_{{ line_item.key }}"
-                name="updates[]"
-                data-id="{{ line_item.key }}"
-                value="{{ quantity }}"
-                title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-                pattern="[0-9]*"
-                {% if bundle_opened or line_item_reward or line_item_gift %}
-                  data-bundle-cart-quantity
-                  disabled
-                {% endif %}
-              >
-
-              {%- unless bundle_opened or line_item_reward or line_item_gift -%}
                 <button
                   class="cart__quantity-plus"
                   type="button"
@@ -364,8 +443,8 @@
                 >
                   {%- render 'icon-plus' -%}
                 </button>
-              {%- endunless -%}
-            </div>
+              </div>
+            {%- endunless -%}
           </quantity-counter>
         </div>
       </div>
@@ -373,8 +452,6 @@
       {%- if line_item_original_price > line_item_final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}
           <p class="cart__discount">
-            {%- render 'icon-tags' -%}
-
             {%- assign discount_price = discount.amount | money -%}
 
             <span>
@@ -490,11 +567,10 @@
           data-id="{{ line_item.key }}"
           title="{{ 'cart.general.remove' | t }}"
         >
-          {%- render 'icon-remove' -%}
+          {%- render 'icon-trash' -%}
         </a>
 
-        {%- render 'icon-plus' -%}
-        {%- render 'icon-minus' -%}
+        {%- render 'icon-nav-arrow-down' -%}
       </summary>
 
       <div
@@ -527,13 +603,6 @@
     assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
     assign line_items_gifts = line_items_gifts | remove_first: ',' | split: ','
   -%}
-
-  <script>
-    console.log({{ buy_promo_meta | json }})
-  </script>
-  <script>
-    console.log({{ gwp_promo_meta | json }})
-  </script>
 
   <script type="application/json" data-cart-json>
     {

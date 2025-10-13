@@ -1,0 +1,38 @@
+{%- doc -%}
+  Renders vertical product list or upsell products on Cart page and Cart drawer
+
+  @param {object} block - Block object (required)
+
+  @example
+  {% render 'cart-block-vertical-upsell', block: block %}
+{%- enddoc -%}
+
+{%- liquid
+  assign product_count = block.settings.product_list.count
+
+  capture product_list
+    for product in block.settings.product_list
+      render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, instant_add: true, is_vertical: true, show_available_upsell_only: true
+    endfor
+  endcapture
+
+  assign color_scheme = 'color-' | append: block.settings.color_scheme
+-%}
+
+{%- if request.design_mode or product_count > 0 and product_list != blank -%}
+  {{ 'product-variants.css' | asset_url | stylesheet_tag }}
+
+  <div class="cart__widget cart__widget--upsell cart__widget--upsell-vertical {{ color_scheme }}">
+    {%- if block.settings.title != blank -%}
+      <div class="cart__widget__title">
+        <span>{{ block.settings.title }}</span>
+      </div>
+    {%- endif -%}
+
+    <div class="cart__widget__content">
+      <div class="cart__widget__content__inner">
+        {{- product_list -}}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

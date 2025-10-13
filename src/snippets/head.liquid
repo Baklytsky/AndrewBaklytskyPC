@@ -148,9 +148,11 @@
     when 'regular'
       assign swatch_size_filters = '1.15'
       assign swatch_size_product = '2.2'
+      assign swatch_size_upsell = '1'
     when 'large'
       assign swatch_size_filters = '1.5'
       assign swatch_size_product = '3.0'
+      assign swatch_size_upsell = '1.32'
   endcase
 
   assign backdrop_bg = 'rgba(0,0,0,0.4)'
@@ -254,6 +256,12 @@
         if contrast_white < contrast_limit and contrast_black > contrast_white
           assign link_opposite = '#000000'
         endif
+
+        assign color_bg_accent_opposite = scheme.settings.bg_light | color_lighten: 100
+        assign color_bg_accent_contrast = scheme.settings.bg_light | color_contrast: color_bg_accent_opposite
+        if color_bg_accent_contrast < contrast_limit
+          assign color_bg_accent_opposite = scheme.settings.bg_light | color_darken: 100
+        endif
       -%}
 
       --COLOR-TEXT: {{ scheme.settings.text }};
@@ -275,6 +283,8 @@
       --COLOR-BG-GRADIENT: {{ scheme.settings.bg_gradient | default: scheme.settings.bg }};
 
       --COLOR-BG-ACCENT: {{ scheme.settings.bg_light }};
+      --COLOR-BG-ACCENT-OPPOSITE: {{ color_bg_accent_opposite }};
+      --COLOR-BG-ACCENT-OPPOSITE-A50: {{ color_bg_accent_opposite | color_modify: 'alpha', 0.50 }};
       --COLOR-BG-ACCENT-LIGHTEN: {{ scheme.settings.bg_light | color_lighten: 15 }};
 
       --COLOR-BORDER: {{ scheme.settings.border | color_to_rgb }};
@@ -346,6 +356,8 @@
       --border-hairline: var(--COLOR-BORDER-HAIRLINE);
       --bg: var(--COLOR-BG-GRADIENT, var(--COLOR-BG));
       --bg-accent: var(--COLOR-BG-ACCENT);
+      --bg-accent-opposite: var(--COLOR-BG-ACCENT-OPPOSITE);
+      --bg-accent-opposite-a50: var(--COLOR-BG-ACCENT-OPPOSITE-A50);
       --bg-accent-lighten: var(--COLOR-BG-ACCENT-LIGHTEN);
       --icons: var(--COLOR-TEXT);
       --link: var(--COLOR-LINK);
@@ -437,34 +449,16 @@
     --header-overlay-color: transparent;
 
     /*** Custom Cursor ***/
-    --ICON-ZOOM-IN: url( "{{ 'icon-zoom-in.svg' | asset_url }}" );
-    --ICON-ZOOM-OUT: url( "{{ 'icon-zoom-out.svg' | asset_url }}" );
+    --ICON-ZOOM-IN: url( "{{ 'icon-plus.svg' | asset_url }}" );
+    --ICON-ZOOM-OUT: url( "{{ 'icon-minus.svg' | asset_url }}" );
 
     /*** Custom Icons ***/
-    {% assign icon_style = settings.icon_style %}
-    {% if icon_style == '2' %}
-      {% comment %} Icon style Bold {% endcomment %}
-      --ICON-ADD-BAG: url( "{{ 'icon-add-bag-bold.svg' | asset_url }}" );
-      --ICON-ADD-CART: url( "{{ 'icon-add-cart-bold.svg' | asset_url }}" );
-      --ICON-ARROW-LEFT: url( "{{ 'icon-arrow-left-bold.svg' | asset_url }}" );
-      --ICON-ARROW-RIGHT: url( "{{ 'icon-arrow-right-bold.svg' | asset_url }}" );
-      --ICON-SELECT: url("{{ 'icon-select-bold.svg' | asset_url }}");
-    {% elsif icon_style == '1.5' %}
-      {% comment %} Icon style Medium {% endcomment %}
-      --ICON-ADD-BAG: url( "{{ 'icon-add-bag-medium.svg' | asset_url }}" );
-      --ICON-ADD-CART: url( "{{ 'icon-add-cart-medium.svg' | asset_url }}" );
-      --ICON-ARROW-LEFT: url( "{{ 'icon-arrow-left-medium.svg' | asset_url }}" );
-      --ICON-ARROW-RIGHT: url( "{{ 'icon-arrow-right-medium.svg' | asset_url }}" );
-      --ICON-SELECT: url("{{ 'icon-select-medium.svg' | asset_url }}");
-    {% else %}
-      {% comment %} Icon style Regular {% endcomment %}
-      --ICON-ADD-BAG: url( "{{ 'icon-add-bag.svg' | asset_url }}" );
-      --ICON-ADD-CART: url( "{{ 'icon-add-cart.svg' | asset_url }}" );
-      --ICON-ARROW-LEFT: url( "{{ 'icon-arrow-left.svg' | asset_url }}" );
-      --ICON-ARROW-RIGHT: url( "{{ 'icon-arrow-right.svg' | asset_url }}" );
-      --ICON-SELECT: url("{{ 'icon-select.svg' | asset_url }}");
-    {% endif %}
+    --ICON-BAG: url( "{{ 'icon-bag.svg' | asset_url }}" );
+    --ICON-ARROW-LEFT: url( "{{ 'icon-nav-arrow-left.svg' | asset_url }}" );
+    --ICON-ARROW-RIGHT: url( "{{ 'icon-nav-arrow-right.svg' | asset_url }}" );
+    --ICON-SELECT: url("{{ 'icon-nav-arrow-down.svg' | asset_url }}");
 
+    /*** Product card images apsect ratio ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
 
     /*** Typography ***/
@@ -566,11 +560,17 @@
     --SIDEBAR-WIDTH-MEDIUM: 258px;
 
     {%- comment -%} Drawers {%- endcomment -%}
-    --DRAWER-WIDTH: 520px;
+    --DRAWER-WIDTH: 600px;
     --DRAWER-WIDTH-MOBILE: 380px;
 
-    {%- comment -%} Grid Variables {%- endcomment -%}
+    {%- comment -%} Spacing Variables {%- endcomment -%}
+    --SPACING-MICRO: 5px;
+    --SPACING-TINY: 10px;
+    --SPACING-SMALL: 16px;
+    --SPACING-MEDIUM: 20px;
+    --SPACING-LARGE: 24px;
 
+    {%- comment -%} Grid Variables {%- endcomment -%}
     --COLUMNS: 4;
     --COLUMNS-MEDIUM: 3;
     --COLUMNS-SMALL: 2;
@@ -752,6 +752,7 @@
     /*** Swatch Size ***/
     --swatch-size-filters: {{ swatch_size_filters }}rem;
     --swatch-size-product: {{ swatch_size_product }}rem;
+    --swatch-size-upsell: {{ swatch_size_upsell }}rem;
   }
 
   /*** Backdrop ***/
@@ -852,7 +853,7 @@
   {%- render 'swatch-color-list' -%}
 {%- endif %}
 
-{%- if settings.quickview_enable -%}
+{%- if settings.quickview_enable or template.suffix == 'bundle-collection' -%}
   {{ 'product-quick-add-modal.css' | asset_url | stylesheet_tag }}
   {{ 'quick-add.css' | asset_url | stylesheet_tag }}
 {%- endif -%}
@@ -937,7 +938,7 @@
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
 
-{%- if settings.quickview_enable -%}
+{%- if settings.quickview_enable or template.suffix == 'bundle-collection' -%}
   <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 

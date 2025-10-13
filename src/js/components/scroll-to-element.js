@@ -1,15 +1,3 @@
-const selectors = {
-  scrollToElement: '[data-scroll-to]',
-  tooltip: '[data-tooltip]',
-  collapsibleTrigger: '[data-collapsible-trigger]',
-};
-
-const attributes = {
-  open: 'open',
-  dataScrollTo: 'data-scroll-to',
-  tooltipStopMousenterValue: 'data-tooltip-stop-mouseenter',
-};
-
 if (!customElements.get('scroll-to-element')) {
   customElements.define(
     'scroll-to-element',
@@ -17,13 +5,13 @@ if (!customElements.get('scroll-to-element')) {
       constructor() {
         super();
 
-        this.scrollToButton = this.querySelector(selectors.scrollToElement);
+        this.scrollToButton = this.querySelector('[data-scroll-to]');
       }
 
       connectedCallback() {
         if (this.scrollToButton) {
           this.scrollToButton.addEventListener('click', () => {
-            const target = document.querySelector(this.scrollToButton.getAttribute(attributes.dataScrollTo));
+            const target = document.querySelector(this.scrollToButton.getAttribute('data-scroll-to'));
 
             if (!target || this.scrollToButton.tagName === 'A') return;
 
@@ -38,21 +26,21 @@ if (!customElements.get('scroll-to-element')) {
         const collapsibleElement = element.nextElementSibling.matches('details') ? element.nextElementSibling : null;
 
         if (collapsibleElement) {
-          const collapsibleTrigger = collapsibleElement?.querySelector(selectors.collapsibleTrigger);
-          const isOpen = collapsibleElement.hasAttribute(attributes.open);
+          const collapsibleTrigger = collapsibleElement?.querySelector('[data-collapsible-trigger]');
+          const isOpen = collapsibleElement.hasAttribute('open');
 
           if (!isOpen) {
             collapsibleTrigger?.dispatchEvent(new Event('click'));
           }
         }
 
-        const tooltips = document.querySelectorAll(`${selectors.tooltip}:not([${attributes.tooltipStopMousenterValue}])`);
+        const tooltips = document.querySelectorAll('[data-tooltip]:not([data-tooltip-stop-mouseenter])');
         if (tooltips.length) {
           tooltips.forEach((tooltip) => {
-            tooltip.setAttribute(attributes.tooltipStopMousenterValue, '');
+            tooltip.setAttribute('data-tooltip-stop-mouseenter', '');
 
             setTimeout(() => {
-              tooltip.removeAttribute(attributes.tooltipStopMousenterValue);
+              tooltip.removeAttribute('data-tooltip-stop-mouseenter');
             }, 1000);
           });
         }

@@ -93,34 +93,36 @@
     <span data-remaining-count>{{ current_inventory | default: 0 }}</span>
   {%- endcapture -%}
 
-  <div class="product__block variant__countdown {{ show_remaining_class }} block-padding"
+  <div
+    class="product__block variant__countdown {{ show_remaining_class }} block-padding"
     data-remaining-max="{{ max_inventory }}"
     data-remaining-show-notice="{{ show_notice }}"
     data-remaining-wrapper
     {{ block.shopify_attributes }}
-    {{ block_style }}>
-    <span class="variant__countdown--in"{{ in_stock_icon_color }}>
-      {% render 'icon-in-stock' %}
+    {{ block_style }}
+  >
+    <span class="variant__countdown--in" {{ in_stock_icon_color }}>
+      {% render 'icon-check' %}
       <span class="variant__countdown-text">{{ 'products.product.in_stock' | t }}</span>
     </span>
     {%- if hide_inventory_count -%}
-      <span class="variant__countdown--low"{{ low_stock_icon_color }}>
-        {% render 'icon-low-inventory' %}
+      <span class="variant__countdown--low" {{ low_stock_icon_color }}>
+        {% render 'icon-warning-sign' %}
         <span class="variant__countdown-text">{{ 'products.product.remaining_no_count' | t }}</span>
       </span>
     {%- else -%}
-      <span class="variant__countdown--low"{{ low_stock_icon_color }}>
-        {% render 'icon-low-inventory' %}
+      <span class="variant__countdown--low" {{ low_stock_icon_color }}>
+        {% render 'icon-warning-sign' %}
         <span class="variant__countdown-text">{{ 'products.product.remaining_html' | t: inventory: inventory }}</span>
       </span>
     {%- endif -%}
 
-    <span class="variant__countdown--out"{{ out_of_stock_icon_color }}>
-      {% render 'icon-out-of-stock' %}
+    <span class="variant__countdown--out" {{ out_of_stock_icon_color }}>
+      {% render 'icon-no-available' %}
       <span class="variant__countdown-text">{{ 'products.product.out_of_stock' | t }}</span>
     </span>
-    <span class="variant__countdown--unavailable"{{ out_of_stock_icon_color }}>
-      {% render 'icon-out-of-stock' %}
+    <span class="variant__countdown--unavailable" {{ out_of_stock_icon_color }}>
+      {% render 'icon-no-available' %}
       <span class="variant__countdown-text">{{ 'products.product.item_unavailable' | t }}</span>
     </span>
 

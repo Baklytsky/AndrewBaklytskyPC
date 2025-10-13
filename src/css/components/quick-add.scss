@@ -4,36 +4,31 @@
   --btn-text: var(--accent);
 
   position: absolute;
+  right: 0;
   bottom: 0;
+  margin: 10px;
   z-index: 10;
-  width: 100%;
-  background: var(--TRANSPARENT);
-  border-top: none;
-  text-align: center;
   pointer-events: auto;
-
-  @include media-query ($medium-up) {
-    backdrop-filter: blur(5px);
-  }
+  transform-origin: right bottom;
 }
 
 .no-touch {
-  .product-item:not(.product-item--bundle) .product-item__image:hover {
-    .quick-add__button { visibility: visible; }
+  .product-item:not(.is-bundle) .product-item__image:hover {
+    .quick-add__button { visibility: unset; }
   }
 
   @include media-query ($medium-up) {
-    body.is-focused .product-item:not(.product-item--bundle) .quick-add__button {
-      visibility: visible;
+    body.is-focused .product-item:not(.is-bundle) .quick-add__button {
+      visibility: unset;
       transition: none;
     }
 
-    .product-item:not(.product-item--bundle) .quick-add__holder {
+    .product-item:not(.is-bundle) .quick-add__holder {
       opacity: 0;
       animation: slideOutDown 0.25s ease;
     }
 
-    .product-item:not(.product-item--bundle) .quick-add__button {
+    .product-item:not(.is-bundle) .quick-add__button {
       visibility: hidden;
       transition: visibility 0.5s;
 
@@ -43,25 +38,25 @@
       }
     }
 
-    .product-item:not(.product-item--bundle) .product-item__image:hover {
+    .product-item:not(.is-bundle) .product-item__image:hover {
       .quick-add__holder:not(.is-disabled) {
         animation: slideInUp 0.25s ease;
         animation-fill-mode: forwards;
       }
     }
 
-    body.is-focused .product-item:not(.product-item--bundle) .quick-add__holder:focus-within,
-    .product-item:not(.product-item--bundle) .quick-add__holder.is-visible,
-    .product-item:not(.product-item--bundle) .quick-add__holder.has-error {
+    body.is-focused .product-item:not(.is-bundle) .quick-add__holder:focus-within,
+    .product-item:not(.is-bundle) .quick-add__holder.is-visible,
+    .product-item:not(.is-bundle) .quick-add__holder.has-error {
       animation: slideInUp 0.25s ease;
       animation-fill-mode: forwards;
     }
-    .product-item:not(.product-item--bundle) .quick-add__holder.is-disabled { animation: slideOutDown 0.25s ease; }
-    .product-item:not(.product-item--bundle) .quick-add__holder.is-disabled .quick-add__button { visibility: hidden; }
+    .product-item:not(.is-bundle) .quick-add__holder.is-disabled { animation: slideOutDown 0.25s ease; }
+    .product-item:not(.is-bundle) .quick-add__holder.is-disabled .quick-add__button { visibility: hidden; }
 
-    .product-item:not(.product-item--bundle) .has-error > .quick-add__button {
+    .product-item:not(.is-bundle) .has-error > .quick-add__button {
       @include media-query($medium-down) {
-        visibility: visible;
+        visibility: unset;
         display: block;
         max-height: none;
         padding: 15px;
@@ -76,46 +71,44 @@
 }
 
 .quick-add__button {
+  font-size: var(--font-body-small);
   color: var(--COLOR-QUICK-ADD-TEXT);
+  background: var(--COLOR-QUICK-ADD-BG);
 
   &.is-visible,
   &.is-loading,
   &.is-added {
-    visibility: visible;
+    visibility: unset;
   }
 
   &.is-disabled {
     pointer-events: none;
   }
 
-  .btn__plus {
-    color: var(--accent);
-  }
-
   @include media-query($medium-up) {
     position: relative;
-    text-decoration: none;
-    display: block;
-    width: 100%;
+    display: flex;
+    width: auto;
     padding: 15px;
     cursor: pointer;
-    text-align: center;
     box-shadow: none;
+    text-decoration: none;
 
-    &::after {
-      content: "";
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      top: 0;
-      left: 0;
+    .btn__bag {
       position: absolute;
-      opacity: 0.7;
-      background: var(--COLOR-QUICK-ADD-BG);
+      margin: 0 10px 0 auto;
+      display: block;
+      align-self: center;
+      width: 24px;
+      height: 24px;
+      transform: scale(0);
+      transition: transform .3s ease;
     }
+    .btn__text { transition: padding .3s ease; }
 
-    .btn__plus {
-      display: none;
+    &:hover:not(.is-loading, .is-added) {
+      .btn__bag { transform: none; }
+      .btn__text { padding-inline-end: 24px; }
     }
   }
 
@@ -123,9 +116,7 @@
     --btn-size: 36px;
     --btn-offset: 5px;
 
-    position: absolute;
-    bottom: var(--btn-offset);
-    left: var(--btn-offset);
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -165,52 +156,52 @@
   }
 }
 
-.quick-add__button>span {
+.quick-add__button > span {
   pointer-events: none;
 }
 
 @keyframes slideInUp {
   from {
-    transform: translateY(100%);
+    transform: scale(0);
     opacity: 0;
   }
 
   to {
-    transform: translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
 @keyframes slideOutDown {
   from {
-    transform: translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
 
   to {
-    transform: translateY(100%);
+    transform: scale(0);
     opacity: 0;
   }
 }
 
 @keyframes slideToggle {
   0% {
-    transform: translateY(100%);
+    transform: scale(0);
     opacity: 0;
   }
 
   10% {
-    transform: translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
 
   90% {
-    transform: translateY(0);
+    transform: scale(1);
     opacity: 1;
   }
 
   100% {
-    transform: translateY(100%);
+    transform: scale(0);
     opacity: 0;
   }
 }

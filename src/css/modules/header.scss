@@ -137,16 +137,16 @@ hover-disclosure { display: block; }
 }
 
 .header__mobile__hamburger {
+  --icon-size: 44px;
+
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
   height: 100%;
   left: 0;
-  padding: 0 5px;
-  margin-left: -10px;
-  margin-right: 2px;
+  padding: 0;
+  margin-left: -12px;
   cursor: pointer;
 }
 
@@ -162,9 +162,6 @@ hover-disclosure { display: block; }
     display: block;
   }
 }
-
-.header__mobile__hamburger .icon { --icon-size: 24px; }
-
 
 // Hide texts in favor of icons on mobile if Icons style is set to "Text"
 .header__mobile__button .navlink__cart__content > .navtext {
@@ -361,31 +358,21 @@ hover-disclosure { display: block; }
 
 .header__mobile__button .navlink:not(.navlink--toplevel),
 .header__desktop__button .navlink:not(.navlink--toplevel) {
-  padding: 5px 9px;
+  padding: 5px;
   transition: color 0.25s $ease-out-fast;
 
   @include media-query($medium-up) {
-    padding-left: 11px;
-    padding-right: 11px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 }
 
 .header__mobile__button .popout-header,
 .header__desktop__button .popout-header { margin: 0; }
 
-.header__desktop__button--cta {
-  padding: 0 16px;
-
-  .header__mobile & { padding: 0 11px; }
-
-  [data-header-style="logo_above"] & { padding-left: 0; }
-
-  @include media-query($medium-down) {
-    display: none;
-  }
-}
-
 .navlink {
+  --icon-size: 32px;
+
   @include nav;
 
   line-height: 1.2;
@@ -395,18 +382,12 @@ hover-disclosure { display: block; }
   color: var(--link);
 
   &:hover { color: var(--link-hover); }
-
-  .icon {
-    --icon-size: 24px;
-
-    fill: none;
-  }
 }
 
 .navlink--search {
   cursor: pointer;
 
-  .icon-cancel { display: none; }
+  .icon-close { display: none; }
 }
 
 .navlink--child,
@@ -726,12 +707,11 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   line-height: var(--FONT-SIZE-NAV);
 }
 
-.navlink--cart--icon .header__cart__status {
-  @include header-cart-status;
-}
+.navlink--cart--icon {
+  --icon-size: 28px;
 
-.navlink--cart--icon .header__cart__status[data-cart-count="0"] {
-  display: none;
+  .header__cart__status { @include header-cart-status; }
+  .header__cart__status[data-cart-count="0"] { display: none; }
 }
 
 .navlink--cart--text .header__cart__status {

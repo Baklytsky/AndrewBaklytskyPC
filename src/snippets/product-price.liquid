@@ -18,9 +18,9 @@
     data-animation-delay="{{ animation_delay }}"
   {% endif %}
 >
-  <div class="product__price__wrap">
+  <div class="product__price__wrap{% if price_font_size != blank %} {{ price_font_size }}{% endif %}">
     <div
-      class="product__price{% if has_units %} product__price--has-units{% endif %}{% if price_font_size != blank %} {{ price_font_size }}{% endif %}"
+      class="product__price{% if has_units %} product__price--has-units{% endif %}"
       data-price-wrapper
     >
       <span
@@ -118,7 +118,7 @@
               class="product__final-sale-question"
               data-tooltip="<div style='--text: var(--COLOR-SALE);'>{{ settings.final_sale_tooltip | replace: '"', "'" }}</div>"
             >
-              {%- render 'icon-question' -%}
+              {%- render 'icon-get-help' -%}
             </tooltip-component>
           </div>
         {%- endif -%}

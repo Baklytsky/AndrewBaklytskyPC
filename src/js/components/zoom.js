@@ -1,34 +1,10 @@
-const selectors = {
-  zoomCaption: '[data-zoom-caption]',
-  zoomImage: '[data-zoom-image]',
-  pswpThumbsTemplate: '[data-pswp-thumbs-template]',
-  section: '[data-section-type]',
-  thumbs: '.pswp__thumbs',
-  productImages: 'product-images',
-};
-
-const classes = {
-  dragging: 'is-dragging',
-  variantSoldOut: 'variant--soldout',
-  variantUnavailable: 'variant--unavailable',
-  popupClass: 'pswp-zoom-gallery',
-  popupClassNoThumbs: 'pswp-zoom-gallery--single',
-};
-
-const attributes = {
-  dataImageSrc: 'data-image-src',
-  dataImageWidth: 'data-image-width',
-  dataImageHeight: 'data-image-height',
-};
-
 class ZoomImages extends HTMLElement {
   constructor() {
     super();
 
-    this.container = this.closest(selectors.section);
-    this.images = this.querySelectorAll(selectors.zoomImage);
-    this.zoomCaptions = this.container.querySelector(selectors.zoomCaption);
-    this.thumbsContainer = document.querySelector(selectors.thumbs);
+    this.container = this.closest('[data-section-type]');
+    this.images = this.querySelectorAll('[data-zoom-image]');
+    this.thumbsContainer = document.querySelector('.pswp__thumbs');
   }
 
   connectedCallback() {
@@ -37,7 +13,7 @@ class ZoomImages extends HTMLElement {
         e.preventDefault();
 
         // Don't open Zoom popup if dragging
-        if (image.closest(selectors.productImages).classList.contains(classes.dragging)) return;
+        if (image.closest('product-images').classList.contains('is-dragging')) return;
 
         this.createZoom(index);
 
@@ -58,20 +34,20 @@ class ZoomImages extends HTMLElement {
   }
 
   createZoom(indexImage) {
-    const thumbsTemplate = this.container.querySelector(selectors.pswpThumbsTemplate);
+    const thumbsTemplate = this.container.querySelector('[data-pswp-thumbs-template]');
     const thumbs = thumbsTemplate?.innerHTML;
     let items = [];
     let counter = 0;
 
     this.images.forEach((image) => {
-      const imgSrc = image.getAttribute(attributes.dataImageSrc);
+      const imgSrc = image.getAttribute('data-image-src');
 
       counter += 1;
 
       items.push({
         src: imgSrc,
-        w: parseInt(image.getAttribute(attributes.dataImageWidth)),
-        h: parseInt(image.getAttribute(attributes.dataImageHeight)),
+        w: parseInt(image.getAttribute('data-image-width')),
+        h: parseInt(image.getAttribute('data-image-height')),
         msrc: imgSrc,
       });
 
@@ -80,7 +56,7 @@ class ZoomImages extends HTMLElement {
           history: false,
           focus: false,
           index: indexImage,
-          mainClass: counter === 1 ? `${classes.popupClass} ${classes.popupClassNoThumbs}` : `${classes.popupClass}`,
+          mainClass: counter === 1 ? 'pswp-zoom-gallery pswp-zoom-gallery--single' : 'pswp-zoom-gallery',
           showHideOpacity: true,
           howAnimationDuration: 150,
           hideAnimationDuration: 250,
@@ -96,9 +72,6 @@ class ZoomImages extends HTMLElement {
           spacing: 0,
           allowPanToNext: true,
           pinchToClose: false,
-          addCaptionHTMLFn: (item, captionEl, isFake) => {
-            this.zoomCaption(item, captionEl, isFake);
-          },
           getThumbBoundsFn: () => {
             const imageLocation = this.images[indexImage];
             const pageYScroll = window.scrollY || document.documentElement.scrollTop;
@@ -114,29 +87,6 @@ class ZoomImages extends HTMLElement {
         }
       }
     });
-  }
-
-  zoomCaption(item, captionEl) {
-    let captionHtml = '';
-    const targetContainer = captionEl.children[0];
-    if (this.zoomCaptions) {
-      captionHtml = this.zoomCaptions.innerHTML;
-
-      if (this.zoomCaptions.closest(`.${classes.variantSoldOut}`)) {
-        targetContainer.classList.add(classes.variantSoldOut);
-      } else {
-        targetContainer.classList.remove(classes.variantSoldOut);
-      }
-
-      if (this.zoomCaptions.closest(`.${classes.variantUnavailable}`)) {
-        targetContainer.classList.add(classes.variantUnavailable);
-      } else {
-        targetContainer.classList.remove(classes.variantUnavailable);
-      }
-    }
-
-    targetContainer.innerHTML = captionHtml;
-    return false;
   }
 }
 

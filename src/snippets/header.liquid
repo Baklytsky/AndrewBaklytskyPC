@@ -111,9 +111,7 @@
     assign cart_item_count = '9+'
   endif
 
-  assign cart_icon_family = section.settings.cart_icon_family
   assign show_icons = section.settings.show_icons
-  assign icon_string_cart = 'icon-' | append: cart_icon_family
 
   capture navlink_cart_classes
     echo 'navlink--cart'
@@ -147,14 +145,11 @@
   {%- if settings.instagram_link != ''
     or settings.pinterest_link != ''
     or settings.facebook_link != ''
-    or settings.twitter_link != ''
+    or settings.x_link != ''
     or settings.youtube_link != ''
     or settings.tiktok_link != ''
     or settings.linkedin_link != ''
-    or settings.vimeo_link != ''
-    or settings.tumblr_link != ''
     or settings.snapchat_link != ''
-    or settings.feed_link != ''
   -%}
     {%- assign show_socials = true -%}
   {%- endif -%}
@@ -166,12 +161,8 @@
     --HEADER-HEIGHT-MEDIUM: {{ header_height_medium }}px;
     --HEADER-HEIGHT-MOBILE: {{ header_height_mobile }}px;
 
-    {% comment %} --icon-add-cart variable is used on PGI and Product upsell block {% endcomment %}
-    {%- if cart_icon_family == 'bag' -%}
-      --icon-add-cart: var(--ICON-ADD-BAG);
-    {%- else -%}
-      --icon-add-cart: var(--ICON-ADD-CART);
-    {%- endif -%}
+    {% comment %} --icon-bag variable is used on PGI and Product upsell block {% endcomment %}
+    --icon-bag: var(--ICON-BAG);
   }
 
   .theme__header {
@@ -251,7 +242,7 @@
       </cart-count>
 
       {%- if cart_icon_as_circle == false -%}
-        {%- render 'header-icon', filename: icon_string_cart -%}
+        {%- render 'icon-bag' -%}
       {%- endif -%}
     </span>
   </div>
@@ -313,7 +304,7 @@
           <small class="navtext">{{ 'layout.header.menu' | t }}</small>
         {%- endif -%}
 
-        {%- render 'icon-menu' -%}
+        {%- render 'icon-hamburger-menu' -%}
       </button>
     </div>
 
@@ -323,7 +314,7 @@
           <details>
             <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
               {%- render 'icon-search' -%}
-              {%- render 'icon-cancel' -%}
+              {%- render 'icon-close' -%}
               <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
             </summary>
 
@@ -349,7 +340,7 @@
     {%- if shop.customer_accounts_enabled -%}
       <div class="header__mobile__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}">
-          {%- render 'icon-profile-circled' -%}
+          {%- render 'icon-user' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
@@ -383,7 +374,7 @@
     {%- if shop.customer_accounts_enabled -%}
       <div class="header__desktop__button">
         <a href="{{ routes.account_url }}" class="navlink{% if show_icons == false %} navlink--toplevel{% endif %}" title="{{ 'customer.account.title' | t }}">
-          {%- render 'icon-profile-circled' -%}
+          {%- render 'icon-user' -%}
           <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.account' | t }}</span>
         </a>
       </div>
@@ -395,7 +386,7 @@
           <details>
             <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
               {%- render 'icon-search' -%}
-              {%- render 'icon-cancel' -%}
+              {%- render 'icon-close' -%}
               <span class="{% if show_icons == false %}navtext{% else %}visually-hidden{% endif %}">{{ 'layout.header.search' | t }}</span>
             </summary>
 
@@ -441,7 +432,7 @@
           aria-expanded="true"
           aria-controls="header-menu">
 
-          {%- render 'icon-cancel' -%}
+          {%- render 'icon-close' -%}
         </button>
       </header>
 
@@ -612,17 +603,14 @@
       "logo": {{ logo | image_url: width: 500 | prepend: "https:" | json }},
     {% endif %}
     "sameAs": [
-      {{ settings.twitter_link | json }},
+      {{ settings.x_link | json }},
       {{ settings.facebook_link | json }},
       {{ settings.instagram_link | json }},
       {{ settings.pinterest_link | json }},
       {{ settings.youtube_link | json }},
       {{ settings.tiktok_link | json }},
       {{ settings.linkedin_link | json }},
-      {{ settings.vimeo_link | json }},
-      {{ settings.snapchat_link | json }},
-      {{ settings.tumblr_link | json }},
-      {{ settings.feed_link | json }}
+      {{ settings.snapchat_link | json }}
     ],
     "url": {{ shop.url | append: page.url | json }}
   }

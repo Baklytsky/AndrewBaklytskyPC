@@ -213,12 +213,54 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 }
 
 .product__thumbs {
+  position: relative;
   display: block;
   flex: 1 1 100%;
   margin: 10px 0;
 
   @include media-query ($small) {
     min-height: 85px; // Prevent CLS
+
+    .scroll-arrow { display: none; } // Hide on mobile
+  }
+}
+
+@include media-query ($medium-up) {
+  .product__wrapper--thumbnails .product__thumbs {
+    .product__thumbs__holder { padding: 0 5px; }
+
+    native-scrollbar {
+      position: relative;
+      padding: 0 28px;
+      min-height: 100%;
+    }
+  }
+
+  .product__wrapper--thumbnails-left,
+  .product__wrapper--thumbnails-right {
+    .product__thumbs__holder { padding: 5px 0; }
+
+    .product__thumbs native-scrollbar {
+      position: absolute;
+      inset: 0;
+      padding: 28px 0;
+      min-height: 100%;
+
+      .scroll-arrow {
+        padding-right: 10px;
+
+        .icon { transform: rotate(90deg); }
+      }
+
+      .scroll-arrow--prev { top: 0; }
+      .scroll-arrow--next { bottom: 0; }
+    }
+  }
+
+  .product__thumbs:has(native-scrollbar > .scroll-arrow--prev[disabled]):has(native-scrollbar > .scroll-arrow--next[disabled]) {
+    .product__thumbs__holder,
+    native-scrollbar { padding: 0; }
+    native-scrollbar .scroll-arrow { display: none; }
   }
 }
 
@@ -259,12 +301,10 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
     .product__images { display: flex; }
 
     .product__thumbs__holder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      position: relative;
       padding-right: 10px;
       width: 100%;
+      height: 100%;
       flex-flow: column;
       overflow-y: auto;
       overflow-x: hidden;
@@ -344,31 +384,21 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   position: relative;
   display: inline-block;
   margin: 0 10px 0 0;
-  padding: 0 0 10px;
   cursor: pointer;
+  scroll-snap-align: start;
+
+  &:last-child { margin-right: 0; }
 
   &:only-child .product__thumb__link { cursor: default; }
 
   &::after {
     content: "";
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: 100%;
-    height: 2px;
-    background-color: var(--border-dark);
+    inset: 0;
+    border: 2px solid var(--accent);
     opacity: 0;
     transition: opacity 0.2s;
-  }
-
-  @include media-query($small) {
-    padding-bottom: 10px;
-    margin: 0 10px 0 0;
-    scroll-snap-align: start;
-
-    &:last-child { margin-right: 0; }
+    pointer-events: none;
   }
 }
 
@@ -499,10 +529,11 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   min-width: 0;
   background: var(--COLOR-SALE-BG);
   color: var(--COLOR-SALE-TEXT);
-  padding: var(--padding-vertical) 15px;
+  padding: var(--padding-vertical) 12px;
   margin-left: 1rem;
   border-radius: var(--btn-radius);
   text-align: center;
+  font-size: var(--font-body-x-small);
 
   @include caps;
 
@@ -524,13 +555,7 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   color: var(--COLOR-SALE);
 }
 
-.product__final-sale-wrap {
-  padding: 0.25em 0;
-  font-size: var(--font-body-x-small);
-  // Match price line-height to make it vertically centered
-  min-height: 30px;
-}
-
+.product__final-sale-wrap { font-size: var(--font-body-x-small); }
 .product__final-sale { margin-left: 1rem; }
 
 .product__final-sale-question {
@@ -633,7 +658,7 @@ dialog[closing] .product-modal__outer { animation: heroFadeOut 0.5s ease forward
   .tab-content { padding: 0; }
 
   .product-tabs__head {
-    padding: 16px 13px;
+    padding: 13px;
     margin: 0 -13px -13px;
   }
 }
@@ -695,7 +720,7 @@ dialog[closing] .product-modal__outer { animation: heroFadeOut 0.5s ease forward
   align-self: flex-start;
   width: var(--icon-size, 20px);
   flex: 0 0 var(--icon-size, 20px);
-  margin: 0 10px 0 0;
+  margin: 0 var(--SPACING-MICRO) 0 0;
 }
 
 .block__icon__text {

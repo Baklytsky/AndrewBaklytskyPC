@@ -4,9 +4,9 @@ popup-component { display: block; }
 
 .modal__inner {
   width: 100%;
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 50px;
+  padding: var(--inner);
 }
 
 .modal__text {
@@ -36,12 +36,11 @@ popup-component { display: block; }
 }
 
 .modal__close {
-  display: block;
-  width: 20px;
-  height: 20px;
   position: absolute;
   top: 20px;
   right: 20px;
+  width: 20px;
+  height: 20px;
   z-index: 20;
   padding: 0;
   cursor: pointer;
@@ -53,9 +52,34 @@ popup-component { display: block; }
     pointer-events: none;
     transition: transform 0.3s;
   }
-
-  &:hover .icon { transform: rotate(90deg); }
 }
+
+
+.modal__nav-button {
+  --btn-size: 40px;
+
+  width: var(--btn-size);
+  height: var(--btn-size);
+  padding: 8px;
+  z-index: 202;
+  background: var(--COLOR-BG);
+  border-radius: var(--RADIUS);
+
+  &[disabled] {
+    opacity: 0;
+    visibility: hidden;
+    cursor: default;
+  }
+}
+
+.modal__prev,
+.modal__next {
+  position: absolute;
+  top: 50%;
+  margin-top: calc(var(--btn-size) / -2);
+}
+.modal__prev { left: 20px; }
+.modal__next { right: 20px; }
 
 @include media-query($small) {
   .modal__body {
@@ -66,9 +90,4 @@ popup-component { display: block; }
   .modal__text {
     width: 100%;
   }
-
-  .modal__inner { padding: 10px 25px 25px; }
-
-  dialog[open] .modal__body { animation: translateUp 0.5s 50ms forwards; }
-  dialog[closing] .modal__body { animation: translateDown 0.5s 50ms forwards; }
 }

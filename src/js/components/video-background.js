@@ -1,15 +1,3 @@
-const selectors = {
-  videoTemplate: '[data-video-template]',
-};
-
-const classes = {
-  loading: 'is-loading',
-};
-
-const attributes = {
-  videoId: 'data-video-id',
-};
-
 if (!customElements.get('video-background')) {
   customElements.define(
     'video-background',
@@ -19,9 +7,9 @@ if (!customElements.get('video-background')) {
       }
 
       connectedCallback() {
-        this.videoId = this.getAttribute(attributes.videoId);
-        this.videoTemplate = this.querySelector(selectors.videoTemplate);
         this.video = null;
+        this.videoId = this.hasAttribute('data-video-id') ? this.getAttribute('data-video-id') : null;
+        this.videoTemplate = this.querySelector('[data-video-template]');
         this.powerSaverVideoPlay = this.powerSaverVideoPlay.bind(this);
 
         if (this.videoId) {
@@ -41,12 +29,13 @@ if (!customElements.get('video-background')) {
           (entries, observer) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
-                const content = this.videoTemplate.innerHTML;
+                const content = this.videoTemplate?.innerHTML;
+                if (content) this.innerHTML = content;
 
-                this.innerHTML = content;
-                this.classList.remove(classes.loading);
+                this.classList.remove('is-loading');
                 this.video = this.querySelector('video');
                 this.observeVideoPlayToggle();
+                this.playPauseEvents();
 
                 // Detect low power mode
                 this.video
@@ -71,6 +60,43 @@ if (!customElements.get('video-background')) {
         );
 
         this.videoTemplateObserver.observe(this);
+      }
+
+      playPauseEvents() {
+        this.querySelectorAll('[data-video-hover-pause]').forEach((button) => {
+          const video = this.querySelector('video');
+
+          if (!video) return;
+          button.addEventListener('mouseenter', () => {
+            try {
+              video.pause();
+            } catch (e) {}
+          });
+          button.addEventListener('mouseleave', () => {
+            try {
+              video.play();
+            } catch (e) {}
+          });
+          // For touch devices treat touchstart as hover
+          button.addEventListener(
+            'touchstart',
+            () => {
+              try {
+                video.pause();
+              } catch (e) {}
+            },
+            {passive: true}
+          );
+          button.addEventListener(
+            'touchend',
+            () => {
+              try {
+                video.play();
+              } catch (e) {}
+            },
+            {passive: true}
+          );
+        });
       }
 
       observeVideoPlayToggle() {

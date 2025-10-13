@@ -35,8 +35,6 @@ const selectors = {
   section: '[data-section-type]',
   variantSku: '[data-variant-sku]',
   variantFinalSaleMeta: '[data-variant-final-sale-metafield]',
-  variantButtons: '[data-variant-buttons]',
-  variantOptionImage: '[data-variant-option-image]',
   quickAddModal: '[data-quick-add-modal]',
   priceOffAmount: '[data-price-off-amount]',
   priceOffBadge: '[data-price-off-badge]',
@@ -142,12 +140,6 @@ class ProductForm extends HTMLElement {
     } else {
       console.error('Missing product JSON');
     }
-
-    this.variantOptionImages = this.container.querySelectorAll(selectors.variantOptionImage);
-    this.variantButtons = this.container.querySelectorAll(selectors.variantButtons);
-    if (this.variantOptionImages.length > 1) {
-      this.optionImagesWidth();
-    }
   }
 
   cartAddEvents() {
@@ -160,7 +152,7 @@ class ProductForm extends HTMLElement {
         const bundleButton = document.querySelector(`[${attributes.bundleProductButton}="${this.productJSON.id}"]`);
         if (bundleButton) {
           bundleButton.dispatchEvent(
-            new CustomEvent('theme:bundle:button', {
+            new CustomEvent('theme:bundle:button-modal', {
               detail: {
                 data: {
                   product: this.productJSON,
@@ -373,25 +365,6 @@ class ProductForm extends HTMLElement {
     } else if (!variant && this.remainingWrapper) {
       this.remainingWrapper.classList.add(classes.remainingUnavailable);
     }
-  }
-
-  optionImagesWidth() {
-    if (!this.variantButtons) return;
-
-    let maxItemWidth = 0;
-
-    requestAnimationFrame(() => {
-      this.variantOptionImages.forEach((item) => {
-        const itemWidth = item.clientWidth;
-        if (itemWidth > maxItemWidth) {
-          maxItemWidth = itemWidth;
-        }
-      });
-
-      this.variantButtons.forEach((item) => {
-        item.style?.setProperty('--option-image-width', maxItemWidth + 'px');
-      });
-    });
   }
 
   getBaseUnit(variant) {

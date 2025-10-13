@@ -92,7 +92,7 @@ if (!customElements.get('mobile-sliderule')) {
         const newPosition = parseInt(this.pane.dataset.sliderulePane, 10) - 1;
         this.pane.setAttribute(selectors.sliderulePane, newPosition);
         this.pane.classList.add(classes.isHiding);
-        this.mobileMenuBlock.style.removeProperty('--menu-height');
+        this.mobileMenuBlock?.style.removeProperty('--menu-height');
         this.sliderule.classList.add(classes.isHiding);
         const hiddenSelector = close ? `[${selectors.animates}].${classes.isHidden}` : `[${selectors.animates}="${newPosition}"]`;
         const hiddenItems = this.pane.querySelectorAll(hiddenSelector);
@@ -170,7 +170,7 @@ if (!customElements.get('mobile-sliderule')) {
 
         this.sliderule.classList.add(classes.isVisible);
         this.pane.setAttribute(selectors.sliderulePane, newPosition);
-        this.mobileMenuBlock.style.setProperty('--menu-height', this.sliderule.offsetHeight + 'px');
+        this.mobileMenuBlock?.style.setProperty('--menu-height', this.sliderule.offsetHeight + 'px');
 
         const hiddenItems = this.pane.querySelectorAll(`[${selectors.animates}="${oldPosition}"]`);
         if (hiddenItems.length) {

@@ -1,7 +1,3 @@
-const selectors = {
-  section: '[data-section-type]',
-};
-
 if (!customElements.get('recently-viewed')) {
   customElements.define(
     'recently-viewed',
@@ -9,7 +5,7 @@ if (!customElements.get('recently-viewed')) {
       constructor() {
         super();
 
-        this.section = this.closest(selectors.section);
+        this.section = this.closest('[data-section-type]');
         this.howManyToShow = parseInt(this.dataset.limit) || 3;
         this.target = this.dataset.target;
         this.wrapperId = this.dataset.wrapperId || this.id;

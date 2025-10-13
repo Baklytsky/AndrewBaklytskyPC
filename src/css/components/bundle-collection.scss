@@ -1,7 +1,5 @@
-// Timeline
-
-@import "../tools/mixins.scss";
-@import "../settings/variables.scss";
+@use "../tools/mixins.scss" as *;
+@use "../settings/variables.scss" as *;
 
 bundle-collection {
   --animation-duration: calc(var(--animation-timing) / 2 * 1ms);
@@ -76,7 +74,7 @@ bundle-collection {
   top: calc((var(--min-height) / 2) + (var(--circle-width) / 4) - 1px);
 }
 
-.bundle-placeholder:not(:last-child) .bundle-placeholder__line:before {
+.bundle-placeholder:not(:last-child) .bundle-placeholder__line::before {
   position: absolute;
   top: 0;
   left: 0;
@@ -86,17 +84,17 @@ bundle-collection {
   content: '';
 }
 
-.is-removing .bundle-placeholder:not(:last-child) .bundle-placeholder__line:before,
-.is-adding .bundle-placeholder:not(:last-child) .bundle-placeholder__line:before {
+.is-removing .bundle-placeholder:not(:last-child) .bundle-placeholder__line::before,
+.is-adding .bundle-placeholder:not(:last-child) .bundle-placeholder__line::before {
   transition: height var(--animation-duration) cubic-bezier(1, 0, 1, 1);
 }
 
-.is-removing .bundle-placeholder:not(:last-child) .bundle-placeholder__line:before {
+.is-removing .bundle-placeholder:not(:last-child) .bundle-placeholder__line::before {
   transition-timing-function: cubic-bezier(0, 0, 0, 1);
   transition-delay: var(--animation-delay);
 }
 
-.bundle-placeholder.is-line-active .bundle-placeholder__line:before { height: 100%; }
+.bundle-placeholder.is-line-active .bundle-placeholder__line::before { height: 100%; }
 
 .bundle-placeholder__inner {
   display: grid;
@@ -106,7 +104,7 @@ bundle-collection {
 }
 
 .bundle__widget--background .bundle-placeholder:not(:last-child) .bundle-placeholder__line,
-.bundle__widget--background .bundle-placeholder__dot:before,
+.bundle__widget--background .bundle-placeholder__dot::before,
 .bundle__widget--background .bundle-placeholder__inner { background: var(--bg); }
 
 .bundle-placeholder__dot {
@@ -122,7 +120,7 @@ bundle-collection {
   --icons: var(--bg-light);
 }
 
-.bundle-placeholder__dot:before {
+.bundle-placeholder__dot::before {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -134,32 +132,31 @@ bundle-collection {
   content: '';
 }
 
-.bundle-placeholder:first-child .bundle-placeholder__dot:before {
+.bundle-placeholder:first-child .bundle-placeholder__dot::before {
   width: 50%;
   height: 50%;
 }
 
-.is-dot-active .bundle-placeholder__dot:before { background: var(--text); }
+.is-dot-active .bundle-placeholder__dot::before { background: var(--text); }
 
-.is-adding .bundle-placeholder__dot:before,
-.is-removing .bundle-placeholder__dot:before { transition: background var(--animation-duration) var(--animation-delay) cubic-bezier(0.5, 0, 0, 1); }
+.is-adding .bundle-placeholder__dot::before,
+.is-removing .bundle-placeholder__dot::before { transition: background var(--animation-duration) var(--animation-delay) cubic-bezier(0.5, 0, 0, 1); }
 
 .bundle-placeholder__dot .icon {
   position: absolute;
   top: 50%;
   left: 50%;
-  fill: var(--icons, currentColor);
   stroke-width: 0;
   transform: translate(-50%, -50%);
 }
 
 .bundle-placeholder:first-child .bundle-placeholder__dot .icon { display: none; }
 
-.is-adding .bundle-placeholder__dot .icon,
-.is-removing .bundle-placeholder__dot .icon { transition: fill var(--animation-duration) var(--animation-delay) linear; }
+.is-adding .bundle-placeholder__dot .icon path,
+.is-removing .bundle-placeholder__dot .icon path { transition: fill var(--animation-duration) var(--animation-delay) linear; }
 
-.is-removing .bundle-placeholder__dot .icon,
-.is-removing .bundle-placeholder__dot:before { transition-delay: 0s; }
+.is-removing .bundle-placeholder__dot .icon path,
+.is-removing .bundle-placeholder__dot::before { transition-delay: 0s; }
 
 .bundle-placeholder__empty,
 .bundle-placeholder__filled {
@@ -178,6 +175,11 @@ bundle-collection {
   opacity: 1;
   transition: transform var(--animation-duration), opacity var(--animation-duration);
   transition-timing-function: cubic-bezier(1, 0, 1, 1);
+}
+
+.bundle-placeholder__empty .icon path {
+  fill: none;
+  stroke: var(--icons, currentColor);
 }
 
 .is-animate-in .bundle-placeholder__empty {
@@ -231,6 +233,7 @@ bundle-collection {
 
 .bundle__button.is-loading .bundle__button-add,
 .bundle__button:not(:disabled) .bundle__button-add { display: inline; }
+
 .bundle__button-add,
 .bundle__button.is-loading .bundle__button-add ~ .bundle__button-default,
 .bundle__button:not(:disabled) .bundle__button-add ~ .bundle__button-default { display: none; }
@@ -327,13 +330,13 @@ bundle-collection {
   font-size: var(--font-body-x-small);
 }
 
-.product-inline__text--vendor {
-  font-style: italic;
-}
+.product-inline__text--vendor { font-style: italic; }
 
 .product-inline__title { margin: 0; }
 
 .product-inline__price { font-size: var(--font-body-x-small); }
+
+.product-inline__remove { padding-right: 0; }
 
 /* Product inline animations */
 .product-inline__image,
