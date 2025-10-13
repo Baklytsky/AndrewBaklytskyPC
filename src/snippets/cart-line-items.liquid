@@ -368,17 +368,16 @@
             {%- endif -%}
           </div>
 
-          <quantity-counter class="cart__quantity-counter">
-            {%- assign quantity = line_item.quantity -%}
+          {%- unless bundle_opened or line_item_reward or line_item_gift -%}
+            <quantity-counter class="cart__quantity-counter">
+              {%- assign quantity = line_item.quantity -%}
 
-            {%- if line_item.variant.inventory_policy == 'deny'
-              and line_item.variant.inventory_management != null
-              and line_item.variant.inventory_quantity < quantity
-            -%}
-              {%- assign quantity = line_item.variant.inventory_quantity -%}
-            {%- endif -%}
-
-            {%- unless bundle_opened or line_item_reward or line_item_gift -%}
+              {%- if line_item.variant.inventory_policy == 'deny'
+                and line_item.variant.inventory_management != null
+                and line_item.variant.inventory_quantity < quantity
+              -%}
+                {%- assign quantity = line_item.variant.inventory_quantity -%}
+              {%- endif -%}
               <a
                 class="cart__item__remove"
                 href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
@@ -444,8 +443,8 @@
                   {%- render 'icon-plus' -%}
                 </button>
               </div>
-            {%- endunless -%}
-          </quantity-counter>
+            </quantity-counter>
+          {%- endunless -%}
         </div>
       </div>
 
