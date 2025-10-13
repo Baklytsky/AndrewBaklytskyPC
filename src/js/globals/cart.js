@@ -39,6 +39,7 @@ const selectors = {
   cartCheckoutButtonWrapper: '[data-cart-checkout-buttons]',
   cartCheckoutButton: '[data-cart-checkout-button]',
   cartTotal: '[data-cart-total]',
+  cartJson: '[data-cart-json]',
   errorMessage: '[data-error-message]',
   formCloseError: '[data-close-error]',
   formErrorsContainer: '[data-cart-errors-container]',
@@ -487,65 +488,156 @@ class CartItems extends HTMLElement {
     }
   }
 
-  toggleReward(response) {
-    const cartJsonScript = response.querySelector('[data-cart-json]');
-    if (cartJsonScript) {
-      const cartJson = JSON.parse(cartJsonScript.innerHTML);
-      const meta = cartJson.meta;
-      const startDateString = meta['promotion-start-date'];
-      const startDate = new Date(startDateString);
-      const endDateString = meta['promotion-end-date'];
-      const endDate = new Date(endDateString);
-      const status = meta['promotion-status'];
-      const timeNow = new Date();
-      const config = meta['function-configuration'];
-      const rewards = config.rewards;
+  checkActiveReward(config) {
+    const startDateString = config['promotion-start-date'];
+    const startDate = new Date(startDateString);
+    const endDateString = config['promotion-end-date'];
+    const endDate = new Date(endDateString);
+    const status = config['promotion-status'];
+    const timeNow = new Date();
 
-      if (status === 'active' && timeNow > startDate && timeNow < endDate && rewards.length) {
-        const price = cartJson.price;
-        const collections = cartJson.collections;
-        const tags = cartJson.tags;
-        const products = cartJson.products;
-        const conditions = config.conditions;
-        const addedRewards = cartJson.rewards;
-        let result = false;
+    if (isNaN(startDate) || isNaN(endDate)) {
+      return false;
+    }
 
-        const data = {
-          price: price,
-          tags: tags,
-          collections: collections,
-          products: products,
-        };
+    return status === 'active' && timeNow > startDate && timeNow < endDate;
+  }
 
-        for (let i = 0; i < conditions.length; ) {
-          let groupResult = this.checkConditions(conditions[i], data);
-          i++;
+  toggleReward(data) {
+    const conditions = data.functionConfig.conditions;
+    const rewards = data.functionConfig.rewards;
+    let addItems = [];
+    let removeItems = [];
 
-          for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
-            groupResult = groupResult && this.checkConditions(conditions[i], data);
-          }
+    if (conditions?.length && rewards?.length) {
+      const addedRewards = data.metaConfig.rewards;
+      let result = false;
 
-          result = result || groupResult;
+      for (let i = 0; i < conditions.length; ) {
+        let groupResult = this.checkConditions(conditions[i], data.info);
+        i++;
+
+        for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
+          groupResult = groupResult && this.checkConditions(conditions[i], data.info);
         }
 
-        if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
-          this.showGetCartResponse = false;
-          if (result && !addedRewards.length) {
-            let items = [];
-            rewards.forEach((reward) => {
-              items.push({
-                id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
-                quantity: reward.quantity,
-                properties: {
-                  _reward: `reward`,
-                },
-              });
-            });
+        result = result || groupResult;
+      }
 
-            this.addToCart(items);
-          } else {
-            this.removeMultipleProducts(addedRewards);
-          }
+      if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
+        if (result && !addedRewards.length) {
+          rewards.forEach((reward) => {
+            addItems.push({
+              id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
+              quantity: reward.quantity ?? 1,
+              properties: {
+                _reward: `reward`,
+              },
+            });
+          });
+        } else {
+          removeItems = addedRewards;
+        }
+      }
+    }
+
+    return {addItems, removeItems};
+  }
+
+  toggleTier(data) {
+    const tierVariants = data.functionConfig.tiers;
+    let addItems = [];
+    let removeItems = [];
+
+    if (tierVariants?.length) {
+      const tierMode = data.functionConfig.cumulative;
+      const addedGifts = data.metaConfig.gifts;
+
+      tierVariants.sort((a, b) => b.threshold - a.threshold);
+
+      for (let index = 0; index < tierVariants.length; index++) {
+        const tier = tierVariants[index];
+        let addVariant = true;
+        const variantId = tier.variantId.replace('gid://shopify/ProductVariant/', '');
+        const condition = {
+          type: 'ORDER_AMOUNT',
+          value: tier.threshold,
+          operator: 'greater_than_or_equal',
+        };
+        const resultCondition = this.checkConditions(condition, data.info);
+
+        if (addedGifts.length) {
+          addedGifts.forEach((addedReward) => {
+            const addedRewardVariantId = addedReward.split(':')[0];
+
+            if (resultCondition && addedRewardVariantId === variantId) {
+              addVariant = false;
+
+              if (!tierMode && addItems.length > 0) {
+                removeItems.push(addedReward);
+              }
+            }
+
+            if (!resultCondition && addedRewardVariantId === variantId) {
+              removeItems.push(addedReward);
+            }
+          });
+        }
+
+        if (resultCondition && addVariant && addItems.length < 1) {
+          addItems.push({
+            id: variantId,
+            quantity: 1,
+            properties: {
+              _gift: `gift`,
+            },
+          });
+        }
+
+        if (!tierMode && index === 0 && !addVariant) {
+          break;
+        }
+      }
+    }
+
+    return {addItems, removeItems};
+  }
+
+  toggleAwards(response) {
+    const cartJson = response.querySelector(selectors.cartJson);
+    if (cartJson) {
+      const info = JSON.parse(cartJson.innerHTML);
+      const meta = info.meta;
+      let addItems = [];
+      let removeItems = [];
+
+      for (const property in meta) {
+        const metaConfig = meta[property];
+        const config = metaConfig.config;
+        const isRewardActive = this.checkActiveReward(config);
+
+        if (isRewardActive) {
+          const functionConfig = config['function-configuration'];
+          const data = {functionConfig, metaConfig, info};
+          const toggleRewardObj = this.toggleReward(data);
+          const toggleTierObj = this.toggleTier(data);
+
+          addItems.push(...toggleRewardObj.addItems, ...toggleTierObj.addItems);
+          removeItems.push(...toggleRewardObj.removeItems, ...toggleTierObj.removeItems);
+        }
+      }
+
+      if (addItems.length || removeItems.length) {
+        this.showGetCartResponse = false;
+        let addItemsSkip = true;
+
+        if (removeItems.length) {
+          this.removeMultipleProducts(removeItems);
+          addItemsSkip = false;
+        }
+
+        if (addItems.length && addItemsSkip) {
+          this.addToCart(addItems);
         }
       }
     }
@@ -566,7 +658,7 @@ class CartItems extends HTMLElement {
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        this.toggleReward(element);
+        this.toggleAwards(element);
 
         if (this.showGetCartResponse) {
           const cleanResponse = element.querySelector(selectors.apiContent);

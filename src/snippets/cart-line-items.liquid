@@ -12,7 +12,10 @@
   assign line_items_tags = null
   assign line_items_products = null
   assign line_items_rewards = null
-  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
+  assign line_items_gifts = null
+  assign buy_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
+  assign buy_promo_meta = shop.metafields[buy_promo_meta_name]
+  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--gwp-tiers'
   assign gwp_promo_meta = shop.metafields[gwp_promo_meta_name]
 -%}
 
@@ -30,6 +33,7 @@
     assign line_item_original_price = line_item.original_price
     assign line_item_unit_price = line_item.unit_price | money
     assign line_item_reward = false
+    assign line_item_gift = false
 
     assign bundle_name = line_item.properties._bundle_title
     assign bundle_image = line_item.properties._bundle_image
@@ -49,6 +53,11 @@
     if line_item.properties._reward == 'reward'
       assign line_item_reward = true
       assign line_items_rewards = line_items_rewards | append: ',' | append: line_item.key
+    endif
+
+    if line_item.properties._gift == 'gift'
+      assign line_item_gift = true
+      assign line_items_gifts = line_items_gifts | append: ',' | append: line_item.key
     endif
   -%}
 
@@ -359,17 +368,16 @@
             {%- endif -%}
           </div>
 
-          <quantity-counter class="cart__quantity-counter">
-            {%- assign quantity = line_item.quantity -%}
+          {%- unless bundle_opened or line_item_reward or line_item_gift -%}
+            <quantity-counter class="cart__quantity-counter">
+              {%- assign quantity = line_item.quantity -%}
 
-            {%- if line_item.variant.inventory_policy == 'deny'
-              and line_item.variant.inventory_management != null
-              and line_item.variant.inventory_quantity < quantity
-            -%}
-              {%- assign quantity = line_item.variant.inventory_quantity -%}
-            {%- endif -%}
-
-            {%- unless bundle_opened or line_item_reward -%}
+              {%- if line_item.variant.inventory_policy == 'deny'
+                and line_item.variant.inventory_management != null
+                and line_item.variant.inventory_quantity < quantity
+              -%}
+                {%- assign quantity = line_item.variant.inventory_quantity -%}
+              {%- endif -%}
               <a
                 class="cart__item__remove"
                 href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
@@ -435,21 +443,8 @@
                   {%- render 'icon-plus' -%}
                 </button>
               </div>
-            {%- else -%}
-              <input
-                class="cart__quantity-field"
-                type="number"
-                id="updates_{{ line_item.key }}"
-                name="updates[]"
-                data-id="{{ line_item.key }}"
-                value="{{ quantity }}"
-                title="{{ 'cart.general.quantity_field_label' | t }} - {{ line_item.product.title | strip_html }}"
-                pattern="[0-9]*"
-                data-bundle-cart-quantity
-                disabled
-              >
-            {%- endunless -%}
-          </quantity-counter>
+            </quantity-counter>
+          {%- endunless -%}
         </div>
       </div>
 
@@ -599,22 +594,35 @@
   {%- endif -%}
 {%- endfor -%}
 
-{%- if gwp_promo_meta != blank -%}
+{%- if buy_promo_meta != blank or gwp_promo_meta != blank -%}
   {%- liquid
     assign line_items_collections = line_items_collections | uniq
     assign line_items_tags = line_items_tags | uniq
     assign line_items_products = line_items_products | remove_first: ',' | split: ','
     assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
+    assign line_items_gifts = line_items_gifts | remove_first: ',' | split: ','
   -%}
 
   <script type="application/json" data-cart-json>
     {
-      "rewards": {{ line_items_rewards | json }},
       "price": {{ cart.total_price | plus: 0 | json }},
       "products": {{ line_items_products | json }},
       "collections": {{ line_items_collections | json }},
       "tags": {{ line_items_tags | json }},
-      "meta": {{ gwp_promo_meta | json }}
+      "meta": {
+        {%- if buy_promo_meta != blank -%}
+          "reward": {
+            "rewards": {{ line_items_rewards | json }},
+            "config": {{ buy_promo_meta | json }}
+          }{%- if gwp_promo_meta != blank -%},{%- endif -%}
+        {%- endif -%}
+        {%- if gwp_promo_meta != blank -%}
+          "gift": {
+            "gifts": {{ line_items_gifts | json }},
+            "config": {{ gwp_promo_meta | json }}
+          }
+        {%- endif -%}
+      }
     }
   </script>
 {%- endif -%}
