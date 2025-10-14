@@ -18,10 +18,10 @@ const classes = {
   bundle: 'is-bundle',
 };
 
-if (!customElements.get('product-item')) {
+if (!customElements.get('product-card')) {
   customElements.define(
-    'product-item',
-    class ProductItem extends HTMLElement {
+    'product-card',
+    class ProductCard extends HTMLElement {
       abortController = undefined;
       pendingSwapHandle = null;
       postProcessHtmlCallbacks = [];
@@ -82,7 +82,7 @@ if (!customElements.get('product-item')) {
 
         this.renderProductItem({
           // Fetch the new product's HTML with section rendering API
-          requestUrl: `${productUrl}?section_id=api-product-grid-item`,
+          requestUrl: `${productUrl}?section_id=api-product-card`,
           // Returns a function that will process and swap the HTML after fetch completes
           callback: this.handleSwapProduct(),
         });
@@ -90,9 +90,9 @@ if (!customElements.get('product-item')) {
 
       handleSwapProduct() {
         return (html) => {
-          // Set up animation parameters with the new product-item element's ID
+          // Set up animation parameters with the new product-card element's ID
           const aosDelay = 0;
-          const productItem = html.querySelector('product-item');
+          const productItem = html.querySelector('product-card');
           const aosAnchor = productItem.id ? `#${productItem.id}` : '';
 
           // Add bundle template to DOM
@@ -118,11 +118,11 @@ if (!customElements.get('product-item')) {
           // Parse the processed HTML back into a DOM element
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = productHTML;
-          const processedProductItem = tempDiv.querySelector('product-item');
+          const processedProductItem = tempDiv.querySelector('product-card');
 
           window.theme.htmlUpdate.viewTransition(
-            this, // Current product-item element to be replaced
-            processedProductItem, // New product-item element with updated content
+            this, // Current product-card element to be replaced
+            processedProductItem, // New product-card element with updated content
             this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
           );
         };

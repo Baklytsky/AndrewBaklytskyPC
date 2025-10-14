@@ -164,7 +164,10 @@
           {%- if featured_collection != blank -%}
             {%- if featured_collection.products_count > 0 -%}
               {%- liquid
-                for product in featured_collection.products limit: limit_products
+                assign products_rendered = 0
+
+                for product in featured_collection.products
+                  # Process featured images for every product position
                   if featured_images_array.size > 0
                     for featured_image in featured_images_array
                       if featured_image == ''
@@ -182,6 +185,7 @@
                           assign added_images_index = added_images_index | append: '@' | append: featured_image_index | append: '@#'
 
                           echo featured_image_markup
+                          assign products_rendered = products_rendered | plus: 1
                         endunless
                       endif
                     endfor
@@ -189,11 +193,24 @@
                     assign counter_grid = counter_grid | plus: 1
                   endif
 
-                  assign animation_delay = forloop.index0 | times: 1
-                  assign grid_int = grid_columns | times: 1
-                  assign animation_delay = forloop.index0 | modulo: grid_int | times: 1
+                  # Only render visible products
+                  unless product.tags contains 'hide'
+                    # Only render up to the limit
+                    if products_rendered < limit_products
+                      assign animation_delay = products_rendered | times: 1
+                      assign grid_int = grid_columns | times: 1
+                      assign animation_delay = products_rendered | modulo: grid_int | times: 1
 
-                  render 'product-grid-item', product: product, animation_delay: animation_delay, index: forloop.index
+                      render 'product-card', product: product, animation_delay: animation_delay, index: products_rendered | plus: 1
+
+                      assign products_rendered = products_rendered | plus: 1
+                    endif
+                  endunless
+
+                  # Break if we've rendered enough products
+                  if products_rendered >= limit_products
+                    break
+                  endif
                 endfor
               -%}
             {%- else -%}
@@ -230,7 +247,7 @@
                   assign counter_grid = counter_grid | plus: 1
                 endif
 
-                render 'onboarding-product-grid-item', index: forloop.index, animation_delay: forloop.index0, placeholder_root: 'product-'
+                render 'product-card', product: null, index: forloop.index, animation_delay: forloop.index0
               endfor
             -%}
           {%- endif -%}
