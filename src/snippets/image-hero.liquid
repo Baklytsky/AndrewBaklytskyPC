@@ -42,11 +42,16 @@
   assign alt = alt | escape
   assign preload = preload | default: null
   assign fetchpriority = fetchpriority | default: null
-  assign parallax_disable = parallax_disable | default: false
+  assign parallax_enable = settings.parallax_enable
+  assign prevent_parallax = parallax_disable | default: false
   assign is_mixed_picture = false
   assign wrapper_tag = 'div'
 
-  if settings.parallax_enable and parallax_disable == false
+  if prevent_parallax
+    assign parallax_enable = false
+  endif
+
+  if parallax_enable
     assign wrapper_tag = 'parallax-hero'
   endif
 
@@ -89,7 +94,7 @@
     echo '--aspect-ratio-mobile: ' | append: aspect_ratio_mobile | append: ';'
     echo '"'
 
-    if settings.parallax_enable and parallax_disable == false
+    if parallax_enable
       echo ' data-parallax-wrapper'
     endif
 
@@ -124,8 +129,8 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- if settings.parallax_enable and parallax_disable == false -%}
-  <script src="{{ 'load-rellax.js' | asset_url }}" defer="defer"></script>
+{%- if parallax_enable -%}
+  <script src="{{ 'rellax.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'parallax-hero.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -133,7 +138,7 @@
   <div class="image__hero__pane" {{ aos_animation }}>
     <div
       class="image__hero__scale image__fill lazy-image{% if show_backfill %} lazy-image--backfill{% endif %} is-loading"
-      {% if settings.parallax_enable and parallax_disable == false %}
+      {% if parallax_enable %}
         data-parallax-img
       {% endif %}
     >

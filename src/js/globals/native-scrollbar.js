@@ -15,6 +15,7 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       connectedCallback() {
+        this.addEventListener('theme:swatches:loaded', this.resizeEvents);
         document.addEventListener('theme:resize', this.resizeEvents);
 
         // Detect scroll direction
@@ -36,6 +37,7 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       disconnectedCallback() {
+        this.removeEventListener('theme:swatches:loaded', this.resizeEvents);
         document.removeEventListener('theme:resize', this.resizeEvents);
       }
 
@@ -108,9 +110,9 @@ if (!customElements.get('native-scrollbar')) {
         const atStart = this.scrollDirection === 'horizontal' ? sb.scrollLeft <= EPS : sb.scrollTop <= EPS;
         const atEnd = this.scrollDirection === 'horizontal' ? Math.ceil(sb.scrollLeft + sb.clientWidth) >= sb.scrollWidth - EPS : Math.ceil(sb.scrollTop + sb.clientHeight) >= sb.scrollHeight - EPS;
 
-        // Prev е disabled в началото или когато не е нужен скрол
+        // Prev is disabled at the beginning or when scrolling is not needed
         this.arrowPrev?.toggleAttribute('disabled', atStart || !need);
-        // Next е disabled в края или когато не е нужен скрол
+        // Next is disabled at the end or when scrolling is not needed
         this.arrowNext?.toggleAttribute('disabled', atEnd || !need);
       }
 

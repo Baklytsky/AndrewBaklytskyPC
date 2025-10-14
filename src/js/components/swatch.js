@@ -12,6 +12,7 @@ const selectors = {
   swatchLink: '[data-swatch-link]',
   swatchText: '[data-swatch-text]',
   template: '[data-swatch-template]',
+  nativeScrollbar: 'native-scrollbar',
 };
 
 const classes = {
@@ -69,6 +70,7 @@ class GridSwatch extends HTMLElement {
     this.innerHTML = '';
     this.count = 0;
     this.limitedCount = 0;
+    this.swatchesCount = 0;
 
     this.swatches.forEach((swatch) => {
       let variant = null;
@@ -143,6 +145,12 @@ class GridSwatch extends HTMLElement {
           this.limitedCount++;
         }
         this.count++;
+      }
+
+      this.swatchesCount++;
+
+      if (this.swatchesCount == this.swatches.length) {
+        this.closest(selectors.nativeScrollbar)?.dispatchEvent(new Event('theme:swatches:loaded'));
       }
     });
 
