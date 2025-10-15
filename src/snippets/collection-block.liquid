@@ -1,24 +1,24 @@
 <!-- /snippets/collection-block.liquid -->
 
 {% comment %}
-    Renders a list of products from a collection
+  Renders a list of products from a collection
 
-    Accepts:
-    - collection: {Object} Image to render (required)
-    - block: {Object} Image section settings (required)
-    - limit: {Number} contains a value of products to render in grid (required)
+  Accepts:
+  - collection: {Object} Image to render (required)
+  - block: {Object} Image section settings (required)
+  - limit: {Number} contains a value of products to render in grid (required)
 
-    Usage:
-    {%- render 'collection-block' collection: collection, block: block, limit: limit -%}
+  Usage:
+  {%- render 'collection-block' collection: collection, block: block, limit: limit -%}
 {% endcomment %}
 
 {%- liquid
   assign collection_title = block.settings.collection_name
   assign collection_image = block.settings.image | default: collection.image
 
-  assign mobile_slider = "grid--mobile-vertical"
+  assign mobile_slider = 'grid--mobile-vertical'
   if section.settings.layout_mobile == 'slider'
-    assign mobile_slider = "grid--mobile-slider"
+    assign mobile_slider = 'grid--mobile-slider'
   endif
 
   assign products_block_html = ''
@@ -44,7 +44,7 @@
       if forloop.index0 <= 1 and collection_image == blank
         capture products_block_html
           echo products_block_html
-          render 'product-grid-item', product: product, animation_delay: forloop.index0, collection: collection, index: forloop.index
+          render 'product-card', product: product, animation_delay: forloop.index0, collection: collection, index: forloop.index
 
           assign modifier_class = 'mobile'
         endcapture
@@ -52,7 +52,7 @@
 
       capture products_list_html
         echo products_list_html
-        render 'product-grid-item', product: product, animation_delay: forloop.index0, collection: collection, index: forloop.index, modifier_class: modifier_class
+        render 'product-card', product: product, animation_delay: forloop.index0, collection: collection, index: forloop.index, modifier_class: modifier_class
       endcapture
 
       if forloop.index == limit
@@ -72,7 +72,7 @@
       if forloop.index0 <= 1 and collection_image == blank
         capture products_block_html
           echo products_block_html
-          render 'onboarding-product-grid-item', index: forloop.index, animation_delay: forloop.index0
+          render 'product-card', product: null, index: forloop.index, animation_delay: forloop.index0
 
           assign modifier_class = 'mobile'
         endcapture
@@ -80,7 +80,7 @@
 
       capture products_list_html
         echo products_list_html
-        render 'onboarding-product-grid-item', index: forloop.index, animation_delay: forloop.index0, modifier_class: modifier_class
+        render 'product-card', product: null, index: forloop.index, animation_delay: forloop.index0, modifier_class: modifier_class
       endcapture
     endfor
   endif
@@ -116,14 +116,18 @@
 
     <a href="{{ collection.url }}" class="collection-block__image" aria-label="{{ image_aria_label }}">
       <div class="collection-block__image-bg">
-        {%- render 'image' image: collection_image, sizes: sizes, cover: true -%}
+        {%- render 'image', image: collection_image, sizes: sizes, cover: true -%}
       </div>
     </a>
   {%- endif -%}
 </div>
 
 {%- if products_list_html != '' -%}
-  <section class="index-products{% if products_list_index <= 2 and collection_image == blank %} mobile{% endif %}" data-section-id="{{ section.id }}" data-section-type="product-grid">
+  <section
+    class="index-products{% if products_list_index <= 2 and collection_image == blank %} mobile{% endif %}"
+    data-section-id="{{ section.id }}"
+    data-section-type="product-grid"
+  >
     <div class="grid-outer">
       <div class="grid {{ mobile_slider }}">
         {{ products_list_html }}
@@ -133,7 +137,9 @@
 {%- elsif products_list_index == 0 -%}
   <div class="collection-block__empty">
     <div class="no-results">
-      <p><strong>{{ 'collections.general.no_matches' | t }}</strong></p>
+      <p>
+        <strong>{{ 'collections.general.no_matches' | t }}</strong>
+      </p>
     </div>
   </div>
 {%- endif -%}

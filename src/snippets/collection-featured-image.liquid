@@ -35,14 +35,14 @@
 {%- endcapture -%}
 
 <div
-  class="grid-item product-item product-item--featured-image{% if align_with_image %} product-item--aligned{% endif %}"
-  id="Product-item--{{ block.id }}"
+  class="grid-item product-card product-card--featured-image{% if align_with_image %} product-card--aligned{% endif %}"
+  id="product-card--{{ block.id }}"
   style="{{ style }}"
   {{ block.shopify_attributes }}
 >
   {%- capture featured_image_content -%}
-    <div class="product-item__image-overlay">
-      <div class="product-item__image-content">
+    <div class="product-card__image-overlay">
+      <div class="product-card__image-content">
         {%- if featured_header != blank -%}
           {%- liquid
             assign heading_tag = 'h3'
@@ -69,15 +69,15 @@
       </div>
 
       {%- if featured_button_text == blank and featured_button_link != blank -%}
-        <a href="{{ featured_button_link }}" class="product-item__image-link" aria-label="{{ featured_image.alt | default: featured_header | default: featured_text | strip_html | escape }}"></a>
+        <a href="{{ featured_button_link }}" class="product-card__image-link" aria-label="{{ featured_image.alt | default: featured_header | default: featured_text | strip_html | escape }}"></a>
       {%- endif -%}
     </div>
   {%- endcapture -%}
 
   {%- if featured_image != blank -%}
-    <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+    <div class="product-card__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
       <div
-        class="product-item__bg"
+        class="product-card__bg"
         data-aos="img-in"
         data-aos-anchor="{{ animation_anchor }}"
         data-aos-delay="{{ animation_delay | times: 150 }}"
@@ -95,9 +95,9 @@
       {{ featured_image_content }}
     </div>
   {%- elsif featured_video != blank -%}
-    <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+    <div class="product-card__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
       <div
-        class="product-item__bg"
+        class="product-card__bg"
         data-aos="img-in"
         data-aos-anchor="{{ animation_anchor }}"
         data-aos-delay="{{ animation_delay | times: 150 }}"
@@ -125,7 +125,7 @@
       {{ featured_image_content }}
     </div>
   {%- else -%}
-    <div class="product-item__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+    <div class="product-card__image{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
       <div class="svg-placeholder">
         {{ 'collection-1' | placeholder_svg_tag }}
       </div>

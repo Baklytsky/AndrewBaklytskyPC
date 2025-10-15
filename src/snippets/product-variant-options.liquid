@@ -63,8 +63,8 @@
       {%- capture meta_products -%}
         {{ meta_products }}
 
-        <div class="product-card">
-          <div class="product-card__image">
+        <div class="card-bundle">
+          <div class="card-bundle__image">
             <a href="{{ item_url }}">
               {%- render 'image',
                 image: item_featured_image,
@@ -76,15 +76,15 @@
             </a>
           </div>
 
-          <div class="product-card__content">
-            <span class="product-card__title">
-              <a href="{{ item_url }}" class="product-card__link">
+          <div class="card-bundle__content">
+            <span class="card-bundle__title">
+              <a href="{{ item_url }}" class="card-bundle__link">
                 {{ item.title }}
               </a>
             </span>
 
-            <div class="product-card__price">
-              {%- render 'product-grid-price', product: item, current_variant: item_current_variant -%}
+            <div class="card-bundle__price">
+              {%- render 'product-card-price', product: item, current_variant: item_current_variant -%}
             </div>
           </div>
         </div>
@@ -582,10 +582,12 @@
       </div>
 
       {%- if meta_products != '' -%}
-        <div class="product-selectors__products">
-          <span class="product-cards-title body-medium">{{ 'products.general.bundle_products' | t }}</span>
+        <div class="product-selectors__products product-cards">
+          <div class="product-cards__title body-medium">
+            {{ 'products.general.bundle_products' | t }}
+          </div>
 
-          <div class="product-cards">
+          <div class="product-cards__items">
             {{ meta_products }}
           </div>
         </div>

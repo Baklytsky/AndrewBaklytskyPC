@@ -1,0 +1,88 @@
+{%- doc -%}
+  Renders a product card in grid layouts
+  When the product object is null, renders placeholders.
+
+  @param {object} product - The product object
+  @param {object} children - The children of the product card
+{%- enddoc -%}
+
+{%- liquid
+  assign product = product | default: empty
+  assign children = children | default: ''
+  assign shopify_attributes = shopify_attributes | default: ''
+
+  # Early return if product is hidden
+  if product.tags contains 'hide'
+    echo '<!-- Info: product is hidden by tag -->'
+
+    break
+  endif
+
+  # Build 'product-card' element CSS classes
+  capture product_card_classes
+    echo 'product-card grid-item'
+    if settings.product_grid_center
+      echo ' product-card--centered'
+    else
+      assign no_padding_class = ' product-card--no-padding'
+      if settings.grid_style == 'compact' or settings.grid_override and settings.grid_gap_horizontal < 1
+        assign no_padding_class = ''
+      endif
+      echo ' product-card--left' | append: no_padding_class
+    endif
+  endcapture
+
+  # Define "unique_id" if it is not passed
+  if unique_id == blank
+    capture unique_id
+      echo 'product-card--' | append: section.id | append: '-' | append: product.id
+    endcapture
+  endif
+
+  # Passed attributes and modifiers for the 'product-card' element
+  assign attributes = attributes | default: ''
+  assign modifier_class = modifier_class | default: ''
+  if modifier_class != ''
+    assign product_card_classes = product_card_classes | append: ' ' | append: modifier_class
+  endif
+  # Variables needed for "product-card-media" snippet
+  assign animation_delay = animation_delay | default: 0
+  assign aos_delay_default = animation_delay | times: 100
+  assign aos_delay = aos_delay | default: aos_delay_default
+  assign animation_anchor = animation_anchor | default: unique_id
+  assign aos_anchor = aos_anchor | default: animation_anchor
+  assign index = index | default: 1
+  assign bundle_product = bundle_product | default: false
+  assign bundle_template = bundle_template | default: false
+  assign sizes = sizes | default: ''
+  assign block_index = block_index | default: 1
+-%}
+
+<product-card
+  class="{{ product_card_classes }}"
+  id="{{ unique_id }}"
+  data-grid-item
+  data-url="{{ product.url }}"
+  data-swap-id="true"
+  {{ attributes }}
+  {{ shopify_attributes }}
+>
+  {% if children != blank %}
+    {%- comment -%} Theme blocks {%- endcomment -%}
+    {{ children }}
+  {% else %}
+    {%- comment -%} Section blocks {%- endcomment -%}
+    {% render 'product-card-media',
+      product: product,
+      unique_id: unique_id,
+      index: index,
+      block_index: block_index,
+      sizes: sizes,
+      aos_delay: aos_delay,
+      aos_anchor: aos_anchor,
+      bundle_product: bundle_product,
+      bundle_template: bundle_template
+    %}
+    {% render 'product-card-content', product: product, index: index, block_index: block_index %}
+  {% endif %}
+</product-card>

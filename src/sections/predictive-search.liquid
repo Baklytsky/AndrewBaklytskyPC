@@ -20,14 +20,14 @@
   assign first_column_results_size = query_count | plus: collection_count | plus: page_count | plus: article_count
 
   comment
-    Product grid items classes
+    Product cards classes
   endcomment
-  assign product_item_classes = ''
+  assign product_card_classes = ''
 
   if settings.product_grid_center
-    assign product_item_classes = product_item_classes | append: ' product-item--centered'
+    assign product_card_classes = product_card_classes | append: ' product-card--centered'
   else
-    assign product_item_classes = product_item_classes | append: ' product-item--left'
+    assign product_card_classes = product_card_classes | append: ' product-card--left'
   endif
 -%}
 
@@ -153,11 +153,11 @@
             >
               <div class="grid">
                 {%- for product in predictive_search.resources.products -%}
-                  {%- render 'search-product-item',
+                  {%- render 'search-product-card',
                     product: product,
                     animation_delay: animation_delay,
                     animation_anchor: animation_anchor,
-                    product_item_classes: product_item_classes,
+                    product_card_classes: product_card_classes,
                     tabindex: false,
                     index: forloop.index
                   -%}

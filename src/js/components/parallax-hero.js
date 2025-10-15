@@ -2,29 +2,38 @@ if (!customElements.get('parallax-hero')) {
   customElements.define(
     'parallax-hero',
     class ParallaxHero extends HTMLElement {
+      defaultOptions = {
+        center: true,
+        round: true,
+        frame: this,
+      };
+
       constructor() {
         super();
+
+        this.rellax = null;
+        this.refreshEvent = window.theme.debounce(() => {
+          this.refresh();
+        }, 500);
       }
 
       connectedCallback() {
         const imageSelector = this.querySelector('[data-parallax-img]');
-        const frameElement = this;
-
         if (!imageSelector) return;
 
-        this.rellax = new window.theme.LoadRellax(frameElement, imageSelector);
+        const Rellax = window.themeRellax?.Rellax || window.Rellax;
+        this.rellax = new Rellax(imageSelector, this.defaultOptions);
 
-        window.addEventListener('load', () => {
-          if (typeof this.rellax.refresh === 'function') {
-            this.rellax.refresh();
-          }
-        });
+        window.addEventListener('resize', this.refreshEvent);
+      }
+
+      refresh() {
+        this.rellax.refresh();
       }
 
       disconnectedCallback() {
-        if (typeof this.rellax.refresh === 'function') {
-          this.rellax.refresh();
-        }
+        this.rellax.destroy();
+        window.removeEventListener('resize', this.refreshEvent);
       }
     }
   );
