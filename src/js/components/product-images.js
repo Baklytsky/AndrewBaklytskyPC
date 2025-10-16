@@ -112,10 +112,11 @@ if (!customElements.get('product-images')) {
         const y = (e.pageY || e.changedTouches[0].screenY) - this.offsetTop;
         const distanceX = x - this.startX;
         const distanceY = y - this.startY;
+        const swipeDistance = 100;
         const direction = distanceX > 0 ? 1 : -1;
         const isImage = this.getCurrentMedia().hasAttribute('data-type') && this.getCurrentMedia().getAttribute('data-type') === 'image';
 
-        if (Math.abs(distanceX) > 10 && Math.abs(distanceX) > Math.abs(distanceY) && isImage) {
+        if (Math.abs(distanceX) > swipeDistance && Math.abs(distanceX) > Math.abs(distanceY) && isImage) {
           direction < 0 ? this.showNextImage() : this.showPreviousImage();
         }
 
@@ -184,7 +185,7 @@ if (!customElements.get('product-images')) {
       }
 
       removeArrows() {
-        this.querySelector(`.${'slider__arrows'}`)?.remove();
+        this.querySelector('.slider__arrows')?.remove();
       }
 
       preloadImageOnArrowHover() {
