@@ -255,7 +255,9 @@ if (!customElements.get('bundle-collection')) {
         const placeholder = this.placeholders[this.selectedProducts.length];
         if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing) || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
         const variant = data.variant;
-        const product = data.product;
+        // TODO:
+        // we don't have product json anymore
+        // const product = data.product;
         const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {

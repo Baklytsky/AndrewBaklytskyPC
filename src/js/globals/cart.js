@@ -24,9 +24,12 @@ const classes = {
 const selectors = {
   apiContent: '[data-api-content]',
   apiLineItems: '[data-api-line-items]',
+  apiUpsellItems: '[data-api-upsell-items]',
+  apiBundleItems: '[data-api-bundle-items]',
   apiCartPrice: '[data-api-cart-price]',
   animation: '[data-animation]',
-  cartBarAdd: '[data-add-to-cart-bar]',
+  buttonSkipUpsellProduct: '[data-skip-upsell-product]',
+  cartBarAdd: '[data-cart-bar-add-to-cart]',
   cartCloseError: '[data-cart-error-close]',
   cartDrawer: 'cart-drawer',
   cartDrawerClose: '[data-cart-drawer-close]',
@@ -39,7 +42,7 @@ const selectors = {
   cartCheckoutButtonWrapper: '[data-cart-checkout-buttons]',
   cartCheckoutButton: '[data-cart-checkout-button]',
   cartTotal: '[data-cart-total]',
-  cartJson: '[data-cart-json]',
+  checkoutButtons: '[data-checkout-buttons]',
   errorMessage: '[data-error-message]',
   formCloseError: '[data-close-error]',
   formErrorsContainer: '[data-cart-errors-container]',
@@ -51,32 +54,43 @@ const selectors = {
   item: '[data-item]',
   itemsHolder: '[data-items-holder]',
   leftToSpend: '[data-left-to-spend]',
-  leftToSpendPromo: '[data-left-to-spend-promo]',
   navDrawer: '[data-drawer]',
   outerSection: '[data-section-id]',
   priceHolder: '[data-cart-price-holder]',
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
+  upsellProductsHolder: '[data-upsell-products]',
+  bundleProductsHolder: '[data-bundle-products]',
+  upsellWidget: '[data-upsell-widget]',
+  bundleWidget: '[data-bundle-widget]',
   termsErrorMessage: '[data-terms-error-message]',
-  bundleRemoveButton: '[data-bundle-cart-remove]',
-  discountButton: '[data-cart-discount-button]',
-  discountField: '[data-cart-discount-field]',
+  collapsibleBody: '[data-collapsible-body]',
+  discountInput: '[data-discount-input]',
+  discountField: '[data-discount-field]',
+  discountButton: '[data-apply-discount]',
+  discountBody: '[data-discount-body]',
+  discountCode: '[data-discount-code]',
+  discountErrorMessage: '[data-discount-error-message]',
+  removeDiscount: '[data-remove-discount]',
 };
 
 const attributes = {
   cartTotal: 'data-cart-total',
   disabled: 'disabled',
   freeShipping: 'data-free-shipping',
+  freeShippingLimit: 'data-free-shipping-limit',
   item: 'data-item',
   itemIndex: 'data-item-index',
   itemTitle: 'data-item-title',
+  open: 'open',
   quickAddHolder: 'data-quick-add-holder',
   quickAddVariant: 'data-quick-add-variant',
   scrollLocked: 'data-scroll-locked',
+  upsellAutoOpen: 'data-upsell-auto-open',
   name: 'name',
-  bundleRemoveButton: 'data-bundle-cart-remove',
-  bundleQuantityField: 'data-bundle-cart-quantity',
+  maxInventoryReached: 'data-max-inventory-reached',
+  errorMessagePosition: 'data-error-message-position',
   discountButton: 'data-cart-discount-button',
 };
 
@@ -96,6 +110,7 @@ class CartItems extends HTMLElement {
     this.cartTermsCheckbox = document.querySelector(selectors.cartTermsCheckbox);
     this.cartCheckoutButtonWrapper = document.querySelector(selectors.cartCheckoutButtonWrapper);
     this.cartCheckoutButton = document.querySelector(selectors.cartCheckoutButton);
+    this.checkoutButtons = document.querySelector(selectors.checkoutButtons);
     this.itemsHolder = document.querySelector(selectors.itemsHolder);
     this.priceHolder = document.querySelector(selectors.priceHolder);
     this.items = document.querySelectorAll(selectors.item);
@@ -105,11 +120,36 @@ class CartItems extends HTMLElement {
     this.cartCloseErrorMessage = document.querySelector(selectors.cartCloseError);
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
+    this.upsellProductsHolder = document.querySelector(selectors.upsellProductsHolder);
+    this.bundleProductsHolder = document.querySelector(selectors.bundleProductsHolder);
     this.subtotal = window.theme.subtotal;
-    this.showGetCartResponse = true;
+    this.discountInput = document.querySelector(selectors.discountInput);
+    this.discountField = document.querySelector(selectors.discountField);
+    this.discountButton = document.querySelector(selectors.discountButton);
+    this.hasDiscountBlock = !!document.querySelector(selectors.discountButton);
+    this.discountErrorMessage = document.querySelector(selectors.discountErrorMessage);
+    this.existingDiscountCodes = [];
+    this.discounts = document.querySelectorAll(selectors.discountBody);
 
     // Define Cart object depending on if we have cart drawer or cart page
     this.cart = this.cartDrawer || this.cartPage;
+
+    // Discounts
+    if (this.hasDiscountBlock) {
+      this.discountButton.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const newDiscountCode = this.discountInput.value.trim();
+        this.discountInput.value = '';
+
+        if (newDiscountCode) {
+          this.applyDiscount(newDiscountCode);
+        }
+      });
+
+      // Fill existing discount codes and bind event listeners
+      this.bindDiscountEventListeners();
+    }
 
     // Cart events
     this.animateItems = this.animateItems.bind(this);
@@ -127,20 +167,18 @@ class CartItems extends HTMLElement {
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
 
+    // Upsell or bundle products
+    this.skipUpsellProductsArray = [];
+    this.skipBundleProductsArray = [];
+    this.skipUpsellOrBundleProductEvent();
+    this.checkSkippedUpsellOrBundleProductsFromStorage();
+    this.toggleCartUpsellOrBundleWidgetVisibility();
+
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
-    const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
-    const promotion1Limit = Number(this.freeShipping[0]?.getAttribute('data-free-shipping-limit'));
-    const promotion2Limit = Number(this.freeShipping[0]?.getAttribute('data-promo-center-limit'));
-    this.promotion1Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-primary-promo') === 'true' : false;
-    this.promotion2Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-secondary-promo') === 'true' : false;
-    const limitAttr = this.freeShipping.length ? promotion1Limit : 0;
-    let centerLimitAttr = this.promotion1Enabled ? promotion2Limit : 0;
-    if (!this.promotion1Enabled && this.promotion2Enabled && promotion2Limit > 0) {
-      centerLimitAttr = promotion2Limit;
-    }
-    this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
-    this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
+    this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
+
+    this.freeShippingMessageHandle(this.subtotal);
     this.updateProgress();
 
     this.build = this.build.bind(this);
@@ -163,8 +201,9 @@ class CartItems extends HTMLElement {
 
     // Flags
     this.totalItems = this.items.length;
-
+    this.showCannotAddMoreInCart = false;
     this.cartUpdateFailed = false;
+    this.discountError = false;
 
     // Cart Events
     this.cartEvents();
@@ -174,8 +213,6 @@ class CartItems extends HTMLElement {
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
     document.addEventListener('theme:cart:refresh', this.getCart.bind(this));
-
-    this.updateDiscount();
   }
 
   disconnectedCallback() {
@@ -208,6 +245,10 @@ class CartItems extends HTMLElement {
       item.classList.add(classes.hiding);
       item.addEventListener('animationend', removeHidingClass);
     });
+
+    if (this.hasDiscountBlock) {
+      this.discountErrorMessage?.classList.add('hidden');
+    }
   }
 
   /**
@@ -258,96 +299,11 @@ class CartItems extends HTMLElement {
       });
     });
 
-    const cartBundleRemove = document.querySelectorAll(selectors.bundleRemoveButton);
-    if (cartBundleRemove.length) {
-      cartBundleRemove.forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.preventDefault();
-          if (button.hasAttribute(attributes.bundleRemoveButton) && button.getAttribute(attributes.bundleRemoveButton) !== '') {
-            event.stopPropagation();
-            const lineItemKey = button.getAttribute(attributes.bundleRemoveButton);
-            const lineItemKeyArr = lineItemKey.split(',');
-
-            this.removeMultipleProducts(lineItemKeyArr);
-          }
-        });
-      });
-    }
-
     if (this.cartCloseErrorMessage) {
       this.cartCloseErrorMessage.addEventListener('click', (event) => {
         event.preventDefault();
 
         this.cartErrorHolder.classList.remove(classes.expanded);
-      });
-    }
-  }
-
-  /**
-   * Remove multiple products from cart
-   *
-   * @param   {Array}  A list of products
-   *
-   * @return  {Void}
-   */
-  removeMultipleProducts(productsArr) {
-    let formData = new FormData();
-
-    productsArr.forEach((element) => {
-      formData.append(`updates[${element}]`, 0);
-    });
-
-    this.disableCartButtons();
-
-    fetch(theme.routes.cart_update_url, {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.text())
-      .then((state) => {
-        this.getCart();
-      })
-      .catch((error) => {
-        console.log(error);
-        this.enableCartButtons();
-      });
-  }
-
-  /**
-   * Update discount in the cart
-   *
-   * @return  {Void}
-   */
-  updateDiscount() {
-    const discountButton = this.cart.querySelector(selectors.discountButton);
-    const discountField = this.cart.querySelector(selectors.discountField);
-
-    if (discountButton && discountField) {
-      discountButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        const newDiscountCode = discountField.value;
-
-        if (newDiscountCode !== '') {
-          const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
-          this.disableCartButtons();
-          fetch(theme.routes.cart_update_url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              discount: `${newDiscountCode}${existingDiscountCodes}`,
-            }),
-          })
-            .then((data) => {
-              this.getCart();
-              discountField.value = '';
-            })
-            .catch((error) => {
-              console.log(error);
-              this.enableCartButtons();
-            });
-        }
       });
     }
   }
@@ -359,30 +315,139 @@ class CartItems extends HTMLElement {
    */
 
   cartAddEvent(event) {
-    let formData = event.detail.data ? event.detail.data : '';
+    let formData = '';
     let button = event.detail.button;
 
     if (button.hasAttribute('disabled')) return;
+    const form = button.form || button.closest('form');
+    // Validate form
 
-    const form = button.closest('form');
-    if (form) {
-      // Validate form
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      formData = new FormData(form);
-
-      if (form !== null && form.querySelector('[type="file"]')) {
-        return;
-      }
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
     }
+    formData = new FormData(form);
 
+    if (form !== null && form.querySelector('[type="file"]')) {
+      return;
+    }
     if (theme.settings.cartType === 'drawer' && this.cartDrawer) {
       event.preventDefault();
     }
 
+    const maxInventoryReached = form.getAttribute(attributes.maxInventoryReached);
+    const errorMessagePosition = form.getAttribute(attributes.errorMessagePosition);
+    this.showCannotAddMoreInCart = false;
+    if (maxInventoryReached === 'true' && errorMessagePosition === 'cart') {
+      this.showCannotAddMoreInCart = true;
+    }
+
     this.addToCart(formData, button);
+  }
+
+  /**
+   * Bind event listeners for discount elements
+   *
+   * @return  {Void}
+   */
+  bindDiscountEventListeners() {
+    if (!this.hasDiscountBlock) return;
+
+    this.discounts = document.querySelectorAll(selectors.discountBody);
+
+    this.discounts.forEach((discount) => {
+      const discountCode = discount.dataset.discountCode;
+
+      if (!this.existingDiscountCodes.includes(discountCode)) {
+        this.existingDiscountCodes.push(discountCode);
+      }
+
+      // Add event listener to remove discount
+      const removeButton = discount.querySelector(selectors.removeDiscount);
+      if (removeButton) {
+        // Remove existing listener to prevent duplicates
+        removeButton.removeEventListener('click', this.handleRemoveDiscount);
+
+        // Add new listener
+        removeButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          this.removeDiscount(discountCode);
+        });
+      }
+    });
+  }
+
+  applyDiscount(discountCode) {
+    if (this.existingDiscountCodes.includes(discountCode)) {
+      this.discountErrorMessage.classList.remove('hidden');
+      this.discountErrorMessage.textContent = window.theme.strings.discount_already_applied;
+      return;
+    }
+
+    this.existingDiscountCodes.push(discountCode);
+    this.updateCartDiscounts(this.existingDiscountCodes.join(','));
+  }
+
+  removeDiscount(discountCode) {
+    if (!this.existingDiscountCodes.includes(discountCode)) return;
+
+    this.existingDiscountCodes = this.existingDiscountCodes.filter((code) => code !== discountCode);
+    this.updateCartDiscounts(this.existingDiscountCodes.join(','));
+  }
+
+  updateCartDiscounts(discountString) {
+    const lastAttemptedDiscount = discountString
+      .split(',')
+      .filter((c) => c)
+      .pop()
+      ?.trim();
+
+    this.disableCartButtons();
+    this.discountErrorMessage.classList.add('hidden');
+
+    fetch(window.theme.routes.cart_update_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        discount: discountString,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((text) => {
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse cart update response:', text);
+          throw new Error('Invalid JSON response from server.');
+        }
+
+        if (lastAttemptedDiscount) {
+          const wasApplied = data.discount_codes && Array.isArray(data.discount_codes) && data.discount_codes.some((d) => d.code === lastAttemptedDiscount && d.applicable);
+
+          if (!wasApplied) {
+            this.discountError = true;
+            this.existingDiscountCodes = this.existingDiscountCodes.filter((code) => code !== lastAttemptedDiscount);
+          } else {
+            this.discountError = false;
+          }
+        } else {
+          this.discountError = false;
+        }
+
+        this.getCart();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   /**
@@ -440,210 +505,6 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Converts a user input amount to cents (or the smallest currency unit)
-   * @param {string|number} input - entered value (e.g. 25.99 or "500.000")
-   * @param {string} currencyCode - the currency code, e.g. "USD", "JPY"
-   * @returns {number} - value in cents (or units if it's a zero-decimal currency)
-   */
-  normalizePriceToMinorUnits(input, currencyCode) {
-    const zeroDecimalCurrencies = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
-    const rawValue = parseFloat(input);
-    if (isNaN(rawValue)) {
-      throw new Error(input);
-    }
-
-    const isZeroDecimal = zeroDecimalCurrencies.includes(currencyCode);
-
-    return isZeroDecimal ? Math.round(rawValue) : Math.round(rawValue * 100);
-  }
-
-  checkConditions(condition, data) {
-    const value = condition.value;
-    switch (condition.type) {
-      case 'ORDER_AMOUNT':
-        const operator = condition.operator;
-        const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
-        const price = data.price;
-        const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
-        return match;
-        break;
-
-      case 'PRODUCT_TAG':
-        return data.tags.includes(value);
-        break;
-
-      case 'COLLECTION':
-        const collectionsIds = data.collections.map((item) => item.id.toString());
-        const collectionId = value.replace('gid://shopify/Collection/', '');
-        return collectionsIds.includes(collectionId);
-        break;
-
-      case 'SPECIFIC_PRODUCT':
-        const productId = value.replace('gid://shopify/Product/', '');
-        return data.products.includes(productId);
-        break;
-
-      default:
-        return false;
-    }
-  }
-
-  checkActiveReward(config) {
-    const startDateString = config['promotion-start-date'];
-    const startDate = new Date(startDateString);
-    const endDateString = config['promotion-end-date'];
-    const endDate = new Date(endDateString);
-    const status = config['promotion-status'];
-    const timeNow = new Date();
-
-    if (isNaN(startDate) || isNaN(endDate)) {
-      return false;
-    }
-
-    return status === 'active' && timeNow > startDate && timeNow < endDate;
-  }
-
-  toggleReward(data) {
-    const conditions = data.functionConfig.conditions;
-    const rewards = data.functionConfig.rewards;
-    let addItems = [];
-    let removeItems = [];
-
-    if (conditions?.length && rewards?.length) {
-      const addedRewards = data.metaConfig.rewards;
-      let result = false;
-
-      for (let i = 0; i < conditions.length; ) {
-        let groupResult = this.checkConditions(conditions[i], data.info);
-        i++;
-
-        for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
-          groupResult = groupResult && this.checkConditions(conditions[i], data.info);
-        }
-
-        result = result || groupResult;
-      }
-
-      if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
-        if (result && !addedRewards.length) {
-          rewards.forEach((reward) => {
-            addItems.push({
-              id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
-              quantity: reward.quantity ?? 1,
-              properties: {
-                _reward: `reward`,
-              },
-            });
-          });
-        } else {
-          removeItems = addedRewards;
-        }
-      }
-    }
-
-    return {addItems, removeItems};
-  }
-
-  toggleTier(data) {
-    const tierVariants = data.functionConfig.tiers;
-    let addItems = [];
-    let removeItems = [];
-
-    if (tierVariants?.length) {
-      const tierMode = data.functionConfig.cumulative;
-      const addedGifts = data.metaConfig.gifts;
-
-      tierVariants.sort((a, b) => b.threshold - a.threshold);
-
-      for (let index = 0; index < tierVariants.length; index++) {
-        const tier = tierVariants[index];
-        let addVariant = true;
-        const variantId = tier.variantId.replace('gid://shopify/ProductVariant/', '');
-        const condition = {
-          type: 'ORDER_AMOUNT',
-          value: tier.threshold,
-          operator: 'greater_than_or_equal',
-        };
-        const resultCondition = this.checkConditions(condition, data.info);
-
-        if (addedGifts.length) {
-          addedGifts.forEach((addedReward) => {
-            const addedRewardVariantId = addedReward.split(':')[0];
-
-            if (resultCondition && addedRewardVariantId === variantId) {
-              addVariant = false;
-
-              if (!tierMode && addItems.length > 0) {
-                removeItems.push(addedReward);
-              }
-            }
-
-            if (!resultCondition && addedRewardVariantId === variantId) {
-              removeItems.push(addedReward);
-            }
-          });
-        }
-
-        if (resultCondition && addVariant && addItems.length < 1) {
-          addItems.push({
-            id: variantId,
-            quantity: 1,
-            properties: {
-              _gift: `gift`,
-            },
-          });
-        }
-
-        if (!tierMode && index === 0 && !addVariant) {
-          break;
-        }
-      }
-    }
-
-    return {addItems, removeItems};
-  }
-
-  toggleAwards(response) {
-    const cartJson = response.querySelector(selectors.cartJson);
-    if (cartJson) {
-      const info = JSON.parse(cartJson.innerHTML);
-      const meta = info.meta;
-      let addItems = [];
-      let removeItems = [];
-
-      for (const property in meta) {
-        const metaConfig = meta[property];
-        const config = metaConfig.config;
-        const isRewardActive = this.checkActiveReward(config);
-
-        if (isRewardActive) {
-          const functionConfig = config['function-configuration'];
-          const data = {functionConfig, metaConfig, info};
-          const toggleRewardObj = this.toggleReward(data);
-          const toggleTierObj = this.toggleTier(data);
-
-          addItems.push(...toggleRewardObj.addItems, ...toggleTierObj.addItems);
-          removeItems.push(...toggleRewardObj.removeItems, ...toggleTierObj.removeItems);
-        }
-      }
-
-      if (addItems.length || removeItems.length) {
-        this.showGetCartResponse = false;
-        let addItemsSkip = true;
-
-        if (removeItems.length) {
-          this.removeMultipleProducts(removeItems);
-          addItemsSkip = false;
-        }
-
-        if (addItems.length && addItemsSkip) {
-          this.addToCart(addItems);
-        }
-      }
-    }
-  }
-
-  /**
    * Get response from the cart
    *
    * @return  {Void}
@@ -654,16 +515,11 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
-        this.showGetCartResponse = true;
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        this.toggleAwards(element);
-
-        if (this.showGetCartResponse) {
-          const cleanResponse = element.querySelector(selectors.apiContent);
-          this.build(cleanResponse);
-        }
+        const cleanResponse = element.querySelector(selectors.apiContent);
+        this.build(cleanResponse);
       })
       .catch((error) => console.log(error));
   }
@@ -678,19 +534,6 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
-    let headers = {
-      'X-Requested-With': 'XMLHttpRequest',
-      Accept: 'application/javascript',
-    };
-
-    if (Array.isArray(formData)) {
-      headers = {
-        'Content-Type': 'application/json',
-        Accept: 'application/javascript',
-      };
-      formData = JSON.stringify({items: formData});
-    }
-
     if (this.cart) {
       this.cart.classList.add(classes.loading);
     }
@@ -708,10 +551,15 @@ class CartItems extends HTMLElement {
 
     fetch(theme.routes.cart_add_url, {
       method: 'POST',
-      headers: headers,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'application/javascript',
+      },
       body: formData,
     })
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((response) => {
         if (response.status) {
           this.addToCartError(response, button);
@@ -721,7 +569,7 @@ class CartItems extends HTMLElement {
             button.disabled = false;
           }
 
-          return;
+          if (!this.showCannotAddMoreInCart) return;
         }
 
         if (this.cart) {
@@ -739,11 +587,9 @@ class CartItems extends HTMLElement {
               })
             );
           }
-
           if (theme.settings.cartType === 'page') {
             window.location = theme.routes.cart_url;
           }
-
           this.getCart();
         } else {
           // Redirect to cart page if "Add to cart" is successful
@@ -805,6 +651,7 @@ class CartItems extends HTMLElement {
           this.toggleErrorMessage();
           this.resetLineItem(currentItem);
           this.enableCartButtons();
+          this.bindDiscountEventListeners();
 
           return;
         }
@@ -859,7 +706,7 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll(`input:not([${attributes.bundleQuantityField}])`);
+    const inputs = this.cart.querySelectorAll('input');
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
     if (inputs.length) {
@@ -899,9 +746,10 @@ class CartItems extends HTMLElement {
   toggleErrorMessage() {
     if (!this.cartErrorHolder) return;
 
-    this.cartErrorHolder.classList.toggle(classes.expanded, this.cartUpdateFailed);
+    this.cartErrorHolder.classList.toggle(classes.expanded, this.cartUpdateFailed || this.showCannotAddMoreInCart);
 
     // Reset cart error events flag
+    this.showCannotAddMoreInCart = false;
     this.cartUpdateFailed = false;
   }
 
@@ -936,7 +784,19 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
 
+  /**
+   * Hide error message container as soon as an item is successfully added to the cart
+   */
+  hideAddToCartErrorMessage() {
+    const holder = this.button.closest(selectors.upsellHolder) ? this.button.closest(selectors.upsellHolder) : this.button.closest(selectors.productForm);
+    const errorContainer = holder?.querySelector(selectors.formErrorsContainer);
+
+    errorContainer?.classList.remove(classes.visible);
+  }
+
   addToCartError(data, button) {
+    if (this.showCannotAddMoreInCart) return; // Show error in cart drawer instead of product form
+
     if (button !== null) {
       const outerContainer = button.closest(selectors.outerSection) || button.closest(selectors.quickAddHolder) || button.closest(selectors.quickAddModal);
       let errorContainer = outerContainer?.querySelector(selectors.formErrorsContainer);
@@ -953,7 +813,7 @@ class CartItems extends HTMLElement {
           errorMessage = data.message;
         }
 
-        errorContainer.innerHTML = `<div class="errors">${errorMessage}<button type="button" class="errors__close" data-close-error><svg aria-hidden="true" focusable="false" role="presentation" width="24px" height="24px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="icon icon-close"><path d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div>`;
+        errorContainer.innerHTML = `<div class="errors">${errorMessage}<button type="button" class="errors__close" data-close-error><svg aria-hidden="true" focusable="false" role="presentation" width="24px" height="24px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor" class="icon icon-cancel"><path d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div>`;
         errorContainer.classList.add(classes.visible);
         this.formErrorsEvents(errorContainer);
       }
@@ -1058,7 +918,10 @@ class CartItems extends HTMLElement {
 
   build(data) {
     const cartItemsData = data.querySelector(selectors.apiLineItems);
-    const cartEmptyData = Boolean(cartItemsData === null);
+    const upsellItemsData = data.querySelector(selectors.apiUpsellItems);
+    const bundleItemsData = data.querySelector(selectors.apiBundleItems);
+
+    const cartEmptyData = Boolean(cartItemsData === null && upsellItemsData === null && bundleItemsData === null);
     const priceData = data.querySelector(selectors.apiCartPrice);
     const cartTotal = data.querySelector(selectors.cartTotal);
 
@@ -1068,8 +931,28 @@ class CartItems extends HTMLElement {
 
     if (cartEmptyData) {
       this.itemsHolder.innerHTML = data.innerHTML;
+
+      if (this.upsellProductsHolder) {
+        this.upsellProductsHolder.innerHTML = '';
+      }
+
+      if (this.bundleProductsHolder) {
+        this.bundleProductsHolder.innerHTML = '';
+      }
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
+
+      if (this.upsellProductsHolder) {
+        this.upsellProductsHolder.innerHTML = upsellItemsData.innerHTML;
+      }
+
+      if (this.bundleProductsHolder) {
+        this.bundleProductsHolder.innerHTML = bundleItemsData.innerHTML;
+      }
+
+      this.skipUpsellOrBundleProductEvent();
+      this.checkSkippedUpsellOrBundleProductsFromStorage();
+      this.toggleCartUpsellOrBundleWidgetVisibility();
     }
 
     this.newTotalItems = cartItemsData && cartItemsData.querySelectorAll(selectors.item).length ? cartItemsData.querySelectorAll(selectors.item).length : 0;
@@ -1109,12 +992,27 @@ class CartItems extends HTMLElement {
       });
     }
 
+    if (this.hasDiscountBlock) {
+      if (this.discountField) {
+        this.discountField.value = this.existingDiscountCodes.join(',');
+      }
+
+      if (this.discountError) {
+        this.discountErrorMessage.textContent = window.theme.strings.discount_not_applicable;
+        this.discountErrorMessage.classList.remove('hidden');
+      } else {
+        this.discountErrorMessage.classList.add('hidden');
+      }
+    }
+
+    this.freeShippingMessageHandle(this.subtotal);
     this.cartRemoveEvents();
     this.cartUpdateEvents();
     this.toggleErrorMessage();
     this.enableCartButtons();
     this.updateProgress();
     this.animateItems();
+    this.bindDiscountEventListeners();
 
     document.dispatchEvent(
       new CustomEvent('theme:product:added', {
@@ -1144,6 +1042,23 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Show/hide free shipping message
+   *
+   * @param   {Number}  total
+   *
+   * @return  {Void}
+   */
+
+  freeShippingMessageHandle(total) {
+    if (!this.freeShipping.length) return;
+
+    this.freeShipping.forEach((message) => {
+      const hasQualifiedShippingMessage = message.hasAttribute(attributes.freeShipping) && message.getAttribute(attributes.freeShipping) === 'true' && total >= 0;
+      message.classList.toggle(classes.success, hasQualifiedShippingMessage && total >= this.freeShippingLimit);
+    });
+  }
+
+  /**
    * Update progress when update cart
    *
    * @return  {Void}
@@ -1154,49 +1069,21 @@ class CartItems extends HTMLElement {
 
     if (!this.freeShipping.length) return;
 
-    let hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
-    let forceSuccess = false;
-
-    if (!this.promotion1Enabled && !this.promotion2Enabled) {
-      hasReachedLimit = true;
-      forceSuccess = true;
-    } else if (this.promotion1Enabled && !this.promotion2Enabled && this.freeShippingLimit === 0) {
-      hasReachedLimit = true;
-      forceSuccess = true;
-    } else if (!this.promotion1Enabled && this.promotion2Enabled && this.promoCenterLimit === 0) {
-      hasReachedLimit = true;
-      forceSuccess = true;
-    } else if (this.promotion1Enabled && this.promotion2Enabled && this.freeShippingLimit === 0 && this.promoCenterLimit === 0) {
-      hasReachedLimit = true;
-      forceSuccess = true;
-    }
-
-    const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;
-    const percent = forceSuccess ? 100 : Math.max(0, Math.min(percentValue * 100, 100));
+    const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
+    const percent = Math.min(percentValue * 100, 100);
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpendCents = Math.max(0, this.freeShippingLimit - this.subtotal);
-    const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
-    const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
-    const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
-    const hasReachedCenterLimit = this.promoCenterLimit > 0 && this.subtotal >= this.promoCenterLimit;
+    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
 
     this.freeShipping.forEach((item) => {
       const progressBar = item.querySelector(selectors.freeShippingProgress);
       const progressGraph = item.querySelector(selectors.freeShippingGraph);
       const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
-      const leftToSpendPromo = item.querySelector(selectors.leftToSpendPromo);
-      const promoCenter = item.querySelector('[data-promo-center]');
 
-      // Update "left to spend" messages
       if (leftToSpendMessage) {
         leftToSpendMessage.innerHTML = leftToSpend.replace('.00', '');
       }
 
-      if (leftToSpendPromo) {
-        leftToSpendPromo.innerHTML = leftToSpendPromoMoney.replace('.00', '');
-      }
-
-      // Set progress bar value and add animation class
+      // Set progress bar value
       if (progressBar) {
         progressBar.value = percent;
       }
@@ -1205,21 +1092,112 @@ class CartItems extends HTMLElement {
       if (progressGraph) {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
+    });
+  }
 
-      const isCenterActive = (promoCenter && this.promoCenterLimit === 0) || hasReachedCenterLimit;
+  /**
+   * Skip upsell or bundle product
+   */
+  skipUpsellOrBundleProductEvent() {
+    if (this.upsellProductsHolder === null && this.bundleProductsHolder === null) {
+      return;
+    }
 
-      // Clear all state classes first
-      item.classList.remove(classes.success, classes.active);
+    const upsellSkipButtons = this.upsellProductsHolder?.querySelectorAll(selectors.buttonSkipUpsellProduct) || [];
+    const bundleSkipButtons = this.bundleProductsHolder?.querySelectorAll(selectors.buttonSkipUpsellProduct) || [];
+    const allSkipButtons = [...upsellSkipButtons, ...bundleSkipButtons];
 
-      // Apply appropriate state class
-      if (hasReachedLimit) {
-        // Final goal reached - show success
-        item.classList.add(classes.success);
-      } else if (isCenterActive && !hasReachedLimit) {
-        // Center goal reached but not final goal - show active (dual promo)
-        item.classList.add(classes.active);
+    if (allSkipButtons.length) {
+      allSkipButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+
+          const productID = button.closest(selectors.quickAddHolder).getAttribute(attributes.quickAddHolder);
+          const isUpsell = !!button.closest(selectors.upsellWidget);
+          const isBundle = !!button.closest(selectors.bundleWidget);
+
+          if (isUpsell && !this.skipUpsellProductsArray.includes(productID)) {
+            this.skipUpsellProductsArray.push(productID);
+            window.sessionStorage.setItem('skip_upsell_products', this.skipUpsellProductsArray);
+            this.removeUpsellOrBundleProduct(productID, 'upsell');
+          }
+
+          if (isBundle && !this.skipBundleProductsArray.includes(productID)) {
+            this.skipBundleProductsArray.push(productID);
+            window.sessionStorage.setItem('skip_bundle_products', this.skipBundleProductsArray);
+            this.removeUpsellOrBundleProduct(productID, 'bundle');
+          }
+
+          this.toggleCartUpsellOrBundleWidgetVisibility();
+        });
+      });
+    }
+  }
+
+  /**
+   * Check for skipped upsell or bundle product added to session storage
+   */
+  checkSkippedUpsellOrBundleProductsFromStorage() {
+    const types = [
+      {key: 'upsell', storageKey: 'skip_upsell_products', array: this.skipUpsellProductsArray},
+      {key: 'bundle', storageKey: 'skip_bundle_products', array: this.skipBundleProductsArray},
+    ];
+
+    types.forEach(({key, storageKey, array}) => {
+      const skippedItems = window.sessionStorage.getItem(storageKey);
+      if (skippedItems) {
+        skippedItems.split(',').forEach((productID) => {
+          if (!array.includes(productID)) {
+            array.push(productID);
+          }
+          this.removeUpsellOrBundleProduct(productID, key);
+        });
       }
     });
+  }
+
+  removeUpsellOrBundleProduct(productID, type = 'upsell') {
+    const holders = {
+      upsell: this.upsellProductsHolder,
+      bundle: this.bundleProductsHolder,
+    };
+    const holder = holders[type];
+    if (!holder) return;
+
+    const product = holder.querySelector(`[${attributes.quickAddHolder}="${productID}"]`);
+    if (product && product.parentNode) {
+      product.parentNode.remove();
+    }
+  }
+
+  /**
+   * Show or hide cart upsell or bundle products widget visibility
+   */
+  toggleCartUpsellOrBundleWidgetVisibility() {
+    if (!this.upsellProductsHolder && !this.bundleProductsHolder) return;
+
+    const upsellItems = this.upsellProductsHolder?.querySelectorAll(selectors.quickAddHolder);
+    const bundleItems = this.bundleProductsHolder?.querySelectorAll(selectors.quickAddHolder);
+    const upsellWidget = this.upsellProductsHolder?.closest(selectors.upsellWidget);
+    const bundleWidget = this.bundleProductsHolder?.closest(selectors.bundleWidget);
+
+    if (!upsellWidget && !bundleWidget) return;
+
+    // Helper to toggle and auto-open widget
+    const toggleWidget = (widget, items, autoOpenAttr) => {
+      if (!widget) return;
+      widget.classList.toggle(classes.hidden, !items.length);
+      if (items.length && !widget.hasAttribute(attributes.open) && widget.hasAttribute(autoOpenAttr)) {
+        widget.setAttribute(attributes.open, true);
+        const widgetBody = widget.querySelector(selectors.collapsibleBody);
+        if (widgetBody) {
+          widgetBody.style.height = 'auto';
+        }
+      }
+    };
+
+    toggleWidget(upsellWidget, upsellItems, attributes.upsellAutoOpen);
+    toggleWidget(bundleWidget, bundleItems, attributes.upsellAutoOpen);
   }
 
   /**

@@ -134,17 +134,17 @@
 {{ 'product.css' | asset_url | stylesheet_tag }}
 {{ 'product-media.css' | asset_url | stylesheet_tag }}
 
-<product-component
-  id="Product--{{ unique }}"
+<product-info
+  id="MainProduct--{{ unique }}"
   class="index-product section-padding {{ color_scheme }}"
-  data-section-id="{{ unique }}"
-  data-section-type="product"
+  data-section-id="{{ section.id }}"
   data-product-handle="{{ product.handle }}"
+  data-product-id="{{ product.id }}"
+  data-enable-history-state="{{ enable_history_state }}"
   data-url="{{ product.url }}"
-  data-enable-history-state="true"
   data-overlay-header
   data-sticky-enabled="{{ product_sticky_enable }}"
-  data-variant-image-scroll="{{ variant_image_scroll }}"
+  data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"
   {% if show_cart_bar %}
     data-cart-bar-enabled
   {% endif %}
@@ -154,11 +154,9 @@
       :root { --cart-bar-height: 80px; }
     {%- endif -%}
 
-    #Product--{{ section.id }} {
+    #MainProduct-{{ section.id }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
-
-      --swatch-size: var(--swatch-size-product);
     }
   {%- endstyle -%}
 
@@ -322,9 +320,6 @@
             data-form-wrapper
           >
             <div class="form__width">
-              {% comment %} The input with name="id" submits to cart {% endcomment %}
-              <input type="hidden" name="id" value="{{ current_variant.id }}" form="{{ product_form_id }}">
-
               {% comment %} Add a line item property called 'Preorder' to preorder products {% endcomment %}
               {%- if preorder -%}
                 <input
@@ -386,9 +381,9 @@
                     -%}
 
                   {%- when 'variants' -%}
-                    {%- render 'product-variant-options',
+                    {%- render 'product-variant-picker',
                       product: product,
-                      unique: unique,
+                      current_variant: current_variant,
                       block: block,
                       block_style: block_style,
                       product_form_id: product_form_id,
@@ -586,32 +581,32 @@
     </div>
   </{{ wrapper_tag }}>
 
-  {% unless product == empty %}
-    <script type="application/json" data-product-json>
-      {{ product | json }}
-    </script>
-    <script type="application/json" id="ModelJSON-{{ unique }}">
-      {{ product.media | where: 'media_type', 'model' | json }}
-    </script>
-
-    {%- liquid
-      assign metafields_data = '['
-      for variant in product.variants
-        assign metafield_value = variant.metafields.theme.final_sale.value | replace: '"', "''"
-        assign metafields_data = metafields_data | append: '{"variant_id":"' | append: variant.id | append: '" , "metafield_value":"' | append: metafield_value | append: '"},'
-      endfor
-      assign metafields_data = metafields_data | append: ']'
-      assign metafields_data = metafields_data | replace: ',]', ']'
-    -%}
-
-    <span data-variant-final-sale-metafield style="display:none;">{{ metafields_data }}</span>
-  {% endunless %}
-
   {%- if show_cart_bar -%}
     {%- render 'cart-bar', product: product -%}
+  {%- endif -%}
+
+  <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+  {%- if product_sticky_enable -%}
+    <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if product.quantity_price_breaks_configured? -%}
+    <script src="{{ 'show-more.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if show_thumbnails -%}
+    <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if first_3d_model -%}
+    <script type="application/json" id="ProductJSON-{{ product.id }}">
+      {{ product.media | where: 'media_type', 'model' | json }}
+    </script>
+    <script src="{{ 'product-model.js' | asset_url }}" defer></script>
   {%- endif -%}
 
   <script type="application/ld+json">
     {{ product | structured_data }}
   </script>
-</product-component>
+</product-info>

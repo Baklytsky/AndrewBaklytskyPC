@@ -4,7 +4,6 @@ const selectors = {
   productComponent: 'product-component',
   addToCart: '[data-add-to-cart]',
   productImage: '[data-product-image]',
-  productJson: '[data-product-json]',
   productPage: '.product__page',
   headerSticky: '[data-header-sticky]',
   productMediaList: '[data-product-media-list]',
@@ -66,14 +65,7 @@ if (!customElements.get('product-component')) {
       }
 
       connectedCallback() {
-        // Stop parsing if we don't have the product json script tag when loading
-        // section in the Theme Editor
-        const productJson = this.querySelector(selectors.productJson);
-        if ((productJson && !productJson.innerHTML) || !productJson) {
-          return;
-        }
-
-        const productJsonHandle = JSON.parse(productJson.innerHTML).handle;
+        const productJsonHandle = this.dataset.productHandle;
         let recentObj = {};
         if (productJsonHandle) {
           recentObj = {

@@ -1,25 +1,3 @@
-const selectors = {
-  productImage: '[data-image-id]',
-  productImagesContainer: 'product-images',
-  section: '[data-section-type]',
-  thumbItem: '[data-thumb-item]',
-  thumbLink: '[data-thumb-link]',
-  thumbSlider: '[data-thumbs-slider]',
-};
-
-const attributes = {
-  activeMedia: 'data-active-media',
-  mediaId: 'data-media-id',
-};
-
-const classes = {
-  active: 'is-active',
-  focused: 'is-focused',
-  mediaActive: 'media--active',
-  mediaHidden: 'media--hidden',
-  mediaHiding: 'media--hiding',
-};
-
 if (!customElements.get('product-thumbs')) {
   customElements.define(
     'product-thumbs',
@@ -27,12 +5,12 @@ if (!customElements.get('product-thumbs')) {
       constructor() {
         super();
 
-        this.container = this.closest(selectors.section);
-        this.productImages = this.container.querySelectorAll(selectors.productImage);
-        this.productImagesContainer = this.container.querySelector(selectors.productImagesContainer);
-        this.productThumbs = this.container.querySelectorAll(selectors.thumbItem);
-        this.thumbSlider = this.querySelector(selectors.thumbSlider);
-        this.thumbLinks = this.querySelectorAll(selectors.thumbLink);
+        this.container = this.closest('[data-section-id]');
+        this.productImages = this.container.querySelectorAll('[data-image-id]');
+        this.productImagesContainer = this.container.querySelector('product-images');
+        this.productThumbs = this.container.querySelectorAll('[data-thumb-item]');
+        this.thumbSlider = this.querySelector('[data-thumbs-slider]');
+        this.thumbLinks = this.querySelectorAll('[data-thumb-link]');
       }
 
       connectedCallback() {
@@ -53,7 +31,7 @@ if (!customElements.get('product-thumbs')) {
         // Callback function to execute when mutations are observed
         const callback = (mutationList) => {
           for (const mutation of mutationList) {
-            if (mutation.type === 'attributes' && mutation.attributeName == attributes.activeMedia) {
+            if (mutation.type === 'attributes' && mutation.attributeName == 'data-active-media') {
               this.setActiveThumb();
             }
           }
@@ -67,11 +45,11 @@ if (!customElements.get('product-thumbs')) {
         this.thumbLinks.forEach((thumb) => {
           thumb.addEventListener('click', (e) => {
             e.preventDefault();
-            const thumbItem = thumb.closest(selectors.thumbItem);
-            const id = thumb.getAttribute(attributes.mediaId);
+            const thumbItem = thumb.closest('[data-thumb-item]');
+            const id = thumb.getAttribute('data-media-id');
 
             // Do nothing if clicked on the active thumbnail
-            if (thumbItem.classList.contains(classes.active)) return;
+            if (thumbItem.classList.contains('is-active')) return;
 
             // Dispatch media select event to show the related product image
             this.dispatchEvent(
@@ -87,9 +65,9 @@ if (!customElements.get('product-thumbs')) {
           thumb.addEventListener('keyup', (e) => {
             // On keypress Enter move the focus to the first focusable element in the related slide
             if (e.code === 'Enter') {
-              const mediaId = thumb.getAttribute(attributes.mediaId);
+              const mediaId = thumb.getAttribute('data-media-id');
               const mediaElem = this.productImagesContainer
-                .querySelector(`[${attributes.mediaId}="${mediaId}"]`)
+                .querySelector(`[data-media-id="${mediaId}"]`)
                 ?.querySelectorAll('model-viewer, video, iframe, button, [href], input, [tabindex]:not([tabindex="-1"])')[0];
               if (mediaElem) {
                 mediaElem.dispatchEvent(new Event('focus'));
@@ -104,22 +82,22 @@ if (!customElements.get('product-thumbs')) {
       preloadImagesOnHover() {
         this.thumbLinks.forEach((thumb) => {
           thumb.addEventListener('mouseover', () => {
-            const id = thumb.getAttribute(attributes.mediaId);
-            const productImage = this.productImagesContainer.querySelector(`[${attributes.mediaId}="${id}"] img`);
+            const id = thumb.getAttribute('data-media-id');
+            const productImage = this.productImagesContainer.querySelector(`[data-media-id="${id}"] img`);
             productImage?.setAttribute('loading', 'eager');
           });
         });
       }
 
       setActiveThumb() {
-        const id = this.productImagesContainer.getAttribute(attributes.activeMedia);
-        const selectedThumb = this.querySelector(`[${attributes.mediaId}="${id}"]`);
+        const id = this.productImagesContainer.getAttribute('data-active-media');
+        const selectedThumb = this.querySelector(`[data-media-id="${id}"]`);
 
         // Remove class active from the previously selected thumbnail
-        this.querySelector(`${selectors.thumbItem}.${classes.active}`)?.classList.remove(classes.active);
+        this.querySelector('[data-thumb-item].is-active')?.classList.remove('is-active');
 
         // Add class active to the selected thumbnail
-        selectedThumb?.parentNode.classList.add(classes.active);
+        selectedThumb?.parentNode.classList.add('is-active');
 
         requestAnimationFrame(() => {
           this.scrollToThumb();
@@ -130,7 +108,7 @@ if (!customElements.get('product-thumbs')) {
         const thumbs = this.thumbSlider;
 
         if (thumbs) {
-          const thumb = thumbs.querySelector(`.${classes.active}`);
+          const thumb = thumbs.querySelector('.is-active');
           if (!thumb) return;
           const thumbsScrollTop = thumbs.scrollTop;
           const thumbsScrollLeft = thumbs.scrollLeft;
