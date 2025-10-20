@@ -136,29 +136,10 @@
     </div>
 
     {%- if sale_badge or final_sale -%}
-      <div
-        class="product__sale"
-        data-price-off
-      >
+      <div class="product__sale">
         {%- if sale_badge and is_on_sale -%}
-          <span
-            class="product__price--off"
-            data-price-off-badge
-          >
-            {% if settings.sale_badge_type == 'percentage' %}
-              <span>{{ compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round }}%</span>
-            {% else %}
-              {%- liquid
-                assign price_difference = compare_at_price | minus: price
-
-                if settings.currency_code_enable
-                  assign price_difference = price_difference | money_with_currency
-                else
-                  assign price_difference = price_difference | money
-                endif
-              -%}
-              <span>{{ price_difference }}</span>
-            {% endif %}
+          <span class="product__price--off">
+            <span>{{ compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round }}%</span>
             {{ 'products.product.off' | t }}
           </span>
         {%- endif -%}
