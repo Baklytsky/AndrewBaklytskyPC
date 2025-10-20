@@ -90,7 +90,7 @@
                       {%- assign swatch_style = swatch_style | append: '--animation-delay: ' | append: animation_delay | append: 's;' -%}
 
                       <tooltip-component
-                        class="swatches swatch__button swatch__button--{{ settings.swatch_style }}"
+                        class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ option_value.name | handleize }}"
                         data-swatch-button
                         data-tooltip="{{ option_value }}"
                         data-swatch-variant="{{ option_value.variant.id }}"
@@ -158,7 +158,7 @@
 -%}
 
 {%- comment -%} Conditional rendering {%- endcomment -%}
-{% liquid
+{%- liquid
   assign render_siblings = false
   assign render_swatches = false
   if has_colors == true

@@ -177,16 +177,13 @@
                                 {%- elsif filter_value.swatch.color != blank -%}
                                   {%- liquid
                                     assign is_white = false
-                                    if filter_value.swatch.color == '#ffffff'
+                                    if filter_value.swatch.color == '#FFFFFF'
                                       assign is_white = true
                                     endif
                                   -%}
 
                                   <div
-                                    class="swatch__button {{ swatch_button_style }}"
-                                    {% if is_white %}
-                                      data-swatch="white"
-                                    {% endif %}
+                                    class="swatch__button swatch__button--filter {{ swatch_button_style }} swatch-{{ filter_value.label | handleize }}"
                                     style="background-color: {{ filter_value.swatch.color }};"
                                   ></div>
                                 {%- else -%}
