@@ -75,9 +75,7 @@
                     endif
                   -%}
 
-                  {% if settings.collection_swatch_style != 'text' %}
-
-
+                  {%- if settings.collection_swatch_style != 'text' -%}
                     {%- for option_value in option.values limit: limit -%}
                       {%- if option_value.swatch.image -%}
                         {%- assign swatch = option_value.swatch.image | image_url: width: 48 | prepend: 'url(' | append: ')' -%}
@@ -100,8 +98,8 @@
                         style="{{ swatch_style }}"
                       >
 
-                        <a class="swatch__link" data-swatch-link href="{{ product_url }}?variant={{ option_value.variant.id }}">
-                          <span class="visually-hidden" data-swatch-text>{{ option_value }}</span>
+                        <a class="swatch__link" href="{{ product.url }}?variant={{ option_value.variant.id }}">
+                          <span class="visually-hidden">{{ option_value }}</span>
                         </a>
                       </tooltip-component>
                     {%- endfor -%}
@@ -112,7 +110,7 @@
                     {%- if mobileSwatchesLeft > 0 -%}
                       <div class="swatch-limited mobile">{{ '+' | append: mobileSwatchesLeft }}</div>
                     {%- endif -%}
-                  {% endif %}
+                  {%- endif -%}
                 {%- endif -%}
               {%- endfor -%}
             </grid-swatch>
