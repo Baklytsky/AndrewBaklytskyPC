@@ -301,6 +301,7 @@ class CartItems extends HTMLElement {
       formData.append(`updates[${element}]`, 0);
     });
 
+    this.cart.classList.add(classes.loading);
     this.disableCartButtons();
 
     fetch(theme.routes.cart_update_url, {
