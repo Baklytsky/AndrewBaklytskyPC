@@ -84,7 +84,7 @@
   <div class="product-quick-add__form">
     <div class="product-quick-add__form__inner" data-form-wrapper>
       {%- liquid
-        assign product_form_id = 'product-form-upsell-' | append: section.id | append: '-' | append: product.id
+        assign product_form_id = 'ProductFormUpsell-' | append: section.id | append: '-' | append: product.id
 
         render 'product-title', product: product, is_title_linked: true, animation_name: animation_name, animation_delay: animation_delay
         assign animation_delay = animation_delay | plus: animation_delay_increment
@@ -142,22 +142,4 @@
       -%}
     </div>
   </div>
-
-  {% unless product == empty %}
-    <script type="application/json" data-product-json>
-      {{ product | json }}
-    </script>
-
-    {%- liquid
-      assign metafields_data = '['
-      for variant in product.variants
-        assign metafield_value = variant.metafields.theme.final_sale.value | replace: '"', "''"
-        assign metafields_data = metafields_data | append: '{"variant_id":"' | append: variant.id | append: '" , "metafield_value":"' | append: metafield_value | append: '"},'
-      endfor
-      assign metafields_data = metafields_data | append: ']'
-      assign metafields_data = metafields_data | replace: ',]', ']'
-    -%}
-
-    <span data-variant-final-sale-metafield style="display:none;">{{ metafields_data }}</span>
-  {% endunless %}
 </div>

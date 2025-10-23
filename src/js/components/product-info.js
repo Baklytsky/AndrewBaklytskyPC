@@ -166,7 +166,6 @@ if (!customElements.get('product-info')) {
         this.pendingRequestUrl = productUrl;
         const shouldSwapProduct = this.dataset.url !== productUrl;
         const shouldFetchFullPage = this.dataset.updateUrl === 'true' && shouldSwapProduct;
-
         this.renderProductInfo({
           requestUrl: this.buildRequestUrlWithParams(productUrl, selectedOptionValues, shouldFetchFullPage),
           targetId: target.id,
@@ -319,7 +318,6 @@ if (!customElements.get('product-info')) {
 
           this.updateQuantityRules(this.sectionId, html);
           this.querySelector(`#Quantity-Rules-${this.dataset.sectionId}`)?.classList.remove('hidden');
-          this.querySelector(`#Volume-Note-${this.dataset.sectionId}`)?.classList.remove('hidden');
 
           // Recalculate button price after DOM updates
           this.updateButtonPrice();
@@ -338,7 +336,7 @@ if (!customElements.get('product-info')) {
       }
 
       updateVariantInputs(variantId) {
-        this.querySelectorAll(`#product-form-${this.dataset.sectionId}, #product-form-installment-${this.dataset.sectionId}`).forEach((productForm) => {
+        this.querySelectorAll(`#ProductForm-${this.dataset.sectionId}, #ProductFormInstallment-${this.dataset.sectionId}`).forEach((productForm) => {
           const input = productForm.querySelector('input[name="id"]');
           input.value = variantId ?? '';
           input.dispatchEvent(new Event('change', {bubbles: true}));
@@ -436,7 +434,6 @@ if (!customElements.get('product-info')) {
         const currentVariantId = this.productForm?.variantIdInput?.value;
         if (!currentVariantId) return;
 
-        this.querySelector('.quantity__rules-cart .loading__spinner').classList.remove('hidden');
         return fetch(`${this.dataset.url}?variant=${currentVariantId}&section_id=${this.dataset.sectionId}`)
           .then((response) => response.text())
           .then((responseText) => {
@@ -445,10 +442,6 @@ if (!customElements.get('product-info')) {
           })
           .catch((e) => {
             console.warn('Failed to fetch quantity rules:', e);
-          })
-          .finally(() => {
-            // Always reset loading state
-            this.querySelector('.quantity__rules-cart .loading__spinner')?.classList.add('hidden');
           });
       }
 

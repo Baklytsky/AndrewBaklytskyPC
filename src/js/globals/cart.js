@@ -595,6 +595,12 @@ class CartItems extends HTMLElement {
           // Redirect to cart page if "Add to cart" is successful
           window.location = theme.routes.cart_url;
         }
+
+        publish(theme.PUB_SUB_EVENTS.cartUpdate, {
+          source: 'product-form',
+          productVariantId: formData.get('id'),
+          cartData: response,
+        });
       })
       .catch((error) => {
         this.addToCartError(error, button);

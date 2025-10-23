@@ -31,14 +31,14 @@ if (!customElements.get('product-form')) {
 
         const quickAddModal = this.closest('quick-add-modal');
         if (!quickAddModal) {
-          window.a11y.lastElement = this.submitButton;
+          window.theme.a11y.lastElement = this.submitButton;
         }
       }
 
       toggleSubmitButton(disable = true, text = window.theme.strings.addToCart) {
         this.submitButton.toggleAttribute('disabled', disable);
         // Preserve existing price markup inside the add-to-cart text
-        const existingPriceElement = this.submitButtonText.querySelector('[data-product-price]');
+        const existingPriceElement = this.submitButtonText?.querySelector('[data-product-price]');
         if (existingPriceElement) {
           const priceHTML = existingPriceElement.outerHTML;
           this.submitButtonText.textContent = text;

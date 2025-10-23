@@ -357,7 +357,7 @@ if (!customElements.get('quick-add-product')) {
         this.setAttribute('data-initialized', 'true');
 
         // Handle swatch selection
-        const swatchInputs = this.instantAddForm.querySelectorAll('[data-variant-selector] input[type="radio"]');
+        const swatchInputs = this.instantAddForm.querySelectorAll('variant-selects input[type="radio"]');
         swatchInputs.forEach((input) => {
           input.addEventListener('change', this.handleInstantAddVariantChange);
         });
@@ -373,14 +373,14 @@ if (!customElements.get('quick-add-product')) {
        * Handle variant change for instant add (swatches)
        */
       handleInstantAddVariantChange(e) {
-        const variantId = e.target.getAttribute('data-variant-id');
-        if (!variantId) return;
+        // const variantId = e.target.getAttribute('data-variant-id');
+        // if (!variantId) return;
 
-        const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
-        if (!variantIdInput) return;
+        // const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
+        // if (!variantIdInput) return;
 
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
+        // variantIdInput.value = variantId;
+        // variantIdInput.dispatchEvent(new Event('change'));
         this.closeAllErrorContainers(this.parentElement);
       }
 
