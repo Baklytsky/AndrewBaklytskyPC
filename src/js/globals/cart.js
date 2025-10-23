@@ -62,7 +62,6 @@ const selectors = {
   bundleRemoveButton: '[data-bundle-cart-remove]',
   discountButton: '[data-cart-discount-button]',
   discountField: '[data-cart-discount-field]',
-  collapsible: '[data-collapsible]',
 };
 
 const attributes = {
@@ -267,10 +266,10 @@ class CartItems extends HTMLElement {
           if (button.hasAttribute(attributes.bundleRemoveButton) && button.getAttribute(attributes.bundleRemoveButton) !== '') {
             const lineItemKey = button.getAttribute(attributes.bundleRemoveButton);
             const lineItemKeyArr = lineItemKey.split(',');
-            const collapsible = button.closest(selectors.collapsible);
+            const lineItem = button.closest(selectors.item);
 
-            if (collapsible) {
-              collapsible.classList.add(classes.removed);
+            if (lineItem) {
+              lineItem.classList.add(classes.removed);
             }
 
             this.removeMultipleProducts(lineItemKeyArr);
@@ -777,13 +776,7 @@ class CartItems extends HTMLElement {
       if (updatedQuantity) {
         currentItem.classList.add(classes.loading);
       } else {
-        const collapsible = currentItem.closest(selectors.collapsible);
-
         currentItem.classList.add(classes.removed);
-
-        if (collapsible) {
-          collapsible.classList.add(classes.removed);
-        }
       }
     }
     this.disableCartButtons();

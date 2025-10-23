@@ -29,9 +29,7 @@ const attributes = {
   animationTiming: 'data-bundle-animation-timing',
   productId: 'data-bundle-product-button',
   quickAdd: 'data-quick-add-btn',
-  bundleName: 'data-bundle-name',
-  bundleImage: 'data-bundle-image',
-  bundleHandle: 'data-bundle-handle',
+  bundleId: 'data-bundle-id',
   bundleCartItem: 'data-bundle-cart-item',
   placeholderImage: 'data-placeholder-image',
   bundleProductUrl: 'data-bundle-product-url',
@@ -67,7 +65,7 @@ if (!customElements.get('bundle-collection')) {
         this.placeholders = this.querySelectorAll(selectors.placeholder);
         this.selectedProducts = [];
         this.bundleCartItems = null;
-        this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
+        this.bundleId = this.hasAttribute(attributes.bundleId) ? this.getAttribute(attributes.bundleId) : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
         this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
@@ -116,9 +114,9 @@ if (!customElements.get('bundle-collection')) {
       addProductsToCart() {
         if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
           this.selectedProducts.forEach((element) => {
-            if (this.handle !== '') {
-              this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
-              element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
+            if (this.bundleId !== '') {
+              this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.bundleId}"]`);
+              element.properties._bundle_unique_id = `${this.bundleId}_${this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1}`;
             }
           });
 
@@ -262,7 +260,7 @@ if (!customElements.get('bundle-collection')) {
           id: variant.id,
           quantity: 1,
           properties: {
-            _bundle_title: `${this.getAttribute(attributes.bundleName)}`,
+            _bundle_unique_id: ``,
           },
           price: variant.price,
           priceCompare: variant.compare_at_price ? variant.compare_at_price : 0,
@@ -281,10 +279,6 @@ if (!customElements.get('bundle-collection')) {
           },
           variants: product.variants.length,
         };
-
-        if (this.hasAttribute(attributes.bundleImage)) {
-          productData.properties._bundle_image = `${this.getAttribute(attributes.bundleImage)}`;
-        }
 
         this.setProductToPlaceholder(productData, placeholder);
 
