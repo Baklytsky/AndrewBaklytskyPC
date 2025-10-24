@@ -419,12 +419,36 @@
                   {%- when 'pickup' -%}
                     {{ 'pickup-availability.css' | asset_url | stylesheet_tag }}
 
+                    {%- assign pick_up_availabilities = current_variant.store_availabilities
+                      | where: 'pick_up_enabled', true
+                    -%}
+
                     <pickup-availability
                       class="product__block product__pickup block-padding"
-                      data-store-availability-container="{{ current_variant.id }}"
+                      {% if current_variant.available and pick_up_availabilities.size > 0 %}
+                        available
+                      {% endif %}
+                      data-root-url="{{ routes.root_url }}"
+                      data-variant-id="{{ current_variant.id }}"
+                      data-has-only-default-variant="{{ product.has_only_default_variant }}"
+                      data-product-page-color-scheme="{{ color_scheme }}"
                       {{ block.shopify_attributes }}
                       {{ block_style }}
-                    ></pickup-availability>
+                    >
+                      <template>
+                        <pickup-availability-preview class="pickup__preview">
+                          {%- render 'icon-cancel' -%}
+                          <div class="pickup__info">
+                            <p class="pickup__info__text">
+                              {{ 'products.product.pickup_availability.unavailable' | t }}
+                            </p>
+                            <button class="pickup__button text-link small">
+                              {{ 'products.product.pickup_availability.refresh' | t }}
+                            </button>
+                          </div>
+                        </pickup-availability-preview>
+                      </template>
+                    </pickup-availability>
 
                     <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
 

@@ -54,17 +54,20 @@
       echo '--swatch: ' | append: swatch_value | append: ';'
     endif
   endcapture
+
+  assign sale = false
+  if value.variant.compare_at_price > value.variant.price and settings.variant_on_sale
+    assign sale = true
+  endif
 -%}
 
 <tooltip-component
-  is_theme_swatch_option="{{is_theme_swatch_option}}"
-  is_native_swatch_option="{{is_native_swatch_option}}"
   data-tooltip="{{ value | escape | capitalize }}"
   class="
     swatch__button
     swatch__button--{{ settings.swatch_style }}
     swatch__button swatch-{{ value | handle }}
-    {% if sale %} sale{% endif %}
+    {% if sale %} swatch__button--sale{% endif %}
     swatches
   "
   {%- if swatch_style != '' -%}

@@ -373,15 +373,32 @@ if (!customElements.get('quick-add-product')) {
        * Handle variant change for instant add (swatches)
        */
       handleInstantAddVariantChange(e) {
-        // const variantId = e.target.getAttribute('data-variant-id');
-        // if (!variantId) return;
+        const variantId = e.target.getAttribute('data-variant-id');
+        if (!variantId) return;
 
-        // const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
-        // if (!variantIdInput) return;
+        const productUrl = `${theme.routes.root}products/${e.target.dataset.productHandle}?section_id=api-product-price&variant=${variantId}`;
+        this.updatePrice(productUrl);
 
-        // variantIdInput.value = variantId;
-        // variantIdInput.dispatchEvent(new Event('change'));
+        const variantIdInput = this.instantAddForm.querySelector('[name=id]');
+        if (!variantIdInput) return;
+
+        // Update variant id
+        variantIdInput.value = variantId;
+        variantIdInput.dispatchEvent(new Event('change'));
         this.closeAllErrorContainers(this.parentElement);
+      }
+
+      updatePrice(productUrl) {
+        fetch(productUrl)
+          .then(this.handleErrors)
+          .then((response) => response.text())
+          .then((text) => {
+            const priceHTML = new DOMParser().parseFromString(text, 'text/html').querySelector('.shopify-section').innerHTML;
+            this.querySelector('.product-upsell__price').innerHTML = priceHTML;
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       }
 
       resetAnimatedItems() {

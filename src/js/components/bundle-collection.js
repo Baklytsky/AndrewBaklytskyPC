@@ -1,5 +1,3 @@
-import {getSizedImageUrl} from '@shopify/theme-images';
-
 const selectors = {
   bundleJson: '[data-bundle-json]',
   template: '[data-bundle-template]',
@@ -168,7 +166,7 @@ if (!customElements.get('bundle-collection')) {
       }
 
       isSupportedByGetSizedImageUrl(src, size = '100x') {
-        return getSizedImageUrl(src, size) !== null;
+        return theme.getSizedImageUrl(src, size) !== null;
       }
 
       setProductToPlaceholder(data, placeholder) {

@@ -1,73 +1,85 @@
-import FetchError from '../util/fetch-error';
-
-const selectors = {
-  pickupContainer: 'data-store-availability-container',
-  shopifySection: '.shopify-section',
-  drawer: '[data-pickup-drawer]',
-  section: '[data-section-type]',
-};
-
-const classes = {
-  isHidden: 'hidden',
-};
-
-class PickupAvailability extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.container = this.closest(selectors.section);
-    this.drawer = null;
-    this.container.addEventListener('theme:variant:change', (event) => this.fetchPickupAvailability(event));
-    this.fetchPickupAvailability();
-  }
-
-  fetchPickupAvailability(event) {
-    if ((event && !event.detail.variant) || (event && event.detail.variant && !event.detail.variant.available)) {
-      this.classList.add(classes.isHidden);
-      return;
-    }
-
-    const variantID = event && event.detail.variant ? event.detail.variant.id : this.getAttribute(selectors.pickupContainer);
-
-    if (variantID) {
-      fetch(`${window.theme.routes.root}variants/${variantID}/?section_id=api-pickup-availability`)
-        .then(this.handleErrors)
-        .then((response) => response.text())
-        .then((text) => {
-          const pickupAvailabilityHTML = new DOMParser().parseFromString(text, 'text/html').querySelector(selectors.shopifySection).innerHTML;
-          this.innerHTML = pickupAvailabilityHTML;
-
-          this.drawer = this.querySelector(selectors.drawer);
-          if (!this.drawer) {
-            this.classList.add(classes.isHidden);
-            return;
-          }
-
-          this.classList.remove(classes.isHidden);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    }
-  }
-
-  handleErrors(response) {
-    if (!response.ok) {
-      return response.json().then(function (json) {
-        const e = new FetchError({
-          status: response.statusText,
-          headers: response.headers,
-          json: json,
-        });
-        throw e;
-      });
-    }
-    return response;
-  }
-}
-
 if (!customElements.get('pickup-availability')) {
-  customElements.define('pickup-availability', PickupAvailability);
+  customElements.define(
+    'pickup-availability',
+    class PickupAvailability extends HTMLElement {
+      constructor() {
+        super();
+
+        if (!this.hasAttribute('available')) return;
+
+        this.errorHtml = this.querySelector('template').content.firstElementChild.cloneNode(true);
+        this.onClickRefreshList = this.onClickRefreshList.bind(this);
+        this.fetchAvailability(this.dataset.variantId);
+      }
+
+      fetchAvailability(variantId) {
+        if (!variantId) return;
+
+        let rootUrl = this.dataset.rootUrl;
+        if (!rootUrl.endsWith('/')) {
+          rootUrl = rootUrl + '/';
+        }
+        const variantSectionUrl = `${rootUrl}variants/${variantId}/?section_id=api-pickup-availability`;
+
+        fetch(variantSectionUrl)
+          .then((response) => response.text())
+          .then((text) => {
+            const sectionInnerHTML = new DOMParser().parseFromString(text, 'text/html').querySelector('.shopify-section');
+            this.renderPreview(sectionInnerHTML);
+          })
+          .catch((e) => {
+            const button = this.querySelector('button');
+            if (button) button.removeEventListener('click', this.onClickRefreshList);
+            this.renderError();
+          });
+      }
+
+      onClickRefreshList() {
+        this.fetchAvailability(this.dataset.variantId);
+      }
+
+      update(variant) {
+        if (variant?.available) {
+          this.fetchAvailability(variant.id);
+        } else {
+          this.removeAttribute('available');
+          this.innerHTML = '';
+        }
+      }
+
+      renderError() {
+        this.innerHTML = '';
+        this.appendChild(this.errorHtml);
+
+        this.querySelector('button').addEventListener('click', this.onClickRefreshList);
+      }
+
+      renderPreview(sectionInnerHTML) {
+        const drawer = document.querySelector('pickup-availability-drawer');
+
+        if (drawer) drawer.remove();
+        if (!sectionInnerHTML.querySelector('pickup-availability-preview')) {
+          this.innerHTML = '';
+          this.removeAttribute('available');
+          return;
+        }
+
+        this.innerHTML = sectionInnerHTML.querySelector('pickup-availability-preview').outerHTML;
+        this.setAttribute('available', '');
+
+        document.body.appendChild(sectionInnerHTML.querySelector('pickup-availability-drawer'));
+        const colorClassesToApply = this.dataset.productPageColorScheme.split(' ');
+        colorClassesToApply.forEach((colorClass) => {
+          document.querySelector('pickup-availability-drawer').classList.add(colorClass);
+        });
+
+        const button = this.querySelector('button');
+
+        if (button)
+          button.addEventListener('click', () => {
+            document.querySelector('pickup-availability-drawer popup-component').popupOpen();
+          });
+      }
+    }
+  );
 }
