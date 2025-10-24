@@ -115,7 +115,7 @@ if (!customElements.get('quick-add-product')) {
               getScript(
                 scriptUrl,
                 () => {
-                  console.log('success');
+                  // console.log('success');
                 },
                 () => {
                   console.log('error');

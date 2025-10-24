@@ -282,7 +282,7 @@ class CartItems extends HTMLElement {
   cartRemoveEvents() {
     const cartItemRemove = document.querySelectorAll(selectors.cartItemRemove);
 
-    cartItemRemove.forEach((button) => {
+    cartItemRemove?.forEach((button) => {
       const item = button.closest(selectors.item);
       button.addEventListener('click', (event) => {
         event.preventDefault();
@@ -296,6 +296,23 @@ class CartItems extends HTMLElement {
           },
           item
         );
+      });
+    });
+
+    const cartBundleRemove = document.querySelectorAll('[data-bundle-cart-remove]');
+    cartBundleRemove?.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (button.getAttribute('data-bundle-cart-remove') !== '') {
+          const lineItemKey = button.getAttribute('data-bundle-cart-remove');
+          const lineItemKeyArr = lineItemKey.split(',');
+
+          button.closest('[data-bundle-cart-item]')?.classList.add('is-removed');
+
+          this.removeMultipleProducts(lineItemKeyArr);
+        }
       });
     });
 
@@ -315,31 +332,34 @@ class CartItems extends HTMLElement {
    */
 
   cartAddEvent(event) {
-    let formData = '';
+    let formData = event.detail.data || '';
     let button = event.detail.button;
 
     if (button.hasAttribute('disabled')) return;
     const form = button.form || button.closest('form');
     // Validate form
 
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-    formData = new FormData(form);
+    if (form) {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      formData = new FormData(form);
 
-    if (form !== null && form.querySelector('[type="file"]')) {
-      return;
+      if (form.querySelector('[type="file"]')) {
+        return;
+      }
+
+      const maxInventoryReached = form.getAttribute(attributes.maxInventoryReached);
+      const errorMessagePosition = form.getAttribute(attributes.errorMessagePosition);
+      this.showCannotAddMoreInCart = false;
+      if (maxInventoryReached === 'true' && errorMessagePosition === 'cart') {
+        this.showCannotAddMoreInCart = true;
+      }
     }
+
     if (theme.settings.cartType === 'drawer' && this.cartDrawer) {
       event.preventDefault();
-    }
-
-    const maxInventoryReached = form.getAttribute(attributes.maxInventoryReached);
-    const errorMessagePosition = form.getAttribute(attributes.errorMessagePosition);
-    this.showCannotAddMoreInCart = false;
-    if (maxInventoryReached === 'true' && errorMessagePosition === 'cart') {
-      this.showCannotAddMoreInCart = true;
     }
 
     this.addToCart(formData, button);
@@ -515,8 +535,16 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
+        this.showGetCartResponse = true;
         const element = document.createElement('div');
         element.innerHTML = response;
+
+        this.toggleAwards(element);
+
+        if (this.showGetCartResponse) {
+          const cleanResponse = element.querySelector(selectors.apiContent);
+          this.build(cleanResponse);
+        }
 
         const cleanResponse = element.querySelector(selectors.apiContent);
         this.build(cleanResponse);
@@ -534,6 +562,19 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
+    let headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/javascript',
+    };
+
+    if (Array.isArray(formData)) {
+      headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/javascript',
+      };
+      formData = JSON.stringify({items: formData});
+    }
+
     if (this.cart) {
       this.cart.classList.add(classes.loading);
     }
@@ -551,10 +592,7 @@ class CartItems extends HTMLElement {
 
     fetch(theme.routes.cart_add_url, {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        Accept: 'application/javascript',
-      },
+      headers: headers,
       body: formData,
     })
       .then((response) => {
@@ -596,9 +634,11 @@ class CartItems extends HTMLElement {
           window.location = theme.routes.cart_url;
         }
 
+        if (typeof formData === 'string') return;
+
         publish(theme.PUB_SUB_EVENTS.cartUpdate, {
           source: 'product-form',
-          productVariantId: formData.get('id'),
+          productVariantId: formData?.get('id'),
           cartData: response,
         });
       })
@@ -712,21 +752,17 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll('input');
+    const inputs = this.cart.querySelectorAll('input:not([data-bundle-cart-quantity]');
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
-    if (inputs.length) {
-      inputs.forEach((item) => {
-        item.classList.remove(classes.disabled);
-        item.disabled = false;
-      });
-    }
+    inputs?.forEach((item) => {
+      item.classList.remove(classes.disabled);
+      item.disabled = false;
+    });
 
-    if (buttons.length) {
-      buttons.forEach((item) => {
-        item.removeAttribute(attributes.disabled);
-      });
-    }
+    buttons?.forEach((item) => {
+      item.removeAttribute(attributes.disabled);
+    });
 
     this.cart.classList.remove(classes.loading);
   }
@@ -1160,6 +1196,279 @@ class CartItems extends HTMLElement {
         });
       }
     });
+  }
+
+  /**
+   * Remove multiple products from cart
+   *
+   * @param   {Array}  A list of products
+   *
+   * @return  {Void}
+   */
+  removeMultipleProducts(productsArr) {
+    let formData = new FormData();
+
+    productsArr.forEach((element) => {
+      formData.append(`updates[${element}]`, 0);
+    });
+
+    this.disableCartButtons();
+
+    fetch(theme.routes.cart_update_url, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.text())
+      .then((state) => {
+        this.getCart();
+      })
+      .catch((error) => {
+        console.log(error);
+        this.enableCartButtons();
+      });
+  }
+
+  /**
+   * Update discount in the cart
+   *
+   * @return  {Void}
+   */
+  updateDiscount() {
+    const discountButton = this.cart.querySelector(selectors.discountButton);
+    const discountField = this.cart.querySelector(selectors.discountField);
+
+    if (discountButton && discountField) {
+      discountButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newDiscountCode = discountField.value;
+
+        if (newDiscountCode !== '') {
+          const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
+          this.disableCartButtons();
+          fetch(theme.routes.cart_update_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              discount: `${newDiscountCode}${existingDiscountCodes}`,
+            }),
+          })
+            .then((data) => {
+              this.getCart();
+              discountField.value = '';
+            })
+            .catch((error) => {
+              console.log(error);
+              this.enableCartButtons();
+            });
+        }
+      });
+    }
+  }
+
+  /**
+   * Converts a user input amount to cents (or the smallest currency unit)
+   * @param {string|number} input - entered value (e.g. 25.99 or "500.000")
+   * @param {string} currencyCode - the currency code, e.g. "USD", "JPY"
+   * @returns {number} - value in cents (or units if it's a zero-decimal currency)
+   */
+  normalizePriceToMinorUnits(input, currencyCode) {
+    const zeroDecimalCurrencies = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
+    const rawValue = parseFloat(input);
+    if (isNaN(rawValue)) {
+      throw new Error(input);
+    }
+
+    const isZeroDecimal = zeroDecimalCurrencies.includes(currencyCode);
+
+    return isZeroDecimal ? Math.round(rawValue) : Math.round(rawValue * 100);
+  }
+
+  checkConditions(condition, data) {
+    const value = condition.value;
+    switch (condition.type) {
+      case 'ORDER_AMOUNT':
+        const operator = condition.operator;
+        const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
+        const price = data.price;
+        const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
+        return match;
+        break;
+
+      case 'PRODUCT_TAG':
+        return data.tags.includes(value);
+        break;
+
+      case 'COLLECTION':
+        const collectionsIds = data.collections.map((item) => item.id.toString());
+        const collectionId = value.replace('gid://shopify/Collection/', '');
+        return collectionsIds.includes(collectionId);
+        break;
+
+      case 'SPECIFIC_PRODUCT':
+        const productId = value.replace('gid://shopify/Product/', '');
+        return data.products.includes(productId);
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  checkActiveReward(config) {
+    const startDateString = config['promotion-start-date'];
+    const startDate = new Date(startDateString);
+    const endDateString = config['promotion-end-date'];
+    const endDate = new Date(endDateString);
+    const status = config['promotion-status'];
+    const timeNow = new Date();
+
+    if (isNaN(startDate) || isNaN(endDate)) {
+      return false;
+    }
+
+    return status === 'active' && timeNow > startDate && timeNow < endDate;
+  }
+
+  toggleReward(data) {
+    const conditions = data.functionConfig.conditions;
+    const rewards = data.functionConfig.rewards;
+    let addItems = [];
+    let removeItems = [];
+
+    if (conditions?.length && rewards?.length) {
+      const addedRewards = data.metaConfig.rewards;
+      let result = false;
+
+      for (let i = 0; i < conditions.length; ) {
+        let groupResult = this.checkConditions(conditions[i], data.info);
+        i++;
+
+        for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
+          groupResult = groupResult && this.checkConditions(conditions[i], data.info);
+        }
+
+        result = result || groupResult;
+      }
+
+      if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
+        if (result && !addedRewards.length) {
+          rewards.forEach((reward) => {
+            addItems.push({
+              id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
+              quantity: reward.quantity ?? 1,
+              properties: {
+                _reward: `reward`,
+              },
+            });
+          });
+        } else {
+          removeItems = addedRewards;
+        }
+      }
+    }
+
+    return {addItems, removeItems};
+  }
+
+  toggleTier(data) {
+    const tierVariants = data.functionConfig.tiers;
+    let addItems = [];
+    let removeItems = [];
+
+    if (tierVariants?.length) {
+      const tierMode = data.functionConfig.cumulative;
+      const addedGifts = data.metaConfig.gifts;
+
+      tierVariants.sort((a, b) => b.threshold - a.threshold);
+
+      for (let index = 0; index < tierVariants.length; index++) {
+        const tier = tierVariants[index];
+        let addVariant = true;
+        const variantId = tier.variantId.replace('gid://shopify/ProductVariant/', '');
+        const condition = {
+          type: 'ORDER_AMOUNT',
+          value: tier.threshold,
+          operator: 'greater_than_or_equal',
+        };
+        const resultCondition = this.checkConditions(condition, data.info);
+
+        if (addedGifts.length) {
+          addedGifts.forEach((addedReward) => {
+            const addedRewardVariantId = addedReward.split(':')[0];
+
+            if (resultCondition && addedRewardVariantId === variantId) {
+              addVariant = false;
+
+              if (!tierMode && addItems.length > 0) {
+                removeItems.push(addedReward);
+              }
+            }
+
+            if (!resultCondition && addedRewardVariantId === variantId) {
+              removeItems.push(addedReward);
+            }
+          });
+        }
+
+        if (resultCondition && addVariant && addItems.length < 1) {
+          addItems.push({
+            id: variantId,
+            quantity: 1,
+            properties: {
+              _gift: `gift`,
+            },
+          });
+        }
+
+        if (!tierMode && index === 0 && !addVariant) {
+          break;
+        }
+      }
+    }
+
+    return {addItems, removeItems};
+  }
+
+  toggleAwards(response) {
+    const cartJson = response.querySelector(selectors.cartJson);
+    if (cartJson) {
+      const info = JSON.parse(cartJson.innerHTML);
+      const meta = info.meta;
+      let addItems = [];
+      let removeItems = [];
+
+      for (const property in meta) {
+        const metaConfig = meta[property];
+        const config = metaConfig.config;
+        const isRewardActive = this.checkActiveReward(config);
+
+        if (isRewardActive) {
+          const functionConfig = config['function-configuration'];
+          const data = {functionConfig, metaConfig, info};
+          const toggleRewardObj = this.toggleReward(data);
+          const toggleTierObj = this.toggleTier(data);
+
+          addItems.push(...toggleRewardObj.addItems, ...toggleTierObj.addItems);
+          removeItems.push(...toggleRewardObj.removeItems, ...toggleTierObj.removeItems);
+        }
+      }
+
+      if (addItems.length || removeItems.length) {
+        this.showGetCartResponse = false;
+        let addItemsSkip = true;
+
+        if (removeItems.length) {
+          this.removeMultipleProducts(removeItems);
+          addItemsSkip = false;
+        }
+
+        if (addItems.length && addItemsSkip) {
+          this.addToCart(addItems);
+        }
+      }
+    }
   }
 
   removeUpsellOrBundleProduct(productID, type = 'upsell') {

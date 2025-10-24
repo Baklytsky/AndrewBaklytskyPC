@@ -45,6 +45,12 @@
     assign enable_thumbs_mobile = true
   endif
 
+  if product.media.size <= 1
+    assign show_thumbnails = false
+    assign enable_thumbs = false
+    assign enable_thumbs_mobile = false
+  endif
+
   assign modifier = image_layout | default: 'thumbnails'
   assign product_wrapper_modifier = 'product__wrapper--' | append: modifier
 

@@ -19,14 +19,42 @@ if (!customElements.get('product-form')) {
       onSubmitHandler(evt) {
         evt.preventDefault();
 
-        document.dispatchEvent(
-          new CustomEvent('theme:cart:add', {
-            detail: {
-              button: this.submitButton,
-            },
-            bubbles: false,
-          })
-        );
+        if (this.buttonATC.hasAttribute('data-bundle-modal-button')) {
+          // TODO:
+          // productJSON.id
+          // this.productJSON
+          // this.productForm.getFormState().variant
+          console.log('product form submit handler - needs productJSON.id');
+          const bundleButton = document.querySelector(`[data-bundle-product-button="${this.productJSON.id}"]`);
+          if (bundleButton) {
+            bundleButton.dispatchEvent(
+              new CustomEvent('theme:bundle:button-modal', {
+                detail: {
+                  data: {
+                    product: this.productJSON,
+                    variant: this.productForm.getFormState().variant,
+                  },
+                },
+                bubbles: true,
+              })
+            );
+
+            document.dispatchEvent(
+              new CustomEvent('theme:bundle:added', {
+                bubbles: true,
+              })
+            );
+          }
+        } else {
+          document.dispatchEvent(
+            new CustomEvent('theme:cart:add', {
+              detail: {
+                button: this.submitButton,
+              },
+              bubbles: false,
+            })
+          );
+        }
 
         const quickAddModal = this.closest('quick-add-modal');
         if (!quickAddModal) {

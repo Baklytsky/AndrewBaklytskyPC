@@ -85,16 +85,10 @@ if (!customElements.get('bundle-collection')) {
         }
 
         this.addEventListener('theme:bundle:change', this.bundleButtonChangeEvent);
-
         this.addEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
 
-        if (this.scrollToBundleButton) {
-          this.scrollToBundleButton.addEventListener('click', this.scrollToBundleEvent);
-        }
-
-        if (this.addButton) {
-          this.addButton.addEventListener('click', this.addProductsToCartEvent);
-        }
+        this.scrollToBundleButton?.addEventListener('click', this.scrollToBundleEvent);
+        this.addButton?.addEventListener('click', this.addProductsToCartEvent);
 
         if (this.bundleProducts.length) {
           this.loadLocalStorage();
@@ -205,7 +199,7 @@ if (!customElements.get('bundle-collection')) {
             dataImageAspectRatio = data.image.variant?.aspect_ratio;
           }
 
-          const imageSrc = this.isSupportedByGetSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) ? getSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) : dataImageSrc;
+          const imageSrc = this.isSupportedByGetSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) ? theme.getSizedImageUrl(dataImageSrc, `${imageWidthRetina}x`) : dataImageSrc;
           imageTag.src = imageSrc;
           imageTag.width = imageWidthRetina;
           imageTag.height = imageWidthRetina / dataImageAspectRatio;
@@ -253,9 +247,7 @@ if (!customElements.get('bundle-collection')) {
         const placeholder = this.placeholders[this.selectedProducts.length];
         if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing) || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
         const variant = data.variant;
-        // TODO:
-        // we don't have product json anymore
-        // const product = data.product;
+        const product = data.product;
         const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {
@@ -309,11 +301,9 @@ if (!customElements.get('bundle-collection')) {
         }, this.animationTiming);
 
         const focusableElements = placeholder.querySelectorAll(selectors.focusable);
-        if (focusableElements.length) {
-          focusableElements.forEach((element) => {
-            element.removeAttribute('tabindex');
-          });
-        }
+        focusableElements?.forEach((element) => {
+          element.removeAttribute('tabindex');
+        });
 
         this.updateUI();
       }
