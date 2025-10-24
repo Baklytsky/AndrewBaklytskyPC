@@ -377,7 +377,9 @@ if (!customElements.get('quick-add-product')) {
         if (!variantId) return;
 
         const productUrl = `${theme.routes.root}products/${e.target.dataset.productHandle}?section_id=api-product-price&variant=${variantId}`;
+        const variantImageUrl = e.target.dataset.variantImage;
         this.updatePrice(productUrl);
+        this.updateImage(variantImageUrl);
 
         const variantIdInput = this.instantAddForm.querySelector('[name=id]');
         if (!variantIdInput) return;
@@ -399,6 +401,15 @@ if (!customElements.get('quick-add-product')) {
           .catch((e) => {
             console.error(e);
           });
+      }
+
+      updateImage(variantImageUrl) {
+        // Add current sibling swatch image to PGI image
+        const image = this.querySelector('.product-upsell__image__thumb img');
+        if (!image || !variantImageUrl) return;
+
+        image.src = variantImageUrl;
+        image.srcset = variantImageUrl + ' 120w';
       }
 
       resetAnimatedItems() {
