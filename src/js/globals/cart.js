@@ -315,7 +315,6 @@ class CartItems extends HTMLElement {
     cartBundleRemove?.forEach((button) => {
       button.addEventListener('click', (event) => {
         event.preventDefault();
-        event.stopPropagation();
 
         if (button.getAttribute('data-bundle-cart-remove') !== '') {
           const lineItemKey = button.getAttribute('data-bundle-cart-remove');
@@ -1266,6 +1265,7 @@ class CartItems extends HTMLElement {
       formData.append(`updates[${element}]`, 0);
     });
 
+    this.cart.classList.add(classes.loading);
     this.disableCartButtons();
 
     fetch(theme.routes.cart_update_url, {

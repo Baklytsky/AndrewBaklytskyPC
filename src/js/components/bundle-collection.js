@@ -17,7 +17,7 @@ if (!customElements.get('bundle-collection')) {
         this.placeholders = this.querySelectorAll('[data-bundle-placeholder]');
         this.selectedProducts = [];
         this.bundleCartItems = null;
-        this.handle = this.hasAttribute('data-bundle-handle') ? this.getAttribute('data-bundle-handle') : '';
+        this.bundleId = this.hasAttribute('data-bundle-id') ? this.getAttribute('data-bundle-id') : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
         this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
@@ -60,9 +60,9 @@ if (!customElements.get('bundle-collection')) {
       addProductsToCart() {
         if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
           this.selectedProducts.forEach((element) => {
-            if (this.handle !== '') {
-              this.bundleCartItems = document.querySelectorAll(`[data-bundle-cart-item="${this.handle}"]`);
-              element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
+            if (this.bundleId !== '') {
+              this.bundleCartItems = document.querySelectorAll(`[data-bundle-cart-item="${this.bundleId}"]`);
+              element.properties._bundle_unique_id = `${this.bundleId}_${this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1}`;
             }
           });
 
@@ -206,7 +206,7 @@ if (!customElements.get('bundle-collection')) {
           id: variant,
           quantity: 1,
           properties: {
-            _bundle_title: `${this.getAttribute('data-bundle-name')}`,
+            _bundle_unique_id: ``,
           },
           price: variant.price,
           priceCompare: variant.compare_at_price ? variant.compare_at_price : 0,
@@ -225,10 +225,6 @@ if (!customElements.get('bundle-collection')) {
           },
           variants: product.variants.length,
         };
-
-        if (this.hasAttribute('data-bundle-image')) {
-          productData.properties._bundle_image = `${this.getAttribute('data-bundle-image')}`;
-        }
 
         this.setProductToPlaceholder(productData, placeholder);
 

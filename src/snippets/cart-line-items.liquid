@@ -1,5 +1,6 @@
 {%- liquid
   assign line_items_bundle = ''
+  assign line_items_bundle_counter = 0
   assign animation_name = animation_name | default: 'cart-items-fade'
   assign animation_delay_increment = 50
   assign animation_delay = animation_delay | default: 0
@@ -35,19 +36,30 @@
     assign line_item_reward = false
     assign line_item_gift = false
 
-    assign bundle_name = line_item.properties._bundle_title
-    assign bundle_image = line_item.properties._bundle_image
     assign bundle_unique_id = line_item.properties._bundle_unique_id
+    assign bundle_id = bundle_unique_id | split: '_' | first
     assign prev_index = forloop.index0 | minus: 1
     assign next_index = forloop.index0 | plus: 1
     assign prev_line_item = cart.items[prev_index]
     assign next_line_item = cart.items[next_index]
-    assign next_line_item_bundle_name = next_line_item.properties._bundle_title
     assign next_line_item_bundle_unique_id = next_line_item.properties._bundle_unique_id
+    assign next_line_item_bundle_id = next_line_item_bundle_unique_id | split: '_' | first
 
-    if bundle_opened == false and bundle_name != blank
+    if bundle_opened == false and bundle_unique_id != blank
       assign bundle_opened = true
+      assign bundle_id_number = bundle_id | plus: 0
+      assign bundle_collection = line_item.product.collections | where: 'id', bundle_id_number | first
+      assign bundle_name = bundle_collection.title
+      assign bundle_url = bundle_collection.url
+      assign bundle_image = bundle_collection.image
+    endif
+
+    if bundle_opened
+      assign bundle_price = bundle_price | plus: line_item_final_price
+      assign bundle_keys = bundle_keys | append: ',' | append: line_item.key
       assign animation_delay = animation_delay | plus: animation_delay_increment
+    else
+      assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
     endif
 
     if line_item.properties._reward == 'reward'
@@ -61,11 +73,58 @@
     endif
   -%}
 
-  {%- capture line_item_product -%}
-    {%- unless bundle_opened -%}
-      {%- assign animation_delay_bundle = animation_delay | plus: animation_delay_increment -%}
-    {%- endunless -%}
+  {%- if bundle_opened -%}
+    {%- assign line_items_bundle_counter = line_items_bundle_counter | plus: 1 -%}
+    {%- capture line_items_bundle -%}
+      {{ line_items_bundle }}
 
+      <div class="cart__item__sub">
+        <div class="cart__item__sub__image{% unless line_item.image %} image--empty{% endunless %}">
+          <a
+            href="{{ line_item.url }}"
+            aria-label="{{ line_item.title | escape }}"
+            {% if settings.show_image_bg != 'none' %}
+              class="show-gray-bg"
+            {% endif %}
+          >
+            {%- if line_item.image -%}
+              <div class="lazy-image is-loading">
+                {{
+                  line_item.image
+                  | image_url: width: 60
+                  | image_tag:
+                    widths: '30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360',
+                    sizes: '30px',
+                    class: 'is-loading',
+                    loading: 'lazy',
+                    fetchpriority: fetchpriority
+                }}
+              </div>
+            {%- endif -%}
+          </a>
+        </div>
+
+        <div class="cart__item__sub__content">
+          <h5 class="cart__item__sub__title">
+            <a href="{{ line_item.url }}">
+              {{- line_item.product.title | strip_html -}}
+            </a>
+          </h5>
+
+          {%- unless line_item.product.has_only_default_variant -%}
+            <p class="cart__item__sub__options">
+              {%- for option in line_item.options_with_values -%}
+                {%- unless forloop.first -%}
+                  <span> | </span>
+                {%- endunless -%}
+                <span>{{ option.value }}</span>
+              {%- endfor -%}
+            </p>
+          {%- endunless -%}
+        </div>
+      </div>
+    {%- endcapture -%}
+  {%- else -%}
     <div
       class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
       data-item="{{ line_item.key }}"
@@ -79,6 +138,9 @@
         <a
           href="{{ line_item.url }}"
           aria-label="{{ line_item.title | escape }}"
+          {% unless line_item.image %}
+            tabindex="-1"
+          {% endunless %}
           {% if settings.show_image_bg != 'none' %}
             class="show-gray-bg"
           {% endif %}
@@ -168,12 +230,11 @@
 
               {%- if sale or discounted -%}
                 <span class="cart__price__save">
-                  <span>{{- 'cart.general.save' | t -}} </span>
+                  <span>{{- 'cart.general.save' | t -}}</span>
                   {{ sale_compared_price | minus: line_item_final_price | money }}
                 </span>
               {%- endif -%}
             </span>
-
 
             {%- if line_item.unit_price -%}
               {%- capture unit_price_separator -%}
@@ -277,6 +338,10 @@
                 <div class="cart__item__subs">
                   {%- for bundle_sub in line_item.product.metafields.theme_modules.bundle_products.value -%}
                     {%- liquid
+                      unless bundle_opened
+                        assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
+                      endunless
+
                       assign bundle_sub_variants_string = ''
                       assign bundle_sub_image = bundle_sub.featured_image
                       assign bundle_sub_selected_options = ''
@@ -296,16 +361,18 @@
 
                       if bundle_sub_variants_string != ''
                         assign bundle_sub_variants = bundle_sub_variants_string | remove_first: '@@@@' | split: '@@@@' | join: ' / '
-                        assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants
+                        assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants | first
                         assign bundle_sub_selected_options = bundle_sub_variants | replace: ' / ', ' | '
 
-                        if bundle_sub_variant[0].featured_image != blank
-                          assign bundle_sub_image = bundle_sub_variant[0].featured_image
+                        if bundle_sub_variant.featured_image != blank
+                          assign bundle_sub_image = bundle_sub_variant.featured_image
                         endif
                       endif
                     -%}
 
-                    <div class="cart__item__sub">
+                    <div
+                      class="cart__item__sub"
+                    >
                       <div class="cart__item__sub__image{% unless bundle_sub_image %} image--empty{% endunless %}">
                         <a
                           href="{{ bundle_sub.url }}"
@@ -389,22 +456,38 @@
               </a>
 
               <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-hidden{% endif %}">
-                <button type="button"
+                <button
+                  type="button"
                   class="select-popout__toggle"
                   aria-expanded="false"
                   aria-controls="{{ line_item.key }}-select-quantity"
                   aria-labelledby="{{ line_item.key }}-select-quantity-label"
-                  data-popout-toggle>
+                  data-popout-toggle
+                >
                   <span data-popout-toggle-text>{{ quantity }}</span>
                   {%- render 'icon-nav-arrow-down' -%}
                 </button>
 
-                <ul id="{{ line_item.key }}-select-quantity" class="select-popout__list" data-popout-list data-scroll-lock-scrollable>
+                <ul
+                  id="{{ line_item.key }}-select-quantity"
+                  class="select-popout__list"
+                  data-popout-list
+                  data-scroll-lock-scrollable
+                >
                   {%- for idx in (1..10) -%}
                     <li class="select-popout__item{% if forloop.index == quantity %} is-active{% endif %}">
-                      <a class="select-popout__option" href="#" {% if forloop.index == quantity %}aria-current="true"{% endif %} data-value="{{ forloop.index }}" data-popout-option>
+                      <a
+                        class="select-popout__option"
+                        href="#"
+                        {% if forloop.index == quantity %}
+                          aria-current="true"
+                        {% endif %}
+                        data-value="{{ forloop.index }}"
+                        data-popout-option
+                      >
                         <span>
-                          {{ forloop.index }} {% if forloop.last %}+{% endif %}
+                          {{ forloop.index }}
+                          {% if forloop.last %}+{% endif %}
                         </span>
                       </a>
                     </li>
@@ -463,125 +546,98 @@
         {%- endfor -%}
       {%- endif -%}
     </div>
-  {%- endcapture -%}
-
-  {%- if bundle_opened -%}
-    {%- assign bundle_price = bundle_price | plus: line_item_final_price -%}
-    {%- assign bundle_keys = bundle_keys | append: ',' | append: line_item.key -%}
-
-    {%- capture line_items_bundle -%}
-      {{ line_items_bundle }}
-
-      {{ line_item_product }}
-    {%- endcapture -%}
-  {%- else -%}
-    {{ line_item_product }}
   {%- endif -%}
 
-  {%- if bundle_opened
-    and next_line_item_bundle_name == blank
-    or next_line_item_bundle_unique_id != bundle_unique_id
-  -%}
-    <details
-      data-collapsible
-      open="true"
-      class="cart__bundle"
-      data-animation="cart-items-fade"
-      data-bundle-cart-item="{{ bundle_name | handle }}"
+  {%- if bundle_opened and next_line_item_bundle_id == blank or next_line_item_bundle_unique_id != bundle_unique_id -%}
+    <div
+      class="cart__item"
+      data-animation="{{ animation_name }}"
+      data-animation-delay="{{ animation_delay_bundle }}"
+      data-bundle-cart-item="{{ bundle_id }}"
+      data-item="{{ line_item.key }}"
+      data-item-index="{{ forloop.index }}"
+      data-item-title="{{ line_item.title | strip_html }}"
     >
-      <summary
-        data-collapsible-trigger
-        class="cart__bundle__content"
-      >
-        <div
-          class="cart__item"
-          data-animation="{{ animation_name }}"
-          data-animation-delay="{{ animation_delay_bundle }}"
+      {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
+      {%- assign animation_delay_bundle = animation_delay_bundle | plus: animation_delay_increment -%}
+
+      <div class="cart__item__image{% unless bundle_image %} image--empty{% endunless %}">
+        <a
+          href="{{ bundle_url }}"
+          aria-label="{{ bundle_name | escape }}"
+          {% unless bundle_image != blank %}
+            tabindex="-1"
+          {% endunless %}
+          {% if settings.show_image_bg != 'none' %}
+            class="show-gray-bg"
+          {% endif %}
         >
-          {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
-          <div class="cart__item__image{% unless bundle_image %} image--empty{% endunless %}">
-            <a
-              href="{{ line_item.url }}"
-              aria-label="{{ bundle_name | escape }}"
-              tabindex="-1"
-              {% if settings.show_image_bg != 'none' %}
-                class="show-gray-bg"
-              {% endif %}
-            >
-              {%- if bundle_image -%}
-                {%- liquid
-                  capture bundle_srcset
-                    render 'image-srcset', image_url: bundle_image, widths: '90, 180, 270, 360', image_width: 180
-                  endcapture
-                -%}
+          {%- if bundle_image -%}
+            <div class="lazy-image is-loading">
+              {{
+                bundle_image
+                | image_url: width: 180
+                | image_tag:
+                  widths: '90, 180, 270, 360',
+                  sizes: '90px',
+                  class: 'is-loading',
+                  loading: 'lazy',
+                  fetchpriority: fetchpriority
+              }}
+            </div>
+          {%- endif -%}
+        </a>
+      </div>
 
-                <div class="lazy-image is-loading">
-                  <img
-                    src="{{ bundle_image }}"
-                    class="is-loading"
-                    loading="lazy"
-                    sizes="90px"
-                    srcset="{{ bundle_srcset }}"
-                    alt="{{ bundle_name | strip_html }}"
-                  >
-                </div>
-              {%- endif -%}
+      <div class="cart__item__content">
+        <div class="cart__item__content-inner">
+          <h4 class="cart__item__title">
+            <a href="{{ bundle_url }}">
+              {{- bundle_name | strip_html -}}
             </a>
-          </div>
+          </h4>
 
-          <div class="cart__item__content">
-            <div class="cart__item__content-inner">
-              <h4 class="cart__item__title">
-                {{- bundle_name | strip_html -}}
-              </h4>
+          <p class="cart__price">
+            <span class="cart__price__row">
+              <span class="cart__price__inner">
+                {%- if bundle_price_compare > bundle_price -%}
+                  <ins>{{ bundle_price | money }}</ins>
 
-              <p class="cart__price">
-                <span class="cart__price__row">
-                  <span class="cart__price__inner">
-                    {%- if bundle_price_compare > bundle_price -%}
-                      <ins>{{ bundle_price | money }}</ins>
+                  <del>{{ bundle_price_compare | money }}</del>
+                {%- else -%}
+                  {{ bundle_price | money }}
+                {%- endif -%}
+              </span>
 
-                      <del>{{ bundle_price_compare | money }}</del>
-                    {%- else -%}
-                      {{ bundle_price | money }}
-                    {%- endif -%}
-                  </span>
-
-                  {%- if bundle_price_compare > bundle_price -%}
-                    <span class="cart__price__save">
-                      <span>{{- 'cart.general.save' | t -}}</span>
-                      {{ bundle_price_compare | minus: bundle_price | money }}
-                    </span>
-                  {%- endif -%}
+              {%- if bundle_price_compare > bundle_price -%}
+                <span class="cart__price__save">
+                  <span>{{- 'cart.general.save' | t -}}</span>
+                  {{ bundle_price_compare | minus: bundle_price | money }}
                 </span>
-              </p>
+              {%- endif -%}
+            </span>
+          </p>
+        </div>
+
+        <div class="cart__item__content-bottom">
+          <div class="cart__item__meta">
+            <div class="cart__item__subs">
+              {{ line_items_bundle }}
             </div>
           </div>
-        </div>
 
-        <a
-          class="cart__item__remove"
-          href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
-          data-bundle-cart-remove="{{ bundle_keys | remove_first: ',' }}"
-          data-id="{{ line_item.key }}"
-          title="{{ 'cart.general.remove' | t }}"
-        >
-          {%- render 'icon-trash' -%}
-        </a>
-
-        {%- render 'icon-nav-arrow-down' -%}
-      </summary>
-
-      <div
-        data-collapsible-body
-        class="cart__bundle__products"
-        style="height: auto;"
-      >
-        <div data-collapsible-content>
-          {{ line_items_bundle }}
+          <a
+            class="cart__item__remove"
+            href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
+            data-bundle-cart-remove="{{ bundle_keys | remove_first: ',' }}"
+            data-id="{{ line_item.key }}"
+            title="{{ 'cart.general.remove' | t }}"
+          >
+            {%- render 'icon-trash' -%}
+          </a>
         </div>
       </div>
-    </details>
+    </div>
 
     {%- liquid
       assign bundle_opened = false
@@ -589,7 +645,9 @@
       assign bundle_price_compare = 0
       assign bundle_keys = ''
       assign line_items_bundle = ''
-      assign animation_delay = animation_delay | minus: animation_delay_increment
+      assign bundle_animation_timing = line_items_bundle_counter | times: animation_delay_increment
+      assign line_items_bundle_counter = 0
+      assign animation_delay = animation_delay | minus: bundle_animation_timing
     -%}
   {%- endif -%}
 {%- endfor -%}
