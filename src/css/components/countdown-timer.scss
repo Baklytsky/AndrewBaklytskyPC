@@ -62,3 +62,38 @@ countdown-timer { display: block; }
 
   .announcement__bar & { font-size: inherit; }
 }
+
+.countdown-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--gap) / 2);
+  text-align: left;
+  color: var(--text);
+  background: var(--bg);
+
+  .announcement__bar & { padding: 5px 0; }
+
+  .countdown__timer { margin: 0; }
+
+  .announcement__bar-holder--slider & { min-width: calc(100vw - var(--scrollbar-width) - var(--outer) * 2); }
+  .announcement__bar-holder--arrows & { min-width: calc(100vw - var(--scrollbar-width) - var(--outer) * 2 - var(--arrow-space) * 2 - 60px); }
+
+  .timer {
+    padding: 0;
+    text-transform: none;
+  }
+  .announcement__bar & .timer__unit { font-size: inherit; }
+
+  .announcement__bar-holder--marquee & {
+    .timer {
+      flex-direction: row;
+      gap: calc(var(--gap) / 2);
+      align-items: center;
+    }
+
+    .countdown__datetime { grid-template-columns: repeat(4, auto); }
+  }
+
+  &.flex-column .countdown__datetime { display: flex; }
+}

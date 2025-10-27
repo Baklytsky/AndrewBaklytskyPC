@@ -145,6 +145,25 @@
                 {{ block.settings.code }}
               {%- endif -%}
 
+            {%- when 'countdown' -%}
+              <div class="countdown-block" data-countdown-block>
+                <div class="countdown-block__text">
+                  {%- if block.settings.text != blank -%}
+                    {{ block.settings.text }}
+                  {%- endif -%}
+                </div>
+
+                <div class="countdown-block__timer">
+                  {%- render 'countdown-timer',
+                    end_date: block.settings.end_date,
+                    end_time: block.settings.end_time,
+                    period: block.settings.period,
+                    end_message: block.settings.end_message,
+                    hide_on_complete: block.settings.hide_on_complete,
+                  -%}
+                </div>
+              </div>
+
             {%- when 'collection' -%}
               {%- assign collection = collections[block.settings.collection] -%}
 
