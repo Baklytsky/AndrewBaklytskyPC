@@ -117,8 +117,8 @@ if (!customElements.get('quick-add-product')) {
                 () => {
                   // console.log('success');
                 },
-                () => {
-                  console.log('error');
+                (e) => {
+                  console.error(e);
                 }
               );
             });
