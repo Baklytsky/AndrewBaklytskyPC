@@ -48,12 +48,9 @@ const selectors = {
   formErrorsContainer: '[data-cart-errors-container]',
   formWrapper: '[data-form-wrapper]',
   freeShipping: '[data-free-shipping]',
-  freeShippingGraph: '[data-progress-graph]',
-  freeShippingProgress: '[data-progress-bar]',
   headerWrapper: '[data-header-wrapper]',
   item: '[data-item]',
   itemsHolder: '[data-items-holder]',
-  leftToSpend: '[data-left-to-spend]',
   navDrawer: '[data-drawer]',
   outerSection: '[data-section-id]',
   priceHolder: '[data-cart-price-holder]',
@@ -123,6 +120,7 @@ class CartItems extends HTMLElement {
     this.upsellProductsHolder = document.querySelector(selectors.upsellProductsHolder);
     this.bundleProductsHolder = document.querySelector(selectors.bundleProductsHolder);
     this.subtotal = window.theme.subtotal;
+    this.showGetCartResponse = true;
     this.discountInput = document.querySelector(selectors.discountInput);
     this.discountField = document.querySelector(selectors.discountField);
     this.discountButton = document.querySelector(selectors.discountButton);
@@ -178,6 +176,19 @@ class CartItems extends HTMLElement {
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
     this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
 
+    const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
+    const promotion1Limit = Number(this.freeShipping[0]?.getAttribute('data-free-shipping-limit'));
+    const promotion2Limit = Number(this.freeShipping[0]?.getAttribute('data-promo-center-limit'));
+    this.promotion1Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-primary-promo') === 'true' : false;
+    this.promotion2Enabled = this.freeShipping.length ? this.freeShipping[0].getAttribute('data-free-shipping-secondary-promo') === 'true' : false;
+    const limitAttr = this.freeShipping.length ? promotion1Limit : 0;
+    let centerLimitAttr = this.promotion1Enabled ? promotion2Limit : 0;
+    if (!this.promotion1Enabled && this.promotion2Enabled && promotion2Limit > 0) {
+      centerLimitAttr = promotion2Limit;
+    }
+    this.freeShippingLimit = Math.max(0, limitAttr * 100 * currencyRate);
+    this.promoCenterLimit = Math.max(0, centerLimitAttr * 100 * currencyRate);
+
     this.freeShippingMessageHandle(this.subtotal);
     this.updateProgress();
 
@@ -209,6 +220,7 @@ class CartItems extends HTMLElement {
     this.cartEvents();
     this.cartRemoveEvents();
     this.cartUpdateEvents();
+    this.updateDiscount();
 
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
@@ -1111,21 +1123,51 @@ class CartItems extends HTMLElement {
 
     if (!this.freeShipping.length) return;
 
-    const percentValue = isNaN(this.subtotal / this.freeShippingLimit) ? 100 : this.subtotal / this.freeShippingLimit;
-    const percent = Math.min(percentValue * 100, 100);
+    let hasReachedLimit = this.freeShippingLimit > 0 && this.subtotal >= this.freeShippingLimit;
+    let forceSuccess = false;
+
+    if (!this.promotion1Enabled && !this.promotion2Enabled) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (this.promotion1Enabled && !this.promotion2Enabled && this.freeShippingLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (!this.promotion1Enabled && this.promotion2Enabled && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    } else if (this.promotion1Enabled && this.promotion2Enabled && this.freeShippingLimit === 0 && this.promoCenterLimit === 0) {
+      hasReachedLimit = true;
+      forceSuccess = true;
+    }
+
+    const percentValue = this.freeShippingLimit > 0 ? this.subtotal / this.freeShippingLimit : 0;
+    const percent = forceSuccess ? 100 : Math.max(0, Math.min(percentValue * 100, 100));
+
     const dashoffset = this.circumference - ((percent / 100) * this.circumference) / 2;
-    const leftToSpend = window.theme.formatMoney(this.freeShippingLimit - this.subtotal, theme.moneyFormat);
+    const leftToSpendCents = Math.max(0, this.freeShippingLimit - this.subtotal);
+    const leftToSpendPromoCents = Math.max(0, this.promoCenterLimit - this.subtotal);
+    const leftToSpend = window.theme.formatMoney(leftToSpendCents, theme.moneyFormat);
+    const leftToSpendPromoMoney = window.theme.formatMoney(leftToSpendPromoCents, theme.moneyFormat);
+    const hasReachedCenterLimit = this.promoCenterLimit > 0 && this.subtotal >= this.promoCenterLimit;
 
     this.freeShipping.forEach((item) => {
-      const progressBar = item.querySelector(selectors.freeShippingProgress);
-      const progressGraph = item.querySelector(selectors.freeShippingGraph);
-      const leftToSpendMessage = item.querySelector(selectors.leftToSpend);
+      const progressBar = item.querySelector('[data-progress-bar]');
+      const progressGraph = item.querySelector('[data-progress-graph]');
+      const leftToSpendMessage = item.querySelector('[data-left-to-spend]');
+      const leftToSpendPromo = item.querySelector('[data-left-to-spend-promo]');
+      const promoCenter = item.querySelector('[data-promo-center]');
+      const isCenterActive = (promoCenter && this.promoCenterLimit === 0) || hasReachedCenterLimit;
 
+      // Update "left to spend" messages
       if (leftToSpendMessage) {
         leftToSpendMessage.innerHTML = leftToSpend.replace('.00', '');
       }
 
-      // Set progress bar value
+      if (leftToSpendPromo) {
+        leftToSpendPromo.innerHTML = leftToSpendPromoMoney.replace('.00', '');
+      }
+
+      // Set progress bar value and add animation class
       if (progressBar) {
         progressBar.value = percent;
       }
@@ -1134,6 +1176,19 @@ class CartItems extends HTMLElement {
       if (progressGraph) {
         progressGraph.style.setProperty('--stroke-dashoffset', `${dashoffset}`);
       }
+
+      // Clear all state classes first
+      item.classList.remove(classes.success, classes.active);
+
+      // Apply appropriate state class
+      if (hasReachedLimit) {
+        // Final goal reached - show success
+        item.classList.add(classes.success);
+      } else if (isCenterActive && !hasReachedLimit) {
+        // Center goal reached but not final goal - show active (dual promo)
+        item.classList.add(classes.active);
+      }
+    });
     });
   }
 
@@ -1432,7 +1487,7 @@ class CartItems extends HTMLElement {
   }
 
   toggleAwards(response) {
-    const cartJson = response.querySelector(selectors.cartJson);
+    const cartJson = response.querySelector('[data-cart-json]');
     if (cartJson) {
       const info = JSON.parse(cartJson.innerHTML);
       const meta = info.meta;
