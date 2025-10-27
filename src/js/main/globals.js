@@ -1,4 +1,5 @@
 import {initAnimations} from '../globals/animations';
+import appendCartItems from '../globals/append-cart-items';
 import floatLabels from '../globals/forms';
 import resizeListener from '../globals/resize';
 import scrollListener from '../globals/scroll';
@@ -41,6 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
   floatLabels(document);
   wrapElements(document);
   removeLoadingClassFromLoadedImages(document);
+  appendCartItems();
 
   requestIdleCallback(() => {
     if (Shopify.visualPreviewMode) {

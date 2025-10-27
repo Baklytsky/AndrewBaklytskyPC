@@ -1,3 +1,5 @@
+import appendCartItems from '../globals/append-cart-items';
+
 if (!customElements.get('cart-drawer')) {
   customElements.define(
     'cart-drawer',
@@ -65,6 +67,8 @@ if (!customElements.get('cart-drawer')) {
         if (document.querySelectorAll('cart-drawer').length <= 1) {
           window.theme.hasCartDrawer = false;
         }
+
+        appendCartItems();
       }
 
       /**

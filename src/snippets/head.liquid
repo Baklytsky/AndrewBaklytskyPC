@@ -753,6 +753,8 @@
     --swatch-size-filters: {{ swatch_size_filters }}rem;
     --swatch-size-product: {{ swatch_size_product }}rem;
     --swatch-size-upsell: {{ swatch_size_upsell }}rem;
+    --swatch-size: var(--swatch-size-product);
+    --swatch-default: #CCC;
   }
 
   /*** Backdrop ***/
@@ -848,7 +850,7 @@
   {{ 'design-mode.css' | asset_url | stylesheet_tag }}
 {%- endif -%}
 
-{%- if settings.enable_color_swatches or settings.siblings != blank -%}
+{%- if settings.enable_swatches or settings.siblings != blank -%}
   {{ 'swatches.css' | asset_url | stylesheet_tag }}
   {%- render 'swatch-color-list' -%}
 {%- endif %}
@@ -941,7 +943,7 @@
   <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-{%- if settings.enable_color_swatches -%}
+{%- if settings.enable_swatches -%}
   <script src="{{ 'swatch.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 

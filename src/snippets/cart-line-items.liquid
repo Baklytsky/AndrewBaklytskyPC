@@ -251,7 +251,7 @@
 
               <span class="cart__price__row">
                 <span class="line__price line__price--unit">
-                  <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
+                  <small class="visually-hidden">{{ 'products.product.unit_price' | t }}</small>
 
                   <small>
                     {{- line_item_unit_price -}}
@@ -436,7 +436,7 @@
           </div>
 
           {%- unless bundle_opened or line_item_reward or line_item_gift -%}
-            <quantity-counter class="cart__quantity-counter">
+            <quantity-input class="cart__quantity-counter">
               {%- assign quantity = line_item.quantity -%}
 
               {%- if line_item.variant.inventory_policy == 'deny'
@@ -455,7 +455,7 @@
                 {%- render 'icon-trash' -%}
               </a>
 
-              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-replaced{% endif %}">
+              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-hidden{% endif %}">
                 <button
                   type="button"
                   class="select-popout__toggle"
@@ -526,7 +526,7 @@
                   {%- render 'icon-plus' -%}
                 </button>
               </div>
-            </quantity-counter>
+            </quantity-input>
           {%- endunless -%}
         </div>
       </div>
