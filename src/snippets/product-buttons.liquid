@@ -14,14 +14,14 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign show_dynamic_checkout = false
-  assign featured_product_bundle = featured_product_bundle | default: false
+  assign is_featured_product_bundle = is_featured_product_bundle | default: false
   assign gift_card_recipient_feature_active = false
   assign show_quantity = show_quantity | default: block.settings.show_quantity | default: false
   assign is_quickview = quickview | default: false
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign section_id = unique | default: section.id
-  assign product_bundle = product_bundle | default: false
+  assign is_product_bundle = is_product_bundle | default: false
 
   if is_quickview
     assign show_newsletter = false
@@ -394,7 +394,7 @@
             </div>
           {%- endif -%}
 
-          {%- if featured_product_bundle -%}
+          {%- if is_featured_product_bundle -%}
             <div class="product__submit__link text-center">
               <a href="{{ product.url }}" class="text-link small">{{ 'products.general.bundle_link' | t }}</a>
             </div>
@@ -402,5 +402,14 @@
         </div>
       </div>
     {%- endform -%}
+
+    {%- if is_product_bundle -%}
+      <script type="application/json" data-bundle-json>
+        {
+          "product": {{ product | json }},
+          "variant": {{ product.selected_or_first_available_variant | json }}
+        }
+      </script>
+    {%- endif -%}
   </product-form>
 </div>

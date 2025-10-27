@@ -14,25 +14,26 @@ if (!customElements.get('product-form')) {
         if (document.querySelector('cart-drawer')) this.submitButton.setAttribute('aria-haspopup', 'dialog');
 
         this.hideErrors = this.dataset.hideErrors === 'true';
+
+        console.log('product form', this.variantInputId);
       }
 
       onSubmitHandler(evt) {
         evt.preventDefault();
+        const isBundle = this.buttonATC.hasAttribute('data-bundle-modal-button');
 
-        if (this.buttonATC.hasAttribute('data-bundle-modal-button')) {
-          // TODO:
-          // productJSON.id
-          // this.productJSON
-          // this.productForm.getFormState().variant
-          console.log('product form submit handler - needs productJSON.id');
-          const bundleButton = document.querySelector(`[data-bundle-product-button="${this.productJSON.id}"]`);
+        if (isBundle) {
+          const productJSONhtml = this.container.querySelector('[data-bundle-json]')?.innerHTML;
+          const productJSON = JSON.parse(productJSONhtml);
+          const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.id}"]`);
+
           if (bundleButton) {
             bundleButton.dispatchEvent(
               new CustomEvent('theme:bundle:button-modal', {
                 detail: {
                   data: {
-                    product: this.productJSON,
-                    variant: this.productForm.getFormState().variant,
+                    product: productJSON,
+                    variant: productJSON.variant,
                   },
                 },
                 bubbles: true,

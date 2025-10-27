@@ -1,51 +1,3 @@
-const selectors = {
-  bundleJson: '[data-bundle-json]',
-  template: '[data-bundle-template]',
-  productGridItem: '[data-grid-item]',
-  button: '[data-bundle-product-button]',
-  selectedCount: '[data-bundle-selected-count]',
-  bundleTotal: '[data-bundle-total]',
-  bundleTotalSavings: '[data-bundle-total-savings]',
-  addButton: '[data-bundle-add-to-cart]',
-  removeButton: '[data-bundle-remove-button]',
-  scrollToBundleButton: '[data-bundle-scroll-button]',
-  placeholder: '[data-bundle-placeholder]',
-  placeholderFilled: '[data-bundle-placeholder-filled]',
-  placeholderPrice: '[data-placeholder-price]',
-  placeholderPriceCompare: '[data-placeholder-price-compare]',
-  placeholderVendor: '[data-placeholder-vendor]',
-  placeholderTitle: '[data-placeholder-title]',
-  placeholderUrl: '[data-placeholder-url]',
-  placeholderOptions: '[data-placeholder-options]',
-  placeholderImage: '[data-placeholder-image]',
-  focusable: 'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])',
-};
-
-const attributes = {
-  bundle: 'data-bundle',
-  maxSelection: 'data-bundle-max-selection',
-  animationTiming: 'data-bundle-animation-timing',
-  productId: 'data-bundle-product-button',
-  quickAdd: 'data-quick-add-btn',
-  bundleName: 'data-bundle-name',
-  bundleImage: 'data-bundle-image',
-  bundleHandle: 'data-bundle-handle',
-  bundleCartItem: 'data-bundle-cart-item',
-  placeholderImage: 'data-placeholder-image',
-  bundleProductUrl: 'data-bundle-product-url',
-};
-
-const classes = {
-  filled: 'is-filled',
-  focused: 'is-focused',
-  lineActive: 'is-line-active',
-  dotActive: 'is-dot-active',
-  animateIn: 'is-animate-in',
-  animateOut: 'is-animate-out',
-  adding: 'is-adding',
-  removing: 'is-removing',
-};
-
 if (!customElements.get('bundle-collection')) {
   customElements.define(
     'bundle-collection',
@@ -53,19 +5,19 @@ if (!customElements.get('bundle-collection')) {
       constructor() {
         super();
 
-        this.bundle = this.getAttribute(attributes.bundle) === 'true';
-        this.buttons = this.querySelectorAll(selectors.button);
-        this.maxSelection = parseInt(this.getAttribute(attributes.maxSelection));
-        this.animationTiming = parseInt(this.getAttribute(attributes.animationTiming));
-        this.selectedCount = this.querySelector(selectors.selectedCount);
-        this.bundleTotal = this.querySelector(selectors.bundleTotal);
-        this.bundleTotalSavings = this.querySelector(selectors.bundleTotalSavings);
-        this.addButton = this.querySelector(selectors.addButton);
-        this.scrollToBundleButton = this.querySelector(selectors.scrollToBundleButton);
-        this.placeholders = this.querySelectorAll(selectors.placeholder);
+        this.bundle = this.getAttribute('data-bundle') === 'true';
+        this.buttons = this.querySelectorAll('[data-bundle-product-button]');
+        this.maxSelection = parseInt(this.getAttribute('data-bundle-max-selection'));
+        this.animationTiming = parseInt(this.getAttribute('data-bundle-animation-timing'));
+        this.selectedCount = this.querySelector('[data-bundle-selected-count]');
+        this.bundleTotal = this.querySelector('[data-bundle-total]');
+        this.bundleTotalSavings = this.querySelector('[data-bundle-total-savings]');
+        this.addButton = this.querySelector('[data-bundle-add-to-cart]');
+        this.scrollToBundleButton = this.querySelector('[data-bundle-scroll-button]');
+        this.placeholders = this.querySelectorAll('[data-bundle-placeholder]');
         this.selectedProducts = [];
         this.bundleCartItems = null;
-        this.handle = this.hasAttribute(attributes.bundleHandle) ? this.getAttribute(attributes.bundleHandle) : '';
+        this.handle = this.hasAttribute('data-bundle-handle') ? this.getAttribute('data-bundle-handle') : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
         this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
@@ -109,7 +61,7 @@ if (!customElements.get('bundle-collection')) {
         if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
           this.selectedProducts.forEach((element) => {
             if (this.handle !== '') {
-              this.bundleCartItems = document.querySelectorAll(`[${attributes.bundleCartItem}="${this.handle}"]`);
+              this.bundleCartItems = document.querySelectorAll(`[data-bundle-cart-item="${this.handle}"]`);
               element.properties._bundle_unique_id = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
             }
           });
@@ -128,14 +80,14 @@ if (!customElements.get('bundle-collection')) {
       }
 
       bundleButtonChange(event) {
-        event.target.querySelector(selectors.button)?.addEventListener('click', this.bundleButtonAddEvent);
+        event.target.querySelector('[data-bundle-product-button]')?.addEventListener('click', this.bundleButtonAddEvent);
       }
 
       bundleButtonAdd(event) {
         const target = event.currentTarget;
-        if (!target.hasAttribute(attributes.quickAdd)) {
-          const productItem = target.closest(selectors.productGridItem);
-          const dataSelector = productItem.querySelector(selectors.bundleJson);
+        if (!target.hasAttribute('data-quick-add-btn')) {
+          const productItem = target.closest('[data-grid-item]');
+          const dataSelector = productItem.querySelector('[data-bundle-json]');
           if ((dataSelector && !dataSelector.innerHTML) || !dataSelector) {
             return;
           }
@@ -152,10 +104,10 @@ if (!customElements.get('bundle-collection')) {
 
           this.setProductToPlaceholder(data, placeholder);
 
-          placeholder.classList.add(classes.filled, classes.dotActive, classes.lineActive);
+          placeholder.classList.add('is-filled', 'is-dot-active', 'is-line-active');
         });
 
-        this.placeholders[this.bundleProducts.length - 1].classList.remove(classes.lineActive);
+        this.placeholders[this.bundleProducts.length - 1].classList.remove('is-line-active');
         this.selectedProducts = this.bundleProducts;
       }
 
@@ -164,32 +116,32 @@ if (!customElements.get('bundle-collection')) {
       }
 
       setProductToPlaceholder(data, placeholder) {
-        const template = this.querySelector(selectors.template);
+        const template = this.querySelector('[data-bundle-template]');
         const cloneTemplate = template.content.cloneNode(true);
-        const filledEl = placeholder.querySelector(selectors.placeholderFilled);
-        const button = this.querySelector(`[${attributes.productId}="${data.productId}"]`);
-        const productUrl = button?.hasAttribute(attributes.bundleProductUrl) ? button.getAttribute(attributes.bundleProductUrl) : null;
+        const filledEl = placeholder.querySelector('[data-bundle-placeholder-filled]');
+        const button = this.querySelector(`[data-bundle-product-button="${data.productId}"]`);
+        const productUrl = button?.hasAttribute('data-bundle-product-url') ? button.getAttribute('data-bundle-product-url') : null;
 
-        cloneTemplate.querySelector(selectors.placeholderVendor).textContent = data.vendor;
-        cloneTemplate.querySelector(selectors.placeholderTitle).innerHTML = data.title;
-        cloneTemplate.querySelector(selectors.placeholderPrice).innerHTML = this.formatRate(data.price);
+        cloneTemplate.querySelector('[data-placeholder-vendor]').textContent = data.vendor;
+        cloneTemplate.querySelector('[data-placeholder-title]').innerHTML = data.title;
+        cloneTemplate.querySelector('[data-placeholder-price]').innerHTML = this.formatRate(data.price);
 
-        cloneTemplate.querySelectorAll(selectors.placeholderUrl).forEach((element) => {
+        cloneTemplate.querySelectorAll('[data-placeholder-url]').forEach((element) => {
           element.href = `${productUrl}?variant=${data.id}`;
         });
 
         if (parseFloat(data.priceCompare) > 0) {
-          cloneTemplate.querySelector(selectors.placeholderPriceCompare).innerHTML = this.formatRate(data.priceCompare);
+          cloneTemplate.querySelector('[data-placeholder-price-compare]').innerHTML = this.formatRate(data.priceCompare);
         }
 
         if (data.variants > 1) {
-          cloneTemplate.querySelector(selectors.placeholderOptions).textContent = data.optionsText;
+          cloneTemplate.querySelector('[data-placeholder-options]').textContent = data.optionsText;
         }
 
         if (data.image.variant?.src || data.image.product?.src) {
-          const placeholderImage = cloneTemplate.querySelector(selectors.placeholderImage);
+          const placeholderImage = cloneTemplate.querySelector('[data-placeholder-image]');
           const imageTag = document.createElement('img');
-          const imageWidth = placeholderImage.hasAttribute(attributes.placeholderImage) ? parseInt(placeholderImage.getAttribute(attributes.placeholderImage)) : 0;
+          const imageWidth = placeholderImage.hasAttribute('data-placeholder-image') ? parseInt(placeholderImage.getAttribute('data-placeholder-image')) : 0;
           const imageWidthRetina = imageWidth * 2;
           let dataImageSrc = data.image.product?.src || null;
           let dataImageAspectRatio = data.image.product?.aspect_ratio || null;
@@ -212,7 +164,7 @@ if (!customElements.get('bundle-collection')) {
 
         filledEl.innerHTML = '';
         filledEl.appendChild(cloneTemplate);
-        filledEl.querySelector(selectors.removeButton).addEventListener('click', (event) => this.removeProductFromBundle(event));
+        filledEl.querySelector('[data-bundle-remove-button]').addEventListener('click', (event) => this.removeProductFromBundle(event));
       }
 
       updateUI() {
@@ -235,7 +187,7 @@ if (!customElements.get('bundle-collection')) {
         this.bundleTotal.innerHTML = this.formatRate(total.price);
         this.bundleTotalSavings.innerHTML = window.theme.formatMoney(total.priceCompare, theme.moneyFormat);
         this.addButton.disabled = filledCount !== this.maxSelection;
-        if (filledCount === this.maxSelection && document.body.classList.contains(classes.focused)) {
+        if (filledCount === this.maxSelection && document.body.classList.contains('is-focused')) {
           this.addButton.focus();
         }
         this.buttons.forEach((button) => {
@@ -245,16 +197,16 @@ if (!customElements.get('bundle-collection')) {
 
       addProductToBundle(data) {
         const placeholder = this.placeholders[this.selectedProducts.length];
-        if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing) || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
+        if (this.classList.contains('is-adding') || this.classList.contains('is-removing') || !placeholder || this.selectedProducts.length >= this.maxSelection) return;
         const variant = data.variant;
         const product = data.product;
         const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {
-          id: variant.id,
+          id: variant,
           quantity: 1,
           properties: {
-            _bundle_title: `${this.getAttribute(attributes.bundleName)}`,
+            _bundle_title: `${this.getAttribute('data-bundle-name')}`,
           },
           price: variant.price,
           priceCompare: variant.compare_at_price ? variant.compare_at_price : 0,
@@ -274,8 +226,8 @@ if (!customElements.get('bundle-collection')) {
           variants: product.variants.length,
         };
 
-        if (this.hasAttribute(attributes.bundleImage)) {
-          productData.properties._bundle_image = `${this.getAttribute(attributes.bundleImage)}`;
+        if (this.hasAttribute('data-bundle-image')) {
+          productData.properties._bundle_image = `${this.getAttribute('data-bundle-image')}`;
         }
 
         this.setProductToPlaceholder(productData, placeholder);
@@ -285,22 +237,22 @@ if (!customElements.get('bundle-collection')) {
         localStorage.setItem(this.localStorageName, JSON.stringify(this.selectedProducts));
 
         if (this.selectedProducts.length > 1) {
-          this.placeholders[this.selectedProducts.length - 2].classList.add(classes.lineActive);
+          this.placeholders[this.selectedProducts.length - 2].classList.add('is-line-active');
         }
 
-        this.classList.add(classes.adding);
+        this.classList.add('is-adding');
 
         requestAnimationFrame(() => {
-          placeholder.classList.add(classes.animateIn, classes.dotActive);
+          placeholder.classList.add('is-animate-in', 'is-dot-active');
         });
 
         setTimeout(() => {
-          placeholder.classList.remove(classes.animateIn);
-          placeholder.classList.add(classes.filled);
-          this.classList.remove(classes.adding);
+          placeholder.classList.remove('is-animate-in');
+          placeholder.classList.add('is-filled');
+          this.classList.remove('is-adding');
         }, this.animationTiming);
 
-        const focusableElements = placeholder.querySelectorAll(selectors.focusable);
+        const focusableElements = placeholder.querySelectorAll('button, [href], select, textarea, [tabindex]:not([tabindex="-1"])');
         focusableElements?.forEach((element) => {
           element.removeAttribute('tabindex');
         });
@@ -309,62 +261,62 @@ if (!customElements.get('bundle-collection')) {
       }
 
       removeProductFromBundle(event) {
-        if (this.classList.contains(classes.adding) || this.classList.contains(classes.removing)) return;
+        if (this.classList.contains('is-adding') || this.classList.contains('is-removing')) return;
 
-        this.classList.add(classes.removing);
+        this.classList.add('is-removing');
 
-        const placeholder = event.currentTarget.closest(selectors.placeholder);
-        placeholder.classList.add(classes.animateOut);
+        const placeholder = event.currentTarget.closest('[data-bundle-placeholder]');
+        placeholder.classList.add('is-animate-out');
         const placeholdersArr = Array.from(this.placeholders);
         const index = placeholdersArr.indexOf(placeholder);
-        const targetFocusButton = this.querySelector(`[${attributes.productId}="${this.selectedProducts[index].productId}"]`);
+        const targetFocusButton = this.querySelector(`[data-bundle-product-button="${this.selectedProducts[index].productId}"]`);
         this.selectedProducts.splice(index, 1);
         localStorage.setItem(this.localStorageName, JSON.stringify(this.selectedProducts));
 
         let lastFilledPlaceholder = null;
         if (this.selectedProducts.length) {
           lastFilledPlaceholder = this.placeholders[this.selectedProducts.length];
-          this.placeholders[this.selectedProducts.length - 1].classList.remove(classes.lineActive);
-          this.placeholders[this.selectedProducts.length].classList.remove(classes.dotActive);
+          this.placeholders[this.selectedProducts.length - 1].classList.remove('is-line-active');
+          this.placeholders[this.selectedProducts.length].classList.remove('is-dot-active');
         } else {
-          this.placeholders[0].classList.remove(classes.dotActive);
+          this.placeholders[0].classList.remove('is-dot-active');
         }
 
-        placeholder.classList.remove(classes.filled);
+        placeholder.classList.remove('is-filled');
 
         setTimeout(() => {
-          placeholder.classList.remove(classes.animateOut);
-          placeholder.querySelector(selectors.placeholderFilled).innerHTML = '';
+          placeholder.classList.remove('is-animate-out');
+          placeholder.querySelector('[data-bundle-placeholder-filled]').innerHTML = '';
 
           if (lastFilledPlaceholder) {
             lastFilledPlaceholder.after(placeholder);
 
-            this.placeholders = this.querySelectorAll(selectors.placeholder);
+            this.placeholders = this.querySelectorAll('[data-bundle-placeholder]');
 
             let lastFilledPlaceholderNew = null;
             this.placeholders.forEach((element) => {
-              if (element.classList.contains(classes.filled)) {
+              if (element.classList.contains('is-filled')) {
                 lastFilledPlaceholderNew = element;
-                element.classList.add(classes.lineActive, classes.dotActive);
+                element.classList.add('is-line-active', 'is-dot-active');
               } else {
-                element.classList.remove(classes.lineActive, classes.dotActive);
+                element.classList.remove('is-line-active', 'is-dot-active');
               }
             });
 
-            lastFilledPlaceholderNew.classList.remove(classes.lineActive);
+            lastFilledPlaceholderNew.classList.remove('is-line-active');
           }
 
-          this.classList.remove(classes.removing);
+          this.classList.remove('is-removing');
         }, this.animationTiming);
 
-        const focusableElements = placeholder.querySelectorAll(selectors.focusable);
+        const focusableElements = placeholder.querySelectorAll('button, [href], select, textarea, [tabindex]:not([tabindex="-1"])');
         if (focusableElements.length) {
           focusableElements.forEach((element) => {
             element.setAttribute('tabindex', -1);
           });
         }
 
-        if (document.body.classList.contains(classes.focused) && targetFocusButton) {
+        if (document.body.classList.contains('is-focused') && targetFocusButton) {
           targetFocusButton.disabled = false;
           targetFocusButton.focus();
         }
