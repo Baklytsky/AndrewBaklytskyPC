@@ -1189,7 +1189,6 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.active);
       }
     });
-    });
   }
 
   /**
