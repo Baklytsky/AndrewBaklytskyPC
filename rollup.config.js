@@ -49,7 +49,7 @@ const globalPackages = {
   swiper: 'themeVendor.swiper',
 };
 
-const externalPackages = ['@shopify/theme-product', '@shopify/theme-product-form', '@shopify/theme-rte', 'swiper', 'scroll-lock'];
+const externalPackages = ['@shopify/theme-rte', 'swiper', 'scroll-lock'];
 
 const config = {
   development: [

@@ -1,4 +1,3 @@
-import {getSizedImageUrl} from '@shopify/theme-images';
 class SiblingSwatches {
   constructor(swatches, product) {
     this.swatches = swatches;
@@ -91,7 +90,7 @@ class SiblingSwatches {
     const ratio = window.devicePixelRatio || 1;
     const pixels = this.productImage.offsetWidth * ratio;
     const widthRounded = Math.ceil(pixels / 180) * 180;
-    const imageSrc = getSizedImageUrl(siblingImage, `${widthRounded}x`);
+    const imageSrc = theme.getSizedImageUrl(siblingImage, `${widthRounded}x`);
     const imageExists = this.productImageSibling.querySelector(`[src="${imageSrc}"]`);
     const showCurrentImage = () => {
       this.productImageSibling.classList.add('is-visible');

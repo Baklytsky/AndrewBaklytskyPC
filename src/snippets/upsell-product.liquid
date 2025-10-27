@@ -59,17 +59,10 @@
   assign upsell_variant = upsell_product.selected_or_first_available_variant
   assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.featured_media.preview_image
 
-  if settings.currency_code_enable
-    assign upsell_variant_price = upsell_variant.price | money_with_currency
-    assign upsell_variant_compare_at_price = upsell_variant.compare_at_price | money_with_currency
-  else
-    assign upsell_variant_price = upsell_variant.price | money
-    assign upsell_variant_compare_at_price = upsell_variant.compare_at_price | money
-  endif
-
   assign unique_id = unique_id | default: section.id
+  assign section_id = unique_id
   assign unique = unique_id | append: '-' | append: upsell_product.id
-  assign product_form_id = 'productFormUpsell--' | append: unique
+  assign product_form_id = 'ProductFormUpsell-' | append: section_id
 
   assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
 
@@ -122,7 +115,7 @@
     comment
       Check if the single option is a color option by looking for swatches
     endcomment
-    if settings.enable_color_swatches
+    if settings.enable_swatches
       for value in single_option.values
         if value.swatch
           assign is_native_swatch_option = true
@@ -173,7 +166,7 @@
       data-quick-add-btn
       data-quick-add-modal-handle="{{ upsell_product.handle }}"
     >
-      <span class="btn__text">{{ upsell_button_text }}</span>
+      <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
 
       <span class="btn__loader">
         <svg height="18" width="18" class="svg-loader">
@@ -237,7 +230,7 @@
                   class="product-upsell__btn btn btn--medium btn--primary btn--outline"
                   type="button"
                 >
-                  <span class="btn__text">{{ upsell_button_text }}</span>
+                  <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
                 </button>
               </div>
             {%- endif -%}
@@ -255,45 +248,13 @@
                 </p>
               {%- endif -%}
 
-              <p class="product-upsell__price{% if upsell_variant.compare_at_price > upsell_variant.price %} sale{% endif %}">
-                <span class="new-price">
-                  {%- if upsell_variant.price == 0 -%}
-                    {{ 'general.money.free' | t }}
-                  {%- else -%}
-                    {{ upsell_variant_price }}
-                  {%- endif -%}
-                </span>
-
-                {%- if upsell_variant.compare_at_price > upsell_variant.price -%}
-                  <span class="old-price">{{ upsell_variant_compare_at_price }}</span>
-                {%- endif -%}
-
-                {%- if upsell_variant.unit_price -%}
-                  {%- capture unit_price_separator -%}
-                    <span aria-hidden="true">/</span>
-                    <span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
-                  {%- endcapture -%}
-
-                  {%- capture unit_price_base_unit -%}
-                    {% if upsell_variant.unit_price_measurement.reference_value != 1 %}
-                      {{ upsell_variant.unit_price_measurement.reference_value }}
-                    {% endif %}
-                    {{ upsell_variant.unit_price_measurement.reference_unit }}
-                  {%- endcapture -%}
-
-                  <br>
-
-                  <span class="visually-hidden visually-hidden--inline">
-                    {{- 'products.product.unit_price_label' | t -}}
-                  </span>
-
-                  <span class="unit">
-                    {{ upsell_variant.unit_price | money }}
-                    {{ unit_price_separator }}
-                    {{ unit_price_base_unit }}
-                  </span>
-                {% endif -%}
-              </p>
+              <div
+                class="product-upsell__price"
+                id="Price-{{ section_id }}"
+                role="status"
+              >
+                {%- render 'price', product: upsell_product -%}
+              </div>
             </a>
 
             {%- if all_variants_soldout -%}
@@ -350,13 +311,17 @@
                 {%- assign render_quick_add_template = true -%}
               {%- else -%}
                 {%- comment -%} Instant add {%- endcomment -%}
+
                 {%- form 'product',
                   upsell_product,
                   id: product_form_id,
                   class: 'product-upsell__form product-upsell__form--instant-add',
+                  novalidate: 'novalidate',
+                  data-type: 'add-to-cart-form',
+                  data-product-form: '',
                   data-instant-add-form: ''
                 -%}
-                  <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
+                  <input type="hidden" name="id" value="{{ upsell_variant.id }}">
 
                   {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
                   <input
@@ -367,9 +332,9 @@
                   >
 
                   {%- comment -%} Variant selector {%- endcomment -%}
-                  <div
+                  <variant-selects
                     class="product-upsell__variant-selector product-upsell__variant-selector--{{ settings.collection_swatch_style }}"
-                    data-variant-selector
+                    data-section="{{ section_id }}"
                   >
                     {%- if is_color_option -%}
                       {%- comment -%} Color swatches {%- endcomment -%}
@@ -378,7 +343,10 @@
                       {%- endif -%}
 
                       <native-scrollbar>
-                        <div class="selector-wrapper__scrollbar radio__buttons radio__buttons--top" data-scrollbar>
+                        <fieldset
+                          class="selector-wrapper__scrollbar radio__buttons radio__buttons--top"
+                          data-scrollbar
+                        >
                           {%- for value in single_option.values -%}
                             {%- liquid
                               assign swatch_value = null
@@ -405,11 +373,14 @@
                               assign value_handle = value | strip_html | escape | handle | append: '-' | append: forloop.index
                               assign input_id = product_form_id | append: '-swatch-' | append: value_handle
                               assign variant_for_value = null
-                              for variant in upsell_product.variants
-                                if variant.options[0] == value
-                                  assign variant_for_value = variant
-                                  break
-                                endif
+
+                              for option in upsell_product.options_with_values
+                                for option_value in option.values
+                                  if option_value == value
+                                    assign variant_for_value = option_value.variant
+                                    break
+                                  endif
+                                endfor
                               endfor
                             -%}
 
@@ -426,12 +397,13 @@
                                 <input
                                   type="radio"
                                   form="{{ product_form_id }}"
-                                  data-single-option-selector
                                   data-index="option1"
                                   name="options[{{ single_option.name | escape }}]-{{ unique }}"
                                   value="{{ value | escape }}"
                                   id="{{ input_id }}"
                                   data-variant-id="{{ variant_for_value.id }}"
+                                  data-variant-image="{{ variant_for_value.featured_image | image_url: width: 208 }}"
+                                  data-product-handle="{{ upsell_product.handle }}"
                                   {% if value == upsell_variant.options[0] %}
                                     checked
                                   {% endif %}
@@ -462,7 +434,7 @@
 
                             {%- assign render_quick_add_template = true -%}
                           {%- endif -%}
-                        </div>
+                        </fieldset>
 
                         {%- if settings.collection_swatch_style == 'text-slider'
                           or settings.collection_swatch_style == 'slider'
@@ -532,16 +504,16 @@
                             name="options[{{ single_option.name | escape }}]-{{ unique }}"
                             value="{{ upsell_variant.options[0] | escape }}"
                             data-popout-input
-                            data-single-option-selector
                             data-index="option1"
                           >
                         </popout-select>
                       </div>
                     {%- endif -%}
-                  </div>
+                  </variant-selects>
 
                   <div class="product-upsell__actions">
                     <button
+                      id="ProductSubmitButton-{{ section_id }}"
                       class="product-upsell__btn btn btn--medium btn--primary btn--outline"
                       type="submit"
                       name="add"
@@ -551,7 +523,7 @@
                         disabled="disabled"
                       {% endunless %}
                     >
-                      <span class="btn__text">{{ upsell_button_text }}</span>
+                      <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
 
                       <span class="btn__loader">
                         <svg height="18" width="18" class="svg-loader">
@@ -570,40 +542,52 @@
             {%- unless upsell_quick_add_hide or enable_instant_add -%}
               <div class="product-upsell__actions">
                 {%- if upsell_product.variants.size == 1 -%}
-                  {%- comment -%} Single variant: direct add to cart {%- endcomment -%}
-                  {%- form 'product', upsell_product, id: product_form_id, class: 'product-upsell__form' -%}
-                    <input type="hidden" name="id" value="{{ upsell_variant.id }}">
+                  <div
+                    data-product-id="{{ upsell_product.id }}"
+                    data-section-id="{{ section_id }}"
+                  >
+                    {%- comment -%} Single variant: direct add to cart {%- endcomment -%}
+                    {%- form 'product',
+                      upsell_product,
+                      id: product_form_id,
+                      class: 'product-upsell__form',
+                      data-type: 'add-to-cart-form',
+                      data-product-form: ''
+                    -%}
+                      <input type="hidden" name="id" value="{{ upsell_variant.id }}">
 
-                    {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
-                    <input
-                      type="hidden"
-                      form="{{ product_form_id }}"
-                      name="properties[{{ 'general.siblings.label' | t }}]"
-                      value="{{ sibling_color }}"
-                    >
+                      {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
+                      <input
+                        type="hidden"
+                        form="{{ product_form_id }}"
+                        name="properties[{{ 'general.siblings.label' | t }}]"
+                        value="{{ sibling_color }}"
+                      >
 
-                    <button
-                      class="product-upsell__btn btn btn--medium btn--primary btn--outline"
-                      type="submit"
-                      name="add"
-                      data-quick-add-btn
-                      data-add-to-cart
-                      {% unless upsell_variant.available %}
-                        disabled="disabled"
-                      {% endunless %}
-                    >
-                      <span class="btn__text">{{ upsell_button_text }}</span>
+                      <button
+                        id="ProductSubmitButton-{{ section_id }}"
+                        class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                        type="submit"
+                        name="add"
+                        data-quick-add-btn
+                        data-add-to-cart
+                        {% unless upsell_variant.available %}
+                          disabled="disabled"
+                        {% endunless %}
+                      >
+                        <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
 
-                      <span class="btn__loader">
-                        <svg height="18" width="18" class="svg-loader">
-                          <circle r="7" cx="9" cy="9" />
-                          <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                        </svg>
-                      </span>
+                        <span class="btn__loader">
+                          <svg height="18" width="18" class="svg-loader">
+                            <circle r="7" cx="9" cy="9" />
+                            <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                          </svg>
+                        </span>
 
-                      <span class="btn__added">&nbsp;</span>
-                    </button>
-                  {%- endform -%}
+                        <span class="btn__added">&nbsp;</span>
+                      </button>
+                    {%- endform -%}
+                  </div>
                 {%- else -%}
                   {%- comment -%} Multiple options: open the Quick add drawer {%- endcomment -%}
                   {{- open_quick_add_drawer_button -}}

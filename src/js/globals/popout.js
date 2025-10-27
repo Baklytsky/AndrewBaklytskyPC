@@ -7,17 +7,14 @@ if (!customElements.get('popout-select')) {
       }
 
       connectedCallback() {
-        // Prevent duplicate initialization
-        if (this.hasAttribute('data-popout-initialized')) return;
-        this.setAttribute('data-popout-initialized', 'true');
-
         this.popoutList = this.querySelector('[data-popout-list]');
         this.popoutToggle = this.querySelector('[data-popout-toggle]');
         this.popoutToggleText = this.querySelector('[data-popout-toggle-text]');
-        this.popoutInput = this.querySelector('[data-popout-input]') || this.parentNode.querySelector('[data-popout-input]');
+        this.popoutInput = this.querySelector('[data-popout-input]') || this.parentNode.querySelector('[data-popout-input]') || this.parentNode.parentNode.querySelector('[data-quantity-input]');
+
         this.popoutOptions = this.querySelectorAll('[data-popout-option]');
+        this.productGridItem = this.popoutList.closest('[data-grid-item]');
         this.fireSubmitEvent = this.hasAttribute('submit');
-        this.shouldChangeVariant = this.hasAttribute('data-variant-change');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -35,6 +32,16 @@ if (!customElements.get('popout-select')) {
         const button = evt.currentTarget;
         const ariaExpanded = button.getAttribute('aria-expanded') === 'true';
 
+        if (this.productGridItem) {
+          const productGridItemImage = this.productGridItem.querySelector('[data-product-image]');
+
+          if (productGridItemImage) {
+            productGridItemImage.classList.toggle('is-visible', !ariaExpanded);
+          }
+
+          this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
+        }
+
         evt.currentTarget.setAttribute('aria-expanded', !ariaExpanded);
         this.popoutList.classList.toggle('popout-list--visible');
         this.popupListSetDimensions();
@@ -44,17 +51,14 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupToggleFocusout(evt) {
-        if (!document.body.classList.contains('is-focused')) return;
-
         const popoutLostFocus = this.contains(evt.relatedTarget);
+
         if (!popoutLostFocus) {
           this._hideList();
         }
       }
 
       onPopupListFocusout(evt) {
-        if (!document.body.classList.contains('is-focused')) return;
-
         const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
         const isVisible = this.popoutList.classList.contains('popout-list--visible');
 
@@ -97,20 +101,20 @@ if (!customElements.get('popout-select')) {
       popupOptionsClick(evt) {
         const link = evt.target.closest('[data-popout-option]');
 
-        if (link && link.attributes.href.value === '#') {
+        if (link.attributes.href.value === '#') {
           evt.preventDefault();
 
-          const attrValue = link.hasAttribute('data-value') ? link.getAttribute('data-value') : '';
-          const currentTarget = link.parentElement; // <li class="select-popout__item">
-          const isLastOption = !currentTarget.nextSibling;
-          const isLineItemQty = this.popoutInput.name === 'updates[]';
-          const isProductFormQty = this.popoutInput.name === 'quantity';
-          // Don't change the input value for "10+" in cart - just switch to input mode
-          const shouldChangeInputValue = isLastOption && isLineItemQty ? false : true;
-          const shouldReplaceDropdown = (isProductFormQty && isLastOption) || (isLastOption && isLineItemQty);
+          const attrValue = evt.currentTarget.hasAttribute('data-value') ? evt.currentTarget.getAttribute('data-value') : '';
 
-          if (shouldChangeInputValue) {
-            this.popoutInput.value = attrValue;
+          this.popoutInput.value = attrValue;
+
+          // Sync option metadata onto the hidden input so downstream logic can read it
+          const listItem = evt.currentTarget.closest('li');
+          if (listItem) {
+            const optionValueId = listItem.getAttribute('data-option-value-id');
+            const productUrl = listItem.getAttribute('data-product-url');
+            if (optionValueId) this.popoutInput.setAttribute('data-option-value-id', optionValueId);
+            if (productUrl) this.popoutInput.setAttribute('data-product-url', productUrl);
           }
 
           if (this.popoutInput.disabled) {
@@ -120,31 +124,27 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
-
-            // Only dispatch change event if we actually changed the value
-            if (shouldChangeInputValue) {
-              this.popoutInput.dispatchEvent(new Event('change'));
-            }
-            if (this.shouldChangeVariant) this.triggerVariantChange(link);
-
-            // Update active state
+            const currentTarget = evt.currentTarget.parentElement;
             const listTargetElement = this.popoutList.querySelector('.is-active');
-            if (listTargetElement) listTargetElement.classList.remove('is-active');
-            if (currentTarget) currentTarget.classList.add('is-active');
-
-            if (shouldReplaceDropdown) {
-              this.classList.add('is-replaced');
-            }
-
-            // Update aria-current attribute
             const targetAttribute = this.popoutList.querySelector('[aria-current]');
 
-            link.setAttribute('aria-current', 'true');
-            if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
-              targetAttribute.removeAttribute('aria-current');
+            // Fire a bubbling change event so parent controllers can react
+            this.popoutInput.dispatchEvent(new Event('change', {bubbles: true}));
+
+            if (listTargetElement) {
+              listTargetElement.classList.remove('is-active');
+              currentTarget.classList.add('is-active');
             }
 
-            // Update toggle text
+            if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
+              this.classList.add('is-hidden');
+            }
+
+            if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
+              targetAttribute.removeAttribute('aria-current');
+              evt.currentTarget.setAttribute('aria-current', 'true');
+            }
+
             if (attrValue !== '') {
               this.popoutToggleText.innerHTML = attrValue;
 
@@ -152,27 +152,10 @@ if (!customElements.get('popout-select')) {
                 this.popoutToggleText.setAttribute('data-popout-toggle-text', attrValue);
               }
             }
-
-            // Close the dropdown after selection
-            this._hideList();
+            this.onPopupToggleFocusout(evt);
+            this.onPopupListFocusout(evt);
           }
         }
-      }
-
-      /**
-       * Trigger variant change for popout select
-       * @param {HTMLElement} link - The link that was clicked
-       */
-      triggerVariantChange(link) {
-        if (!link) return;
-        const variantId = link.getAttribute('data-variant-id');
-        const form = this.closest('form');
-        if (!variantId || !form) return;
-        const variantIdInput = form.querySelector('[data-variant-id]');
-        if (!variantIdInput) return;
-
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
       }
 
       onKeyUp(evt) {

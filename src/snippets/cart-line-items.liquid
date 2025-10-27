@@ -190,7 +190,7 @@
 
               <span class="cart__price__row">
                 <span class="line__price line__price--unit">
-                  <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
+                  <small class="visually-hidden">{{ 'products.product.unit_price' | t }}</small>
 
                   <small>
                     {{- line_item_unit_price -}}
@@ -369,7 +369,7 @@
           </div>
 
           {%- unless bundle_opened or line_item_reward or line_item_gift -%}
-            <quantity-counter class="cart__quantity-counter">
+            <quantity-input class="cart__quantity-counter">
               {%- assign quantity = line_item.quantity -%}
 
               {%- if line_item.variant.inventory_policy == 'deny'
@@ -388,7 +388,7 @@
                 {%- render 'icon-trash' -%}
               </a>
 
-              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-replaced{% endif %}">
+              <popout-select class="select-popout select-popout--small{% if quantity >= 10 %} is-hidden{% endif %}">
                 <button type="button"
                   class="select-popout__toggle"
                   aria-expanded="false"
@@ -443,7 +443,7 @@
                   {%- render 'icon-plus' -%}
                 </button>
               </div>
-            </quantity-counter>
+            </quantity-input>
           {%- endunless -%}
         </div>
       </div>
@@ -486,6 +486,7 @@
       data-collapsible
       open="true"
       class="cart__bundle"
+      data-animation="cart-items-fade"
       data-bundle-cart-item="{{ bundle_name | handle }}"
     >
       <summary
@@ -562,7 +563,6 @@
           class="cart__item__remove"
           href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0"
           data-bundle-cart-remove="{{ bundle_keys | remove_first: ',' }}"
-          data-collapsible-prevent
           data-id="{{ line_item.key }}"
           title="{{ 'cart.general.remove' | t }}"
         >

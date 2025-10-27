@@ -305,7 +305,7 @@
       <quick-add-product data-bundle-item-replace>
         <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
           {%- if product.variants.size == 1 -%}
-            {%- assign product_form_id = 'ProductForm--' | append: unique -%}
+            {%- assign product_form_id = 'ProductForm-' | append: unique -%}
             {%- form 'product', product, id: product_form_id -%}
               <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
 
@@ -319,6 +319,7 @@
               {%- endif -%}
 
               <button class="quick-add__button caps"
+                id="ProductSubmitButton-{{ section_id }}"
                 type="submit"
                 name="add"
                 aria-label="{{ 'products.general.quick_add' | t }}"
@@ -410,24 +411,22 @@
 
         {{ featured_image }}
 
-        {%- if settings.enable_color_swatches and current_variant -%}
+        {%- if settings.enable_swatches and current_variant -%}
           {%- assign image_inner_empty = true -%}
           {%- assign variant_images = '' -%}
-          {%- for variant in product.variants -%}
-            {%- if variant.featured_image != blank -%}
-              {%- comment -%}
-                Prevent duplicated variant images to be rendered
-              {%- endcomment -%}
-              {%- unless variant_images contains variant.featured_image -%}
+
+          {%- for media in product.media -%}
+            {%- if media.alt contains 'variant--' and media.media_type == 'image' -%}
+              {%- unless variant_images contains media.preview_image -%}
                 {%- liquid
-                  assign variant_images = variant_images | append: variant.featured_image | append: ', '
+                  assign variant_images = variant_images | append: media.preview_image | append: ', '
                   assign image_inner_empty = false
-                  assign variant_title = variant.title | replace: '"', "'"
+                  assign variant_title = media.alt | replace: 'variant--', '' | replace: '"', "'"
                 -%}
 
                 <div class="product-card__bg__inner" data-variant-title="{{ variant_title }}">
                   {%- render 'image',
-                    image: variant.featured_image,
+                    image: media.preview_image,
                     aspect_ratio: aspect_ratio,
                     sizes: sizes,
                     widths: widths,

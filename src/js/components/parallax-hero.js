@@ -24,7 +24,7 @@ if (!customElements.get('parallax-hero')) {
         const Rellax = window.themeRellax?.Rellax || window.Rellax;
         this.rellax = new Rellax(imageSelector, this.defaultOptions);
 
-        window.addEventListener('resize', this.refreshEvent);
+        document.addEventListener('theme:resize', this.refreshEvent);
       }
 
       refresh() {
@@ -33,7 +33,7 @@ if (!customElements.get('parallax-hero')) {
 
       disconnectedCallback() {
         this.rellax.destroy();
-        window.removeEventListener('resize', this.refreshEvent);
+        document.removeEventListener('theme:resize', this.refreshEvent);
       }
     }
   );

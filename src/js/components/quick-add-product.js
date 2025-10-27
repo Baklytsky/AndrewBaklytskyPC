@@ -115,10 +115,10 @@ if (!customElements.get('quick-add-product')) {
               getScript(
                 scriptUrl,
                 () => {
-                  console.log('success');
+                  // console.log('success');
                 },
-                () => {
-                  console.log('error');
+                (e) => {
+                  console.error(e);
                 }
               );
             });
@@ -357,7 +357,7 @@ if (!customElements.get('quick-add-product')) {
         this.setAttribute('data-initialized', 'true');
 
         // Handle swatch selection
-        const swatchInputs = this.instantAddForm.querySelectorAll('[data-variant-selector] input[type="radio"]');
+        const swatchInputs = this.instantAddForm.querySelectorAll('variant-selects input[type="radio"]');
         swatchInputs.forEach((input) => {
           input.addEventListener('change', this.handleInstantAddVariantChange);
         });
@@ -376,12 +376,40 @@ if (!customElements.get('quick-add-product')) {
         const variantId = e.target.getAttribute('data-variant-id');
         if (!variantId) return;
 
-        const variantIdInput = this.instantAddForm.querySelector('[data-variant-id]');
+        const productUrl = `${theme.routes.root}products/${e.target.dataset.productHandle}?section_id=api-product-price&variant=${variantId}`;
+        const variantImageUrl = e.target.dataset.variantImage;
+        this.updatePrice(productUrl);
+        this.updateImage(variantImageUrl);
+
+        const variantIdInput = this.instantAddForm.querySelector('[name=id]');
         if (!variantIdInput) return;
 
+        // Update variant id
         variantIdInput.value = variantId;
         variantIdInput.dispatchEvent(new Event('change'));
         this.closeAllErrorContainers(this.parentElement);
+      }
+
+      updatePrice(productUrl) {
+        fetch(productUrl)
+          .then(this.handleErrors)
+          .then((response) => response.text())
+          .then((text) => {
+            const priceHTML = new DOMParser().parseFromString(text, 'text/html').querySelector('.shopify-section').innerHTML;
+            this.querySelector('.product-upsell__price').innerHTML = priceHTML;
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      }
+
+      updateImage(variantImageUrl) {
+        // Add current sibling swatch image to PGI image
+        const image = this.querySelector('.product-upsell__image__thumb img');
+        if (!image || !variantImageUrl) return;
+
+        image.src = variantImageUrl;
+        image.srcset = variantImageUrl + ' 120w';
       }
 
       resetAnimatedItems() {

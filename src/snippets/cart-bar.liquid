@@ -15,18 +15,17 @@
   endif
 
   assign any_variant_available = false
-  for variant in product.variants
-    if variant.available
-      assign any_variant_available = true
-      break
-    endif
+  for option in product.options_with_values
+    for option_value in option.values
+      if option_value.available
+        assign any_variant_available = true
+        break
+      endif
+    endfor
   endfor
 -%}
 
-{% if product.selling_plan_groups.size > 0
-  and blocks_form.size > 0
-  and blocks_form[0].settings.subscriptions_enable_selectors
-%}
+{% if product.selling_plan_groups.size > 0 and blocks_form.size > 0 %}
   {%- assign selling_plan_hide = false -%}
 {% endif %}
 
@@ -34,9 +33,22 @@
   {%- assign button_add = true -%}
 {%- endif -%}
 
-{{ 'cart-bar.css' | asset_url | stylesheet_tag }}
+{%- style -%}
+  :root {
+    --cart-bar-height: 80px;
+  }
+{%- endstyle -%}
 
-<div id="cart-bar" class="cart-bar" data-cart-bar>
+<script src="{{ 'cart-bar.js' | asset_url }}" defer="defer"></script>
+
+<link
+  rel="preload"
+  href="{{ 'cart-bar.css' | asset_url }}"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+>
+
+<cart-bar id="CartBar-{{ section.id }}" class="cart-bar">
   <div
     class="cart-bar__form__wrapper form__wrapper{% if button_add and current_variant.available != true %} variant--soldout{% endif %}{% if settings.show_newsletter %} show-product-notification{% endif %}{% unless any_variant_available %} all-variants--soldout{% endunless %}"
     data-form-wrapper
@@ -46,35 +58,16 @@
     </div>
 
     <div class="cart-bar__form">
-      <div class="cart-bar__product__price product__price body-small" data-price-wrapper>
-        <span
-          data-product-price
-          {% if current_variant.compare_at_price > current_variant.price %}
-            class="product__price--sale"
-          {% endif %}
-        >
-          {%- if current_variant.price == 0 -%}
-            {{ 'general.money.free' | t }}
-          {%- else -%}
-            {{ current_variant_price }}
-          {%- endif -%}
-        </span>
-
-        {% if product.compare_at_price_max > product.price %}
-          <span class="visually-hidden" data-compare-text>{{ 'products.product.regular_price' | t }}</span>
-          <s class="product__price--strike" data-compare-price>
-            {% if current_variant.compare_at_price > current_variant.price %}
-              {{ current_variant_compare_at_price }}
-            {% endif %}
-          </s>
-        {% endif %}
+      <div class="cart-bar__product__price product__price">
+        {%- render 'price', product: product, price_font_size: 'body-small' -%}
       </div>
       <div class="cart-bar__submit product__submit product__submit--spb">
         <button
+          id="ProductSubmitButton-{{ section_id }}"
           type="button"
           class="btn btn--primary btn--solid product__submit__add{% unless button_add %} product__submit__add--default{% endunless %}"
           {% if button_add %}
-            data-add-to-cart-bar
+            data-cart-bar-add-to-cart
           {% elsif any_variant_available %}
             data-cart-bar-scroll
           {% endif %}
@@ -125,17 +118,21 @@
 
         {%- if settings.show_newsletter -%}
           {%- assign newsletter_text = 'general.newsletter_form.newsletter_product_availability' | t -%}
-          {%- assign button_text = 'products.product.sold_out' | t | append: ' - ' | append: newsletter_text -%}
+          {%- assign newsletter_button_text = 'products.product.sold_out'
+            | t
+            | append: ' - '
+            | append: newsletter_text
+          -%}
 
           <button
             type="button"
             class="btn btn--primary btn--outline product__submit__add product__submit__add--default product__cart-bar-notification-button"
             data-notification-popup-button
           >
-            <span class="btn__text">{{ button_text }}</span>
+            <span class="btn__text">{{ newsletter_button_text }}</span>
           </button>
         {%- endif -%}
       </div>
     </div>
   </div>
-</div>
+</cart-bar>

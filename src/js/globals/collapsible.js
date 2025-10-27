@@ -11,7 +11,6 @@ const attributes = {
   mobile: 'mobile',
   open: 'open',
   single: 'single',
-  prevent: 'data-collapsible-prevent',
 };
 
 class CollapsibleElements extends HTMLElement {
@@ -113,11 +112,6 @@ class CollapsibleElements extends HTMLElement {
     event.preventDefault();
 
     const trigger = event.target;
-
-    if (trigger.hasAttribute(attributes.prevent)) {
-      return;
-    }
-
     const collapsible = trigger.closest(selectors.collapsible);
 
     // When we want only one item expanded at the same time

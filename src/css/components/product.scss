@@ -1,7 +1,7 @@
 @use '../globals' as *;
 
-product-component,
-product-sticky { display: block; }
+product-sticky,
+product-info { display: block; }
 
 @include media-query($medium-up) {
   .product__page {
@@ -493,33 +493,25 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 
 .product__subheading p:only-child { margin: 0; }
 
-.product__price__wrap {
+.product__price  > .price {
   display: flex;
   justify-content: flex-start;
 }
 
-.product__price {
+.price__container {
   margin: 0;
   line-height: var(--line-height-normal);
   align-items: flex-start;
   padding: 0.25rem 0;
 }
 
-.product__price:not([class*="body-"]) { font-size: var(--font-body-medium); }
+.price--has-units { margin-bottom: calc(var(--font-body-small) * var(--line-height-normal)); }
 
-.product__price--has-units { margin-bottom: calc(var(--font-body-small) * var(--line-height-normal)); }
-
-.product__price--unit {
+.unit-price {
+  display: block;
+  position: absolute; // Prevent CLS on variant change
   color: var(--text-light);
   font-size: var(--font-body-small);
-  position: absolute; // Prevent CLS on variant change
-}
-
-.product__price--strike { color: var(--text-light); }
-
-.product__price--sale {
-  margin-right: 10px;
-  color: var(--COLOR-SALE);
 }
 
 .product__price--off {
@@ -562,6 +554,48 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   margin-left: 0.5rem;
 
   &:hover { cursor: help; }
+}
+
+.price__regular {
+  display: block;
+}
+
+.price__sale,
+.price .price__badge-sale,
+.price .price__badge-sold-out,
+.price--on-sale .price__regular {
+  display: none;
+}
+
+.price--sold-out .price__badge-sold-out,
+.price--on-sale .price__badge-sale,
+.volume-pricing--sale-badge .price__badge-sale {
+  display: inline-block;
+}
+
+.volume-pricing--sale-badge .price__badge-sale {
+  margin-left: 0.5rem;
+}
+
+.price--on-sale .price__sale {
+  display: initial;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.price--center {
+  display: initial;
+  justify-content: center;
+}
+
+.price-item--sale {
+  margin-right: 10px;
+  color: var(--COLOR-SALE);
+}
+
+.price--on-sale .price-item--regular {
+  text-decoration: line-through;
+  color: var(--text-light);
 }
 
 .product__form__errors {
