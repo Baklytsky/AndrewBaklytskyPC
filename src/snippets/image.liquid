@@ -31,10 +31,10 @@
   assign widths = widths | default: '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100, 2260, 2450, 2700, 3000, 3350, 3750, 4100, 4450, 4800, 5150, 5500, 5760'
   assign alt = alt | default: image.alt
   assign alt = alt | escape
-  assign attributes = attributes | default: nil
-  assign modifier = modifier | default: nil
-  assign fetchpriority = fetchpriority | default: nil
-  assign preload = preload | default: nil
+  assign attributes = attributes | default: null
+  assign modifier = modifier | default: null
+  assign fetchpriority = fetchpriority | default: null
+  assign preload = preload | default: null
   assign cover = cover | default: false
   assign fill = false
 
@@ -42,7 +42,7 @@
     assign fill = true
   endif
 
-  if show_backfill == nil
+  if show_backfill == null
     assign show_backfill = true
 
     unless image
@@ -105,18 +105,21 @@
   capture srcset
     render 'image-srcset', image: image, widths: widths
   endcapture
- -%}
+-%}
 
 <figure class="{{ wrapper_classes }}" {{ wrapper_attributes }}>
   {%- if image -%}
-    {{ image | image_url: width: width, height: height | image_tag:
-      loading: loading,
-      srcset: srcset,
-      sizes: sizes,
-      alt: alt,
-      fetchpriority: fetchpriority,
-      preload: preload,
-      class: img_class
+    {{
+      image
+      | image_url: width: width, height: height
+      | image_tag:
+        loading: loading,
+        srcset: srcset,
+        sizes: sizes,
+        alt: alt,
+        fetchpriority: fetchpriority,
+        preload: preload,
+        class: img_class
     }}
   {%- elsif placeholder != blank -%}
     {{ placeholder | placeholder_svg_tag: 'svg-placeholder' }}
