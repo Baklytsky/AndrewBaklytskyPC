@@ -120,6 +120,23 @@
       render 'image-srcset', image: image, widths: widths
     endcapture
   endif
+
+  assign focal_point_default = image.presentation.focal_point
+  capture focal_point_desktop
+    if image_desktop
+      echo image_desktop.presentation.focal_point
+    else
+      echo focal_point_default
+    endif
+  endcapture
+
+  capture focal_point_mobile
+    if image_mobile
+      echo image_mobile.presentation.focal_point
+    else
+      echo focal_point_default
+    endif
+  endcapture
 -%}
 
 {%- capture aos_animation -%}
@@ -145,10 +162,10 @@
       {%- if is_mixed_picture -%}
         {%- style -%}
           @media (min-width: 750px) {
-            #{{ id }} { --focal-point: {{ image_desktop.presentation.focal_point | default: image.presentation.focal_point }}; }
+            #{{ id }} { --focal-point: {{ focal_point_desktop }}; }
           }
           @media (max-width: 749px) {
-            #{{ id }} { --focal-point: {{ image_mobile.presentation.focal_point | default: image.presentation.focal_point }}; }
+            #{{ id }} { --focal-point: {{ focal_point_mobile }}; }
           }
         {%- endstyle -%}
 
