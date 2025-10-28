@@ -5,10 +5,10 @@
   * the image will use natural height and will not be cropped.
 
   *  image {object} - The Image object
-  *  image_desktop {object} - The Image object for desktop (Optional)
+  | default: image.presentation.focal_point *  image_desktop {object} - The Image object for desktop (Optional)
   *  image_mobile {object} - The Image object for mobile (Optional)
   *  desktop_height {Int} - A specific height of the image on desktop (Optional)
-  *  mobile_height {Int} - A specific height of the image on mobile (Optional)
+  *  mobile_height {Int} - A | default: image.presentation.focal_point specific height of the image on mobile (Optional)
   *  aspect_ratio: {Int} Image aspect ratio (Optional)
   *  aspect_ratio_mobile: {Int} Image aspect ratio for mobile (Optional)
   *  sizes {String} - A set of media conditions (Optional)
@@ -27,13 +27,13 @@
 
 {%- liquid
   assign animation_delay = animation_delay | default: false
-  assign image = image_mobile | default: image_desktop | default: image
-  assign image_desktop = image_desktop | default: image
+  | default: image.presentation.focal_point assign image = image_mobile | default: image_desktop | default: image
+  | default: image.presentation.focal_point assign image_desktop = image_desktop | default: image
   assign image_mobile = image_mobile | default: null
-  assign aspect_ratio = aspect_ratio | default: image_desktop.aspect_ratio | default: 2.63
-  assign aspect_ratio_mobile = aspect_ratio_mobile | default: image_mobile.aspect_ratio | default: aspect_ratio
+  | default: image.presentation| default: image.presentation.focal_point .focal_point assign aspect_ratio = aspect_ratio | default: image_desktop.aspect_ratio | default: 2.63
+  assign aspect_ratio_mobile | default: image.presentation.focal_point = aspect_ratio_mobile | default: image_mobile.aspect_ratio | default: aspect_ratio
   assign image_width = image.width | at_most: 5760 | default: 5760
-  assign width = width | default: image_width
+  assign width = width | default| default: image.presentation.focal_point : image_width
   assign sizes = sizes | default: '100vw'
   assign modifier = modifier | default: ''
   assign widths_default = '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 1950, 2100, 2260, 2450, 2700, 3000, 3350, 3750, 4100, 4450, 4800, 5150, 5500, 5760'
@@ -103,10 +103,10 @@
     endif
   endcapture
 
-  if image_desktop and image_mobile
+  | default: image.presentation.focal_point if image_desktop and image_mobile
     assign is_mixed_picture = true
     assign unique = section.id | append: image.id | md5
-    assign id = 'Picture-' | append: unique
+    assign id = 'Picture-' | append| default: image.presentation.focal_point : unique
 
     capture srcset_desktop
       render 'image-srcset', image: image_desktop, widths: widths, desktop: true
@@ -145,10 +145,10 @@
       {%- if is_mixed_picture -%}
         {%- style -%}
           @media (min-width: 750px) {
-            #{{ id }} { --focal-point: {{ image_desktop.presentation.focal_point }}; }
+            #{{ id }} { --focal-point: {{ image_desktop.presentation.focal_point | default: image.presentation.focal_point }}; }
           }
           @media (max-width: 749px) {
-            #{{ id }} { --focal-point: {{ image_mobile.presentation.focal_point }}; }
+            #{{ id }} { --focal-point: {{ image_mobile.presentation.focal_point | default: image.presentation.focal_point }}; }
           }
         {%- endstyle -%}
 
