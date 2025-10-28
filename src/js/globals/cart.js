@@ -1377,12 +1377,18 @@ class CartItems extends HTMLElement {
     const endDate = new Date(endDateString);
     const status = config['promotion-status'];
     const timeNow = new Date();
+    let checkStartDate = true;
+    let checkEndDate = true;
 
-    if (isNaN(startDate) || isNaN(endDate)) {
-      return false;
+    if (isNaN(startDate) || timeNow <= startDate) {
+      checkStartDate = false;
     }
 
-    return status === 'active' && timeNow > startDate && timeNow < endDate;
+    if (!isNaN(endDate) && timeNow >= endDate) {
+      checkEndDate = false;
+    }
+
+    return status === 'active' && checkStartDate && checkEndDate;
   }
 
   toggleReward(data) {
