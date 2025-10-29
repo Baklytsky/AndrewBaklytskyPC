@@ -846,19 +846,32 @@
 
 {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-{%- if request.design_mode -%}
-  {{ 'design-mode.css' | asset_url | stylesheet_tag }}
-{%- endif -%}
+{%- if settings.show_siblings or settings.enable_swatches -%}
+  {%- capture css_swatches -%}
+    {{ 'swatches.css' | inline_asset_content }}
+  {%- endcapture -%}
 
-{%- if settings.enable_swatches or settings.siblings != blank -%}
-  {{ 'swatches.css' | asset_url | stylesheet_tag }}
   {%- render 'swatch-color-list' -%}
 {%- endif %}
 
-{%- if settings.quickview_enable or template.suffix == 'bundle-collection' -%}
-  {{ 'product-quick-add-modal.css' | asset_url | stylesheet_tag }}
-  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+{%- if request.design_mode -%}
+  {%- capture css_design_mode -%}
+    {{ 'design-mode.css' | inline_asset_content }}
+  {%- endcapture -%}
 {%- endif -%}
+
+{%- if settings.quickview_enable or template.suffix == 'bundle-collection' -%}
+  {%- capture css_quick_add -%}
+    {{ 'product-quick-add-modal.css' | inline_asset_content }}
+    {{ 'quick-add.css' | inline_asset_content }}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- stylesheet -%}
+  {{ css_swatches }}
+  {{ css_design_mode }}
+  {{ css_quick_add }}
+{%- endstylesheet -%}
 
 <script>
     document.documentElement.style.setProperty('--full-height', `${window.innerHeight}px`);
@@ -938,6 +951,11 @@
 
 <script src="{{ 'vendor.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+
+{%- if settings.parallax_enable -%}
+  <script src="{{ 'rellax.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'parallax-hero.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
 {%- if settings.quickview_enable or template.suffix == 'bundle-collection' -%}
   <script src="{{ 'quick-add-product.js' | asset_url }}" defer="defer"></script>
