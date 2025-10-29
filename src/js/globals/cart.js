@@ -556,9 +556,6 @@ class CartItems extends HTMLElement {
           const cleanResponse = element.querySelector(selectors.apiContent);
           this.build(cleanResponse);
         }
-
-        const cleanResponse = element.querySelector(selectors.apiContent);
-        this.build(cleanResponse);
       })
       .catch((error) => console.log(error));
   }
