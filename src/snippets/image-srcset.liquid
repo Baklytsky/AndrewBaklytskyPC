@@ -1,8 +1,6 @@
 {%- comment -%}
   * Common srcset values
 
-  *  image_url {String} - The url of the image (Optional)
-  *  image_width {Int} - The default image width (Optional)
   *  image {object} - The image object (not a url)
   *  widths {аrray} - An array of the image widths for srcset
   *  mobile {Boolean} - Set mobile sizes only
@@ -12,7 +10,7 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign image_width = image_width | default: image.width | default: image.preview_image.width
+  assign image_width = image.width | default: image.preview_image.width
 
   if image_width != blank
     assign widths = widths | split: ','
@@ -26,12 +24,12 @@
           continue
         endif
 
+        if desktop and width < 1500
+          continue
+        endif
+
         capture src
-          if image_url != blank
-            echo image_url
-          else
-            echo image | image_url: width: width
-          endif
+          echo image | image_url: width: width
           echo ' ' | append: width | append: 'w'
         endcapture
 
