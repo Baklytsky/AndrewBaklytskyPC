@@ -131,13 +131,127 @@ var Rellax = function (el, options) {
     }
   }
 
-  // Get and cache initial position of all elements
+  // === OPTIMIZED SECTION FOR PERFORMANCE ===
+
+  // Utility: Debounce for resize handler
+  function debounce(fn, wait) {
+    let t;
+    return function () {
+      clearTimeout(t);
+      t = setTimeout(fn, wait);
+    };
+  }
+
+  // Store all layout reads in a pass, then all writes
+  function batchLayoutAndStyle(fn) {
+    // Could wrap in two phases if needed
+    fn();
+  }
+
+  // Slightly refactored cacheBlocks for batching reads
   var cacheBlocks = function () {
+    // Phase 1: Read all bounding rects & store data
+    let blockData = [];
     for (var i = 0; i < self.elems.length; i++) {
-      var block = createBlock(self.elems[i]);
-      blocks.push(block);
+      let el = self.elems[i];
+      let data = {};
+      data.el = el;
+      data.dataPercentage = el.getAttribute('data-rellax-percentage');
+      data.dataSpeed = el.getAttribute('data-rellax-speed');
+      data.dataZindex = el.getAttribute('data-rellax-zindex') || 0;
+      data.dataMin = el.getAttribute('data-rellax-min');
+      data.dataMax = el.getAttribute('data-rellax-max');
+      data.style = el.style.cssText;
+      data.bounds = el.getBoundingClientRect(); // single forced reflow per element
+      data.blockHeight = el.clientHeight || el.offsetHeight || el.scrollHeight;
+      data.blockWidth = el.clientWidth || el.offsetWidth || el.scrollWidth;
+      blockData.push(data);
+    }
+    // Phase 2: Compute values and create blocks
+    for (var i = 0; i < blockData.length; i++) {
+      let d = blockData[i];
+      var wrapperPosY = self.options.wrapper ? self.options.wrapper.scrollTop : window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      if (self.options.relativeToWrapper) {
+        var scrollPosY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+        wrapperPosY = scrollPosY - self.options.wrapper.offsetTop;
+      }
+      var posY = self.options.vertical ? (d.dataPercentage || self.options.center ? wrapperPosY : 0) : 0;
+      var posX = self.options.horizontal
+        ? d.dataPercentage || self.options.center
+          ? self.options.wrapper
+            ? self.options.wrapper.scrollLeft
+            : window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft
+          : 0
+        : 0;
+      var blockTop = posY + d.bounds.top;
+      var blockLeft = posX + d.bounds.left;
+      var percentageY = d.dataPercentage ? d.dataPercentage : (posY - blockTop + screenY) / (d.blockHeight + screenY);
+      var percentageX = d.dataPercentage ? d.dataPercentage : (posX - blockLeft + screenX) / (d.blockWidth + screenX);
+      if (self.options.center) {
+        percentageX = 0.5;
+        percentageY = 0.5;
+      }
+      var speed = d.dataSpeed ? d.dataSpeed : self.options.speed;
+      var bases = updatePosition(percentageX, percentageY, speed);
+      // Inline transforms
+      var transform = '';
+      var style = d.style;
+      var searchResult = /transform\s*:/i.exec(style);
+      if (searchResult) {
+        var index = searchResult.index;
+        var trimmedStyle = style.slice(index);
+        var delimiter = trimmedStyle.indexOf(';');
+        if (delimiter) {
+          transform = ' ' + trimmedStyle.slice(11, delimiter).replace(/\s/g, '');
+        } else {
+          transform = ' ' + trimmedStyle.slice(11).replace(/\s/g, '');
+        }
+      }
+      blocks[i] = {
+        baseX: bases.x,
+        baseY: bases.y,
+        top: blockTop,
+        left: blockLeft,
+        height: d.blockHeight,
+        width: d.blockWidth,
+        speed: speed,
+        style: d.style,
+        transform: transform,
+        zindex: d.dataZindex,
+        min: d.dataMin,
+        max: d.dataMax,
+      };
     }
   };
+
+  // Replace init with deferred/heavy work using requestIdleCallback or rAF
+  var init = function () {
+    // Batch DOM writes: write all previous styles
+    for (var i = 0; i < blocks.length; i++) {
+      self.elems[i].style.cssText = blocks[i] && blocks[i].style;
+    }
+    blocks = [];
+    screenY = window.innerHeight;
+    screenX = window.innerWidth;
+    setPosition();
+    var cacheFn = function () {
+      cacheBlocks();
+      animate();
+      if (pause) {
+        window.addEventListener('resize', debouncedInit);
+        pause = false;
+        update();
+      }
+    };
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(cacheFn);
+    } else {
+      requestAnimationFrame(cacheFn);
+    }
+  };
+
+  // Debounce init on resize
+  var debouncedInit = debounce(init, 150);
 
   // Let's kick this script off
   // Build array for cached element values
@@ -337,24 +451,15 @@ var Rellax = function (el, options) {
 
   // Transform3d on parallax element
   var animate = function () {
-    var positions;
+    // Phase 1: Calculate values for all elements
+    var outPositions = new Array(self.elems.length);
     for (var i = 0; i < self.elems.length; i++) {
       var percentageY = (posY - blocks[i].top + screenY) / (blocks[i].height + screenY);
       var percentageX = (posX - blocks[i].left + screenX) / (blocks[i].width + screenX);
-
-      // Subtracting initialize value, so element stays in same spot as HTML
-      positions = updatePosition(percentageX, percentageY, blocks[i].speed); // - blocks[i].baseX;
+      var positions = updatePosition(percentageX, percentageY, blocks[i].speed);
       var positionY = positions.y - blocks[i].baseY;
       var positionX = positions.x - blocks[i].baseX;
-
-      // The next two "if" blocks go like this:
-      // Check if a limit is defined (first "min", then "max");
-      // Check if we need to change the Y or the X
-      // (Currently working only if just one of the axes is enabled)
-      // Then, check if the new position is inside the allowed limit
-      // If so, use new position. If not, set position to limit.
-
-      // Check if a min limit is defined
+      // Min/Max constraints
       if (blocks[i].min !== null) {
         if (self.options.vertical && !self.options.horizontal) {
           positionY = positionY <= blocks[i].min ? blocks[i].min : positionY;
@@ -363,8 +468,6 @@ var Rellax = function (el, options) {
           positionX = positionX <= blocks[i].min ? blocks[i].min : positionX;
         }
       }
-
-      // Check if a max limit is defined
       if (blocks[i].max !== null) {
         if (self.options.vertical && !self.options.horizontal) {
           positionY = positionY >= blocks[i].max ? blocks[i].max : positionY;
@@ -373,25 +476,26 @@ var Rellax = function (el, options) {
           positionX = positionX >= blocks[i].max ? blocks[i].max : positionX;
         }
       }
-
-      var zindex = blocks[i].zindex;
-
-      // Move that element
-      // (Set the new translation and append initial inline transforms.)
-      var translate = 'translate3d(' + (self.options.horizontal ? positionX : '0') + 'px,' + (self.options.vertical ? positionY : '0') + 'px,' + zindex + 'px) ' + blocks[i].transform;
-      self.elems[i].style[transformProp] = translate;
+      outPositions[i] = {positionX, positionY, zindex: blocks[i].zindex, i};
     }
-    self.options.callback(positions);
+    // Phase 2: Write all transforms
+    for (var i = 0; i < self.elems.length; i++) {
+      var o = outPositions[i];
+      var translate = 'translate3d(' + (self.options.horizontal ? o.positionX : '0') + 'px,' + (self.options.vertical ? o.positionY : '0') + 'px,' + o.zindex + 'px) ' + blocks[o.i].transform;
+      self.elems[o.i].style[transformProp] = translate;
+    }
+    self.options.callback(outPositions);
   };
 
+  // Debounce init on resize
   self.destroy = function () {
     for (var i = 0; i < self.elems.length; i++) {
-      self.elems[i].style.cssText = blocks[i].style;
+      self.elems[i].style.cssText = blocks[i] && blocks[i].style;
     }
 
     // Remove resize event listener if not pause, and pause
     if (!pause) {
-      window.removeEventListener('resize', init);
+      window.removeEventListener('resize', debouncedInit);
       pause = true;
     }
 
@@ -400,11 +504,11 @@ var Rellax = function (el, options) {
     loopId = null;
   };
 
-  // Init
-  init();
-
-  // Allow to recalculate the initial values whenever we want
+  // Patch init reference
   self.refresh = init;
+
+  // Main run
+  init();
 
   return self;
 };
