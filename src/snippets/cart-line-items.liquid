@@ -88,17 +88,7 @@
             {% endif %}
           >
             {%- if line_item.image -%}
-              <div class="lazy-image is-loading">
-                {{
-                  line_item.image
-                  | image_url: width: 60
-                  | image_tag:
-                    widths: '30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360',
-                    sizes: '30px',
-                    class: 'is-loading',
-                    loading: 'lazy'
-                }}
-              </div>
+              {%- render 'image', image: line_item.image, width: 60, widths: '30, 60, 90, 180', sizes: '30px', loading: 'lazy' -%}
             {%- endif -%}
           </a>
         </div>
@@ -145,13 +135,13 @@
           {% endif %}
         >
           {%- if line_item.image -%}
-            <div class="lazy-image is-loading">
-              {{
-                line_item.image
-                | image_url: width: 180
-                | image_tag: widths: '90, 180, 270, 360', sizes: '90px', class: 'is-loading', loading: 'lazy'
-              }}
-            </div>
+            {%- render 'image',
+              image: line_item.image,
+              width: 160,
+              widths: '80, 120, 160, 240',
+              sizes: '80px',
+              loading: 'lazy'
+            -%}
           {%- endif -%}
         </a>
       </div>
@@ -376,17 +366,13 @@
                           {% endif %}
                         >
                           {%- if bundle_sub_image -%}
-                            <div class="lazy-image is-loading">
-                              {{
-                                bundle_sub_image
-                                | image_url: width: 60
-                                | image_tag:
-                                  widths: '30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360',
-                                  sizes: '30px',
-                                  class: 'is-loading',
-                                  loading: 'lazy'
-                              }}
-                            </div>
+                            {%- render 'image',
+                              image: bundle_sub_image,
+                              width: 60,
+                              widths: '30, 60, 90, 120',
+                              sizes: '30px',
+                              loading: 'lazy'
+                            -%}
                           {%- endif -%}
                         </a>
                       </div>
@@ -566,13 +552,13 @@
           {% endif %}
         >
           {%- if bundle_image -%}
-            <div class="lazy-image is-loading">
-              {{
-                bundle_image
-                | image_url: width: 180
-                | image_tag: widths: '90, 180, 270, 360', sizes: '90px', class: 'is-loading', loading: 'lazy'
-              }}
-            </div>
+            {%- render 'image',
+              image: bundle_image,
+              width: 160,
+              widths: '80, 120, 160, 240',
+              sizes: '80px',
+              loading: 'lazy'
+            -%}
           {%- endif -%}
         </a>
       </div>

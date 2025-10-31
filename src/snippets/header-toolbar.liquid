@@ -1,11 +1,11 @@
 {% comment %}
-    Renders header toolbar block
+  Renders header toolbar block
 
-    Accepts:
-    - block: {Object} Toolbar block object (required)
+  Accepts:
+  - block: {Object} Toolbar block object (required)
 
-    Usage:
-    {% render 'header-toolbar', block: toolbar_block %}
+  Usage:
+  {% render 'header-toolbar', block: toolbar_block %}
 {% endcomment %}
 
 {%- liquid
@@ -38,7 +38,6 @@
       assign show_toolbar_menu = true
     endif
 
-
     if show_locale_selector and localization.available_languages.size > 1
       assign languages = true
     endif
@@ -56,7 +55,7 @@
       echo '--PB: ' | append: block.settings.padding_bottom | append: 'px;'
 
       if show_border
-        echo '--border-opacity: ' | append: border_opacity  | append: ';'
+        echo '--border-opacity: ' | append: border_opacity | append: ';'
       endif
     endcapture
   endif
@@ -98,17 +97,19 @@
 
 {%- if show_toolbar -%}
   {%- if show_utilities or text != blank -%}
-    <div class="toolbar{% if show_border %} has-border{% endif %} section-padding{% if text == blank %} toolbar--no-text{% endif %} {{ color_scheme }}"
+    <div
+      class="toolbar{% if show_border %} has-border{% endif %} section-padding{% if text == blank %} toolbar--no-text{% endif %} {{ color_scheme }}"
       {% if style != blank %}
         style="{{ style }}"
       {% endif %}
       data-header-toolbar
-      {{ block.shopify_attributes }}>
+      {{ block.shopify_attributes }}
+    >
       <div class="wrapper--full-padded">
         <div class="toolbar__inner{% if text == blank %} desktop{% endif %}">
           {%- if show_toolbar_menu or text != blank -%}
             <ticker-bar class="toolbar__text">
-              <div data-ticker-frame class="toolbar__text__frame">
+              <div class="toolbar__text__frame">
                 <div data-ticker-scale class="toolbar__text__ticker announcement__scale ticker--unloaded">
                   <div data-ticker-text class="announcement__text">
                     {%- if text != blank -%}

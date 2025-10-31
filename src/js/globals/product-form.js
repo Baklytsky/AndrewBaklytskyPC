@@ -21,7 +21,7 @@ if (!customElements.get('product-form')) {
         const isBundle = this.submitButton.hasAttribute('data-bundle-modal-button');
 
         if (isBundle) {
-          const productJSONhtml = this.container.querySelector('[data-bundle-json]')?.innerHTML;
+          const productJSONhtml = this.querySelector('[data-bundle-json]')?.innerHTML;
           const productJSON = JSON.parse(productJSONhtml);
           const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.id}"]`);
 
