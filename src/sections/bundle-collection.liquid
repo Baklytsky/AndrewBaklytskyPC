@@ -27,7 +27,14 @@
     assign modifier_class = ''
   endunless
 -%}
-
+{%- comment -%}
+  <script>
+    console.log({{ collection.metafields | json }})
+  </script>
+  <script>
+    console.log({{ collection.metafields.carbon | json }})
+  </script>
+{%- endcomment -%}
 {%- style -%}
   #Collection--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
@@ -227,7 +234,7 @@
                     >
                       <p class="bundle__price__row bundle__price__row--subtotal">
                         <span>{{ 'collections.bundle.subtotal' | t }}</span>
-                        <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                        <span data-bundle-total>{{ 0 | money }}</span>
                       </p>
 
                       <p class="bundle__price__row">

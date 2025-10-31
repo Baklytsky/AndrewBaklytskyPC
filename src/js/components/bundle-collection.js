@@ -203,7 +203,7 @@ if (!customElements.get('bundle-collection')) {
         const imageMediaItems = (product.media || []).filter((item) => item.media_type === 'image');
 
         const productData = {
-          id: variant,
+          id: variant.id,
           quantity: 1,
           properties: {
             _bundle_unique_id: ``,
@@ -321,8 +321,7 @@ if (!customElements.get('bundle-collection')) {
       }
 
       formatRate(cents) {
-        const price = cents === 0 ? window.theme.strings.free : window.theme.formatMoney(cents, theme.moneyFormat);
-        return price;
+        return window.theme.formatMoney(cents, theme.moneyFormat);
       }
 
       disconnectedCallback() {
@@ -338,13 +337,8 @@ if (!customElements.get('bundle-collection')) {
 
         this.removeEventListener('theme:bundle:button-modal', this.addProductToBundleModalEvent);
 
-        if (this.scrollToBundleButton) {
-          this.scrollToBundleButton.removeEventListener('click', this.scrollToBundleEvent);
-        }
-
-        if (this.addButton) {
-          this.addButton.removeEventListener('click', this.addProductsToCartEvent);
-        }
+        this.scrollToBundleButton?.removeEventListener('click', this.scrollToBundleEvent);
+        this.addButton?.removeEventListener('click', this.addProductsToCartEvent);
       }
     }
   );

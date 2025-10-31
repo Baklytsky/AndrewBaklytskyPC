@@ -8,6 +8,8 @@
   assign bundle_opened = false
   assign bundle_price = 0
   assign bundle_price_compare = 0
+  assign bundle_discount_amount = 0
+  assign bundle_discount_title = ''
   assign bundle_keys = ''
   assign line_items_collections = null
   assign line_items_tags = null
@@ -58,6 +60,15 @@
       assign bundle_price = bundle_price | plus: line_item_final_price
       assign bundle_keys = bundle_keys | append: ',' | append: line_item.key
       assign animation_delay = animation_delay | plus: animation_delay_increment
+
+      if line_item_original_price > line_item_final_price
+        for discount in line_item.line_level_discount_allocations
+          if discount.discount_application.title contains bundle_name
+            assign bundle_discount_title = discount.discount_application.title
+            assign bundle_discount_amount = bundle_discount_amount | plus: discount.amount
+          endif
+        endfor
+      endif
     else
       assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
     endif
@@ -623,12 +634,24 @@
           </a>
         </div>
       </div>
+
+      {%- if bundle_discount_amount > 0 and bundle_discount_title != '' -%}
+        <p class="cart__discount">
+          {%- assign bundle_discount_price = bundle_discount_amount | money -%}
+
+          <span>
+            {{- 'cart.general.discount_label_html' | t: amount: bundle_discount_price, title: bundle_discount_title -}}
+          </span>
+        </p>
+      {%- endif -%}
     </div>
 
     {%- liquid
       assign bundle_opened = false
       assign bundle_price = 0
       assign bundle_price_compare = 0
+      assign bundle_discount_amount = 0
+      assign bundle_discount_title = ''
       assign bundle_keys = ''
       assign line_items_bundle = ''
       assign bundle_animation_timing = line_items_bundle_counter | times: animation_delay_increment
