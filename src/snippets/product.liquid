@@ -137,8 +137,8 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
-{{ 'product.css' | asset_url | stylesheet_tag }}
-{{ 'product-media.css' | asset_url | stylesheet_tag }}
+{%- render 'stylesheet', name: 'product.css', async: true -%}
+{%- render 'stylesheet', name: 'product-media.css', async: true -%}
 
 <product-info
   id="MainProduct-{{ unique }}"
@@ -423,7 +423,7 @@
                     {%- render 'product-inventory', product: product, block: block, block_style: block_style -%}
 
                   {%- when 'pickup' -%}
-                    {{ 'pickup-availability.css' | asset_url | stylesheet_tag }}
+                    {%- render 'stylesheet', name: 'pickup-availability.css', blocking: true -%}
 
                     {%- assign pick_up_availabilities = current_variant.store_availabilities
                       | where: 'pick_up_enabled', true

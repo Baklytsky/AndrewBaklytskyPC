@@ -14,7 +14,7 @@
 -%}
 
 {%- if enable_tabs -%}
-  {{ 'tabs.css' | asset_url | stylesheet_tag }}
+  {%- render 'stylesheet', name: 'tabs.css', async: true -%}
 {%- endif -%}
 
 {%- for block in section.blocks -%}
@@ -97,7 +97,8 @@
   --PB: {{ section.settings.padding_bottom }}px;
 {%- endcapture -%}
 
-{{ 'related-products.css' | asset_url | stylesheet_tag }}
+{%- render 'stylesheet', name: 'related-products.css', async: true -%}
+
 <script src="{{ 'related-products.js' | asset_url }}" defer="defer"></script>
 
 <related-products
