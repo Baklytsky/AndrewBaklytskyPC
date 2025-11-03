@@ -3,21 +3,19 @@ let firstLoad = true;
 
 window.theme.readHeights = function () {
   const h = {};
-  h.windowHeight = Math.min(window.screen.height, window.innerHeight);
-  h.footerHeight = getHeight('[data-section-type*="footer"]');
+  h.windowHeight = Math.min(window.screen.height, theme.windowHeight);
   h.headerHeight = getHeight('[data-header-height]');
   h.stickyHeaderHeight = document.querySelector('[data-header-sticky]') ? h.headerHeight : 0;
   h.collectionNavHeight = getHeight('[data-collection-nav]');
-  h.logoHeight = getFooterLogoWithPadding();
 
   return h;
 };
 
 function setVars() {
-  const {windowHeight, headerHeight, logoHeight, footerHeight, collectionNavHeight} = window.theme.readHeights();
+  const {windowHeight, headerHeight, collectionNavHeight} = window.theme.readHeights();
   const currentScreenOrientation = getScreenOrientation();
 
-  if (!firstLoad || currentScreenOrientation !== screenOrientation || window.innerWidth > window.theme.sizes.mobile) {
+  if (!firstLoad || currentScreenOrientation !== screenOrientation || theme.windowWidth > window.theme.sizes.mobile) {
     // Only update the heights on screen orientation change or larger than mobile devices
     document.documentElement.style.setProperty('--full-height', `${windowHeight}px`);
     document.documentElement.style.setProperty('--three-quarters', `${windowHeight * (3 / 4)}px`);
@@ -32,9 +30,6 @@ function setVars() {
 
   document.documentElement.style.setProperty('--collection-nav-height', `${collectionNavHeight}px`);
   document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
-  document.documentElement.style.setProperty('--footer-height', `${footerHeight}px`);
-  document.documentElement.style.setProperty('--content-full', `${windowHeight - headerHeight - logoHeight / 2}px`);
-  document.documentElement.style.setProperty('--content-min', `${windowHeight - headerHeight - footerHeight}px`);
 }
 
 function getScreenOrientation() {
@@ -51,15 +46,6 @@ function getHeight(selector) {
   const el = document.querySelector(selector);
   if (el) {
     return el.offsetHeight;
-  } else {
-    return 0;
-  }
-}
-
-function getFooterLogoWithPadding() {
-  const height = getHeight('[data-footer-logo]');
-  if (height > 0) {
-    return height + 20;
   } else {
     return 0;
   }

@@ -132,7 +132,7 @@ if (!customElements.get('timeline-component')) {
         const isDesktopView = !theme.isMobile;
         const elementHeight = this.holderHeight / this.rows.length;
         let elementsTop = this.holderTop;
-        const windowHeight = window.innerHeight;
+        const windowHeight = theme.windowHeight;
         const windowMiddle = window.scrollY + windowHeight * 1.5;
         const outerSpace = 16; // wrapper padding using --outer CSS variable
         let mobilePercent = 0;

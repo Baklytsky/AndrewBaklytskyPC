@@ -58,7 +58,7 @@ if (!customElements.get('scroll-spy')) {
         this.top = this.elementToSpy.getBoundingClientRect().top;
 
         // Check element's visibility in the viewport
-        const windowHeight = Math.round(window.innerHeight);
+        const windowHeight = Math.round(theme.windowHeight);
         const scrollTop = Math.round(window.scrollY);
         const scrollBottom = scrollTop + windowHeight;
         const elementOffsetTopPoint = Math.round(this.top + scrollTop);
@@ -90,11 +90,11 @@ if (!customElements.get('scroll-spy')) {
             break;
 
           case 'middle':
-            triggerPointReached = this.top <= window.innerHeight / 2;
+            triggerPointReached = this.top <= theme.windowHeight / 2;
             break;
 
           case 'bottom':
-            triggerPointReached = this.top <= window.innerHeight;
+            triggerPointReached = this.top <= theme.windowHeight;
             break;
 
           default:

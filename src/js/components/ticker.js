@@ -44,7 +44,7 @@ if (!customElements.get('ticker-bar')) {
         this.removeClones();
 
         const isOverflowing = this.clientWidth < this.comparitor.clientWidth;
-        const limitClones = this.autoplay ? parseInt(window.innerWidth / this.text.clientWidth) : 2;
+        const limitClones = this.autoplay ? parseInt(theme.windowWidth / this.text.clientWidth) : 2;
 
         if (isOverflowing || this.autoplay) {
           for (let index = 0; index <= limitClones; index++) {

@@ -108,7 +108,7 @@ if (!customElements.get('product-sticky')) {
         const eventExist = Boolean(e && e.detail);
         const isAccordion = Boolean(eventExist && e.detail.element && e.detail.element === 'accordion');
         const formWrapperHeight = this.formWrapper.offsetHeight;
-        const heightDifference = window.innerHeight - formWrapperHeight - this.defaultTopBottomSpacings;
+        const heightDifference = theme.windowHeight - formWrapperHeight - this.defaultTopBottomSpacings;
         const scrollDifference = Math.abs(this.scrollTopPosition - this.scrollLastPosition);
 
         if (this.scrollDirectionDown) {
