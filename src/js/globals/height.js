@@ -14,7 +14,6 @@ window.theme.readHeights = function () {
 };
 
 function setVars() {
-  console.log('setVars');
   const {windowHeight, headerHeight, logoHeight, footerHeight, collectionNavHeight} = window.theme.readHeights();
   const currentScreenOrientation = getScreenOrientation();
 

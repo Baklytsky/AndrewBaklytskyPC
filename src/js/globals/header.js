@@ -11,7 +11,6 @@ const selectors = {
 };
 
 const classes = {
-  clone: 'js__header__clone',
   headerGroup: 'shopify-section-header-group-group',
   showMobileClass: 'js__show__mobile',
   sticky: 'has-header-sticky',
