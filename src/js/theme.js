@@ -1,6 +1,5 @@
 /* ================ Required ================ */
 import './main/settings';
-import './globals/media-query';
 import './globals/constants';
 import './globals/pubsub';
 import './globals/currency';
