@@ -5,7 +5,7 @@
   assign desktop_height = section.settings.height
   assign mobile_height = section.settings.mobile_height
   assign width = section.settings.width
-  assign text_slide_blocks = section.blocks | where: 'type', 'text-slide'
+  assign collection_blocks = section.blocks | where: 'type', 'collection'
   assign show_placeholder = section.settings.show_placeholder
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign show_video_background = false
@@ -135,6 +135,10 @@
     </div>
   {%- endif -%}
 {%- endcapture -%}
+
+{%- if collection_blocks.size > 0 -%}
+  {{ 'collection-cards.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
 
 <section
   id="BrickSection--{{ section.id }}"
