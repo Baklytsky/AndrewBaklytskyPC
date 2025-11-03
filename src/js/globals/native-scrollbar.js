@@ -156,9 +156,9 @@ if (!customElements.get('native-scrollbar')) {
 
         const style = getComputedStyle(this.scrollbar);
 
-        if ((style.overflowX === 'auto' || style.overflowX === 'scroll') && this.scrollbar.scrollWidth > this.scrollbar.clientWidth) {
+        if (style.overflowX === 'auto' || style.overflowX === 'scroll') {
           this.scrollDirection = 'horizontal';
-        } else if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && this.scrollbar.scrollHeight > this.scrollbar.clientHeight) {
+        } else if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
           this.scrollDirection = 'vertical';
         } else {
           this.scrollDirection = null;

@@ -74,7 +74,7 @@ if (!customElements.get('product-sticky')) {
 
         if (!targetFormWrapper) return;
 
-        if (!window.theme.isMobile()) {
+        if (!theme.isMobile) {
           const form = this.querySelector(selectors.formWrapper);
           const productMediaList = this.querySelector(selectors.productMediaList);
 

@@ -95,7 +95,7 @@ if (!customElements.get('newsletter-component')) {
 
       scrollToForm(newsletter) {
         const rect = newsletter.getBoundingClientRect();
-        const isVisible = rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.theme.getWindowHeight() && rect.right <= window.theme.getWindowWidth();
+        const isVisible = rect.top >= 0 && rect.left >= 0 && rect.bottom <= theme.windowHeight && rect.right <= theme.windowWidth;
 
         if (!isVisible) {
           setTimeout(() => {

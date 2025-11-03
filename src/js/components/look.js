@@ -61,7 +61,7 @@ if (!customElements.get('look-component')) {
               e.preventDefault();
               const idx = thumb.hasAttribute(attributes.thumbValue) && thumb.getAttribute(attributes.thumbValue) !== '' ? parseInt(thumb.getAttribute(attributes.thumbValue)) : i;
               const slide = this.slides[idx];
-              if (window.theme.isMobile()) {
+              if (theme.isMobile) {
                 const parentPadding = parseInt(window.getComputedStyle(this.slider).paddingLeft);
                 this.slider.scrollTo({
                   top: 0,
@@ -74,7 +74,7 @@ if (!customElements.get('look-component')) {
                 const {stickyHeaderHeight} = window.theme.readHeights();
                 const slideTop = slide.getBoundingClientRect().top;
                 const slideHeightHalf = slide.offsetHeight / 2;
-                const windowHeight = window.innerHeight;
+                const windowHeight = theme.windowHeight;
                 const windowHeightHalf = windowHeight / 2;
                 let scrollTarget = slideTop + slideHeightHalf - windowHeightHalf + window.scrollY;
                 const sliderContainerTop = this.getBoundingClientRect().top + window.scrollY;

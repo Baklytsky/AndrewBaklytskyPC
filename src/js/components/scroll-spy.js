@@ -45,7 +45,7 @@ if (!customElements.get('scroll-spy')) {
       }
 
       isEligible() {
-        const isDesktopView = !window.theme.isMobile();
+        const isDesktopView = !theme.isMobile;
         const isMobileView = !isDesktopView;
         return (
           (isMobileView && this.anchor.hasAttribute('data-scroll-spy-mobile')) ||

@@ -71,7 +71,7 @@ if (!customElements.get('header-component')) {
             const key = button.hasAttribute(attributes.drawerToggle) ? button.getAttribute(attributes.drawerToggle) : '';
             const desktopDrawer = document.querySelector(`[${attributes.drawer}="${key}"]`);
             const mobileDrawer = document.querySelector(`mobile-menu > [${attributes.drawer}]`);
-            const isDesktopView = !window.theme.isMobile();
+            const isDesktopView = !theme.isMobile;
 
             if (isDesktopView) {
               drawer = desktopDrawer;
@@ -100,42 +100,51 @@ if (!customElements.get('header-component')) {
       }
 
       checkWidth() {
-        if (document.body.clientWidth < this.minWidth) {
-          this.classList.add(classes.showMobileClass);
+        if (!this.minWidth) return;
 
-          // Update --header-height CSS variable when switching to a mobile nav
-          const {headerHeight} = window.theme.readHeights();
-          document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
-        } else {
-          this.classList.remove(classes.showMobileClass);
-        }
+        // Debounce execution to run at most every 150ms
+        if (this._resizeTimeout) cancelAnimationFrame(this._resizeTimeout);
+
+        this._resizeTimeout = requestAnimationFrame(() => {
+          clearTimeout(this._resizeDebounce);
+          this._resizeDebounce = setTimeout(() => {
+            const isMobile = document.body.clientWidth < this.minWidth;
+            this.classList.toggle(classes.showMobileClass, isMobile);
+
+            if (isMobile) {
+              const {headerHeight} = window.theme.readHeights();
+              document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+            }
+          }, 150);
+        });
       }
 
       getMinWidth() {
-        const comparitor = document.createElement('div');
-        comparitor.classList.add(classes.clone, classes.headerWrapper);
-        comparitor.appendChild(this.querySelector('header').cloneNode(true));
-        document.body.appendChild(comparitor);
-        const widthWrappers = comparitor.querySelectorAll(selectors.widthContentWrapper);
+        // Measure actual visible header content instead of cloning
+        const wrappers = this.querySelectorAll(selectors.widthContentWrapper);
         let minWidth = 0;
-        let spaced = 0;
+        let spacing = 0;
 
-        widthWrappers.forEach((context) => {
-          const wideElements = context.querySelectorAll(selectors.widthContent);
-          let thisWidth = 0;
-          if (wideElements.length === 3) {
-            thisWidth = this._sumSplitWidths(wideElements);
-          } else {
-            thisWidth = this._sumWidths(wideElements);
-          }
-          if (thisWidth > minWidth) {
-            minWidth = thisWidth;
-            spaced = wideElements.length * 20;
+        wrappers.forEach((wrapper) => {
+          const children = wrapper.querySelectorAll(selectors.widthContent);
+          if (!children.length) return;
+
+          let total = 0;
+          children.forEach((el) => {
+            // Only include visible elements
+            if (el.offsetParent !== null) {
+              total += el.offsetWidth;
+            }
+          });
+
+          const space = children.length * 20;
+          if (total + space > minWidth) {
+            minWidth = total;
+            spacing = space;
           }
         });
 
-        document.body.removeChild(comparitor);
-        return minWidth + spaced;
+        return minWidth + spacing;
       }
 
       cartToggleEvent() {
@@ -214,30 +223,6 @@ if (!customElements.get('header-component')) {
           this.cls.remove(classes.stuck);
           this.isStuck = false;
         }
-      }
-
-      _sumSplitWidths(nodes) {
-        let arr = [];
-        nodes.forEach((el) => {
-          if (el.firstElementChild) {
-            arr.push(el.firstElementChild.clientWidth);
-          }
-        });
-        if (arr[0] > arr[2]) {
-          arr[2] = arr[0];
-        } else {
-          arr[0] = arr[2];
-        }
-        const width = arr.reduce((a, b) => a + b);
-        return width;
-      }
-
-      _sumWidths(nodes) {
-        let width = 0;
-        nodes.forEach((el) => {
-          width += el.clientWidth;
-        });
-        return width;
       }
 
       disconnectedCallback() {
