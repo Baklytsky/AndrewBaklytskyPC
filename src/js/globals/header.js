@@ -107,10 +107,10 @@ if (!customElements.get('header-component')) {
         this._resizeTimeout = requestAnimationFrame(() => {
           clearTimeout(this._resizeDebounce);
           this._resizeDebounce = setTimeout(() => {
-            const isMobile = document.body.clientWidth < this.minWidth;
-            this.classList.toggle(classes.showMobileClass, isMobile);
+            const isHamburgerMenu = theme.windowWidth < this.minWidth;
+            this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
 
-            if (isMobile) {
+            if (isHamburgerMenu) {
               const {headerHeight} = window.theme.readHeights();
               document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
             }

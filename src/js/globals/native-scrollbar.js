@@ -11,15 +11,15 @@ if (!customElements.get('native-scrollbar')) {
         this.scrollbarWidth = 0;
         this.scrollbarHeight = 0;
         this.resizeEvents = this.resizeEvents.bind(this);
+        this.detectScrollDirection = this.detectScrollDirection.bind(this);
         this.scrollDirection = null;
+
+        // Detect scroll direction
+        document.addEventListener('DOMContentLoaded', () => setTimeout(() => this.detectScrollDirection(), 300));
       }
 
       connectedCallback() {
-        this.addEventListener('theme:swatches:loaded', this.resizeEvents);
         document.addEventListener('theme:resize', this.resizeEvents);
-
-        // Detect scroll direction
-        this.detectScrollDirection();
 
         if (this.scrollbar.hasAttribute('data-scrollbar-slider')) {
           this.scrollToVisibleElement();
@@ -37,7 +37,6 @@ if (!customElements.get('native-scrollbar')) {
       }
 
       disconnectedCallback() {
-        this.removeEventListener('theme:swatches:loaded', this.resizeEvents);
         document.removeEventListener('theme:resize', this.resizeEvents);
       }
 
