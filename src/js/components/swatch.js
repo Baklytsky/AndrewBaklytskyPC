@@ -57,7 +57,7 @@ if (!customElements.get('grid-swatch')) {
             });
           }
 
-          if (this.collectionSwatchesStyle == 'slider' || this.collectionSwatchesStyle == 'grid') {
+          if (this.swatchesStyle == 'slider' || this.swatchesStyle == 'grid') {
             this.swatchFieldset.classList.add('is-visible');
           }
 
