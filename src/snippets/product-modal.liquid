@@ -22,124 +22,133 @@
 -%}
 
 <div data-api-content>
-  {%- render 'stylesheet', name: 'product.css', blocking: true -%}
-  {%- render 'stylesheet', name: 'product-media.css', blocking: true -%}
-
-  <script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
-
-  <product-images
-    class="product-quick-add__images product__images product__images--thumbs product__images--mobile-thumbs"
-    data-active-media="{{ section.id }}-{{ featured_media.id }}"
-    data-fader-desktop
+  <product-info
+    id="ProductModal-{{ unique }}"
+    data-section-id="{{ section.id }}"
+    data-product-handle="{{ product.handle }}"
+    data-product-id="{{ product.id }}"
+    data-url="{{ product.url }}"
+    data-update-url="false"
   >
-    <div
-      class="product__slides"
-      data-product-media-list
-      data-animation="{{ animation_name_images }}"
-      data-animation-delay="{{ animation_delay }}"
-      {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
-    >
-      {%- if product.media.size > 0 -%}
-        {%- for media in product.media -%}
-          {%- render 'media',
-            media: media,
-            featured_media: featured_media,
-            enable_video_looping: true,
-            sectionkey: section.id,
-            product_api: true,
-            image_width: '365',
-            loading: 'eager',
-            cover: true
-          -%}
-        {%- endfor -%}
+    {%- render 'stylesheet', name: 'product.css', blocking: true -%}
+    {%- render 'stylesheet', name: 'product-media.css', blocking: true -%}
 
-        {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
-        {%- if first_3d_model -%}
-          <button
-            class="btn btn--outline btn--black btn--ar product-quick-add__view-in-space"
-            data-shopify-xr
-            data-shopify-model3d-id="{{ first_3d_model.id }}"
-            data-shopify-title="{{ product.title | strip_html }}"
-            data-shopify-xr-hidden
-          >
-            {%- render 'icon-media-model' -%}
-            <span class="product-quick-add__view-in-space-text">{{ 'products.general.view_space' | t }}</span>
-          </button>
-        {%- endif -%}
-      {%- else -%}
-        <div class="product__slide">
-          <div class="product__photo{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
-            {%- render 'image',
-              image: product.featured_image,
-              widths: '365, 550, 730, 1100, 1460',
+    <script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
+
+    <product-images
+      class="product-quick-add__images product__images product__images--thumbs product__images--mobile-thumbs"
+      data-active-media="{{ section.id }}-{{ featured_media.id }}"
+      data-fader-desktop
+    >
+      <div
+        class="product__slides"
+        data-product-media-list
+        data-animation="{{ animation_name_images }}"
+        data-animation-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
+      >
+        {%- if product.media.size > 0 -%}
+          {%- for media in product.media -%}
+            {%- render 'media',
+              media: media,
+              featured_media: featured_media,
+              enable_video_looping: true,
+              sectionkey: section.id,
+              product_api: true,
+              image_width: '365',
               loading: 'eager',
               cover: true
             -%}
+          {%- endfor -%}
+
+          {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+          {%- if first_3d_model -%}
+            <button
+              class="btn btn--outline btn--black btn--ar product-quick-add__view-in-space"
+              data-shopify-xr
+              data-shopify-model3d-id="{{ first_3d_model.id }}"
+              data-shopify-title="{{ product.title | strip_html }}"
+              data-shopify-xr-hidden
+            >
+              {%- render 'icon-media-model' -%}
+              <span class="product-quick-add__view-in-space-text">{{ 'products.general.view_space' | t }}</span>
+            </button>
+          {%- endif -%}
+        {%- else -%}
+          <div class="product__slide">
+            <div class="product__photo{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+              {%- render 'image',
+                image: product.featured_image,
+                widths: '365, 550, 730, 1100, 1460',
+                loading: 'eager',
+                cover: true
+              -%}
+            </div>
           </div>
-        </div>
-      {%- endif -%}
-    </div>
-  </product-images>
+        {%- endif -%}
+      </div>
+    </product-images>
 
-  <div class="product-quick-add__form">
-    <div class="product-quick-add__form__inner" data-form-wrapper>
-      {%- liquid
-        assign product_form_id = 'ProductFormUpsell-' | append: section.id | append: '-' | append: product.id
+    <div class="product-quick-add__form">
+      <div class="product-quick-add__form__inner" data-form-wrapper>
+        {%- liquid
+          assign product_form_id = 'ProductFormUpsell-' | append: section.id | append: '-' | append: product.id
 
-        render 'product-title', product: product, is_title_linked: true, animation_name: animation_name, animation_delay: animation_delay
-        assign animation_delay = animation_delay | plus: animation_delay_increment
-
-        render 'product-price', product: product, unique: unique, animation_name: animation_name, animation_delay: animation_delay
-        assign animation_delay = animation_delay | plus: animation_delay_increment
-
-        unless product_bundle
-          render 'product-siblings', product: product, product_form_id: product_form_id, metafields: true, product_api: true, animation_name: animation_name, animation_delay: animation_delay
+          render 'product-title', product: product, is_title_linked: true, animation_name: animation_name, animation_delay: animation_delay
           assign animation_delay = animation_delay | plus: animation_delay_increment
-        endunless
 
-        render 'product-variant-picker', product: product, product_form_id: product_form_id, unique: unique, current_variant: current_variant, enable_size_chart: false, animation_name: animation_name, animation_delay: animation_delay, is_bundle: is_bundle, quickview: true
-        assign animation_delay = animation_delay | plus: animation_delay_increment
+          render 'product-price', product: product, unique: unique, animation_name: animation_name, animation_delay: animation_delay
+          assign animation_delay = animation_delay | plus: animation_delay_increment
 
-        render 'product-description', product: product, product_api: true, animation_name: animation_name, animation_delay: animation_delay
-        assign animation_delay = animation_delay | plus: animation_delay_increment
-      -%}
+          unless product_bundle
+            render 'product-siblings', product: product, product_form_id: product_form_id, metafields: true, product_api: true, animation_name: animation_name, animation_delay: animation_delay
+            assign animation_delay = animation_delay | plus: animation_delay_increment
+          endunless
 
-      {%- unless product_bundle -%}
-        {%- comment -%}
-          Add a line item property called 'Preorder' to preorder products
-        {%- endcomment -%}
-        {%- if preorder -%}
-          <input
-            type="hidden"
-            name="properties[{{ 'products.product.sale_type' | t }}]"
-            value="{{ 'products.product.pre_order' | t }}"
-            form="{{ product_form_id }}"
-            data-product-preorder
-          >
-        {%- endif -%}
+          render 'product-variant-picker', product: product, product_form_id: product_form_id, unique: unique, current_variant: current_variant, enable_size_chart: false, animation_name: animation_name, animation_delay: animation_delay, is_bundle: is_bundle, quickview: true
+          assign animation_delay = animation_delay | plus: animation_delay_increment
 
-        {%- if settings.show_gift_card_recipient and product.gift_card? -%}
-          <div
-            class="product__block block-padding"
-            {% if animation_name %}
-              data-animation="{{ animation_name }}"
-              data-animation-delay="{{ animation_delay }}"
-            {% endif %}
-          >
-            {%- render 'gift-card-recipient-form', product: product, form: form, product_form_id: product_form_id -%}
-          </div>
-        {%- endif -%}
-      {%- endunless -%}
+          render 'product-description', product: product, product_api: true, animation_name: animation_name, animation_delay: animation_delay
+          assign animation_delay = animation_delay | plus: animation_delay_increment
+        -%}
 
-      {%- render 'product-buttons',
-        product: product,
-        unique: unique,
-        product_form_id: product_form_id,
-        animation_name: animation_name,
-        animation_delay: animation_delay,
-        quickview: true,
-        product_bundle: product_bundle
-      -%}
+        {%- unless product_bundle -%}
+          {%- comment -%}
+            Add a line item property called 'Preorder' to preorder products
+          {%- endcomment -%}
+          {%- if preorder -%}
+            <input
+              type="hidden"
+              name="properties[{{ 'products.product.sale_type' | t }}]"
+              value="{{ 'products.product.pre_order' | t }}"
+              form="{{ product_form_id }}"
+              data-product-preorder
+            >
+          {%- endif -%}
+
+          {%- if settings.show_gift_card_recipient and product.gift_card? -%}
+            <div
+              class="product__block block-padding"
+              {% if animation_name %}
+                data-animation="{{ animation_name }}"
+                data-animation-delay="{{ animation_delay }}"
+              {% endif %}
+            >
+              {%- render 'gift-card-recipient-form', product: product, form: form, product_form_id: product_form_id -%}
+            </div>
+          {%- endif -%}
+        {%- endunless -%}
+
+        {%- render 'product-buttons',
+          product: product,
+          unique: unique,
+          product_form_id: product_form_id,
+          animation_name: animation_name,
+          animation_delay: animation_delay,
+          quickview: true,
+          product_bundle: product_bundle
+        -%}
+      </div>
     </div>
-  </div>
+  </product-info>
 </div>
