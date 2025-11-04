@@ -40,7 +40,7 @@ if (!customElements.get('collections-hover')) {
         const buttonSelected = this.querySelector(`${selectors.button}.${classes.selected}`);
         const imageVisible = this.querySelector(`${selectors.image}.${classes.visible}`);
 
-        if (target && !window.theme.isMobile()) {
+        if (target && !theme.isMobile) {
           imageVisible?.classList.remove(classes.visible);
           buttonSelected?.classList.remove(classes.selected);
 

@@ -1,21 +1,28 @@
-let lastWindowWidth = window.theme.getWindowWidth();
-let lastWindowHeight = window.theme.getWindowHeight();
+window.theme.windowWidth = getWindowWidth();
+window.theme.windowHeight = getWindowHeight();
+window.theme.isMobile = isMobile();
+
 let lastScale = window.visualViewport ? window.visualViewport.scale : 1;
 
 function dispatch() {
   document.dispatchEvent(new CustomEvent('theme:resize', {bubbles: true}));
 
-  const currentWidth = window.theme.getWindowWidth();
-  const currentHeight = window.theme.getWindowHeight();
+  const currentWidth = getWindowWidth();
+  const currentHeight = getWindowHeight();
+  const currentMediaQuery = isMobile();
 
-  if (lastWindowWidth !== currentWidth) {
+  if (window.theme.windowWidth !== currentWidth) {
     document.dispatchEvent(new CustomEvent('theme:resize:width', {bubbles: true}));
-    lastWindowWidth = currentWidth;
+    window.theme.windowWidth = currentWidth;
   }
 
-  if (lastWindowHeight !== currentHeight) {
+  if (window.theme.windowHeight !== currentHeight) {
     document.dispatchEvent(new CustomEvent('theme:resize:height', {bubbles: true}));
-    lastWindowHeight = currentHeight;
+    window.theme.windowHeight = currentHeight;
+  }
+
+  if (window.theme.isMobile !== currentMediaQuery) {
+    window.theme.isMobile = currentMediaQuery;
   }
 }
 
@@ -37,6 +44,18 @@ function resizeListener() {
       dispatch();
     }, 50)
   );
+}
+
+function getWindowWidth() {
+  return document.documentElement.clientWidth || document.body.clientWidth || window.innerWidth;
+}
+
+function getWindowHeight() {
+  return document.documentElement.clientHeight || document.body.clientHeight || window.innerHeight;
+}
+
+function isMobile() {
+  return theme.windowWidth < theme.sizes.small;
 }
 
 export default resizeListener;

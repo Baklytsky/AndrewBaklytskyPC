@@ -80,7 +80,7 @@ if (!customElements.get('popout-select')) {
         };
 
         if (button.getAttribute('aria-expanded') === 'true') {
-          if (window.innerHeight / 2 < popoutTop) {
+          if (theme.windowHeight / 2 < popoutTop) {
             this.popoutList.classList.add('popout-list--top');
           }
         } else {
@@ -93,8 +93,8 @@ if (!customElements.get('popout-select')) {
         this.popoutList.style.setProperty('--max-height', '100vh');
 
         requestAnimationFrame(() => {
-          this.popoutList.style.setProperty('--max-width', `${parseInt(document.body.clientWidth - this.popoutList.getBoundingClientRect().left)}px`);
-          this.popoutList.style.setProperty('--max-height', `${parseInt(document.body.clientHeight - this.popoutList.getBoundingClientRect().top)}px`);
+          this.popoutList.style.setProperty('--max-width', `${parseInt(theme.windowWidth - this.popoutList.getBoundingClientRect().left)}px`);
+          this.popoutList.style.setProperty('--max-height', `${parseInt(theme.windowHeight - this.popoutList.getBoundingClientRect().top)}px`);
         });
       }
 

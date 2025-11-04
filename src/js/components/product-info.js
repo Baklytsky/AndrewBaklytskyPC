@@ -365,7 +365,7 @@ if (!customElements.get('product-info')) {
         if (!selectedImage) return;
 
         const selectedImageId = selectedImage.getAttribute('data-media-id');
-        const isDesktopView = !window.theme.isMobile();
+        const isDesktopView = !theme.isMobile;
 
         // Update image on the desktop slideshow
         selectedImage.dispatchEvent(

@@ -34,7 +34,7 @@ class MainSearch extends HeaderSearchForm {
   }
 
   onInputFocus() {
-    if (window.theme.isMobile()) {
+    if (theme.isMobile) {
       this.scrollIntoView({behavior: 'smooth'});
     }
   }

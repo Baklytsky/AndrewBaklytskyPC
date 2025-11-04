@@ -5,7 +5,7 @@ if (!customElements.get('announcement-bar')) {
       constructor() {
         super();
 
-        this.enableSlider = !window.theme.isMobile();
+        this.enableSlider = !theme.isMobile;
         this.initSliderEvent = (event) => this.initSlider(event);
         this.resizeHandler = this.reinitializeSlider.bind(this);
         customElements.whenDefined('swiper-container').then(() => this.initSlider());
@@ -52,7 +52,7 @@ if (!customElements.get('announcement-bar')) {
 
         this.restoreAllSlides();
 
-        const isMobileView = window.theme.isMobile();
+        const isMobileView = theme.isMobile;
         this.allSlides.forEach((slide) => {
           const isMobileOnly = slide.classList.contains('mobile');
           const isDesktopOnly = slide.classList.contains('desktop');
