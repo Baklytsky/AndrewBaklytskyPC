@@ -17,9 +17,14 @@
 {%- endif -%}
 
 {%- if settings.enable_swatches and settings.show_grid_swatches -%}
-  {%- assign has_colors = false -%}
-  {%- assign swatch_translation = 'general.swatches.color' | t -%}
-  {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
+  {%- liquid
+    assign has_colors = false
+    assign swatch_translation = 'general.swatches.color' | t
+    assign swatch_labels = swatch_translation | append: ',' | split: ','
+    assign swatch_count = 0
+    assign count_string_one = 'collections.general.colors_with_count.one' | t
+    assign count_string_other = 'collections.general.colors_with_count.other' | t
+  -%}
 
   {%- capture swatches -%}
     {%- for label in swatch_labels -%}
@@ -28,6 +33,7 @@
 
       {%- if option and option.values.size > 0 -%}
         {%- assign has_colors = true -%}
+        {%- assign swatch_count = option.values.size -%}
         {%- capture swatch_values -%}
           {%- for value in option.values -%}
             {%- liquid
@@ -63,8 +69,6 @@
                 {%- if swatch_color_label contains option.name -%}
                   {%- liquid
                     assign count = option.values.size
-                    assign count_string_one = 'collections.general.colors_with_count.one' | t
-                    assign count_string_other = 'collections.general.colors_with_count.other' | t
                     assign limit = 2048
 
                     if count > 5 and settings.collection_swatch_style == 'limited'
@@ -181,9 +185,18 @@
       >
         {{ swatches }}
 
-        <span class="product-card__swatches__count">
-          <span data-swatch-count>&nbsp;</span>
-        </span>
+        {%- if settings.collection_swatch_style == 'text' or settings.collection_swatch_style == 'text-slider' -%}
+          <span class="product-card__swatches__count">
+            <span data-swatch-count>
+              {{- swatch_count }}
+              {{ swatch_count | pluralize: count_string_one, count_string_other -}}
+            </span>
+          </span>
+        {%- else -%}
+          <span class="product-card__swatches__count">
+            <span data-swatch-count>&nbsp;</span>
+          </span>
+        {%- endif -%}
       </div>
     {%- endif -%}
   {%- when 'check-siblings' -%}
