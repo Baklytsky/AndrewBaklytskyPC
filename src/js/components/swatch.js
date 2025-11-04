@@ -41,12 +41,18 @@ if (!customElements.get('grid-swatch')) {
           if (this.swatchesStyle == 'text' || this.swatchesStyle == 'text-slider') {
             if (this.swatchesStyle == 'text') return;
 
-            this.swatchCount.addEventListener('mouseenter', () => {
+            const showSwatches = () => {
               if (this.hideSwatchesTimer) clearTimeout(this.hideSwatchesTimer);
 
               this.productInfo.classList.add('no-events');
               this.swatchFieldset.classList.add('is-visible');
-            });
+            };
+
+            this.swatchCount.addEventListener('mouseenter', showSwatches);
+
+            if (this.swatchFieldset) {
+              this.swatchFieldset.addEventListener('mouseenter', showSwatches);
+            }
 
             // Prevent color swatches blinking on mouse move
             this.productInfo.addEventListener('mouseleave', () => {
