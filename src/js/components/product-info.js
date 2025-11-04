@@ -336,10 +336,18 @@ if (!customElements.get('product-info')) {
       }
 
       updateVariantInputs(variantId) {
-        this.querySelectorAll(`#ProductForm-${this.dataset.sectionId}, #ProductFormInstallment-${this.dataset.sectionId}`).forEach((productForm) => {
+        const formSelectors = [
+          `#ProductForm-${this.dataset.sectionId}`, // Product form
+          `#ProductFormInstallment-${this.dataset.sectionId}`, // Shop Pay Installments
+          `[id^="ProductFormModal-${this.dataset.sectionId}"]`, // product-modal form
+        ];
+
+        this.querySelectorAll(formSelectors.join(', ')).forEach((productForm) => {
           const input = productForm.querySelector('input[name="id"]');
-          input.value = variantId ?? '';
-          input.dispatchEvent(new Event('change', {bubbles: true}));
+          if (input) {
+            input.value = variantId ?? '';
+            input.dispatchEvent(new Event('change', {bubbles: true}));
+          }
         });
       }
 
