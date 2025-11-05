@@ -33,7 +33,8 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- render 'stylesheet', name: 'collection.css', inline: true -%}
+{%- render 'stylesheet', name: 'filters.css' -%}
+{%- render 'stylesheet', name: 'collection.css' -%}
 
 {%- style -%}
   #Collection--{{ section.id }} {
@@ -102,15 +103,15 @@
   >
     {%- assign align_classes = '' -%}
     {%- if enable_sort -%}
-      {%- assign align_classes = align_classes | append: ' collection__nav--sort ' -%}
+      {%- assign align_classes = align_classes | append: ' filters__nav--sort ' -%}
     {%- endif -%}
 
     {%- if enable_filters -%}
-      {% assign align_classes = align_classes | append: ' collection__nav--filter ' %}
+      {% assign align_classes = align_classes | append: ' filters__nav--filter ' %}
     {%- endif -%}
 
     {%- if enable_sort or enable_filters -%}
-      <nav class="collection__nav {{ align_classes }}" data-collection-nav>
+      <nav class="filters__nav {{ align_classes }}" data-filters-nav>
         {%- if enable_filters -%}
           {%- liquid
             assign filter_active_count = 0
