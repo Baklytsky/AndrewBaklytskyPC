@@ -20,6 +20,8 @@ if (!customElements.get('bundle-collection')) {
         this.bundleId = this.hasAttribute('data-bundle-id') ? this.getAttribute('data-bundle-id') : '';
         this.localStorageName = `bundleProducts-${window.location.pathname}`;
         this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
+        this.discountType = this?.getAttribute('data-bundle-discount-type');
+        this.discountValue = this?.getAttribute('data-bundle-discount-value');
         this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
         this.bundleButtonChangeEvent = (event) => this.bundleButtonChange(event);
         this.addProductsToCartEvent = (event) => this.addProductsToCart(event);
@@ -170,22 +172,26 @@ if (!customElements.get('bundle-collection')) {
       updateUI() {
         const filledCount = this.selectedProducts.length;
         this.selectedCount.textContent = filledCount;
-        const total = this.selectedProducts.reduce(
-          (sum, product) => {
-            const price = product ? parseFloat(product.price) : 0;
-            const priceCompare = product ? parseFloat(product.priceCompare) : 0;
-            const difference = Math.max(0, priceCompare - price);
+        let savingPrice = 0;
+        let price = this.selectedProducts.reduce((sum, product) => {
+          const price = parseFloat(product?.price);
+          return sum + (isNaN(price) ? 0 : price);
+        }, 0);
 
-            return {
-              price: sum.price + price,
-              priceCompare: sum.priceCompare + difference,
-            };
-          },
-          {price: 0, priceCompare: 0}
-        );
+        if (filledCount === this.maxSelection && this.discountValue && this.discountType) {
+          const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
+          const discountValue = Number(this.discountValue) * 100 * currencyRate;
+          if (this.discountType === 'percent') {
+            savingPrice = (price * parseFloat(this.discountValue)) / 100;
+            price -= savingPrice;
+          } else if (this.discountType === 'fixed' && price > discountValue) {
+            savingPrice = discountValue;
+            price -= discountValue;
+          }
+        }
 
-        this.bundleTotal.innerHTML = this.formatRate(total.price);
-        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(total.priceCompare, theme.moneyFormat);
+        this.bundleTotal.innerHTML = this.formatRate(price);
+        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(savingPrice, theme.moneyFormat);
         this.addButton.disabled = filledCount !== this.maxSelection;
         if (filledCount === this.maxSelection && document.body.classList.contains('is-focused')) {
           this.addButton.focus();

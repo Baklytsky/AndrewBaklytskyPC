@@ -27,14 +27,7 @@
     assign modifier_class = ''
   endunless
 -%}
-{%- comment -%}
-  <script>
-    console.log({{ collection.metafields | json }})
-  </script>
-  <script>
-    console.log({{ collection.metafields.carbon | json }})
-  </script>
-{%- endcomment -%}
+
 {%- style -%}
   #Collection--{{ section.id }} {
     --PT: {{ section.settings.padding_top }}px;
@@ -66,6 +59,10 @@
     data-bundle-max-selection="{{ max_selection }}"
     data-bundle-animation-timing="{{ bundle_animation_timing }}"
     data-bundle-id="{{ collection.id }}"
+    {% if collection.metafields.carbon.discount_value != blank %}
+      data-bundle-discount-type="{{ collection.metafields.carbon.discount_type }}"
+      data-bundle-discount-value="{{ collection.metafields.carbon.discount_value }}"
+    {% endif %}
   >
     <div class="wrapper--full-padded">
       <div class="bundle__container">
