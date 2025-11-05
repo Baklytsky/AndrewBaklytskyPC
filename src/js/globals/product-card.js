@@ -120,7 +120,7 @@ if (!customElements.get('product-card')) {
           tempDiv.innerHTML = productHTML;
           const processedProductItem = tempDiv.querySelector('product-card');
 
-          window.theme.htmlUpdate.viewTransition(
+          HTMLUpdateUtility.viewTransition(
             this, // Current product-card element to be replaced
             processedProductItem, // New product-card element with updated content
             this.postProcessHtmlCallbacks // Run any post-processing after swap (focus, init components)
