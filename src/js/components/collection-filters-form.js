@@ -170,7 +170,7 @@ class CollectionFiltersForm extends HTMLElement {
       link.classList.remove(classes.hidden);
       const input = link.querySelector(selectors.input);
       if (index === 0 && document.body.classList.contains(classes.focused) && input) {
-        if (this.collectionSidebarSlideOut || window.theme.isMobile()) {
+        if (this.collectionSidebarSlideOut || theme.isMobile) {
           this.a11y.removeTrapFocus();
           this.a11y.trapFocus(this.collectionSidebar, {
             elementToFocus: input,

@@ -54,7 +54,7 @@ if (!customElements.get('product-images')) {
       }
 
       toggleEvents() {
-        const isMobileView = window.theme.isMobile();
+        const isMobileView = theme.isMobile;
 
         if ((isMobileView && this.hasAttribute('data-fader-mobile')) || (!isMobileView && this.hasAttribute('data-fader-desktop'))) {
           this.bindEventListeners();
