@@ -58,14 +58,11 @@ class SiblingSwatches {
   showSibling(event) {
     const swatch = event.target;
     const siblingPrice = swatch.hasAttribute('data-sibling-price') ? swatch.getAttribute('data-sibling-price') : '';
-    const siblingCompareAtPrice = swatch.hasAttribute('data-sibling-compare-at-price') ? swatch.getAttribute('data-sibling-compare-at-price') : '';
     const siblingCutline = swatch.hasAttribute('data-sibling-cutline') ? swatch.getAttribute('data-sibling-cutline') : '';
     const siblingImage = swatch.hasAttribute('data-sibling-image') ? swatch.getAttribute('data-sibling-image') : '';
 
-    if (siblingCompareAtPrice) {
-      this.productPrice.innerHTML = `<span class="price sale"><span class="new-price">${siblingPrice}</span> <span class="old-price">${siblingCompareAtPrice}</span></span>`;
-    } else {
-      this.productPrice.innerHTML = `<span class="price">${siblingPrice}</span>`;
+    if (siblingPrice) {
+      this.productPrice.innerHTML = siblingPrice;
     }
 
     if (this.productCutline) {
