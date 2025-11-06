@@ -60,6 +60,10 @@
     data-bundle-max-selection="{{ max_selection }}"
     data-bundle-animation-timing="{{ bundle_animation_timing }}"
     data-bundle-id="{{ collection.id }}"
+    {% if collection.metafields.carbon.discount_value != blank %}
+      data-bundle-discount-type="{{ collection.metafields.carbon.discount_type }}"
+      data-bundle-discount-value="{{ collection.metafields.carbon.discount_value }}"
+    {% endif %}
   >
     <div class="wrapper--full-padded">
       <div class="bundle__container">
@@ -205,11 +209,6 @@
 
                               <div class="bundle-placeholder__text">
                                 <strong>{{ 'collections.bundle.select_product' | t }}</strong>
-
-                                {%- assign unlock_text = 'collections.bundle.unlock' | t -%}
-                                {%- if unlock_text != blank -%}
-                                  <p>{{ unlock_text }}</p>
-                                {%- endif -%}
                               </div>
                             </div>
                             <div data-bundle-placeholder-filled class="bundle-placeholder__filled">&nbsp;</div>
@@ -228,7 +227,7 @@
                     >
                       <p class="bundle__price__row bundle__price__row--subtotal">
                         <span>{{ 'collections.bundle.subtotal' | t }}</span>
-                        <span data-bundle-total>{{ 'general.money.free' | t }}</span>
+                        <span data-bundle-total>{{ 0 | money }}</span>
                       </p>
 
                       <p class="bundle__price__row">

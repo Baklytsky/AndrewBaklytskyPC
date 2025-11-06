@@ -23,14 +23,14 @@ if (!customElements.get('product-form')) {
         if (isBundle) {
           const productJSONhtml = this.querySelector('[data-bundle-json]')?.innerHTML;
           const productJSON = JSON.parse(productJSONhtml);
-          const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.id}"]`);
+          const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.product.id}"]`);
 
           if (bundleButton) {
             bundleButton.dispatchEvent(
               new CustomEvent('theme:bundle:button-modal', {
                 detail: {
                   data: {
-                    product: productJSON,
+                    product: productJSON.product,
                     variant: productJSON.variant,
                   },
                 },

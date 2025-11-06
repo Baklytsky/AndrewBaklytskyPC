@@ -8,6 +8,8 @@
   assign bundle_opened = false
   assign bundle_price = 0
   assign bundle_price_compare = 0
+  assign bundle_discount_amount = 0
+  assign bundle_discount_title = ''
   assign bundle_keys = ''
   assign line_items_collections = null
   assign line_items_tags = null
@@ -58,6 +60,15 @@
       assign bundle_price = bundle_price | plus: line_item_final_price
       assign bundle_keys = bundle_keys | append: ',' | append: line_item.key
       assign animation_delay = animation_delay | plus: animation_delay_increment
+
+      if line_item_original_price > line_item_final_price
+        for discount in line_item.line_level_discount_allocations
+          if discount.discount_application.title contains bundle_name
+            assign bundle_discount_title = discount.discount_application.title
+            assign bundle_discount_amount = bundle_discount_amount | plus: discount.amount
+          endif
+        endfor
+      endif
     else
       assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
     endif
@@ -317,91 +328,89 @@
               {%- endfor -%}
             {%- endif -%}
 
-            {%- unless line_item.product.has_only_default_variant -%}
-              {%- if line_item.product.metafields.theme_modules.is_bundle -%}
-                <div class="cart__item__subs">
-                  {%- for bundle_sub in line_item.product.metafields.theme_modules.bundle_products.value -%}
-                    {%- liquid
-                      unless bundle_opened
-                        assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
-                      endunless
+            {%- if line_item.product.metafields.theme_modules.is_bundle -%}
+              <div class="cart__item__subs">
+                {%- for bundle_sub in line_item.product.metafields.theme_modules.bundle_products.value -%}
+                  {%- liquid
+                    unless bundle_opened
+                      assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
+                    endunless
 
-                      assign bundle_sub_variants_string = ''
-                      assign bundle_sub_image = bundle_sub.featured_image
-                      assign bundle_sub_selected_options = ''
-                      assign bundle_separator_open = '('
-                      assign bundle_separator_close = ')'
+                    assign bundle_sub_variants_string = ''
+                    assign bundle_sub_image = bundle_sub.featured_image
+                    assign bundle_sub_selected_options = ''
+                    assign bundle_separator_open = '('
+                    assign bundle_separator_close = ')'
 
-                      for line_item_option in line_item.options_with_values
-                        for bundle_sub_option in bundle_sub.options_with_values
-                          assign bundle_sub_option_name = bundle_sub.title | append: ' ' | append: bundle_separator_open | append: bundle_sub_option.name | append: bundle_separator_close
+                    for line_item_option in line_item.options_with_values
+                      for bundle_sub_option in bundle_sub.options_with_values
+                        assign bundle_sub_option_name = bundle_sub.title | append: ' ' | append: bundle_separator_open | append: bundle_sub_option.name | append: bundle_separator_close
 
-                          if line_item_option.name == bundle_sub_option_name
-                            assign bundle_sub_variants_string = bundle_sub_variants_string | append: '@@@@' | append: line_item_option.value
-                            break
-                          endif
-                        endfor
-                      endfor
-
-                      if bundle_sub_variants_string != ''
-                        assign bundle_sub_variants = bundle_sub_variants_string | remove_first: '@@@@' | split: '@@@@' | join: ' / '
-                        assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants | first
-                        assign bundle_sub_selected_options = bundle_sub_variants | replace: ' / ', ' | '
-
-                        if bundle_sub_variant.featured_image != blank
-                          assign bundle_sub_image = bundle_sub_variant.featured_image
+                        if line_item_option.name == bundle_sub_option_name
+                          assign bundle_sub_variants_string = bundle_sub_variants_string | append: '@@@@' | append: line_item_option.value
+                          break
                         endif
+                      endfor
+                    endfor
+
+                    if bundle_sub_variants_string != ''
+                      assign bundle_sub_variants = bundle_sub_variants_string | remove_first: '@@@@' | split: '@@@@' | join: ' / '
+                      assign bundle_sub_variant = bundle_sub.variants | where: 'title', bundle_sub_variants | first
+                      assign bundle_sub_selected_options = bundle_sub_variants | replace: ' / ', ' | '
+
+                      if bundle_sub_variant.featured_image != blank
+                        assign bundle_sub_image = bundle_sub_variant.featured_image
                       endif
-                    -%}
+                    endif
+                  -%}
 
-                    <div
-                      class="cart__item__sub"
-                    >
-                      <div class="cart__item__sub__image{% unless bundle_sub_image %} image--empty{% endunless %}">
-                        <a
-                          href="{{ bundle_sub.url }}"
-                          aria-label="{{ bundle_sub.title | escape }}"
-                          {% if settings.show_image_bg != 'none' %}
-                            class="show-gray-bg"
-                          {% endif %}
-                        >
-                          {%- if bundle_sub_image -%}
-                            {%- render 'image',
-                              image: bundle_sub_image,
-                              width: 60,
-                              widths: '30, 60, 90, 120',
-                              sizes: '30px',
-                              loading: 'lazy'
-                            -%}
-                          {%- endif -%}
-                        </a>
-                      </div>
-
-                      <div class="cart__item__sub__content">
-                        <h5 class="cart__item__sub__title">
-                          <a href="{{ bundle_sub.url }}">
-                            {{- bundle_sub.title | strip_html -}}
-                          </a>
-                        </h5>
-
-                        {%- if bundle_sub_selected_options != '' -%}
-                          <p class="cart__item__sub__options">{{ bundle_sub_selected_options }}</p>
+                  <div
+                    class="cart__item__sub"
+                  >
+                    <div class="cart__item__sub__image{% unless bundle_sub_image %} image--empty{% endunless %}">
+                      <a
+                        href="{{ bundle_sub.url }}"
+                        aria-label="{{ bundle_sub.title | escape }}"
+                        {% if settings.show_image_bg != 'none' %}
+                          class="show-gray-bg"
+                        {% endif %}
+                      >
+                        {%- if bundle_sub_image -%}
+                          {%- render 'image',
+                            image: bundle_sub_image,
+                            width: 60,
+                            widths: '30, 60, 90, 120',
+                            sizes: '30px',
+                            loading: 'lazy'
+                          -%}
                         {%- endif -%}
-                      </div>
+                      </a>
                     </div>
-                  {%- endfor -%}
-                </div>
-              {%- else -%}
-                <p class="cart__item__selected-options">
-                  {%- for option in line_item.options_with_values -%}
-                    {%- unless forloop.first -%}
-                      <span> | </span>
-                    {%- endunless -%}
-                    <span>{{ option.value }}</span>
-                  {%- endfor -%}
-                </p>
-              {%- endif -%}
-            {%- endunless -%}
+
+                    <div class="cart__item__sub__content">
+                      <h5 class="cart__item__sub__title">
+                        <a href="{{ bundle_sub.url }}">
+                          {{- bundle_sub.title | strip_html -}}
+                        </a>
+                      </h5>
+
+                      {%- if bundle_sub_selected_options != '' -%}
+                        <p class="cart__item__sub__options">{{ bundle_sub_selected_options }}</p>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                {%- endfor -%}
+              </div>
+            {%- elsif line_item.product.has_only_default_variant != true -%}
+              <p class="cart__item__selected-options">
+                {%- for option in line_item.options_with_values -%}
+                  {%- unless forloop.first -%}
+                    <span> | </span>
+                  {%- endunless -%}
+                  <span>{{ option.value }}</span>
+                {%- endfor -%}
+              </p>
+            {%- endif -%}
 
             {%- if line_item.selling_plan_allocation -%}
               <p class="cart__item__text cart__item__text--selling-plan">
@@ -611,12 +620,24 @@
           </a>
         </div>
       </div>
+
+      {%- if bundle_discount_amount > 0 and bundle_discount_title != '' -%}
+        <p class="cart__discount">
+          {%- assign bundle_discount_price = bundle_discount_amount | money -%}
+
+          <span>
+            {{- 'cart.general.discount_label_html' | t: amount: bundle_discount_price, title: bundle_discount_title -}}
+          </span>
+        </p>
+      {%- endif -%}
     </div>
 
     {%- liquid
       assign bundle_opened = false
       assign bundle_price = 0
       assign bundle_price_compare = 0
+      assign bundle_discount_amount = 0
+      assign bundle_discount_title = ''
       assign bundle_keys = ''
       assign line_items_bundle = ''
       assign bundle_animation_timing = line_items_bundle_counter | times: animation_delay_increment
