@@ -1,0 +1,173 @@
+# .github/workflows/lighthouse-ci.yml
+name: Shopify Lighthouse CI
+on: [push]
+jobs:
+  cancel:
+    name: 'Cancel Previous Runs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+    - uses: styfle/cancel-workflow-action@0.12.1
+      with:
+        access_token: ${{ github.token }}
+  yarn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+        always-auth: true
+        registry-url: https://npm.pkg.github.com/
+    - uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-v1.1-
+    - name: Yarn install
+      run: yarn install --frozen-lockfile
+
+  build:
+    needs: [yarn]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - uses: actions/cache@v4
+        id: node_modules-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-v1.1-${{ hashFiles('yarn.lock') }}-${{ hashFiles('patches/*.patch') }}
+          fail-on-cache-miss: true
+      - uses: actions/cache@v4
+        id: build-cache
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-v1-${{ hashFiles('src/**/*', 'yarn.lock') }}
+      - name: Build Theme
+        run: yarn build
+      - name: Ensure dist/ is not empty
+        run: if [ -z "$(ls -A dist 2>/dev/null)" ]; then exit 1; fi
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+  lhci:
+    name: Lighthouse
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Run Lighthouse
+        id: lighthouse
+        uses: shopify/lighthouse-ci-action@v1
+        env:
+          LHCI_WORKING_DIRECTORY: dist
+        with:
+          store: ${{ secrets.LHCI_SHOP_STORE }}
+          password: ${{ secrets.LHCI_SHOP_STORE_PASSWORD }}
+          access_token: ${{ secrets.LHCI_SHOP_ACCESS_TOKEN }}
+          lhci_github_app_token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          product_handle: amazing-dry-sandals-collection10
+          collection_handle: all
+          theme_root: 'dist'
+          lhci_min_score_performance: 0.6
+          lhci_min_score_accessibility: 0.8
+        continue-on-error: true
+
+      - name: Extract Lighthouse Results from Logs
+        id: extract_results
+        if: always()
+        run: |
+          # Extract scores to a file
+          echo "## 🚦 Lighthouse Performance Scores" > lighthouse_results.txt
+          found=0
+          PATTERN="Performance:|Accessibility:|Best Practices:|SEO:"
+
+          # Candidate directories to search for logs
+          CANDIDATES=(
+            "${RUNNER_TEMP:-}"
+            "$GITHUB_WORKSPACE"
+            "$(dirname "$GITHUB_WORKSPACE")"
+          )
+
+          for dir in "${CANDIDATES[@]}"; do
+            if [ -n "$dir" ] && [ -d "$dir" ]; then
+              # Search recursively, skip node_modules and dist to avoid noise
+              if grep -R -I -E "$PATTERN" "$dir" --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git >> lighthouse_results.txt 2>/dev/null; then
+                found=1
+                break
+              fi
+            fi
+          done
+
+          if [ "$found" -ne 1 ]; then
+            echo "ℹ️ No scores found" >> lighthouse_results.txt
+          fi
+          echo "" >> lighthouse_results.txt
+          echo "📊 Scores parsed from Shopify Lighthouse logs." >> lighthouse_results.txt
+
+          # Add to step summary
+          cat lighthouse_results.txt >> $GITHUB_STEP_SUMMARY
+
+          # Prepare for PR comment (escape for GitHub Actions output)
+          {
+            echo 'results<<EOF'
+            cat lighthouse_results.txt
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Lighthouse Results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const results = `${{ steps.extract_results.outputs.results }}`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('🚦 Lighthouse Performance Scores')
+            );
+
+            const commentBody = results + '\n\n---\n*Updated at ' + new Date().toISOString() + '*';
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

@@ -68,7 +68,7 @@ if (!customElements.get('grid-slider')) {
         const slidesWidth = this.getSlidesWidth();
         const isEnabled = sliderWidth < slidesWidth;
 
-        if (isEnabled && (!window.theme.isMobile() || !window.theme.touch)) {
+        if (isEnabled && (!theme.isMobile || !window.theme.touch)) {
           if (this.isInitialized) return;
 
           this.slidesObserver = new IsInView(this.slider, selectors.slide);

@@ -421,7 +421,6 @@
 {%- capture drawer -%}
   <header-drawer class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
     data-drawer="hamburger"
-    aria-label="{{ 'layout.header.menu' | t }}"
     id="header-menu">
     <div class="drawer__inner" data-drawer-inner>
       <header class="drawer__head">
@@ -509,8 +508,7 @@
   </header-drawer>
 {%- endcapture -%}
 
-{{ 'header-dropdown.css' | asset_url | stylesheet_tag }}
-{{ 'header-search-popdown.css' | asset_url | stylesheet_tag }}
+{%- render 'stylesheet', name: 'header-dropdown.css', async: true -%}
 
 {%- if section.settings.enable_search -%}
   <script src="{{ 'header-search-popdown.js' | asset_url }}" defer="defer"></script>

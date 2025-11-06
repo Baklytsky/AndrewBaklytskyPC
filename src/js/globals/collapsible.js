@@ -52,7 +52,7 @@ class CollapsibleElements extends HTMLElement {
   }
 
   toggle() {
-    const isDesktopView = !window.theme.isMobile();
+    const isDesktopView = !theme.isMobile;
 
     this.collapsibles.forEach((collapsible) => {
       if (!collapsible.hasAttribute(attributes.desktop) && !collapsible.hasAttribute(attributes.mobile)) return;

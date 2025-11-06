@@ -128,7 +128,7 @@ if (!customElements.get('product-thumbs')) {
           const rightCheck = thumbRightPos > thumbsPositionRight;
           const verticalCheck = bottomCheck || topCheck;
           const horizontalCheck = rightCheck || leftCheck;
-          const isMobileView = window.theme.isMobile();
+          const isMobileView = theme.isMobile;
 
           if (verticalCheck || horizontalCheck) {
             let scrollTopPosition = thumbPosTop - thumbsHeight + thumbHeight;

@@ -1,6 +1,6 @@
 <!-- /sections/section-hero.liquid -->
 {%- liquid
-  assign image_1 = section.settings.image_1
+  assign image = section.settings.image
   assign banner_link = section.settings.link
   assign section_width = section.settings.width
   assign desktop_height = section.settings.height
@@ -20,21 +20,21 @@
 
   # Rendering conditions
   assign render_section = false
-  assign render_image_1 = true
+  assign render_image = true
   assign render_image_overlay = false
   assign render_metafield_info = false
   assign render_content_blocks = false
-  if image_1 != blank or mobile_image != blank or show_placeholder or request.design_mode
+  if image != blank or mobile_image != blank or show_placeholder or request.design_mode
     assign render_section = true
   endif
   unless show_overlay_text or overlay_opacity == 0.0
     assign render_image_overlay = true
   endunless
-  if image_1 == blank and mobile_image == blank and show_placeholder == false
-    assign render_image_1 = false
+  if image == blank and mobile_image == blank and show_placeholder == false
+    assign render_image = false
     assign render_metafield_info = true
   endif
-  if section.blocks.size > 0 and image_1 != blank or mobile_image != blank or show_placeholder == true
+  if section.blocks.size > 0 and image != blank or mobile_image != blank or show_placeholder == true
     assign render_content_blocks = true
   endif
 
@@ -53,6 +53,16 @@
       echo 'calc(100vw - 32px)'
     endif
   endcapture
+
+  assign loading = 'lazy'
+  assign fetchpriority = 'auto'
+  assign preload = false
+
+  if section.index < 3
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+    assign preload = true
+  endif
 
   assign hero_transparent = true
   if show_text_background and scheme_bg_color.alpha != 0.0 or scheme_bg_color != blank
@@ -89,12 +99,15 @@
         <div class="hero__images frame__item">
       {%- endif -%}
 
-      {%- if render_image_1 -%}
-        <div class="hero__split-image{% if image_1 == blank %} hero__split-image--blank{% endif %}">
+      {%- if render_image -%}
+        <div class="hero__split-image{% if image == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
-            image_desktop: image_1,
+            image_desktop: image,
             image_mobile: mobile_image,
             sizes: sizes,
+            loading: loading,
+            preload: preload,
+            fetchpriority: fetchpriority,
             desktop_height: desktop_height,
             mobile_height: mobile_height
           -%}
@@ -158,7 +171,7 @@
     },
     {
       "type": "image_picker",
-      "id": "image_1",
+      "id": "image",
       "label": "Primary image",
       "info": "3200 x 1200px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
     },

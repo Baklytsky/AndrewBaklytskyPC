@@ -213,7 +213,7 @@
       {%- else -%}
         <swiper-slide {{ block_attributes }}>
           <ticker-bar style="{{ block_style }}">
-            <div data-ticker-frame class="announcement__message">
+            <div class="announcement__message">
               <div data-ticker-scale class="announcement__scale ticker--unloaded">
                 {%- if block.type == 'image' -%}
                   {{ block_content }}
@@ -300,7 +300,8 @@
   {%- endstyle -%}
 {%- endif -%}
 
-{{ 'section-announcement.css' | asset_url | stylesheet_tag }}
+{%- render 'stylesheet', name: 'section-announcement.css' -%}
+
 <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
 
@@ -390,7 +391,7 @@
                 autoplay
                 speed="{{ 100.0 | divided_by: section.settings.marquee_speed | times: marquee_time }}"
               >
-                <div data-ticker-frame class="announcement__message">
+                <div class="announcement__message">
                   <div data-ticker-scale class="announcement__scale ticker--unloaded">
                     <div data-ticker-text class="announcement__text">
                       {{ bar_markup }}
