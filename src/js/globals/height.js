@@ -6,7 +6,7 @@ window.theme.readHeights = function () {
   h.windowHeight = Math.min(window.screen.height, theme.windowHeight);
   h.headerHeight = getHeight('[data-header-height]');
   h.stickyHeaderHeight = document.querySelector('[data-header-sticky]') ? h.headerHeight : 0;
-  h.collectionNavHeight = getHeight('[data-collection-nav]');
+  h.collectionNavHeight = getHeight('[data-filters-nav]');
 
   return h;
 };
@@ -28,7 +28,7 @@ function setVars() {
     firstLoad = false;
   }
 
-  document.documentElement.style.setProperty('--collection-nav-height', `${collectionNavHeight}px`);
+  document.documentElement.style.setProperty('--filters-nav-height', `${collectionNavHeight}px`);
   document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
 }
 

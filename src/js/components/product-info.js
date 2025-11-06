@@ -23,6 +23,7 @@ if (!customElements.get('product-info')) {
         this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
         this.productFormWrapper = this.querySelector('[data-form-wrapper]');
         this.productForm = this.querySelector('product-form');
+        this.siblingLinks = this.querySelectorAll('[data-swap-url]');
       }
 
       connectedCallback() {
@@ -59,6 +60,30 @@ if (!customElements.get('product-info')) {
         this.checkLiveCartInfo();
         this.checkLiveCartInfoCallback = () => this.checkLiveCartInfo();
         document.addEventListener('theme:cart-drawer:close', this.checkLiveCartInfoCallback);
+
+        this.siblingChange();
+      }
+
+      siblingChange() {
+        if (this.siblingLinks.length) {
+          this.siblingLinks.forEach((link) => {
+            link.addEventListener('click', (event) => {
+              event.preventDefault();
+              const productUrl = event.currentTarget?.getAttribute('data-swap-url');
+              const targetId = event.currentTarget?.id;
+              const shouldSwapProduct = this.dataset.url !== productUrl;
+              const shouldFetchFullPage = this.dataset.updateUrl === 'true' && shouldSwapProduct;
+
+              if (!shouldSwapProduct) return;
+
+              this.renderProductInfo({
+                requestUrl: productUrl,
+                targetId: targetId,
+                callback: shouldSwapProduct ? this.handleSwapProduct(productUrl, shouldFetchFullPage) : this.handleUpdateProductInfo(productUrl),
+              });
+            });
+          });
+        }
       }
 
       checkLiveCartInfo() {
@@ -166,6 +191,7 @@ if (!customElements.get('product-info')) {
         this.pendingRequestUrl = productUrl;
         const shouldSwapProduct = this.dataset.url !== productUrl;
         const shouldFetchFullPage = this.dataset.updateUrl === 'true' && shouldSwapProduct;
+
         this.renderProductInfo({
           requestUrl: this.buildRequestUrlWithParams(productUrl, selectedOptionValues, shouldFetchFullPage),
           targetId: target.id,

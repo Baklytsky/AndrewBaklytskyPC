@@ -21,7 +21,7 @@
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign section_id = unique | default: section.id
-  assign is_product_bundle = product_bundle | default: false
+  assign is_bundle = product_bundle | default: false
 
   if is_quickview
     assign show_newsletter = false
@@ -334,7 +334,7 @@
                 class="btn {{ button_style }} {{ button_size }} {{ button_type }}"
                 data-preorder="{{ preorder }}"
                 data-add-to-cart
-                {% if is_product_bundle %}
+                {% if is_bundle %}
                   data-bundle-modal-button="{{ 'products.general.add_bundle' | t }}"
                 {% endif %}
                 {% if current_variant.available == false or quantity_rule_soldout or current_variant == null %}
@@ -405,7 +405,7 @@
         </div>
       {%- endform -%}
 
-      {%- if is_product_bundle -%}
+      {%- if is_bundle -%}
         <script type="application/json" data-bundle-json>
           {
             "product": {{ product | json }},

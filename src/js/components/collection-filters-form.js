@@ -20,7 +20,7 @@ const selectors = {
   rangeMaxDefault: 'data-se-max',
   showMore: '[data-show-more]',
   linkHidden: '[data-link-hidden]',
-  collectionNav: '[data-collection-nav]',
+  collectionNav: '[data-filters-nav]',
   productsContainer: '[data-products-grid]',
   activeFilters: '[data-active-filters]',
   activeFiltersCount: 'data-active-filters-count',
