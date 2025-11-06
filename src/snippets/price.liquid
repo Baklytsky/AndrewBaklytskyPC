@@ -8,128 +8,58 @@
   - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
   - price_class: {String} Adds a price class to the price element (optional)
   - price_font_size: {String} Adds a price font size to the price element (optional)
-  - index: {Number} Index for onboarding price calculation (optional)
-  - block_index: {Number} Block index for onboarding price calculation (optional)
 
   Usage:
   {% render 'price', product: product %}
 {% endcomment %}
 
 {%- liquid
-  # Check if this is an onboarding product (product is empty or onboarding_product flag is set)
-  assign is_onboarding = false
-  if product == empty or onboarding_product
-    assign is_onboarding = true
-  endif
--%}
-
-{%- comment -%} Onboarding product price logic {%- endcomment -%}
-{%- if is_onboarding -%}
-  {%- liquid
-    # Variable onboarding prices for product cards (with block/index context)
-    assign index = index | default: 1
-    assign block_id_index = 0
-
-    if block.id != blank or index != blank
-      # Get block index from the ID (e.g., "product_card_price-3" -> "3")
-      if block.id != blank
-        assign block_id_index = block.id | split: '-' | last | plus: 0 | default: 0
-      endif
-
-      assign product_card_index = block_id_index
-      if block.id == blank
-        assign product_card_index = index | plus: 0 | default: 0
-      endif
-
-      # Calculate variable onboarding price based on index
-      # Alternates between 6000-9900 (odd) and 9900-20000 (even)
-      assign base_price = 9900
-      assign is_even_index = product_card_index | modulo: 2
-      assign price_modifier = product_card_index | times: 50
-
-      if is_even_index == 0
-        assign onboarding_price_value = base_price | plus: price_modifier | at_most: 20000
-      else
-        assign onboarding_price_value = base_price | minus: price_modifier | at_least: 6000
-      endif
-
-      assign onboarding_price_formatted = onboarding_price_value | money
-      if settings.currency_code_enable
-        assign onboarding_price_formatted = onboarding_price_value | money_with_currency
-      endif
-    else
-      # Simple fallback onboarding price (for sections without block/index context)
-      assign onboarding_price_formatted = 1999 | money
-      if settings.currency_code_enable
-        assign onboarding_price_formatted = 1999 | money_with_currency
-      endif
-    endif
-  -%}
-
-  <div class="price">{{ onboarding_price_formatted }}</div>
-  {%- break -%}
-{%- endif -%}
-
-{%- comment -%} Regular product price logic {%- endcomment -%}
-{%- liquid
   # Determine price target (variant or product)
+  assign current_variant = product.selected_or_first_available_variant
   if use_variant
-    assign target = product.selected_or_first_available_variant
+    assign target = current_variant
+  elsif onboarding_product
+    assign target = null
   else
     assign target = product
   endif
 
   # Extract price data from product/variant
   assign compare_at_price = target.compare_at_price
-  assign price = target.price
+  assign price = target.price | default: 1999
   assign price_min = product.price_min
   assign price_max = product.price_max
   assign available = target.available | default: false
 
+  assign money_price = price | money
+  assign money_price_min = price_min | money
+  assign money_price_max = price_max | money
+
+  if settings.currency_code_enable
+    assign money_price = price | money_with_currency
+    assign money_price_min = price_min | money_with_currency
+    assign money_price_max = price_max | money_with_currency
+  endif
+
+  if price == 0
+    assign money_price = 'general.money.free' | t
+  endif
+
+  # Add "from" prefix if price varies
+  if target == product and product.price_varies
+    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+  endif
+
   # Unit price detection
   assign has_units = false
-  assign unit_price = ''
-  if target.unit_price_measurement != null
+  if current_variant.unit_price_measurement
     assign has_units = true
-    assign unit_price = target.unit_price | money
-    if settings.currency_code_enable
-      assign unit_price = target.unit_price | money_with_currency
-    endif
   endif
 
   # Sale detection
   assign is_on_sale = false
   if compare_at_price > price
     assign is_on_sale = true
-  endif
-
-  # Price formatting
-  assign money_price = ''
-  assign money_price_min = ''
-  assign money_price_max = ''
-
-  if price == 0
-    assign money_price = 'general.money.free' | t
-  else
-    assign money_price = price | money
-  endif
-
-  assign money_price_min = price_min | money
-  assign money_price_max = price_max | money
-
-  if settings.currency_code_enable
-    if price == 0
-      assign money_price = 'general.money.free' | t
-    else
-      assign money_price = price | money_with_currency
-    endif
-    assign money_price_min = price_min | money_with_currency
-    assign money_price_max = price_max | money_with_currency
-  endif
-
-  # Add "from" prefix if price varies
-  if target == product and product.price_varies
-    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
   endif
 
   # Sale badges
@@ -188,28 +118,19 @@
       </div>
     {%- endif -%}
 
-    {%- comment -%} Unit Price {%- endcomment -%}
-    <small class="unit-price caption{% unless has_units %} hidden{% endunless %}">
-      <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
-      <span class="price-item price-item--last">
-        <span>{{- unit_price -}}</span>
-        <span aria-hidden="true">/</span>
-        <span class="visually-hidden">&nbsp;{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
-        <span>
-          {%- if target.unit_price_measurement.reference_value != 1 -%}
-            {{- target.unit_price_measurement.reference_value -}}
-          {%- endif -%}
-          {{ target.unit_price_measurement.reference_unit }}
-        </span>
-      </span>
-    </small>
+    {%- if has_units -%}
+      {%- render 'unit-price',
+        price: current_variant.unit_price,
+        measurement: current_variant.unit_price_measurement
+      -%}
+    {%- endif -%}
   </div>
 
   {%- comment -%} Sale Badges {%- endcomment -%}
   {%- if show_badges -%}
     {%- if sale_badge or final_sale -%}
       <div class="product__sale">
-        {%- if sale_badge and is_on_sale -%}
+        {%- if is_on_sale and sale_badge -%}
           <span class="product__price--off">
             <span>{{ compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round }}%</span>
             {{ 'products.product.off' | t }}

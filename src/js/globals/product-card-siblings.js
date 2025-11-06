@@ -58,42 +58,11 @@ class SiblingSwatches {
   showSibling(event) {
     const swatch = event.target;
     const siblingPrice = swatch.hasAttribute('data-sibling-price') ? swatch.getAttribute('data-sibling-price') : '';
-    const siblingCompareAtPrice = swatch.hasAttribute('data-sibling-compare-at-price') ? swatch.getAttribute('data-sibling-compare-at-price') : '';
     const siblingCutline = swatch.hasAttribute('data-sibling-cutline') ? swatch.getAttribute('data-sibling-cutline') : '';
     const siblingImage = swatch.hasAttribute('data-sibling-image') ? swatch.getAttribute('data-sibling-image') : '';
 
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = this.productPriceValue;
-    const regularPriceHidden = tempDiv.querySelector('.price__regular .visually-hidden')?.textContent || '';
-    const salePriceHidden = tempDiv.querySelector('.price__sale .visually-hidden')?.textContent || '';
-    const regularPriceHiddenSale = tempDiv.querySelectorAll('.price__sale .visually-hidden')[1]?.textContent || regularPriceHidden;
-
-    if (siblingCompareAtPrice) {
-      this.productPrice.innerHTML = `
-        <div class="price price--on-sale">
-          <div class="price__container">
-            <div class="price__sale">
-              <span class="visually-hidden visually-hidden--inline">${salePriceHidden || 'Sale price'}</span>
-              <span class="price-item price-item--sale price-item--last">${siblingPrice}</span>
-              <span class="visually-hidden visually-hidden--inline">${regularPriceHiddenSale || 'Regular price'}</span>
-              <span>
-                <s class="price-item price-item--regular">${siblingCompareAtPrice}</s>
-              </span>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
-      this.productPrice.innerHTML = `
-        <div class="price">
-          <div class="price__container">
-            <div class="price__regular">
-              <span class="visually-hidden visually-hidden--inline">${regularPriceHidden || 'Regular price'}</span>
-              <span class="price-item price-item--regular">${siblingPrice}</span>
-            </div>
-          </div>
-        </div>
-      `;
+    if (siblingPrice) {
+      this.productPrice.innerHTML = siblingPrice;
     }
 
     if (this.productCutline) {
