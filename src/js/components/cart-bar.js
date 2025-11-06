@@ -45,10 +45,10 @@ class CartBar extends HTMLElement {
 
   scrollToTop() {
     const productOptions = this.section.querySelector('variant-selects');
-    const scrollTarget = !window.theme.isMobile() ? this.section : productOptions ? productOptions : this.form;
+    const scrollTarget = !theme.isMobile ? this.section : productOptions ? productOptions : this.form;
     const scrollTargetTop = scrollTarget.getBoundingClientRect().top;
 
-    window.theme.scrollTo(!window.theme.isMobile() ? scrollTargetTop : scrollTargetTop - 10);
+    window.theme.scrollTo(!theme.isMobile ? scrollTargetTop : scrollTargetTop - 10);
   }
 
   toggleCartBarOnScroll() {

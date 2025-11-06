@@ -87,7 +87,7 @@ if (!customElements.get('collection-component')) {
         const collectionSidebarSlideOut = this.querySelector(selectors.collectionSidebarSlideOut);
         const isScrollLocked = document.documentElement.hasAttribute('data-scroll-locked');
 
-        const isMobileView = window.theme.isMobile();
+        const isMobileView = theme.isMobile;
         this.collectionSidebar.classList.add(classes.animated);
 
         if (collectionSidebarSlideOut === null) {
@@ -124,7 +124,7 @@ if (!customElements.get('collection-component')) {
       }
 
       toggleSidebarSlider() {
-        if (window.theme.isMobile()) {
+        if (theme.isMobile) {
           this.hideSidebar();
         } else if (this.collectionSidebar.classList.contains(classes.expanded)) {
           this.showSidebarCallback();

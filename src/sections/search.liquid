@@ -23,7 +23,8 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- render 'stylesheet', name: 'collection.css', async: true -%}
+{%- render 'stylesheet', name: 'collection.css' -%}
+{%- render 'stylesheet', name: 'filters.css' -%}
 
 {%- style -%}
   .search-page {
@@ -95,11 +96,11 @@
     {%- liquid
       assign nav_classes = ''
       if enable_sort
-        assign nav_classes = nav_classes | append: ' collection__nav--sort'
+        assign nav_classes = nav_classes | append: ' filters__nav--sort'
       endif
 
       if enable_filters
-        assign nav_classes = nav_classes | append: ' collection__nav--filter'
+        assign nav_classes = nav_classes | append: ' filters__nav--filter'
       endif
     -%}
 
@@ -111,7 +112,7 @@
           assign filter_active_count = filter_active_count | plus: filter.active_values.size
         endfor
       -%}
-      <nav class="collection__nav{{ nav_classes }}" data-collection-nav>
+      <nav class="filters__nav{{ nav_classes }}" data-filters-nav>
         {%- if enable_filters -%}
           <div class="popout--group">
             <button

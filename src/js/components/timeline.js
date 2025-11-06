@@ -30,7 +30,7 @@ if (!customElements.get('timeline-component')) {
         this.buttons = this.querySelectorAll(selectors.button);
         this.rowsHolder = this.querySelector(selectors.rows);
         this.requestAnimation = null;
-        this.isDesktopView = !window.theme.isMobile();
+        this.isDesktopView = !theme.isMobile;
         this.isScrollEnabled = false;
 
         this.scrollEvent = (e) => this.scrollEvents(e);
@@ -54,7 +54,7 @@ if (!customElements.get('timeline-component')) {
               const row = e.currentTarget.closest(selectors.row);
               if (!row) return;
 
-              if (!window.theme.isMobile()) {
+              if (!theme.isMobile) {
                 const hightestRow = Math.max(...this.rowsHeight);
                 const rowHeight = this.holderHeight / this.rows.length;
                 const holderTop = this.getBoundingClientRect().top;
@@ -80,7 +80,7 @@ if (!customElements.get('timeline-component')) {
         this.holderHeight = this.offsetHeight;
         this.calculateRowsDimensions();
         this.requestAnimation = requestAnimationFrame(() => this.calculatePosition());
-        const isDesktopView = !window.theme.isMobile();
+        const isDesktopView = !theme.isMobile;
 
         if (isDesktopView && !this.isScrollEnabled) {
           this.isScrollEnabled = true;
@@ -129,10 +129,10 @@ if (!customElements.get('timeline-component')) {
       calculatePosition(target = null) {
         this.removeAnimationFrame();
         this.holderTop = this.getBoundingClientRect().top + window.scrollY;
-        const isDesktopView = !window.theme.isMobile();
+        const isDesktopView = !theme.isMobile;
         const elementHeight = this.holderHeight / this.rows.length;
         let elementsTop = this.holderTop;
-        const windowHeight = window.innerHeight;
+        const windowHeight = theme.windowHeight;
         const windowMiddle = window.scrollY + windowHeight * 1.5;
         const outerSpace = 16; // wrapper padding using --outer CSS variable
         let mobilePercent = 0;

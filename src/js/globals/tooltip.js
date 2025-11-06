@@ -53,7 +53,7 @@ if (!customElements.get('tooltip-component')) {
           let tooltipTargetPositionLeft = tooltipRect.left - tooltipTargetWidth / 2 + tooltipWidth / 2;
           const tooltipLeftWithWidth = tooltipTargetPositionLeft + tooltipTargetWidth;
           const sideOffset = 24;
-          const tooltipTargetWindowDifference = tooltipLeftWithWidth - window.theme.getWindowWidth() + sideOffset;
+          const tooltipTargetWindowDifference = tooltipLeftWithWidth - theme.windowWidth + sideOffset;
 
           if (tooltipTargetWindowDifference > 0) {
             tooltipTargetPositionLeft -= tooltipTargetWindowDifference;
