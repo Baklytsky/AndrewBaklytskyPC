@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('shopify:section:load', (e) => {
   const container = e.target;
+  if (typeof container !== 'object' || container.nodeValue === 'undefined') return;
+
   floatLabels(container);
   wrapElements(container);
   ariaToggle(document);
