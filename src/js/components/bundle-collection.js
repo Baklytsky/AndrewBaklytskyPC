@@ -172,30 +172,37 @@ if (!customElements.get('bundle-collection')) {
       updateUI() {
         const filledCount = this.selectedProducts.length;
         this.selectedCount.textContent = filledCount;
+        this.addButton.disabled = filledCount !== this.maxSelection;
         let savingPrice = 0;
         let price = this.selectedProducts.reduce((sum, product) => {
           const price = parseFloat(product?.price);
           return sum + (isNaN(price) ? 0 : price);
         }, 0);
 
-        if (filledCount === this.maxSelection && this.discountValue && this.discountType) {
-          const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
-          const discountValue = Number(this.discountValue) * 100 * currencyRate;
-          if (this.discountType === 'percent') {
-            savingPrice = (price * parseFloat(this.discountValue)) / 100;
-            price -= savingPrice;
-          } else if (this.discountType === 'fixed' && price > discountValue) {
-            savingPrice = discountValue;
-            price -= discountValue;
+        if (filledCount === this.maxSelection) {
+          if (this.discountValue && this.discountType && this.bundleTotalSavings) {
+            const currencyRate = window.Shopify && window.Shopify.currency && window.Shopify.currency.rate ? Number(window.Shopify.currency.rate) : 1;
+            const discountValue = Number(this.discountValue) * 100 * currencyRate;
+            if (this.discountType === 'percent') {
+              savingPrice = (price * parseFloat(this.discountValue)) / 100;
+              price -= savingPrice;
+            } else if (this.discountType === 'fixed' && price > discountValue) {
+              savingPrice = discountValue;
+              price -= discountValue;
+            }
+          }
+
+          if (document.body.classList.contains('is-focused')) {
+            this.addButton.focus();
           }
         }
 
         this.bundleTotal.innerHTML = this.formatRate(price);
-        this.bundleTotalSavings.innerHTML = window.theme.formatMoney(savingPrice, theme.moneyFormat);
-        this.addButton.disabled = filledCount !== this.maxSelection;
-        if (filledCount === this.maxSelection && document.body.classList.contains('is-focused')) {
-          this.addButton.focus();
+
+        if (this.bundleTotalSavings) {
+          this.bundleTotalSavings.innerHTML = window.theme.formatMoney(savingPrice, theme.moneyFormat);
         }
+
         this.buttons.forEach((button) => {
           button.disabled = filledCount >= this.maxSelection;
         });
