@@ -9,12 +9,6 @@
     assign border_class = 'brick--border'
   endif
 
-  assign transparent_header = false
-  assign non_image_block_types = 'text, newsletter, reviews, product, collection' | split: ','
-  unless non_image_block_types contains section.blocks[0].type and non_image_block_types contains section.blocks[1].type
-    assign transparent_header = true
-  endunless
-
   assign selected_color_scheme = section.settings.color_scheme | strip
   assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.bg
   assign animation_anchor = 'BrickSection--' | append: section.id
@@ -53,9 +47,6 @@
   id="BrickSection--{{ section.id }}"
   data-section-id="{{ section.id }}"
   data-section-type="custom-content"
-  {% if transparent_header %}
-    data-overlay-header
-  {% endif %}
   class="section-padding {{ color_scheme }}"
 >
   {%- if section.blocks.size > 0 -%}
