@@ -2,7 +2,7 @@ class ZoomImages extends HTMLElement {
   constructor() {
     super();
 
-    this.container = this.closest('[data-section-type]');
+    this.container = this.closest('[data-section-id]');
     this.images = this.querySelectorAll('[data-zoom-image]');
     this.thumbsContainer = document.querySelector('.pswp__thumbs');
   }
