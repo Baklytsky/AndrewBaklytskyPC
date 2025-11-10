@@ -86,6 +86,10 @@
                   endif
                 -%}
 
+                {% capture sib_price_html %}
+                  {%- render 'price', product: sib_product -%}
+                {% endcapture %}
+
                 <tooltip-component
                   class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ swatch_color }}"
                   style="
@@ -96,8 +100,7 @@
                   data-swap-handle="{{ sib_product.handle }}"
                   data-swap-url="{{ sib_product.url }}"
                   data-sibling-link="{{ sib_product.url }}"
-                  data-sibling-price="{{ sib_product_price | strip_html }}"
-                  data-sibling-compare-at-price="{{ sib_product_compare_at_price | strip_html }}"
+                  data-sibling-price="{{ sib_price_html | strip | escape }}"
                   data-sibling-cutline="{{ sib_cutline }}"
                   data-sibling-image="{{ sib_product.featured_media.preview_image.src | image_url }}"
                   tabindex="0"

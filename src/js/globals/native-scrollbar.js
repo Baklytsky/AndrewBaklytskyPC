@@ -21,19 +21,24 @@ if (!customElements.get('native-scrollbar')) {
       connectedCallback() {
         document.addEventListener('theme:resize', this.resizeEvents);
 
-        if (this.scrollbar.hasAttribute('data-scrollbar-slider')) {
-          this.scrollToVisibleElement();
-        }
+        // Detect scroll direction after layout is complete
+        requestAnimationFrame(() => {
+          this.detectScrollDirection();
+
+          if (this.scrollbar.hasAttribute('data-scrollbar-slider')) {
+            this.scrollToVisibleElement();
+          }
+
+          if (this.arrowNext && this.arrowPrev) {
+            this.resizeEvents();
+            this.clickEvents();
+          }
+        });
 
         this.scrollbar.addEventListener(
           'scroll',
           window.theme.debounce(() => this.updateArrows(), 16)
         );
-
-        if (this.arrowNext && this.arrowPrev) {
-          this.resizeEvents();
-          this.clickEvents();
-        }
       }
 
       disconnectedCallback() {

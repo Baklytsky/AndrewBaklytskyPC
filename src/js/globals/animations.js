@@ -149,6 +149,8 @@ function initAnimations() {
 
   // Remove unloaded section from the anchors array on section:unload event
   document.addEventListener('shopify:section:unload', (e) => {
+    if (typeof e.target !== 'object' || e.target.nodeValue === 'undefined') return;
+
     const sectionId = e.target.querySelector('[data-section-id]')?.id;
     const sectionIndex = anchorContainers.indexOf(sectionId);
 

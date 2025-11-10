@@ -131,6 +131,9 @@ if (!customElements.get('cart-drawer')) {
 
         this.classList.add('is-open');
 
+        // Load images instantly when open Cart drawer
+        for (const img of this.querySelectorAll('img[loading="lazy"]')) img.removeAttribute('loading');
+
         // Observe Additional Checkout Buttons
         this.observeAdditionalCheckoutButtons();
 
