@@ -148,7 +148,15 @@
   }
 
   .cart__price__row {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 0;
+    max-width: 100%;
+
+    @include media-query($small) {
+      align-items: flex-start;
+    }
   }
 
   .cart__price__save {
@@ -157,6 +165,13 @@
     margin-top: 2px;
     font-size: max(calc(var(--font-body-x-small) - 2px), 10px);
     opacity: 0.6;
+    text-align: right;
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    @include media-query($small) {
+      text-align: left;
+    }
   }
 }
 
@@ -673,14 +688,16 @@ input.cart__acceptance__input {
 }
 
 .cart__price {
-  margin: 0 0 2px;
+  margin: 0;
+  text-align: right;
+  font-size: var(--font-body-small);
 
   ins {
     display: inline-block;
     background: none;
-    margin-right: var(--SPACING-MICRO);
     color: var(--text);
     vertical-align: top;
+    text-decoration: none;
   }
 
   del {
@@ -693,33 +710,53 @@ input.cart__acceptance__input {
   .line__price {
     display: block;
     margin: 0;
+    text-align: right;
   }
 
-  .line__price--unit small {
+  .unit-price {
     opacity: 0.6;
   }
 }
 
 .cart__price--has-units {
+  position: relative;
   margin-bottom: calc(var(--font-body-small) * var(--line-height-normal));
+
+  .unit-price {
+    right: 0;
+  }
 }
 
-.cart__price__inner { min-width: 0; }
+.cart__price__inner {
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: min(var(--SPACING-MICRO), 4px);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 
 .cart__price__row {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-end;
   margin: 0;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
 
   &:not(:last-child) { margin-bottom: 2px; }
 }
 
 .cart__price__save {
   flex: 0 0 auto;
-  max-width: 50%;
-  padding-left: var(--SPACING-MICRO);
+  width: 100%;
+  text-align: right;
+  padding-left: 0;
   word-break: break-word;
-  font-style: italic;
+  overflow-wrap: break-word;
+  color: var(--accent);
 }
 
 .shipping-calculator {
