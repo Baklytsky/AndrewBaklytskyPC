@@ -39,13 +39,24 @@
 {%- endif -%}
 
 {%- capture cart_title -%}
-  <h3 class="cart__title drawer__title{% if title_block[0].settings.uppercase %} uppercase{% endif %}">
+  <h3
+    class="
+      cart__title drawer__title
+      {% if title_block[0].settings.uppercase %} uppercase{% endif %}
+      {% if title_block[0].settings.title_font_size %} {{ title_block[0].settings.title_font_size }}{% endif %}
+    "
+  >
     {{ title_block[0].settings.title | default: cart_title_default }}
 
     <cart-count class="cart__items-count" data-cart-count="{{ cart_item_count }}">{{ cart_item_count }}</cart-count>
   </h3>
 
-  <button type="button" class="drawer__close" data-cart-drawer-close aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}">
+  <button
+    type="button"
+    class="drawer__close"
+    data-cart-drawer-close
+    aria-label="{{ 'general.accessibility.close' | t }} {{ 'cart.general.title' | t }}"
+  >
     {%- render 'icon-close' -%}
   </button>
 {%- endcapture -%}
@@ -393,6 +404,20 @@
           "id": "title",
           "label": "Text",
           "default": "Your cart"
+        },
+        {
+          "type": "select",
+          "id": "title_font_size",
+          "label": "Title size",
+          "default": "heading-small",
+          "options": [
+            {"value": "heading-mini", "label": "Mini"},
+            {"value": "heading-x-small", "label": "Extra small"},
+            {"value": "heading-small", "label": "Small"},
+            {"value": "heading-medium", "label": "Medium"},
+            {"value": "heading-large", "label": "Large"},
+            {"value": "heading-x-large", "label": "Extra large"}
+          ]
         },
         {
           "type": "checkbox",
