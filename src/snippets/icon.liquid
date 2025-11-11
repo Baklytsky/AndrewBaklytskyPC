@@ -9,6 +9,7 @@
   assign image = block.settings.image
   assign icon_color = block.settings.icon_color
   assign padding_bottom = block.settings.padding_bottom | default: 0
+  assign alignment = block.settings.alignment | default: ''
 
   case block.settings.width
     when 'full'
@@ -38,7 +39,7 @@
 {%- endif -%}
 
 <div
-  class="product__block block__icon__container{{ width }} block-padding{% if align_text != '' %} {{ align_text }}{% endif %}"
+  class="product__block block__icon__container{{ width }} block-padding{% if alignment != '' %} {{ alignment }}{% endif %}"
   {{ block.shopify_attributes }}
   {{ block_style }}
 >
