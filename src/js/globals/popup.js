@@ -10,12 +10,13 @@ if (!customElements.get('popup-component')) {
         this.popup = this.querySelector('dialog');
         this.preventTopLayer = this.popup.hasAttribute('data-prevent-top-layer');
         this.enableScrollLock = this.popup.hasAttribute('data-scroll-lock-required');
-        this.buttonOpen = this.querySelector('[data-popup-open]');
+        this.buttonOpen = this.querySelector('[data-popup-open]') || document.querySelector(`[data-popup-open="${this.id}"]`);
         this.buttonPrev = this.querySelector('[data-popup-prev]');
         this.buttonNext = this.querySelector('[data-popup-next]');
         this.a11y = window.theme.a11y;
         this.isAnimating = false;
 
+        this.popupOpenEvent = this.popupOpen.bind(this);
         this.popupCloseEvent = this.popupClose.bind(this);
         this.bindListeners();
       }
@@ -109,6 +110,7 @@ if (!customElements.get('popup-component')) {
         this.popup.addEventListener('close', () => this.popupCloseActions());
         document.addEventListener('theme:quick-add:open', this.popupCloseEvent);
         document.addEventListener('theme:product:added', this.popupCloseEvent);
+        this.addEventListener('theme:popup:open', this.popupOpenEvent);
       }
 
       popupOpen() {
@@ -210,6 +212,7 @@ if (!customElements.get('popup-component')) {
       disconnectedCallback() {
         document.removeEventListener('theme:quick-add:open', this.popupCloseEvent);
         document.removeEventListener('theme:product:added', this.popupCloseEvent);
+        this.removeEventListener('theme:popup:open', this.popupOpenEvent);
       }
     }
   );
