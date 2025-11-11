@@ -70,19 +70,22 @@ if (!customElements.get('popout-select')) {
       toggleListPosition() {
         const button = this.querySelector('[data-popout-toggle]');
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
+        const isInDrawer = this.closest('cart-drawer');
 
         const removeTopClass = () => {
           if (button.getAttribute('aria-expanded') !== 'true') {
-            this.popoutList.classList.remove('popout-list--top');
+            // Don't remove the class if inside the cart drawer to prevent excess scrollbar
+            // Even though `select-popout__list`is absolute, it extends the scrollable container and creates a scrollbar inside the drawer body
+            if (!isInDrawer) {
+              this.popoutList.classList.remove('popout-list--top');
+            }
           }
 
           this.popoutList.removeEventListener('transitionend', removeTopClass);
         };
 
         if (button.getAttribute('aria-expanded') === 'true') {
-          if (theme.windowHeight / 2 < popoutTop) {
-            this.popoutList.classList.add('popout-list--top');
-          }
+          this.popoutList.classList.toggle('popout-list--top', theme.windowHeight / 2 < popoutTop);
         } else {
           this.popoutList.addEventListener('transitionend', removeTopClass);
         }
