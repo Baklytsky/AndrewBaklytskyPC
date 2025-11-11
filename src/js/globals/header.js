@@ -32,7 +32,7 @@ if (!customElements.get('header-component')) {
       constructor() {
         super();
 
-        this.style = this.dataset.style;
+        this.headerStyle = this.dataset.headerStyle;
         this.desktop = this.querySelector(selectors.desktop);
         this.deadLinks = document.querySelectorAll(selectors.deadLink);
         this.resizeObserver = null;
@@ -48,7 +48,7 @@ if (!customElements.get('header-component')) {
         this.cartToggleEvent();
         this.initSticky();
 
-        if (this.style !== 'drawer' && this.desktop) {
+        if (this.headerStyle !== 'drawer' && this.desktop) {
           this.minWidth = this.getMinWidth();
           this.listenWidth();
         }
