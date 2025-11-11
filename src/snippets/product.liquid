@@ -137,8 +137,8 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
 
-{%- render 'stylesheet', name: 'product.css', async: true -%}
-{%- render 'stylesheet', name: 'product-media.css', async: true -%}
+{%- render 'stylesheet', name: 'product.css' -%}
+{%- render 'stylesheet', name: 'product-media.css' -%}
 
 <product-info
   id="MainProduct-{{ unique }}"
@@ -547,6 +547,17 @@
                       {%- endif -%}
                     </div>
 
+                  {%- when 'sku' -%}
+                    <div
+                      class="product__block product__sku block-padding"
+                      id="Sku-{{ section.id }}"
+                      role="status"
+                      {{ block_style }}
+                      {{ block.shopify_attributes }}
+                    >
+                      {{ 'products.product.sku' | t }}: {{ current_variant.sku }}
+                    </div>
+
                   {%- when 'fit-guide' -%}
                     {%- liquid
                       assign fit_color = block.settings.fit_color
@@ -556,6 +567,8 @@
                         endcapture
                       endunless
                     -%}
+
+                    {%- render 'stylesheet', name: 'fit-guide.css' -%}
 
                     <div
                       class="product__block product__guide guide block-padding"

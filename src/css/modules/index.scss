@@ -1,10 +1,5 @@
 @use '../globals' as *;
 
-.rte--homepage {
-  font-size: var(--font-body-medium);
-  margin-bottom: 0;
-}
-
 .index-rte {
   position: relative;
 
@@ -374,13 +369,6 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 
 .hero__content:has(.is-initialized) {
   @include media-query($medium-up) {
-    .hero__slide {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-
-      &.swiper-slide-active { opacity: 1; }
-    }
-
     .swiper-pagination-bullets {
       top: auto;
       bottom: 0;
@@ -394,14 +382,6 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 
     &:has([data-dots="line"]) .swiper,
     &:has([data-dots="circle"]) .swiper { padding-bottom: 20px; }
-  }
-}
-
-.hero__content.grid--mobile-slider {
-  @include media-query ($small) {
-    flex-direction: row;
-
-    .hero__slide { padding: 0 var(--outer); }
   }
 }
 
@@ -470,8 +450,7 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
   vertical-align: middle;
 }
 
-/*=== Text sections ===*/
-
+// Text sections
 .text-link,
 .rte a,
 .hero__rte a,
@@ -697,7 +676,7 @@ p a {
 
 .index-newsletter .hero__content__wrapper { z-index: 11; }
 
-//=============== Use this for hero section that have height settings ===============//
+// Use this for hero section that have height settings
 .frame {
   display: grid;
   grid-template-columns: 1fr;
@@ -823,3 +802,6 @@ p a {
   width: 100%;
   height: 100%;
 }
+
+// Fix horizontal scroll on page load
+variant-selects { display: flex; }
