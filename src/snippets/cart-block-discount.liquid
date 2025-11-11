@@ -8,51 +8,33 @@
   {% render 'cart-block-discount', block: block %}
 {% endcomment %}
 
-<details
-  class="cart__widget accordion"
-  data-collapsible
->
-  <summary class="cart__widget__title" data-collapsible-trigger aria-controls="discounts">
-    {%- if block.settings.title != blank -%}
-      {{- block.settings.title -}}
-    {%- else -%}
-      {{- 'cart.general.discounts_label' | t -}}
-    {%- endif -%}
+<div class="cart-discount">
+  <label for="cart-discount" class="visually-hidden">{{ 'cart.general.discount_code' | t }}</label>
 
-    {%- render 'icon-nav-arrow-down' -%}
-  </summary>
+  <div class="cart-discount__inner flex">
+    <input
+      type="text"
+      id="cart-discount"
+      class="cart__field"
+      placeholder="{{ 'cart.general.discount_code' | t }}"
+      aria-label="{{ 'cart.general.discount_code' | t }}"
+      data-discount-input
+    >
 
-  <div
-    id="discounts"
-    class="cart__widget__content"
-    data-collapsible-body
-  >
-    <div class="cart__widget__content__inner" data-collapsible-content>
-      <label for="cart-discount" class="visually-hidden">{{ 'cart.general.discount_code' | t }}</label>
-
-      <input
-        type="text"
-        id="cart-discount"
-        class="cart__field"
-        placeholder="{{ 'cart.general.discount_code' | t }}"
-        aria-label="{{ 'cart.general.discount_code' | t }}"
-        data-discount-input
-      >
-
-      <p
-        class="cart__errors__content cart__errors__content--discount hidden"
-        data-discount-error-message
-        role="alert"
-      ></p>
-
-      <input type="hidden" name="discount" value="" data-discount-field>
-
-      <button
-        class="btn btn--full btn--primary btn--solid"
-        data-apply-discount
-      >
-        <span>{{ 'cart.general.apply' | t }}</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--primary btn--solid"
+      data-apply-discount
+    >
+      <span>{{ 'cart.general.apply' | t }}</span>
+    </button>
   </div>
-</details>
+
+  <p
+    class="cart__errors__content cart__errors__content--discount hidden"
+    data-discount-error-message
+    role="alert"
+  ></p>
+
+  <input type="hidden" name="discount" value="" data-discount-field>
+</div>

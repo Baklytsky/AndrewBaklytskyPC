@@ -424,21 +424,6 @@ class CartItems extends HTMLElement {
       this.onDiscountInputChange = () => this.clearDiscountErrors();
       this.discountInput.addEventListener('input', this.onDiscountInputChange);
     }
-
-    // Collapsible toggle clears error message
-    const discountContainer = document.getElementById('discounts');
-    if (discountContainer) {
-      const discountTrigger = document.querySelector(`[data-collapsible-trigger][aria-controls="${discountContainer.id}"]`);
-      if (discountTrigger) {
-        if (this.onDiscountCollapsibleToggle) {
-          discountTrigger.removeEventListener('click', this.onDiscountCollapsibleToggle);
-          discountTrigger.removeEventListener('keyup', this.onDiscountCollapsibleToggle);
-        }
-        this.onDiscountCollapsibleToggle = () => this.clearDiscountErrors();
-        discountTrigger.addEventListener('click', this.onDiscountCollapsibleToggle);
-        discountTrigger.addEventListener('keyup', this.onDiscountCollapsibleToggle);
-      }
-    }
   }
 
   /**
