@@ -16,34 +16,32 @@
 
   assign cart_discount_size = discount_codes.size
 
-  if currency_code_enable
-    assign original_subtotal_formatted = original_subtotal | money_with_currency
-  else
-    assign original_subtotal_formatted = original_subtotal | money
-  endif
-
-  if original_subtotal < subtotal or cart_discount_size == 0
-    assign cart_total_hidden = true
-  endif
-
   if cart_discount_size == 0
     assign cart_total_discount_hidden = true
   endif
+
+  # Calculate total savings
+  assign total_savings = original_subtotal | minus: subtotal
+  assign has_savings = false
+  if total_savings > 0
+    assign has_savings = true
+    if currency_code_enable
+      assign total_savings_formatted = total_savings | money_with_currency
+    else
+      assign total_savings_formatted = total_savings | money
+    endif
+  endif
 -%}
 
-{%- unless cart_total_hidden -%}
-  <div class="cart__total">
-    <span class="cart__total__label">{{ 'cart.general.subtotal_items' | t }}</span>
+{%- if has_savings -%}
+  <div class="cart__total cart__total--savings">
+    <span class="cart__total__label">{{- 'cart.general.savings' | t -}}</span>
 
     <span class="cart__total__price">
-      {%- if original_subtotal == 0 -%}
-        {{ 'general.money.free' | t }}
-      {%- else -%}
-        {{- original_subtotal_formatted -}}
-      {%- endif -%}
+      {{- total_savings_formatted -}}
     </span>
   </div>
-{%- endunless -%}
+{%- endif -%}
 
 {%- unless cart_total_discount_hidden -%}
   <div class="cart__total__discount">
@@ -76,22 +74,20 @@
         -%}
 
         <div class="cart__total" data-discount-body data-discount-code="{{ discount_code }}">
-          <div>
-            {%- render 'icon-tags' -%}
+          {%- render 'icon-sale-tag' -%}
 
-            <span>
-              {{- discount_code -}}
-            </span>
+          <span class="cart__total__discount-title">
+            {{- discount_code -}}
+          </span>
 
-            <span>
-              -
-              {{- total_allocated_discount -}}
-            </span>
+          <span class="cart__total__discount-amount">
+            &nbsp;-
+            {{- total_allocated_discount -}}
+          </span>
 
-            <span class="remove-discount" aria-label="{{ 'cart.general.remove_discount' | t }}" data-remove-discount>
-              {%- render 'icon-cancel' -%}
-            </span>
-          </div>
+          <span class="remove-discount" aria-label="{{ 'cart.general.remove_discount' | t }}" data-remove-discount>
+            {%- render 'icon-close' -%}
+          </span>
         </div>
       {%- endfor -%}
     {%- endif -%}
