@@ -383,28 +383,26 @@
 
               {%- if sale or discounted -%}
                 <span class="cart__price__save">
-                  {% if discounted and line_item.line_level_discount_allocations.size > 0 %}
-                    {%- for discount in line_item.line_level_discount_allocations -%}
-                      {%- liquid
+                  {%- liquid
+                    if discounted and line_item.line_level_discount_allocations.size > 0
+                      for discount in line_item.line_level_discount_allocations
                         assign discount_price = discount.amount | money
                         assign discount_title = discount.discount_application.title
                         assign discount_type = discount.discount_application.type
-                      -%}
-                      <span class="cart__price__save">
-                        {%- if discount_type == 'discount_code' -%}
-                          {{-
-                            'cart.general.saving_with_discount_code'
-                            | t: amount: discount_price, discount_code: discount_title
-                          -}}
-                        {%- else -%}
-                          {{- 'cart.general.saving_amount' | t: amount: discount_price -}}
-                        {%- endif -%}
-                      </span>
-                    {%- endfor -%}
-                  {% else %}
-                    {%- assign sale_price = sale_compared_price | minus: line_item_final_price | money -%}
-                    {{- 'cart.general.saving_amount' | t: amount: sale_price -}}
-                  {% endif %}
+
+                        if discount_type == 'discount_code'
+                          echo 'cart.general.saving_with_discount_code' | t: amount: discount_price, discount_code: discount_title
+                        elsif line_item.product.metafields.theme_modules.is_bundle
+                          echo 'cart.general.saving_with_bundle_discount' | t: amount: discount_price
+                        else
+                          echo 'cart.general.saving_amount' | t: amount: discount_price
+                        endif
+                      endfor
+                    else
+                      assign sale_price = sale_compared_price | minus: line_item_final_price | money
+                      echo 'cart.general.saving_amount' | t: amount: sale_price
+                    endif
+                  -%}
                 </span>
               {%- endif -%}
             </span>
