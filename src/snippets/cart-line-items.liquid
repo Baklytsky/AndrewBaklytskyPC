@@ -383,8 +383,28 @@
 
               {%- if sale or discounted -%}
                 <span class="cart__price__save">
-                  <span>{{- 'cart.general.save' | t -}}</span>
-                  {{ sale_compared_price | minus: line_item_final_price | money }}
+                  {% if discounted and line_item.line_level_discount_allocations.size > 0 %}
+                    {%- for discount in line_item.line_level_discount_allocations -%}
+                      {%- liquid
+                        assign discount_price = discount.amount | money
+                        assign discount_title = discount.discount_application.title
+                        assign discount_type = discount.discount_application.type
+                      -%}
+                      <span class="cart__price__save">
+                        {%- if discount_type == 'discount_code' -%}
+                          {{-
+                            'cart.general.saving_with_discount_code'
+                            | t: amount: discount_price, discount_code: discount_title
+                          -}}
+                        {%- else -%}
+                          {{- 'cart.general.saving_amount' | t: amount: discount_price -}}
+                        {%- endif -%}
+                      </span>
+                    {%- endfor -%}
+                  {% else %}
+                    {%- assign sale_price = sale_compared_price | minus: line_item_final_price | money -%}
+                    {{- 'cart.general.saving_amount' | t: amount: sale_price -}}
+                  {% endif %}
                 </span>
               {%- endif -%}
             </span>
@@ -504,21 +524,6 @@
           </quantity-input>
         {%- endunless -%}
       </div>
-
-      {%- if line_item_original_price > line_item_final_price -%}
-        {%- for discount in line_item.line_level_discount_allocations -%}
-          <p class="cart__discount">
-            {%- assign discount_price = discount.amount | money -%}
-
-            <span>
-              {{-
-                'cart.general.discount_label_html'
-                | t: amount: discount_price, title: discount.discount_application.title
-              -}}
-            </span>
-          </p>
-        {%- endfor -%}
-      {%- endif -%}
     </div>
   {%- endif -%}
 
@@ -579,9 +584,9 @@
               </span>
 
               {%- if bundle_price_compare > bundle_price -%}
+                {%- assign bundle_discount_price = bundle_discount_amount | money -%}
                 <span class="cart__price__save">
-                  <span>{{- 'cart.general.save' | t -}}</span>
-                  {{ bundle_price_compare | minus: bundle_price | money }}
+                  {{- 'cart.general.saving_with_bundle_discount' | t: amount: bundle_discount_price -}}
                 </span>
               {%- endif -%}
             </span>
@@ -606,16 +611,6 @@
           </a>
         </div>
       </div>
-
-      {%- if bundle_discount_amount > 0 and bundle_discount_title != '' -%}
-        <p class="cart__discount">
-          {%- assign bundle_discount_price = bundle_discount_amount | money -%}
-
-          <span>
-            {{- 'cart.general.discount_label_html' | t: amount: bundle_discount_price, title: bundle_discount_title -}}
-          </span>
-        </p>
-      {%- endif -%}
     </div>
 
     {%- liquid
