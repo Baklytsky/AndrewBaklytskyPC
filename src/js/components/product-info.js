@@ -18,8 +18,7 @@ if (!customElements.get('product-info')) {
         super();
 
         this.quantityInput = this.querySelector('[data-quantity-input]');
-        this.productImages = this.querySelector('product-images');
-        this.productMediaList = this.querySelector('[data-product-media-list]');
+        this.productImages = this.querySelector('product-images-swiper');
         this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
         this.productFormWrapper = this.querySelector('[data-form-wrapper]');
         this.productForm = this.querySelector('product-form');
@@ -393,7 +392,7 @@ if (!customElements.get('product-info')) {
       }
 
       updateMedia(variantFeaturedMediaId) {
-        if (!variantFeaturedMediaId) return;
+        if (!variantFeaturedMediaId || !this.productImages) return;
 
         const selectedImage = this.querySelector(`[data-image-id="${variantFeaturedMediaId}"]`);
         if (!selectedImage) return;
@@ -401,18 +400,23 @@ if (!customElements.get('product-info')) {
         const selectedImageId = selectedImage.getAttribute('data-media-id');
         const isDesktopView = !theme.isMobile;
 
-        // Update image on the desktop slideshow
-        selectedImage.dispatchEvent(
-          new CustomEvent('theme:media:select', {
-            bubbles: true,
-            detail: {
-              id: selectedImageId,
-            },
-          })
-        );
+        // Update image using Swiper component
+        if (this.productImages.selectMedia) {
+          this.productImages.selectMedia(selectedImageId);
+        } else {
+          // Fallback: dispatch event if method not available yet
+          this.productImages.dispatchEvent(
+            new CustomEvent('theme:media:select', {
+              bubbles: true,
+              detail: {
+                id: selectedImageId,
+              },
+            })
+          );
+        }
 
         requestAnimationFrame(() => {
-          if (isDesktopView && !this.productImages.hasAttribute('data-fader-desktop') && this.variantImageScroll) {
+          if (isDesktopView && !this.productImages.hasAttribute('data-thumbs-enabled') && this.variantImageScroll) {
             const selectedImageTop = selectedImage.getBoundingClientRect().top;
 
             document.dispatchEvent(
@@ -424,15 +428,8 @@ if (!customElements.get('product-info')) {
               })
             );
 
-            // Update image on desktop on non slider layout
+            // Scroll to image on desktop when not using thumbnails layout
             window.theme.scrollTo(selectedImageTop);
-          }
-
-          // Update image on mobile slider
-          if (!isDesktopView && !this.productImages.hasAttribute('data-fader-mobile')) {
-            this.productMediaList.scrollTo({
-              left: selectedImage.offsetLeft,
-            });
           }
         });
       }
