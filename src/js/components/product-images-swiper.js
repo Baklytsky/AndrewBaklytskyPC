@@ -59,12 +59,17 @@ if (!customElements.get('product-images-swiper')) {
           this.thumbsSwiper = this.thumbsContainer.swiper;
           this.setupThumbnailClicks();
           this.setupThumbsArrows();
-          this.updateThumbsArrows();
 
-          // Update arrows on slide change
+          // Update arrows on slide change and swiper updates
           this.thumbsSwiper.on('slideChange', this.updateThumbsArrows);
           this.thumbsSwiper.on('reachBeginning', this.updateThumbsArrows);
           this.thumbsSwiper.on('reachEnd', this.updateThumbsArrows);
+          this.thumbsSwiper.on('update', this.updateThumbsArrows);
+
+          // Initial update with a small delay to ensure DOM is ready
+          requestAnimationFrame(() => {
+            setTimeout(() => this.updateThumbsArrows(), 100);
+          });
         }
 
         // Handle slide changes on main slider
@@ -362,16 +367,37 @@ if (!customElements.get('product-images-swiper')) {
           return;
         }
 
+        const thumbsContainer = this.thumbsContainer?.closest('.product__thumbs');
+        if (!thumbsContainer) return;
+
         const isBeginning = this.thumbsSwiper.isBeginning;
         const isEnd = this.thumbsSwiper.isEnd;
         const slidesCount = this.thumbsSwiper.slides.length;
 
-        // Disable arrows if there's only one slide or no slides
-        if (slidesCount <= 1) {
-          this.thumbsArrowPrev?.toggleAttribute('disabled', true);
-          this.thumbsArrowNext?.toggleAttribute('disabled', true);
+        // Check if scrolling is needed
+        // Check if swiper is locked (can't scroll) or compare container vs wrapper dimensions
+        const containerEl = this.thumbsSwiper.el;
+        const wrapperEl = this.thumbsSwiper.wrapperEl || this.thumbsContainer?.querySelector('.swiper-wrapper');
+        if (!containerEl || !wrapperEl) return;
+
+        const isHorizontal = this.thumbsSwiper.params.direction === 'horizontal';
+
+        // Check if swiper is locked (no scrolling needed)
+        const isLocked = this.thumbsSwiper.locked || false;
+
+        // Also check dimensions as fallback
+        const needsScrolling = !isLocked && (isHorizontal ? wrapperEl.scrollWidth > containerEl.clientWidth : wrapperEl.scrollHeight > containerEl.clientHeight);
+
+        // Hide arrows and remove padding if scrolling isn't needed
+        if (!needsScrolling || slidesCount <= 1) {
+          thumbsContainer.classList.add('thumbs-no-scroll');
+          this.thumbsArrowPrev?.setAttribute('disabled', 'true');
+          this.thumbsArrowNext?.setAttribute('disabled', 'true');
           return;
         }
+
+        // Show arrows and add padding when scrolling is needed
+        thumbsContainer.classList.remove('thumbs-no-scroll');
 
         // Update disabled state based on swiper position
         this.thumbsArrowPrev?.toggleAttribute('disabled', isBeginning);
@@ -386,6 +412,7 @@ if (!customElements.get('product-images-swiper')) {
           this.thumbsSwiper.off('slideChange', this.updateThumbsArrows);
           this.thumbsSwiper.off('reachBeginning', this.updateThumbsArrows);
           this.thumbsSwiper.off('reachEnd', this.updateThumbsArrows);
+          this.thumbsSwiper.off('update', this.updateThumbsArrows);
         }
         if (this.thumbsContainer) {
           this.thumbsContainer.removeEventListener('click', this.handleThumbClick);

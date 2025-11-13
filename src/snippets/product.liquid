@@ -276,7 +276,7 @@
 
             {%- if enable_thumbs or enable_thumbs_mobile -%}
               <div
-                class="product__thumbs"
+                class="product__thumbs{% if product.media.size < 8 %} thumbs-no-scroll{% endif %}"
                 {% if image_layout == 'thumbnails-left' or image_layout == 'thumbnails-right' %}
                   data-direction="vertical"
                 {% else %}
@@ -298,10 +298,6 @@
                     {% endif %}
                     free-mode="true"
                     free-mode-sticky="true"
-                    centered-slides="false"
-                    slides-offset-before="0"
-                    slides-offset-after="0"
-                    loop="false"
                     watch-slides-progress="true"
                     {% if product.media.size <= 1 %}
                       allow-slide-next="false"

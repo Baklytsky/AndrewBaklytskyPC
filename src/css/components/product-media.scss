@@ -118,6 +118,8 @@
     min-height: 85px; // Prevent CLS
   }
 
+  .swiper-wrapper:not(.is-initialized) { overflow: hidden; }
+
   .product__thumb {
     width: auto;
     height: auto;
@@ -129,37 +131,28 @@
     z-index: 2;
   }
 
+  // Hide arrows and remove padding when scrolling isn't needed
+  &.thumbs-no-scroll {
+    .product__thumbs__arrow {
+      display: none;
+    }
+
+    &[data-direction="horizontal"] .swiper,
+    &[data-direction="vertical"] .swiper {
+      padding: 0;
+    }
+  }
+
   // Add padding to prevent slides from colliding with arrows
-  &[data-direction="horizontal"] .swiper {
-    padding-left: calc(var(--btn-size, 28px) + 5px);
-    padding-right: calc(var(--btn-size, 28px) + 5px);
-  }
+  &:not(.thumbs-no-scroll) {
+    &[data-direction="horizontal"] .swiper {
+      padding-left: calc(var(--btn-size, 28px) + 5px);
+      padding-right: calc(var(--btn-size, 28px) + 5px);
+    }
 
-  &[data-direction="vertical"] .swiper {
-    padding-top: calc(var(--btn-size, 28px) + 5px);
-    padding-bottom: calc(var(--btn-size, 28px) + 5px);
-  }
-}
-
-// Old thumbs holder styles - keep for backward compatibility if needed
-.product__thumbs__holder {
-  position: relative;
-  list-style: none;
-  display: flex;
-  flex-flow: row nowrap;
-  text-align: left;
-
-  @include media-query ($small) {
-    margin-left: var(--outer-offset);
-    margin-right: var(--outer-offset);
-    padding-left: var(--outer);
-
-    &::after {
-      content: "";
-      display: block;
-      position: relative;
-      min-height: 1px;
-      padding-right: var(--outer);
+    &[data-direction="vertical"] .swiper {
+      padding-top: calc(var(--btn-size, 28px) + 5px);
+      padding-bottom: calc(var(--btn-size, 28px) + 5px);
     }
   }
 }
@@ -256,7 +249,7 @@
   cursor: pointer;
 
   @include media-query($medium-up) {
-    .product__wrapper--thumbnails & {
+    .product__wrapper--thumbnails .swiper-wrapper:not(.is-initialized) & {
       margin: 0 10px 0 0;
 
       &:last-child { margin-right: 0; }
@@ -264,9 +257,11 @@
   }
 
   @include media-query($small) {
-    margin: 0 10px 0 0;
+    .product__wrapper--thumbnails .swiper-wrapper:not(.is-initialized) & {
+      margin: 0 10px 0 0;
 
-    &:last-child { margin-right: 0; }
+      &:last-child { margin-right: 0; }
+    }
   }
 
   &::after {
@@ -283,6 +278,29 @@
   &.swiper-slide-thumb-active::after {
     opacity: 1;
   }
+
+  .icon {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    margin: 0;
+    height: 20px;
+    width: 20px;
+    color: transparent;
+    fill: var(--bg);
+    vertical-align: baseline;
+
+    path {
+      fill: inherit;
+      stroke: inherit;
+
+      &.icon-media-model-outline,
+      &.icon-media-video-outline { stroke: var(--border-hairline); }
+
+      &.icon-media-model-element,
+      &.icon-media-video-element { fill: var(--text-dark); }
+    }
+  }
 }
 
 .product__thumb__link {
@@ -297,29 +315,6 @@
   padding: 0;
   text-align: center;
   background: var(--bg);
-}
-
-.product__thumbs__holder .icon {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  margin: 0;
-  height: 20px;
-  width: 20px;
-  color: transparent;
-  fill: var(--bg);
-  vertical-align: baseline;
-
-  path {
-    fill: inherit;
-    stroke: inherit;
-
-    &.icon-media-model-outline,
-    &.icon-media-video-outline { stroke: var(--border-hairline); }
-
-    &.icon-media-model-element,
-    &.icon-media-video-element { fill: var(--text-dark); }
-  }
 }
 
 .product__photo {
