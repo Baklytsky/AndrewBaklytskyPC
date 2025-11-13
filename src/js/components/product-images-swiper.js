@@ -68,7 +68,13 @@ if (!customElements.get('product-images-swiper')) {
 
           // Initial update with a small delay to ensure DOM is ready
           requestAnimationFrame(() => {
-            setTimeout(() => this.updateThumbsArrows(), 100);
+            setTimeout(() => {
+              // Force swiper to recalculate dimensions (fixes issue with vertical thumbs)
+              if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
+                this.thumbsSwiper.update();
+              }
+              this.updateThumbsArrows();
+            }, 100);
           });
         }
 
