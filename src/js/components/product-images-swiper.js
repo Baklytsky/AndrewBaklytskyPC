@@ -21,6 +21,7 @@ if (!customElements.get('product-images-swiper')) {
         this.enableThumbsMobile = this.hasAttribute('data-thumbs-mobile');
         this.activeMediaId = this.getAttribute('data-active-media');
         this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
+        this.originalThumbsDirection = null; // Store original direction to restore on resize
 
         this.handleSlideChange = this.handleSlideChange.bind(this);
         // this.handleMediaSelect = this.handleMediaSelect.bind(this);
@@ -57,6 +58,23 @@ if (!customElements.get('product-images-swiper')) {
         // Setup thumbnails if enabled and available
         if (this.thumbsContainer?.swiper && this.enableThumbs) {
           this.thumbsSwiper = this.thumbsContainer.swiper;
+
+          // Store original direction from data attribute or swiper params
+          const thumbsContainer = this.thumbsContainer?.closest('.product__thumbs');
+          const originalDirection = thumbsContainer?.getAttribute('data-direction') || this.thumbsSwiper.params.direction;
+          this.originalThumbsDirection = originalDirection;
+
+          // Check if viewport is <469px and change direction to horizontal on initial load
+          const currentDirection = this.thumbsSwiper.params.direction;
+
+          if (theme.isMobile && currentDirection === 'vertical') {
+            // Change to horizontal on mobile
+            this.thumbsSwiper.changeDirection('horizontal');
+            if (thumbsContainer) {
+              thumbsContainer.setAttribute('data-direction', 'horizontal');
+            }
+          }
+
           this.setupThumbnailClicks();
           this.setupThumbsArrows();
 
@@ -341,6 +359,23 @@ if (!customElements.get('product-images-swiper')) {
           this.mainSwiper.update();
         }
         if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
+          const currentDirection = this.thumbsSwiper.params.direction;
+          const thumbsContainer = this.thumbsContainer?.closest('.product__thumbs');
+
+          if (theme.isMobile && currentDirection === 'vertical') {
+            // Change to horizontal on mobile
+            this.thumbsSwiper.changeDirection('horizontal');
+            if (thumbsContainer) {
+              thumbsContainer.setAttribute('data-direction', 'horizontal');
+            }
+          } else if (!theme.isMobile && currentDirection === 'horizontal' && this.originalThumbsDirection === 'vertical') {
+            // Change back to vertical on larger screens if it was originally vertical
+            this.thumbsSwiper.changeDirection('vertical');
+            if (thumbsContainer) {
+              thumbsContainer.setAttribute('data-direction', 'vertical');
+            }
+          }
+
           this.thumbsSwiper.update();
           this.updateThumbsArrows();
         }

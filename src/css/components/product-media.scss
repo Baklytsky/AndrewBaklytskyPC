@@ -84,8 +84,8 @@
     background: transparent;
   }
 
-  .swiper-button-prev { left: var(--btn-size); }
-  .swiper-button-next { right: var(--btn-size); }
+  .swiper-button-prev { left: var(--inner); }
+  .swiper-button-next { right: var(--inner); }
 
   // Hide navigation when only one slide
   &:has(swiper-slide:only-child) {
@@ -112,12 +112,6 @@
 
   .swiper-wrapper:not(.is-initialized) { overflow: hidden; }
 
-  .product__thumb {
-    width: auto;
-    height: auto;
-    display: inline-block;
-  }
-
   // Thumbs navigation arrows
   .product__thumbs__arrow {
     z-index: 2;
@@ -138,13 +132,58 @@
   // Add padding to prevent slides from colliding with arrows
   &:not(.thumbs-no-scroll) {
     &[data-direction="horizontal"] .swiper {
-      padding-left: calc(var(--btn-size, 28px) + 5px);
-      padding-right: calc(var(--btn-size, 28px) + 5px);
+      padding-left: var(--btn-size, 28px);
+      padding-right: var(--btn-size, 28px);
     }
 
-    &[data-direction="vertical"] .swiper {
-      padding-top: calc(var(--btn-size, 28px) + 5px);
-      padding-bottom: calc(var(--btn-size, 28px) + 5px);
+    @include media-query($medium-up) {
+      &[data-direction="vertical"] .swiper {
+        padding-top: var(--btn-size, 28px);
+        padding-bottom: var(--btn-size, 28px);
+      }
+    }
+
+    @include media-query($small) {
+      // Override vertical layout to horizontal on mobile
+      &[data-direction="vertical"] {
+        .swiper {
+          padding-left: var(--btn-size, 28px);
+          padding-right: var(--btn-size, 28px);
+        }
+
+        .scroll-arrow {
+          top: 0;
+          width: var(--btn-size, 28px);
+          height: 100%;
+
+          &::after {
+            top: 0;
+            bottom: 0;
+            height: 100%;
+            width: 12px;
+          }
+        }
+
+        .scroll-arrow--prev {
+          left: 0;
+          right: auto;
+
+          &::after {
+            left: 100%;
+            background: linear-gradient(to right,var(--COLOR-BG) 0%, transparent 100%);
+          }
+        }
+
+        .scroll-arrow--next {
+          right: 0;
+          left: auto;
+
+          &::after {
+            right: 100%;
+            background: linear-gradient(to left,var(--COLOR-BG) 0%, transparent 100%);
+          }
+        }
+      }
     }
   }
 }
@@ -152,10 +191,12 @@
 // Thumbnails left/right
 .product__wrapper--thumbnails-right,
 .product__wrapper--thumbnails-left {
+  .swiper-wrapper:not(.is-initialized) { gap: var(--gap); }
+
   @include media-query ($medium-up) {
     .product__images:has(.product__thumbs) {
       position: relative;
-      padding-left: 100px;
+      padding-left: 90px;
     }
 
     .product__thumbs {
@@ -173,27 +214,32 @@
         flex-direction: column;
         height: 100% !important;
       }
-
-      swiper-slide {
-        width: 75px;
-        height: 75px;
-      }
     }
-
-    .swiper-wrapper:not(.is-initialized) { gap: 20px;}
 
     .product__thumbs__arrow .icon { transform: rotate(90deg); }
   }
 
   @include media-query($small) {
     .product__thumbs {
-      position: static;
+      position: relative;
       width: 100%;
-      margin: 0;
+    }
+  }
+}
 
-      swiper-slide {
-        width: auto;
+@include media-query($small) {
+  .product__thumbs {
+    &[data-direction="vertical"] {
+      // Override vertical layout to horizontal
+      .swiper { height: auto !important; }
+
+      swiper-container:not(.is-initialized) {
+        display: flex;
+        flex-direction: row !important;
+        height: auto !important;
       }
+
+      .swiper-wrapper { flex-direction: row !important; }
     }
   }
 }
@@ -205,9 +251,10 @@
 
 .product__thumb {
   position: relative;
-  display: inline-block;
   margin: 0;
   cursor: pointer;
+  width: 75px;
+  height: 75px;
 
   &::after {
     content: "";
