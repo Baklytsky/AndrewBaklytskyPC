@@ -341,6 +341,7 @@ if (!customElements.get('product-info')) {
           updateSourceFromDestination('CartBar');
           updateSourceFromDestination('Preorder');
           updateSourceFromDestination('Badges');
+          updateSourceFromDestination('Quantity-Form');
 
           this.updateQuantityRules(this.sectionId, html);
           this.querySelector(`#Quantity-Rules-${this.dataset.sectionId}`)?.classList.remove('hidden');
