@@ -533,12 +533,15 @@ if (!customElements.get('product-info')) {
         const productNotification = this.querySelector('product-notification');
         if (!productNotification) return;
 
-        const buttonPopupOpen = productNotification.closest('popup-component')?.querySelector('[data-popup-open]');
-
         this.querySelectorAll('[data-notification-popup-button]')?.forEach((button) => {
           button.addEventListener('click', (event) => {
             event.preventDefault();
-            buttonPopupOpen.dispatchEvent(new Event('click'));
+
+            productNotification.dispatchEvent(
+              new CustomEvent('theme:popup:open', {
+                bubbles: true,
+              })
+            );
           });
         });
       }

@@ -353,40 +353,14 @@
               </button>
 
               {%- if show_newsletter -%}
-                <popup-component class="product-soldout-notification">
-                  <button
-                    type="button"
-                    class="btn {{ button_style }} {{ button_type }} {{ button_size }}"
-                    data-popup-open
-                    tabindex="-1"
-                  >
-                    <span class="btn__text">{{ newsletter_button_text }}</span>
-                  </button>
-
-                  <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
-                    <form method="dialog">
-                      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
-                    </form>
-
-                    <div class="drawer__inner product-modal__notification">
-                      <div class="product-modal__content small" data-scroll-lock-scrollable>
-                        <button
-                          type="button"
-                          class="product-modal__close"
-                          data-popup-close
-                          aria-label="{{ 'general.accessibility.close' | t }}"
-                        >
-                          {%- render 'icon-close' -%}
-                        </button>
-
-                        {%- render 'notification-form',
-                          product_title: product.title,
-                          current_variant: current_variant
-                        -%}
-                      </div>
-                    </div>
-                  </dialog>
-                </popup-component>
+                <button
+                  type="button"
+                  class="product-soldout-button btn {{ button_style }} {{ button_type }} {{ button_size }}"
+                  data-popup-open="{{ section.id }}-{{ block.id }}-notification-popup"
+                  tabindex="-1"
+                >
+                  <span class="btn__text">{{ newsletter_button_text }}</span>
+                </button>
               {%- endif -%}
             </div>
 
@@ -404,6 +378,31 @@
           </div>
         </div>
       {%- endform -%}
+
+      {%- if show_newsletter -%}
+        <popup-component class="product-soldout-notification" id="{{ section.id }}-{{ block.id }}-notification-popup">
+          <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
+            <form method="dialog">
+              <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+            </form>
+
+            <div class="drawer__inner product-modal__notification">
+              <div class="product-modal__content small" data-scroll-lock-scrollable>
+                <button
+                  type="button"
+                  class="product-modal__close"
+                  data-popup-close
+                  aria-label="{{ 'general.accessibility.close' | t }}"
+                >
+                  {%- render 'icon-close' -%}
+                </button>
+
+                {%- render 'notification-form', product_title: product.title, current_variant: current_variant -%}
+              </div>
+            </div>
+          </dialog>
+        </popup-component>
+      {%- endif -%}
 
       {%- if is_bundle -%}
         <script type="application/json" data-bundle-json>
