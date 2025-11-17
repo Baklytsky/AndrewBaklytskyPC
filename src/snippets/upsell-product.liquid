@@ -62,7 +62,7 @@
   assign unique_id = unique_id | default: section.id
   assign section_id = unique_id
   assign unique = unique_id | append: '-' | append: upsell_product.id
-  assign product_form_id = 'ProductFormUpsell-' | append: section_id
+  assign product_form_id = 'productFormUpsell--' | append: unique
 
   assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
 
@@ -321,7 +321,7 @@
                   data-product-form: '',
                   data-instant-add-form: ''
                 -%}
-                  <input type="hidden" name="id" value="{{ upsell_variant.id }}">
+                  <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
 
                   {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
                   <input

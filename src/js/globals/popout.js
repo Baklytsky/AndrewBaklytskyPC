@@ -15,6 +15,7 @@ if (!customElements.get('popout-select')) {
         this.popoutOptions = this.querySelectorAll('[data-popout-option]');
         this.productGridItem = this.popoutList.closest('[data-grid-item]');
         this.fireSubmitEvent = this.hasAttribute('submit');
+        this.shouldChangeVariant = this.hasAttribute('data-variant-change');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -104,15 +105,15 @@ if (!customElements.get('popout-select')) {
       popupOptionsClick(evt) {
         const link = evt.target.closest('[data-popout-option]');
 
-        if (link.attributes.href.value === '#') {
+        if (link && link.attributes.href.value === '#') {
           evt.preventDefault();
 
-          const attrValue = evt.currentTarget.hasAttribute('data-value') ? evt.currentTarget.getAttribute('data-value') : '';
+          const attrValue = link.hasAttribute('data-value') ? link.getAttribute('data-value') : '';
 
           this.popoutInput.value = attrValue;
 
           // Sync option metadata onto the hidden input so downstream logic can read it
-          const listItem = evt.currentTarget.closest('li');
+          const listItem = link.closest('li');
           if (listItem) {
             const optionValueId = listItem.getAttribute('data-option-value-id');
             const productUrl = listItem.getAttribute('data-product-url');
@@ -127,12 +128,17 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
-            const currentTarget = evt.currentTarget.parentElement;
+            const currentTarget = link.parentElement;
             const listTargetElement = this.popoutList.querySelector('.is-active');
             const targetAttribute = this.popoutList.querySelector('[aria-current]');
 
             // Fire a bubbling change event so parent controllers can react
             this.popoutInput.dispatchEvent(new Event('change', {bubbles: true}));
+
+            // Trigger variant change if this is a variant selector
+            if (this.shouldChangeVariant) {
+              this.triggerVariantChange(link);
+            }
 
             if (listTargetElement) {
               listTargetElement.classList.remove('is-active');
@@ -145,8 +151,8 @@ if (!customElements.get('popout-select')) {
 
             if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
               targetAttribute.removeAttribute('aria-current');
-              evt.currentTarget.setAttribute('aria-current', 'true');
             }
+            link.setAttribute('aria-current', 'true');
 
             if (attrValue !== '') {
               this.popoutToggleText.innerHTML = attrValue;
@@ -208,6 +214,22 @@ if (!customElements.get('popout-select')) {
         this.popoutToggle.setAttribute('aria-expanded', false);
         this.toggleListPosition();
         document.body.removeEventListener('click', this.bodyClickEvent);
+      }
+
+      /**
+       * Trigger variant change for popout select
+       * @param {HTMLElement} link - The link that was clicked
+       */
+      triggerVariantChange(link) {
+        if (!link) return;
+        const variantId = link.getAttribute('data-variant-id');
+        const form = this.closest('form');
+        if (!variantId || !form) return;
+        const variantIdInput = form.querySelector('[name="id"]');
+        if (!variantIdInput) return;
+
+        variantIdInput.value = variantId;
+        variantIdInput.dispatchEvent(new Event('change'));
       }
     }
   );
