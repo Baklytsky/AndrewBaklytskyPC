@@ -91,7 +91,7 @@ class LoadPhotoswipe {
     this.popupThumbs.forEach((element, i) => {
       element.addEventListener('click', (e) => {
         e.preventDefault();
-        const lastCurrentElement = element.parentElement.querySelector('is-current');
+        const lastCurrentElement = element.parentElement.querySelector('.is-current');
         lastCurrentElement.classList.remove('is-current');
         lastCurrentElement.setAttribute('aria-current', false);
         element.classList.add('is-current');

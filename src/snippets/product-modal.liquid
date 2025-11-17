@@ -34,33 +34,62 @@
     {%- render 'stylesheet', name: 'product-media.css', blocking: true -%}
 
     <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'product-images-swiper.js' | asset_url }}" defer="defer"></script>
 
-    <product-images
-      class="product-quick-add__images product__images product__images--thumbs product__images--mobile-thumbs"
+    <product-images-swiper
+      class="product-quick-add__images product__images"
+      data-section-id="{{ section.id }}"
       data-active-media="{{ section.id }}-{{ featured_media.id }}"
-      data-fader-desktop
     >
       <div
-        class="product__slides"
-        data-product-media-list
+        class="product__slides-swiper"
         data-animation="{{ animation_name_images }}"
         data-animation-delay="{{ animation_delay }}"
         {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
       >
         {%- if product.media.size > 0 -%}
-          {%- for media in product.media -%}
-            {%- render 'media',
-              media: media,
-              featured_media: featured_media,
-              enable_video_looping: true,
-              sectionkey: section.id,
-              product_api: true,
-              image_width: '365',
-              loading: 'eager',
-              cover: true
-            -%}
-          {%- endfor -%}
+          <div class="swiper">
+            <swiper-container
+              class="swiper-wrapper"
+              effect="fade"
+              fade-effect-cross-fade="true"
+              auto-height="true"
+              navigation="true"
+              navigation-prev-el=".product-quick-add__images .swiper-button-prev"
+              navigation-next-el=".product-quick-add__images .swiper-button-next"
+              {% if product.media.size <= 1 %}
+                allow-slide-next="false"
+                allow-slide-prev="false"
+              {% endif %}
+              keyboard="true"
+              grab-cursor="true"
+              loop="false"
+            >
+              {%- for media in product.media -%}
+                {%- render 'media',
+                  media: media,
+                  featured_media: featured_media,
+                  enable_video_looping: true,
+                  sectionkey: section.id,
+                  product_api: true,
+                  image_width: '365',
+                  loading: 'eager',
+                  cover: true
+                -%}
+              {%- endfor -%}
+            </swiper-container>
+
+            {%- if product.media.size > 1 -%}
+              <div class="swiper-button-prev">
+                <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
+                {%- render 'icon-nav-arrow-left' -%}
+              </div>
+              <div class="swiper-button-next">
+                <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
+                {%- render 'icon-nav-arrow-right' -%}
+              </div>
+            {%- endif -%}
+          </div>
 
           {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
           {%- if first_3d_model -%}
@@ -76,19 +105,21 @@
             </button>
           {%- endif -%}
         {%- else -%}
-          <div class="product__slide">
-            <div class="product__photo{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
-              {%- render 'image',
-                image: product.featured_image,
-                widths: '365, 550, 730, 1100, 1460',
-                loading: 'eager',
-                cover: true
-              -%}
+          <div class="product__slides">
+            <div class="product__slide">
+              <div class="product__photo{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
+                {%- render 'image',
+                  image: product.featured_image,
+                  widths: '365, 550, 730, 1100, 1460',
+                  loading: 'eager',
+                  cover: true
+                -%}
+              </div>
             </div>
           </div>
         {%- endif -%}
       </div>
-    </product-images>
+    </product-images-swiper>
 
     <div class="product-quick-add__form">
       <div class="product-quick-add__form__inner" data-form-wrapper>
