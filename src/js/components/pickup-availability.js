@@ -73,12 +73,9 @@ if (!customElements.get('pickup-availability')) {
           document.querySelector('pickup-availability-drawer').classList.add(colorClass);
         });
 
-        const button = this.querySelector('button');
-
-        if (button)
-          button.addEventListener('click', () => {
-            document.querySelector('pickup-availability-drawer popup-component').popupOpen();
-          });
+        this.querySelector('button')?.addEventListener('click', () => {
+          document.querySelector('pickup-availability-drawer popup-component').popupOpen();
+        });
       }
     }
   );

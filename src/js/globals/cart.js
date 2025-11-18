@@ -1285,8 +1285,8 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   updateDiscount() {
-    const discountButton = this.cart.querySelector(selectors.discountButton);
-    const discountField = this.cart.querySelector(selectors.discountField);
+    const discountButton = this.cart?.querySelector(selectors.discountButton);
+    const discountField = this.cart?.querySelector(selectors.discountField);
 
     if (discountButton && discountField) {
       discountButton.addEventListener('click', (e) => {
