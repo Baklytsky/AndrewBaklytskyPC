@@ -47,45 +47,6 @@
   assign instant_add = instant_add | default: false
   assign render_quick_add_template = false
 
-  if upsell_product == blank
-    assign show_upsell = false
-    assign upsell_error = true
-  endif
-
-  if request.design_mode or upsell_product != blank
-    assign show_upsell = true
-  endif
-
-  assign upsell_variant = upsell_product.selected_or_first_available_variant
-  assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.featured_media.preview_image
-
-  assign unique_id = unique_id | default: section.id
-  assign section_id = unique_id
-  assign unique = unique_id | append: '-' | append: upsell_product.id
-  assign product_form_id = 'productFormUpsell--' | append: unique
-
-  assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
-
-  assign show_available_upsell_only = show_available_upsell_only | default: false
-  assign all_variants_soldout = true
-
-  for option in upsell_product.options_with_values
-    for option_value in option.values
-      if option_value.available
-        assign all_variants_soldout = false
-        break
-      endif
-    endfor
-  endfor
-
-  if all_variants_soldout
-    assign upsell_quick_add_hide = true
-  endif
-
-  if show_available_upsell_only and all_variants_soldout
-    assign show_upsell = false
-  endif
-
   assign product_title = 'products.general.upsell_error_title' | t
   assign product_info = 'products.general.upsell_error_info' | t
 
@@ -94,6 +55,51 @@
     assign upsell_error = true
     assign product_title = 'products.general.choose_product' | t
     assign product_info = 'products.general.product_info' | t
+  elsif upsell_product == blank
+    assign show_upsell = false
+    assign upsell_error = true
+  else
+    if request.design_mode or upsell_product != blank
+      assign show_upsell = true
+    endif
+
+    assign upsell_variant = upsell_product.selected_or_first_available_variant
+    assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.featured_media.preview_image
+
+    assign unique_id = unique_id | default: section.id
+    assign section_id = unique_id
+    assign unique = unique_id | append: '-' | append: upsell_product.id
+    assign product_form_id = 'productFormUpsell--' | append: unique
+
+    assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
+
+    assign show_available_upsell_only = show_available_upsell_only | default: false
+    assign all_variants_soldout = true
+
+    for option in upsell_product.options_with_values
+      for option_value in option.values
+        if option_value.available
+          assign all_variants_soldout = false
+          break
+        endif
+      endfor
+    endfor
+
+    if all_variants_soldout
+      assign upsell_quick_add_hide = true
+    endif
+
+    if show_available_upsell_only and all_variants_soldout
+      assign show_upsell = false
+    endif
+  endif
+
+  if onboarding
+    assign unique_id = unique_id | default: section.id
+    assign section_id = unique_id
+    assign unique = unique_id | append: '-onboarding'
+    assign product_form_id = 'productFormUpsell--' | append: unique
+    assign sibling_color = blank
   endif
 
   comment
@@ -108,7 +114,7 @@
   assign is_swatch_option = false
   assign single_option = null
 
-  if instant_add and upsell_product.variants.size > 1 and upsell_product.options.size == 1
+  if instant_add and upsell_product != blank and upsell_product.variants.size > 1 and upsell_product.options.size == 1
     assign enable_instant_add = true
     assign single_option = upsell_product.options_with_values.first
 
@@ -164,7 +170,9 @@
       class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
       type="button"
       data-quick-add-btn
-      data-quick-add-modal-handle="{{ upsell_product.handle }}"
+      {%- unless onboarding -%}
+        data-quick-add-modal-handle="{{ upsell_product.handle }}"
+      {%- endunless -%}
     >
       <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
 
@@ -182,7 +190,11 @@
   <quick-add-product>
     <div
       class="{{ holder_classes }}"
-      data-quick-add-holder="{{ upsell_product.id }}"
+      {%- if onboarding -%}
+        data-quick-add-holder="onboarding-{{ unique }}"
+      {%- else -%}
+        data-quick-add-holder="{{ upsell_product.id }}"
+      {%- endif -%}
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
 
@@ -620,7 +632,7 @@
         </div>
       </div>
 
-      {%- if render_quick_add_template -%}
+      {%- if render_quick_add_template and upsell_product != blank -%}
         {%- render 'product-quick-add-modal-template', product_id: upsell_product.id, unique: unique -%}
       {%- endif -%}
     </div>
