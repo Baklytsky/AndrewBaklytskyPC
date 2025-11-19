@@ -387,7 +387,7 @@ if (!customElements.get('product-info')) {
         this.productForm?.toggleSubmitButton(true, window.theme.strings.unavailable);
         this.showSoldoutNotificationButton(false);
 
-        const selectors = ['price', 'Inventory', 'Sku', 'Price-Per-Item', 'Volume-Note', 'Volume', 'Quantity-Rules'].map((id) => `#${id}-${this.dataset.sectionId}`).join(', ');
+        const selectors = ['Price', 'Inventory', 'Sku', 'Price-Per-Item', 'Volume-Note', 'Volume', 'Quantity-Rules'].map((id) => `#${id}-${this.dataset.sectionId}`).join(', ');
         document.querySelectorAll(selectors).forEach(({classList}) => classList.add('hidden'));
       }
 
