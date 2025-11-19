@@ -48,18 +48,19 @@
   assign instant_add = instant_add | default: false
   assign render_quick_add_template = false
 
-  assign product_title = 'products.general.upsell_error_title' | t
-  assign product_info = 'products.general.upsell_error_info' | t
-
   if onboarding
     assign show_upsell = true
-    assign upsell_error = true
+    assign upsell_error = false
     assign product_title = 'products.general.choose_product' | t
     assign product_info = 'products.general.product_info' | t
   elsif upsell_product == blank
     assign show_upsell = false
     assign upsell_error = true
+    assign product_title = 'products.general.upsell_error_title' | t
+    assign product_info = 'products.general.upsell_error_info' | t
   else
+    assign product_title = upsell_product.title | strip_html | escape
+
     if request.design_mode or upsell_product != blank
       assign show_upsell = true
     endif
@@ -148,7 +149,7 @@
 
   capture holder_classes
     echo 'product-upsell__holder'
-    if upsell_error
+    if upsell_error or onboarding
       echo ' product-upsell__holder--onboarding'
     endif
     if is_compact
@@ -199,7 +200,7 @@
 
       <div class="product-upsell{% if upsell_modifier != '' %} {{ upsell_modifier }}{% endif %}">
         <div class="product-upsell__image">
-          {%- if upsell_error -%}
+          {%- if upsell_error or onboarding -%}
             <div
               class="product-upsell__image__thumb svg-placeholder{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
               role="img"
@@ -208,9 +209,9 @@
             </div>
           {%- else -%}
             <a
-              href="{{ upsell_product.url }}"
+              href="{{ upsell_product.url | default: '#' }}"
               class="product-upsell__image__link"
-              aria-label="{{ upsell_product.title | strip_html | escape }}"
+              aria-label="{{ product_title }}"
             >
               <div class="product-upsell__image__thumb{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
                 {%- render 'image',
@@ -235,7 +236,7 @@
 
             <p class="product-upsell__variant-title h4">{{ product_info }}</p>
 
-            {%- if onboarding and upsell_quick_add_hide == false -%}
+            {%- if upsell_quick_add_hide == false -%}
               <div class="product-upsell__actions">
                 <button
                   class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
@@ -246,8 +247,10 @@
               </div>
             {%- endif -%}
           {%- else -%}
-            <a href="{{ upsell_product.url }}" class="product-upsell__link">
-              <p class="product-upsell__title h3">{{ upsell_product.title | strip_html }}</p>
+            <a href="{{ upsell_product.url | default: '#' }}" class="product-upsell__link">
+              <p class="product-upsell__title h3">
+                {{ product_title }}
+              </p>
 
               {%- unless sibling_color == blank or upsell_product.title contains sibling_color -%}
                 <p class="product-upsell__variant-title h4">{{ 'general.siblings.label' | t }}: {{ sibling_color }}</p>
