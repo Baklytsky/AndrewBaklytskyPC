@@ -144,13 +144,14 @@ class CartItems extends HTMLElement {
     this.cartAddEvent = this.cartAddEvent.bind(this);
     this.updateProgress = this.updateProgress.bind(this);
     this.onCartDrawerClose = this.onCartDrawerClose.bind(this);
+    this.onCartDrawerOpen = this.onCartDrawerOpen.bind(this);
 
     // Set global event listeners for "Add to cart" and Announcement bar wheel progress
     document.addEventListener('theme:cart:add', this.cartAddEvent);
     document.addEventListener('theme:announcement:init', this.updateProgress);
 
     if (theme.settings.cartType == 'drawer') {
-      document.addEventListener('theme:cart-drawer:open', this.animateItems);
+      document.addEventListener('theme:cart-drawer:open', this.onCartDrawerOpen);
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
 
@@ -228,6 +229,11 @@ class CartItems extends HTMLElement {
     if (document.documentElement.hasAttribute(attributes.scrollLocked)) {
       document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
     }
+  }
+
+  onCartDrawerOpen(e) {
+    // Animate items
+    this.animateItems(e);
   }
 
   onCartDrawerClose() {
@@ -368,6 +374,30 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Log currently rendered discount codes from the DOM
+   * This is the post-render check that shows what discounts are actually visible in the UI
+   *
+   * @return {Void}
+   */
+  logRenderedDiscounts() {
+    if (!this.cart) return;
+
+    const discountElements = this.cart.querySelectorAll('[data-discount-body],[data-discount-title]');
+    if (discountElements.length === 0) {
+      console.log(`[Cart discounts] Applied: (none)`);
+      return;
+    }
+
+    const renderedDiscounts = Array.from(discountElements)
+      .map((el) => el?.dataset?.discountTitle || el?.dataset?.discountCode)
+      .filter(Boolean);
+
+    if (renderedDiscounts.length > 0) {
+      console.log(`[Cart discounts] ✅ Applied: ${renderedDiscounts.map((discount) => `"${discount}"`).join(', ')}`);
+    }
+  }
+
+  /**
    * Clear discount error message UI
    *
    * @return {Void}
@@ -446,9 +476,12 @@ class CartItems extends HTMLElement {
       if (this.discountErrorMessage) {
         this.discountErrorMessage.classList.remove('hidden');
         this.discountErrorMessage.textContent = window.theme.strings.discount_already_applied;
+        console.log(`[Cart discounts] ❌ "${inputCode}" already applied`);
       }
       return;
     }
+
+    console.log(`[Cart discounts] Attempting to apply: "${inputCode}"`);
 
     const proposedCodes = [...currentCodes, inputCode].join(',');
     this.updateCartDiscounts(proposedCodes, inputCode);
@@ -467,6 +500,8 @@ class CartItems extends HTMLElement {
     const target = String(discountCode || '').toLowerCase();
     const canonical = currentCodes.find((code) => String(code).toLowerCase() === target);
     if (!canonical) return;
+
+    console.log(`[Cart discounts] Removing "${discountCode}"`);
 
     const proposedCodes = currentCodes.filter((code) => code !== canonical).join(',');
     this.updateCartDiscounts(proposedCodes);
@@ -770,6 +805,52 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Collect discount codes from cart state
+   * Builds a complete list of discount codes from cart and line items applications
+   * Matches the Liquid logic in cart-price.liquid
+   *
+   * @param   {Object}  parsedState  Parsed cart state from API
+   * @return  {Void}
+   */
+  logDiscountCodes(parsedState) {
+    let discountCodes = new Set();
+    const discountKeys = new Set();
+
+    // Helper function to check and add unique discounts
+    const addDiscount = (title, type) => {
+      const key = `${title}|${type}`;
+      if (!discountKeys.has(key)) {
+        discountKeys.add(key);
+        discountCodes.add({title, type});
+      }
+    };
+
+    // Get cart-level discount codes
+    if (parsedState.cart_level_discount_applications.length > 0) {
+      parsedState.cart_level_discount_applications.forEach((application) => {
+        if (application.discount_application) {
+          addDiscount(application.discount_application.title, application.discount_application.type);
+        }
+      });
+    }
+
+    // Get line-level discount codes from all items
+    if (parsedState.items.length > 0) {
+      parsedState.items.forEach((item) => {
+        if (item.line_level_discount_allocations.length > 0) {
+          item.line_level_discount_allocations.forEach((allocation) => {
+            addDiscount(allocation.discount_application.title, allocation.discount_application.type);
+          });
+        }
+      });
+    }
+
+    if (discountCodes.size > 0) {
+      console.log('Discount details:', Array.from(discountCodes));
+    }
+  }
+
+  /**
    * Update cart
    *
    * @param   {Object}  updateData
@@ -823,6 +904,7 @@ class CartItems extends HTMLElement {
           return;
         }
 
+        this.logDiscountCodes(parsedState);
         this.getCart();
       })
       .catch((error) => {
@@ -1201,11 +1283,13 @@ class CartItems extends HTMLElement {
         if (this.discountErrorMessage) {
           this.discountErrorMessage.textContent = window.theme.strings.shipping_discounts_at_checkout;
           this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.shipping_discounts_at_checkout}`);
         }
       } else if (this.discountError) {
         if (this.discountErrorMessage) {
           this.discountErrorMessage.textContent = window.theme.strings.discount_not_applicable;
           this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.discount_not_applicable}`);
         }
       } else {
         this.discountErrorMessage?.classList.add('hidden');
@@ -1220,6 +1304,7 @@ class CartItems extends HTMLElement {
     this.updateProgress();
     this.animateItems();
     this.bindDiscountEventListeners();
+    this.logRenderedDiscounts();
 
     document.dispatchEvent(
       new CustomEvent('theme:product:added', {
@@ -1428,6 +1513,14 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
+        try {
+          const parsedState = JSON.parse(state);
+          if (!parsedState.errors) {
+            this.logDiscountCodes(parsedState);
+          }
+        } catch (e) {
+          // If response is not JSON, continue with getCart()
+        }
         this.getCart();
       })
       .catch((error) => {
