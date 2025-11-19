@@ -94,7 +94,6 @@ if (!customElements.get('product-info')) {
 
         // Get quantity directly from the quantity input
         const quantity = this.quantityInput ? parseInt(this.quantityInput.value, 10) : 1;
-
         const productUrl = `${theme.routes.root}products/${this.dataset.productHandle}?section_id=api-live-cart-info&variant=${variantId}`;
 
         fetch(productUrl)
@@ -134,12 +133,20 @@ if (!customElements.get('product-info')) {
         if (!this.quantityForm) return;
 
         this.setQuantityBoundaries();
-        // Update button price when quantity changes
-        this.quantityInput.addEventListener('change', () => this.updateButtonPrice());
-        this.quantityInput.addEventListener('change', () => this.checkLiveCartInfo());
+
+        this.quantityEvents();
+
         if (!this.dataset.originalSection) {
           this.cartUpdateUnsubscriber = subscribe(theme.PUB_SUB_EVENTS.cartUpdate, this.fetchQuantityRules.bind(this));
         }
+      }
+
+      quantityEvents() {
+        if (!this.quantityInput) return;
+
+        // Update button price when quantity changes
+        this.quantityInput.addEventListener('change', () => this.updateButtonPrice());
+        this.quantityInput.addEventListener('change', () => this.checkLiveCartInfo());
       }
 
       disconnectedCallback() {
@@ -302,6 +309,9 @@ if (!customElements.get('product-info')) {
           this.updateURL(productUrl, variant?.id);
           this.updateVariantInputs(variant?.id);
 
+          // Remove error message on variant change
+          this.productForm?.querySelector('[data-cart-errors-container]').classList.remove('is-visible');
+
           if (!variant) {
             this.setUnavailable();
             return;
@@ -343,6 +353,9 @@ if (!customElements.get('product-info')) {
           updateSourceFromDestination('Badges');
           updateSourceFromDestination('Quantity-Form');
 
+          // Reassign quantityInput after DOM updates
+          this.quantityInput = this.querySelector('[data-quantity-input]');
+
           this.updateQuantityRules(this.sectionId, html);
           this.querySelector(`#Quantity-Rules-${this.dataset.sectionId}`)?.classList.remove('hidden');
 
@@ -351,6 +364,10 @@ if (!customElements.get('product-info')) {
 
           // Update variant option image widths after DOM updates
           this.optionImagesWidth();
+
+          // Update quantity handlers after DOM updates
+          this.checkLiveCartInfo();
+          this.quantityEvents();
 
           publish(theme.PUB_SUB_EVENTS.variantChange, {
             data: {
@@ -459,6 +476,18 @@ if (!customElements.get('product-info')) {
           this.quantityInput.removeAttribute('max');
         }
         this.quantityInput.value = min;
+
+        this.quantityInput
+          .closest('quantity-input')
+          ?.querySelector('popout-select')
+          ?.dispatchEvent(
+            new CustomEvent('theme:popout:update', {
+              detail: {
+                value: min,
+              },
+              bubbles: true,
+            })
+          );
 
         publish(theme.PUB_SUB_EVENTS.quantityUpdate, undefined);
         // Ensure button price reflects current quantity boundaries
