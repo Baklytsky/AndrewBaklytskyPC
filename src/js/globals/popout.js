@@ -137,7 +137,10 @@ if (!customElements.get('popout-select')) {
 
             // Trigger variant change if this is a variant selector
             if (this.shouldChangeVariant) {
-              this.triggerVariantChange(link);
+              const variantSelects = this.closest('variant-selects');
+              if (variantSelects) {
+                variantSelects.triggerVariantChange(link.getAttribute('data-variant-id'));
+              }
             }
 
             if (listTargetElement) {
@@ -214,22 +217,6 @@ if (!customElements.get('popout-select')) {
         this.popoutToggle.setAttribute('aria-expanded', false);
         this.toggleListPosition();
         document.body.removeEventListener('click', this.bodyClickEvent);
-      }
-
-      /**
-       * Trigger variant change for popout select
-       * @param {HTMLElement} link - The link that was clicked
-       */
-      triggerVariantChange(link) {
-        if (!link) return;
-        const variantId = link.getAttribute('data-variant-id');
-        const form = this.closest('form');
-        if (!variantId || !form) return;
-        const variantIdInput = form.querySelector('[name="id"]');
-        if (!variantIdInput) return;
-
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
       }
     }
   );

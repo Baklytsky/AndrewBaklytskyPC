@@ -28,6 +28,21 @@ class VariantSelects extends HTMLElement {
 
     return [...selectedNativeDropdowns, ...selectedRadios, ...selectedPopouts].map(({dataset}) => dataset.optionValueId).filter((id) => Boolean(id));
   }
+
+  /**
+   * Trigger variant change by updating the variant ID input in a form
+   * @param {string} variantId - The variant ID to trigger
+   */
+  triggerVariantChange(variantId) {
+    const targetForm = this.closest('form');
+    if (!targetForm || !variantId) return;
+
+    const variantIdInput = targetForm.querySelector('[name="id"]');
+    if (!variantIdInput) return;
+
+    variantIdInput.value = variantId;
+    variantIdInput.dispatchEvent(new Event('change'));
+  }
 }
 
 customElements.define('variant-selects', VariantSelects);
