@@ -27,19 +27,9 @@
   {%- if is_onboarding -%}
     {%- comment -%} Render onboarding products {%- endcomment -%}
     {%- for i in (1..onboarding_count) -%}
-      {%- capture upsell_product -%}
+      <swiper-slide>
         {%- render 'upsell-product', upsell_product: blank, unique_id: block.id, is_compact: true, instant_add: true, onboarding: true -%}
-      {%- endcapture -%}
-
-      {%- if upsell_product != blank -%}
-        {%- if show_slider -%}
-          <swiper-slide>
-            {{- upsell_product -}}
-          </swiper-slide>
-        {%- else -%}
-          {{- upsell_product -}}
-        {%- endif -%}
-      {%- endif -%}
+      </swiper-slide>
     {%- endfor -%}
   {%- else -%}
     {%- for product in block.settings.product_list limit: 3 -%}
@@ -62,9 +52,11 @@
 
 {%- if request.design_mode or product_count > 0 and product_list != blank or is_onboarding -%}
   <div class="cart__widget cart__widget--upsell cart__widget--upsell-horizontal {{ color_scheme }}">
-    {%- if block.settings.title != blank -%}
+    {%- if block.settings.title != blank or show_slider -%}
       <div class="cart__widget__title subheading">
-        <span>{{ block.settings.title }}</span>
+        {% if block.settings.title != blank %}
+          <span>{{ block.settings.title }}</span>
+        {% endif %}
 
         {%- if show_slider -%}
           <div class="swiper-navigation-static">

@@ -8,41 +8,66 @@
 {%- enddoc -%}
 
 {%- liquid
+  assign product_count = block.settings.product_list.count
   assign upsell_auto_open = block.settings.upsell_auto_open
 
+  assign onboarding_count = 3
+  assign is_onboarding = false
+  if product_count == 0 and request.design_mode
+    assign is_onboarding = true
+  endif
+
   capture product_list
-    for product in block.settings.product_list
-      render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, show_available_upsell_only: true
-    endfor
+    if is_onboarding
+      for i in (1..onboarding_count)
+        render 'upsell-product', upsell_product: blank, unique_id: block.id, is_compact: true, show_available_upsell_only: true, onboarding: true
+      endfor
+    else
+      for product in block.settings.product_list
+        render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, show_available_upsell_only: true
+      endfor
+    endif
   endcapture
 -%}
 
 {%- if request.design_mode or block.settings.product_list.count > 0 and product_list != blank -%}
-  <details
-    class="cart__widget cart__widget--products accordion"
-    {% if upsell_auto_open and product_list != blank %}
-      open="true"
-    {% endif %}
-    data-collapsible
-  >
-    <summary class="cart__widget__title subheading" data-collapsible-trigger>
-      {{ block.settings.title }}
-
-      {%- render 'icon-nav-arrow-down' -%}
-    </summary>
-
-    <div
-      class="cart__widget__content"
-      {% if upsell_auto_open and product_list != blank %}
-        style="height: auto;"
-      {% endif %}
-      data-collapsible-body
-    >
-      <div class="cart__widget__content__inner" data-collapsible-content>
-        <div class="cart__widget__products">
-          {{ product_list }}
+  {%- if block.settings.title == blank -%}
+    <div class="cart__widget cart__widget--headless cart__widget--products">
+      <div class="cart__widget__content">
+        <div class="cart__widget__content__inner">
+          <div class="cart__widget__products">
+            {{- product_list -}}
+          </div>
         </div>
       </div>
     </div>
-  </details>
+  {%- else -%}
+    <details
+      class="cart__widget cart__widget--products accordion"
+      {% if upsell_auto_open and product_list != blank %}
+        open="true"
+      {% endif %}
+      data-collapsible
+    >
+      <summary class="cart__widget__title subheading" data-collapsible-trigger>
+        {{ block.settings.title }}
+
+        {%- render 'icon-nav-arrow-down' -%}
+      </summary>
+
+      <div
+        class="cart__widget__content"
+        {% if upsell_auto_open and product_list != blank %}
+          style="height: auto;"
+        {% endif %}
+        data-collapsible-body
+      >
+        <div class="cart__widget__content__inner" data-collapsible-content>
+          <div class="cart__widget__products">
+            {{ product_list }}
+          </div>
+        </div>
+      </div>
+    </details>
+  {%- endif -%}
 {%- endif -%}

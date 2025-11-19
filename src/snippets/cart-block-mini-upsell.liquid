@@ -27,12 +27,8 @@
   {%- if is_onboarding -%}
     {%- comment -%} Render onboarding products {%- endcomment -%}
     {%- for i in (1..onboarding_count) -%}
-      {%- capture upsell_product -%}
-        {%- render 'upsell-product', upsell_product: blank, unique_id: block.id, is_compact: true, is_mini_upsell: true, onboarding: true -%}
-      {%- endcapture -%}
-
       <swiper-slide>
-        {{- upsell_product -}}
+        {%- render 'upsell-product', upsell_product: blank, unique_id: block.id, is_compact: true, is_mini_upsell: true, onboarding: true -%}
       </swiper-slide>
     {%- endfor -%}
   {%- else -%}
