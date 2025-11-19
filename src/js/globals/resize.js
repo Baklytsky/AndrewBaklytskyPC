@@ -5,11 +5,14 @@ window.theme.isMobile = isMobile();
 let lastScale = window.visualViewport ? window.visualViewport.scale : 1;
 
 function dispatch() {
-  document.dispatchEvent(new CustomEvent('theme:resize', {bubbles: true}));
+  // Update isMobile state before dispatching event
+  const currentMediaQuery = isMobile();
+  if (window.theme.isMobile !== currentMediaQuery) {
+    window.theme.isMobile = currentMediaQuery;
+  }
 
   const currentWidth = getWindowWidth();
   const currentHeight = getWindowHeight();
-  const currentMediaQuery = isMobile();
 
   if (window.theme.windowWidth !== currentWidth) {
     document.dispatchEvent(new CustomEvent('theme:resize:width', {bubbles: true}));
@@ -21,9 +24,7 @@ function dispatch() {
     window.theme.windowHeight = currentHeight;
   }
 
-  if (window.theme.isMobile !== currentMediaQuery) {
-    window.theme.isMobile = currentMediaQuery;
-  }
+  document.dispatchEvent(new CustomEvent('theme:resize', {bubbles: true}));
 }
 
 function resizeListener() {
@@ -41,6 +42,7 @@ function resizeListener() {
       }
 
       lastScale = currentScale;
+
       dispatch();
     }, 50)
   );
@@ -55,7 +57,7 @@ function getWindowHeight() {
 }
 
 function isMobile() {
-  return theme.windowWidth < theme.sizes.small;
+  return window.innerWidth < theme.sizes.small;
 }
 
 export default resizeListener;

@@ -1,3 +1,5 @@
+import {Rellax} from '../rellax';
+
 if (!customElements.get('parallax-hero')) {
   customElements.define(
     'parallax-hero',
@@ -21,7 +23,6 @@ if (!customElements.get('parallax-hero')) {
         const imageSelector = this.querySelector('[data-parallax-img]');
         if (!imageSelector) return;
 
-        const Rellax = window.themeRellax?.Rellax || window.Rellax;
         this.rellax = new Rellax(imageSelector, this.defaultOptions);
 
         document.addEventListener('theme:resize', this.refreshEvent);

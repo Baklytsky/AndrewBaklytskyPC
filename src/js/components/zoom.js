@@ -12,8 +12,12 @@ class ZoomImages extends HTMLElement {
       image.addEventListener('click', (e) => {
         e.preventDefault();
 
-        // Don't open Zoom popup if dragging
-        if (image.closest('product-images').classList.contains('is-dragging')) return;
+        // Don't open Zoom popup if Swiper is being dragged
+        const productImages = image.closest('product-images-swiper') || image.closest('product-images');
+        if (productImages) {
+          const swiperContainer = productImages.querySelector('swiper-container');
+          if (swiperContainer?.swiper?.touching) return;
+        }
 
         this.createZoom(index);
 

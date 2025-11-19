@@ -9,6 +9,7 @@
   assign image_size = section.settings.image_size
   assign image_layout = section.settings.image_layout
   assign mobile_image_style = section.settings.mobile_image_style
+  assign enable_zoom = section.settings.enable_zoom
   assign featured_media = current_variant.featured_media | default: product.featured_media
   assign featured_media_aspect_ratio = featured_media.aspect_ratio | default: 1
   assign is_title_linked = true
@@ -31,22 +32,18 @@
     assign variant_image_scroll = false
   endif
 
-  assign show_thumbnails = false
   assign enable_thumbs = false
   assign enable_thumbs_mobile = false
 
   if image_layout == 'thumbnails' or image_layout == 'thumbnails-left' or image_layout == 'thumbnails-right'
     assign enable_thumbs = true
-    assign show_thumbnails = true
   endif
 
   if mobile_image_style == 'thumbs'
-    assign show_thumbnails = true
     assign enable_thumbs_mobile = true
   endif
 
   if product.media.size <= 1
-    assign show_thumbnails = false
     assign enable_thumbs = false
     assign enable_thumbs_mobile = false
   endif
@@ -57,6 +54,11 @@
   assign wrapper_tag = 'div'
   if product_sticky_enable
     assign wrapper_tag = 'product-sticky'
+  endif
+
+  assign slides_tag = 'div'
+  if enable_zoom
+    assign slides_tag = 'zoom-images'
   endif
 
   assign show_buy_buttons = false
@@ -165,59 +167,98 @@
     }
   {%- endstyle -%}
 
-  <script src="{{ 'product-images.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-images-swiper.js' | asset_url }}" defer="defer"></script>
   {%- if product_sticky_enable -%}
     <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- if enable_zoom -%}
+    <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
+  {%- else -%}
+    </div>
   {%- endif -%}
 
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
     <div class="product__wrapper__inner">
       <div class="product__page">
-        <product-images
+        <product-images-swiper
           class="{{ product_images_classlist }}"
+          data-section-id="{{ section.id }}"
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
+          data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"
           {% if enable_thumbs %}
-            data-fader-desktop
+            data-thumbs-enabled
           {% endif %}
           {% if enable_thumbs_mobile %}
-            data-fader-mobile
+            data-thumbs-mobile
           {% endif %}
         >
           {%- if product.media.size > 0 -%}
-            {%- capture product_slides_attributes -%}
-                class="product__slides product-single__photos"
-                style="--featured-media-aspect-ratio: {{ featured_media_aspect_ratio | round: 2 }};"
-                data-product-media-list
-              {%- endcapture -%}
+            <{{ slides_tag }}
+              class="product__slides"
+              style="--featured-media-aspect-ratio: {{ featured_media_aspect_ratio | round: 2 }};"
+            >
+              <div class="swiper">
+                <swiper-container
+                  id="swiper-{{ section.id }}"
+                  class="swiper-wrapper"
+                  effect="fade"
+                  fade-effect-cross-fade="true"
+                  auto-height="true"
+                  {% if enable_thumbs or enable_thumbs_mobile %}
+                    navigation="true"
+                    navigation-prev-el=".product__slides .swiper-button-prev.{{ section.id }}--button"
+                    navigation-next-el=".product__slides .swiper-button-next.{{ section.id }}--button"
+                  {% endif %}
+                  {% if product.media.size <= 1 %}
+                    allow-slide-next="false"
+                    allow-slide-prev="false"
+                  {% endif %}
+                  keyboard="true"
+                  grab-cursor="true"
+                  loop="false"
+                  thumbs-swiper="#swiper-thumbs-{{ section.id }}"
+                >
+                  {%- render 'media',
+                    media: featured_media,
+                    featured_media: featured_media,
+                    enable_video_looping: enable_video_looping,
+                    sectionkey: unique,
+                    image_width: image_width,
+                    cover: true
+                  -%}
 
-            {%- if section.settings.enable_zoom -%}
-              <zoom-images {{ product_slides_attributes }}>
-            {%- else -%}
-              <div {{ product_slides_attributes }}>
-            {%- endif -%}
+                  {%- for media in product.media -%}
+                    {% if media == featured_media %}
+                      {% continue %}
+                    {% endif %}
 
-            {%- for media in product.media -%}
-              {%- render 'media',
-                media: media,
-                featured_media: featured_media,
-                enable_video_looping: enable_video_looping,
-                sectionkey: unique,
-                image_width: image_width,
-                cover: true
-              -%}
-            {%- endfor -%}
+                    {%- render 'media',
+                      media: media,
+                      featured_media: featured_media,
+                      enable_video_looping: enable_video_looping,
+                      sectionkey: unique,
+                      image_width: image_width,
+                      cover: true
+                    -%}
+                  {%- endfor -%}
+                </swiper-container>
 
-            {%- if section.settings.enable_zoom -%}
-              </zoom-images>
-
-              <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
-              <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
-            {%- else -%}
+                {%- if product.media.size > 1 -%}
+                  <div class="{{ section.id }}--button swiper-button-prev" data-aria-controls="swiper-{{ section.id }}">
+                    <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
+                    {%- render 'icon-nav-arrow-left' -%}
+                  </div>
+                  <div class="{{ section.id }}--button swiper-button-next" data-aria-controls="swiper-{{ section.id }}">
+                    <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
+                    {%- render 'icon-nav-arrow-right' -%}
+                  </div>
+                {%- endif -%}
               </div>
-            {%- endif -%}
+            </{{ slides_tag }}>
 
             {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
-            {{ 'model-ui.css' | asset_url | stylesheet_tag }}
             {%- if first_3d_model -%}
               <button
                 class="btn btn--outline btn--black btn--ar product-single__view-in-space"
@@ -232,65 +273,74 @@
               </button>
             {%- endif -%}
 
-            {%- if show_thumbnails -%}
-              <product-thumbs class="product__thumbs">
-                <native-scrollbar>
-                  <div
-                    class="product__thumbs__holder"
-                    data-scrollbar
-                    data-scroll-lock-scrollable
-                    data-thumbs-slider
+            {%- if enable_thumbs or enable_thumbs_mobile -%}
+              <div
+                class="product__thumbs{% if product.media.size < 8 %} thumbs-no-scroll{% endif %}"
+                {% if image_layout == 'thumbnails-left' or image_layout == 'thumbnails-right' %}
+                  data-direction="vertical"
+                {% else %}
+                  data-direction="horizontal"
+                {% endif %}
+              >
+                <div class="swiper">
+                  <swiper-container
+                    id="swiper-thumbs-{{ section.id }}"
+                    class="swiper-wrapper"
+                    {% if image_layout == 'thumbnails-left' or image_layout == 'thumbnails-right' %}
+                      direction="vertical"
+                      slides-per-view="auto"
+                      space-between="15px"
+                    {% else %}
+                      direction="horizontal"
+                      slides-per-view="auto"
+                      space-between="15px"
+                    {% endif %}
+                    free-mode="true"
+                    free-mode-sticky="true"
+                    watch-slides-progress="true"
+                    {% if product.media.size <= 1 %}
+                      allow-slide-next="false"
+                      allow-slide-prev="false"
+                    {% endif %}
                   >
+                    {%- if featured_media -%}
+                      {%- render 'media-thumb', media: featured_media, featured_media: featured_media -%}
+                    {%- endif -%}
+
                     {%- for media in product.media -%}
-                      <div class="product__thumb{% if media == featured_media %} is-active{% endif %}" data-thumb-item>
-                        <a
-                          class="product__thumb__link{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
-                          href="{{ media.preview_image.src | image_url }}"
-                          aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
-                          data-media-id="{{ section.id }}-{{ media.id }}"
-                          data-thumb-link
-                        >
-                          {%- liquid
-                            render 'image', image: media.preview_image, width: 150, height: 150, sizes: '75px', widths: '75, 100, 150, 225, 300', aspect_ratio: 1
+                      {%- if media == featured_media -%}
+                        {%- continue -%}
+                      {%- endif -%}
 
-                            if media.media_type == 'video' or media.media_type == 'external_video'
-                              render 'icon-media-video'
-                            elsif media.media_type == 'model'
-                              render 'icon-media-model'
-                            endif
-                          -%}
-                        </a>
-                      </div>
+                      {%- render 'media-thumb', media: media, featured_media: featured_media -%}
                     {%- endfor -%}
-                  </div>
+                  </swiper-container>
+                </div>
 
-                  <button
-                    type="button"
-                    class="scroll-arrow scroll-arrow--prev"
-                    disabled
-                    data-scrollbar-arrow-prev
-                  >
-                    <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
-                    {%- render 'icon-nav-arrow-left' -%}
-                  </button>
+                <button
+                  type="button"
+                  class="scroll-arrow scroll-arrow--prev product__thumbs__arrow product__thumbs__arrow--prev"
+                  data-thumbs-arrow-prev
+                  disabled
+                >
+                  {%- render 'icon-nav-arrow-left' -%}
+                  <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
+                </button>
 
-                  <button
-                    type="button"
-                    class="scroll-arrow scroll-arrow--next"
-                    disabled
-                    data-scrollbar-arrow-next
-                  >
-                    <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
-                    {%- render 'icon-nav-arrow-right' -%}
-                  </button>
-                </native-scrollbar>
-              </product-thumbs>
-
-              <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
+                <button
+                  type="button"
+                  class="scroll-arrow scroll-arrow--next product__thumbs__arrow product__thumbs__arrow--next"
+                  data-thumbs-arrow-next
+                  disabled
+                >
+                  {%- render 'icon-nav-arrow-right' -%}
+                  <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
+                </button>
+              </div>
             {%- endif -%}
 
             {%- comment -%} Thumbnails template for Photoswipe {%- endcomment -%}
-            {%- if section.settings.enable_zoom -%}
+            {%- if enable_zoom -%}
               <template data-pswp-thumbs-template>
                 {%- liquid
                   assign images = product.media | where: 'media_type', 'image'
@@ -316,7 +366,7 @@
               </div>
             </div>
           {%- endif -%}
-        </product-images>
+        </product-images-swiper>
 
         <div class="product__content">
           <div
@@ -634,11 +684,8 @@
     <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
-  {%- if show_thumbnails -%}
-    <script src="{{ 'product-thumbs.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
-
   {%- if first_3d_model -%}
+    {%- render 'stylesheet', name: 'model-ui.css', async: true -%}
     <script type="application/json" id="ProductJSON-{{ product.id }}">
       {{ product.media | where: 'media_type', 'model' | json }}
     </script>
