@@ -49,6 +49,7 @@ if (!customElements.get('product-card')) {
         });
 
         this.initProductSwapUtility();
+        this.initPopoutHandlers();
       }
 
       disconnectedCallback() {
@@ -178,6 +179,36 @@ if (!customElements.get('product-card')) {
         const computedStyle = getComputedStyle(swatch);
         const swatchOffset = swatch.offsetLeft + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight);
         requestAnimationFrame(() => nativeScrollbar.move(swatchOffset - swatch.clientWidth, 'instant'));
+      }
+
+      initPopoutHandlers() {
+        const popoutSelects = this.querySelectorAll('popout-select');
+
+        popoutSelects.forEach((popoutSelect) => {
+          const popoutToggle = popoutSelect.querySelector('[data-popout-toggle]');
+
+          // watch for aria-expanded changes
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'aria-expanded') {
+                const popoutList = popoutSelect.querySelector('[data-popout-list]');
+                const ariaExpanded = popoutToggle.getAttribute('aria-expanded') === 'true';
+                const productGridItemImage = this.querySelector('[data-product-image]');
+
+                if (productGridItemImage) {
+                  productGridItemImage.classList.toggle('is-visible', !ariaExpanded);
+                }
+
+                popoutList.style.maxHeight = `${Math.abs(popoutToggle.getBoundingClientRect().bottom - this.getBoundingClientRect().bottom)}px`;
+              }
+            });
+          });
+
+          observer.observe(popoutToggle, {
+            attributes: true,
+            attributeFilter: ['aria-expanded'],
+          });
+        });
       }
     }
   );

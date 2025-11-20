@@ -9,13 +9,16 @@ if (!customElements.get('popout-select')) {
       }
 
       connectedCallback() {
+        // Prevent duplicate initialization
+        if (this.hasAttribute('data-popout-initialized')) return;
+        this.setAttribute('data-popout-initialized', 'true');
+
         this.popoutList = this.querySelector('[data-popout-list]');
         this.popoutToggle = this.querySelector('[data-popout-toggle]');
         this.popoutToggleText = this.querySelector('[data-popout-toggle-text]');
         this.popoutInput = this.querySelector('[data-popout-input]') || this.parentNode.querySelector('[data-popout-input]') || this.parentNode.parentNode.querySelector('[data-quantity-input]');
 
         this.popoutOptions = this.querySelectorAll('[data-popout-option]');
-        this.productGridItem = this.popoutList.closest('[data-grid-item]');
         this.fireSubmitEvent = this.hasAttribute('submit');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
@@ -40,16 +43,6 @@ if (!customElements.get('popout-select')) {
         const button = evt.currentTarget;
         const ariaExpanded = button.getAttribute('aria-expanded') === 'true';
 
-        if (this.productGridItem) {
-          const productGridItemImage = this.productGridItem.querySelector('[data-product-image]');
-
-          if (productGridItemImage) {
-            productGridItemImage.classList.toggle('is-visible', !ariaExpanded);
-          }
-
-          this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
-        }
-
         evt.currentTarget.setAttribute('aria-expanded', !ariaExpanded);
         this.popoutList.classList.toggle('popout-list--visible');
         this.popupListSetDimensions();
@@ -59,6 +52,8 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupToggleFocusout(evt) {
+        if (!document.body.classList.contains('is-focused')) return;
+
         const popoutLostFocus = this.contains(evt.relatedTarget);
 
         if (!popoutLostFocus) {
@@ -67,6 +62,8 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupListFocusout(evt) {
+        if (!document.body.classList.contains('is-focused')) return;
+
         const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
         const isVisible = this.popoutList.classList.contains('popout-list--visible');
 
@@ -78,19 +75,22 @@ if (!customElements.get('popout-select')) {
       toggleListPosition() {
         const button = this.querySelector('[data-popout-toggle]');
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
+        const isInDrawer = this.closest('cart-drawer');
 
         const removeTopClass = () => {
           if (button.getAttribute('aria-expanded') !== 'true') {
-            this.popoutList.classList.remove('popout-list--top');
+            // Don't remove the class if inside the cart drawer to prevent excess scrollbar
+            // Even though `select-popout__list`is absolute, it extends the scrollable container and creates a scrollbar inside the drawer body
+            if (!isInDrawer) {
+              this.popoutList.classList.remove('popout-list--top');
+            }
           }
 
           this.popoutList.removeEventListener('transitionend', removeTopClass);
         };
 
         if (button.getAttribute('aria-expanded') === 'true') {
-          if (theme.windowHeight / 2 < popoutTop) {
-            this.popoutList.classList.add('popout-list--top');
-          }
+          this.popoutList.classList.toggle('popout-list--top', theme.windowHeight / 2 < popoutTop);
         } else {
           this.popoutList.addEventListener('transitionend', removeTopClass);
         }
@@ -109,20 +109,23 @@ if (!customElements.get('popout-select')) {
       popupOptionsClick(evt) {
         const link = evt.target.closest('[data-popout-option]');
 
-        if (link.attributes.href.value === '#') {
+        if (link && link.attributes.href.value === '#') {
           evt.preventDefault();
 
-          const attrValue = evt.currentTarget.hasAttribute('data-value') ? evt.currentTarget.getAttribute('data-value') : '';
+          const attrValue = link.hasAttribute('data-value') ? link.getAttribute('data-value') : '';
 
           this.popoutInput.value = attrValue;
 
           // Sync option metadata onto the hidden input so downstream logic can read it
-          const listItem = evt.currentTarget.closest('li');
+          const listItem = link.closest('li');
           if (listItem) {
             const optionValueId = listItem.getAttribute('data-option-value-id');
             const productUrl = listItem.getAttribute('data-product-url');
+            const variantId = link.getAttribute('data-variant-id');
             if (optionValueId) this.popoutInput.setAttribute('data-option-value-id', optionValueId);
             if (productUrl) this.popoutInput.setAttribute('data-product-url', productUrl);
+            // set the variant ID on the hidden input so it can be used to trigger a variant change in 'variant-selects' elements' methods
+            if (variantId) this.popoutInput.setAttribute('data-variant-id', variantId);
           }
 
           if (this.popoutInput.disabled) {
@@ -143,8 +146,9 @@ if (!customElements.get('popout-select')) {
 
             this.changeStates(currentTarget);
             this.updateButtonText(attrValue);
-            this.onPopupToggleFocusout(evt);
-            this.onPopupListFocusout(evt);
+
+            // Close the dropdown after selection
+            this._hideList();
           }
         }
       }

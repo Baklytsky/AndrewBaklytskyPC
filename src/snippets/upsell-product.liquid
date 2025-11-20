@@ -41,59 +41,67 @@
   assign upsell_quick_add_hide = upsell_quick_add_hide | default: false
   assign upsell_description = upsell_description | default: ''
   assign upsell_description_font_size = upsell_description_font_size | default: ''
+  assign onboarding = onboarding | default: false
   assign is_compact = is_compact | default: false
   assign is_mini_upsell = is_mini_upsell | default: false
   assign is_vertical = is_vertical | default: false
   assign instant_add = instant_add | default: false
   assign render_quick_add_template = false
 
-  if upsell_product == blank
-    assign show_upsell = false
-    assign upsell_error = true
-  endif
-
-  if request.design_mode or upsell_product != blank
-    assign show_upsell = true
-  endif
-
-  assign upsell_variant = upsell_product.selected_or_first_available_variant
-  assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.featured_media.preview_image
-
-  assign unique_id = unique_id | default: section.id
-  assign section_id = unique_id
-  assign unique = unique_id | append: '-' | append: upsell_product.id
-  assign product_form_id = 'ProductFormUpsell-' | append: section_id
-
-  assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
-
-  assign show_available_upsell_only = show_available_upsell_only | default: false
-  assign all_variants_soldout = true
-
-  for option in upsell_product.options_with_values
-    for option_value in option.values
-      if option_value.available
-        assign all_variants_soldout = false
-        break
-      endif
-    endfor
-  endfor
-
-  if all_variants_soldout
-    assign upsell_quick_add_hide = true
-  endif
-
-  if show_available_upsell_only and all_variants_soldout
-    assign show_upsell = false
-  endif
-
-  assign product_title = 'products.general.upsell_error_title' | t
-  assign product_info = 'products.general.upsell_error_info' | t
-
   if onboarding
     assign show_upsell = true
-    assign upsell_error = true
+    assign upsell_error = false
     assign product_title = 'products.general.choose_product' | t
     assign product_info = 'products.general.product_info' | t
+  elsif upsell_product == blank
+    assign show_upsell = false
+    assign upsell_error = true
+    assign product_title = 'products.general.upsell_error_title' | t
+    assign product_info = 'products.general.upsell_error_info' | t
+  else
+    assign product_title = upsell_product.title | strip_html | escape
+
+    if request.design_mode or upsell_product != blank
+      assign show_upsell = true
+    endif
+
+    assign upsell_variant = upsell_product.selected_or_first_available_variant
+    assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.featured_media.preview_image
+
+    assign unique_id = unique_id | default: section.id
+    assign section_id = unique_id
+    assign unique = unique_id | append: '-' | append: upsell_product.id
+    assign product_form_id = 'ProductFormUpsell--' | append: unique
+
+    assign sibling_color = upsell_product.metafields.theme.sibling_color.value | default: upsell_product.metafields.theme.sibling_colour.value | default: upsell_product.metafields.theme.siblings_color.value | default: upsell_product.metafields.theme.siblings_colour.value | default: upsell_product.metafields.theme.siblings_colors.value | default: upsell_product.metafields.theme.siblings_colours.value
+
+    assign show_available_upsell_only = show_available_upsell_only | default: false
+    assign all_variants_soldout = true
+
+    for option in upsell_product.options_with_values
+      for option_value in option.values
+        if option_value.available
+          assign all_variants_soldout = false
+          break
+        endif
+      endfor
+    endfor
+
+    if all_variants_soldout
+      assign upsell_quick_add_hide = true
+    endif
+
+    if show_available_upsell_only and all_variants_soldout
+      assign show_upsell = false
+    endif
+  endif
+
+  if onboarding
+    assign unique_id = unique_id | default: section.id
+    assign section_id = unique_id
+    assign unique = unique_id | append: '-onboarding'
+    assign product_form_id = 'ProductFormUpsell--' | append: unique
+    assign sibling_color = blank
   endif
 
   comment
@@ -108,7 +116,7 @@
   assign is_swatch_option = false
   assign single_option = null
 
-  if instant_add and upsell_product.variants.size > 1 and upsell_product.options.size == 1
+  if instant_add and upsell_product != blank and upsell_product.variants.size > 1 and upsell_product.options.size == 1
     assign enable_instant_add = true
     assign single_option = upsell_product.options_with_values.first
 
@@ -141,7 +149,7 @@
 
   capture holder_classes
     echo 'product-upsell__holder'
-    if upsell_error
+    if upsell_error or onboarding
       echo ' product-upsell__holder--onboarding'
     endif
     if is_compact
@@ -161,10 +169,12 @@
 {%- if show_upsell -%}
   {%- capture open_quick_add_drawer_button -%}
     <button
-      class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+      class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
       type="button"
       data-quick-add-btn
-      data-quick-add-modal-handle="{{ upsell_product.handle }}"
+      {% unless onboarding %}
+        data-quick-add-modal-handle="{{ upsell_product.handle }}"
+      {% endunless %}
     >
       <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
 
@@ -182,13 +192,15 @@
   <quick-add-product>
     <div
       class="{{ holder_classes }}"
-      data-quick-add-holder="{{ upsell_product.id }}"
+      {% unless onboarding %}
+        data-quick-add-holder="{{ upsell_product.id }}"
+      {% endunless %}
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
 
       <div class="product-upsell{% if upsell_modifier != '' %} {{ upsell_modifier }}{% endif %}">
         <div class="product-upsell__image">
-          {%- if upsell_error -%}
+          {%- if upsell_error or onboarding -%}
             <div
               class="product-upsell__image__thumb svg-placeholder{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
               role="img"
@@ -197,9 +209,9 @@
             </div>
           {%- else -%}
             <a
-              href="{{ upsell_product.url }}"
+              href="{{ upsell_product.url | default: '#' }}"
               class="product-upsell__image__link"
-              aria-label="{{ upsell_product.title | strip_html | escape }}"
+              aria-label="{{ product_title }}"
             >
               <div class="product-upsell__image__thumb{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
                 {%- render 'image',
@@ -224,10 +236,10 @@
 
             <p class="product-upsell__variant-title h4">{{ product_info }}</p>
 
-            {%- if onboarding and upsell_quick_add_hide == false -%}
+            {%- if upsell_quick_add_hide == false -%}
               <div class="product-upsell__actions">
                 <button
-                  class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                  class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
                   type="button"
                 >
                   <span class="btn__text" data-add-to-cart-text>{{ upsell_button_text }}</span>
@@ -235,8 +247,10 @@
               </div>
             {%- endif -%}
           {%- else -%}
-            <a href="{{ upsell_product.url }}" class="product-upsell__link">
-              <p class="product-upsell__title h3">{{ upsell_product.title | strip_html }}</p>
+            <a href="{{ upsell_product.url | default: '#' }}" class="product-upsell__link">
+              <p class="product-upsell__title h3">
+                {{ product_title }}
+              </p>
 
               {%- unless sibling_color == blank or upsell_product.title contains sibling_color -%}
                 <p class="product-upsell__variant-title h4">{{ 'general.siblings.label' | t }}: {{ sibling_color }}</p>
@@ -321,7 +335,7 @@
                   data-product-form: '',
                   data-instant-add-form: ''
                 -%}
-                  <input type="hidden" name="id" value="{{ upsell_variant.id }}">
+                  <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
 
                   {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
                   <input
@@ -383,9 +397,18 @@
                                 endfor
                               endfor
 
-                              assign variant_image_url = ''
-                              if variant_for_value.featured_image
-                                assign variant_image_url = variant_for_value.featured_image | image_url: width: 208
+                              comment
+                                Get variant image, fallback to product image if variant has no image
+                              endcomment
+                              assign variant_image = null
+                              if variant_for_value
+                                if variant_for_value.featured_media
+                                  assign variant_image = variant_for_value.featured_media.preview_image | image_url: width: 208
+                                else
+                                  assign variant_image = upsell_product.featured_media.preview_image | image_url: width: 208
+                                endif
+                              else
+                                assign variant_image = upsell_product.featured_media.preview_image | image_url: width: 208
                               endif
                             -%}
 
@@ -406,8 +429,12 @@
                                   name="options[{{ single_option.name | escape }}]-{{ unique }}"
                                   value="{{ value | escape }}"
                                   id="{{ input_id }}"
-                                  data-variant-id="{{ variant_for_value.id }}"
-                                  data-variant-image="{{ variant_image_url }}"
+                                  {%- if variant_for_value -%}
+                                    data-variant-id="{{ variant_for_value.id }}"
+                                  {%- endif -%}
+                                  {%- if variant_image -%}
+                                    data-variant-image="{{ variant_image }}"
+                                  {%- endif -%}
                                   data-product-handle="{{ upsell_product.handle }}"
                                   {% if value == upsell_variant.options[0] %}
                                     checked
@@ -521,7 +548,7 @@
                   <div class="product-upsell__actions">
                     <button
                       id="ProductSubmitButton-{{ section_id }}"
-                      class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                      class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
                       type="submit"
                       name="add"
                       data-quick-add-btn
@@ -573,7 +600,7 @@
 
                       <button
                         id="ProductSubmitButton-{{ section_id }}"
-                        class="product-upsell__btn btn btn--medium btn--primary btn--outline"
+                        class="product-upsell__btn btn btn--medium btn--secondary btn--outline"
                         type="submit"
                         name="add"
                         data-quick-add-btn
@@ -607,7 +634,7 @@
         </div>
       </div>
 
-      {%- if render_quick_add_template -%}
+      {%- if render_quick_add_template and onboarding == false -%}
         {%- render 'product-quick-add-modal-template', product_id: upsell_product.id, unique: unique -%}
       {%- endif -%}
     </div>

@@ -9,7 +9,7 @@
 {% endcomment %}
 
 {%- liquid
-  assign custom_message_text = block.settings.cart_custom_message_text
+  assign custom_message_text = block.settings.cart_message_text
   assign custom_message_link_text = block.settings.link_text
   assign modifier = modifier | default: ''
 -%}
@@ -19,7 +19,7 @@
     class="cart__message{% if custom_message_link_text != blank %} cart__message--link{% endif %} color-{{ block.settings.color_scheme }} {{ block.settings.align_text }} {{ block.settings.text_font_size }}{% if modifier != '' %} {{ modifier }}{% endif %}"
   >
     {%- if custom_message_text != blank -%}
-      {{ block.settings.cart_custom_message_text }}
+      <p class="subheading">{{ block.settings.cart_message_text }}</p>
     {%- endif -%}
 
     {%- if custom_message_link_text != blank -%}

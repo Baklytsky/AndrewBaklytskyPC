@@ -134,17 +134,6 @@ class CartItems extends HTMLElement {
 
     // Discounts
     if (this.hasDiscountBlock) {
-      this.discountButton.addEventListener('click', (event) => {
-        event.preventDefault();
-
-        const newDiscountCode = this.discountInput.value.trim();
-        this.discountInput.value = '';
-
-        if (newDiscountCode) {
-          this.applyDiscount(newDiscountCode);
-        }
-      });
-
       // Fill existing discount codes and bind event listeners
       this.bindDiscountEventListeners();
     }
@@ -155,13 +144,14 @@ class CartItems extends HTMLElement {
     this.cartAddEvent = this.cartAddEvent.bind(this);
     this.updateProgress = this.updateProgress.bind(this);
     this.onCartDrawerClose = this.onCartDrawerClose.bind(this);
+    this.onCartDrawerOpen = this.onCartDrawerOpen.bind(this);
 
     // Set global event listeners for "Add to cart" and Announcement bar wheel progress
     document.addEventListener('theme:cart:add', this.cartAddEvent);
     document.addEventListener('theme:announcement:init', this.updateProgress);
 
     if (theme.settings.cartType == 'drawer') {
-      document.addEventListener('theme:cart-drawer:open', this.animateItems);
+      document.addEventListener('theme:cart-drawer:open', this.onCartDrawerOpen);
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
 
@@ -215,12 +205,14 @@ class CartItems extends HTMLElement {
     this.showCannotAddMoreInCart = false;
     this.cartUpdateFailed = false;
     this.discountError = false;
+    this.shippingDiscountError = false;
+    this.pendingDiscountCheck = null;
+    this.activeDiscountFetch = null;
 
     // Cart Events
     this.cartEvents();
     this.cartRemoveEvents();
     this.cartUpdateEvents();
-    this.updateDiscount();
 
     document.addEventListener('theme:product:add', this.productAddCallback);
     document.addEventListener('theme:product:add-error', this.productAddCallback);
@@ -237,6 +229,11 @@ class CartItems extends HTMLElement {
     if (document.documentElement.hasAttribute(attributes.scrollLocked)) {
       document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
     }
+  }
+
+  onCartDrawerOpen(e) {
+    // Animate items
+    this.animateItems(e);
   }
 
   onCartDrawerClose() {
@@ -259,7 +256,7 @@ class CartItems extends HTMLElement {
     });
 
     if (this.hasDiscountBlock) {
-      this.discountErrorMessage?.classList.add('hidden');
+      this.clearDiscountErrors();
     }
   }
 
@@ -377,66 +374,180 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Bind event listeners for discount elements
+   * Log currently rendered discount codes from the DOM
+   * This is the post-render check that shows what discounts are actually visible in the UI
+   *
+   * @return {Void}
+   */
+  logRenderedDiscounts() {
+    if (!this.cart) return;
+
+    const discountElements = this.cart.querySelectorAll('[data-discount-body],[data-discount-title]');
+    if (discountElements.length === 0) {
+      console.log(`[Cart discounts] Applied: (none)`);
+      return;
+    }
+
+    const renderedDiscounts = Array.from(discountElements)
+      .map((el) => el?.dataset?.discountTitle || el?.dataset?.discountCode)
+      .filter(Boolean);
+
+    if (renderedDiscounts.length > 0) {
+      console.log(`[Cart discounts] ✅ Applied: ${renderedDiscounts.map((discount) => `"${discount}"`).join(', ')}`);
+    }
+  }
+
+  /**
+   * Clear discount error message UI
+   *
+   * @return {Void}
+   */
+  clearDiscountErrors() {
+    if (this.discountErrorMessage) {
+      this.discountErrorMessage.classList.add('hidden');
+      this.discountErrorMessage.textContent = '';
+    }
+    this.discountError = false;
+    this.shippingDiscountError = false;
+    this.pendingDiscountCheck = null;
+  }
+
+  /**
+   * Bind event listeners for discount elements.
+   * This includes applying, removing, and clearing errors on UI interaction.
    *
    * @return  {Void}
    */
   bindDiscountEventListeners() {
     if (!this.hasDiscountBlock) return;
 
-    this.discounts = document.querySelectorAll(selectors.discountBody);
+    // Apply new discount
+    if (this.discountButton) {
+      this.discountButton.addEventListener('click', (event) => {
+        event.preventDefault();
 
-    this.discounts.forEach((discount) => {
+        const newDiscountCode = this.discountInput.value.trim();
+        this.discountInput.value = '';
+
+        if (newDiscountCode) {
+          this.applyDiscount(newDiscountCode);
+        }
+      });
+    }
+
+    // Remove existing discount (bind only; do not mutate local code list)
+    document.querySelectorAll(selectors.discountBody)?.forEach((discount) => {
       const discountCode = discount.dataset.discountCode;
 
-      if (!this.existingDiscountCodes.includes(discountCode)) {
-        this.existingDiscountCodes.push(discountCode);
-      }
-
       // Add event listener to remove discount
-      const removeButton = discount.querySelector(selectors.removeDiscount);
-      if (removeButton) {
-        // Remove existing listener to prevent duplicates
-        removeButton.removeEventListener('click', this.handleRemoveDiscount);
-
-        // Add new listener
-        removeButton.addEventListener('click', (event) => {
-          event.preventDefault();
-          this.removeDiscount(discountCode);
-        });
-      }
+      discount.querySelector(selectors.removeDiscount)?.addEventListener('click', (event) => {
+        event.preventDefault();
+        this.removeDiscount(discountCode);
+      });
     });
+
+    // Clear error messages on user interaction
+    if (this.discountInput) {
+      if (this.onDiscountInputChange) {
+        this.discountInput.removeEventListener('input', this.onDiscountInputChange);
+      }
+      this.onDiscountInputChange = () => this.clearDiscountErrors();
+      this.discountInput.addEventListener('input', this.onDiscountInputChange);
+    }
   }
 
-  applyDiscount(discountCode) {
-    if (this.existingDiscountCodes.includes(discountCode)) {
-      this.discountErrorMessage.classList.remove('hidden');
-      this.discountErrorMessage.textContent = window.theme.strings.discount_already_applied;
+  /**
+   * Apply a discount code to the cart.
+   * - Reads current applied codes from /cart.js to avoid stale state
+   * - Prevents duplicate submissions
+   *
+   * @param {string} discountCode - The code entered by the customer
+   * @return {Promise<void>}
+   */
+  async applyDiscount(discountCode) {
+    const inputCode = String(discountCode || '').trim();
+    if (!inputCode) return;
+
+    const currentCodes = await this.getExistingDiscountCodes();
+    const lowerInput = inputCode.toLowerCase();
+    const hasDuplicate = [...currentCodes, ...this.existingDiscountCodes].some((code) => String(code).toLowerCase() === lowerInput);
+
+    if (hasDuplicate) {
+      if (this.discountErrorMessage) {
+        this.discountErrorMessage.classList.remove('hidden');
+        this.discountErrorMessage.textContent = window.theme.strings.discount_already_applied;
+        console.log(`[Cart discounts] ❌ "${inputCode}" already applied`);
+      }
       return;
     }
 
-    this.existingDiscountCodes.push(discountCode);
-    this.updateCartDiscounts(this.existingDiscountCodes.join(','));
+    console.log(`[Cart discounts] Attempting to apply: "${inputCode}"`);
+
+    const proposedCodes = [...currentCodes, inputCode].join(',');
+    this.updateCartDiscounts(proposedCodes, inputCode);
   }
 
-  removeDiscount(discountCode) {
-    if (!this.existingDiscountCodes.includes(discountCode)) return;
+  /**
+   * Remove a discount code from the cart.
+   * - Reads current applied codes from /cart.js
+   * - Submits the remaining codes to the cart update endpoint
+   *
+   * @param {string} discountCode - The code to remove
+   * @return {Promise<void>}
+   */
+  async removeDiscount(discountCode) {
+    const currentCodes = await this.getExistingDiscountCodes();
+    const target = String(discountCode || '').toLowerCase();
+    const canonical = currentCodes.find((code) => String(code).toLowerCase() === target);
+    if (!canonical) return;
 
-    this.existingDiscountCodes = this.existingDiscountCodes.filter((code) => code !== discountCode);
-    this.updateCartDiscounts(this.existingDiscountCodes.join(','));
+    console.log(`[Cart discounts] Removing "${discountCode}"`);
+
+    const proposedCodes = currentCodes.filter((code) => code !== canonical).join(',');
+    this.updateCartDiscounts(proposedCodes);
   }
 
-  updateCartDiscounts(discountString) {
-    const lastAttemptedDiscount = discountString
-      .split(',')
-      .filter((c) => c)
-      .pop()
-      ?.trim();
+  /**
+   * Create or replace the AbortController used for discount update requests.
+   * Aborts any in-flight submission so the latest attempt is authoritative.
+   *
+   * @return {AbortController}
+   */
+  createDiscountAbortController() {
+    if (this.activeDiscountFetch) {
+      this.activeDiscountFetch.abort();
+    }
+    this.activeDiscountFetch = new AbortController();
+    return this.activeDiscountFetch;
+  }
 
-    this.disableCartButtons();
-    this.discountErrorMessage.classList.add('hidden');
+  /**
+   * Get currently applied discount codes from the Cart API (GET /cart.js).
+   * Returns only codes that Shopify marks as applicable; falls back to in-memory state on error.
+   *
+   * @return {Promise<string[]>}
+   */
+  async getExistingDiscountCodes() {
+    try {
+      const response = await fetch(`${window.Shopify.routes.root}cart.js`, {headers: {Accept: 'application/json'}});
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const cart = await response.json();
+      const raw = Array.isArray(cart.discount_codes) ? cart.discount_codes : [];
+      return raw.filter((d) => d.applicable).map((d) => d.code);
+    } catch (e) {
+      return Array.isArray(this.existingDiscountCodes) ? this.existingDiscountCodes.slice() : [];
+    }
+  }
 
-    fetch(window.theme.routes.cart_update_url, {
+  /**
+   * POST discount update to Shopify's cart update endpoint and parse result.
+   *
+   * @param {string} discountString - CSV of discount codes to attempt
+   * @param {AbortSignal} [signal] - Optional abort signal for in-flight cancellation
+   * @return {Promise<{data: any, appliedCodes: string[]}>}
+   */
+  async updateAndParse(discountString, signal) {
+    const response = await fetch(window.theme.routes.cart_update_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -445,40 +556,77 @@ class CartItems extends HTMLElement {
       body: JSON.stringify({
         discount: discountString,
       }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.text();
-      })
-      .then((text) => {
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error('Failed to parse cart update response:', text);
-          throw new Error('Invalid JSON response from server.');
-        }
+      signal,
+    });
 
-        if (lastAttemptedDiscount) {
-          const wasApplied = data.discount_codes && Array.isArray(data.discount_codes) && data.discount_codes.some((d) => d.code === lastAttemptedDiscount && d.applicable);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-          if (!wasApplied) {
-            this.discountError = true;
-            this.existingDiscountCodes = this.existingDiscountCodes.filter((code) => code !== lastAttemptedDiscount);
-          } else {
-            this.discountError = false;
-          }
-        } else {
-          this.discountError = false;
-        }
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      const rawCodes = Array.isArray(data.discount_codes) ? data.discount_codes : [];
+      const appliedCodes = rawCodes.filter((d) => d.applicable).map((d) => d.code);
+      return {data, appliedCodes};
+    } catch (e) {
+      console.error('Failed to parse cart update response:', text);
+      throw new Error('Invalid JSON response from server.');
+    }
+  }
 
-        this.getCart();
-      })
-      .catch((error) => {
+  /**
+   * Make a cart discount update and refresh UI.
+   * - Disables inputs, shows loading, and uses an AbortController
+   * - Sets discountError when attemptedCode is present and not applicable
+   * - Syncs local state from server and triggers a cart re-render
+   *
+   * @param {string} discountString - CSV of codes to set on the cart
+   * @param {string|null} attemptedCode - Code the user just tried to add (for UX messaging)
+   * @return {Promise<void>}
+   */
+  async updateCartDiscounts(discountString, attemptedCode = null) {
+    this.disableCartButtons();
+    this.addLoadingClass();
+    this.discountError = false;
+    this.shippingDiscountError = false;
+    const abortController = this.createDiscountAbortController();
+
+    try {
+      // Capture currently visible discount codes rendered by Liquid (shipping codes are not rendered)
+      const visibleCodesBefore = Array.from(document.querySelectorAll(selectors.discountBody))
+        .map((el) => el?.dataset?.discountCode)
+        .filter(Boolean);
+
+      const {data, appliedCodes} = await this.updateAndParse(discountString, abortController.signal);
+      if (attemptedCode) {
+        const attempted = (Array.isArray(data.discount_codes) ? data.discount_codes : []).find((d) => d.code === attemptedCode);
+        this.discountError = Boolean(attempted && attempted.applicable === false);
+        const attemptedApplicable = Boolean(attempted && attempted.applicable === true);
+        const codeIncluded = appliedCodes.some((c) => String(c).toLowerCase() === String(attemptedCode).toLowerCase());
+        // Defer detection to after the UI re-renders
+        this.pendingDiscountCheck = {
+          attemptedCode,
+          attemptedApplicable,
+          codeIncluded,
+          visibleCodesBefore,
+        };
+      } else {
+        this.discountError = false;
+      }
+
+      this.existingDiscountCodes = appliedCodes;
+      this.getCart();
+    } catch (error) {
+      // Silently ignore aborted discount requests to avoid noisy logs and stale refreshes
+      const isAbortError = error && (error.name === 'AbortError' || (typeof error.message === 'string' && error.message.toLowerCase().includes('abort')));
+      if (!isAbortError) {
         console.log(error);
-      });
+        this.getCart(); // Sync cart state on non-abort errors
+      }
+    } finally {
+      this.activeDiscountFetch = null;
+      this.removeLoadingClass();
+      this.enableCartButtons();
+    }
   }
 
   /**
@@ -657,6 +805,52 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Collect discount codes from cart state
+   * Builds a complete list of discount codes from cart and line items applications
+   * Matches the Liquid logic in cart-price.liquid
+   *
+   * @param   {Object}  parsedState  Parsed cart state from API
+   * @return  {Void}
+   */
+  logDiscountCodes(parsedState) {
+    let discountCodes = new Set();
+    const discountKeys = new Set();
+
+    // Helper function to check and add unique discounts
+    const addDiscount = (title, type) => {
+      const key = `${title}|${type}`;
+      if (!discountKeys.has(key)) {
+        discountKeys.add(key);
+        discountCodes.add({title, type});
+      }
+    };
+
+    // Get cart-level discount codes
+    if (parsedState.cart_level_discount_applications.length > 0) {
+      parsedState.cart_level_discount_applications.forEach((application) => {
+        if (application.discount_application) {
+          addDiscount(application.discount_application.title, application.discount_application.type);
+        }
+      });
+    }
+
+    // Get line-level discount codes from all items
+    if (parsedState.items.length > 0) {
+      parsedState.items.forEach((item) => {
+        if (item.line_level_discount_allocations.length > 0) {
+          item.line_level_discount_allocations.forEach((allocation) => {
+            addDiscount(allocation.discount_application.title, allocation.discount_application.type);
+          });
+        }
+      });
+    }
+
+    if (discountCodes.size > 0) {
+      console.log('Discount details:', Array.from(discountCodes));
+    }
+  }
+
+  /**
    * Update cart
    *
    * @param   {Object}  updateData
@@ -710,6 +904,7 @@ class CartItems extends HTMLElement {
           return;
         }
 
+        this.logDiscountCodes(parsedState);
         this.getCart();
       })
       .catch((error) => {
@@ -741,6 +936,28 @@ class CartItems extends HTMLElement {
       );
 
     item.classList.remove(classes.loading);
+  }
+
+  /**
+   * Add loading class to cart
+   *
+   * @return  {Void}
+   */
+  addLoadingClass() {
+    if (this.cart) {
+      this.cart.classList.add(classes.loading);
+    }
+  }
+
+  /**
+   * Remove loading class from cart
+   *
+   * @return  {Void}
+   */
+  removeLoadingClass() {
+    if (this.cart) {
+      this.cart.classList.remove(classes.loading);
+    }
   }
 
   /**
@@ -1057,11 +1274,35 @@ class CartItems extends HTMLElement {
         this.discountField.value = this.existingDiscountCodes.join(',');
       }
 
-      if (this.discountError) {
-        this.discountErrorMessage.textContent = window.theme.strings.discount_not_applicable;
-        this.discountErrorMessage.classList.remove('hidden');
+      // Post-render check for shipping-only discounts based on UI not gaining a new "remove-discount" pill
+      if (this.pendingDiscountCheck) {
+        const currentVisibleCodes = Array.from(this.cart.querySelectorAll(selectors.discountBody))
+          .map((el) => el?.dataset?.discountCode)
+          .filter(Boolean)
+          .map((c) => String(c).toLowerCase());
+        const beforeSet = new Set(this.pendingDiscountCheck.visibleCodesBefore.map((c) => String(c).toLowerCase()));
+        const attemptedLower = String(this.pendingDiscountCheck.attemptedCode).toLowerCase();
+        const uiGainedAttempted = currentVisibleCodes.includes(attemptedLower) && !beforeSet.has(attemptedLower);
+
+        this.shippingDiscountError = Boolean(this.pendingDiscountCheck.attemptedApplicable && this.pendingDiscountCheck.codeIncluded && !uiGainedAttempted);
+
+        this.pendingDiscountCheck = null;
+      }
+
+      if (this.shippingDiscountError) {
+        if (this.discountErrorMessage) {
+          this.discountErrorMessage.textContent = window.theme.strings.shipping_discounts_at_checkout;
+          this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.shipping_discounts_at_checkout}`);
+        }
+      } else if (this.discountError) {
+        if (this.discountErrorMessage) {
+          this.discountErrorMessage.textContent = window.theme.strings.discount_not_applicable;
+          this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.discount_not_applicable}`);
+        }
       } else {
-        this.discountErrorMessage.classList.add('hidden');
+        this.discountErrorMessage?.classList.add('hidden');
       }
     }
 
@@ -1072,6 +1313,7 @@ class CartItems extends HTMLElement {
     this.updateProgress();
     this.animateItems();
     this.bindDiscountEventListeners();
+    this.logRenderedDiscounts();
 
     if (!this.showCannotAddMoreInCart) {
       this.hideAddToCartErrorMessage();
@@ -1285,51 +1527,20 @@ class CartItems extends HTMLElement {
     })
       .then((response) => response.text())
       .then((state) => {
+        try {
+          const parsedState = JSON.parse(state);
+          if (!parsedState.errors) {
+            this.logDiscountCodes(parsedState);
+          }
+        } catch (e) {
+          // If response is not JSON, continue with getCart()
+        }
         this.getCart();
       })
       .catch((error) => {
         console.log(error);
         this.enableCartButtons();
       });
-  }
-
-  /**
-   * Update discount in the cart
-   *
-   * @return  {Void}
-   */
-  updateDiscount() {
-    const discountButton = this.cart?.querySelector(selectors.discountButton);
-    const discountField = this.cart?.querySelector(selectors.discountField);
-
-    if (discountButton && discountField) {
-      discountButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        const newDiscountCode = discountField.value;
-
-        if (newDiscountCode !== '') {
-          const existingDiscountCodes = e.currentTarget.getAttribute(attributes.discountButton);
-          this.disableCartButtons();
-          fetch(theme.routes.cart_update_url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              discount: `${newDiscountCode}${existingDiscountCodes}`,
-            }),
-          })
-            .then((data) => {
-              this.getCart();
-              discountField.value = '';
-            })
-            .catch((error) => {
-              console.log(error);
-              this.enableCartButtons();
-            });
-        }
-      });
-    }
   }
 
   /**

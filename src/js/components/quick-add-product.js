@@ -10,6 +10,8 @@ if (!customElements.get('quick-add-product')) {
         super();
 
         this.quickAddHolder = this.querySelector('[data-quick-add-holder]');
+        if (!this.quickAddHolder) return;
+
         this.modal = null;
         this.currentModal = null;
         this.productId = this.quickAddHolder.getAttribute('data-quick-add-holder');

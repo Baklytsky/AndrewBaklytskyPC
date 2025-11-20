@@ -35,7 +35,7 @@
   >
     <div class="cart__empty" data-cart-empty>
       <h1
-        class="cart__title"
+        class="cart__title{% if section.settings.heading_font_size %} {{ section.settings.heading_font_size }}{% endif %}"
         data-animation="{{ animation_name }}"
         data-animation-delay="{{ animation_cart_empty_delay }}"
         {%- assign animation_cart_empty_delay = animation_cart_empty_delay | plus: animation_delay_increment -%}
@@ -171,6 +171,9 @@
                 {%- when 'icon' -%}
                   {%- render 'icon', block: block -%}
 
+                {%- when 'reviews' -%}
+                  {%- render 'cart-block-reviews', block: block -%}
+
                 {%- when 'payment-icons' -%}
                   {%- unless shop.enabled_payment_types == empty -%}
                     <ul class="cart__payment-icons">
@@ -266,7 +269,7 @@
 
         <div class="cart__content">
           <h1
-            class="cart__title"
+            class="cart__title{% if section.settings.heading_font_size %} {{ section.settings.heading_font_size }}{% endif %}"
             data-animation="{{ animation_name }}"
             data-animation-delay="{{ animation_delay }}"
             {%- assign animation_delay = animation_delay | plus: animation_delay_increment -%}
@@ -338,6 +341,20 @@
   "name": "Cart",
   "settings": [
     {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-medium",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
       "type": "header",
       "content": "Colors"
     },
@@ -379,24 +396,10 @@
       "limit": 1,
       "settings": [
         {
-          "type": "richtext",
-          "id": "cart_custom_message_text",
+          "type": "text",
+          "id": "cart_message_text",
           "label": "Text",
-          "default": "<p>Earn points for every $1 spent.</p>"
-        },
-        {
-          "type": "select",
-          "id": "text_font_size",
-          "label": "Text size",
-          "info": "Applies only when content in Text field is set to Paragraph.",
-          "default": "body-medium",
-          "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
-          ]
+          "default": "Earn points for every $1 spent."
         },
         {
           "type": "header",
@@ -458,7 +461,7 @@
           "type": "select",
           "id": "text_font_size",
           "label": "Text size",
-          "default": "body-medium",
+          "default": "body-large",
           "options": [
             {"value": "body-x-small", "label": "Extra small"},
             {"value": "body-small", "label": "Small"},
@@ -552,7 +555,7 @@
           "type": "select",
           "id": "icon_name",
           "label": "Icon",
-          "default": "icon-domestic-love",
+          "default": "icon-favs",
           "options": [
             {"label": "Accessibility", "value": "icon-a11y"},
             {"label": "Add to bag", "value": "icon-bag"},
@@ -635,7 +638,7 @@
           "min": 20,
           "max": 80,
           "step": 5,
-          "default": 20
+          "default": 25
         },
         {
           "type": "color",
@@ -643,30 +646,79 @@
           "label": "Icon color"
         },
         {
-          "type": "richtext",
-          "id": "text",
-          "label": "Text",
-          "default": "<p>Title<\/p>"
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "align--middle-center",
+          "options": [
+            {"value": "align--middle-left", "label": "Left"},
+            {"value": "align--middle-center", "label": "Center"}
+          ]
         },
         {
-          "type": "select",
-          "id": "text_font_size",
-          "label": "Text size",
-          "info": "Applies only when content in Text field is set to Paragraph.",
-          "default": "body-medium",
-          "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
-          ]
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "30 day, money-back guarantee."
         },
         {
           "type": "checkbox",
           "id": "pin_to_top",
           "label": "Pin to top",
           "default": false
+        }
+      ]
+    },
+    {
+      "type": "reviews",
+      "name": "Reviews",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "4.9/5 based on 8,120 reviews"
+        },
+        {
+          "type": "range",
+          "id": "stars",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "label": "Stars",
+          "default": 5
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Style",
+          "options": [
+            {
+              "value": "stacked",
+              "label": "Stacked"
+            },
+            {
+              "value": "inline",
+              "label": "Inline"
+            }
+          ],
+          "default": "inline"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "align--middle-center",
+          "options": [
+            {"value": "align--middle-left", "label": "Left"},
+            {"value": "align--middle-center", "label": "Center"}
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "pin_to_bottom",
+          "label": "Pin to bottom",
+          "default": true
         }
       ]
     },
@@ -771,7 +823,7 @@
           "type": "text",
           "id": "title",
           "label": "Heading",
-          "default": "Choose your FREE GIFT!"
+          "default": "Choose your free gift!"
         },
         {
           "type": "product_list",
@@ -829,12 +881,6 @@
       "name": "Discount",
       "limit": 1,
       "settings": [
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title",
-          "default": "Add a promo code"
-        },
         {
           "type": "checkbox",
           "id": "pin_to_top",

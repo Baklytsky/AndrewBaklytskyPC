@@ -15,11 +15,21 @@
   align-items: stretch;
   background-color: var(--bg);
   color: var(--text);
+
+  .select-popout {
+    --border: var(--BTN-SECONDARY-BORDER);
+
+    background: var(--bg-accent);
+  }
 }
 
 .product-upsell__image {
   padding: var(--sp-block) var(--sp-inline);
   width: 120px;
+
+  .placeholder-svg {
+    background: var(--COLOR-BG);
+  }
 }
 
 .product-upsell__image__link {
@@ -49,10 +59,6 @@
   align-items: flex-start;
 }
 
-.product-upsell__actions {
-  align-self: flex-end;
-}
-
 .product-upsell__link {
   --link: var(--bg-accent-opposite);
   --link-hover: var(--bg-accent-opposite-a50);
@@ -61,7 +67,7 @@
 .product-upsell__title {
   @include body;
 
-  font-size: var(--font-body-medium);
+  font-size: var(--font-body-large);
   margin: 0 0 2px;
 }
 
@@ -85,20 +91,26 @@
 }
 
 .product-upsell__price {
-  @include body;
+  font-size: var(--font-body-small);
 
-  margin: 0 0 2px;
-  font-size: var(--font-body-x-small);
-  line-height: 1.33;
+  .price__container {
+    padding: 0;
+  }
+
+  .price-item--sale {
+    margin-right: min(var(--SPACING-MICRO), 4px);
+    color: inherit;
+  }
+
+  .unit-price {
+    font-size: var(--font-body-small);
+    color: var(--text);
+    opacity: 0.6;
+  }
 }
 
-.product-upsell__price .unit {
-  @include body;
-
-  display: block;
-  margin-block-start: 2px;
-  color: var(--text);
-  opacity: 0.6;
+.product-upsell__actions {
+  padding-block-start: var(--SPACING-SMALL);
 }
 
 .product-upsell__btn {
@@ -206,6 +218,7 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
 
   .product-upsell__actions {
     align-self: center;
+    padding-block: 0;
   }
 }
 
@@ -214,6 +227,14 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
   .product-upsell {
     --bg: var(--COLOR-BG);
     --text: var(--COLOR-TEXT);
+  }
+
+  .select-popout {
+    --border: var(--bg-accent);
+  }
+
+  .placeholder-svg {
+    background: var(--bg-accent);
   }
 
   .product-upsell__image {
@@ -227,12 +248,7 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
   }
 
   .product-upsell__form--instant-add {
-    gap: var(--SPACING-MICRO);
-  }
-
-  .product-upsell__actions {
-    padding-block-start: var(--SPACING-MICRO);
-    align-self: flex-start;
+    gap: 0;
   }
 
   .product-upsell__variant-selector--text-slider,
@@ -249,10 +265,6 @@ quick-add-product + quick-add-product .product-upsell__holder { margin-top: calc
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
-
-  @include media-query($medium-down) {
-    gap: var(--SPACING-MICRO);
-  }
 
   &:has(.select-popout) {
     padding-block-start: var(--SPACING-MICRO);

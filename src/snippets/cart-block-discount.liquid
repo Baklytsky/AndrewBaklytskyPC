@@ -8,44 +8,33 @@
   {% render 'cart-block-discount', block: block %}
 {% endcomment %}
 
-{%- liquid
-  assign discount_codes = ''
-  if cart.cart_level_discount_applications.size > 0
-    for discount in cart.cart_level_discount_applications
-      assign discount_codes = discount_codes | append: ',' | append: discount.title
-    endfor
-  endif
--%}
+<div class="cart-discount">
+  <label for="cart-discount" class="visually-hidden">{{ 'cart.general.discount_code' | t }}</label>
 
-<details
-  class="cart__widget accordion"
-  data-collapsible
->
-  <summary class="cart__widget__title" data-collapsible-trigger>
-    {{ block.settings.title }}
+  <div class="cart-discount__inner flex">
+    <input
+      type="text"
+      id="cart-discount"
+      class="cart__field"
+      placeholder="{{ 'cart.general.discount_code' | t }}"
+      aria-label="{{ 'cart.general.discount_code' | t }}"
+      data-discount-input
+    >
 
-    {%- render 'icon-nav-arrow-down' -%}
-  </summary>
-
-  <div class="cart__widget__content" data-collapsible-body>
-    <div class="cart__widget__content__inner" data-collapsible-content>
-      <label for="cart-discount" class="visually-hidden">{{ block.settings.title }}</label>
-
-      <input
-        type="text"
-        id="cart-discount"
-        class="cart__field"
-        placeholder="{{ placeholder_field }}"
-        aria-label="{{ placeholder_field }}"
-        data-cart-discount-field
-      >
-
-      <button
-        class="btn btn--full btn--primary btn--solid"
-        data-cart-discount-button="{{ discount_codes }}"
-      >
-        <span>Apply</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--primary btn--solid"
+      data-apply-discount
+    >
+      <span>{{ 'cart.general.apply' | t }}</span>
+    </button>
   </div>
-</details>
+
+  <p
+    class="cart__errors__content cart__errors__content--discount hidden"
+    data-discount-error-message
+    role="alert"
+  ></p>
+
+  <input type="hidden" name="discount" value="" data-discount-field>
+</div>
