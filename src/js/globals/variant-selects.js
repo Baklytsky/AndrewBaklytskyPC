@@ -7,6 +7,9 @@ class VariantSelects extends HTMLElement {
     this.addEventListener('change', (event) => {
       const target = this.getInputForEventTarget(event.target);
 
+      // Check if this change event is from a 'popout-select' dropdown that should trigger variant change
+      this.triggerPopoutVariantChange(target);
+
       publish(theme.PUB_SUB_EVENTS.optionValueSelectionChange, {
         data: {
           event,
@@ -30,18 +33,29 @@ class VariantSelects extends HTMLElement {
   }
 
   /**
-   * Trigger variant change by updating the variant ID input in a form
-   * @param {string} variantId - The variant ID to trigger
+   * Trigger variant change from a popout-select dropdown
+   * @param {HTMLElement} target - The target element that triggered the change event
    */
-  triggerVariantChange(variantId) {
+  triggerPopoutVariantChange(target) {
+    // check if the target is the correct input
+    if (!target || !target.hasAttribute('data-popout-input')) return;
+
+    // check if the popout-select has the correct attribute
+    const popoutSelect = target.closest('popout-select');
+    if (!popoutSelect || !popoutSelect.hasAttribute('data-variant-change')) return;
+
+    // get the variant ID from the target
+    const variantId = target.getAttribute('data-variant-id');
+    if (!variantId) return;
+
+    // get the target form and the variant ID input
     const targetForm = this.closest('form');
-    if (!targetForm || !variantId) return;
+    const variantIdInput = targetForm?.querySelector('[name="id"]');
+    if (!targetForm || !variantIdInput) return;
 
-    const variantIdInput = targetForm.querySelector('[name="id"]');
-    if (!variantIdInput) return;
-
+    // set the variant ID value and trigger the variant change
     variantIdInput.value = variantId;
-    variantIdInput.dispatchEvent(new Event('change'));
+    variantIdInput.dispatchEvent(new Event('change', {bubbles: true}));
   }
 }
 

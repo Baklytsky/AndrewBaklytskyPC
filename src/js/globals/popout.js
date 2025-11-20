@@ -19,7 +19,6 @@ if (!customElements.get('popout-select')) {
         this.popoutOptions = this.querySelectorAll('[data-popout-option]');
         this.productGridItem = this.popoutList.closest('[data-grid-item]');
         this.fireSubmitEvent = this.hasAttribute('submit');
-        this.shouldChangeVariant = this.hasAttribute('data-variant-change');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
         this.popupListFocusoutEvent = (evt) => this.onPopupListFocusout(evt);
@@ -125,8 +124,11 @@ if (!customElements.get('popout-select')) {
           if (listItem) {
             const optionValueId = listItem.getAttribute('data-option-value-id');
             const productUrl = listItem.getAttribute('data-product-url');
+            const variantId = link.getAttribute('data-variant-id');
             if (optionValueId) this.popoutInput.setAttribute('data-option-value-id', optionValueId);
             if (productUrl) this.popoutInput.setAttribute('data-product-url', productUrl);
+            // set the variant ID on the hidden input so it can be used to trigger a variant change in 'variant-selects' elements' methods
+            if (variantId) this.popoutInput.setAttribute('data-variant-id', variantId);
           }
 
           if (this.popoutInput.disabled) {
@@ -142,14 +144,6 @@ if (!customElements.get('popout-select')) {
 
             // Fire a bubbling change event so parent controllers can react
             this.popoutInput.dispatchEvent(new Event('change', {bubbles: true}));
-
-            // Trigger variant change if this is a variant selector
-            if (this.shouldChangeVariant) {
-              const variantSelects = this.closest('variant-selects');
-              if (variantSelects) {
-                variantSelects.triggerVariantChange(link.getAttribute('data-variant-id'));
-              }
-            }
 
             if (listTargetElement) {
               listTargetElement.classList.remove('is-active');
