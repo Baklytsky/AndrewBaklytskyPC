@@ -7,6 +7,10 @@ if (!customElements.get('popout-select')) {
       }
 
       connectedCallback() {
+        // Prevent duplicate initialization
+        if (this.hasAttribute('data-popout-initialized')) return;
+        this.setAttribute('data-popout-initialized', 'true');
+
         this.popoutList = this.querySelector('[data-popout-list]');
         this.popoutToggle = this.querySelector('[data-popout-toggle]');
         this.popoutToggleText = this.querySelector('[data-popout-toggle-text]');
@@ -52,6 +56,8 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupToggleFocusout(evt) {
+        if (!document.body.classList.contains('is-focused')) return;
+
         const popoutLostFocus = this.contains(evt.relatedTarget);
 
         if (!popoutLostFocus) {
@@ -60,6 +66,8 @@ if (!customElements.get('popout-select')) {
       }
 
       onPopupListFocusout(evt) {
+        if (!document.body.classList.contains('is-focused')) return;
+
         const childInFocus = evt.currentTarget.contains(evt.relatedTarget);
         const isVisible = this.popoutList.classList.contains('popout-list--visible');
 
@@ -164,8 +172,9 @@ if (!customElements.get('popout-select')) {
                 this.popoutToggleText.setAttribute('data-popout-toggle-text', attrValue);
               }
             }
-            this.onPopupToggleFocusout(evt);
-            this.onPopupListFocusout(evt);
+
+            // Close the dropdown after selection
+            this._hideList();
           }
         }
       }
