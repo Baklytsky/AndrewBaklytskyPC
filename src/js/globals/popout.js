@@ -17,7 +17,6 @@ if (!customElements.get('popout-select')) {
         this.popoutInput = this.querySelector('[data-popout-input]') || this.parentNode.querySelector('[data-popout-input]') || this.parentNode.parentNode.querySelector('[data-quantity-input]');
 
         this.popoutOptions = this.querySelectorAll('[data-popout-option]');
-        this.productGridItem = this.popoutList.closest('[data-grid-item]');
         this.fireSubmitEvent = this.hasAttribute('submit');
 
         this.popupToggleFocusoutEvent = (evt) => this.onPopupToggleFocusout(evt);
@@ -35,16 +34,6 @@ if (!customElements.get('popout-select')) {
       onPopupToggleClick(evt) {
         const button = evt.currentTarget;
         const ariaExpanded = button.getAttribute('aria-expanded') === 'true';
-
-        if (this.productGridItem) {
-          const productGridItemImage = this.productGridItem.querySelector('[data-product-image]');
-
-          if (productGridItemImage) {
-            productGridItemImage.classList.toggle('is-visible', !ariaExpanded);
-          }
-
-          this.popoutList.style.maxHeight = `${Math.abs(this.popoutToggle.getBoundingClientRect().bottom - this.productGridItem.getBoundingClientRect().bottom)}px`;
-        }
 
         evt.currentTarget.setAttribute('aria-expanded', !ariaExpanded);
         this.popoutList.classList.toggle('popout-list--visible');
