@@ -72,16 +72,28 @@ if (!customElements.get('popout-select')) {
         }
       }
 
+      hasOverflowParent() {
+        let element = this.parentElement;
+        while (element && element !== document.body) {
+          const style = getComputedStyle(element);
+          if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+            return true;
+          }
+          element = element.parentElement;
+        }
+        return false;
+      }
+
       toggleListPosition() {
         const button = this.querySelector('[data-popout-toggle]');
         const popoutTop = this.getBoundingClientRect().top + this.clientHeight;
-        const isInDrawer = this.closest('cart-drawer');
+        const hasOverflowParent = this.hasOverflowParent();
 
         const removeTopClass = () => {
           if (button.getAttribute('aria-expanded') !== 'true') {
-            // Don't remove the class if inside the cart drawer to prevent excess scrollbar
-            // Even though `select-popout__list`is absolute, it extends the scrollable container and creates a scrollbar inside the drawer body
-            if (!isInDrawer) {
+            // Don't remove the class if inside a container with overflow auto/scroll
+            // Even though `select-popout__list` is absolute, it extends the scrollable container and creates a scrollbar
+            if (!hasOverflowParent) {
               this.popoutList.classList.remove('popout-list--top');
             }
           }
