@@ -4,6 +4,8 @@ if (!customElements.get('popout-select')) {
     class Popout extends HTMLElement {
       constructor() {
         super();
+
+        this.updateOptionsEvent = (evt) => this.updateOptions(evt);
       }
 
       connectedCallback() {
@@ -29,6 +31,12 @@ if (!customElements.get('popout-select')) {
         this._connectToggle();
         this._onFocusOut();
         this.popupListSetDimensions();
+
+        this.addEventListener('theme:popout:update', this.updateOptionsEvent);
+      }
+
+      disconnectedCallback() {
+        this.removeEventListener('theme:popout:update', this.updateOptionsEvent);
       }
 
       onPopupToggleClick(evt) {
@@ -127,38 +135,58 @@ if (!customElements.get('popout-select')) {
           if (this.fireSubmitEvent) {
             this._submitForm(attrValue);
           } else {
-            const currentTarget = link.parentElement;
-            const listTargetElement = this.popoutList.querySelector('.is-active');
-            const targetAttribute = this.popoutList.querySelector('[aria-current]');
+            const currentTarget = evt.currentTarget;
 
             // Fire a bubbling change event so parent controllers can react
             this.popoutInput.dispatchEvent(new Event('change', {bubbles: true}));
 
-            if (listTargetElement) {
-              listTargetElement.classList.remove('is-active');
-              currentTarget.classList.add('is-active');
-            }
-
-            if (this.popoutInput.name == 'quantity' && !currentTarget.nextSibling) {
+            if (this.popoutInput.name == 'quantity' && !currentTarget.parentElement.nextSibling) {
               this.classList.add('is-hidden');
             }
 
-            if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
-              targetAttribute.removeAttribute('aria-current');
-            }
-            link.setAttribute('aria-current', 'true');
-
-            if (attrValue !== '') {
-              this.popoutToggleText.innerHTML = attrValue;
-
-              if (this.popoutToggleText.hasAttribute('data-popout-toggle-text') && this.popoutToggleText.getAttribute('data-popout-toggle-text') !== '') {
-                this.popoutToggleText.setAttribute('data-popout-toggle-text', attrValue);
-              }
-            }
+            this.changeStates(currentTarget);
+            this.updateButtonText(attrValue);
 
             // Close the dropdown after selection
             this._hideList();
           }
+        }
+      }
+
+      changeStates(target) {
+        if (!target) return;
+
+        const parent = target.parentElement;
+        const listTargetElement = this.popoutList.querySelector('.is-active');
+        const targetAttribute = this.popoutList.querySelector('[aria-current]');
+
+        if (listTargetElement) {
+          listTargetElement.classList.remove('is-active');
+          parent.classList.add('is-active');
+        }
+
+        if (targetAttribute && targetAttribute.hasAttribute('aria-current')) {
+          targetAttribute.removeAttribute('aria-current');
+          target.setAttribute('aria-current', 'true');
+        }
+      }
+
+      updateButtonText(text) {
+        if (text !== '') {
+          this.popoutToggleText.innerHTML = text;
+
+          if (this.popoutToggleText.hasAttribute('data-popout-toggle-text') && this.popoutToggleText.getAttribute('data-popout-toggle-text') !== '') {
+            this.popoutToggleText.setAttribute('data-popout-toggle-text', text);
+          }
+        }
+      }
+
+      updateOptions(evt) {
+        if (evt && evt.detail && evt.detail.value) {
+          const value = evt.detail.value;
+          const target = this.querySelector(`[data-popout-option][data-value="${value}"]`);
+          this.changeStates(target);
+          this.updateButtonText(value);
         }
       }
 

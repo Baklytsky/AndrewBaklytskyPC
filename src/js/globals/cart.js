@@ -921,7 +921,20 @@ class CartItems extends HTMLElement {
   resetLineItem(item) {
     const qtyInput = item.querySelector(selectors.qtyInput);
     const qty = qtyInput.getAttribute('value');
+
     qtyInput.value = qty;
+    qtyInput
+      .closest('quantity-input')
+      ?.querySelector('popout-select')
+      ?.dispatchEvent(
+        new CustomEvent('theme:popout:update', {
+          detail: {
+            value: qty,
+          },
+          bubbles: true,
+        })
+      );
+
     item.classList.remove(classes.loading);
   }
 
@@ -1013,10 +1026,9 @@ class CartItems extends HTMLElement {
   toggleErrorMessage() {
     if (!this.cartErrorHolder) return;
 
-    this.cartErrorHolder.classList.toggle(classes.expanded, this.cartUpdateFailed || this.showCannotAddMoreInCart);
+    this.cartErrorHolder.classList.toggle(classes.expanded, this.cartUpdateFailed);
 
     // Reset cart error events flag
-    this.showCannotAddMoreInCart = false;
     this.cartUpdateFailed = false;
   }
 
@@ -1055,15 +1067,13 @@ class CartItems extends HTMLElement {
    * Hide error message container as soon as an item is successfully added to the cart
    */
   hideAddToCartErrorMessage() {
-    const holder = this.button.closest(selectors.upsellHolder) ? this.button.closest(selectors.upsellHolder) : this.button.closest(selectors.productForm);
+    const holder = document.querySelector(selectors.formWrapper);
     const errorContainer = holder?.querySelector(selectors.formErrorsContainer);
 
     errorContainer?.classList.remove(classes.visible);
   }
 
   addToCartError(data, button) {
-    if (this.showCannotAddMoreInCart) return; // Show error in cart drawer instead of product form
-
     if (button !== null) {
       const outerContainer = button.closest(selectors.outerSection) || button.closest(selectors.quickAddHolder) || button.closest(selectors.quickAddModal);
       let errorContainer = outerContainer?.querySelector(selectors.formErrorsContainer);
@@ -1299,18 +1309,22 @@ class CartItems extends HTMLElement {
     this.freeShippingMessageHandle(this.subtotal);
     this.cartRemoveEvents();
     this.cartUpdateEvents();
-    this.toggleErrorMessage();
     this.enableCartButtons();
     this.updateProgress();
     this.animateItems();
     this.bindDiscountEventListeners();
     this.logRenderedDiscounts();
 
-    document.dispatchEvent(
-      new CustomEvent('theme:product:added', {
-        bubbles: true,
-      })
-    );
+    if (!this.showCannotAddMoreInCart) {
+      this.hideAddToCartErrorMessage();
+      document.dispatchEvent(
+        new CustomEvent('theme:product:added', {
+          bubbles: true,
+        })
+      );
+    }
+
+    this.toggleErrorMessage();
   }
 
   /**
