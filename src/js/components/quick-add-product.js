@@ -408,12 +408,8 @@ if (!customElements.get('quick-add-product')) {
         const image = this.querySelector('.product-upsell__image__thumb img');
         if (!image || !variantImageUrl) return;
 
-        console.log({variantImageUrl});
-
         image.src = variantImageUrl;
         image.srcset = variantImageUrl + ' 120w';
-
-        console.log({image});
       }
 
       resetAnimatedItems() {
