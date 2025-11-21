@@ -121,6 +121,19 @@ if (!customElements.get('popout-select')) {
         const toggleRelativeTop = toggleRect.top - containerRect.top + containerScrollTop;
         const toggleRelativeBottom = toggleRect.bottom - containerRect.top + containerScrollTop;
 
+        if (dimension === 'width') {
+          const popoutListRect = this.popoutList.getBoundingClientRect();
+
+          // Calculate viewport available width
+          const viewportWidth = theme.windowWidth - popoutListRect.left;
+
+          // Calculate confined container available width
+          const containerWidth = containerRect.right - popoutListRect.left;
+
+          // Use the smaller space
+          return Math.max(0, parseInt(Math.min(viewportWidth, containerWidth)));
+        }
+
         if (dimension === 'height') {
           // Calculate viewport available space
           const viewportSpaceAbove = toggleRect.top;
@@ -148,7 +161,6 @@ if (!customElements.get('popout-select')) {
           }
         }
 
-        // For width, return null to use default viewport calculation
         return null;
       }
 
@@ -175,6 +187,11 @@ if (!customElements.get('popout-select')) {
 
           // Override with confined container calculations if available
           if (this.closest('[data-popout-select-confine]')) {
+            const confinedWidth = this.calculateConfinedDimensions('width');
+            if (confinedWidth !== null) {
+              maxWidth = confinedWidth;
+            }
+
             const confinedHeight = this.calculateConfinedDimensions('height');
             if (confinedHeight !== null) {
               maxHeight = confinedHeight;
