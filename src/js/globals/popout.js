@@ -108,7 +108,7 @@ if (!customElements.get('popout-select')) {
         }
       }
 
-      calculateConfinedDimensions(dimension) {
+      calculateConfinedDimensions() {
         const confineContainer = this.closest('[data-popout-select-confine]');
         if (!confineContainer) return null;
 
@@ -121,47 +121,31 @@ if (!customElements.get('popout-select')) {
         const toggleRelativeTop = toggleRect.top - containerRect.top + containerScrollTop;
         const toggleRelativeBottom = toggleRect.bottom - containerRect.top + containerScrollTop;
 
-        if (dimension === 'width') {
-          const popoutListRect = this.popoutList.getBoundingClientRect();
+        // Calculate viewport available space
+        const viewportSpaceAbove = toggleRect.top;
+        const viewportSpaceBelow = theme.windowHeight - toggleRect.bottom;
 
-          // Calculate viewport available width
-          const viewportWidth = theme.windowWidth - popoutListRect.left;
+        // Calculate confined container available space
+        const containerSpaceAbove = toggleRelativeTop;
+        const containerSpaceBelow = containerClientHeight - toggleRelativeBottom;
 
-          // Calculate confined container available width
-          const containerWidth = containerRect.right - popoutListRect.left;
+        // Use the smaller space for each direction
+        const effectiveSpaceAbove = Math.min(viewportSpaceAbove, containerSpaceAbove);
+        const effectiveSpaceBelow = Math.min(viewportSpaceBelow, containerSpaceBelow);
 
-          // Use the smaller space
-          return Math.max(0, parseInt(Math.min(viewportWidth, containerWidth)));
-        }
+        // Determine if opening on top based on effective available space
+        const shouldOpenTop = effectiveSpaceAbove > effectiveSpaceBelow && effectiveSpaceAbove > 0;
 
-        if (dimension === 'height') {
-          // Calculate viewport available space
-          const viewportSpaceAbove = toggleRect.top;
-          const viewportSpaceBelow = theme.windowHeight - toggleRect.bottom;
+        // Set the class based on the calculation
+        this.popoutList.classList.toggle('popout-list--top', shouldOpenTop);
 
-          // Calculate confined container available space
-          const containerSpaceAbove = toggleRelativeTop;
-          const containerSpaceBelow = containerClientHeight - toggleRelativeBottom;
+        // Calculate max-height based on opening direction using the smaller space
+        const maxHeight = shouldOpenTop ? Math.max(0, parseInt(effectiveSpaceAbove)) : Math.max(0, parseInt(effectiveSpaceBelow));
 
-          // Use the smaller space for each direction
-          const effectiveSpaceAbove = Math.min(viewportSpaceAbove, containerSpaceAbove);
-          const effectiveSpaceBelow = Math.min(viewportSpaceBelow, containerSpaceBelow);
-
-          // Determine if opening on top based on effective available space
-          const shouldOpenTop = effectiveSpaceAbove > effectiveSpaceBelow && effectiveSpaceAbove > 0;
-
-          // Set the class based on the calculation
-          this.popoutList.classList.toggle('popout-list--top', shouldOpenTop);
-
-          // Calculate max-height based on opening direction using the smaller space
-          if (shouldOpenTop) {
-            return Math.max(0, parseInt(effectiveSpaceAbove));
-          } else {
-            return Math.max(0, parseInt(effectiveSpaceBelow));
-          }
-        }
-
-        return null;
+        return {
+          width: null,
+          height: maxHeight,
+        };
       }
 
       popupListSetDimensions() {
@@ -186,17 +170,9 @@ if (!customElements.get('popout-select')) {
           }
 
           // Override with confined container calculations if available
-          if (this.closest('[data-popout-select-confine]')) {
-            const confinedWidth = this.calculateConfinedDimensions('width');
-            if (confinedWidth !== null) {
-              maxWidth = confinedWidth;
-            }
-
-            const confinedHeight = this.calculateConfinedDimensions('height');
-            if (confinedHeight !== null) {
-              maxHeight = confinedHeight;
-            }
-          }
+          const {width: confinedWidth, height: confinedHeight} = this.calculateConfinedDimensions() || {};
+          maxWidth = confinedWidth ?? maxWidth;
+          maxHeight = confinedHeight ?? maxHeight;
 
           this.popoutList.style.setProperty('--max-width', `${maxWidth}px`);
           this.popoutList.style.setProperty('--max-height', `${maxHeight}px`);
