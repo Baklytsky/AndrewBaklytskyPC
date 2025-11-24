@@ -77,6 +77,7 @@ if (!customElements.get('cart-drawer')) {
        * @return  {Void}
        */
       openCartDrawerOnProductAdded() {
+        if (theme.settings.cartType !== 'drawer') return;
         if (!this.cartDrawerIsOpen) {
           this.openCartDrawer();
         }

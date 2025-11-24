@@ -783,6 +783,7 @@ class CartItems extends HTMLElement {
           }
           if (theme.settings.cartType === 'page') {
             window.location = theme.routes.cart_url;
+            return;
           }
           this.getCart();
         } else {
