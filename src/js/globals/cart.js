@@ -162,6 +162,10 @@ class CartItems extends HTMLElement {
     this.checkSkippedUpsellOrBundleProductsFromStorage();
     this.toggleCartUpsellOrBundleWidgetVisibility();
 
+    // Upsell product caching system
+    this.upsellProductCache = new Map();
+    this.cartProductVariants = new Map();
+
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
     this.freeShippingLimit = this.freeShipping.length ? Number(this.freeShipping[0].getAttribute(attributes.freeShippingLimit)) * 100 * window.Shopify.currency.rate : 0;
@@ -1195,10 +1199,9 @@ class CartItems extends HTMLElement {
 
   build(data) {
     const cartItemsData = data.querySelector(selectors.apiLineItems);
-    const upsellItemsData = data.querySelector(selectors.apiUpsellItems);
     const bundleItemsData = data.querySelector(selectors.apiBundleItems);
 
-    const cartEmptyData = Boolean(cartItemsData === null && upsellItemsData === null && bundleItemsData === null);
+    const cartEmptyData = Boolean(cartItemsData === null && bundleItemsData === null);
     const priceData = data.querySelector(selectors.apiCartPrice);
     const cartTotal = data.querySelector(selectors.cartTotal);
 
@@ -1216,14 +1219,14 @@ class CartItems extends HTMLElement {
       if (this.bundleProductsHolder) {
         this.bundleProductsHolder.innerHTML = '';
       }
+
+      // Clear upsell cache when cart is empty
+      this.upsellProductCache.clear();
+      this.cartProductVariants.clear();
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
 
-      if (this.upsellProductsHolder) {
-        this.upsellProductsHolder.innerHTML = upsellItemsData.innerHTML;
-      }
-
-      if (this.bundleProductsHolder) {
+      if (this.bundleProductsHolder && bundleItemsData) {
         this.bundleProductsHolder.innerHTML = bundleItemsData.innerHTML;
       }
 
@@ -1231,6 +1234,11 @@ class CartItems extends HTMLElement {
       this.checkSkippedUpsellOrBundleProductsFromStorage();
       this.toggleCartUpsellOrBundleWidgetVisibility();
     }
+
+    // Update upsell blocks
+    this.updateUpsellBlocks(data).catch((error) => {
+      console.error('Error updating upsell blocks:', error);
+    });
 
     this.newTotalItems = cartItemsData && cartItemsData.querySelectorAll(selectors.item).length ? cartItemsData.querySelectorAll(selectors.item).length : 0;
     this.subtotal = cartTotal && cartTotal.hasAttribute(attributes.cartTotal) ? parseInt(cartTotal.getAttribute(attributes.cartTotal)) : 0;
@@ -1325,6 +1333,286 @@ class CartItems extends HTMLElement {
     }
 
     this.toggleErrorMessage();
+  }
+
+  /**
+   * Update upsell blocks based on cart state
+   * Removes products that have all variants in cart
+   * Caches products when removed for future restoration
+   *
+   * @param   {HTMLElement}  [dataElement]  Element containing cart data from api-cart-items
+   * @return  {Promise<void>}
+   */
+  async updateUpsellBlocks(dataElement) {
+    const upsellBlocks = Array.from(this.cartDrawer.querySelectorAll('.cart__widget--upsell'));
+    if (upsellBlocks.length === 0) return;
+
+    // Get product variants from the current cart state
+    const cartProductVariants = this.getCartProductVariants(dataElement);
+    const cartIsEmpty = cartProductVariants.size === 0;
+
+    // If cart is empty, clear cache and restore all products
+    if (cartIsEmpty) {
+      this.upsellProductCache.clear();
+      this.cartProductVariants.clear();
+      // Fetch fresh cart drawer section to restore all upsells
+      // TODO: await this.refreshCartDrawerUpsells();
+      return;
+    }
+    console.log({cartProductVariants});
+
+    // Process each upsell block
+    for (const blockElement of upsellBlocks) {
+      const blockId = blockElement.getAttribute('data-upsell-block-id');
+      if (!blockId) continue;
+
+      // Initialize cache for this block if needed
+      if (!this.upsellProductCache.has(blockId)) {
+        this.upsellProductCache.set(blockId, new Map());
+      }
+      const blockCache = this.upsellProductCache.get(blockId);
+
+      // Get all products currently visible in the block
+      const productHolders = blockElement.querySelectorAll('[data-quick-add-holder]');
+      const visibleProductIds = new Set();
+
+      // Process each visible product in the block
+      for (const productHolder of productHolders) {
+        const productId = productHolder.getAttribute('data-quick-add-holder');
+        const productHandle = productHolder.getAttribute('data-product-handle');
+        if (!productId || !productHandle) continue;
+
+        const productIdStr = productId.toString();
+        visibleProductIds.add(productIdStr);
+
+        let cartVariants = cartProductVariants.get(productIdStr) || new Set();
+
+        // Check if product should be removed (all variants in cart)
+        const allVariantsInCart = await this.areAllVariantsInCart(productIdStr, cartVariants, productHandle);
+
+        // Check if product should be removed (all variants in cart)
+        if (allVariantsInCart && !blockCache.has(productIdStr)) {
+          // Product has all variants in cart - cache and remove it
+          const hasSlider = blockElement.hasAttribute('data-upsell-has-slider');
+          const productElement = hasSlider ? productHolder.closest('swiper-slide') : productHolder.parentElement;
+
+          if (productElement && productElement !== blockElement) {
+            blockCache.set(productIdStr, productElement.outerHTML);
+            productElement.remove();
+
+            // If it's a slider, update the swiper
+            if (hasSlider) {
+              this.updateSwiperSlider(blockElement);
+            }
+          }
+        } else if (!allVariantsInCart && blockCache.has(productIdStr)) {
+          // Product doesn't have all variants in cart - restore from cache
+          const cachedHtml = blockCache.get(productIdStr);
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = cachedHtml;
+          const restoredElement = tempDiv.firstElementChild;
+
+          if (!restoredElement) {
+            blockCache.delete(productIdStr);
+            continue;
+          }
+
+          const itemsContainer = blockElement.querySelector('[data-upsell-block-items]');
+          if (!itemsContainer) {
+            console.warn('Upsell block items container not found for block:', blockId);
+            blockCache.delete(productIdStr);
+            continue;
+          }
+
+          const hasSlider = blockElement.hasAttribute('data-upsell-has-slider');
+          if (hasSlider) {
+            const swiper = itemsContainer.querySelector('swiper-container');
+            if (!swiper) {
+              console.warn('Swiper container not found in slider block:', blockId);
+              blockCache.delete(productIdStr);
+              continue;
+            }
+            swiper.appendChild(restoredElement);
+            this.updateSwiperSlider(blockElement);
+          } else {
+            itemsContainer.appendChild(restoredElement);
+          }
+          blockCache.delete(productIdStr);
+        }
+      }
+
+      // Also check cached products that aren't currently visible - they might need to be restored
+      for (const [cachedProductId, cachedHtml] of blockCache.entries()) {
+        // Skip if we already processed this product above
+        if (visibleProductIds.has(cachedProductId)) continue;
+
+        // Get product handle from cached HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cachedHtml;
+        const cachedProductHolder = tempDiv.querySelector('[data-product-handle]');
+        if (!cachedProductHolder) continue;
+
+        const productHandle = cachedProductHolder.getAttribute('data-product-handle');
+        let cartVariants = cartProductVariants.get(cachedProductId) || new Set();
+
+        // Check if product should be restored (not all variants in cart)
+        const allVariantsInCart = await this.areAllVariantsInCart(cachedProductId, cartVariants, productHandle);
+
+        if (!allVariantsInCart) {
+          // Product doesn't have all variants in cart - restore from cache
+          const restoredElement = tempDiv.firstElementChild;
+
+          if (!restoredElement) {
+            blockCache.delete(cachedProductId);
+            continue;
+          }
+
+          const itemsContainer = blockElement.querySelector('[data-upsell-block-items]');
+          if (!itemsContainer) {
+            console.warn('Upsell block items container not found for block:', blockId);
+            blockCache.delete(cachedProductId);
+            continue;
+          }
+
+          const hasSlider = blockElement.hasAttribute('data-upsell-has-slider');
+          if (hasSlider) {
+            const swiper = itemsContainer.querySelector('swiper-container');
+            if (!swiper) {
+              console.warn('Swiper container not found in slider block:', blockId);
+              blockCache.delete(cachedProductId);
+              continue;
+            }
+            swiper.appendChild(restoredElement);
+            this.updateSwiperSlider(blockElement);
+          } else {
+            itemsContainer.appendChild(restoredElement);
+          }
+          blockCache.delete(cachedProductId);
+        }
+      }
+
+      // Update block visibility - hide the whole cart-block if no products
+      const remainingProducts = blockElement.querySelectorAll('[data-quick-add-holder]');
+      const cartBlock = blockElement.closest('.cart-block');
+      if (cartBlock) {
+        cartBlock.style.display = remainingProducts.length > 0 ? '' : 'none';
+      }
+    }
+
+    // Update cart product variants cache
+    this.cartProductVariants = cartProductVariants;
+  }
+
+  /**
+   * Get cart state - product IDs and their variant IDs
+   * Extracts data from the api-cart-items response to avoid extra API calls
+   *
+   * @param   {HTMLElement}  [dataElement]  Optional element containing data-api-cart-items-json
+   * @return  {Map}  Map of productId -> Set of variantIds
+   */
+  getCartProductVariants(dataElement = null) {
+    const productVariants = new Map();
+
+    let cartItemsData = null;
+    if (!dataElement) return;
+
+    const jsonScript = dataElement.querySelector('[data-api-cart-items-json]');
+    if (jsonScript) {
+      try {
+        cartItemsData = JSON.parse(jsonScript.textContent);
+      } catch (e) {
+        console.warn('Failed to parse cart items JSON:', e);
+      }
+    }
+
+    // Process items from the JSON data
+    if (cartItemsData.items && Array.isArray(cartItemsData.items)) {
+      cartItemsData.items.forEach((item) => {
+        const productId = String(item.product_id);
+        const variantId = String(item.variant_id);
+
+        if (!productVariants.has(productId)) {
+          productVariants.set(productId, new Set());
+        }
+        productVariants.get(productId).add(variantId);
+      });
+    }
+
+    return productVariants;
+  }
+
+  /**
+   * Check if all variants of a product are in cart
+   * Uses cached variant counts to avoid repeated API calls
+   *
+   * @param   {string}  productId  Product ID
+   * @param   {Set}     cartVariantIds  Set of variant IDs in cart for this product
+   * @return  {Promise<boolean>}
+   */
+  async areAllVariantsInCart(productId, cartVariantIds, productHandle = null) {
+    if (!productHandle) {
+      console.warn(`Product handle not provided for product ${productId}, cannot fetch variant data`);
+      return false;
+    }
+
+    // Fetch fresh product data to check actual variant IDs
+    const productUrl = `${window.Shopify.routes.root}products/${productHandle}.js`;
+
+    try {
+      const response = await fetch(productUrl, {
+        headers: {Accept: 'application/json'},
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to fetch product ${productHandle}: ${response.status} ${response.statusText}`);
+        return false;
+      }
+
+      const product = await response.json();
+
+      // Get all available variant IDs from the product (only count available variants)
+      const allAvailableVariantIds = new Set(product.variants.filter((variant) => variant.available).map((variant) => String(variant.id)));
+
+      console.log({productHandle}, 'All available product variant IDs:', Array.from(allAvailableVariantIds));
+      console.log('Cart variant IDs:', Array.from(cartVariantIds));
+
+      // If no available variants, don't remove from upsells
+      if (allAvailableVariantIds.size === 0) return false;
+
+      // Check if all available variants are in the cart
+      const cartVariantIdsStr = new Set(Array.from(cartVariantIds).map((id) => String(id)));
+
+      // Check if every available variant from the product is in the cart
+      const allVariantsInCart = Array.from(allAvailableVariantIds).every((variantId) => cartVariantIdsStr.has(variantId));
+
+      console.log('All variants in cart:', allVariantsInCart, `(${cartVariantIdsStr.size}/${allAvailableVariantIds.size})`);
+
+      return allVariantsInCart;
+    } catch (error) {
+      // If we can't fetch product data, don't remove from upsells
+      console.error(`Error fetching product ${productHandle} data:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Update/reinitialize swiper slider after slides are added or removed
+   *
+   * @param   {HTMLElement}  blockElement  The upsell block element
+   * @return  {void}
+   */
+  updateSwiperSlider(blockElement) {
+    const swiper = blockElement.querySelector('swiper-container');
+    if (!swiper) return;
+
+    if (swiper.swiper) {
+      swiper.swiper.update();
+      return;
+    }
+
+    customElements.whenDefined('swiper-container').then(() => {
+      if (swiper.swiper) swiper.swiper.update();
+    });
   }
 
   /**

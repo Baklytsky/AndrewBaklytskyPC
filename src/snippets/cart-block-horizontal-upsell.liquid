@@ -51,7 +51,13 @@
 {%- endcapture -%}
 
 {%- if request.design_mode or product_count > 0 and product_list != blank or is_onboarding -%}
-  <div class="cart__widget cart__widget--upsell cart__widget--upsell-horizontal {{ color_scheme }}">
+  <div
+    class="cart__widget cart__widget--upsell cart__widget--upsell-horizontal {{ color_scheme }}"
+    data-upsell-block-id="{{ block.id }}"
+    {%- if show_slider -%}
+      data-upsell-has-slider="true"
+    {%- endif -%}
+  >
     {%- if block.settings.title != blank or show_slider -%}
       <div class="cart__widget__title subheading">
         {% if block.settings.title != blank %}
@@ -72,7 +78,7 @@
     {%- endif -%}
 
     <div class="cart__widget__content">
-      <div class="cart__widget__content__inner">
+      <div class="cart__widget__content__inner" data-upsell-block-items>
         {%- if show_slider -%}
           <div class="swiper">
             <swiper-container
