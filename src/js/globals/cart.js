@@ -1190,6 +1190,60 @@ class CartItems extends HTMLElement {
   }
 
   /**
+   * Refresh cart drawer upsell blocks
+   * Used when cart is emptied to restore all products
+   *
+   * @return  {Promise<void>}
+   */
+  async refreshCartDrawerUpsells() {
+    try {
+      // Find the section ID from the cart drawer
+      const sectionElement = this.cartDrawer.closest('[data-section-id]');
+      const sectionId = sectionElement?.getAttribute('data-section-id');
+      if (!sectionId) {
+        console.warn('Section ID not found for cart drawer');
+        return;
+      }
+
+      // Fetch the cart drawer section
+      const response = await fetch(`${window.Shopify.routes.root}?section_id=${sectionId}`);
+      if (!response.ok) {
+        console.error('Failed to fetch cart drawer section:', response.status);
+        return;
+      }
+
+      const html = await response.text();
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+
+      // Find upsell blocks in the fetched HTML using data attribute
+      const fetchedUpsellBlocks = tempDiv.querySelectorAll('[data-upsell-block-id]');
+      const currentUpsellBlocks = Array.from(this.cartDrawer.querySelectorAll('[data-upsell-block-id]'));
+
+      // Create a map of block IDs to fetched blocks for easier matching
+      const fetchedBlocksMap = new Map();
+      fetchedUpsellBlocks.forEach((block) => {
+        const blockId = block.getAttribute('data-upsell-block-id');
+        if (blockId) {
+          fetchedBlocksMap.set(blockId, block);
+        }
+      });
+
+      // Replace each current upsell block with fresh content by matching block IDs
+      currentUpsellBlocks.forEach((currentBlock) => {
+        const blockId = currentBlock.getAttribute('data-upsell-block-id');
+        const fetchedBlock = fetchedBlocksMap.get(blockId);
+
+        if (fetchedBlock) {
+          currentBlock.innerHTML = fetchedBlock.innerHTML;
+        }
+      });
+    } catch (error) {
+      console.error('Error refreshing cart drawer upsells:', error);
+    }
+  }
+
+  /**
    * Build cart depends on results
    *
    * @param   {Object}  data
@@ -1511,7 +1565,7 @@ class CartItems extends HTMLElement {
     if (cartIsEmpty) {
       this.upsellProductCache.clear();
       this.cartProductVariants.clear();
-      // await this.refreshCartDrawerUpsells();
+      await this.refreshCartDrawerUpsells();
       return;
     }
 
