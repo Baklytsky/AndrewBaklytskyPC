@@ -106,7 +106,7 @@
     if enable_thumbs_mobile
       echo ' product__images--mobile-thumbs'
     else
-      echo ' product__images--mobile-slider'
+      echo ' product__images--mobile-no-thumbs'
     endif
   endcapture
 
@@ -215,6 +215,9 @@
                   {% if product.media.size <= 1 %}
                     allow-slide-next="false"
                     allow-slide-prev="false"
+                  {% endif %}
+                  {% if image_layout == 'grid-1' or image_layout == 'grid-2' or image_layout == 'stacked' %}
+                    breakpoint="(max-width: 749px)"
                   {% endif %}
                   keyboard="true"
                   grab-cursor="true"

@@ -24,7 +24,7 @@ if (!customElements.get('product-images-swiper')) {
         this.originalThumbsDirection = null; // Store original direction to restore on resize
 
         this.handleSlideChange = this.handleSlideChange.bind(this);
-        // this.handleMediaSelect = this.handleMediaSelect.bind(this);
+        this.handleMediaSelect = this.handleMediaSelect.bind(this);
         this.handleResize = this.handleResize.bind(this);
         this.handleThumbClick = this.handleThumbClick.bind(this);
         this.handleThumbKeyup = this.handleThumbKeyup.bind(this);
@@ -354,10 +354,6 @@ if (!customElements.get('product-images-swiper')) {
       }
 
       handleResize() {
-        // Update swiper on resize
-        if (this.mainSwiper && !this.mainSwiper.destroyed) {
-          this.mainSwiper.update();
-        }
         if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
           const currentDirection = this.thumbsSwiper.params.direction;
           const thumbsContainer = this.thumbsContainer?.closest('.product__thumbs');
@@ -465,7 +461,7 @@ if (!customElements.get('product-images-swiper')) {
         if (this.thumbsArrowNext) {
           this.thumbsArrowNext.removeEventListener('click', this.handleThumbsArrowClick);
         }
-        // this.removeEventListener('theme:media:select', this.handleMediaSelect);
+        this.removeEventListener('theme:media:select', this.handleMediaSelect);
         document.removeEventListener('theme:resize:width', this.handleResize);
       }
 
