@@ -20,6 +20,8 @@ class UpsellBlock extends HTMLElement {
     if (!this.isInitialized) {
       this.cacheInitialProducts();
       this.isInitialized = true;
+
+      this.checkInitialCartState();
     }
 
     // Listen for cart updates
@@ -35,6 +37,16 @@ class UpsellBlock extends HTMLElement {
     document.removeEventListener('theme:cart:update', this.handleCartUpdate);
     document.removeEventListener('theme:cart:refresh', this.handleCartUpdate);
     document.removeEventListener('theme:cart:change', this.handleCartChange);
+  }
+
+  /**
+   * Check initial cart state on page load
+   * This ensures upsell blocks are updated if products are already in the cart
+   *
+   * @return  {Promise<void>}
+   */
+  async checkInitialCartState() {
+    await this.updateFromCartAPI();
   }
 
   /**
