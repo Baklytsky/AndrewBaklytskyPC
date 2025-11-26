@@ -273,6 +273,8 @@ class UpsellBlock extends HTMLElement {
     const cachedHtml = this.productCache.get(productIdStr);
     if (!cachedHtml) return false;
 
+    // Use DocumentFragment to properly parse and insert HTML
+    // This ensures custom elements are properly recognized by the browser
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = cachedHtml;
     const restoredElement = tempDiv.firstElementChild;
@@ -281,6 +283,10 @@ class UpsellBlock extends HTMLElement {
       this.productCache.delete(productIdStr);
       return false;
     }
+
+    // Reset state classes on restored element (buttons, forms, etc.)
+    // Do this before inserting into DOM
+    this.resetElementState(restoredElement);
 
     // Find the correct container - for sliders, it's inside swiper-container
     if (this.hasSlider) {
@@ -299,6 +305,59 @@ class UpsellBlock extends HTMLElement {
 
     this.productCache.delete(productIdStr);
     return true;
+  }
+
+  /**
+   * Reset state classes on restored elements
+   * Removes classes like is-added, is-loading, has-error, etc.
+   *
+   * @param   {HTMLElement}  element  Element to reset
+   * @return  {void}
+   */
+  resetElementState(element) {
+    // State classes to remove from buttons and forms
+    const stateClasses = ['is-added', 'is-loading', 'is-disabled', 'has-error', 'is-visible', 'is-animated'];
+
+    // Reset buttons
+    element.querySelectorAll('button, [data-quick-add-button]').forEach((button) => {
+      stateClasses.forEach((className) => {
+        button.classList.remove(className);
+      });
+      if (button.disabled) {
+        button.disabled = false;
+      }
+    });
+
+    // Reset form containers
+    element.querySelectorAll('[data-quick-add-holder], [data-form-wrapper]').forEach((container) => {
+      stateClasses.forEach((className) => {
+        container.classList.remove(className);
+      });
+    });
+
+    // Reset error containers
+    element.querySelectorAll('[data-cart-errors-container], [data-error-message]').forEach((errorEl) => {
+      errorEl.classList.remove('is-visible', 'has-error');
+      if (errorEl.innerHTML) {
+        errorEl.innerHTML = '';
+      }
+    });
+
+    // Remove initialization attributes from all custom elements to allow re-initialization
+    // This handles any custom element that uses initialization flags
+    const initAttributePatterns = ['data-initialized', 'data-popout-initialized'];
+
+    // Build selector to query only elements with these attributes
+    const selector = initAttributePatterns.map((attr) => `[${attr}]`).join(', ');
+    const elementsWithInitAttrs = element.querySelectorAll(selector);
+
+    elementsWithInitAttrs.forEach((el) => {
+      initAttributePatterns.forEach((attr) => {
+        if (el.hasAttribute(attr)) {
+          el.removeAttribute(attr);
+        }
+      });
+    });
   }
 
   /**
@@ -418,6 +477,15 @@ class UpsellBlock extends HTMLElement {
         this.innerHTML = fetchedBlock.innerHTML;
         // Clear cache after refresh
         this.productCache.clear();
+
+        // Reset state for all products in the block
+        this.querySelectorAll('[data-quick-add-holder]').forEach((holder) => {
+          const productElement = this.hasSlider ? holder.closest('swiper-slide') : holder.parentElement;
+          if (productElement) {
+            this.resetElementState(productElement);
+          }
+        });
+
         // Update visibility
         this.updateVisibility();
       }
