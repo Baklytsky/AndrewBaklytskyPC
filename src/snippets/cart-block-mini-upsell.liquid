@@ -78,7 +78,13 @@
     {%- endif -%}
 
     <div class="cart__widget__content">
-      <div class="cart__widget__content__inner" data-upsell-block-items>
+      <upsell-block
+        class="cart__widget__content__inner"
+        data-upsell-block-id="{{ block.id }}"
+        {%- if show_slider -%}
+          data-upsell-has-slider="true"
+        {%- endif -%}
+      >
         {%- if show_slider -%}
           <div class="swiper">
             <swiper-container
@@ -99,7 +105,7 @@
         {%- else -%}
           {{- product_list -}}
         {%- endif -%}
-      </div>
+      </upsell-block>
     </div>
   </div>
 {%- endif -%}
