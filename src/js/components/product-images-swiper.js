@@ -21,6 +21,7 @@ if (!customElements.get('product-images-swiper')) {
         this.enableThumbsMobile = this.hasAttribute('data-thumbs-mobile');
         this.activeMediaId = this.getAttribute('data-active-media');
         this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
+        this.imageLayout = this.getAttribute('data-image-layout');
         this.originalThumbsDirection = null; // Store original direction to restore on resize
 
         this.handleSlideChange = this.handleSlideChange.bind(this);
@@ -54,6 +55,20 @@ if (!customElements.get('product-images-swiper')) {
         if (!this.mainContainer?.swiper) return;
 
         this.mainSwiper = this.mainContainer.swiper;
+
+        // Check if we should disable Swiper on desktop for grid-1, grid-2, and stacked layouts
+        // Keep markup but disable Swiper functionality on desktop
+        const skipOnDesktop = ['grid-1', 'grid-2', 'stacked'].includes(this.imageLayout);
+        if (skipOnDesktop && !theme.isMobile) {
+          // Disable Swiper interactions on desktop for these layouts
+          // The markup remains but Swiper won't be functional
+          if (this.mainSwiper) {
+            this.mainSwiper.allowSlideNext = false;
+            this.mainSwiper.allowSlidePrev = false;
+            this.mainSwiper.allowTouchMove = false;
+            this.mainSwiper.keyboard.enabled = false;
+          }
+        }
 
         // Setup thumbnails if enabled and available
         if (this.thumbsContainer?.swiper && this.enableThumbs) {
@@ -354,10 +369,30 @@ if (!customElements.get('product-images-swiper')) {
       }
 
       handleResize() {
-        // Update swiper on resize
+        // Check if we should disable/enable Swiper based on layout and viewport
+        const skipOnDesktop = ['grid-1', 'grid-2', 'stacked'].includes(this.imageLayout);
+
         if (this.mainSwiper && !this.mainSwiper.destroyed) {
+          // Enable/disable Swiper based on viewport and layout
+          if (skipOnDesktop) {
+            if (theme.isMobile) {
+              // Enable Swiper on mobile
+              this.mainSwiper.allowSlideNext = true;
+              this.mainSwiper.allowSlidePrev = true;
+              this.mainSwiper.allowTouchMove = true;
+              this.mainSwiper.keyboard.enabled = true;
+            } else {
+              // Disable Swiper on desktop
+              this.mainSwiper.allowSlideNext = false;
+              this.mainSwiper.allowSlidePrev = false;
+              this.mainSwiper.allowTouchMove = false;
+              this.mainSwiper.keyboard.enabled = false;
+            }
+          }
+
           this.mainSwiper.update();
         }
+
         if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
           const currentDirection = this.thumbsSwiper.params.direction;
           const thumbsContainer = this.thumbsContainer?.closest('.product__thumbs');
@@ -465,7 +500,7 @@ if (!customElements.get('product-images-swiper')) {
         if (this.thumbsArrowNext) {
           this.thumbsArrowNext.removeEventListener('click', this.handleThumbsArrowClick);
         }
-        // this.removeEventListener('theme:media:select', this.handleMediaSelect);
+        this.removeEventListener('theme:media:select', this.handleMediaSelect);
         document.removeEventListener('theme:resize:width', this.handleResize);
       }
 

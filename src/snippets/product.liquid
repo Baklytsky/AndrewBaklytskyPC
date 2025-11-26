@@ -188,6 +188,7 @@
           data-section-id="{{ section.id }}"
           data-active-media="{{ section.id }}-{{ featured_media.id }}"
           data-variant-image-scroll="{{ section.settings.variant_image_scroll }}"
+          data-image-layout="{{ image_layout }}"
           {% if enable_thumbs %}
             data-thumbs-enabled
           {% endif %}
@@ -215,6 +216,9 @@
                   {% if product.media.size <= 1 %}
                     allow-slide-next="false"
                     allow-slide-prev="false"
+                  {% endif %}
+                  {% if image_layout == 'grid-1' or image_layout == 'grid-2' or image_layout == 'stacked' %}
+                    breakpoint="(max-width: 480px)"
                   {% endif %}
                   keyboard="true"
                   grab-cursor="true"
