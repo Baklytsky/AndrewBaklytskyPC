@@ -1222,12 +1222,51 @@ class CartItems extends HTMLElement {
       });
     }
 
+    if (this.hasDiscountBlock) {
+      if (this.discountField) {
+        this.discountField.value = this.existingDiscountCodes.join(',');
+      }
+
+      // Post-render check for shipping-only discounts based on UI not gaining a new "remove-discount" pill
+      if (this.pendingDiscountCheck) {
+        const currentVisibleCodes = Array.from(this.cart.querySelectorAll(selectors.discountBody))
+          .map((el) => el?.dataset?.discountCode)
+          .filter(Boolean)
+          .map((c) => String(c).toLowerCase());
+        const beforeSet = new Set(this.pendingDiscountCheck.visibleCodesBefore.map((c) => String(c).toLowerCase()));
+        const attemptedLower = String(this.pendingDiscountCheck.attemptedCode).toLowerCase();
+        const uiGainedAttempted = currentVisibleCodes.includes(attemptedLower) && !beforeSet.has(attemptedLower);
+
+        this.shippingDiscountError = Boolean(this.pendingDiscountCheck.attemptedApplicable && this.pendingDiscountCheck.codeIncluded && !uiGainedAttempted);
+
+        this.pendingDiscountCheck = null;
+      }
+
+      if (this.shippingDiscountError) {
+        if (this.discountErrorMessage) {
+          this.discountErrorMessage.textContent = window.theme.strings.shipping_discounts_at_checkout;
+          this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.shipping_discounts_at_checkout}`);
+        }
+      } else if (this.discountError) {
+        if (this.discountErrorMessage) {
+          this.discountErrorMessage.textContent = window.theme.strings.discount_not_applicable;
+          this.discountErrorMessage.classList.remove('hidden');
+          console.log(`[Cart discounts] ❌ ${window.theme.strings.discount_not_applicable}`);
+        }
+      } else {
+        this.discountErrorMessage?.classList.add('hidden');
+      }
+    }
+
     this.freeShippingMessageHandle(this.subtotal);
     this.cartRemoveEvents();
     this.cartUpdateEvents();
     this.enableCartButtons();
     this.updateProgress();
     this.animateItems();
+    this.bindDiscountEventListeners();
+    this.logRenderedDiscounts();
 
     if (!this.showCannotAddMoreInCart) {
       this.hideAddToCartErrorMessage();
@@ -1530,6 +1569,52 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.animated);
       });
     });
+  }
+
+  /**
+   * Collect discount codes from cart state
+   * Builds a complete list of discount codes from cart and line items applications
+   * Matches the Liquid logic in cart-price.liquid
+   *
+   * @param   {Object}  parsedState  Parsed cart state from API
+   * @return  {Void}
+   */
+  logDiscountCodes(parsedState) {
+    let discountCodes = new Set();
+    const discountKeys = new Set();
+
+    // Helper function to check and add unique discounts
+    const addDiscount = (title, type) => {
+      const key = `${title}|${type}`;
+      if (!discountKeys.has(key)) {
+        discountKeys.add(key);
+        discountCodes.add({title, type});
+      }
+    };
+
+    // Get cart-level discount codes
+    if (parsedState.cart_level_discount_applications.length > 0) {
+      parsedState.cart_level_discount_applications.forEach((application) => {
+        if (application.discount_application) {
+          addDiscount(application.discount_application.title, application.discount_application.type);
+        }
+      });
+    }
+
+    // Get line-level discount codes from all items
+    if (parsedState.items.length > 0) {
+      parsedState.items.forEach((item) => {
+        if (item.line_level_discount_allocations.length > 0) {
+          item.line_level_discount_allocations.forEach((allocation) => {
+            addDiscount(allocation.discount_application.title, allocation.discount_application.type);
+          });
+        }
+      });
+    }
+
+    if (discountCodes.size > 0) {
+      console.log('Discount details:', Array.from(discountCodes));
+    }
   }
 }
 
