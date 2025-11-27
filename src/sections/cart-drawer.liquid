@@ -242,6 +242,9 @@
                       </div>
                     {%- endif -%}
 
+                  {%- when 'discount' -%}
+                    {%- render 'cart-block-discount', block: block -%}
+
                   {%- when 'checkout-buttons' -%}
                     {{ checkout_buttons }}
 
@@ -949,6 +952,19 @@
         }
       ]
     },
+    {
+      "type": "discount",
+      "name": "Discount",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "pin_to_bottom",
+          "label": "Pin to bottom",
+          "default": false
+        }
+      ]
+    }
   ],
   "presets": [
     {
@@ -985,6 +1001,10 @@
         },
         {
           "type": "checkout-buttons"
+        },
+        {
+          "type": "discount",
+          "settings": {}
         }
       ]
     }

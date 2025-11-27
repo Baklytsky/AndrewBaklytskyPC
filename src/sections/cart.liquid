@@ -189,6 +189,9 @@
                     {{ block.settings.code }}
                   {%- endif -%}
 
+                {%- when 'discount' -%}
+                  {%- render 'cart-block-discount', block: block -%}
+
                 {%- when 'checkout-buttons' -%}
                   <div class="cart__foot__inner">
                     <div class="cart__price__holder" data-cart-price-holder>
@@ -866,6 +869,19 @@
     {
       "type": "payment-icons",
       "name": "Payment icons",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "pin_to_top",
+          "label": "Pin to top",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "discount",
+      "name": "Discount",
+      "limit": 1,
       "settings": [
         {
           "type": "checkbox",
