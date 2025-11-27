@@ -698,8 +698,6 @@ class CartItems extends HTMLElement {
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        this.toggleAwards(element);
-
         if (this.showGetCartResponse) {
           const cleanResponse = element.querySelector(selectors.apiContent);
           this.build(cleanResponse);
@@ -803,52 +801,6 @@ class CartItems extends HTMLElement {
         this.addToCartError(error, button);
         this.enableCartButtons();
       });
-  }
-
-  /**
-   * Collect discount codes from cart state
-   * Builds a complete list of discount codes from cart and line items applications
-   * Matches the Liquid logic in cart-price.liquid
-   *
-   * @param   {Object}  parsedState  Parsed cart state from API
-   * @return  {Void}
-   */
-  logDiscountCodes(parsedState) {
-    let discountCodes = new Set();
-    const discountKeys = new Set();
-
-    // Helper function to check and add unique discounts
-    const addDiscount = (title, type) => {
-      const key = `${title}|${type}`;
-      if (!discountKeys.has(key)) {
-        discountKeys.add(key);
-        discountCodes.add({title, type});
-      }
-    };
-
-    // Get cart-level discount codes
-    if (parsedState.cart_level_discount_applications.length > 0) {
-      parsedState.cart_level_discount_applications.forEach((application) => {
-        if (application.discount_application) {
-          addDiscount(application.discount_application.title, application.discount_application.type);
-        }
-      });
-    }
-
-    // Get line-level discount codes from all items
-    if (parsedState.items.length > 0) {
-      parsedState.items.forEach((item) => {
-        if (item.line_level_discount_allocations.length > 0) {
-          item.line_level_discount_allocations.forEach((allocation) => {
-            addDiscount(allocation.discount_application.title, allocation.discount_application.type);
-          });
-        }
-      });
-    }
-
-    if (discountCodes.size > 0) {
-      console.log('Discount details:', Array.from(discountCodes));
-    }
   }
 
   /**
@@ -1544,216 +1496,6 @@ class CartItems extends HTMLElement {
       });
   }
 
-  /**
-   * Converts a user input amount to cents (or the smallest currency unit)
-   * @param {string|number} input - entered value (e.g. 25.99 or "500.000")
-   * @param {string} currencyCode - the currency code, e.g. "USD", "JPY"
-   * @returns {number} - value in cents (or units if it's a zero-decimal currency)
-   */
-  normalizePriceToMinorUnits(input, currencyCode) {
-    const zeroDecimalCurrencies = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
-    const rawValue = parseFloat(input);
-    if (isNaN(rawValue)) {
-      throw new Error(input);
-    }
-
-    const isZeroDecimal = zeroDecimalCurrencies.includes(currencyCode);
-
-    return isZeroDecimal ? Math.round(rawValue) : Math.round(rawValue * 100);
-  }
-
-  checkConditions(condition, data) {
-    const value = condition.value;
-    switch (condition.type) {
-      case 'ORDER_AMOUNT':
-        const operator = condition.operator;
-        const amount = this.normalizePriceToMinorUnits(value, window.Shopify.currency.active);
-        const price = data.price;
-        const match = (operator === 'greater_than_or_equal' && price >= amount) || (operator === 'less_than_or_equal' && price <= amount) || (operator === 'equal' && price === amount);
-        return match;
-        break;
-
-      case 'PRODUCT_TAG':
-        return data.tags.includes(value);
-        break;
-
-      case 'COLLECTION':
-        const collectionsIds = data.collections.map((item) => item.id.toString());
-        const collectionId = value.replace('gid://shopify/Collection/', '');
-        return collectionsIds.includes(collectionId);
-        break;
-
-      case 'SPECIFIC_PRODUCT':
-        const productId = value.replace('gid://shopify/Product/', '');
-        return data.products.includes(productId);
-        break;
-
-      default:
-        return false;
-    }
-  }
-
-  checkActiveReward(config) {
-    const startDateString = config['promotion-start-date'];
-    const startDate = new Date(startDateString);
-    const endDateString = config['promotion-end-date'];
-    const endDate = new Date(endDateString);
-    const status = config['promotion-status'];
-    const timeNow = new Date();
-    let checkStartDate = true;
-    let checkEndDate = true;
-
-    if (isNaN(startDate) || timeNow <= startDate) {
-      checkStartDate = false;
-    }
-
-    if (!isNaN(endDate) && timeNow >= endDate) {
-      checkEndDate = false;
-    }
-
-    return status === 'active' && checkStartDate && checkEndDate;
-  }
-
-  toggleReward(data) {
-    const conditions = data.functionConfig.conditions;
-    const rewards = data.functionConfig.rewards;
-    let addItems = [];
-    let removeItems = [];
-
-    if (conditions?.length && rewards?.length) {
-      const addedRewards = data.metaConfig.rewards;
-      let result = false;
-
-      for (let i = 0; i < conditions.length; ) {
-        let groupResult = this.checkConditions(conditions[i], data.info);
-        i++;
-
-        for (; i < conditions.length && conditions[i - 1].logicalOperator === 'AND'; i++) {
-          groupResult = groupResult && this.checkConditions(conditions[i], data.info);
-        }
-
-        result = result || groupResult;
-      }
-
-      if ((result && !addedRewards.length) || (!result && addedRewards.length)) {
-        if (result && !addedRewards.length) {
-          rewards.forEach((reward) => {
-            addItems.push({
-              id: parseInt(reward.variantId.replace('gid://shopify/ProductVariant/', '')),
-              quantity: reward.quantity ?? 1,
-              properties: {
-                _reward: `reward`,
-              },
-            });
-          });
-        } else {
-          removeItems = addedRewards;
-        }
-      }
-    }
-
-    return {addItems, removeItems};
-  }
-
-  toggleTier(data) {
-    const tierVariants = data.functionConfig.tiers;
-    let addItems = [];
-    let removeItems = [];
-
-    if (tierVariants?.length) {
-      const tierMode = data.functionConfig.cumulative;
-      const addedGifts = data.metaConfig.gifts;
-
-      tierVariants.sort((a, b) => b.threshold - a.threshold);
-
-      for (let index = 0; index < tierVariants.length; index++) {
-        const tier = tierVariants[index];
-        let addVariant = true;
-        const variantId = tier.variantId.replace('gid://shopify/ProductVariant/', '');
-        const condition = {
-          type: 'ORDER_AMOUNT',
-          value: tier.threshold,
-          operator: 'greater_than_or_equal',
-        };
-        const resultCondition = this.checkConditions(condition, data.info);
-
-        if (addedGifts.length) {
-          addedGifts.forEach((addedReward) => {
-            const addedRewardVariantId = addedReward.split(':')[0];
-
-            if (resultCondition && addedRewardVariantId === variantId) {
-              addVariant = false;
-
-              if (!tierMode && addItems.length > 0) {
-                removeItems.push(addedReward);
-              }
-            }
-
-            if (!resultCondition && addedRewardVariantId === variantId) {
-              removeItems.push(addedReward);
-            }
-          });
-        }
-
-        if (resultCondition && addVariant && addItems.length < 1) {
-          addItems.push({
-            id: variantId,
-            quantity: 1,
-            properties: {
-              _gift: `gift`,
-            },
-          });
-        }
-
-        if (!tierMode && index === 0 && !addVariant) {
-          break;
-        }
-      }
-    }
-
-    return {addItems, removeItems};
-  }
-
-  toggleAwards(response) {
-    const cartJson = response.querySelector('[data-cart-json]');
-    if (cartJson) {
-      const info = JSON.parse(cartJson.innerHTML);
-      const meta = info.meta;
-      let addItems = [];
-      let removeItems = [];
-
-      for (const property in meta) {
-        const metaConfig = meta[property];
-        const config = metaConfig.config;
-        const isRewardActive = this.checkActiveReward(config);
-
-        if (isRewardActive) {
-          const functionConfig = config['function-configuration'];
-          const data = {functionConfig, metaConfig, info};
-          const toggleRewardObj = this.toggleReward(data);
-          const toggleTierObj = this.toggleTier(data);
-
-          addItems.push(...toggleRewardObj.addItems, ...toggleTierObj.addItems);
-          removeItems.push(...toggleRewardObj.removeItems, ...toggleTierObj.removeItems);
-        }
-      }
-
-      if (addItems.length || removeItems.length) {
-        this.showGetCartResponse = false;
-        let addItemsSkip = true;
-
-        if (removeItems.length) {
-          this.removeMultipleProducts(removeItems);
-          addItemsSkip = false;
-        }
-
-        if (addItems.length && addItemsSkip) {
-          this.addToCart(addItems);
-        }
-      }
-    }
-  }
-
   removeUpsellOrBundleProduct(productID, type = 'upsell') {
     const holders = {
       upsell: this.upsellProductsHolder,
@@ -1827,6 +1569,52 @@ class CartItems extends HTMLElement {
         item.classList.add(classes.animated);
       });
     });
+  }
+
+  /**
+   * Collect discount codes from cart state
+   * Builds a complete list of discount codes from cart and line items applications
+   * Matches the Liquid logic in cart-price.liquid
+   *
+   * @param   {Object}  parsedState  Parsed cart state from API
+   * @return  {Void}
+   */
+  logDiscountCodes(parsedState) {
+    let discountCodes = new Set();
+    const discountKeys = new Set();
+
+    // Helper function to check and add unique discounts
+    const addDiscount = (title, type) => {
+      const key = `${title}|${type}`;
+      if (!discountKeys.has(key)) {
+        discountKeys.add(key);
+        discountCodes.add({title, type});
+      }
+    };
+
+    // Get cart-level discount codes
+    if (parsedState.cart_level_discount_applications.length > 0) {
+      parsedState.cart_level_discount_applications.forEach((application) => {
+        if (application.discount_application) {
+          addDiscount(application.discount_application.title, application.discount_application.type);
+        }
+      });
+    }
+
+    // Get line-level discount codes from all items
+    if (parsedState.items.length > 0) {
+      parsedState.items.forEach((item) => {
+        if (item.line_level_discount_allocations.length > 0) {
+          item.line_level_discount_allocations.forEach((allocation) => {
+            addDiscount(allocation.discount_application.title, allocation.discount_application.type);
+          });
+        }
+      });
+    }
+
+    if (discountCodes.size > 0) {
+      console.log('Discount details:', Array.from(discountCodes));
+    }
   }
 }
 

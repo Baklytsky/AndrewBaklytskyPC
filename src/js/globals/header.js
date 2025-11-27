@@ -164,7 +164,7 @@ if (!customElements.get('header-component')) {
 
       toggleButtonClick(e) {
         e.preventDefault();
-        document.dispatchEvent(new CustomEvent('theme:cart:toggle', {bubbles: true}));
+        document.dispatchEvent(new CustomEvent('theme:cart-drawer:toggle', {bubbles: true}));
       }
 
       initSticky() {
