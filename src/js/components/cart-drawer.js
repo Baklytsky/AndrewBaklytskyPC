@@ -48,7 +48,7 @@ if (!customElements.get('cart-drawer')) {
         window.theme.hasCartDrawer = true;
 
         this.addEventListener('theme:cart-drawer:show', this.openCartDrawer);
-        document.addEventListener('theme:cart:toggle', this.toggleCartDrawer);
+        document.addEventListener('theme:cart-drawer:toggle', this.toggleCartDrawer);
         document.addEventListener('theme:quick-add:open', this.closeCartDrawer);
         document.addEventListener('theme:product:added', this.openCartDrawerOnProductAdded);
         document.addEventListener('shopify:block:select', this.openCartDrawerOnSelect);
@@ -58,7 +58,7 @@ if (!customElements.get('cart-drawer')) {
 
       disconnectedCallback() {
         document.removeEventListener('theme:product:added', this.openCartDrawerOnProductAdded);
-        document.removeEventListener('theme:cart:toggle', this.toggleCartDrawer);
+        document.removeEventListener('theme:cart-drawer:toggle', this.toggleCartDrawer);
         document.removeEventListener('theme:quick-add:open', this.closeCartDrawer);
         document.removeEventListener('shopify:block:select', this.openCartDrawerOnSelect);
         document.removeEventListener('shopify:section:select', this.openCartDrawerOnSelect);
