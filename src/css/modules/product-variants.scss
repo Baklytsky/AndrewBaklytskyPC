@@ -221,15 +221,13 @@
   --bg: var(--COLOR-BG);
   --bg-arrow: var(--COLOR-BG);
 
-  display: block;
-  padding: var(--form-margin) 0;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
   visibility: hidden;
   opacity: 0;
   min-width: 0;
   width: 100%;
-  display: flex;
-  flex-flow: row wrap;
-  align-items: center;
   padding: 0 calc(var(--inner) / 2);
   background-color: var(--bg);
   transition: opacity 0.3s ease, visibility 0.3s;
@@ -256,7 +254,6 @@
   .swatch__button {
     padding: 5px 0;
     margin: 0 5px;
-    cursor: pointer;
   }
   .swatch__button input:checked ~ label { margin: 0; }
   .swatch__button input:checked + label::after { border-color: var(--border); }
@@ -377,6 +374,7 @@
   z-index: 0;
   pointer-events: initial;
   backface-visibility: hidden;
+  cursor: pointer;
 }
 
 .swatch__button--empty {
@@ -413,6 +411,9 @@
 .radio__buttons--top .swatch__button { vertical-align: top; }
 
 .selector-wrapper fieldset label { margin-top: unset; }
+
+.swatch__button--bundle,
+.swatch__button--bundle .swatch__link { cursor: default; }
 
 .swatch__button .swatch__link,
 .swatch__button input ~ label {
@@ -504,7 +505,9 @@
   &::after { background: var(--border); }
 }
 
-/*=== Circle swatch style ===*/
+// Circle swatch style
+.swatch__button--circle { border-radius: 50%; }
+
 .swatch__button--circle .sibling__link,
 .swatch__button--circle .swatch__link,
 .swatch__button--circle input ~ label {
@@ -532,7 +535,7 @@
   transform: rotate(-45deg) translate(-50%, -50%);
 }
 
-/*=== Square swatch style ===*/
+// Square swatch style
 
 .swatch__button--square input ~ label,
 .swatch__button--square .sibling__link,
