@@ -6,9 +6,10 @@
   - product_form_id: {String} product form id.
   - section_id: {String} id of section to which this snippet belongs.
   - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
+  - is_bundle: {Boolean} for the bundle modal. If true the bundle modal is rendered, false - not rendered (optional).
 
   Usage:
-  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, unique: unique, show_pickup_availability: true %}
+  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, unique: unique, show_pickup_availability: true, is_bundle: true %}
 {% endcomment %}
 
 {%- liquid
@@ -407,8 +408,7 @@
       {%- if is_bundle -%}
         <script type="application/json" data-bundle-json>
           {
-            "product": {{ product | json }},
-            "variant": {{ product.selected_or_first_available_variant | json }}
+            "product": {{ product | json }}
           }
         </script>
       {%- endif -%}
