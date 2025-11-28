@@ -49,6 +49,7 @@
 
     if bundle_opened
       assign bundle_price = bundle_price | plus: line_item_final_price
+      assign bundle_price_compare = bundle_price_compare | plus: line_item_original_price
       assign bundle_keys = bundle_keys | append: ',' | append: line_item.key
       assign animation_delay = animation_delay | plus: animation_delay_increment
 
@@ -352,7 +353,9 @@
                   {%- liquid
                     assign sale_compared_price = line_item_variant_compare_at_price
                     if bundle_opened
-                      assign bundle_price_compare = bundle_price_compare | plus: line_item_variant_compare_at_price
+                      if line_item_variant_compare_at_price > line_item_original_price
+                        assign bundle_price_compare = bundle_price_compare | minus: line_item_original_price | plus: line_item_variant_compare_at_price
+                      endif
                     endif
                   -%}
                   <del>{{- line_item_variant_compare_at_price | money -}}</del>
@@ -361,9 +364,6 @@
                 {%- if discounted -%}
                   {%- liquid
                     assign sale_compared_price = line_item_original_price
-                    if bundle_opened
-                      assign bundle_price_compare = bundle_price_compare | plus: line_item_original_price
-                    endif
                   -%}
                   <del>{{- line_item_original_price | money -}}</del>
                 {%- endif -%}
@@ -572,7 +572,12 @@
               </span>
 
               {%- if bundle_price_compare > bundle_price -%}
-                {%- assign bundle_discount_price = bundle_discount_amount | money -%}
+                {%- liquid
+                  if bundle_discount_amount == 0
+                    assign bundle_discount_amount = bundle_price_compare | minus: bundle_price
+                  endif
+                  assign bundle_discount_price = bundle_discount_amount | money
+                -%}
                 <span class="cart__price__save">
                   {{- 'cart.general.saving_with_bundle_discount' | t: amount: bundle_discount_price -}}
                 </span>
