@@ -24,6 +24,8 @@ if (!customElements.get('product-form')) {
           const productJSONhtml = this.querySelector('[data-bundle-json]')?.innerHTML;
           const productJSON = JSON.parse(productJSONhtml);
           const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.product.id}"]`);
+          const selectedVariantId = evt.currentTarget.querySelector('[name="id"]')?.value;
+          const selectedVariant = productJSON.product.variants.find((variant) => variant.id === Number(selectedVariantId));
 
           if (bundleButton) {
             bundleButton.dispatchEvent(
@@ -31,7 +33,7 @@ if (!customElements.get('product-form')) {
                 detail: {
                   data: {
                     product: productJSON.product,
-                    variant: productJSON.variant,
+                    variant: selectedVariant,
                   },
                 },
                 bubbles: true,
