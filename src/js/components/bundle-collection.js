@@ -25,10 +25,16 @@ if (!customElements.get('bundle-collection')) {
         this.addProductsToCartEvent = (event) => this.addProductsToCart(event);
         this.addProductToBundleModalEvent = (event) => this.addProductToBundleModal(event);
         this.scrollToBundleEvent = (event) => this.scrollToBundle(event);
+        this.productAddSuccessEvent = (event) => this.handleProductAddSuccess(event);
+        this.cartBuiltEvent = (event) => this.handleCartBuilt(event);
+        this.pendingBundleClear = false;
       }
 
       connectedCallback() {
         if (!this.bundle) return;
+
+        // Reset bundle data on page load/refresh to start fresh
+        this.clearBundleData();
 
         if (this.buttons.length) {
           this.buttons.forEach((button) => {
@@ -42,11 +48,56 @@ if (!customElements.get('bundle-collection')) {
         this.scrollToBundleButton?.addEventListener('click', this.scrollToBundleEvent);
         this.addButton?.addEventListener('click', this.addProductsToCartEvent);
 
+        // Listen for successful product add to mark bundle for clearing
+        document.addEventListener('theme:product:add', this.productAddSuccessEvent);
+        // Listen for cart built event to clear bundle data after cart is ready
+        document.addEventListener('theme:cart:built', this.cartBuiltEvent);
+
         this.updateUI();
       }
 
       scrollToBundle() {
         window.theme.scrollTo(this.getBoundingClientRect().top);
+      }
+
+      handleProductAddSuccess(event) {
+        // Check if this is a bundle add to cart by checking if the button is the bundle add button
+        if (event.detail?.button === this.addButton) {
+          // Mark bundle for clearing when cart is built
+          this.pendingBundleClear = true;
+        }
+      }
+
+      handleCartBuilt(event) {
+        // Clear bundle data after cart has been built
+        if (this.pendingBundleClear) {
+          setTimeout(() => {
+            this.pendingBundleClear = false;
+            this.clearBundleData();
+          }, 600); // match the ".drawer__inner" animation timing of 0.6s
+        }
+      }
+
+      clearBundleData() {
+        // Reset selected products
+        this.selectedProducts = [];
+
+        // Clear all placeholders
+        this.placeholders.forEach((placeholder) => {
+          placeholder.classList.remove('is-filled', 'is-dot-active', 'is-line-active', 'is-animate-in', 'is-animate-out');
+          const filledEl = placeholder.querySelector('[data-bundle-placeholder-filled]');
+          if (filledEl) {
+            filledEl.innerHTML = '';
+          }
+        });
+
+        // Reset first placeholder dot state
+        if (this.placeholders.length > 0) {
+          this.placeholders[0].classList.remove('is-dot-active');
+        }
+
+        // Update UI to reflect cleared state
+        this.updateUI();
       }
 
       addProductToBundleModal(event) {
@@ -335,6 +386,8 @@ if (!customElements.get('bundle-collection')) {
 
         this.scrollToBundleButton?.removeEventListener('click', this.scrollToBundleEvent);
         this.addButton?.removeEventListener('click', this.addProductsToCartEvent);
+        document.removeEventListener('theme:product:add', this.productAddSuccessEvent);
+        document.removeEventListener('theme:cart:built', this.cartBuiltEvent);
       }
     }
   );
