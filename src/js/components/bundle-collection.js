@@ -18,8 +18,6 @@ if (!customElements.get('bundle-collection')) {
         this.selectedProducts = [];
         this.bundleCartItems = null;
         this.bundleId = this.hasAttribute('data-bundle-id') ? this.getAttribute('data-bundle-id') : '';
-        this.localStorageName = `bundleProducts-${window.location.pathname}`;
-        this.bundleProducts = JSON.parse(localStorage.getItem(this.localStorageName)) || [];
         this.discountType = this?.getAttribute('data-bundle-discount-type');
         this.discountValue = this?.getAttribute('data-bundle-discount-value');
         this.bundleButtonAddEvent = (event) => this.bundleButtonAdd(event);
@@ -43,10 +41,6 @@ if (!customElements.get('bundle-collection')) {
 
         this.scrollToBundleButton?.addEventListener('click', this.scrollToBundleEvent);
         this.addButton?.addEventListener('click', this.addProductsToCartEvent);
-
-        if (this.bundleProducts.length) {
-          this.loadLocalStorage();
-        }
 
         this.updateUI();
       }
@@ -103,19 +97,6 @@ if (!customElements.get('bundle-collection')) {
 
           this.addProductToBundle(data);
         }
-      }
-
-      loadLocalStorage() {
-        this.bundleProducts.forEach((data, index) => {
-          const placeholder = this.placeholders[index];
-
-          this.setProductToPlaceholder(data, placeholder);
-
-          placeholder.classList.add('is-filled', 'is-dot-active', 'is-line-active');
-        });
-
-        this.placeholders[this.bundleProducts.length - 1].classList.remove('is-line-active');
-        this.selectedProducts = this.bundleProducts;
       }
 
       isSupportedByGetSizedImageUrl(src, size = '100x') {
@@ -248,8 +229,6 @@ if (!customElements.get('bundle-collection')) {
 
         this.selectedProducts.push(productData);
 
-        localStorage.setItem(this.localStorageName, JSON.stringify(this.selectedProducts));
-
         if (this.selectedProducts.length > 1) {
           this.placeholders[this.selectedProducts.length - 2].classList.add('is-line-active');
         }
@@ -285,7 +264,6 @@ if (!customElements.get('bundle-collection')) {
         const index = placeholdersArr.indexOf(placeholder);
         const targetFocusButton = this.querySelector(`[data-bundle-product-button="${this.selectedProducts[index].productId}"]`);
         this.selectedProducts.splice(index, 1);
-        localStorage.setItem(this.localStorageName, JSON.stringify(this.selectedProducts));
 
         let lastFilledPlaceholder = null;
         if (this.selectedProducts.length) {
