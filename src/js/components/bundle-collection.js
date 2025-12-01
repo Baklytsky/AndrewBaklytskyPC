@@ -61,10 +61,15 @@ if (!customElements.get('bundle-collection')) {
 
       addProductsToCart() {
         if (this.selectedProducts.filter((p) => p !== null).length === this.maxSelection) {
-          this.selectedProducts.forEach((element) => {
+          this.bundleCartItems = document.querySelectorAll(`[data-bundle-cart-item="${this.bundleId}"]`);
+          const bundleSequence = this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1;
+          const timestamp = Date.now();
+
+          this.selectedProducts.forEach((element, index) => {
             if (this.bundleId !== '') {
-              this.bundleCartItems = document.querySelectorAll(`[data-bundle-cart-item="${this.bundleId}"]`);
-              element.properties._bundle_unique_id = `${this.bundleId}_${this.bundleCartItems.length ? this.bundleCartItems.length + 1 : 1}`;
+              // Unique ID prevents Shopify from merging duplicate products into single line items
+              element.properties._bundle_unique_id = `${this.bundleId}_${bundleSequence}_${index + 1}_${timestamp + index}`;
+              element.properties._bundle_item_index = `${index + 1}`;
             }
           });
 
