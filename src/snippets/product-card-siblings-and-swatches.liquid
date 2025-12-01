@@ -95,7 +95,7 @@
                       {%- assign swatch_style = swatch_style | append: '--animation-delay: ' | append: animation_delay | append: 's;' -%}
 
                       <tooltip-component
-                        class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ option_value.name | handleize }}"
+                        class="swatches swatch__button swatch__button--{{ settings.swatch_style }} swatch-{{ option_value.name | handleize }}{% if bundle_product %} swatch__button--bundle{% endif %}"
                         data-swatch-button
                         data-tooltip="{{ option_value }}"
                         data-swatch-variant="{{ option_value.variant.id }}"
@@ -104,10 +104,15 @@
                         data-variant="{{ option_value.variant.id }}"
                         style="{{ swatch_style }}"
                       >
-
-                        <a class="swatch__link" href="{{ product.url }}?variant={{ option_value.variant.id }}">
-                          <span class="visually-hidden">{{ option_value }}</span>
-                        </a>
+                        {%- unless bundle_product -%}
+                          <a class="swatch__link" href="{{ product.url }}?variant={{ option_value.variant.id }}">
+                            <span class="visually-hidden">{{ option_value }}</span>
+                          </a>
+                        {%- else -%}
+                          <span class="swatch__link">
+                            <span class="visually-hidden">{{ option_value }}</span>
+                          </span>
+                        {%- endunless -%}
                       </tooltip-component>
                     {%- endfor -%}
 

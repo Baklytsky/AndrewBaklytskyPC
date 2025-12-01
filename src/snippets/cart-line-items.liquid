@@ -14,12 +14,6 @@
   assign line_items_collections = null
   assign line_items_tags = null
   assign line_items_products = null
-  assign line_items_rewards = null
-  assign line_items_gifts = null
-  assign buy_promo_meta_name = settings.carbon_app_id | append: '--buy-x-get-y'
-  assign buy_promo_meta = shop.metafields[buy_promo_meta_name]
-  assign gwp_promo_meta_name = settings.carbon_app_id | append: '--gwp-tiers'
-  assign gwp_promo_meta = shop.metafields[gwp_promo_meta_name]
 -%}
 
 {%- comment -%}
@@ -34,8 +28,6 @@
     assign line_item_final_price = line_item.final_price
     assign line_item_variant_compare_at_price = line_item.variant.compare_at_price
     assign line_item_original_price = line_item.original_price
-    assign line_item_reward = false
-    assign line_item_gift = false
 
     assign bundle_unique_id = line_item.properties._bundle_unique_id
     assign bundle_id = bundle_unique_id | split: '_' | first
@@ -57,6 +49,7 @@
 
     if bundle_opened
       assign bundle_price = bundle_price | plus: line_item_final_price
+      assign bundle_price_compare = bundle_price_compare | plus: line_item_original_price
       assign bundle_keys = bundle_keys | append: ',' | append: line_item.key
       assign animation_delay = animation_delay | plus: animation_delay_increment
 
@@ -70,16 +63,6 @@
       endif
     else
       assign animation_delay_bundle = animation_delay | plus: animation_delay_increment
-    endif
-
-    if line_item.properties._reward == 'reward'
-      assign line_item_reward = true
-      assign line_items_rewards = line_items_rewards | append: ',' | append: line_item.key
-    endif
-
-    if line_item.properties._gift == 'gift'
-      assign line_item_gift = true
-      assign line_items_gifts = line_items_gifts | append: ',' | append: line_item.key
     endif
   -%}
 
@@ -370,7 +353,9 @@
                   {%- liquid
                     assign sale_compared_price = line_item_variant_compare_at_price
                     if bundle_opened
-                      assign bundle_price_compare = bundle_price_compare | plus: line_item_variant_compare_at_price
+                      if line_item_variant_compare_at_price > line_item_original_price
+                        assign bundle_price_compare = bundle_price_compare | minus: line_item_original_price | plus: line_item_variant_compare_at_price
+                      endif
                     endif
                   -%}
                   <del>{{- line_item_variant_compare_at_price | money -}}</del>
@@ -379,9 +364,6 @@
                 {%- if discounted -%}
                   {%- liquid
                     assign sale_compared_price = line_item_original_price
-                    if bundle_opened
-                      assign bundle_price_compare = bundle_price_compare | plus: line_item_original_price
-                    endif
                   -%}
                   <del>{{- line_item_original_price | money -}}</del>
                 {%- endif -%}
@@ -425,7 +407,7 @@
             {%- endif -%}
           </p>
 
-          {%- unless bundle_opened or line_item_reward or line_item_gift -%}
+          {%- unless bundle_opened -%}
             <div class="cart__item__actions">
               <quantity-input class="cart__quantity-counter">
                 {%- assign quantity = line_item.quantity -%}
@@ -590,7 +572,12 @@
               </span>
 
               {%- if bundle_price_compare > bundle_price -%}
-                {%- assign bundle_discount_price = bundle_discount_amount | money -%}
+                {%- liquid
+                  if bundle_discount_amount == 0
+                    assign bundle_discount_amount = bundle_price_compare | minus: bundle_price
+                  endif
+                  assign bundle_discount_price = bundle_discount_amount | money
+                -%}
                 <span class="cart__price__save">
                   {{- 'cart.general.saving_with_bundle_discount' | t: amount: bundle_discount_price -}}
                 </span>
@@ -627,36 +614,3 @@
     -%}
   {%- endif -%}
 {%- endfor -%}
-
-{%- if buy_promo_meta != blank or gwp_promo_meta != blank -%}
-  {%- liquid
-    assign line_items_collections = line_items_collections | uniq
-    assign line_items_tags = line_items_tags | uniq
-    assign line_items_products = line_items_products | remove_first: ',' | split: ','
-    assign line_items_rewards = line_items_rewards | remove_first: ',' | split: ','
-    assign line_items_gifts = line_items_gifts | remove_first: ',' | split: ','
-  -%}
-
-  <script type="application/json" data-cart-json>
-    {
-      "price": {{ cart.total_price | plus: 0 | json }},
-      "products": {{ line_items_products | json }},
-      "collections": {{ line_items_collections | json }},
-      "tags": {{ line_items_tags | json }},
-      "meta": {
-        {%- if buy_promo_meta != blank -%}
-          "reward": {
-            "rewards": {{ line_items_rewards | json }},
-            "config": {{ buy_promo_meta | json }}
-          }{%- if gwp_promo_meta != blank -%},{%- endif -%}
-        {%- endif -%}
-        {%- if gwp_promo_meta != blank -%}
-          "gift": {
-            "gifts": {{ line_items_gifts | json }},
-            "config": {{ gwp_promo_meta | json }}
-          }
-        {%- endif -%}
-      }
-    }
-  </script>
-{%- endif -%}

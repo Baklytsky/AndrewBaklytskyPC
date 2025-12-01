@@ -108,13 +108,74 @@ if (!customElements.get('popout-select')) {
         }
       }
 
+      calculateConfinedDimensions() {
+        const confineContainer = this.closest('[data-popout-select-confine]');
+        if (!confineContainer) return null;
+
+        const toggleRect = this.popoutToggle.getBoundingClientRect();
+        const containerRect = confineContainer.getBoundingClientRect();
+        const containerClientHeight = confineContainer.clientHeight;
+        const containerScrollTop = confineContainer.scrollTop;
+
+        // Get toggle position relative to container's content area
+        const toggleRelativeTop = toggleRect.top - containerRect.top + containerScrollTop;
+        const toggleRelativeBottom = toggleRect.bottom - containerRect.top + containerScrollTop;
+
+        // Calculate viewport available space
+        const viewportSpaceAbove = toggleRect.top;
+        const viewportSpaceBelow = theme.windowHeight - toggleRect.bottom;
+
+        // Calculate confined container available space
+        const containerSpaceAbove = toggleRelativeTop;
+        const containerSpaceBelow = containerClientHeight - toggleRelativeBottom;
+
+        // Use the smaller space for each direction
+        const effectiveSpaceAbove = Math.min(viewportSpaceAbove, containerSpaceAbove);
+        const effectiveSpaceBelow = Math.min(viewportSpaceBelow, containerSpaceBelow);
+
+        // Determine if opening on top based on effective available space
+        const shouldOpenTop = effectiveSpaceAbove > effectiveSpaceBelow && effectiveSpaceAbove > 0;
+
+        // Set the class based on the calculation
+        this.popoutList.classList.toggle('popout-list--top', shouldOpenTop);
+
+        // Calculate max-height based on opening direction using the smaller space
+        const maxHeight = shouldOpenTop ? Math.max(0, parseInt(effectiveSpaceAbove)) : Math.max(0, parseInt(effectiveSpaceBelow));
+
+        return {
+          width: null,
+          height: maxHeight,
+        };
+      }
+
       popupListSetDimensions() {
         this.popoutList.style.setProperty('--max-width', '100vw');
         this.popoutList.style.setProperty('--max-height', '100vh');
 
         requestAnimationFrame(() => {
-          this.popoutList.style.setProperty('--max-width', `${parseInt(theme.windowWidth - this.popoutList.getBoundingClientRect().left)}px`);
-          this.popoutList.style.setProperty('--max-height', `${parseInt(theme.windowHeight - this.popoutList.getBoundingClientRect().top)}px`);
+          const popoutListRect = this.popoutList.getBoundingClientRect();
+          const toggleRect = this.popoutToggle.getBoundingClientRect();
+
+          // Viewport-based calculations
+          let maxWidth = parseInt(theme.windowWidth - popoutListRect.left);
+          let maxHeight;
+
+          const isOpeningTop = this.popoutList.classList.contains('popout-list--top');
+          if (isOpeningTop) {
+            // When opening on top: space from viewport top to toggle button top
+            maxHeight = parseInt(toggleRect.top);
+          } else {
+            // When opening on bottom: space from popout list top to viewport bottom
+            maxHeight = parseInt(theme.windowHeight - popoutListRect.top);
+          }
+
+          // Override with confined container calculations if available
+          const {width: confinedWidth, height: confinedHeight} = this.calculateConfinedDimensions() || {};
+          maxWidth = confinedWidth ?? maxWidth;
+          maxHeight = confinedHeight ?? maxHeight;
+
+          this.popoutList.style.setProperty('--max-width', `${maxWidth}px`);
+          this.popoutList.style.setProperty('--max-height', `${maxHeight}px`);
         });
       }
 
