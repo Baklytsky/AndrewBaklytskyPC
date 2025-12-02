@@ -158,7 +158,12 @@
                               href="#"
                               data-placeholder-url
                             >
-                              <p class="product-inline__text product-inline__text--vendor" data-placeholder-vendor></p>
+                              {%- if block.settings.show_vendor -%}
+                                <p
+                                  class="product-inline__text product-inline__text--vendor"
+                                  data-placeholder-vendor
+                                ></p>
+                              {%- endif -%}
 
                               <p class="product-inline__title">
                                 <strong data-placeholder-title></strong>
@@ -475,7 +480,14 @@
       "type": "bundle_products",
       "limit": 1,
       "name": "Bundle products",
-      "settings": []
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show vendor",
+          "default": false
+        }
+      ]
     },
     {
       "type": "bundle_price",

@@ -160,8 +160,11 @@ if (!customElements.get('bundle-collection')) {
         const filledEl = placeholder.querySelector('[data-bundle-placeholder-filled]');
         const button = this.querySelector(`[data-bundle-product-button="${data.productId}"]`);
         const productUrl = button?.hasAttribute('data-bundle-product-url') ? button.getAttribute('data-bundle-product-url') : null;
+        const vendor = cloneTemplate.querySelector('[data-placeholder-vendor]');
 
-        cloneTemplate.querySelector('[data-placeholder-vendor]').textContent = data.vendor;
+        if (vendor) {
+          vendor.textContent = data.vendor;
+        }
         cloneTemplate.querySelector('[data-placeholder-title]').innerHTML = data.title;
         cloneTemplate.querySelector('[data-placeholder-price]').innerHTML = this.formatRate(data.price);
 
