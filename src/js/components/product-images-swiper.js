@@ -85,7 +85,7 @@ if (!customElements.get('product-images-swiper')) {
           this.thumbsSwiper.on('update', this.updateThumbsArrows);
 
           // Initial update with a small delay to ensure DOM is ready
-          requestAnimationFrame(() => {
+          queueMicrotask(() => {
             setTimeout(() => {
               // Force swiper to recalculate dimensions (fixes issue with vertical thumbs)
               if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {

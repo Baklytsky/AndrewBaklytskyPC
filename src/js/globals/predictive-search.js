@@ -108,7 +108,7 @@ if (!customElements.get('predictive-search')) {
 
       onFocusOut() {
         setTimeout(() => {
-          if (!this.contains(document.activeElement)) this.close();
+          if (!this.searchPopdown.contains(document.activeElement)) this.close();
         });
       }
 
