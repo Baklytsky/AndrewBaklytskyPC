@@ -1265,6 +1265,9 @@ class CartItems extends HTMLElement {
     this.enableCartButtons();
     this.updateProgress();
     this.animateItems();
+
+    document.dispatchEvent(new CustomEvent('theme:cart:built', {bubbles: true}));
+
     this.bindDiscountEventListeners();
     this.logRenderedDiscounts();
 

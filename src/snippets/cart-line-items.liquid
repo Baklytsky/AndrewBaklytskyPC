@@ -31,12 +31,31 @@
 
     assign bundle_unique_id = line_item.properties._bundle_unique_id
     assign bundle_id = bundle_unique_id | split: '_' | first
+    assign bundle_sequence_parts = bundle_unique_id | split: '_'
+    assign bundle_sequence = ''
+    if bundle_sequence_parts.size > 1
+      assign bundle_sequence = bundle_sequence_parts[1]
+    endif
+    assign bundle_group_key = bundle_id | append: '_' | append: bundle_sequence
     assign prev_index = forloop.index0 | minus: 1
     assign next_index = forloop.index0 | plus: 1
     assign prev_line_item = cart.items[prev_index]
     assign next_line_item = cart.items[next_index]
-    assign next_line_item_bundle_unique_id = next_line_item.properties._bundle_unique_id
-    assign next_line_item_bundle_id = next_line_item_bundle_unique_id | split: '_' | first
+    assign next_line_item_bundle_unique_id = ''
+    assign next_line_item_bundle_id = ''
+    assign next_line_item_bundle_sequence = ''
+    assign next_line_item_bundle_group_key = ''
+    if next_line_item != blank
+      assign next_line_item_bundle_unique_id = next_line_item.properties._bundle_unique_id
+      if next_line_item_bundle_unique_id != blank
+        assign next_line_item_bundle_id = next_line_item_bundle_unique_id | split: '_' | first
+        assign next_line_item_sequence_parts = next_line_item_bundle_unique_id | split: '_'
+        if next_line_item_sequence_parts.size > 1
+          assign next_line_item_bundle_sequence = next_line_item_sequence_parts[1]
+        endif
+        assign next_line_item_bundle_group_key = next_line_item_bundle_id | append: '_' | append: next_line_item_bundle_sequence
+      endif
+    endif
 
     if bundle_opened == false and bundle_unique_id != blank
       assign bundle_opened = true
@@ -507,7 +526,15 @@
     </div>
   {%- endif -%}
 
-  {%- if bundle_opened and next_line_item_bundle_id == blank or next_line_item_bundle_unique_id != bundle_unique_id -%}
+  {%- liquid
+    assign should_close_bundle = false
+    if bundle_opened
+      if next_line_item_bundle_group_key == blank or next_line_item_bundle_group_key != bundle_group_key
+        assign should_close_bundle = true
+      endif
+    endif
+  -%}
+  {%- if should_close_bundle -%}
     <div
       class="cart__item"
       data-animation="{{ animation_name }}"
