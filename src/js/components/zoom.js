@@ -5,7 +5,7 @@ class ZoomImages extends HTMLElement {
 
   connectedCallback() {
     this.container = this.closest('[data-section-id]');
-    this.images = this.getAllZoomImages();
+    this.images = this.querySelectorAll('[data-zoom-image]');
     this.thumbsContainer = document.querySelector('.pswp__thumbs');
 
     this.images.forEach((image, index) => {
@@ -35,21 +35,6 @@ class ZoomImages extends HTMLElement {
         }
       });
     });
-  }
-
-  getAllZoomImages() {
-    let imgs = Array.from(this.querySelectorAll('[data-zoom-image]'));
-
-    const swiperContainer = this.closest('product-images-swiper')?.querySelector('swiper-container');
-
-    if (swiperContainer?.shadowRoot) {
-      const shadowImgs = swiperContainer.shadowRoot.querySelectorAll('img[data-zoom-image]');
-      if (shadowImgs.length > 0) {
-        imgs = Array.from(shadowImgs);
-      }
-    }
-
-    return imgs;
   }
 
   createZoom(indexImage) {
