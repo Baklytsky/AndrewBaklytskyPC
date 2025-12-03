@@ -58,13 +58,14 @@
   }
 
   swiper-container.swiper-disabled::part(wrapper) {
-    height: auto;
+    height: auto !important;
     display: block;
   }
 
   swiper-container.swiper-disabled .product__slide {
     opacity: 1 !important;
     transform: none !important;
+    pointer-events: auto;
   }
 }
 
@@ -103,8 +104,8 @@
     background: transparent;
   }
 
-  .swiper-button-prev { left: var(--inner); }
-  .swiper-button-next { right: var(--inner); }
+  .swiper-button-prev { left: calc(var(--inner) - var(--btn-size) / 2); }
+  .swiper-button-next { right: calc(var(--inner) - var(--btn-size) / 2); }
 
   // Hide navigation when only one slide
   &:has(swiper-slide:only-child) {
@@ -160,6 +161,8 @@
 
   // Add padding to prevent slides from colliding with arrows
   &:not(.thumbs-no-scroll) {
+    &[data-direction="horizontal"] swiper-container:not(.is-initialized) { gap: 15px; }
+
     &[data-direction="horizontal"] .swiper {
       padding-left: var(--btn-size, 28px);
       padding-right: var(--btn-size, 28px);
