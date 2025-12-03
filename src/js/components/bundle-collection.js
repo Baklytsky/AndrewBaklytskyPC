@@ -245,6 +245,7 @@ if (!customElements.get('bundle-collection')) {
 
         this.buttons.forEach((button) => {
           button.disabled = filledCount >= this.maxSelection;
+          button.classList.toggle('is-disabled', filledCount >= this.maxSelection);
         });
       }
 
