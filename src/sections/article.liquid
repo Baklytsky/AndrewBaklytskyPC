@@ -133,26 +133,8 @@
             <div class="hr"></div>
 
             <aside class="flex justify-space-between">
-              {%- if blog.next_article -%}
-                <small class="right">
-                  {%- for post in blog.articles -%}
-                    {%- if post.url == blog.next_article -%}
-                      <a
-                        href="{{ post.url }}"
-                        class="btn btn--text btn--text-no-underline btn--small"
-                        title="{{ post.title | strip_html | escape }}"
-                      >
-                        <span>{{ 'blogs.article.newer_post' | t }}</span>
-
-                        {%- render 'icon-nav-arrow-right' -%}
-                      </a>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </small>
-              {%- endif -%}
-
               {%- if blog.previous_article -%}
-                <small class="left">
+                <small>
                   {%- for post in blog.articles -%}
                     {%- if post.url == blog.previous_article -%}
                       <a
@@ -163,6 +145,24 @@
                         {%- render 'icon-nav-arrow-left' -%}
 
                         <span>{{ 'blogs.article.older_post' | t }}</span>
+                      </a>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </small>
+              {%- endif -%}
+
+              {%- if blog.next_article -%}
+                <small>
+                  {%- for post in blog.articles -%}
+                    {%- if post.url == blog.next_article -%}
+                      <a
+                        href="{{ post.url }}"
+                        class="btn btn--text btn--text-no-underline btn--small"
+                        title="{{ post.title | strip_html | escape }}"
+                      >
+                        <span>{{ 'blogs.article.newer_post' | t }}</span>
+
+                        {%- render 'icon-nav-arrow-right' -%}
                       </a>
                     {%- endif -%}
                   {%- endfor -%}

@@ -42,7 +42,6 @@ if (!customElements.get('product-images-swiper')) {
         this.activeMediaId = this.getAttribute('data-active-media');
         this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
 
-        this.initSwipers();
         this.listen();
       }
 

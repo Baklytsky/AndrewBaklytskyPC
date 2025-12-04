@@ -329,6 +329,7 @@ if (!customElements.get('quick-add-product')) {
       modalCreatedCallback() {
         this.modalEvents();
         this.modalOpen();
+        this.initSwipers();
 
         wrapElements(this.modal);
       }
@@ -459,6 +460,13 @@ if (!customElements.get('quick-add-product')) {
           this.closeAllErrorContainers(swiperContainer);
           this.closeAllOpenDropdowns(swiperContainer);
         });
+      }
+
+      /**
+       * Initialize swipers
+       */
+      initSwipers() {
+        this.modal?.querySelector('swiper-container')?.classList.add('is-initialized');
       }
     }
   );

@@ -4,21 +4,21 @@ if (!customElements.get('native-scrollbar')) {
     class NativeScrollbar extends HTMLElement {
       constructor() {
         super();
-
-        this.scrollbar = this.querySelector('[data-scrollbar]');
-        this.arrowNext = this.querySelector('[data-scrollbar-arrow-next]');
-        this.arrowPrev = this.querySelector('[data-scrollbar-arrow-prev]');
         this.scrollbarWidth = 0;
         this.scrollbarHeight = 0;
+        this.scrollDirection = null;
         this.resizeEvents = this.resizeEvents.bind(this);
         this.detectScrollDirection = this.detectScrollDirection.bind(this);
-        this.scrollDirection = null;
 
         // Detect scroll direction
         document.addEventListener('DOMContentLoaded', () => setTimeout(() => this.detectScrollDirection(), 300));
       }
 
       connectedCallback() {
+        this.scrollbar = this.querySelector('[data-scrollbar]');
+        this.arrowNext = this.querySelector('[data-scrollbar-arrow-next]');
+        this.arrowPrev = this.querySelector('[data-scrollbar-arrow-prev]');
+
         document.addEventListener('theme:resize', this.resizeEvents);
 
         // Detect scroll direction after layout is complete
