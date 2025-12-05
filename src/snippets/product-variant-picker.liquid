@@ -361,14 +361,18 @@
                 echo 'select__fieldset'
               endif
             endcapture
+
+            comment
+              Variables for colors split
+            endcomment
+            assign show_default_swatches = false
+            assign default_swatches_checked = false
+            assign group_legend_bundle_modern = ''
+            assign color_swatches = ''
+            assign swatch_group_array = ''
           -%}
 
-          {%- assign show_default_swatches = false -%}
-          {%- assign default_swatches_checked = false -%}
-
           {%- if picker_type == 'swatch' -%}
-            {%- assign color_swatches = '' -%}
-            {%- assign swatch_group_array = '' -%}
             {%- for value in option.values -%}
               {%- assign swatch_group = '' -%}
               {%- if value.variant != blank -%}
@@ -396,6 +400,12 @@
               {%- if swatch_group != '' -%}
                 {%- assign swatch_group_array = swatch_group_array | append: '@@@@' | append: swatch_group | append: '####' | append: value_swatch -%}
               {%- else -%}
+                {%- assign show_default_swatches = true -%}
+
+                {%- if value.selected -%}
+                  {%- assign default_swatches_checked = true -%}
+                {%- endif -%}
+
                 {%- capture color_swatches -%}
                   {{ color_swatches }}
 
@@ -405,14 +415,6 @@
             {%- endfor -%}
 
             {%- assign swatch_group_array = swatch_group_array | remove_first: '@@@@' | split: '@@@@' | sort -%}
-
-            {%- if color_swatches != '' -%}
-              {%- assign show_default_swatches = true -%}
-
-              {%- if color_swatches contains 'checked' -%}
-                {%- assign default_swatches_checked = true -%}
-              {%- endif -%}
-            {%- endif -%}
           {%- endif -%}
 
           {%- capture options_html -%}
@@ -428,7 +430,7 @@
               >
                 {%- if picker_type == 'swatch' -%}
                   <fieldset class="product-form__input">
-                    <div class="radio__buttons radio__buttons--top" data-variant-buttons>
+                    <div class="radio__buttons radio__buttons--top radio__buttons--swatches" data-variant-buttons>
                       {{ color_swatches }}
                     </div>
                   </fieldset>
@@ -443,34 +445,32 @@
                     %}
                   </fieldset>
                 {%- elsif picker_type == 'dropdown' -%}
-                  <div class="select__fieldset">
-                    <popout-select class="select-popout product-form__input">
-                      <button
-                        type="button"
-                        class="select-popout__toggle"
-                        aria-expanded="false"
-                        aria-controls="{{ uniq_id }}-select-{{ option.name | handle }}"
-                        aria-labelledby="{{ uniq_id }}-select-{{ option.name | handle }}-label"
-                        data-select-soldout=" - {{ 'products.product.sold_out' | t }}"
-                        data-select-unavailable=" - {{ 'products.product.unavailable' | t }}"
-                        data-popout-toggle
-                      >
-                        <span data-popout-toggle-text>{{ option.selected_value }}</span>
-                        {%- render 'icon-nav-arrow-down' -%}
-                      </button>
+                  <popout-select class="select-popout product-form__input">
+                    <button
+                      type="button"
+                      class="select-popout__toggle"
+                      aria-expanded="false"
+                      aria-controls="{{ uniq_id }}-select-{{ option.name | handle }}"
+                      aria-labelledby="{{ uniq_id }}-select-{{ option.name | handle }}-label"
+                      data-select-soldout=" - {{ 'products.product.sold_out' | t }}"
+                      data-select-unavailable=" - {{ 'products.product.unavailable' | t }}"
+                      data-popout-toggle
+                    >
+                      <span data-popout-toggle-text>{{ option.selected_value }}</span>
+                      {%- render 'icon-nav-arrow-down' -%}
+                    </button>
 
-                      {% render 'product-variant-options',
-                        product: product,
-                        product_form_id: product_form_id,
-                        option: option,
-                        picker_type: picker_type
-                      %}
+                    {% render 'product-variant-options',
+                      product: product,
+                      product_form_id: product_form_id,
+                      option: option,
+                      picker_type: picker_type
+                    %}
 
-                      <span class="svg-wrapper">
-                        {{- 'icon-caret.svg' | inline_asset_content -}}
-                      </span>
-                    </popout-select>
-                  </div>
+                    <span class="svg-wrapper">
+                      {{- 'icon-caret.svg' | inline_asset_content -}}
+                    </span>
+                  </popout-select>
                 {%- endif -%}
               </div>
             {%- endif -%}
@@ -512,10 +512,10 @@
                               </span>
                             {%- endunless -%}
 
-                            {%- if settings.show_labels and group contains 'checked' or is_bundle -%}
+                            {%- if settings.show_labels and group contains 'data-swatch-input-checked' or is_bundle -%}
                               <small class="radio__legend__value">
-                                {% if is_bundle %}{{ prefix }}{% if group contains 'checked' %}: {% endif %}{% endif %}
-                                {%- if group contains 'checked' -%}
+                                {% if is_bundle %}{{ prefix }}{% if group contains 'data-swatch-input-checked' %}: {% endif %}{% endif %}
+                                {%- if group contains 'data-swatch-input-checked' -%}
                                   <span data-option-value="{{ option.position }}">{{ current_value }}</span>
                                 {%- endif -%}
                               </small>
@@ -524,22 +524,26 @@
                         </legend>
                       {%- endcapture -%}
 
-                      {%- if form_style == 'modern' -%}
-                        {%- capture group_swatches -%}
-                          <div
-                            class="selector-wrapper{% if settings.variant_boxes or is_theme_swatch_option %} selector-wrapper--fullwidth{% endif %}"
-                          >
-                            <fieldset class="product-form__input">
-                              <div class="radio__buttons radio__buttons--top">
-                                {{ group }}
-                                {%- assign group = '' -%}
-                              </div>
-                            </fieldset>
-                          </div>
-                        {%- endcapture -%}
+                      {%- capture group_swatches -%}
+                        <div
+                          class="selector-wrapper{% if settings.variant_boxes or is_theme_swatch_option %} selector-wrapper--fullwidth{% endif %}"
+                        >
+                          <fieldset class="product-form__input">
+                            <div class="radio__buttons radio__buttons--top radio__buttons--swatches">
+                              {{ group }}
+                              {%- assign group = '' -%}
+                            </div>
+                          </fieldset>
+                        </div>
+                      {%- endcapture -%}
 
+                      {%- if form_style == 'modern' -%}
                         {%- if is_bundle -%}
-                          {{ group_legend }}
+                          {%- capture group_legend_bundle_modern -%}
+                            {{ group_legend_bundle_modern }}
+
+                            {{ group_legend }}
+                          {%- endcapture -%}
 
                           {{ group_swatches }}
                         {%- else -%}
@@ -554,14 +558,7 @@
                       {%- else -%}
                         {{ group_legend }}
 
-                        <div class="selector-wrapper{% if settings.variant_boxes and is_size_option %} selector-wrapper--size{% elsif settings.variant_boxes or is_theme_swatch_option %} selector-wrapper--fullwidth{% endif %}">
-                          <fieldset class="product-form__input">
-                            <div class="radio__buttons radio__buttons--top" data-variant-buttons>
-                              {{ group }}
-                              {%- assign group = '' -%}
-                            </div>
-                          </fieldset>
-                        </div>
+                        {{ group_swatches }}
                       {%- endif -%}
                   {%- unless is_bundle -%}
                       </div>
@@ -634,10 +631,12 @@
                 {%- endif -%}
 
                 {%- if settings.show_labels -%}
-                  {%- if default_swatches_checked or picker_type != 'swatch' -%}
+                  {%- if default_swatches_checked or picker_type != 'swatch' or show_default_swatches and is_bundle -%}
                     <small class="radio__legend__value">
-                      {% if is_bundle %}{{ option_name }}: {% endif %}
-                      <span data-option-value="{{ option.position }}">{{ current_value }}</span>
+                      {% if is_bundle and picker_type != 'swatch' or show_default_swatches %}{{ option_name }}{% if default_swatches_checked or picker_type != 'swatch' %}: {% endif %}{% endif %}
+                      {%- if is_bundle == false or default_swatches_checked or picker_type != 'swatch' -%}
+                        <span data-option-value="{{ option.position }}">{{ current_value }}</span>
+                      {%- endif -%}
                     </small>
                   {%- endif -%}
                 {%- endif -%}
@@ -657,6 +656,10 @@
           {%- unless is_bundle and option_product_name == next_option_product_name -%}
               {%- if picker_type != 'swatch' or show_default_swatches or is_bundle -%}
                     {%- if form_style == 'modern' -%}
+                        {%- if is_bundle and group_legend_bundle_modern != '' -%}
+                          {{ group_legend_bundle_modern }}
+                          {%- assign group_legend_bundle_modern = '' -%}
+                        {%- endif -%}
                       </div>
 
                       <div class="fieldset__column fieldset__column--content">
