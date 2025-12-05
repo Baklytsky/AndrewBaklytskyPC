@@ -132,7 +132,20 @@ if (!customElements.get('bundle-collection')) {
       }
 
       bundleButtonChange(event) {
-        event.target.querySelector('[data-bundle-product-button]')?.addEventListener('click', this.bundleButtonAddEvent);
+        const productCard = event.target;
+        const button = productCard.querySelector('[data-bundle-product-button]');
+
+        if (button) {
+          // Add event listener for the button
+          button.addEventListener('click', this.bundleButtonAddEvent);
+
+          // Check if bundle is full and disable button if needed
+          const filledCount = this.selectedProducts.length;
+          if (filledCount >= this.maxSelection) {
+            button.disabled = true;
+            button.classList.add('is-disabled');
+          }
+        }
       }
 
       bundleButtonAdd(event) {
@@ -243,8 +256,11 @@ if (!customElements.get('bundle-collection')) {
           this.bundleTotalSavings.innerHTML = window.theme.formatMoney(savingPrice, theme.moneyFormat);
         }
 
+        // Query for all bundle buttons to include any dynamically added ones
+        this.buttons = this.querySelectorAll('[data-bundle-product-button]');
         this.buttons.forEach((button) => {
           button.disabled = filledCount >= this.maxSelection;
+          button.classList.toggle('is-disabled', filledCount >= this.maxSelection);
         });
       }
 
