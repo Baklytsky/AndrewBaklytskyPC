@@ -127,32 +127,35 @@
         assign specific_pages_arr = specific_pages | split: ','
       -%}
 
+      {%- capture size_chart_text -%}
+        {%- case size_style -%}
+          {%- when 'text' -%}
+            <span class="radio__legend__link__label">
+              {{- 'general.size_chart.title' | t -}}
+            </span>
+
+          {%- when 'ruler' -%}
+            <span class="btn-size-chart">
+              {%- render 'icon-size-guide' -%}
+            </span>
+
+          {%- when 'question' -%}
+            <span class="btn-size-chart">
+              {%- render 'icon-get-help' -%}
+            </span>
+        {%- endcase -%}{%- endcapture -%}
+
       {%- capture size_button_text -%}
         <a href="{{ info_page.url }}" data-popup-open class="radio__legend__link body-x-small{% if product.has_only_default_variant %} size-popup-link{% endif %} text-link">
           <span class="radio__legend__link__label">
-            {{- 'general.size_chart.title' | t -}}
+            {{ size_chart_text }}
           </span>
         </a>
       {%- endcapture -%}
 
       {%- capture size_button_options -%}
         <a href="{{ info_page.url }}" data-popup-open class="radio__legend__link body-x-small{% if product.has_only_default_variant %} size-popup-link{% endif %}{% if size_style == 'text' %} text-link{% endif %}">
-          {%- case size_style -%}
-            {%- when 'text' -%}
-              <span class="radio__legend__link__label">
-                {{- 'general.size_chart.title' | t -}}
-              </span>
-
-            {%- when 'ruler' -%}
-              <span class="btn-size-chart">
-                {%- render 'icon-size-guide' -%}
-              </span>
-
-            {%- when 'question' -%}
-              <span class="btn-size-chart">
-                {%- render 'icon-get-help' -%}
-              </span>
-          {%- endcase -%}
+          {{ size_chart_text }}
         </a>
       {%- endcapture -%}
 
