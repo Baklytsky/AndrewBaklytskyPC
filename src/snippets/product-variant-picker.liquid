@@ -7,7 +7,6 @@
   assign tags_string = product.tags | join: ','
   assign size_separator = '_size_'
   assign specific_pages = ''
-  assign show_size_link_separated = true
   assign form_style = settings.form_style
   assign is_bundle = is_bundle | default: false
   assign featured_product = featured_product | default: false
@@ -126,14 +125,6 @@
         assign show_size_chart = true
         assign specific_pages_arr = specific_pages | split: ','
       -%}
-
-      {%- capture size_button_text -%}
-        <a href="{{ info_page.url }}" data-popup-open class="radio__legend__link body-x-small{% if product.has_only_default_variant %} size-popup-link{% endif %} text-link">
-          <span class="radio__legend__link__label">
-            {{- 'general.size_chart.title' | t -}}
-          </span>
-        </a>
-      {%- endcapture -%}
 
       {%- capture size_button_options -%}
         <a href="{{ info_page.url }}" data-popup-open class="radio__legend__link body-x-small{% if product.has_only_default_variant %} size-popup-link{% endif %}{% if size_style == 'text' %} text-link{% endif %}">
@@ -315,7 +306,6 @@
 
             if translation_string_size contains option_name_handle_separator
               assign is_size_option = true
-              assign show_size_link_separated = false
             endif
 
             comment
@@ -469,7 +459,7 @@
                   {%- endif -%}
           {%- endunless -%}
 
-          <legend class="radio__legend{% if is_size_option and size_chart_link and show_size_link_separated == false %} radio__legend--size{% endif %}">
+          <legend class="radio__legend{% if is_size_option and size_chart_link %} radio__legend--size{% endif %}">
             <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}" id="{{ uniq_id }}-select-{{ option.name | handle }}-label">
               {%- if option_name_string != '' -%}
                 <span class="radio__legend__option-name">
@@ -530,12 +520,6 @@
       {%- endif -%}
     {%- endunless -%}
   {%- endcapture -%}
-
-  {%- if show_size_link_separated and size_chart_link != blank -%}
-    <div class="radio__fieldset radio__fieldset--single">
-      {{- size_chart_link | replace: '<size-chart-button></size-chart-button>', size_button_text -}}
-    </div>
-  {%- endif -%}
 
   {{- form_fields -}}
 
