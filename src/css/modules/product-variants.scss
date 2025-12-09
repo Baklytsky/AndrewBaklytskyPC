@@ -181,10 +181,10 @@
 
   .radio__button input:disabled + label,
   .radio__button input.disabled + label,
-  .radio__button input.sold-out + label,
-  .radio__button input.unavailable + label {
+  .radio__button input.visually-disabled + label {
     background-color: var(--text-a5);
     color: var(--text-a35);
+    border-color: var(--text-a35);
   }
 
   .radio__button input:checked ~ label { border-color: var(--accent); }
@@ -262,7 +262,7 @@
 }
 
 .radio__fieldset__arrow {
-  --icon-size: 24px;
+  --icon-size: 14px;
 
   display: flex;
   align-items: center;
@@ -453,8 +453,7 @@
   overflow: hidden;
 }
 
-.variant--soldout .swatch__button input ~ label::before,
-.variant--unavailable .swatch__button input ~ label::before,
+.swatch__button input.visually-disabled ~ label::before,
 .swatch__button input:disabled + label::before {
   content: "";
   position: absolute;
@@ -488,13 +487,15 @@
   }
 }
 
-.variant--soldout .swatch__button input ~ label[data-swatch="black" i]::before,
-.variant--unavailable .swatch__button input ~ label[data-swatch="black" i]::before {
+.swatch__button.swatch-black input.visually-disabled ~ label::before,
+.swatch__button.swatch-black input:disabled ~ label::before,
+.swatch__button input.visually-disabled ~ label[data-swatch="black" i]::before,
+.swatch__button input:disabled ~ label[data-swatch="black" i]::before {
   background: #FFF;
 }
 
-.variant--soldout .swatch__button input ~ label[data-swatch="white" i]::before,
-.variant--unavailable .swatch__button input ~ label[data-swatch="white" i]::before {
+.swatch__button input.visually-disabled ~ label[data-swatch="white" i]::before,
+.swatch__button input:disabled ~ label[data-swatch="white" i]::before {
   background: var(--text-dark);
 }
 
@@ -529,8 +530,8 @@
   border-radius: 50%;
 }
 
-.variant--soldout .swatch__button--circle input + label::before,
-.variant--unavailable .swatch__button--circle input + label::before {
+.swatch__button--circle input.visually-disabled + label::before,
+.swatch__button--circle input:disabled + label::before {
   height: var(--swatch-size);
   transform: rotate(-45deg) translate(-50%, -50%);
 }
@@ -561,8 +562,6 @@
 }
 
 .swatch__button--square .sibling__link--sold-out::before,
-.swatch__button--square input.sold-out ~ label::before,
-.swatch__button--square input.unavailable ~ label::before,
 .swatch__button--square input:disabled + label::before,
 .swatch__button--square input.visually-disabled + label::before {
   height: calc(1.375 * var(--swatch-size));

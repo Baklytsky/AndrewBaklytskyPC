@@ -12,6 +12,14 @@ class HTMLUpdateUtility {
     HTMLUpdateUtility.setInnerHTML(newNodeWrapper, newContent.outerHTML);
     const newNode = newNodeWrapper.firstChild;
 
+    // Dispatch a custom event for the node with a swapped ID to notify about the HTML changes
+    const swappedNode = newNodeWrapper.querySelector('[data-swap-id]');
+    if (swappedNode) {
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent('theme:html:change', {detail: {element: swappedNode}, bubbles: true}));
+      });
+    }
+
     // dedupe IDs
     const uniqueKey = Date.now();
     oldNode.querySelectorAll('[id], [form]').forEach((element) => {

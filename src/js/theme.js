@@ -40,3 +40,4 @@ import './globals/tabs';
 import './globals/toggle-ellipsis';
 import './globals/tooltip';
 import './globals/variant-selects';
+import './globals/upsell-block';

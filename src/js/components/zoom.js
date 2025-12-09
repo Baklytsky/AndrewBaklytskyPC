@@ -1,13 +1,13 @@
 class ZoomImages extends HTMLElement {
   constructor() {
     super();
-
-    this.container = this.closest('[data-section-id]');
-    this.images = this.querySelectorAll('[data-zoom-image]');
-    this.thumbsContainer = document.querySelector('.pswp__thumbs');
   }
 
   connectedCallback() {
+    this.container = this.closest('[data-section-id]');
+    this.images = this.querySelectorAll('[data-zoom-image]');
+    this.thumbsContainer = document.querySelector('.pswp__thumbs');
+
     this.images.forEach((image, index) => {
       image.addEventListener('click', (e) => {
         e.preventDefault();

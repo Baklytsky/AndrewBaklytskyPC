@@ -24,11 +24,9 @@ const classes = {
 const selectors = {
   apiContent: '[data-api-content]',
   apiLineItems: '[data-api-line-items]',
-  apiUpsellItems: '[data-api-upsell-items]',
   apiBundleItems: '[data-api-bundle-items]',
   apiCartPrice: '[data-api-cart-price]',
   animation: '[data-animation]',
-  buttonSkipUpsellProduct: '[data-skip-upsell-product]',
   cartBarAdd: '[data-cart-bar-add-to-cart]',
   cartCloseError: '[data-cart-error-close]',
   cartDrawer: 'cart-drawer',
@@ -57,9 +55,7 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
-  upsellProductsHolder: '[data-upsell-products]',
   bundleProductsHolder: '[data-bundle-products]',
-  upsellWidget: '[data-upsell-widget]',
   bundleWidget: '[data-bundle-widget]',
   termsErrorMessage: '[data-terms-error-message]',
   collapsibleBody: '[data-collapsible-body]',
@@ -84,7 +80,6 @@ const attributes = {
   quickAddHolder: 'data-quick-add-holder',
   quickAddVariant: 'data-quick-add-variant',
   scrollLocked: 'data-scroll-locked',
-  upsellAutoOpen: 'data-upsell-auto-open',
   name: 'name',
   maxInventoryReached: 'data-max-inventory-reached',
   errorMessagePosition: 'data-error-message-position',
@@ -117,7 +112,6 @@ class CartItems extends HTMLElement {
     this.cartCloseErrorMessage = document.querySelector(selectors.cartCloseError);
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
-    this.upsellProductsHolder = document.querySelector(selectors.upsellProductsHolder);
     this.bundleProductsHolder = document.querySelector(selectors.bundleProductsHolder);
     this.subtotal = window.theme.subtotal;
     this.showGetCartResponse = true;
@@ -155,12 +149,11 @@ class CartItems extends HTMLElement {
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
 
-    // Upsell or bundle products
-    this.skipUpsellProductsArray = [];
+    // Bundle products
     this.skipBundleProductsArray = [];
-    this.skipUpsellOrBundleProductEvent();
-    this.checkSkippedUpsellOrBundleProductsFromStorage();
-    this.toggleCartUpsellOrBundleWidgetVisibility();
+    this.skipBundleProductEvent();
+    this.checkSkippedBundleProductsFromStorage();
+    this.toggleCartBundleWidgetVisibility();
 
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
@@ -1148,10 +1141,9 @@ class CartItems extends HTMLElement {
 
   build(data) {
     const cartItemsData = data.querySelector(selectors.apiLineItems);
-    const upsellItemsData = data.querySelector(selectors.apiUpsellItems);
     const bundleItemsData = data.querySelector(selectors.apiBundleItems);
 
-    const cartEmptyData = Boolean(cartItemsData === null && upsellItemsData === null && bundleItemsData === null);
+    const cartEmptyData = Boolean(cartItemsData === null && bundleItemsData === null);
     const priceData = data.querySelector(selectors.apiCartPrice);
     const cartTotal = data.querySelector(selectors.cartTotal);
 
@@ -1162,38 +1154,32 @@ class CartItems extends HTMLElement {
     if (cartEmptyData) {
       this.itemsHolder.innerHTML = data.innerHTML;
 
-      if (this.upsellProductsHolder) {
-        this.upsellProductsHolder.innerHTML = '';
-      }
-
       if (this.bundleProductsHolder) {
         this.bundleProductsHolder.innerHTML = '';
       }
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
 
-      if (this.upsellProductsHolder) {
-        this.upsellProductsHolder.innerHTML = upsellItemsData.innerHTML;
-      }
-
-      if (this.bundleProductsHolder) {
+      if (this.bundleProductsHolder && bundleItemsData) {
         this.bundleProductsHolder.innerHTML = bundleItemsData.innerHTML;
       }
 
-      this.skipUpsellOrBundleProductEvent();
-      this.checkSkippedUpsellOrBundleProductsFromStorage();
-      this.toggleCartUpsellOrBundleWidgetVisibility();
+      this.skipBundleProductEvent();
+      this.checkSkippedBundleProductsFromStorage();
+      this.toggleCartBundleWidgetVisibility();
     }
 
     this.newTotalItems = cartItemsData && cartItemsData.querySelectorAll(selectors.item).length ? cartItemsData.querySelectorAll(selectors.item).length : 0;
     this.subtotal = cartTotal && cartTotal.hasAttribute(attributes.cartTotal) ? parseInt(cartTotal.getAttribute(attributes.cartTotal)) : 0;
     this.cartCount = this.getCartItemCount();
 
+    // Dispatch cart change event with data element for upsell blocks updates
     document.dispatchEvent(
       new CustomEvent('theme:cart:change', {
         bubbles: true,
         detail: {
           cartCount: this.cartCount,
+          dataElement: data,
         },
       })
     );
@@ -1265,6 +1251,9 @@ class CartItems extends HTMLElement {
     this.enableCartButtons();
     this.updateProgress();
     this.animateItems();
+
+    document.dispatchEvent(new CustomEvent('theme:cart:built', {bubbles: true}));
+
     this.bindDiscountEventListeners();
     this.logRenderedDiscounts();
 
@@ -1397,64 +1386,48 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Skip upsell or bundle product
+   * Skip bundle product
    */
-  skipUpsellOrBundleProductEvent() {
-    if (this.upsellProductsHolder === null && this.bundleProductsHolder === null) {
+  skipBundleProductEvent() {
+    if (this.bundleProductsHolder === null) {
       return;
     }
 
-    const upsellSkipButtons = this.upsellProductsHolder?.querySelectorAll(selectors.buttonSkipUpsellProduct) || [];
-    const bundleSkipButtons = this.bundleProductsHolder?.querySelectorAll(selectors.buttonSkipUpsellProduct) || [];
-    const allSkipButtons = [...upsellSkipButtons, ...bundleSkipButtons];
+    const bundleSkipButtons = this.bundleProductsHolder?.querySelectorAll('[data-skip-upsell-product]') || [];
 
-    if (allSkipButtons.length) {
-      allSkipButtons.forEach((button) => {
+    if (bundleSkipButtons.length) {
+      bundleSkipButtons.forEach((button) => {
         button.addEventListener('click', (event) => {
           event.preventDefault();
 
           const productID = button.closest(selectors.quickAddHolder).getAttribute(attributes.quickAddHolder);
-          const isUpsell = !!button.closest(selectors.upsellWidget);
           const isBundle = !!button.closest(selectors.bundleWidget);
-
-          if (isUpsell && !this.skipUpsellProductsArray.includes(productID)) {
-            this.skipUpsellProductsArray.push(productID);
-            window.sessionStorage.setItem('skip_upsell_products', this.skipUpsellProductsArray);
-            this.removeUpsellOrBundleProduct(productID, 'upsell');
-          }
 
           if (isBundle && !this.skipBundleProductsArray.includes(productID)) {
             this.skipBundleProductsArray.push(productID);
             window.sessionStorage.setItem('skip_bundle_products', this.skipBundleProductsArray);
-            this.removeUpsellOrBundleProduct(productID, 'bundle');
+            this.removeBundleProduct(productID);
           }
 
-          this.toggleCartUpsellOrBundleWidgetVisibility();
+          this.toggleCartBundleWidgetVisibility();
         });
       });
     }
   }
 
   /**
-   * Check for skipped upsell or bundle product added to session storage
+   * Check for skipped bundle product added to session storage
    */
-  checkSkippedUpsellOrBundleProductsFromStorage() {
-    const types = [
-      {key: 'upsell', storageKey: 'skip_upsell_products', array: this.skipUpsellProductsArray},
-      {key: 'bundle', storageKey: 'skip_bundle_products', array: this.skipBundleProductsArray},
-    ];
-
-    types.forEach(({key, storageKey, array}) => {
-      const skippedItems = window.sessionStorage.getItem(storageKey);
-      if (skippedItems) {
-        skippedItems.split(',').forEach((productID) => {
-          if (!array.includes(productID)) {
-            array.push(productID);
-          }
-          this.removeUpsellOrBundleProduct(productID, key);
-        });
-      }
-    });
+  checkSkippedBundleProductsFromStorage() {
+    const skippedItems = window.sessionStorage.getItem('skip_bundle_products');
+    if (skippedItems) {
+      skippedItems.split(',').forEach((productID) => {
+        if (!this.skipBundleProductsArray.includes(productID)) {
+          this.skipBundleProductsArray.push(productID);
+        }
+        this.removeBundleProduct(productID);
+      });
+    }
   }
 
   /**
@@ -1496,48 +1469,34 @@ class CartItems extends HTMLElement {
       });
   }
 
-  removeUpsellOrBundleProduct(productID, type = 'upsell') {
-    const holders = {
-      upsell: this.upsellProductsHolder,
-      bundle: this.bundleProductsHolder,
-    };
-    const holder = holders[type];
-    if (!holder) return;
+  removeBundleProduct(productID) {
+    if (!this.bundleProductsHolder) return;
 
-    const product = holder.querySelector(`[${attributes.quickAddHolder}="${productID}"]`);
+    const product = this.bundleProductsHolder.querySelector(`[${attributes.quickAddHolder}="${productID}"]`);
     if (product && product.parentNode) {
       product.parentNode.remove();
     }
   }
 
   /**
-   * Show or hide cart upsell or bundle products widget visibility
+   * Show or hide cart bundle products widget visibility
    */
-  toggleCartUpsellOrBundleWidgetVisibility() {
-    if (!this.upsellProductsHolder && !this.bundleProductsHolder) return;
+  toggleCartBundleWidgetVisibility() {
+    if (!this.bundleProductsHolder) return;
 
-    const upsellItems = this.upsellProductsHolder?.querySelectorAll(selectors.quickAddHolder);
-    const bundleItems = this.bundleProductsHolder?.querySelectorAll(selectors.quickAddHolder);
-    const upsellWidget = this.upsellProductsHolder?.closest(selectors.upsellWidget);
-    const bundleWidget = this.bundleProductsHolder?.closest(selectors.bundleWidget);
+    const bundleItems = this.bundleProductsHolder.querySelectorAll(selectors.quickAddHolder);
+    const bundleWidget = this.bundleProductsHolder.closest(selectors.bundleWidget);
 
-    if (!upsellWidget && !bundleWidget) return;
+    if (!bundleWidget) return;
 
-    // Helper to toggle and auto-open widget
-    const toggleWidget = (widget, items, autoOpenAttr) => {
-      if (!widget) return;
-      widget.classList.toggle(classes.hidden, !items.length);
-      if (items.length && !widget.hasAttribute(attributes.open) && widget.hasAttribute(autoOpenAttr)) {
-        widget.setAttribute(attributes.open, true);
-        const widgetBody = widget.querySelector(selectors.collapsibleBody);
-        if (widgetBody) {
-          widgetBody.style.height = 'auto';
-        }
+    bundleWidget.classList.toggle(classes.hidden, !bundleItems.length);
+    if (bundleItems.length && !bundleWidget.hasAttribute(attributes.open) && bundleWidget.hasAttribute('data-upsell-auto-open')) {
+      bundleWidget.setAttribute(attributes.open, true);
+      const widgetBody = bundleWidget.querySelector(selectors.collapsibleBody);
+      if (widgetBody) {
+        widgetBody.style.height = 'auto';
       }
-    };
-
-    toggleWidget(upsellWidget, upsellItems, attributes.upsellAutoOpen);
-    toggleWidget(bundleWidget, bundleItems, attributes.upsellAutoOpen);
+    }
   }
 
   /**

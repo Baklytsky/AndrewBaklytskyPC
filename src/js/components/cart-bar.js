@@ -2,15 +2,16 @@ class CartBar extends HTMLElement {
   constructor() {
     super();
 
-    this.section = this.closest('product-info');
-    this.form = this.section.querySelector('[data-product-form]');
-    this.formWrapper = (theme.settings.productPageSticky && this.section.querySelector('[data-form-wrapper]')) || this.form;
     this.handleProductAddError = this.handleProductAddError.bind(this);
     this.boundToggleCartBarOnScroll = this.toggleCartBarOnScroll.bind(this);
     this.boundSetCartBarHeight = this.setCartBarHeight.bind(this);
   }
 
   connectedCallback() {
+    this.section = this.closest('product-info');
+    this.form = this.section?.querySelector('[data-product-form]');
+    this.formWrapper = (theme.settings.productPageSticky && this.section.querySelector('[data-form-wrapper]')) || this.form;
+
     this.setCartBarHeight();
 
     this.addEventListener('click', this.handleClick.bind(this));

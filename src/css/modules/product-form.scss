@@ -387,6 +387,7 @@ shopify-paypal-button { position: relative; } // fix for dynamic paypal button c
 
 .product__submit__item .product-soldout-button,
 .product-soldout-notification { display: none; }
+
 .show-product-notification.variant--soldout .product-soldout-button,
 .product-soldout-notification.has-success { display: block; }
 
@@ -498,3 +499,43 @@ shopify-paypal-button { position: relative; } // fix for dynamic paypal button c
   // prevent iOS zooming the page on input click
   font-size: max(16px, var(--font-body-medium));
 }
+
+// Klaviyo BIS Trigger
+.klaviyo-bis-trigger {
+  @include btn;
+  @include btn-solid-primary;
+
+  z-index: 2;
+  overflow: hidden;
+
+  --btn-border: var(--BTN-PRIMARY-BG);
+  --btn-bg: var(--BTN-PRIMARY-BG);
+  --btn-text: var(--BTN-PRIMARY-TEXT);
+  --btn-border-hover: var(--BTN-PRIMARY-BG-BRIGHTER);
+  --btn-bg-hover: var(--BTN-PRIMARY-BG-BRIGHTER);
+  --btn-text-hover: var(--BTN-PRIMARY-TEXT);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60px;
+    z-index: -1;
+    width: calc(100% + 120px);
+    height: 100%;
+    background-color: currentcolor;
+    opacity: 1;
+    transform: translate3d(-100%,0,0) skew(30deg);
+    transition: transform 0.5s cubic-bezier(0.33,0,0,1);
+    background-color: var(--btn-bg-hover);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--btn-text-hover);
+      &::after { transform: translateZ(0); }
+    }
+  }
+}
+
+.product__submit:has(.klaviyo-bis-trigger) .product-soldout-button { display: none !important; }

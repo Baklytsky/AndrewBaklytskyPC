@@ -58,13 +58,14 @@
   }
 
   swiper-container.swiper-disabled::part(wrapper) {
-    height: auto;
+    height: auto !important;
     display: block;
   }
 
   swiper-container.swiper-disabled .product__slide {
     opacity: 1 !important;
     transform: none !important;
+    pointer-events: auto;
   }
 }
 
@@ -79,6 +80,12 @@
 .product__wrapper--grid-1 .product__slide:first-child,
 .product__wrapper--grid-2 .product__slide:only-child { column-span: all; }
 
+.product__slides {
+  .swiper-button-prev.swiper-button-disabled,
+  .swiper-button-next.swiper-button-disabled {
+    opacity: 0;
+  }
+}
 
 .product__slides {
   display: block;
@@ -103,8 +110,8 @@
     background: transparent;
   }
 
-  .swiper-button-prev { left: var(--inner); }
-  .swiper-button-next { right: var(--inner); }
+  .swiper-button-prev { left: calc(var(--inner) - var(--btn-size) / 2); }
+  .swiper-button-next { right: calc(var(--inner) - var(--btn-size) / 2); }
 
   // Hide navigation when only one slide
   &:has(swiper-slide:only-child) {

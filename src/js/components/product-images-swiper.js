@@ -16,11 +16,6 @@ if (!customElements.get('product-images-swiper')) {
         this.thumbsContainer = null;
         this.thumbsArrowPrev = null;
         this.thumbsArrowNext = null;
-        this.sectionId = this.getAttribute('data-section-id');
-        this.enableThumbs = this.hasAttribute('data-thumbs-enabled');
-        this.enableThumbsMobile = this.hasAttribute('data-thumbs-mobile');
-        this.activeMediaId = this.getAttribute('data-active-media');
-        this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
         this.originalThumbsDirection = null; // Store original direction to restore on resize
 
         this.handleSlideChange = this.handleSlideChange.bind(this);
@@ -41,8 +36,12 @@ if (!customElements.get('product-images-swiper')) {
         this.thumbsContainer = this.querySelector('.product__thumbs swiper-container');
         this.thumbsArrowPrev = this.querySelector('[data-thumbs-arrow-prev]');
         this.thumbsArrowNext = this.querySelector('[data-thumbs-arrow-next]');
+        this.sectionId = this.getAttribute('data-section-id');
+        this.enableThumbs = this.hasAttribute('data-thumbs-enabled');
+        this.enableThumbsMobile = this.hasAttribute('data-thumbs-mobile');
+        this.activeMediaId = this.getAttribute('data-active-media');
+        this.variantImageScroll = this.getAttribute('data-variant-image-scroll') === 'true';
 
-        this.initSwipers();
         this.listen();
       }
 
@@ -56,7 +55,10 @@ if (!customElements.get('product-images-swiper')) {
         this.mainSwiper = this.mainContainer.swiper;
 
         // Setup thumbnails if enabled and available
-        if (this.thumbsContainer?.swiper && this.enableThumbs) {
+        // Check both enableThumbs and enableThumbsMobile (for mobile)
+        const shouldEnableThumbs = this.enableThumbs || (theme.isMobile && this.enableThumbsMobile);
+
+        if (this.thumbsContainer?.swiper && shouldEnableThumbs) {
           this.thumbsSwiper = this.thumbsContainer.swiper;
 
           // Store original direction from data attribute or swiper params
@@ -85,14 +87,23 @@ if (!customElements.get('product-images-swiper')) {
           this.thumbsSwiper.on('update', this.updateThumbsArrows);
 
           // Initial update with a small delay to ensure DOM is ready
-          requestAnimationFrame(() => {
+          queueMicrotask(() => {
             setTimeout(() => {
               // Force swiper to recalculate dimensions (fixes issue with vertical thumbs)
               if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
                 this.thumbsSwiper.update();
+                // Call updateThumbsArrows after update to ensure it runs
+                this.updateThumbsArrows();
               }
-              this.updateThumbsArrows();
             }, 100);
+          });
+
+          // Also call immediately to ensure it runs at least once
+          // Use requestAnimationFrame to ensure DOM is ready
+          requestAnimationFrame(() => {
+            if (this.thumbsSwiper && !this.thumbsSwiper.destroyed) {
+              this.updateThumbsArrows();
+            }
           });
         }
 
@@ -400,7 +411,10 @@ if (!customElements.get('product-images-swiper')) {
       }
 
       updateThumbsArrows() {
-        if (!this.thumbsSwiper || !this.thumbsArrowPrev || !this.thumbsArrowNext) {
+        if (!this.thumbsSwiper) {
+          return;
+        }
+        if (!this.thumbsArrowPrev || !this.thumbsArrowNext) {
           return;
         }
 
