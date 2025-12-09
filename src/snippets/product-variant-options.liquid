@@ -5,7 +5,6 @@
   - product: {Object} product object.
   - product_form_id: {String} product form id.
   - option: {Object} current product_option object.
-  - block: {Object} block object.
   - picker_type: {String} type of picker to display
   - is_theme_swatch_option: {Boolean} is it a theme swatch
   - is_native_swatch_option: {Boolean} is it a native swatch
@@ -17,7 +16,6 @@
     product: product,
     product_form_id: product_form_id,
     option: option,
-    block: block,
     picker_type: picker_type,
     is_theme_swatch_option: is_theme_swatch_option,
     is_native_swatch_option: is_native_swatch_option,
@@ -39,100 +37,17 @@
 {%- endif -%}
 
 {%- for value in option.values -%}
-  {%- liquid
-    assign option_disabled = true
-    if value.available
-      assign option_disabled = false
-    endif
-  -%}
-
-  {%- capture input_id -%}
-    {{ section.id }}-{{ option.position }}-{{ forloop.index0 -}}-{{ product.id }}
-  {%- endcapture -%}
-
-  {%- capture input_name -%}
-    {{ option.name }}-{{ option.position }}
-  {%- endcapture -%}
-
-  {%- capture input_dataset -%}
-    data-product-url="{{ value.product_url }}"
-    data-option-value-id="{{ value.id }}"
-  {%- endcapture -%}
-
-  {%- capture label_unavailable -%}
-    <span class="visually-hidden label-unavailable">
-      {{- 'products.product.variant_sold_out_or_unavailable' | t -}}
-    </span>
-  {%- endcapture -%}
-
-  {%- if picker_type == 'swatch' -%}
-    {%- capture help_text -%}
-      <span class="visually-hidden">{{ value | escape }}</span>
-      {{ label_unavailable }}
-    {%- endcapture -%}
-    {%
-      render 'swatch-input',
-      id: input_id,
-      name: input_name,
-      value: value | escape,
-      swatch: value.swatch,
-      is_theme_swatch_option: is_theme_swatch_option,
-      is_native_swatch_option: is_native_swatch_option,
-      product_form_id: product_form_id,
-      checked: value.selected,
-      visually_disabled: option_disabled,
-      help_text: help_text,
-      additional_props: input_dataset,
-      is_bundle: is_bundle
-    %}
-  {%- elsif picker_type == 'button' -%}
-    <span class="radio__button">
-      <input
-        type="radio"
-        id="{{ input_id }}"
-        name="{{ input_name | escape }}"
-        value="{{ value | escape }}"
-        form="{{ product_form_id }}"
-        {% if value.selected %}
-          checked
-        {% endif %}
-        {% if option_disabled %}
-          class="disabled"
-        {% endif %}
-        {{ input_dataset }}
-      >
-      <label for="{{ input_id }}">
-        <span class="option-title">{{ value }}</span>
-        <span>{{ label_unavailable }}</span>
-      </label>
-    </span>
-  {%- elsif picker_type == 'dropdown' -%}
-    <li
-      class="select-popout__item{% if is_selected %} is-active{% endif %}"
-      id="{{ input_id }}"
-      value="{{ value | escape }}"
-      {% if value.selected %}
-        selected="selected"
-      {% endif %}
-      {{ input_dataset }}
-    >
-      <a
-        class="select-popout__option{% unless value.available %} unavailable{% endunless %}"
-        href="#"
-        {% if value.selected %}
-          aria-current="true"
-        {% endif %}
-        data-value="{{ value | escape }}"
-        data-popout-option
-        data-select-soldout=" - {{ 'products.product.sold_out' | t }}"
-        data-select-unavailable=" - {{ 'products.product.unavailable' | t }}"
-      >
-        <span>
-          {{ value }}
-        </span>
-      </a>
-    </li>
-  {%- endif -%}
+  {% render 'product-variant-option',
+    product: product,
+    product_form_id: product_form_id,
+    index: forloop.index0,
+    value: value,
+    option: option,
+    picker_type: picker_type,
+    is_theme_swatch_option: is_theme_swatch_option,
+    is_native_swatch_option: is_native_swatch_option,
+    is_bundle: is_bundle
+  %}
 {%- endfor -%}
 {%- if picker_type == 'dropdown' -%}
   </ul>
