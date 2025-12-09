@@ -1,0 +1,123 @@
+{% comment %}
+  Renders product variant option
+
+  Accepts:
+  - product: {Object} product object.
+  - product_form_id: {String} product form id.
+  - index: {Integer} current index.
+  - value: {String} current product_option value.
+  - option: {Object} current product_option object.
+  - picker_type: {String} type of picker to display
+  - is_theme_swatch_option: {Boolean} is it a theme swatch
+  - is_native_swatch_option: {Boolean} is it a native swatch
+  - is_bundle: {Boolean} is it is a bundle
+
+
+  Usage:
+  {% render 'product-variant-option',
+    product: product,
+    product_form_id: product_form_id,
+    index: index,
+    value: value,
+    option: option,
+    picker_type: picker_type,
+    is_theme_swatch_option: is_theme_swatch_option,
+    is_native_swatch_option: is_native_swatch_option,
+    is_bundle: is_bundle
+  %}
+{% endcomment %}
+
+{%- liquid
+  assign value_escaped = value | escape
+  assign option_disabled = true
+  if value.available
+    assign option_disabled = false
+  endif
+-%}
+
+{%- capture input_id -%}
+  {{ section.id }}-{{ option.position }}-{{ index -}}-{{ product.id }}
+{%- endcapture -%}
+
+{%- capture input_name -%}
+  {{ option.name }}-{{ option.position }}
+{%- endcapture -%}
+
+{%- capture input_dataset -%}
+  data-product-url="{{ value.product_url }}"
+  data-option-value-id="{{ value.id }}"
+{%- endcapture -%}
+
+{%- capture label_unavailable -%}
+  <span class="visually-hidden label-unavailable">
+    {{- 'products.product.variant_sold_out_or_unavailable' | t -}}
+  </span>
+{%- endcapture -%}
+
+{%- if picker_type == 'swatch' -%}
+  {%- capture help_text -%}
+    <span class="visually-hidden">{{ value_escaped }}</span>
+    {{ label_unavailable }}
+  {%- endcapture -%}
+  {% render 'swatch-input',
+    id: input_id,
+    name: input_name,
+    value: value_escaped,
+    swatch: value.swatch,
+    is_theme_swatch_option: is_theme_swatch_option,
+    is_native_swatch_option: is_native_swatch_option,
+    product_form_id: product_form_id,
+    checked: value.selected,
+    visually_disabled: option_disabled,
+    help_text: help_text,
+    additional_props: input_dataset,
+    is_bundle: is_bundle
+  %}
+{%- elsif picker_type == 'button' -%}
+  <span class="radio__button">
+    <input
+      type="radio"
+      id="{{ input_id }}"
+      name="{{ input_name | escape }}"
+      value="{{ value_escaped }}"
+      form="{{ product_form_id }}"
+      {% if value.selected %}
+        checked
+      {% endif %}
+      {% if option_disabled %}
+        class="disabled"
+      {% endif %}
+      {{ input_dataset }}
+    >
+    <label for="{{ input_id }}">
+      <span class="option-title">{{ value }}</span>
+      <span>{{ label_unavailable }}</span>
+    </label>
+  </span>
+{%- elsif picker_type == 'dropdown' -%}
+  <li
+    class="select-popout__item{% if is_selected %} is-active{% endif %}"
+    id="{{ input_id }}"
+    value="{{ value_escaped }}"
+    {% if value.selected %}
+      selected="selected"
+    {% endif %}
+    {{ input_dataset }}
+  >
+    <a
+      class="select-popout__option{% unless value.available %} unavailable{% endunless %}"
+      href="#"
+      {% if value.selected %}
+        aria-current="true"
+      {% endif %}
+      data-value="{{ value_escaped }}"
+      data-popout-option
+      data-select-soldout=" - {{ 'products.product.sold_out' | t }}"
+      data-select-unavailable=" - {{ 'products.product.unavailable' | t }}"
+    >
+      <span>
+        {{ value }}
+      </span>
+    </a>
+  </li>
+{%- endif -%}
