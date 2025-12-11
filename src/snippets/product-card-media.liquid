@@ -411,38 +411,42 @@
 
         {{ featured_image }}
 
-        {%- if settings.enable_swatches and current_variant -%}
-          {%- assign image_inner_empty = true -%}
-          {%- assign variant_images = '' -%}
+        {%- if settings.enable_swatches and settings.show_grid_swatches -%}
+          {%- assign swatch_translation = 'general.swatches.color' | t -%}
+          {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
 
-          {%- for media in product.media -%}
-            {%- if media.alt contains 'variant--' and media.media_type == 'image' -%}
-              {%- unless variant_images contains media.preview_image -%}
-                {%- liquid
-                  assign variant_images = variant_images | append: media.preview_image | append: ', '
-                  assign image_inner_empty = false
-                  assign variant_title = media.alt | replace: 'variant--', '' | replace: '"', "'"
-                -%}
+          {%- for label in swatch_labels -%}
+            {%- assign sanitized_label = label | lstrip | rstrip -%}
+            {%- assign option = product.options_by_name[sanitized_label] -%}
 
-                <div class="product-card__bg__inner" data-variant-title="{{ variant_title }}">
-                  {%- render 'image',
-                    image: media.preview_image,
-                    aspect_ratio: aspect_ratio,
-                    sizes: sizes,
-                    widths: widths,
-                    cover: true,
-                    loading: 'lazy'
-                  -%}
-                </div>
-              {%- endunless -%}
+            {%- if option.values.size > 0 -%}
+              {%- assign limit = 2048 -%}
+
+              {%- if option.values.size > 5 and settings.collection_swatch_style == 'limited' -%}
+                {%- assign limit = 5 -%}
+              {%- endif -%}
+
+              {%- for value in option.values limit: limit -%}
+                {%- if value.variant.featured_image != blank -%}
+                  <div
+                    class="product-card__bg__inner"
+                    data-variant-title="{{ product.id }}-{{ value.variant.id }}-{{ value | handle }}"
+                  >
+                    {%- render 'image',
+                      image: value.variant.featured_image,
+                      aspect_ratio: aspect_ratio,
+                      sizes: sizes,
+                      widths: widths,
+                      cover: true,
+                      loading: 'lazy'
+                    -%}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
             {%- endif -%}
-          {%- endfor -%}
 
-          {%- if image_inner_empty -%}
-            &nbsp;
-          {%- endif -%}
-        {%- else -%}
-          &nbsp;
+            {%- break -%}
+          {%- endfor -%}
         {%- endif -%}
       </div>
 
