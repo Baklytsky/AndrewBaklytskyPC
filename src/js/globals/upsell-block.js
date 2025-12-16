@@ -461,9 +461,10 @@ class UpsellBlock extends HTMLElement {
    */
   updateVisibility() {
     const remainingProducts = this.querySelectorAll('[data-quick-add-holder]');
+    const onboardingProducts = this.querySelectorAll('.product-upsell__holder--onboarding');
     const cartBlock = this.closest('.cart-block');
     if (cartBlock) {
-      cartBlock.style.display = remainingProducts.length > 0 ? '' : 'none';
+      cartBlock.style.display = remainingProducts.length > 0 || onboardingProducts.length > 0 ? '' : 'none';
     }
   }
 

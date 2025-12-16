@@ -349,35 +349,40 @@
     align-items: start;
 
     @include media-query($medium-down) {
-      @include hide-scrollbar;
-
-      margin-inline: calc(var(--sp-inline) * -1);
-      padding-inline: var(--sp-inline);
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      overflow-x: scroll;
-      overflow-y: hidden;
-      scroll-behavior: smooth;
-      scroll-snap-type: x mandatory;
-      scroll-padding: var(--sp-inline);
-
-      quick-add-product {
-        width: calc(50% - var(--SPACING-TINY) / 2);
-        flex: 0 0 auto;
-        scroll-snap-align: start;
-      }
-
-      &:has(quick-add-product:nth-child(3)) {
-        quick-add-product {
-          width: 45%;
-        }
-      }
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   .product-upsell__holder {
     margin: 0;
+  }
+
+  &.cart__widget--upsell-vertical-slider {
+    .swiper,
+    swiper-container::part(container) {
+      overflow: unset;
+    }
+
+    .cart__widget__content__inner {
+      display: block;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+
+    swiper-slide {
+      height: auto;
+    }
+
+    // When only 1 or 2 slides remain on mobile, make them 50/50
+    @include media-query($medium-down) {
+      swiper-container:has(swiper-slide:nth-child(1):last-child),
+      swiper-container:has(swiper-slide:nth-child(2):last-child) {
+        swiper-slide {
+          width: calc(50% - var(--SPACING-TINY) / 2) !important;
+        }
+      }
+    }
   }
 }
 
