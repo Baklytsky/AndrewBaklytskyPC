@@ -754,18 +754,10 @@ class CartItems extends HTMLElement {
             button.disabled = false;
           }
 
-          // if (quickAddHolder) {
-          //   quickAddHolder.classList.remove(classes.expanded);
-          // }
-
           if (!this.showCannotAddMoreInCart) return;
         }
 
         if (this.cart) {
-          // if (quickAddHolder) {
-          //   quickAddHolder.classList.remove(classes.expanded);
-          // }
-
           if (button) {
             button.classList.remove(classes.loading);
             button.classList.add(classes.added);
