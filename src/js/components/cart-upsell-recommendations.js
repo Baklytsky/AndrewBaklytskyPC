@@ -123,8 +123,10 @@ class CartUpsellRecommendations extends HTMLElement {
 
       for (const productId of cartProductIds) {
         try {
-          // Use style-specific section to get correctly rendered upsell HTML
-          const sectionId = `api-upsell-recommendations-${this.upsellStyle}`;
+          // Map styles to endpoints based on structural differences:
+          // - instant: has instant add enabled (horizontal, vertical)
+          // - standard: without instant add (compact, mini)
+          const sectionId = this.getSectionId();
           const recommendationsUrl = `${window.theme.routes.product_recommendations_url}?product_id=${productId}&limit=${this.limit * 2}&intent=${this.intent}&section_id=${sectionId}`;
 
           const response = await fetch(recommendationsUrl, {
@@ -147,9 +149,11 @@ class CartUpsellRecommendations extends HTMLElement {
             if (itemProductId && !seenProductIds.has(itemProductId)) {
               seenProductIds.add(itemProductId);
 
-              // Get the rendered upsell product HTML
-              const productHtml = item.querySelector('quick-add-product')?.outerHTML || item.querySelector('.product-upsell__holder')?.outerHTML;
-              if (productHtml) {
+              // Get the upsell holder element to apply visual class modifiers
+              const upsellHolder = item.querySelector('.product-upsell__holder');
+              if (upsellHolder) {
+                this.applyVisualModifiers(upsellHolder);
+                const productHtml = item.querySelector('quick-add-product')?.outerHTML || upsellHolder.outerHTML;
                 allUpsellProducts.push(productHtml);
               }
             }
@@ -211,6 +215,40 @@ class CartUpsellRecommendations extends HTMLElement {
     const cartBlock = this.closest('.cart-block');
     if (cartBlock) {
       cartBlock.style.display = '';
+    }
+  }
+
+  /**
+   * Get the appropriate section ID based on upsell style
+   * Maps styles to endpoints based on structural differences:
+   * - instant: has instant add enabled (horizontal, vertical)
+   * - standard: without instant add (compact, mini)
+   */
+  getSectionId() {
+    switch (this.upsellStyle) {
+      case 'horizontal':
+      case 'vertical':
+        return 'api-upsell-recommendations-instant';
+      case 'compact':
+      case 'mini':
+      default:
+        return 'api-upsell-recommendations-standard';
+    }
+  }
+
+  /**
+   * Apply visual class modifiers based on upsell style
+   * These are CSS-only differences that don't require different HTML structure
+   */
+  applyVisualModifiers(upsellHolder) {
+    switch (this.upsellStyle) {
+      case 'vertical':
+        upsellHolder.classList.add('product-upsell__holder--vertical');
+        break;
+      case 'mini':
+        upsellHolder.classList.add('product-upsell__holder--mini');
+        break;
+      // horizontal and compact use the default styling from Liquid
     }
   }
 
