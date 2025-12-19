@@ -3,7 +3,11 @@
 .quick-add__holder {
   --btn-text: var(--accent);
 
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   position: absolute;
+  left: 0;
   right: 0;
   bottom: 0;
   margin: 10px;
@@ -46,7 +50,7 @@
     }
 
     body.is-focused .product-card:not(.is-bundle) .quick-add__holder:focus-within,
-    .product-card:not(.is-bundle) .quick-add__holder.is-visible,
+    .product-card:not(.is-bundle) .quick-add__holder.is-visible:not(.is-expanded),
     .product-card:not(.is-bundle) .quick-add__holder.has-error {
       animation: slideInUp 0.25s ease;
       animation-fill-mode: forwards;
@@ -66,8 +70,72 @@
   }
 }
 
-.quick-add__holder.is-disabled {
-  pointer-events: none;
+.quick-add__holder.is-disabled { pointer-events: none; }
+
+.quick-add__holder.is-expanded.is-visible {
+  .quick-add__loader circle ~ circle { animation-play-state: running; }
+
+  .quick-add__loader,
+  .quick-add__errors.is-visible {
+    display: block;
+    opacity: 1;
+  }
+
+  .quick-add__value { opacity: 0; }
+
+  .quick-add__errors.is-visible ~ .quick-add__values { display: none; }
+}
+
+.quick-add__holder.is-expanded {
+  .quick-add__values { display: block; }
+
+  .quick-add__button { display: none; }
+}
+
+.quick-add__values {
+  position: relative;
+  display: none;
+  flex: 0 1 100%;
+  width: 100%;
+  padding: 2px;
+  background: var(--COLOR-QUICK-ADD-BG);
+  color: var(--COLOR-QUICK-ADD-TEXT);
+  font-size: var(--font-body-small);
+  text-align: center;
+
+  .quick-add__loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+}
+
+.quick-add__value {
+  min-width: 40px;
+  padding: 2px 5px;
+  margin: 2px;
+  transition: background .3s;
+}
+
+.quick-add__value:not(:disabled):hover { background: var(--COLOR-QUICK-ADD-BG-HOVER); }
+
+.quick-add__value:disabled {
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.quick-add__errors {
+  flex: 0 1 100%;
+  display: none;
+  background-color: var(--COLOR-ERROR-BG);
+  color: var(--COLOR-ERROR);
+  text-align: center;
+
+  .errors { padding: 10px; }
+
+  .errors__close { display: none; }
 }
 
 .quick-add__button {

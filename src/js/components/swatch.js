@@ -79,6 +79,26 @@ if (!customElements.get('grid-swatch')) {
         this.querySelectorAll('[data-swatch-button]')?.forEach((swatchButton) => {
           // Show variant image when hover on color swatch
           swatchButton.addEventListener('mouseenter', this.showVariantImageEvent);
+
+          // Change product card when swatch is clicked
+          if (swatchButton.hasAttribute('data-swatch-change')) {
+            swatchButton.querySelector('a')?.addEventListener('click', (e) => {
+              e.preventDefault();
+              const selectedSwatchId = swatchButton.getAttribute('data-swatch-change');
+              if (selectedSwatchId !== '') {
+                const url = `${e.currentTarget.href}?option_values=${selectedSwatchId}&section_id=api-product-card`;
+
+                this.productItem.dispatchEvent(
+                  new CustomEvent('theme:product-card:change', {
+                    detail: {
+                      url: url,
+                    },
+                    bubbles: false,
+                  })
+                );
+              }
+            });
+          }
         });
 
         this.productItem.addEventListener('mouseleave', this.productItemMouseLeaveEvent);

@@ -198,6 +198,7 @@ if (!customElements.get('product-info')) {
         const shouldSwapProduct = this.dataset.url !== productUrl;
         const shouldFetchFullPage = this.dataset.updateUrl === 'true' && shouldSwapProduct;
 
+        console.log(this.buildRequestUrlWithParams(productUrl, selectedOptionValues, shouldFetchFullPage));
         this.renderProductInfo({
           requestUrl: this.buildRequestUrlWithParams(productUrl, selectedOptionValues, shouldFetchFullPage),
           targetId: target.id,

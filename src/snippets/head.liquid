@@ -404,7 +404,16 @@
     --COLOR-PREORDER-TEXT: {{ settings.preorder_text_color }};
 
     /*** Quick Add ***/
+    {%- assign quick_add_lightness = settings.quick_add_bg_color | color_extract: 'lightness' -%}
+    {%- assign quick_add_bg_hover = settings.quick_add_bg_color -%}
+    {% if quick_add_lightness > 85 %}
+      {%- assign quick_add_bg_hover = settings.quick_add_bg_color | color_darken: 10 -%}
+    {% else %}
+      {%- assign quick_add_bg_hover = settings.quick_add_bg_color | color_lighten: 15 -%}
+    {% endif %}
+
     --COLOR-QUICK-ADD-BG: {{ settings.quick_add_bg_color }};
+    --COLOR-QUICK-ADD-BG-HOVER: {{ quick_add_bg_hover }};
     --COLOR-QUICK-ADD-TEXT: {{ settings.quick_add_text_color }};
 
     /*** Product sale color ***/
