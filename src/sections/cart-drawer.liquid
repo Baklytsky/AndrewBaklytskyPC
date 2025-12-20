@@ -850,13 +850,6 @@
           "info": "Related products are auto-generated. Complementary products require setup via Shopify Search & Discovery app."
         },
         {
-          "type": "product_list",
-          "id": "product_list",
-          "label": "Product list",
-          "limit": 6,
-          "info": "Out of stock products hidden. Only used when 'Fixed product list' is selected."
-        },
-        {
           "type": "range",
           "id": "ai_limit",
           "min": 1,
@@ -864,7 +857,15 @@
           "step": 1,
           "label": "AI recommendations limit",
           "default": 4,
+          "visible_if": "{{ block.settings.recommendation_type == 'ai' or block.settings.recommendation_type == 'ai_complementary' }}",
           "info": "Maximum number of AI recommendations to show"
+        },
+        {
+          "type": "product_list",
+          "id": "product_list",
+          "label": "Product list",
+          "limit": 6,
+          "info": "Out of stock products hidden. Used only when recommendation type is set to \“Fixed product list\”."
         },
         {
           "type": "color_scheme",
