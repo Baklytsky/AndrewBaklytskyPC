@@ -107,6 +107,77 @@
   endif
 -%}
 
+{%- assign variant_images = '' -%}
+{%- assign has_colors = false -%}
+{%- assign option_color_position = 0 -%}
+{%- assign quick_add_overlay_option = '' -%}
+{%- if settings.enable_swatches and settings.show_grid_swatches -%}
+  {%- assign swatch_translation = 'general.swatches.color' | t -%}
+  {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
+
+  {%- for label in swatch_labels -%}
+    {%- assign sanitized_label = label | lstrip | rstrip -%}
+    {%- assign option = product.options_by_name[sanitized_label] -%}
+
+    {%- if option.values.size > 0 -%}
+      {%- assign limit = 2048 -%}
+      {%- assign option_color_position = option.position -%}
+      {%- assign has_colors = true -%}
+
+      {%- if option.values.size > 5 and settings.collection_swatch_style == 'limited' -%}
+        {%- assign limit = 5 -%}
+      {%- endif -%}
+
+      {%- for value in option.values limit: limit -%}
+        {%- if value.variant.featured_image != blank -%}
+          {%- capture variant_images -%}
+            {{ variant_images }}
+
+            <div
+              class="product-card__bg__inner"
+              data-variant-title="{{ product.id }}-{{ value.variant.id }}-{{ value | handle }}"
+            >
+              {%- render 'image',
+                image: value.variant.featured_image,
+                aspect_ratio: aspect_ratio,
+                sizes: sizes,
+                widths: widths,
+                cover: true,
+                loading: 'lazy'
+              -%}
+            </div>
+          {%- endcapture -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- if settings.quick_add_style == 'inline' -%}
+  {%- if product.options_with_values.size == 2 and has_colors -%}
+    {%- assign other_option = '' -%}
+    {%- if option_color_position == 2 -%}
+      {%- assign other_option = product.options_with_values | first -%}
+    {%- else -%}
+      {%- assign other_option = product.options_with_values | last -%}
+    {%- endif -%}
+
+    {%- if other_option.values.size > 1 and other_option.values.size < 6 -%}
+      {%- assign quick_add_overlay_option = other_option -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if product.options_with_values.size == 1
+    and product.options_with_values[0].values.size > 1
+    and product.options_with_values[0].values.size < 6
+    and has_colors == false
+  -%}
+    {%- assign quick_add_overlay_option = product.options_with_values | first -%}
+  {%- endif -%}
+{%- endif -%}
+
 {%- if is_onboarding -%}
   {%- render 'product-card-media-onboarding', index: index, aos_delay: aos_delay, aos_anchor: aos_anchor -%}
 
@@ -304,51 +375,32 @@
 
       <quick-add-product data-bundle-item-replace>
         <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
-          {%- if product.variants.size == 1 -%}
-            {%- assign product_form_id = 'ProductForm-' | append: unique -%}
-            {%- form 'product', product, id: product_form_id -%}
-              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {%- if quick_add_overlay_option != '' -%}
+            <div class="quick-add__errors" data-cart-errors-container></div>
 
-              {{- siblings_line_item_props -}}
+            <div class="quick-add__values">
+              <svg height="18" width="18" class="quick-add__loader svg-loader">
+                <circle r="7" cx="9" cy="9" />
+                <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+              </svg>
 
-              {%- if preorder_value != blank -%}
-                <input
-                  type="hidden"
-                  name="properties[{{ preorder_name }}]"
-                  value="{{ preorder_value }}">
-              {%- endif -%}
+              {%- for value in quick_add_overlay_option.values -%}
+                <button type="button"
+                  class="quick-add__value"
+                  data-quick-add-value="{{ value.variant.id }}"
+                  {% unless value.available %}
+                    disabled
+                  {% endunless %}
+                >
+                  {{ value | escape }}
+                </button>
+              {%- endfor -%}
+            </div>
 
-              <button class="quick-add__button caps"
-                id="ProductSubmitButton-{{ section_id }}"
-                type="submit"
-                name="add"
-                aria-label="{{ 'products.general.quick_add' | t }}"
-                data-add-to-cart
-              >
-                <span class="btn__text">
-                  {%- if preorder -%}
-                    {{ 'products.product.pre_order' | t }}
-                  {%- else -%}
-                    {{ 'products.general.quick_add' | t }}
-                  {%- endif -%}
-                </span>
-                <span class="btn__bag">{% render 'icon-bag' %}</span>
-                <span class="btn__added">&nbsp;</span>
-                <span class="btn__loader">
-                  <svg height="18" width="18" class="svg-loader">
-                    <circle r="7" cx="9" cy="9" />
-                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                  </svg>
-                </span>
-                <span class="btn__error" data-message-error>&nbsp;</span>
-              </button>
-            {%- endform -%}
-          {%- else -%}
             <button class="quick-add__button caps"
               type="button"
               aria-label="{{ 'products.general.quick_add' | t }}"
-              data-quick-add-btn
-              data-quick-add-modal-handle="{{ product.handle }}"
+              data-quick-add-btn-inline
             >
               <span class="btn__text">
                 {%- if preorder -%}
@@ -366,11 +418,75 @@
                 </svg>
               </span>
             </button>
-          {%- endif -%}
+          {%- else -%}
+            {%- if product.variants.size == 1 -%}
+              {%- assign product_form_id = 'ProductForm-' | append: unique -%}
+              {%- form 'product', product, id: product_form_id -%}
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
 
-          {%- unless product.has_only_default_variant -%}
-            {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
-          {%- endunless -%}
+                {{- siblings_line_item_props -}}
+
+                {%- if preorder_value != blank -%}
+                  <input
+                    type="hidden"
+                    name="properties[{{ preorder_name }}]"
+                    value="{{ preorder_value }}">
+                {%- endif -%}
+
+                <button class="quick-add__button caps"
+                  id="ProductSubmitButton-{{ section_id }}"
+                  type="submit"
+                  name="add"
+                  aria-label="{{ 'products.general.quick_add' | t }}"
+                  data-add-to-cart
+                >
+                  <span class="btn__text">
+                    {%- if preorder -%}
+                      {{ 'products.product.pre_order' | t }}
+                    {%- else -%}
+                      {{ 'products.general.quick_add' | t }}
+                    {%- endif -%}
+                  </span>
+                  <span class="btn__bag">{% render 'icon-bag' %}</span>
+                  <span class="btn__added">&nbsp;</span>
+                  <span class="btn__loader">
+                    <svg height="18" width="18" class="svg-loader">
+                      <circle r="7" cx="9" cy="9" />
+                      <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                    </svg>
+                  </span>
+                  <span class="btn__error" data-message-error>&nbsp;</span>
+                </button>
+              {%- endform -%}
+            {%- else -%}
+              <button class="quick-add__button caps"
+                type="button"
+                aria-label="{{ 'products.general.quick_add' | t }}"
+                data-quick-add-btn
+                data-quick-add-modal-handle="{{ product.handle }}"
+              >
+                <span class="btn__text">
+                  {%- if preorder -%}
+                    {{ 'products.product.pre_order' | t }}
+                  {%- else -%}
+                    {{ 'products.general.quick_add' | t }}
+                  {%- endif -%}
+                </span>
+                <span class="btn__bag">{% render 'icon-bag' %}</span>
+                <span class="btn__added">&nbsp;</span>
+                <span class="btn__loader">
+                  <svg height="18" width="18" class="svg-loader">
+                    <circle r="7" cx="9" cy="9" />
+                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                  </svg>
+                </span>
+              </button>
+            {%- endif -%}
+
+            {%- unless product.has_only_default_variant -%}
+              {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+            {%- endunless -%}
+          {%- endif -%}
         </div>
       </quick-add-product>
     {%- endif -%}
@@ -386,6 +502,9 @@
 <div
   class="product-card__image{% if double_img %} double__image{% endif %}{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
   data-product-image
+  {% if quick_add_overlay_option != '' %}
+    data-product-image-overlay
+  {% endif %}
   {{ shopify_attributes }}
 >
   <a
@@ -411,42 +530,8 @@
 
         {{ featured_image }}
 
-        {%- if settings.enable_swatches and settings.show_grid_swatches -%}
-          {%- assign swatch_translation = 'general.swatches.color' | t -%}
-          {%- assign swatch_labels = swatch_translation | append: ',' | split: ',' -%}
-
-          {%- for label in swatch_labels -%}
-            {%- assign sanitized_label = label | lstrip | rstrip -%}
-            {%- assign option = product.options_by_name[sanitized_label] -%}
-
-            {%- if option.values.size > 0 -%}
-              {%- assign limit = 2048 -%}
-
-              {%- if option.values.size > 5 and settings.collection_swatch_style == 'limited' -%}
-                {%- assign limit = 5 -%}
-              {%- endif -%}
-
-              {%- for value in option.values limit: limit -%}
-                {%- if value.variant.featured_image != blank -%}
-                  <div
-                    class="product-card__bg__inner"
-                    data-variant-title="{{ product.id }}-{{ value.variant.id }}-{{ value | handle }}"
-                  >
-                    {%- render 'image',
-                      image: value.variant.featured_image,
-                      aspect_ratio: aspect_ratio,
-                      sizes: sizes,
-                      widths: widths,
-                      cover: true,
-                      loading: 'lazy'
-                    -%}
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endif -%}
-
-            {%- break -%}
-          {%- endfor -%}
+        {%- if variant_images != '' -%}
+          {{ variant_images }}
         {%- endif -%}
       </div>
 

@@ -2,10 +2,10 @@ const selectors = {
   swapHandle: '[data-swap-handle]',
   nativeScrollbar: 'native-scrollbar',
   activeSibling: '.sibling__link--current',
+  productImage: '[data-product-image]',
   bundleContainer: '[data-bundle]',
   bundleTemplate: '[data-bundle-item-template]',
   bundleReplaceTarget: '[data-bundle-item-replace]',
-  bundleImage: '[data-product-image]',
 };
 
 const attributes = {
@@ -33,6 +33,8 @@ if (!customElements.get('product-card')) {
         }
       };
       onHtmlChange = (event) => this.handleHtmlChange(event);
+      onProductCardChange = (event) => this.handleProductCardChange(event);
+      onImageLeave = (event) => this.handleImageLeave(event);
 
       constructor() {
         super();
@@ -50,6 +52,10 @@ if (!customElements.get('product-card')) {
 
         this.initProductSwapUtility();
         this.initPopoutHandlers();
+
+        this.addEventListener('theme:product-card:change', this.onProductCardChange);
+
+        this.querySelector('[data-product-image-overlay]')?.addEventListener('mouseleave', this.onImageLeave);
       }
 
       disconnectedCallback() {
@@ -61,6 +67,32 @@ if (!customElements.get('product-card')) {
           element.removeEventListener('click', this.handleClick);
           element.removeEventListener('keyup', this.handleKeyup);
         });
+
+        this.removeEventListener('theme:product-card:change', this.onProductCardChange);
+
+        this.querySelector('[data-product-image-overlay]')?.removeEventListener('mouseleave', this.onImageLeave);
+      }
+
+      handleProductCardChange(event) {
+        if (event.detail && event.detail.url) {
+          this.renderProductItem({
+            // Fetch the new product's HTML with section rendering API
+            requestUrl: event.detail.url,
+            // Returns a function that will process and swap the HTML after fetch completes
+            callback: this.handleSwapProduct(),
+          });
+        }
+      }
+
+      handleImageLeave(event) {
+        const image = event.currentTarget;
+        let timeoutDuration = 250;
+        if (theme.isMobile) {
+          timeoutDuration = 0;
+        }
+        setTimeout(() => {
+          image?.querySelector('[data-quick-add-holder]')?.classList.remove('is-expanded', 'is-visible');
+        }, timeoutDuration); // Waiting CSS duration
       }
 
       initProductSwapUtility() {
@@ -102,7 +134,7 @@ if (!customElements.get('product-card')) {
             const template = productItem.querySelector(selectors.bundleTemplate);
             const cloneTemplate = template.content.cloneNode(true);
             const replaceTarget = productItem.querySelector(selectors.bundleReplaceTarget);
-            const productItemImage = productItem.querySelector(selectors.bundleImage);
+            const productItemImage = productItem.querySelector(selectors.productImage);
 
             if (replaceTarget) {
               replaceTarget.replaceWith(cloneTemplate);
