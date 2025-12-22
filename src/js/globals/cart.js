@@ -719,7 +719,6 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
-    console.log('addToCart', button);
     window.carbon = window.carbon || {};
     window.carbon.gwpProcessed = false;
 
