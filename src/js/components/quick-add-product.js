@@ -18,6 +18,8 @@ if (!customElements.get('quick-add-product')) {
         this.modalButton = this.quickAddHolder.querySelector('[data-quick-add-modal-handle]');
         this.handle = this.modalButton?.getAttribute('data-quick-add-modal-handle');
         this.buttonQuickAdd = this.quickAddHolder.querySelector('[data-quick-add-btn]');
+        this.buttonQuickAddInline = this.quickAddHolder.querySelector('[data-quick-add-btn-inline]');
+        this.quickAddValueButtons = this.querySelectorAll('[data-quick-add-value]');
         this.buttonATC = this.quickAddHolder.querySelector('[data-add-to-cart]');
         this.button = this.modalButton || this.buttonATC;
         this.modalClose = this.modalClose.bind(this);
@@ -67,6 +69,35 @@ if (!customElements.get('quick-add-product')) {
 
         // Initialize upsell error handling
         this.setupUpsellErrorHandling();
+
+        this.setupQuickAddInline();
+      }
+
+      setupQuickAddInline() {
+        this.buttonQuickAddInline?.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.quickAddHolder.classList.add('is-expanded');
+        });
+
+        this.quickAddValueButtons?.forEach((button) => {
+          button.addEventListener('click', (e) => {
+            this.closeAllErrorContainers(this.parentElement);
+
+            document.dispatchEvent(
+              new CustomEvent('theme:cart:add', {
+                detail: {
+                  button: button,
+                  data: [
+                    {
+                      id: button.getAttribute('data-quick-add-value'),
+                      quantity: 1,
+                    },
+                  ],
+                },
+              })
+            );
+          });
+        });
       }
 
       modalButtonClickEvent(e) {

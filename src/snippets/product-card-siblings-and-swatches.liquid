@@ -81,6 +81,21 @@
                   -%}
 
                   {%- if settings.collection_swatch_style != 'text' -%}
+                    {%- liquid
+                      assign quick_add_inline = false
+                      if settings.quick_add_style == 'inline' and product.options_with_values.size == 2
+                        if option.position == 2
+                          assign other_option = product.options_with_values | first
+                        else
+                          assign other_option = product.options_with_values | last
+                        endif
+
+                        if other_option.values.size > 1 and other_option.values.size < 6
+                          assign quick_add_inline = true
+                        endif
+                      endif
+                    -%}
+
                     {%- for option_value in option.values limit: limit -%}
                       {%- if option_value.swatch.image -%}
                         {%- assign swatch = option_value.swatch.image | image_url: width: 48 | prepend: 'url(' | append: ')' -%}
@@ -101,11 +116,20 @@
                         data-swatch-variant="{{ option_value.variant.id }}"
                         data-swatch-variant-name="{{ product.id }}-{{ option_value.variant.id }}-{{ option_value | handle }}"
                         data-swatch-image="{{ option_value.variant.featured_media.preview_image.src }}"
+                        {% if quick_add_inline %}
+                          data-swatch-change="{{ option_value.id }}"
+                        {% endif %}
                         data-variant="{{ option_value.variant.id }}"
                         style="{{ swatch_style }}"
                       >
                         {%- unless bundle_product -%}
-                          <a class="swatch__link" href="{{ product.url }}?variant={{ option_value.variant.id }}">
+                          {%- if quick_add_inline -%}
+                            {%- assign href = product.url -%}
+                          {%- else -%}
+                            {%- assign href = product.url | append: '?variant=' | append: option_value.variant.id -%}
+                          {%- endif -%}
+
+                          <a class="swatch__link{% if quick_add_inline and option_value.selected %} is-selected{% endif %}" href="{{ href }}">
                             <span class="visually-hidden">{{ option_value }}</span>
                           </a>
                         {%- else -%}

@@ -335,8 +335,8 @@ class CartItems extends HTMLElement {
     let formData = event.detail.data || '';
     let button = event.detail.button;
 
-    if (button.hasAttribute('disabled')) return;
-    const form = button.form || button.closest('form');
+    if (button?.hasAttribute('disabled')) return;
+    const form = button?.form || button?.closest('form');
     // Validate form
 
     if (form) {
@@ -1147,7 +1147,9 @@ class CartItems extends HTMLElement {
         }
       });
 
-      quickAddHolder?.classList.remove(classes.visible);
+      if (quickAddHolder && !quickAddHolder.classList.contains(classes.expanded)) {
+        quickAddHolder.classList.remove(classes.visible);
+      }
     }, 1000);
   }
 
