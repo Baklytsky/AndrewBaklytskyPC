@@ -10,7 +10,7 @@
 {%- liquid
   assign product_count = block.settings.product_list.count
   assign show_slider = false
-  assign onboarding_count = 3
+  assign onboarding_count = 6
   assign is_onboarding = false
 
   if product_count == 0 and request.design_mode
@@ -32,7 +32,7 @@
       </swiper-slide>
     {%- endfor -%}
   {%- else -%}
-    {%- for product in block.settings.product_list limit: 3 -%}
+    {%- for product in block.settings.product_list limit: 6 -%}
       {%- capture upsell_product -%}
         {%- render 'upsell-product', upsell_product: product, unique_id: block.id, is_compact: true, instant_add: true, show_available_upsell_only: true -%}
       {%- endcapture -%}

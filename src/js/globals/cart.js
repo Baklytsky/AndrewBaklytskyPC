@@ -114,7 +114,6 @@ class CartItems extends HTMLElement {
     this.navDrawer = document.querySelector(selectors.navDrawer);
     this.bundleProductsHolder = document.querySelector(selectors.bundleProductsHolder);
     this.subtotal = window.theme.subtotal;
-    this.showGetCartResponse = true;
     this.discountInput = document.querySelector(selectors.discountInput);
     this.discountField = document.querySelector(selectors.discountField);
     this.discountButton = document.querySelector(selectors.discountButton);
@@ -687,13 +686,24 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
-        this.showGetCartResponse = true;
+        window.carbon = window.carbon || {};
+        let shouldRender = true;
+
+        // Check if GWP/BOGO is active in global config
+        const isGwpActive = window.GWP_CART_DRAWER_CONFIG || window.BUY_X_GET_Y_CART_DRAWER_CONFIG;
+
+        // If GWP is active, and the extension has NOT finished processing yet, STOP rendering.
+        if (isGwpActive && window.carbon.gwpProcessed === false) {
+          shouldRender = false;
+        }
         const element = document.createElement('div');
         element.innerHTML = response;
 
-        if (this.showGetCartResponse) {
+        if (shouldRender) {
           const cleanResponse = element.querySelector(selectors.apiContent);
           this.build(cleanResponse);
+          // CRITICAL FIX: Do NOT reset window.carbon.gwpProcessed = false here.
+          // Leaving it true prevents the infinite loop when the extension sees the update.
         }
       })
       .catch((error) => console.log(error));
@@ -709,6 +719,9 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
+    window.carbon = window.carbon || {};
+    window.carbon.gwpProcessed = false;
+
     let headers = {
       'X-Requested-With': 'XMLHttpRequest',
       Accept: 'application/javascript',
@@ -776,7 +789,19 @@ class CartItems extends HTMLElement {
             window.location = theme.routes.cart_url;
             return;
           }
-          this.getCart();
+          // Check if GWP/BOGO extension is active - if so, let the extension handle the cart refresh
+          const isGwpActive = window.GWP_CART_DRAWER_CONFIG || window.BUY_X_GET_Y_CART_DRAWER_CONFIG;
+          if (!isGwpActive) {
+            this.getCart();
+          } else {
+            // Trigger GWP extension to process the cart, it will dispatch theme:cart:refresh when done
+            document.dispatchEvent(
+              new CustomEvent('theme:cart:change', {
+                bubbles: true,
+                detail: {source: 'theme-add-to-cart'},
+              })
+            );
+          }
         } else {
           // Redirect to cart page if "Add to cart" is successful
           window.location = theme.routes.cart_url;
@@ -805,6 +830,9 @@ class CartItems extends HTMLElement {
    */
 
   updateCart(updateData = {}, currentItem = null) {
+    window.carbon = window.carbon || {};
+    window.carbon.gwpProcessed = false;
+
     this.cart.classList.add(classes.loading);
 
     let updatedQuantity = updateData.quantity;
@@ -851,7 +879,19 @@ class CartItems extends HTMLElement {
         }
 
         this.logDiscountCodes(parsedState);
-        this.getCart();
+        // Check if GWP/BOGO extension is active - if so, let the extension handle the cart refresh
+        const isGwpActive = window.GWP_CART_DRAWER_CONFIG || window.BUY_X_GET_Y_CART_DRAWER_CONFIG;
+        if (!isGwpActive) {
+          this.getCart();
+        } else {
+          // Trigger GWP extension to process the cart, it will dispatch theme:cart:refresh when done
+          document.dispatchEvent(
+            new CustomEvent('theme:cart:change', {
+              bubbles: true,
+              detail: {source: 'theme-update-cart'},
+            })
+          );
+        }
       })
       .catch((error) => {
         console.log(error);
