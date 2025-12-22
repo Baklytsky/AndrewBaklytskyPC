@@ -21,6 +21,9 @@ class CartCount extends HTMLElement {
   }
 
   onCartChange(event) {
+    // Ignore events without cartCount (e.g., GWP extension events)
+    if (event.detail.cartCount === undefined) return;
+
     this.cartCount = event.detail.cartCount;
     this.update();
   }
