@@ -924,11 +924,43 @@
           "default": "Choose your free gift!"
         },
         {
+          "type": "select",
+          "id": "recommendation_type",
+          "label": "Recommendation type",
+          "default": "fixed",
+          "options": [
+            {
+              "value": "fixed",
+              "label": "Fixed product list"
+            },
+            {
+              "value": "ai",
+              "label": "AI recommendations (Related)"
+            },
+            {
+              "value": "ai_complementary",
+              "label": "AI recommendations (Complementary)"
+            }
+          ],
+          "info": "Related products are auto-generated. Complementary products require setup via Shopify Search & Discovery app."
+        },
+        {
+          "type": "range",
+          "id": "ai_limit",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "label": "AI recommendations limit",
+          "default": 4,
+          "visible_if": "{{ block.settings.recommendation_type == 'ai' or block.settings.recommendation_type == 'ai_complementary' }}",
+          "info": "Maximum number of AI recommendations to show"
+        },
+        {
           "type": "product_list",
           "id": "product_list",
           "label": "Product list",
           "limit": 3,
-          "info": "Out of stock products hidden"
+          "info": "Out of stock products hidden. Used only when recommendation type is set to \“Fixed product list\”."
         },
         {
           "type": "color_scheme",
