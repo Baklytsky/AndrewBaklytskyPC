@@ -50,7 +50,7 @@
     }
 
     body.is-focused .product-card:not(.is-bundle) .quick-add__holder:focus-within,
-    .product-card:not(.is-bundle) .quick-add__holder.is-visible:not(.is-expanded),
+    .product-card:not(.is-bundle) .quick-add__holder.is-visible,
     .product-card:not(.is-bundle) .quick-add__holder.has-error {
       animation: slideInUp 0.25s ease;
       animation-fill-mode: forwards;
@@ -71,6 +71,9 @@
 }
 
 .quick-add__holder.is-disabled { pointer-events: none; }
+
+.quick-add__holder.has-error > form,
+.quick-add__holder.has-error .quick-add__button { width: 100%; }
 
 .quick-add__holder.is-expanded.is-visible {
   .quick-add__loader circle ~ circle { animation-play-state: running; }
@@ -116,7 +119,7 @@
   min-width: 40px;
   padding: 2px 5px;
   margin: 2px;
-  transition: background .3s;
+  transition: background 0.3s;
 }
 
 .quick-add__value:not(:disabled):hover { background: var(--COLOR-QUICK-ADD-BG-HOVER); }
@@ -146,7 +149,7 @@
   &.is-visible,
   &.is-loading,
   &.is-added {
-    visibility: unset;
+    visibility: unset !important;
   }
 
   &.is-disabled {

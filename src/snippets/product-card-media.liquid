@@ -3,6 +3,7 @@
   assign product_url = product.url | within: collection
   assign shopify_attributes = shopify_attributes | default: ''
   assign unique_id = unique_id | default: ''
+  assign section_id = unique_id | default: section.id
   assign index = index | default: 1
   assign block_index = block_index | default: 1
   assign sizes = sizes | default: ''
@@ -17,7 +18,7 @@
 
   if unique_id == blank
     capture unique_id
-      echo 'product-card--' | append: section.id | append: '-' | append: product.id
+      echo 'ProductCard-' | append: section.id | append: '-' | append: product.id
     endcapture
   endif
 
