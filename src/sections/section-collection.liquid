@@ -52,21 +52,67 @@
 
   assign featured_images_array = ''
 
-  for block in section.blocks
-    capture current_featured_image
-      assign featured_image = block.settings.featured_image
-      assign featured_image_position = block.settings.position
-      assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
+  # Get metaobject type from settings, default to 'collection_featured_promo'
+  assign collection_promo_meta = section.settings.collection_promo_meta | default: 'collection_featured_promo'
 
-      if featured_image_position < 10
-        assign featured_image_order = featured_image_order | prepend: '0'
-      endif
+  # Check if metaobject type exists and process promos directly
+  assign has_metaobject_promos = false
+  if featured_collection != blank and shop.metaobjects[collection_promo_meta]
+    assign all_promos = shop.metaobjects[collection_promo_meta].values
 
-      render 'collection-featured-image', block: block
-    endcapture
+    # Filter and process metaobjects by collection reference
+    if all_promos.size > 0
+      for promo in all_promos
+        if promo.collection.value and promo.collection.value.id == featured_collection.id
+          assign has_metaobject_promos = true
 
-    assign featured_images_array = featured_images_array | append: featured_image_order | append: '#featured_image_position#' | append: featured_image_position | append: '#featured_image_html#' | append: current_featured_image | append: '#featured_image#' | append: featured_image | append: '@@'
-  endfor
+          capture current_featured_image
+            assign featured_image_position = promo.position.value | default: 1
+            assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
+
+            if featured_image_position < 10
+              assign featured_image_order = featured_image_order | prepend: '0'
+            endif
+
+            render 'collection-featured-image', promo_metaobject: promo, index: forloop.index
+          endcapture
+
+          assign featured_image_position = promo.position.value | default: 1
+          assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
+
+          if featured_image_position < 10
+            assign featured_image_order = featured_image_order | prepend: '0'
+          endif
+
+          assign featured_image = promo.image.value
+          if featured_image == blank and promo.video.value != blank
+            assign featured_image = promo.video.value.preview_image
+          endif
+
+          assign featured_images_array = featured_images_array | append: featured_image_order | append: '#featured_image_position#' | append: featured_image_position | append: '#featured_image_html#' | append: current_featured_image | append: '#featured_image#' | append: featured_image | append: '@@'
+        endif
+      endfor
+    endif
+  endif
+
+  # Fallback to blocks for backward compatibility
+  unless has_metaobject_promos
+    for block in section.blocks
+      capture current_featured_image
+        assign featured_image = block.settings.featured_image
+        assign featured_image_position = block.settings.position
+        assign featured_image_order = featured_image_position | append: '-' | append: forloop.index
+
+        if featured_image_position < 10
+          assign featured_image_order = featured_image_order | prepend: '0'
+        endif
+
+        render 'collection-featured-image', block: block
+      endcapture
+
+      assign featured_images_array = featured_images_array | append: featured_image_order | append: '#featured_image_position#' | append: featured_image_position | append: '#featured_image_html#' | append: current_featured_image | append: '#featured_image#' | append: featured_image | append: '@@'
+    endfor
+  endunless
 
   assign featured_images_array = featured_images_array | split: '@@' | sort
 -%}
@@ -269,6 +315,21 @@
       "type": "collection",
       "id": "featured_collection",
       "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Featured promos"
+    },
+    {
+      "type": "paragraph",
+      "content": "Featured promos are configured using metaobjects. Create a metaobject type with a collection reference field to customize which promos appear for each collection. [Learn more](https://help.shopify.com/en/manual/custom-data/metaobjects)"
+    },
+    {
+      "type": "text",
+      "id": "collection_promo_meta",
+      "label": "Metaobject type",
+      "default": "collection_featured_promo",
+      "info": "When referencing a custom or app created \"metaobject type\", the definition must exist on the shop and be available to the storefront"
     },
     {
       "type": "header",
