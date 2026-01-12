@@ -12,10 +12,19 @@
           assign featured_image_order = featured_image_order | prepend: '0'
         endif
       -%}
-      {%- render 'collection-featured-image' block: block -%}
+      {%- render 'collection-featured-image', block: block -%}
     {%- endcapture -%}
 
-    {%- assign featured_images_array = featured_images_array | append: featured_image_order | append: '#featured_image_position#' | append: featured_image_position | append: '#featured_image_html#' | append: current_featured_image | append: '#featured_image#' | append: featured_image | append: '@@' -%}
+    {%- assign featured_images_array = featured_images_array
+      | append: featured_image_order
+      | append: '#featured_image_position#'
+      | append: featured_image_position
+      | append: '#featured_image_html#'
+      | append: current_featured_image
+      | append: '#featured_image#'
+      | append: featured_image
+      | append: '@@'
+    -%}
   {%- endfor -%}
 
   {%- assign featured_images_array = featured_images_array | split: '@@' | sort -%}
