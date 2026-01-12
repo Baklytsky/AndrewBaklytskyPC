@@ -8,10 +8,7 @@
   assign size_separator = '_size_'
   assign specific_pages = ''
   assign form_style = settings.form_style
-  assign is_bundle = is_bundle | default: false
   assign featured_product = featured_product | default: false
-  assign bundle_separator_open = '('
-  assign bundle_separator_close = ')'
   assign meta_products = ''
   assign meta_product_details = ''
   assign meta_swatches = ''
@@ -33,90 +30,6 @@
   endif
 -%}
 
-{%- if is_bundle -%}
-  {%- for item in product.metafields.theme_modules.bundle_products.value -%}
-    {%- assign item_current_variant = item.first_available_variant -%}
-    {%- assign item_featured_image = item.featured_image -%}
-    {%- assign item_url = item.url | within: collection -%}
-    {%- assign item_featured_image_string = '' -%}
-    {%- if item_featured_image != blank -%}
-      {%- assign item_featured_image_string = item_featured_image | image_url: width: 240 -%}
-    {%- endif -%}
-
-    {%- assign meta_product_details = meta_product_details
-      | append: '$$$$'
-      | append: item.title
-      | append: '####'
-      | append: item_featured_image_string
-      | append: '@@@@'
-      | append: item_url
-    -%}
-
-    {%- unless featured_product -%}
-      {%- capture meta_products -%}
-        {{ meta_products }}
-
-        <div class="card-bundle">
-          <div class="card-bundle__image">
-            <a href="{{ item_url }}">
-              {%- render 'image',
-                image: item_featured_image,
-                widths: '150, 300, 450, 600',
-                width: '300',
-                sizes: '150px'
-                aspect_ratio: 1
-              -%}
-            </a>
-          </div>
-
-          <div class="card-bundle__content">
-            <span class="card-bundle__title">
-              <a href="{{ item_url }}" class="card-bundle__link">
-                {{ item.title }}
-              </a>
-            </span>
-
-            <div class="card-bundle__price">
-              {%- render 'price', product: item -%}
-            </div>
-          </div>
-        </div>
-      {%- endcapture -%}
-    {%- endunless -%}
-
-    {%- if settings.enable_swatches -%}
-      {%- for option in item.options_with_values -%}
-        {%- for value in option.values -%}
-          {%- if value.swatch -%}
-            {%- assign option_name_meta = item.title
-              | append: ' '
-              | append: bundle_separator_open
-              | append: option.name
-              | append: bundle_separator_close
-            -%}
-            {%- liquid
-              if value.swatch.image
-                assign image_url = value.swatch.image | image_url: width: 96
-                assign swatch_value = 'url(' | append: image_url | append: ')'
-              elsif value.swatch.color
-                assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
-              endif
-            -%}
-
-            {%- assign meta_swatches = meta_swatches
-              | append: '$$$$'
-              | append: option_name_meta
-              | append: '####'
-              | append: value
-              | append: '@@@@'
-              | append: swatch_value
-            -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endfor -%}
-    {%- endif -%}
-  {%- endfor -%}
-{%- endif -%}
 
 {%- capture size_chart -%}
   {%- if enable_size_chart -%}
@@ -265,35 +178,7 @@
           {%- liquid
             assign current_value = current_variant.options[forloop.index0]
             assign option_name = option.name
-            assign option_title = option_name | split: bundle_separator_open | last | split: bundle_separator_close | first | strip
-            assign option_product_name = option_name | split: bundle_separator_open | first | strip
-            assign next_option = product.options_with_values[forloop.index]
-            assign next_option_product_name = next_option.name | split: bundle_separator_open | first | strip
-            assign prev_index = forloop.index0 | minus: 1
-            assign prev_option = product.options_with_values[prev_index]
-            assign prev_option_product_name = prev_option.name | split: bundle_separator_open | first | strip
-            assign option_name_string = ''
-            assign option_product_splitter = option_product_name | append: '####'
-            assign option_product_details = meta_product_details | split: option_product_splitter | last | split: '$$$$' | first | split: '@@@@'
-            assign option_product_image = option_product_details | first
-            assign option_product_url = option_product_details | last
-
-            if forloop.first
-              assign prev_option_product_name = ''
-            endif
-
-            if forloop.last
-              assign next_option_product_name = ''
-            endif
-
-            if is_bundle
-              assign option_name = option_title
-              if option_product_name != prev_option_product_name
-                assign option_name_string = option_product_name
-              endif
-            else
-              assign option_name_string = option.name
-            endif
+            assign option_name_string = option.name
 
             assign option_name_handle_separator = option_name | handle | prepend: ',' | append: ','
 
@@ -322,9 +207,6 @@
                 endif
               endfor
 
-              if is_bundle and meta_swatches contains option.name
-                assign is_native_swatch_option = true
-              endif
 
               assign swatch_translation = 'general.swatches.color' | t
               assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
@@ -357,7 +239,6 @@
             endcomment
             assign show_default_swatches = false
             assign default_swatches_checked = false
-            assign group_legend_bundle_modern = ''
             assign color_swatches = ''
             assign swatch_group_array = ''
           -%}
@@ -382,8 +263,7 @@
                   option: option,
                   picker_type: picker_type,
                   is_theme_swatch_option: is_theme_swatch_option,
-                  is_native_swatch_option: is_native_swatch_option,
-                  is_bundle: is_bundle
+                  is_native_swatch_option: is_native_swatch_option
                 %}
               {%- endcapture -%}
 
@@ -414,9 +294,7 @@
               <div
                 class="selector-wrapper{% if settings.variant_boxes and is_size_option %} selector-wrapper--size{% elsif settings.variant_boxes or is_theme_swatch_option %} selector-wrapper--fullwidth{% endif %}"
                 data-variant-buttons
-                {% if is_bundle %}
-                  data-option-position="{{ option.position }}"
-                {% endif %}
+                data-option-position="{{ option.position }}"
               >
                 {%- if picker_type == 'swatch' -%}
                   <fieldset class="product-form__input">
@@ -430,8 +308,7 @@
                       product: product,
                       product_form_id: product_form_id,
                       option: option,
-                      picker_type: picker_type,
-                      is_bundle: is_bundle
+                      picker_type: picker_type
                     %}
                   </fieldset>
                 {%- elsif picker_type == 'dropdown' -%}
@@ -488,23 +365,18 @@
                 {%- endcapture -%}
 
                 {% if prefix != next_prefix %}
-                  {%- unless is_bundle -%}
-                    <fieldset>
-                      <div class="{{ fieldset_class }}">
-                  {%- endunless -%}
+                  <fieldset>
+                    <div class="{{ fieldset_class }}">
 
                       {%- capture group_legend -%}
                         <legend class="radio__legend">
                           <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}">
-                            {%- unless is_bundle -%}
-                              <span class="radio__legend__option-name">
-                                {{ prefix }}
-                              </span>
-                            {%- endunless -%}
+                            <span class="radio__legend__option-name">
+                              {{ prefix }}
+                            </span>
 
-                            {%- if settings.show_labels and group contains 'data-swatch-input-checked' or is_bundle -%}
+                            {%- if settings.show_labels and group contains 'data-swatch-input-checked' -%}
                               <small class="radio__legend__value">
-                                {% if is_bundle %}{{ prefix }}{% if group contains 'data-swatch-input-checked' %}: {% endif %}{% endif %}
                                 {%- if group contains 'data-swatch-input-checked' -%}
                                   <span data-option-value="{{ option.position }}">{{ current_value }}</span>
                                 {%- endif -%}
@@ -528,32 +400,20 @@
                       {%- endcapture -%}
 
                       {%- if form_style == 'modern' -%}
-                        {%- if is_bundle -%}
-                          {%- capture group_legend_bundle_modern -%}
-                            {{ group_legend_bundle_modern }}
+                        <div class="fieldset__column fieldset__column--aside">
+                          {{ group_legend }}
+                        </div>
 
-                            {{ group_legend }}
-                          {%- endcapture -%}
-
+                        <div class="fieldset__column fieldset__column--content">
                           {{ group_swatches }}
-                        {%- else -%}
-                          <div class="fieldset__column fieldset__column--aside">
-                            {{ group_legend }}
-                          </div>
-
-                          <div class="fieldset__column fieldset__column--content">
-                            {{ group_swatches }}
-                          </div>
-                        {%- endif -%}
+                        </div>
                       {%- else -%}
                         {{ group_legend }}
 
                         {{ group_swatches }}
                       {%- endif -%}
-                  {%- unless is_bundle -%}
-                      </div>
-                    </fieldset>
-                  {%- endunless -%}
+                    </div>
+                  </fieldset>
                 {% endif %}
 
                 {% assign previous_prefix = prefix %}
@@ -561,129 +421,67 @@
             {%- endif -%}
           {%- endcapture -%}
 
-          {%- unless is_bundle and option_product_name == prev_option_product_name -%}
-            <div class="selector-wrapper{% if settings.variant_boxes and is_size_option %} selector-wrapper--size{% elsif settings.variant_boxes %} selector-wrapper--fullwidth{% endif %}"
-              {% unless is_bundle %}
-                data-option-position="{{ option.position }}"
-              {% endunless %}
-            >
-              {%- if picker_type != 'swatch' or show_default_swatches or is_bundle -%}
-                <fieldset
-                  {% if featured_product and is_bundle and option_product_image != blank %}
-                    class="product__selectors__columns"
-                  {% endif %}
-                >
-                  <div class="{{ fieldset_class }}">
-                    {%- if featured_product and is_bundle and option_product_image != blank -%}
-                      {%- liquid
-                        capture option_product_image_srcset
-                          render 'image-srcset', image_url: option_product_image, widths: '120, 240, 360, 480', image_width: 240
-                        endcapture
-                      -%}
-
-                      <div class="product__selectors__image lazy-image is-loading">
-                        <a href="{{ option_product_url }}">
-                          <img
-                            src="{{ option_product_image }}"
-                            class="is-loading"
-                            loading="lazy"
-                            sizes="120px"
-                            srcset="{{ option_product_image_srcset }}"
-                            alt="{{ option_name | strip_html }}"
-                          >
-                        </a>
-                      </div>
-                    {%- endif -%}
-
-                    {%- if form_style == 'modern' -%}
-                      <div class="fieldset__column fieldset__column--aside">
-                    {%- endif -%}
-              {%- endif -%}
-          {%- endunless -%}
-
-          {%- if picker_type != 'swatch' or show_default_swatches or is_bundle -%}
-            <legend class="radio__legend{% if is_size_option and size_chart_link %} radio__legend--size{% endif %}">
-              <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}" id="{{ uniq_id }}-select-{{ option.name | handle }}-label">
-                {%- if option_name_string != '' -%}
-                  <span class="radio__legend__option-name">
-                    {%- if is_bundle -%}
-                      <a href="{{ option_product_url }}">
-                        {{ option_name_string }}
-                      </a>
-                    {%- else -%}
-                      {{ option_name_string }}
-                    {%- endif -%}
-                  </span>
-                {%- endif -%}
-
-                {%- if is_size_option -%}
-                  {{- size_chart_link | replace: '<size-chart-button></size-chart-button>', size_button_options -}}
-                {%- endif -%}
-
-                {%- if settings.show_labels -%}
-                  {%- if default_swatches_checked or picker_type != 'swatch' or show_default_swatches and is_bundle -%}
-                    <small class="radio__legend__value">
-                      {% if is_bundle and picker_type != 'swatch' or show_default_swatches %}{{ option_name }}{% if default_swatches_checked or picker_type != 'swatch' %}: {% endif %}{% endif %}
-                      {%- if is_bundle == false or default_swatches_checked or picker_type != 'swatch' -%}
-                        <span data-option-value="{{ option.position }}">{{ current_value }}</span>
-                      {%- endif -%}
-                    </small>
+          <div class="selector-wrapper{% if settings.variant_boxes and is_size_option %} selector-wrapper--size{% elsif settings.variant_boxes %} selector-wrapper--fullwidth{% endif %}"
+            data-option-position="{{ option.position }}"
+          >
+            {%- if picker_type != 'swatch' or show_default_swatches -%}
+              <fieldset>
+                <div class="{{ fieldset_class }}">
+                  {%- if form_style == 'modern' -%}
+                    <div class="fieldset__column fieldset__column--aside">
                   {%- endif -%}
-                {%- endif -%}
-              </span>
-            </legend>
-          {%- endif -%}
+            {%- endif -%}
 
-          {%- if form_style == 'classic' -%}
-            {{ options_html }}
-            {%- assign options_html = '' -%}
+            {%- if picker_type != 'swatch' or show_default_swatches -%}
+              <legend class="radio__legend{% if is_size_option and size_chart_link %} radio__legend--size{% endif %}">
+                <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}" id="{{ uniq_id }}-select-{{ option.name | handle }}-label">
+                  {%- if option_name_string != '' -%}
+                    <span class="radio__legend__option-name">
+                      {{ option_name_string }}
+                    </span>
+                  {%- endif -%}
 
-            {%- if is_bundle -%}
+                  {%- if is_size_option -%}
+                    {{- size_chart_link | replace: '<size-chart-button></size-chart-button>', size_button_options -}}
+                  {%- endif -%}
+
+                  {%- if settings.show_labels -%}
+                    {%- if default_swatches_checked or picker_type != 'swatch' or show_default_swatches -%}
+                      <small class="radio__legend__value">
+                        {%- if default_swatches_checked or picker_type != 'swatch' -%}
+                          <span data-option-value="{{ option.position }}">{{ current_value }}</span>
+                        {%- endif -%}
+                      </small>
+                    {%- endif -%}
+                  {%- endif -%}
+                </span>
+              </legend>
+            {%- endif -%}
+
+            {%- if form_style == 'classic' -%}
+              {{ options_html }}
+              {%- assign options_html = '' -%}
               {{ swatch_group_html }}
             {%- endif -%}
-          {%- endif -%}
 
-          {%- unless is_bundle and option_product_name == next_option_product_name -%}
-              {%- if picker_type != 'swatch' or show_default_swatches or is_bundle -%}
-                    {%- if form_style == 'modern' -%}
-                        {%- if is_bundle and group_legend_bundle_modern != '' -%}
-                          {{ group_legend_bundle_modern }}
-                          {%- assign group_legend_bundle_modern = '' -%}
-                        {%- endif -%}
-                      </div>
+            {%- if picker_type != 'swatch' or show_default_swatches -%}
+              {%- if form_style == 'modern' -%}
+                </div>
 
-                      <div class="fieldset__column fieldset__column--content">
-                        {{ options_html }}
-                        {%- assign options_html = '' -%}
-
-                        {%- if is_bundle -%}
-                          {{ swatch_group_html }}
-                        {%- endif -%}
-                      </div>
-                    {%- endif -%}
-                  </div>
-                </fieldset>
+                <div class="fieldset__column fieldset__column--content">
+                  {{ options_html }}
+                  {%- assign options_html = '' -%}
+                  {{ swatch_group_html }}
+                </div>
               {%- endif -%}
-
-              {%- unless is_bundle -%}
-                {{ swatch_group_html }}
-              {%- endunless -%}
             </div>
-          {%- endunless -%}
+          </fieldset>
+          {%- endif -%}
+          {{ swatch_group_html }}
+        </div>
         {%- endfor -%}
       </div>
 
-      {%- if meta_products != '' -%}
-        <div class="product-selectors__products product-cards">
-          <div class="product-cards__title body-medium">
-            {{ 'products.general.bundle_products' | t }}
-          </div>
-
-          <div class="product-cards__items">
-            {{ meta_products }}
-          </div>
-        </div>
-      {%- endif -%}
     {%- endunless -%}
   {%- endcapture -%}
 

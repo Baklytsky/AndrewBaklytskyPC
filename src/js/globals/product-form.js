@@ -18,44 +18,15 @@ if (!customElements.get('product-form')) {
 
       onSubmitHandler(evt) {
         evt.preventDefault();
-        const isBundle = this.submitButton.hasAttribute('data-bundle-modal-button');
 
-        if (isBundle) {
-          const productJSONhtml = this.querySelector('[data-bundle-json]')?.innerHTML;
-          const productJSON = JSON.parse(productJSONhtml);
-          const bundleButton = document.querySelector(`[data-bundle-product-button="${productJSON.product.id}"]`);
-          const selectedVariantId = evt.currentTarget.querySelector('[name="id"]')?.value;
-          const selectedVariant = productJSON.product.variants.find((variant) => variant.id === Number(selectedVariantId));
-
-          if (bundleButton) {
-            bundleButton.dispatchEvent(
-              new CustomEvent('theme:bundle:button-modal', {
-                detail: {
-                  data: {
-                    product: productJSON.product,
-                    variant: selectedVariant,
-                  },
-                },
-                bubbles: true,
-              })
-            );
-
-            document.dispatchEvent(
-              new CustomEvent('theme:bundle:added', {
-                bubbles: true,
-              })
-            );
-          }
-        } else {
-          document.dispatchEvent(
-            new CustomEvent('theme:cart:add', {
-              detail: {
-                button: this.submitButton,
-              },
-              bubbles: false,
-            })
-          );
-        }
+        document.dispatchEvent(
+          new CustomEvent('theme:cart:add', {
+            detail: {
+              button: this.submitButton,
+            },
+            bubbles: false,
+          })
+        );
 
         const quickAddModal = this.closest('quick-add-modal');
         if (!quickAddModal) {

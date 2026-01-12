@@ -61,7 +61,7 @@ The color swatches feature allows customers to select product variants (typicall
 - **Purpose:** Renders variant option inputs (swatches, buttons, or dropdowns)
 - **Critical Elements:**
   - Swatch input render: `render 'swatch-input'` (line 74)
-  - Parameters passed: `is_theme_swatch_option`, `is_native_swatch_option`, `is_bundle` (lines 79-80, 86)
+  - Parameters passed: `is_theme_swatch_option`, `is_native_swatch_option` (lines 79-80, 86)
   - Input ID format: `{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}-{{ product.id }}` (line 50)
   - Input name format: `{{ option.name }}-{{ option.position }}` (line 54)
 

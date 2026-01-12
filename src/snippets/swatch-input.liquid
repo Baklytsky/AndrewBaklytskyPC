@@ -14,7 +14,6 @@
   - additional_props: {String} additional properties to attach to the input (optional)
   - is_theme_swatch_option: {Boolean} is it a theme swatch
   - is_native_swatch_option: {Boolean} is it a native swatch
-  - is_bundle: {Boolean} If it is bundle (optional)
 
   Usage:
    {% render 'swatch-input',
@@ -30,20 +29,15 @@
 {% endcomment %}
 {%- liquid
   assign swatch_value = null
-  if is_bundle
-    assign option_name_with_value = option.name | append: '####' | append: value | append: '@@@@'
-    assign swatch_value = meta_swatches | split: option_name_with_value | last | split: '$$$$' | first
-  else
-    if value.swatch
-      if value.swatch.image
-        assign image_url = value.swatch.image | image_url: width: 96
-        assign swatch_value = 'url(' | append: image_url | append: ')'
-      elsif value.swatch.color
-        assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
-      endif
-    else
-      assign swatch_value = value | handle
+  if value.swatch
+    if value.swatch.image
+      assign image_url = value.swatch.image | image_url: width: 96
+      assign swatch_value = 'url(' | append: image_url | append: ')'
+    elsif value.swatch.color
+      assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
     endif
+  else
+    assign swatch_value = value | handle
   endif
 
   capture swatch_style
