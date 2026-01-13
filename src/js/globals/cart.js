@@ -24,7 +24,6 @@ const classes = {
 const selectors = {
   apiContent: '[data-api-content]',
   apiLineItems: '[data-api-line-items]',
-  apiBundleItems: '[data-api-bundle-items]',
   apiCartPrice: '[data-api-cart-price]',
   animation: '[data-animation]',
   cartBarAdd: '[data-cart-bar-add-to-cart]',
@@ -55,8 +54,6 @@ const selectors = {
   quickAddHolder: '[data-quick-add-holder]',
   quickAddModal: '[data-quick-add-modal]',
   qtyInput: 'input[name="updates[]"]',
-  bundleProductsHolder: '[data-bundle-products]',
-  bundleWidget: '[data-bundle-widget]',
   termsErrorMessage: '[data-terms-error-message]',
   collapsibleBody: '[data-collapsible-body]',
   discountInput: '[data-discount-input]',
@@ -112,7 +109,6 @@ class CartItems extends HTMLElement {
     this.cartCloseErrorMessage = document.querySelector(selectors.cartCloseError);
     this.headerWrapper = document.querySelector(selectors.headerWrapper);
     this.navDrawer = document.querySelector(selectors.navDrawer);
-    this.bundleProductsHolder = document.querySelector(selectors.bundleProductsHolder);
     this.subtotal = window.theme.subtotal;
     this.discountInput = document.querySelector(selectors.discountInput);
     this.discountField = document.querySelector(selectors.discountField);
@@ -147,12 +143,6 @@ class CartItems extends HTMLElement {
       document.addEventListener('theme:cart-drawer:open', this.onCartDrawerOpen);
       document.addEventListener('theme:cart-drawer:close', this.onCartDrawerClose);
     }
-
-    // Bundle products
-    this.skipBundleProductsArray = [];
-    this.skipBundleProductEvent();
-    this.checkSkippedBundleProductsFromStorage();
-    this.toggleCartBundleWidgetVisibility();
 
     // Free Shipping values
     this.circumference = 28 * Math.PI; // radius - stroke * 4 * PI
@@ -300,21 +290,6 @@ class CartItems extends HTMLElement {
       });
     });
 
-    const cartBundleRemove = document.querySelectorAll('[data-bundle-cart-remove]');
-    cartBundleRemove?.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-
-        if (button.getAttribute('data-bundle-cart-remove') !== '') {
-          const lineItemKey = button.getAttribute('data-bundle-cart-remove');
-          const lineItemKeyArr = lineItemKey.split(',');
-
-          button.closest('[data-bundle-cart-item]')?.classList.add('is-removed');
-
-          this.removeMultipleProducts(lineItemKeyArr);
-        }
-      });
-    });
 
     if (this.cartCloseErrorMessage) {
       this.cartCloseErrorMessage.addEventListener('click', (event) => {
@@ -976,7 +951,7 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll('input:not([data-bundle-cart-quantity]');
+    const inputs = this.cart.querySelectorAll('input');
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
     inputs?.forEach((item) => {
@@ -1183,9 +1158,7 @@ class CartItems extends HTMLElement {
 
   build(data) {
     const cartItemsData = data.querySelector(selectors.apiLineItems);
-    const bundleItemsData = data.querySelector(selectors.apiBundleItems);
-
-    const cartEmptyData = Boolean(cartItemsData === null && bundleItemsData === null);
+    const cartEmptyData = Boolean(cartItemsData === null);
     const priceData = data.querySelector(selectors.apiCartPrice);
     const cartTotal = data.querySelector(selectors.cartTotal);
 
@@ -1195,20 +1168,8 @@ class CartItems extends HTMLElement {
 
     if (cartEmptyData) {
       this.itemsHolder.innerHTML = data.innerHTML;
-
-      if (this.bundleProductsHolder) {
-        this.bundleProductsHolder.innerHTML = '';
-      }
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
-
-      if (this.bundleProductsHolder && bundleItemsData) {
-        this.bundleProductsHolder.innerHTML = bundleItemsData.innerHTML;
-      }
-
-      this.skipBundleProductEvent();
-      this.checkSkippedBundleProductsFromStorage();
-      this.toggleCartBundleWidgetVisibility();
     }
 
     this.newTotalItems = cartItemsData && cartItemsData.querySelectorAll(selectors.item).length ? cartItemsData.querySelectorAll(selectors.item).length : 0;
@@ -1427,50 +1388,6 @@ class CartItems extends HTMLElement {
     });
   }
 
-  /**
-   * Skip bundle product
-   */
-  skipBundleProductEvent() {
-    if (this.bundleProductsHolder === null) {
-      return;
-    }
-
-    const bundleSkipButtons = this.bundleProductsHolder?.querySelectorAll('[data-skip-upsell-product]') || [];
-
-    if (bundleSkipButtons.length) {
-      bundleSkipButtons.forEach((button) => {
-        button.addEventListener('click', (event) => {
-          event.preventDefault();
-
-          const productID = button.closest(selectors.quickAddHolder).getAttribute(attributes.quickAddHolder);
-          const isBundle = !!button.closest(selectors.bundleWidget);
-
-          if (isBundle && !this.skipBundleProductsArray.includes(productID)) {
-            this.skipBundleProductsArray.push(productID);
-            window.sessionStorage.setItem('skip_bundle_products', this.skipBundleProductsArray);
-            this.removeBundleProduct(productID);
-          }
-
-          this.toggleCartBundleWidgetVisibility();
-        });
-      });
-    }
-  }
-
-  /**
-   * Check for skipped bundle product added to session storage
-   */
-  checkSkippedBundleProductsFromStorage() {
-    const skippedItems = window.sessionStorage.getItem('skip_bundle_products');
-    if (skippedItems) {
-      skippedItems.split(',').forEach((productID) => {
-        if (!this.skipBundleProductsArray.includes(productID)) {
-          this.skipBundleProductsArray.push(productID);
-        }
-        this.removeBundleProduct(productID);
-      });
-    }
-  }
 
   /**
    * Remove multiple products from cart
@@ -1511,35 +1428,6 @@ class CartItems extends HTMLElement {
       });
   }
 
-  removeBundleProduct(productID) {
-    if (!this.bundleProductsHolder) return;
-
-    const product = this.bundleProductsHolder.querySelector(`[${attributes.quickAddHolder}="${productID}"]`);
-    if (product && product.parentNode) {
-      product.parentNode.remove();
-    }
-  }
-
-  /**
-   * Show or hide cart bundle products widget visibility
-   */
-  toggleCartBundleWidgetVisibility() {
-    if (!this.bundleProductsHolder) return;
-
-    const bundleItems = this.bundleProductsHolder.querySelectorAll(selectors.quickAddHolder);
-    const bundleWidget = this.bundleProductsHolder.closest(selectors.bundleWidget);
-
-    if (!bundleWidget) return;
-
-    bundleWidget.classList.toggle(classes.hidden, !bundleItems.length);
-    if (bundleItems.length && !bundleWidget.hasAttribute(attributes.open) && bundleWidget.hasAttribute('data-upsell-auto-open')) {
-      bundleWidget.setAttribute(attributes.open, true);
-      const widgetBody = bundleWidget.querySelector(selectors.collapsibleBody);
-      if (widgetBody) {
-        widgetBody.style.height = 'auto';
-      }
-    }
-  }
 
   /**
    * Remove initially added AOS classes to allow animation on cart drawer open

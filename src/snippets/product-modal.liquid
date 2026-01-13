@@ -6,19 +6,16 @@
   assign unique = unique | default: section.id
   assign current_variant = product.selected_or_first_available_variant
   assign featured_media = current_variant.featured_media | default: product.featured_media
-  assign is_bundle = is_bundle | default: false
 
-  unless is_bundle
-    assign preorder = false
-    if product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
-      assign preorder = true
-    endif
+  assign preorder = false
+  if product.metafields.theme.preorder.type == 'boolean' and product.metafields.theme.preorder.value == true
+    assign preorder = true
+  endif
 
-    assign product_tags = product.tags | join: ','
-    if product_tags contains '_preorder'
-      assign preorder = true
-    endif
-  endunless
+  assign product_tags = product.tags | join: ','
+  if product_tags contains '_preorder'
+    assign preorder = true
+  endif
 -%}
 
 <div data-api-content>
@@ -132,44 +129,40 @@
           render 'product-price', product: product, unique: unique, animation_name: animation_name, animation_delay: animation_delay
           assign animation_delay = animation_delay | plus: animation_delay_increment
 
-          unless is_bundle
-            render 'product-siblings', product: product, product_form_id: product_form_id, metafields: true, product_api: true, animation_name: animation_name, animation_delay: animation_delay
-            assign animation_delay = animation_delay | plus: animation_delay_increment
-          endunless
+          render 'product-siblings', product: product, product_form_id: product_form_id, metafields: true, product_api: true, animation_name: animation_name, animation_delay: animation_delay
+          assign animation_delay = animation_delay | plus: animation_delay_increment
 
-          render 'product-variant-picker', product: product, product_form_id: product_form_id, unique: unique, current_variant: current_variant, enable_size_chart: false, animation_name: animation_name, animation_delay: animation_delay, is_bundle: is_bundle, quickview: true
+          render 'product-variant-picker', product: product, product_form_id: product_form_id, unique: unique, current_variant: current_variant, enable_size_chart: false, animation_name: animation_name, animation_delay: animation_delay, quickview: true
           assign animation_delay = animation_delay | plus: animation_delay_increment
 
           render 'product-description', product: product, product_api: true, animation_name: animation_name, animation_delay: animation_delay
           assign animation_delay = animation_delay | plus: animation_delay_increment
         -%}
 
-        {%- unless is_bundle -%}
-          {%- comment -%}
-            Add a line item property called 'Preorder' to preorder products
-          {%- endcomment -%}
-          {%- if preorder -%}
-            <input
-              type="hidden"
-              name="properties[{{ 'products.product.sale_type' | t }}]"
-              value="{{ 'products.product.pre_order' | t }}"
-              form="{{ product_form_id }}"
-              data-product-preorder
-            >
-          {%- endif -%}
+        {%- comment -%}
+          Add a line item property called 'Preorder' to preorder products
+        {%- endcomment -%}
+        {%- if preorder -%}
+          <input
+            type="hidden"
+            name="properties[{{ 'products.product.sale_type' | t }}]"
+            value="{{ 'products.product.pre_order' | t }}"
+            form="{{ product_form_id }}"
+            data-product-preorder
+          >
+        {%- endif -%}
 
-          {%- if settings.show_gift_card_recipient and product.gift_card? -%}
-            <div
-              class="product__block block-padding"
-              {% if animation_name %}
-                data-animation="{{ animation_name }}"
-                data-animation-delay="{{ animation_delay }}"
-              {% endif %}
-            >
-              {%- render 'gift-card-recipient-form', product: product, form: form, product_form_id: product_form_id -%}
-            </div>
-          {%- endif -%}
-        {%- endunless -%}
+        {%- if settings.show_gift_card_recipient and product.gift_card? -%}
+          <div
+            class="product__block block-padding"
+            {% if animation_name %}
+              data-animation="{{ animation_name }}"
+              data-animation-delay="{{ animation_delay }}"
+            {% endif %}
+          >
+            {%- render 'gift-card-recipient-form', product: product, form: form, product_form_id: product_form_id -%}
+          </div>
+        {%- endif -%}
 
         {%- render 'product-buttons',
           product: product,
@@ -177,8 +170,7 @@
           product_form_id: product_form_id,
           animation_name: animation_name,
           animation_delay: animation_delay,
-          quickview: true,
-          is_bundle: is_bundle
+          quickview: true
         -%}
       </div>
     </div>

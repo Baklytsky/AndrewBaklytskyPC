@@ -22,6 +22,8 @@ if (!customElements.get('video-popup')) {
 
               const options = {
                 mainClass: 'pswp--video',
+                closeOnScroll: false,
+                closeOnVerticalDrag: false,
               };
 
               new window.theme.LoadPhotoswipe(items, options);

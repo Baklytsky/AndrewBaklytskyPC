@@ -6,23 +6,19 @@
   - product_form_id: {String} product form id.
   - section_id: {String} id of section to which this snippet belongs.
   - show_pickup_availability: {Boolean} for the pickup availability. If true the pickup availability is rendered, false - not rendered (optional).
-  - is_bundle: {Boolean} for the bundle modal. If true the bundle modal is rendered, false - not rendered (optional).
-
   Usage:
-  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, unique: unique, show_pickup_availability: true, is_bundle: true %}
+  {% render 'product-buttons', block: block, product: product, product_form_id: product_form_id, unique: unique, show_pickup_availability: true %}
 {% endcomment %}
 
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign show_dynamic_checkout = false
-  assign is_featured_product_bundle = is_featured_product_bundle | default: false
   assign gift_card_recipient_feature_active = false
   assign show_quantity = show_quantity | default: block.settings.show_quantity | default: false
   assign is_quickview = quickview | default: false
   assign show_newsletter = settings.show_newsletter
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign section_id = unique | default: section.id
-  assign is_bundle = is_bundle | default: false
 
   if is_quickview
     assign show_newsletter = false
@@ -335,9 +331,6 @@
                 class="btn {{ button_style }} {{ button_size }} {{ button_type }}"
                 data-preorder="{{ preorder }}"
                 data-add-to-cart
-                {% if is_bundle %}
-                  data-bundle-modal-button="{{ 'products.general.add_bundle' | t }}"
-                {% endif %}
                 {% if current_variant.available == false or quantity_rule_soldout or current_variant == null %}
                   disabled
                 {% endif %}
@@ -370,12 +363,6 @@
                 {{ form | payment_button }}
               </div>
             {%- endif -%}
-
-            {%- if is_featured_product_bundle -%}
-              <div class="product__submit__link text-center">
-                <a href="{{ product.url }}" class="text-link small">{{ 'products.general.bundle_link' | t }}</a>
-              </div>
-            {%- endif -%}
           </div>
         </div>
       {%- endform -%}
@@ -403,14 +390,6 @@
             </div>
           </dialog>
         </popup-component>
-      {%- endif -%}
-
-      {%- if is_bundle -%}
-        <script type="application/json" data-bundle-json>
-          {
-            "product": {{ product | json }}
-          }
-        </script>
       {%- endif -%}
     </product-form>
   {%- else -%}

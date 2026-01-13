@@ -8,8 +8,6 @@
   assign block_index = block_index | default: 1
   assign sizes = sizes | default: ''
   assign animation_delay = animation_delay | default: 0
-  assign bundle_product = bundle_product | default: false
-  assign bundle_template = bundle_template | default: false
 
   assign double_img = false
   if product.media[1].preview_image and settings.image_hover_enable
@@ -301,59 +299,7 @@
   {%- endif -%}
 
   {%- if current_variant -%}
-    {%- if bundle_product or bundle_template -%}
-      {%- capture bundle_code -%}
-        {%- assign unique = section.id | append: '-' | append: product.id -%}
-
-        <script type="application/json" data-bundle-json>
-          {
-            "product": {{ product | json }},
-            "variant": {{ product.selected_or_first_available_variant | json }}
-          }
-        </script>
-
-        <quick-add-product>
-          <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
-            <button class="quick-add__button caps"
-              type="button"
-              aria-label="{{ 'products.general.quick_add' | t }}"
-              data-bundle-product-button="{{ product.id }}"
-              data-bundle-product-url="{{ product.url }}"
-              {% if product.has_only_default_variant == false and product.variants.size > 1 %}
-                data-quick-add-btn
-                data-quick-add-modal-handle="{{ product.handle }}"
-              {% endif %}
-            >
-              <span class="btn__text">
-                {{ 'products.general.add_bundle' | t }}
-              </span>
-              <span class="btn__bag">{% render 'icon-bag' %}</span>
-              <span class="btn__added">&nbsp;</span>
-              <span class="btn__loader">
-                <svg height="18" width="18" class="svg-loader">
-                  <circle r="7" cx="9" cy="9" />
-                  <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                </svg>
-              </span>
-            </button>
-
-            {%- unless product.has_only_default_variant -%}
-              {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
-            {%- endunless -%}
-          </div>
-        </quick-add-product>
-      {%- endcapture -%}
-    {%- endif -%}
-
-    {%- if bundle_template -%}
-      <template data-bundle-item-template>
-        {{ bundle_code }}
-      </template>
-    {%- endif -%}
-
-    {%- if bundle_product -%}
-      {{ bundle_code }}
-    {%- elsif settings.quickview_enable -%}
+    {%- if settings.quickview_enable -%}
       {%- liquid
         assign has_preorder_meta = false
         assign has_preorder_tag = false
@@ -374,7 +320,7 @@
         assign unique = section.id | append: '-' | append: product.id
       -%}
 
-      <quick-add-product data-bundle-item-replace>
+      <quick-add-product>
         <div class="quick-add__holder" data-quick-add-holder="{{ product.id }}">
           {%- if quick_add_overlay_option != '' -%}
             <div class="quick-add__errors" data-cart-errors-container></div>
