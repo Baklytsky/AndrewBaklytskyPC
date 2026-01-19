@@ -1,14 +1,3 @@
-const selectors = {
-  productPage: '.product__page',
-  formWrapper: '[data-form-wrapper]',
-  headerSticky: '[data-header-sticky]',
-  productMediaList: '[data-product-media-list]',
-};
-
-const classes = {
-  sticky: 'is-sticky',
-};
-
 if (!customElements.get('product-sticky')) {
   customElements.define(
     'product-sticky',
@@ -16,7 +5,6 @@ if (!customElements.get('product-sticky')) {
       constructor() {
         super();
 
-        this.formWrapper = this.querySelector(selectors.formWrapper);
         this.stickyScrollTop = 0;
         this.scrollLastPosition = 0;
         this.stickyDefaultTop = 0;
@@ -34,6 +22,10 @@ if (!customElements.get('product-sticky')) {
       }
 
       connectedCallback() {
+        this.formWrapper = this.querySelector('[data-form-wrapper]');
+
+        if (!this.formWrapper) return;
+
         this.stickyScrollCheck();
         document.addEventListener('theme:resize', this.resizeEvent);
 
@@ -62,45 +54,62 @@ if (!customElements.get('product-sticky')) {
       }
 
       resizeEvents(e) {
+        this.removeAnimationFrameSticky();
+
+        // Re-query formWrapper in case DOM changed
+        this.formWrapper = this.querySelector('[data-form-wrapper]');
+        if (!this.formWrapper) return;
+
         this.stickyScrollCheck();
 
+        // Remove existing listeners before re-adding
         document.removeEventListener('theme:scroll', this.scrollEvent);
+        if (this.formWrapper) {
+          this.formWrapper.removeEventListener('theme:form:sticky', this.stickyFormEvent);
+        }
 
-        this.formWrapper.removeEventListener('theme:form:sticky', this.stickyFormEvent);
+        // Re-add listeners if sticky is enabled
+        if (theme.settings.productPageSticky) {
+          this.formWrapper.addEventListener('theme:form:sticky', this.stickyFormEvent);
+          document.addEventListener('theme:scroll', this.scrollEvent);
+        }
       }
 
       stickyScrollCheck() {
-        const targetFormWrapper = this.querySelector(`${selectors.productPage} ${selectors.formWrapper}`);
-
-        if (!targetFormWrapper) return;
-
         if (!theme.isMobile) {
-          const form = this.querySelector(selectors.formWrapper);
-          const productMediaList = this.querySelector(selectors.productMediaList);
+          // Look for product-images-swiper or .product__slides as the media container
+          const productMediaList = this.querySelector('product-images-swiper .product__slides') ||
+                                   this.querySelector('.product__slides') ||
+                                   this.querySelector('product-images-swiper');
 
-          if (!form || !productMediaList) return;
+          if (!this.formWrapper || !productMediaList) return;
 
-          const productCopyHeight = form.offsetHeight;
+          const productCopyHeight = this.formWrapper.offsetHeight;
           const productImagesHeight = productMediaList.offsetHeight;
 
           // Is the product description and form taller than window space
           // Is also shorter than the window and images
           if (productCopyHeight < productImagesHeight) {
             theme.settings.productPageSticky = true;
-            targetFormWrapper.classList.add(classes.sticky);
+            this.formWrapper.classList.add('is-sticky');
           } else {
             theme.settings.productPageSticky = false;
-            targetFormWrapper.classList.remove(classes.sticky);
+            this.formWrapper.classList.remove('is-sticky');
           }
         } else {
           theme.settings.productPageSticky = false;
-          targetFormWrapper.classList.remove(classes.sticky);
+          this.formWrapper.classList.remove('is-sticky');
         }
       }
 
       calculateStickyPosition(e = null) {
         const isScrollLocked = document.documentElement.hasAttribute('data-scroll-locked');
         if (isScrollLocked) {
+          this.removeAnimationFrameSticky();
+          return;
+        }
+
+        if (!this.formWrapper) {
           this.removeAnimationFrameSticky();
           return;
         }
@@ -118,7 +127,7 @@ if (!customElements.get('product-sticky')) {
         }
 
         if (this.stickyFormLoad) {
-          if (document.querySelector(selectors.headerSticky)) {
+          if (document.querySelector('[data-header-sticky]')) {
             const {headerHeight} = window.theme.readHeights();
             this.stickyDefaultTop = headerHeight;
           } else {
@@ -168,10 +177,15 @@ if (!customElements.get('product-sticky')) {
       }
 
       disconnectedCallback() {
+        this.removeAnimationFrameSticky();
         document.removeEventListener('theme:resize', this.resizeEvent);
 
         if (theme.settings.productPageSticky) {
           document.removeEventListener('theme:scroll', this.scrollEvent);
+        }
+
+        if (this.formWrapper) {
+          this.formWrapper.removeEventListener('theme:form:sticky', this.stickyFormEvent);
         }
       }
     }

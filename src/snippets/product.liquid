@@ -162,16 +162,6 @@
     }
   {%- endstyle -%}
 
-  <script src="{{ 'product-images-swiper.js' | asset_url }}" defer="defer"></script>
-  {%- if product_sticky_enable -%}
-    <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
-
-  {%- if enable_zoom -%}
-    <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
-
   <{{ wrapper_tag }} class="product__wrapper {{ product_wrapper_modifier }}" data-product>
     <div class="product__wrapper__inner">
       <div class="product__page">
@@ -669,6 +659,8 @@
   {%- endif -%}
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-images-swiper.js' | asset_url }}" defer="defer"></script>
+
   {%- if product_sticky_enable -%}
     <script src="{{ 'product-sticky.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
@@ -684,6 +676,11 @@
       {{ product.media | where: 'media_type', 'model' | json }}
     </script>
     <script src="{{ 'product-model.js' | asset_url }}" defer></script>
+  {%- endif -%}
+
+  {%- if enable_zoom -%}
+    <script src="{{ 'load-photoswipe.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'zoom.js' | asset_url }}" defer="defer"></script>
   {%- endif -%}
 
   <script type="application/ld+json">
