@@ -1,6 +1,47 @@
 @use '../globals' as *;
 
 [class^="junip-"] {
+  --junipPrimaryColor: var(--btn-primary-bg);
+  --junipButtonColor: var(--btn-primary-bg);
+  --junipButtonOutlineColor: var(--btn-primary-bg-lighter);
+  --junipStarColor: var(--COLOR-SALE-BG);
+  --junipButtonTextColor: var(--btn-primary-text);
+  --junipBorderColor: var(--COLOR-BORDER);
+  --junipSurfaceColor: var(--COLOR-BG-ACCENT);
+
+  .junip-btn {
+    @include btn;
+    @include btn-solid-primary;
+
+    overflow: hidden;
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -60px;
+      z-index: -1;
+      width: calc(100% + 120px);
+      height: 100%;
+      background-color: var(--btn-bg-hover);
+      opacity: 1;
+      transform: translate3d(-100%,0,0) skew(30deg);
+      transition: transform 0.5s cubic-bezier(0.33,0,0,1);
+    }
+
+    @media (hover: hover) {
+      &:hover::after {
+        transform: translateZ(0);
+      }
+    }
+  }
+
+  .junip-reviews-tab.junip-active,
+  .junip-reviews-tab:hover {
+
+  }
+
   .junip-chevron-left,
   .junip-chevron-right {
     --icon-size: 24px;
