@@ -11,8 +11,15 @@
     document.head.appendChild(link);
   }
 
-  function watchForSelector({ key, href, selectors, timeoutMs = 4000 }) {
-    const hasMatch = () => selectors.some((s) => document.querySelector(s));
+  function watchForSelector({ key, href, selectors, timeoutMs = 4000, checkFn }) {
+    const hasMatch = () => {
+      // Run custom check function first if provided
+      if (checkFn && checkFn()) {
+        return true;
+      }
+      // Fallback to selector check
+      return selectors.some((s) => document.querySelector(s));
+    };
 
     if (hasMatch()) {
       loadCssOnce(key, href);
@@ -30,23 +37,37 @@
     window.setTimeout(() => obs.disconnect(), timeoutMs);
   }
 
-  watchForSelector({
-    key: "carbon-junip",
-    href: window.theme.assets.junipCss,
-    selectors: [
-      ".junip-product-summary",
-      "#junip-product-reviews",
-      "[data-junip-reviews]"
-    ],
-  });
+  const apps = {
+    junip: {
+      key: "carbon-junip",
+      href: window.theme.assets.junipCss,
+      selectors: [
+        ".junip-product-summary",
+        "#junip-product-reviews",
+        "[data-junip-reviews]"
+      ],
+      checkFn: () => {
+        // Check for window.junip (object) or window.junipLoaded (boolean)
+        return (typeof window.junip === "object" && window.junip !== null) ||
+               window.junipLoaded === true;
+      },
+    },
+    recharge: {
+      key: "carbon-recharge",
+      href: window.theme.assets.rechargeCss,
+      selectors: [
+        "[data-recharge-subscription-widget]",
+        ".rc-widget",
+        ".recharge-subscription-widget",
+        ".recharge-gifting-widget",
+      ],
+      checkFn: () => {
+        return typeof window.Recharge === "object" && window.Recharge !== null;
+      }
+    },
+  };
 
-  watchForSelector({
-    key: "carbon-recharge",
-    href: window.theme.assets.rechargeCss,
-    selectors: [
-      "[data-recharge-subscription-widget]",
-      ".rc-widget",
-      "recharge-subscription-widget"
-    ],
+  Object.values(apps).forEach((app) => {
+    watchForSelector(app);
   });
 })();
