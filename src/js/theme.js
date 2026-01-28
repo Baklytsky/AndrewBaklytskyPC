@@ -14,6 +14,7 @@ import './globals/html-update';
 import './main/globals';
 
 /* ================ Globals ================ */
+import './globals/apps-css-loader';
 import './globals/accessibility-handle';
 import './globals/animation-end-promise';
 import './globals/all-animations-end-promise';
