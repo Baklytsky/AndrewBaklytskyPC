@@ -11,7 +11,7 @@
     document.head.appendChild(link);
   }
 
-  function watchForSelector({ key, href, selectors, timeoutMs = 4000, checkFn }) {
+  function watchForSelector({ key, href, selectors, timeoutMs = null, checkFn }) {
     const hasMatch = () => {
       // Run custom check function first if provided
       if (checkFn && checkFn()) {
@@ -34,7 +34,10 @@
 
     obs.observe(document.documentElement, { childList: true, subtree: true });
 
-    window.setTimeout(() => obs.disconnect(), timeoutMs);
+    // Only set timeout if explicitly provided (allows indefinite watching for late-loading widgets)
+    if (timeoutMs !== null && timeoutMs !== undefined) {
+      window.setTimeout(() => obs.disconnect(), timeoutMs);
+    }
   }
 
   const apps = {
