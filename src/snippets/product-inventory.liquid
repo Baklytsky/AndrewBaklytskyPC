@@ -46,26 +46,26 @@
   {%- case status -%}
     {%- when 'in-stock' -%}
       <span class="variant__countdown--in" {{ icon_color_style }}>
-        {% render 'icon-in-stock' %}
+        {% render 'icon-check' %}
         <span class="variant__countdown-text">{{ 'products.product.in_stock' | t }}</span>
       </span>
     {%- when 'low-stock' -%}
       {%- if show_inventory_counter -%}
         <span class="variant__countdown--low" {{ icon_color_style }}>
-          {% render 'icon-low-inventory' %}
+          {% render 'icon-warning-sign' %}
           <span class="variant__countdown-text">
             {{- 'products.product.remaining_html' | t: inventory: variant_inventory -}}
           </span>
         </span>
       {%- else -%}
         <span class="variant__countdown--low" {{ icon_color_style }}>
-          {% render 'icon-low-inventory' %}
+          {% render 'icon-warning-sign' %}
           <span class="variant__countdown-text">{{ 'products.product.remaining_no_count' | t }}</span>
         </span>
       {%- endif -%}
     {%- when 'out-of-stock' -%}
       <span class="variant__countdown--out" {{ icon_color_style }}>
-        {% render 'icon-out-of-stock' %}
+        {% render 'icon-no-available' %}
         <span class="variant__countdown-text">{{ 'products.product.out_of_stock' | t }}</span>
       </span>
   {%- endcase -%}
