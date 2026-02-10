@@ -976,7 +976,7 @@ class CartItems extends HTMLElement {
    * @return  {Void}
    */
   enableCartButtons() {
-    const inputs = this.cart.querySelectorAll('input:not([data-bundle-cart-quantity]');
+    const inputs = this.cart.querySelectorAll('input');
     const buttons = this.cart.querySelectorAll(`button, ${selectors.cartItemRemove}`);
 
     inputs?.forEach((item) => {
