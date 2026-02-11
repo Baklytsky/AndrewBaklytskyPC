@@ -1198,6 +1198,9 @@ class CartItems extends HTMLElement {
       if (this.bundleProductsHolder) {
         this.bundleProductsHolder.innerHTML = '';
       }
+
+      this.skipBundleProductsArray = [];
+      window.sessionStorage.removeItem('skip_bundle_products');
     } else {
       this.itemsHolder.innerHTML = cartItemsData.innerHTML;
 
@@ -1496,9 +1499,15 @@ class CartItems extends HTMLElement {
   }
 
   /**
-   * Check for skipped bundle product added to session storage
+   * Check for skipped bundle product added to session storage.
+   * Prunes storage to only IDs still in the current bundle widget (before removing from DOM).
    */
   checkSkippedBundleProductsFromStorage() {
+    const currentBundleIds = this.bundleProductsHolder
+      ? Array.from(this.bundleProductsHolder.querySelectorAll(selectors.quickAddHolder))
+          .map((el) => el.getAttribute(attributes.quickAddHolder))
+          .filter(Boolean)
+      : [];
     const skippedItems = window.sessionStorage.getItem('skip_bundle_products');
     if (skippedItems) {
       skippedItems.split(',').forEach((productID) => {
@@ -1507,6 +1516,12 @@ class CartItems extends HTMLElement {
         }
         this.removeBundleProduct(productID);
       });
+    }
+    this.skipBundleProductsArray = this.skipBundleProductsArray.filter((id) => currentBundleIds.includes(id));
+    if (this.skipBundleProductsArray.length) {
+      window.sessionStorage.setItem('skip_bundle_products', this.skipBundleProductsArray);
+    } else {
+      window.sessionStorage.removeItem('skip_bundle_products');
     }
   }
 
