@@ -19,18 +19,7 @@
   endif
 
   # Build 'product-card' element CSS classes
-  capture product_card_classes
-    echo 'product-card grid-item'
-    if settings.product_grid_center
-      echo ' product-card--centered'
-    else
-      assign no_padding_class = ' product-card--no-padding'
-      if settings.grid_style == 'compact' or settings.grid_override and settings.grid_gap_horizontal < 1
-        assign no_padding_class = ''
-      endif
-      echo ' product-card--left' | append: no_padding_class
-    endif
-  endcapture
+  assign product_card_classes = 'product-card grid-item'
 
   # Define "unique_id" if it is not passed
   if unique_id == blank
@@ -79,10 +68,6 @@
       aos_delay: aos_delay,
       aos_anchor: aos_anchor
     %}
-    {% render 'product-card-content',
-      product: product,
-      index: index,
-      block_index: block_index
-    %}
+    {% render 'product-card-content', product: product, index: index, block_index: block_index %}
   {% endif %}
 </product-card>

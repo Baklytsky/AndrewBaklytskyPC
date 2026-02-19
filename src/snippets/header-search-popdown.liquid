@@ -2,17 +2,6 @@
   assign animation_anchor = 'SearchPopdown--' | append: section.id
   assign animation_delay = 100
 
-  comment
-    Product cards classes
-  endcomment
-  assign product_card_classes = ''
-
-  if settings.product_grid_center
-    assign product_card_classes = product_card_classes | append: ' product-card--centered'
-  else
-    assign product_card_classes = product_card_classes | append: ' product-card--left'
-  endif
-
   assign empty_search_menu = settings.empty_search_menu
   assign empty_search_product_list = settings.empty_search_product_list
   assign empty_search_product_list_size = empty_search_product_list | map: 'handle' | join: ',' | split: ',' | uniq | size | at_most: 5 | at_least: 3
@@ -157,8 +146,7 @@
                         {%- render 'search-product-card',
                           product: product,
                           animation_delay: animation_delay,
-                          animation_anchor: animation_anchor,
-                          product_card_classes: product_card_classes
+                          animation_anchor: animation_anchor
                         -%}
                       {%- endfor -%}
                     </div>
