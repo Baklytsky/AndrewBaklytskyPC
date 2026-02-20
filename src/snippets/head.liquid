@@ -160,6 +160,11 @@
 
   assign white = '#ffffff'
   assign black = '#000000'
+
+  assign product_grid_alignment = ''
+  if settings.product_grid_center
+    assign product_grid_alignment = 'center'
+  endif
 -%}
 
 <!-- CSS ================================================================== -->
@@ -468,8 +473,9 @@
     --ICON-ARROW-RIGHT: url( "{{ 'icon-nav-arrow-right.svg' | asset_url }}" );
     --ICON-SELECT: url("{{ 'icon-nav-arrow-down.svg' | asset_url }}");
 
-    /*** Product card images apsect ratio ***/
+    /*** Product card ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
+    --PRODUCT-CARD-ALIGNMENT: {{ product_grid_alignment }};
 
     /*** Typography ***/
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};

@@ -18,17 +18,6 @@
   assign page_count = predictive_search.resources.pages.size
 
   assign first_column_results_size = query_count | plus: collection_count | plus: page_count | plus: article_count
-
-  comment
-    Product cards classes
-  endcomment
-  assign product_card_classes = ''
-
-  if settings.product_grid_center
-    assign product_card_classes = product_card_classes | append: ' product-card--centered'
-  else
-    assign product_card_classes = product_card_classes | append: ' product-card--left'
-  endif
 -%}
 
 {%- if predictive_search.performed -%}
@@ -156,8 +145,7 @@
                   {%- render 'search-product-card',
                     product: product,
                     animation_delay: animation_delay,
-                    animation_anchor: animation_anchor,
-                    product_card_classes: product_card_classes
+                    animation_anchor: animation_anchor
                   -%}
                   {%- assign animation_delay = animation_delay | plus: 150 -%}
                 {%- endfor -%}

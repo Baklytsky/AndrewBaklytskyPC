@@ -3,12 +3,11 @@
 
   Accepts:
   - product: {Object} product (required)
-  - product_card_classes: {String} product item classes
   - animation_delay: {Int} Animation delay
   - animation_anchor: {String} Animation anchor
 
   Usage:
-  {% render 'search-product-card', product: product, animation_delay: animation_delay, animation_anchor: animation_anchor, product_card_classes: product_card_classes %}
+  {% render 'search-product-card', product: product, animation_delay: animation_delay, animation_anchor: animation_anchor %}
 {% endcomment %}
 
 {%- liquid
@@ -16,7 +15,6 @@
   assign featured_image = product.featured_media
   assign second_image = product.media[1]
   assign show_second_image = settings.image_hover_enable
-  assign product_card_classes = product_card_classes | prepend: ' ' | default: ''
   assign animation_delay = animation_delay | default: 100
   assign animation_anchor = animation_anchor | default: ''
 
@@ -37,7 +35,7 @@
 
 {%- unless hidden_product -%}
   <div
-    class="predictive-search__grid-item product-card product-card grid-item{{ product_card_classes }}"
+    class="predictive-search__grid-item product-card product-card grid-item"
     role="option"
     aria-selected="false"
     data-aos="fade"
