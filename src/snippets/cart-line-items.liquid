@@ -94,16 +94,12 @@
       {%- assign bundle_components_rendered = true -%}
       {%- assign bundle_components_json = line_item.properties._bundle_components | replace: '&quot;', '"' -%}
       {%- assign component_handle_parts = bundle_components_json | split: '"productHandle":"' -%}
-      <script>
-        console.log('component_handle_parts', {{ component_handle_parts | json }});
-      </script>
+
       {%- for part in component_handle_parts -%}
         {%- unless forloop.first -%}
           {%- assign component_handle = part | split: '"' | first -%}
           {%- assign component_product = all_products[component_handle] -%}
-          <script>
-            console.log('component_product', {{ component_product | json }});
-          </script>
+
           {%- if component_product != blank -%}
             {%- assign line_items_bundle_counter = line_items_bundle_counter | plus: 1 -%}
             {%- capture line_items_bundle -%}
