@@ -62,6 +62,12 @@
       assign bundle_name = bundle_collection.title
       assign bundle_url = bundle_collection.url
       assign bundle_image = bundle_collection.image
+
+      if bundle_name == blank
+        assign bundle_name = line_item.properties._bundle_title | default: line_item.product.title
+        assign bundle_url = line_item.url
+        assign bundle_image = line_item.image
+      endif
     endif
 
     if bundle_opened
@@ -84,45 +90,89 @@
   -%}
 
   {%- if bundle_opened -%}
-    {%- assign line_items_bundle_counter = line_items_bundle_counter | plus: 1 -%}
-    {%- capture line_items_bundle -%}
-      {{ line_items_bundle }}
+    {%- if line_item.properties._bundle_components != blank and bundle_components_rendered != true -%}
+      {%- assign bundle_components_rendered = true -%}
+      {%- assign bundle_components_json = line_item.properties._bundle_components | replace: '&quot;', '"' -%}
+      {%- assign component_handle_parts = bundle_components_json | split: '"productHandle":"' -%}
 
-      <div class="cart__item__sub">
-        <div class="cart__item__sub__image{% unless line_item.image %} image--empty{% endunless %}">
-          <a
-            href="{{ line_item.url }}"
-            aria-label="{{ line_item.title | escape }}"
-            {% if settings.show_image_bg != 'none' %}
-              class="show-gray-bg"
-            {% endif %}
-          >
-            {%- if line_item.image -%}
-              {%- render 'image', image: line_item.image, width: 60, widths: '30, 60, 90, 180', sizes: '30px', loading: 'lazy' -%}
-            {%- endif -%}
-          </a>
-        </div>
+      {%- for part in component_handle_parts -%}
+        {%- unless forloop.first -%}
+          {%- assign component_handle = part | split: '"' | first -%}
+          {%- assign component_product = all_products[component_handle] -%}
 
-        <div class="cart__item__sub__content">
-          <h5 class="cart__item__sub__title">
-            <a href="{{ line_item.url }}">
-              {{- line_item.product.title | strip_html -}}
+          {%- if component_product != blank -%}
+            {%- assign line_items_bundle_counter = line_items_bundle_counter | plus: 1 -%}
+            {%- capture line_items_bundle -%}
+              {{ line_items_bundle }}
+
+              <div class="cart__item__sub">
+                <div class="cart__item__sub__image{% unless component_product.featured_image %} image--empty{% endunless %}">
+                  <a
+                    href="{{ component_product.url }}"
+                    aria-label="{{ component_product.title | escape }}"
+                    {% if settings.show_image_bg != 'none' %}
+                      class="show-gray-bg"
+                    {% endif %}
+                  >
+                    {%- if component_product.featured_image -%}
+                      {%- render 'image', image: component_product.featured_image, width: 60, widths: '30, 60, 90, 180', sizes: '30px', loading: 'lazy' -%}
+                    {%- endif -%}
+                  </a>
+                </div>
+
+                <div class="cart__item__sub__content">
+                  <h5 class="cart__item__sub__title">
+                    <a href="{{ component_product.url }}">
+                      {{- component_product.title | strip_html -}}
+                    </a>
+                  </h5>
+                </div>
+              </div>
+            {%- endcapture -%}
+          {%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- elsif line_item.properties._bundle_components == blank -%}
+      {%- assign line_items_bundle_counter = line_items_bundle_counter | plus: 1 -%}
+      {%- capture line_items_bundle -%}
+        {{ line_items_bundle }}
+
+        <div class="cart__item__sub">
+          <div class="cart__item__sub__image{% unless line_item.image %} image--empty{% endunless %}">
+            <a
+              href="{{ line_item.url }}"
+              aria-label="{{ line_item.title | escape }}"
+              {% if settings.show_image_bg != 'none' %}
+                class="show-gray-bg"
+              {% endif %}
+            >
+              {%- if line_item.image -%}
+                {%- render 'image', image: line_item.image, width: 60, widths: '30, 60, 90, 180', sizes: '30px', loading: 'lazy' -%}
+              {%- endif -%}
             </a>
-          </h5>
+          </div>
 
-          {%- unless line_item.product.has_only_default_variant -%}
-            <p class="cart__item__sub__options">
-              {%- for option in line_item.options_with_values -%}
-                {%- unless forloop.first -%}
-                  <span> | </span>
-                {%- endunless -%}
-                <span>{{ option.value }}</span>
-              {%- endfor -%}
-            </p>
-          {%- endunless -%}
+          <div class="cart__item__sub__content">
+            <h5 class="cart__item__sub__title">
+              <a href="{{ line_item.url }}">
+                {{- line_item.product.title | strip_html -}}
+              </a>
+            </h5>
+
+            {%- unless line_item.product.has_only_default_variant -%}
+              <p class="cart__item__sub__options">
+                {%- for option in line_item.options_with_values -%}
+                  {%- unless forloop.first -%}
+                    <span> | </span>
+                  {%- endunless -%}
+                  <span>{{ option.value }}</span>
+                {%- endfor -%}
+              </p>
+            {%- endunless -%}
+          </div>
         </div>
-      </div>
-    {%- endcapture -%}
+      {%- endcapture -%}
+    {%- endif -%}
   {%- else -%}
     <div
       class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
@@ -627,6 +677,7 @@
 
     {%- liquid
       assign bundle_opened = false
+      assign bundle_components_rendered = false
       assign bundle_price = 0
       assign bundle_price_compare = 0
       assign bundle_discount_amount = 0
