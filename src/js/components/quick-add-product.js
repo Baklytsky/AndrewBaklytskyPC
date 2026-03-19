@@ -66,14 +66,14 @@ if (!customElements.get('quick-add-product')) {
 
             const formContainer = this.quickAddHolder.querySelector('[data-product-form]');
             if (formContainer) {
-              const propElements = formContainer.querySelectorAll('[data-property-name');
+              const propElements = formContainer.querySelectorAll('[data-property-name]');
               const properties = {};
 
               if (propElements.length) {
                 propElements.forEach((element) => {
                   const key = element?.getAttribute('data-property-name');
 
-                  if (key != '') {
+                  if (key !== '') {
                     const value = element.value.trim();
 
                     if (value !== '') {
