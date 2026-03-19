@@ -46,18 +46,49 @@ if (!customElements.get('quick-add-product')) {
         if (this.buttonATC) {
           this.buttonATC.addEventListener('click', (e) => {
             e.preventDefault();
+            const variantId = this.buttonATC?.getAttribute('data-add-to-cart');
+
+            if (!variantId) return;
 
             window.theme.a11y.lastElement = this.buttonATC;
 
             this.closeAllErrorContainers(this.parentElement);
 
-            document.dispatchEvent(
-              new CustomEvent('theme:cart:add', {
-                detail: {
-                  button: this.buttonATC,
+            const detail = {
+              button: this.buttonATC,
+              data: [
+                {
+                  id: parseInt(variantId),
+                  quantity: 1,
                 },
-              })
-            );
+              ],
+            };
+
+            const formContainer = this.quickAddHolder.querySelector('[data-product-form]');
+            if (formContainer) {
+              const propElements = formContainer.querySelectorAll('[data-property-name');
+              const properties = {};
+
+              if (propElements.length) {
+                propElements.forEach((element) => {
+                  const key = element?.getAttribute('data-property-name');
+
+                  if (key != '') {
+                    const value = element.value.trim();
+
+                    if (value !== '') {
+                      properties[`${key.trim()}`] = value;
+                    }
+                  }
+                });
+
+                if (Object.keys(properties).length) {
+                  detail.data[0].properties = properties;
+                }
+              }
+            }
+
+            document.dispatchEvent(new CustomEvent('theme:cart:add', {detail}));
           });
         }
 
@@ -397,7 +428,7 @@ if (!customElements.get('quick-add-product')) {
         // Close error containers on dropdown selection
         const dropdownOptions = this.instantAddForm.querySelectorAll('[data-dropdown] [data-popout-option]');
         dropdownOptions.forEach((option) => {
-          option.addEventListener('click', () => this.closeAllErrorContainers(this.parentElement));
+          option.addEventListener('click', this.handleInstantAddVariantChange);
         });
       }
 
@@ -413,13 +444,12 @@ if (!customElements.get('quick-add-product')) {
         this.updatePrice(productUrl);
         this.updateImage(variantImageUrl);
 
-        const variantIdInput = this.instantAddForm.querySelector('[name=id]');
-        if (!variantIdInput) return;
-
         // Update variant id
-        variantIdInput.value = variantId;
-        variantIdInput.dispatchEvent(new Event('change'));
-        this.closeAllErrorContainers(this.parentElement);
+        if (this.buttonATC && this.buttonATC.hasAttribute('data-add-to-cart')) {
+          this.buttonATC.setAttribute('data-add-to-cart', variantId);
+
+          this.closeAllErrorContainers(this.parentElement);
+        }
       }
 
       updatePrice(productUrl) {

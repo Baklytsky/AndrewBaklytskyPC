@@ -344,7 +344,10 @@ class CartItems extends HTMLElement {
         form.reportValidity();
         return;
       }
-      formData = new FormData(form);
+
+      if (!formData) {
+        formData = new FormData(form);
+      }
 
       if (form.querySelector('[type="file"]')) {
         return;
