@@ -326,25 +326,18 @@
                 {%- assign render_quick_add_template = true -%}
               {%- else -%}
                 {%- comment -%} Instant add {%- endcomment -%}
-
-                {%- form 'product',
-                  upsell_product,
-                  id: product_form_id,
-                  class: 'product-upsell__form product-upsell__form--instant-add',
-                  novalidate: 'novalidate',
-                  data-type: 'add-to-cart-form',
-                  data-product-form: '',
-                  data-instant-add-form: ''
-                -%}
-                  <input type="hidden" name="id" value="{{ upsell_variant.id }}" data-variant-id>
-
-                  {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
-                  <input
-                    type="hidden"
-                    form="{{ product_form_id }}"
-                    name="properties[{{ 'general.siblings.label' | t }}]"
-                    value="{{ sibling_color }}"
-                  >
+                <div
+                  class="product-upsell__form product-upsell__form--instant-add"
+                  data-instant-add-form
+                  data-product-form
+                >
+                  {%- if sibling_color != blank -%}
+                    <input
+                      type="hidden"
+                      data-property-name="{{ 'general.siblings.label' | t }}"
+                      value="{{ sibling_color }}"
+                    >
+                  {%- endif -%}
 
                   {%- comment -%} Variant selector {%- endcomment -%}
                   <variant-selects
@@ -526,6 +519,7 @@
                                   data-value="{{ option_value | escape }}"
                                   data-variant-id="{{ option_value.variant.id }}"
                                   data-popout-option
+                                  data-product-handle="{{ upsell_product.handle }}"
                                 >
                                   <span>{{ option_value }}</span>
                                 </a>
@@ -553,7 +547,7 @@
                       type="submit"
                       name="add"
                       data-quick-add-btn
-                      data-add-to-cart
+                      data-add-to-cart="{{ upsell_variant.id }}"
                       {% unless upsell_variant.available %}
                         disabled="disabled"
                       {% endunless %}
@@ -570,7 +564,7 @@
                       <span class="btn__added">&nbsp;</span>
                     </button>
                   </div>
-                {%- endform -%}
+                </div>
               {%- endif -%}
             {%- endif -%}
 
@@ -582,22 +576,14 @@
                     data-section-id="{{ section_id }}"
                   >
                     {%- comment -%} Single variant: direct add to cart {%- endcomment -%}
-                    {%- form 'product',
-                      upsell_product,
-                      id: product_form_id,
-                      class: 'product-upsell__form',
-                      data-type: 'add-to-cart-form',
-                      data-product-form: ''
-                    -%}
-                      <input type="hidden" name="id" value="{{ upsell_variant.id }}">
-
-                      {% comment %} Form ID must match value in product-form.liquid {% endcomment %}
-                      <input
-                        type="hidden"
-                        form="{{ product_form_id }}"
-                        name="properties[{{ 'general.siblings.label' | t }}]"
-                        value="{{ sibling_color }}"
-                      >
+                    <div class="product-upsell__form" data-product-form>
+                      {%- if sibling_color != blank -%}
+                        <input
+                          type="hidden"
+                          data-property-name="{{ 'general.siblings.label' | t }}"
+                          value="{{ sibling_color }}"
+                        >
+                      {%- endif -%}
 
                       <button
                         id="ProductSubmitButton-{{ section_id }}"
@@ -605,7 +591,7 @@
                         type="submit"
                         name="add"
                         data-quick-add-btn
-                        data-add-to-cart
+                        data-add-to-cart="{{ upsell_variant.id }}"
                         {% unless upsell_variant.available %}
                           disabled="disabled"
                         {% endunless %}
@@ -621,7 +607,7 @@
 
                         <span class="btn__added">&nbsp;</span>
                       </button>
-                    {%- endform -%}
+                    </div>
                   </div>
                 {%- else -%}
                   {%- comment -%} Multiple options: open the Quick add drawer {%- endcomment -%}
