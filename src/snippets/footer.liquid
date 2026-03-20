@@ -6,6 +6,7 @@
 {% endcomment %}
 
 {%- liquid
+  assign footer_style = footer_style | default: ''
   assign blocks_size = section.blocks.size
   assign logo = section.settings.logo
   assign background_image = section.settings.background_image
@@ -295,5 +296,37 @@
         </div>
       {%- endif -%}
     </div>
+
+    {%- if footer_style == 'floating' -%}
+      <div class="footer__bar {{ color_scheme }}">
+        <ul class="supporting-menu">
+          <li>
+            <a href="{{ shop.secure_url }}"
+              >&copy; {{ shop.name }}
+              {{ 'now' | date: '%Y' -}}
+            </a>
+          </li>
+
+          <!-- The following lines fix Lighthouse security warnings on the Shopify link. -->
+          {%- liquid
+            assign powered_by_link_html = powered_by_link
+            if powered_by_link_html contains 'rel="'
+              assign powered_link_rel_text = powered_by_link_html | split: 'rel="'
+              assign powered_link_rel_text = powered_link_rel_text[1] | split: '"' | first
+              assign powered_link_rel = 'rel="' | append: powered_link_rel_text | append: '"'
+              assign powered_by_link_html = powered_by_link_html | replace_first: powered_link_rel, ''
+            endif
+            if powered_by_link_html contains '<a '
+              assign powered_by_link_html = powered_by_link_html | replace: '<a ', '<a rel="noopener" '
+            endif
+            assign powered_by_link = powered_by_link_html
+          -%}
+
+          <!-- Remove the following line to delete 'Powered by Shopify' from your footer -->
+          <li data-powered-link>{{ powered_by_link }}</li>
+          <!-- Do not delete below this line -->
+        </ul>
+      </div>
+    {%- endif -%}
   </div>
 </footer>
