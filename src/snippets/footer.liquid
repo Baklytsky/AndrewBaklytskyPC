@@ -17,6 +17,7 @@
   assign one_third_block_count = 0
   assign blocks_code = ''
   assign blocks_width = 0
+  assign newsletter_block = ''
 -%}
 
 {%- style -%}
@@ -233,23 +234,48 @@
                     </details>
 
                   {%- when 'newsletter' -%}
-                    <div class="footer__block footer__block--newsletter" style="{{ block_style }}" {{ block.shopify_attributes }}>
-                      <div class="footer__newsletter__wrapper">
-                        {%- if title != blank -%}
-                          <h2 class="footer__block__title {{ block.settings.heading_font_size }}">{{ title }}</h2>
+                    {%- capture newsletter_block -%}
+                      {%- liquid
+                        assign selected_color_scheme_newsletter = block.settings.color_scheme | strip
+                        assign newsletter_position_footer = false
+                        if footer_style == 'floating'
+                          assign newsletter_position_footer = true
+                        endif
+                      -%}
+
+                      <div class="footer__newsletter__wrapper{% if footer_style == 'floating' %} color-{{ selected_color_scheme_newsletter }}{% endif %}"
+                        {% if footer_style == 'floating' %}
+                          style="--bg-light: {{ settings.color_schemes[selected_color_scheme_newsletter].settings.bg_light }};"
+                          {{ block.shopify_attributes }}
+                        {% endif %}
+                      >
+                        {%- if title != blank or text != blank -%}
+                          <div class="footer__newsletter__content">
+                            {%- if title != blank -%}
+                              <h2 class="footer__block__title footer__newsletter__heading {{ block.settings.heading_font_size }}">{{ title }}</h2>
+                            {%- endif -%}
+
+                            {%- if text != blank -%}
+                              <div class="rte footer__newsletter__text">{{ text }}</div>
+                            {%- endif -%}
+                          </div>
                         {%- endif -%}
 
-                        {%- if text != blank -%}
-                          <div class="rte footer__newsletter__text">{{ text }}</div>
-                        {%- endif -%}
+                        <div class="footer__newsletter__aside">
+                          {%- render 'newsletter-form' block: block, footer: newsletter_position_footer -%}
 
-                        {%- render 'newsletter-form' block: block, footer: true -%}
-
-                        {%- if show_social_links -%}
-                          {%- render 'social-icons' modifier: 'socials--newsletter' -%}
-                        {%- endif -%}
+                          {%- if show_social_links -%}
+                            {%- render 'social-icons' modifier: 'socials--newsletter' -%}
+                          {%- endif -%}
+                        </div>
                       </div>
-                    </div>
+                    {%- endcapture -%}
+
+                    {%- if footer_style != 'floating' and newsletter_block != '' -%}
+                      <div class="footer__block footer__block--newsletter" style="{{ block_style }}" {{ block.shopify_attributes }}>
+                        {{ newsletter_block }}
+                      </div>
+                    {%- endif -%}
 
                   {%- when 'divider' -%}
                     <div class="footer__block footer__block--divider{{ inline_blocks_placeholder }}" style="{{ block_style }}">
@@ -274,25 +300,9 @@
         </collapsible-elements>
       {%- endif -%}
 
-      {%- if section.settings.enable_newsletter -%}
-        {%- assign selected_color_scheme_newsletter = section.settings.color_scheme_newsletter | strip -%}
-        <div
-          class="footer__newsletter__container color-{{ section.settings.color_scheme_newsletter }}"
-          style="--bg-light: {{ settings.color_schemes[selected_color_scheme_newsletter].settings.bg_light }};"
-        >
-          {%- if section.settings.newsletter_title != blank or section.settings.newsletter_text != blank -%}
-            <div class="footer__newsletter__content">
-              {%- if section.settings.newsletter_title != blank -%}
-                <h2 class="footer__newsletter__heading {{ section.settings.heading_font_size }}">
-                  {{ section.settings.newsletter_title }}
-                </h2>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-
-          <div class="footer__newsletter__aside">
-            {%- render 'newsletter-form', block: block, footer: true -%}
-          </div>
+      {%- if footer_style == 'floating' and newsletter_block != '' -%}
+        <div class="footer__newsletter__container">
+          {{ newsletter_block }}
         </div>
       {%- endif -%}
     </div>
