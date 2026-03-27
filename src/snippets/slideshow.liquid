@@ -37,7 +37,7 @@
   --PB: {{ section.settings.padding_bottom }}px;
 {%- endcapture -%}
 
-{%- render 'stylesheet', name: 'slideshow.css' -%}
+{%- render 'stylesheet', name: 'section-slideshow.css' -%}
 
 <script src="{{ 'slideshow.js' | asset_url }}" defer="defer"></script>
 
@@ -97,10 +97,7 @@
       {%- endif -%}
     {%- else -%}
       <div class="swiper-slide--onboarding {{ section.settings.height }} {{ section.settings.mobile_height }}">
-        {%- capture no_content_text -%}
-          {%- render 'translation', key: 'home_page.onboarding.no_content', fallback: 'Add blocks to this section' -%}
-        {%- endcapture -%}
-        <div class="text-center">{{ no_content_text }}</div>
+        <div class="text-center">{{ 'home_page.onboarding.no_content' | t }}</div>
         <div class="image-overlay"></div>
       </div>
     {%- endif -%}
