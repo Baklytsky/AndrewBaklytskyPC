@@ -21,8 +21,6 @@
     data-section-id="{{ section.id }}"
     data-section-type="blog-section"
   >
-    {%- render 'swiper-loader' -%}
-
     <div class="{{ section.settings.width }}">
       <div class="blog-editorial">
         <div class="swiper editorial__slider">
@@ -122,22 +120,13 @@
                       {%- endunless -%}
 
                       {%- if section.settings.show_button -%}
-                        {%- liquid
-                          assign read_more_label = 'blogs.article.read_more_descriptive' | t
-                          if read_more_label contains 'Translation missing:'
-                            assign read_more_label = 'Read more: ' | append: article.title | strip_html | escape
-                          endif
-                          capture read_more_text
-                            render 'translation', key: 'blogs.article.read_more', fallback: 'Read more'
-                          endcapture
-                        -%}
                         <div class="editorial__link">
                           <a
                             href="{{ article.url }}"
                             class="btn btn--text"
-                            aria-label="{{ read_more_label }}"
+                            aria-label="{{ 'blogs.article.read_more_descriptive' | t | escape }}"
                           >
-                            <span>{{ read_more_text }}</span>
+                            <span>{{ 'blogs.article.read_more' | t }}</span>
                           </a>
                         </div>
                       {%- endif -%}
@@ -162,7 +151,7 @@
 
 {% schema %}
 {
-  "name": "⌬ Featured blog posts",
+  "name": "Featured blog posts",
   "settings": [
     {
       "type": "checkbox",
@@ -408,7 +397,7 @@
   ],
   "presets": [
     {
-      "name": "⌬ Featured blog posts",
+      "name": "Featured blog posts",
       "category": "Text",
       "blocks": [
         {

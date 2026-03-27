@@ -1,0 +1,62 @@
+@use '../globals' as *;
+
+// =============================================================================
+// Double slider section styles (slider-specific only)
+//
+// Used by:
+//   - section-double-slider
+// =============================================================================
+
+// Slider wrapper (brick__slider)
+.brick__slider swiper-container:not(.is-initialized) {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  @include hide-scrollbar;
+
+  .brick__section { min-width: 100%; }
+}
+
+.brick__slider {
+  .swiper-pagination {
+    bottom: 20px;
+    width: 50%;
+  }
+
+  &:has(.brick__block--three-quarters) .swiper-pagination {
+    @include media-query($medium-up) {
+      width: 35%;
+    }
+  }
+
+  @include media-query($small) {
+    &.wrapper,
+    &.wrapper--full-padded {
+      padding: 0;
+
+      swiper-slide {
+        padding-left: var(--outer);
+        padding-right: var(--outer);
+      }
+    }
+
+    .swiper-pagination {
+      padding: 0 calc(var(--outer) * 2);
+
+      .text-left & { justify-content: flex-start; }
+    }
+
+    &[data-dots="line"] .hero__content,
+    &[data-dots="circle"] .hero__content { padding-bottom: 20px; }
+  }
+}
+
+.text-left .brick__block__text .swiper-pagination { justify-content: flex-start; }
+
+// Slider block variant
+.brick__block--slider {
+  @include media-query($small) {
+    .hero__content { flex-direction: row; }
+  }
+}
