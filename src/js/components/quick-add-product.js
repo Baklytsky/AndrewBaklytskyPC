@@ -48,42 +48,43 @@ if (!customElements.get('quick-add-product')) {
             e.preventDefault();
             const variantId = this.buttonATC?.getAttribute('data-add-to-cart');
 
-            if (!variantId) return;
-
             window.theme.a11y.lastElement = this.buttonATC;
 
             this.closeAllErrorContainers(this.parentElement);
 
             const detail = {
               button: this.buttonATC,
-              data: [
+            };
+
+            if (variantId) {
+              detail.data = [
                 {
                   id: parseInt(variantId),
                   quantity: 1,
                 },
-              ],
-            };
+              ];
 
-            const formContainer = this.quickAddHolder.querySelector('[data-product-form]');
-            if (formContainer) {
-              const propElements = formContainer.querySelectorAll('[data-property-name]');
-              const properties = {};
+              const formContainer = this.quickAddHolder.querySelector('[data-product-form]');
+              if (formContainer) {
+                const propElements = formContainer.querySelectorAll('[data-property-name]');
+                const properties = {};
 
-              if (propElements.length) {
-                propElements.forEach((element) => {
-                  const key = element?.getAttribute('data-property-name');
+                if (propElements.length) {
+                  propElements.forEach((element) => {
+                    const key = element?.getAttribute('data-property-name');
 
-                  if (key !== '') {
-                    const value = element.value.trim();
+                    if (key !== '') {
+                      const value = element.value.trim();
 
-                    if (value !== '') {
-                      properties[`${key.trim()}`] = value;
+                      if (value !== '') {
+                        properties[`${key.trim()}`] = value;
+                      }
                     }
-                  }
-                });
+                  });
 
-                if (Object.keys(properties).length) {
-                  detail.data[0].properties = properties;
+                  if (Object.keys(properties).length) {
+                    detail.data[0].properties = properties;
+                  }
                 }
               }
             }
