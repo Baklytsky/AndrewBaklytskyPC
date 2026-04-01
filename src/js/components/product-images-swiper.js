@@ -129,18 +129,25 @@ if (!customElements.get('product-images-swiper')) {
         const activeSlide = this.mainSwiper.slides[this.mainSwiper.activeIndex];
         if (!activeSlide) return;
 
+        const lastSlide = this.mainSwiper.slides[this.mainSwiper.previousIndex];
+        if (lastSlide) {
+          const deferredMedia = lastSlide.querySelector('deferred-media');
+
+          if (deferredMedia && deferredMedia.getAttribute('loaded') === 'true') {
+            deferredMedia.pauseAllMedia();
+          }
+        }
+
         const mediaId = activeSlide.getAttribute('data-media-id');
         if (mediaId) {
           this.setAttribute('data-active-media', mediaId);
           this.setActiveThumbnail(mediaId);
 
           // Load deferred media if needed
-          const deferredMedia = activeSlide.querySelector('deferred-media');
+          const deferredMedia = activeSlide.querySelector('deferred-media') || activeSlide.querySelector('product-model');
           if (deferredMedia && deferredMedia.getAttribute('loaded') !== 'true') {
             const button = activeSlide.querySelector('[data-deferred-media-button]');
-            if (button) {
-              button.dispatchEvent(new Event('click', {bubbles: false}));
-            }
+            button?.dispatchEvent(new Event('click', {bubbles: false}));
           }
 
           // Focus management
