@@ -266,6 +266,8 @@ if (!customElements.get('quick-add-product')) {
           document.dispatchEvent(new CustomEvent('theme:scroll:unlock', {bubbles: true}));
         }
 
+        this.modal.querySelector('deferred-media')?.pauseAllMedia();
+
         document.removeEventListener('theme:product:added', this.modalCloseOnProductAdded);
 
         this.a11y.removeTrapFocus();

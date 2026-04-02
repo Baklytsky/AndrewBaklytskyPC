@@ -8,11 +8,13 @@
   -  sectionkey: {String} - A section key for use in the media object js
   -  image_width: {Number} - Image width on desktop based on the setting
   -  attributes {String} - Additional attributes attached to the image wrapper tag (Optional)
+  -  product_modal: {Boolean} - Media in product modal (Optional)
 
   Usage:
   {% render 'media', media: media, featured_media: featured_media, enable_video_looping: enable_video_looping, sectionkey: section.id  %}
 {% endcomment %}
 {%- liquid
+  assign product_modal = product_modal | default: false
   assign image_size = '1024x1024'
   assign media_aspect_ratio = media.aspect_ratio
   unless media_aspect_ratio
@@ -63,7 +65,10 @@
   {%- if media.media_type == 'image' -%}
     <div
       class="product__photo{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}"
-      tabindex="0"
+      id="product-modal-media-{{ media.id }}"
+      {% unless product_modal %}
+        tabindex="0"
+      {% endunless %}
       style="--aspect-ratio: {{ media_aspect_ratio }}"
       {% if section.settings.enable_zoom %}
         data-zoom-image
@@ -80,8 +85,15 @@
     {%- else -%}
       <deferred-media class="product__media deferred-media" style="padding-top: {{ media_padding_top }}%;">
     {%- endif -%}
-    <button
-      type="button"
+
+    {%- assign button_tag = 'button' -%}
+    {% if product_modal %}
+      {%- assign button_tag = 'div' -%}
+    {% endif %}
+    <{{ button_tag }}
+      {% unless product_modal %}
+        type="button"
+      {% endunless %}
       class="deferred-media__poster"
       aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}"
       data-deferred-media-button
@@ -95,7 +107,7 @@
       </span>
 
       {{ image }}
-    </button>
+    </{{ button_tag }}>
 
     <template>
       {%- liquid
