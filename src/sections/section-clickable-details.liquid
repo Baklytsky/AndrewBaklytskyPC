@@ -1,5 +1,6 @@
 <!-- /sections/section-clickable-details.liquid -->
 {%- liquid
+  assign unique = 'ClickableDetails--' | append: section.id
   assign heading = section.settings.heading
   assign text = section.settings.text
   assign image_width = section.settings.image_width
@@ -23,22 +24,22 @@
 <script data-script-inline src="{{ 'section-clickable-details.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
-  #IndexClickableDetails--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
 
-  {%- if hotspot_bg != 'rgba(0,0,0,0)' and hotspot_bg != '' -%}
-    #IndexClickableDetails--{{ section.id }} .hotspot { --bg: {{ hotspot_bg }}; }
-  {%- endif -%}
+  {%- unless hotspot_bg.alpha or hotspot_bg == blank -%}
+    #{{ unique }} .hotspot { --bg: {{ hotspot_bg }}; }
+  {%- endunless -%}
 
-  {%- if hotspot_color != 'rgba(0,0,0,0)' and hotspot_color != '' -%}
-    #IndexClickableDetails--{{ section.id }} .hotspot__button { --accent: {{ hotspot_color }}; }
-  {%- endif -%}
+  {%- unless hotspot_color.alpha or hotspot_color == blank -%}
+    #{{ unique }} .hotspot__button { --accent: {{ hotspot_color }}; }
+  {%- endunless -%}
 {%- endstyle -%}
 
 <section
-  id="IndexClickableDetails--{{ section.id }}"
+  id="{{ unique }}"
   class="clickable-details section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="look"
@@ -95,7 +96,7 @@
               assign hotspot_text = block.settings.text
               assign info_bubbles_position = block.settings.info_bubbles_position
 
-              capture hotspot_postions
+              capture hotspot_position
                 echo ' --position-x: ' | append: position_x | append: '%;'
                 echo ' --position-y: ' | append: position_y | append: '%;'
               endcapture
@@ -127,10 +128,10 @@
             <div
               id="hotspotItem--{{ block.id }}"
               class="hotspot-item"
-              style="{{ typography_adjustment }} {{ hotspot_postions }} {{ info_bubble_styles }}"
+              style="{{ typography_adjustment }} {{ hotspot_position }} {{ info_bubble_styles }}"
               data-aos="fade"
               data-aos-order="{{ forloop.index | plus: 1 }}"
-              data-aos-anchor="IndexClickableDetails--{{ section.id }}"
+              data-aos-anchor="{{ unique }}"
             >
               <button
                 type="button"
