@@ -1,0 +1,138 @@
+@use '../globals' as *;
+
+.section-sticky-image-cards .brick__wrapper {
+  align-items: flex-start;
+
+  @include media-query($medium-up) { contain: paint; }
+}
+
+.section-sticky-image-cards .brick__wrapper--grid {
+  @include media-query ($small) {
+    display: grid;
+    gap: var(--grid-gap-vertical) var(--grid-gap);
+    grid-template-columns: repeat(2 ,minmax(0,1fr));
+  }
+}
+
+.section-sticky-image-cards .brick__wrapper--slider {
+  @include media-query ($small) {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    margin-left: var(--grid-outer-offset);
+    margin-right: var(--grid-outer-offset);
+    padding-left: var(--grid-outer);
+    padding-right: 0;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--grid-outer);
+
+    @include hide-scrollbar;
+
+    &.is-enabled { cursor: grab; }
+    &.is-dragging:active { cursor: grabbing; }
+
+    // Disable links while dragging
+    &.is-dragging a { pointer-events: none; }
+
+    // Enable dragging momentum animation
+    &.is-scrolling { scroll-snap-type: none; }
+
+    &::after {
+      content: "";
+      min-height: 1px;
+      display: block;
+      position: relative;
+      padding-right: var(--grid-outer);
+    }
+
+    .brick__section {
+      flex: 0 0 auto;
+      width: calc(100% - 50px);
+      margin-right: var(--grid-gap);
+      scroll-snap-align: start;
+      &:last-child { margin-right: 0; }
+      &:only-child { flex: 0 1 100%; }
+    }
+  }
+}
+
+.section-sticky-image-cards.wrapper--full {
+  @include media-query ($small) {
+    overflow: hidden;
+
+    .brick__wrapper--slider::after {
+      display: none;
+      content: none;
+    }
+  }
+}
+
+.section-sticky-image-cards .brick__section { padding: 0; }
+
+.section-sticky-image-cards .brick__block__image {
+  max-width: 100%;
+  min-height: 0;
+}
+
+.section-sticky-image-cards .brick__section--reversed-mobile {
+  @include media-query ($small) {
+    align-self: stretch;
+
+    .brick__block:nth-child(1):first-child { margin-top: auto; }
+
+    .brick__block:nth-child(2):last-child { margin-bottom: auto; }
+  }
+}
+
+.section-sticky-image-cards .brick__block__image .image__hero__frame {
+  --aspect-ratio-value: var(--aspect-ratio-mobile);
+
+  aspect-ratio: calc(1 / var(--aspect-ratio-value, 1));
+  padding-top: 0;
+
+  @include media-query($medium-up) {
+    --aspect-ratio-value: var(--aspect-ratio);
+
+    position: sticky;
+    top: var(--header-sticky-height, 0);
+    min-height: 0;
+    max-height: calc(var(--full-height) - var(--header-sticky-height));
+  }
+}
+
+.section-sticky-image-cards .brick__section:not(:last-child) .brick__block__image {
+  @include media-query($medium-up) {
+    height: 200%;
+  }
+}
+
+.section-sticky-image-cards .brick__section:not(:last-child) .brick__block__image .image__hero__frame {
+  @include media-query($medium-up) {
+    align-self: flex-start;
+    height: 50%;
+  }
+}
+
+body:has([data-header-transparent]):has(.main-content > .shopify-section.section-overlay-header:first-of-type) .section-overlay-header:first-of-type .section-sticky-image-cards .brick__section:first-of-type .image__hero__frame {
+  @include media-query($medium-up) {
+    top: 0;
+    max-height: var(--full-height);
+  }
+}
+
+body:has([data-header-transparent]):has(.main-content > .shopify-section.section-overlay-header:first-of-type) .section-overlay-header:first-of-type .section-sticky-image-cards .brick__section:first-of-type .brick__block--text {
+  @include media-query($medium-up) {
+    padding: var(--header-height) 0;
+  }
+}
+
+body:has([data-header-transparent]):has(.main-content > .shopify-section.section-overlay-header:first-of-type) .section-overlay-header:first-of-type .section-sticky-image-cards .brick__wrapper--grid .brick__section--reversed-mobile:nth-child(-n+2) .brick__block--text,
+body:has([data-header-transparent]):has(.main-content > .shopify-section.section-overlay-header:first-of-type) .section-overlay-header:first-of-type .section-sticky-image-cards .brick__wrapper--slider .brick__section--reversed-mobile .brick__block--text,
+body:has([data-header-transparent]):has(.main-content > .shopify-section.section-overlay-header:first-of-type) .section-overlay-header:first-of-type .section-sticky-image-cards .brick__section:first-of-type.brick__section--reversed-mobile .brick__block--text {
+  @include media-query($small) {
+    padding-top: var(--header-height);
+  }
+}
