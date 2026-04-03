@@ -1,37 +1,38 @@
-<!-- /sections/section-custom-code.liquid -->
-
+<!-- /sections/section-divider.liquid -->
 {%- liquid
+  assign section_width = section.settings.width
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign unique = 'CustomCode--' | append: section.id
-  assign animation_anchor = unique
 -%}
-{%- assign animation_anchor = unique -%}
 
-{%- style -%}
-  #{{ unique }} {
-    --PT: {{ section.settings.padding_top }}px;
-    --PB: {{ section.settings.padding_bottom }}px;
-  }
-{%- endstyle -%}
+{%- capture style -%}
+  --PT: {{ section.settings.padding_top | append: 'px' }};
+  --PB: {{ section.settings.padding_bottom | append: 'px' }};
+{%- endcapture -%}
 
 <section
-  id="{{ unique }}"
-  class="custom-code section-padding {{ section.settings.width }} {{ color_scheme }}"
+  id="Divider--{{ section.id }}"
+  class="divider-section section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
-  data-section-type="custom-code"
+  data-section-type="divider"
+  style="{{ style }}"
 >
-  {{ section.settings.code }}
+  <div class="divider-holder {{ section_width }}">
+    {%- if section.settings.show_line -%}
+      <hr class="divider">
+    {%- endif -%}
+  </div>
 </section>
 
 {% schema %}
 {
-  "name": "Custom code",
+  "name": "Divider",
+  "class": "divider-container",
   "settings": [
     {
-      "type": "liquid",
-      "id": "code",
-      "label": "Custom code",
-      "info": "Add app snippets or other Liquid code to create advanced customizations."
+      "type": "checkbox",
+      "id": "show_line",
+      "label": "Show line",
+      "default": true
     },
     {
       "type": "header",
@@ -41,7 +42,7 @@
       "type": "select",
       "id": "width",
       "label": "Width",
-      "default": "wrapper",
+      "default": "wrapper--full-padded",
       "options": [
         {
           "value": "wrapper--full",
@@ -83,7 +84,7 @@
       "step": 1,
       "unit": "px",
       "label": "Top",
-      "default": 0
+      "default": 50
     },
     {
       "type": "range",
@@ -93,14 +94,16 @@
       "step": 1,
       "unit": "px",
       "label": "Bottom",
-      "default": 0
+      "default": 50
     }
   ],
   "presets": [
     {
-      "name": "Custom code",
-      "category": "Text"
+      "name": "Divider"
     }
-  ]
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside"]
+  }
 }
 {% endschema %}

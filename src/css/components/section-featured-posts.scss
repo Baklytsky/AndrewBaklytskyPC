@@ -1,0 +1,118 @@
+@use '../globals' as *;
+
+.featured-posts {
+  @include media-query($small) {
+    .wrapper &,
+    .wrapper--full-padded & {
+      padding: 0;
+
+      swiper-slide {
+        padding-left: var(--outer);
+        padding-right: var(--outer);
+      }
+    }
+  }
+}
+
+.editorial__slider {
+  .swiper-button-prev,
+  .swiper-button-next {
+    top: auto;
+    bottom: 35px;
+    margin-top: 0;
+
+    @include media-query($large-down) {
+      bottom: 20px;
+    }
+  }
+
+  .swiper-button-prev {
+    left: var(--outer);
+  }
+
+  .swiper-button-next {
+    right: auto;
+    left: calc(var(--outer) + 50px);
+  }
+
+  swiper-container.grid--mobile-slider {
+    @include media-query($small) {
+      width: 100%;
+    }
+  }
+}
+
+.editorial {
+  background: var(--bg);
+  overflow-wrap: break-word;
+
+  @include media-query($medium-up) {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+}
+
+.editorial__aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--outer);
+
+  @include media-query($medium-up) {
+    flex: 0 0 50%;
+  }
+
+  @include media-query($small) {
+    display: block;
+
+    .wrapper--full-padded & { padding-left: 0; }
+  }
+}
+
+.editorial__slider.is-initialized .editorial__aside {
+  @include media-query($small) {
+    padding-bottom: 70px;
+  }
+}
+
+.editorial__aside[data-subheading]::after {
+  @include media-query($medium-up) {
+    content: attr(data-subheading);
+    padding-top: 0.5em;
+    margin-top: auto;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.editorial__content { margin: auto 0; }
+
+.editorial__subheading {
+  padding-left: 5px;
+  padding-bottom: 0.5em;
+  margin: 0 0 auto;
+}
+
+.editorial__subheading + .editorial__content .editorial__title:first-child { margin-top: 0; }
+
+.editorial__meta {
+  font-size: var(--font-body-small);
+  display: flex;
+  flex-wrap: wrap;
+  padding: 7px 0;
+}
+
+.editorial__meta > *:not(:last-child)::after {
+  content: '\2022';
+  padding: 0 7px;
+}
+
+.editorial__image {
+  display: flex;
+
+  @include media-query($medium-up) {
+    flex: 0 0 50%;
+  }
+}
+
+.editorial__link { margin-top: 1em; }

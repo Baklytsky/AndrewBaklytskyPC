@@ -1,0 +1,59 @@
+@use '../globals' as *;
+
+// =============================================================================
+// Overlapping images section-specific styles
+//
+// Used by:
+//   - section-overlapping-images (via section-double snippet)
+// =============================================================================
+
+// Overlapping images — offset positioning
+.brick__block--overlap {
+  --image-offset-default: 50px;
+  --image-offset: var(--image-offset-value, var(--image-offset-default));
+  --image-offset-negative: calc(var(--image-offset) * -1);
+
+  align-self: center;
+  display: flex;
+  align-items: flex-start;
+}
+
+.brick__block--overlap .brick__block__image { flex: 1 0 50%; }
+
+.brick__block--overlap .brick__block__image:not(.brick__block__image--offset):first-child {
+  z-index: 1;
+  margin-top: var(--image-offset);
+  left: calc(var(--image-offset) / 2);
+}
+
+.brick__block--overlap .brick__block__image--offset {
+  @include media-query($medium-up) {
+    margin-top: var(--image-offset);
+    left: calc(var(--image-offset) / 2);
+  }
+}
+
+.brick__block--overlap .brick__block__image:last-child {
+  left: calc(var(--image-offset-negative) / 2);
+}
+
+// Pinned text block — content pushed to top/bottom
+.brick__block--pin {
+  .brick__block__text,
+  collapsible-elements {
+    flex-wrap: wrap;
+  }
+
+  collapsible-elements {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero__content:first-child:not(:last-child) { margin-bottom: auto; }
+
+  .hero__content:last-child:not(:first-child) { margin-top: auto; }
+}
+
+// Accordion + images layout
+.brick__section--accordion .brick__block--images { align-self: flex-start; }

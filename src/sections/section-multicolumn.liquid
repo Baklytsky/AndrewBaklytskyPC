@@ -1,0 +1,1717 @@
+<!-- /sections/section-multicolumn.liquid -->
+
+{%- liquid
+  assign unique = 'SectionMulticolumn--' | append: section.id
+  assign animation_order = 0
+  assign animation_anchor = unique
+  assign heading = section.settings.title
+  assign description = section.settings.description
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign blocks_size = section.blocks.size
+  assign layout_mobile = section.settings.layout_mobile
+  assign column_count = blocks_size | at_least: 2
+  assign column_count_float = column_count | times: 1.000000
+  assign column_width = 100 | divided_by: column_count_float
+  assign one_third_blocks_only = false
+  assign one_third_block_count = 0
+
+  for block in section.blocks
+    if block.settings.column_width == 33
+      assign one_third_block_count = one_third_block_count | plus: 1
+    endif
+  endfor
+
+  if one_third_block_count == blocks_size
+    assign one_third_blocks_only = true
+  endif
+
+  assign columns_mobile = layout_mobile | plus: 0
+
+  if heading != blank or description != blank
+    assign has_content = true
+  endif
+
+  assign eager_images_limit = 3
+
+  capture layout_class
+    echo 'grid multicolumn'
+
+    if layout_mobile == 'slider'
+      echo ' grid--mobile-slider'
+    endif
+  endcapture
+-%}
+
+{%- render 'stylesheet', name: 'multicolumn.css' -%}
+
+{%- style -%}
+  #{{ unique }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --COLUMNS-MOBILE: {{ columns_mobile }};
+  }
+{%- endstyle -%}
+
+<div
+  id="{{ unique }}"
+  class="section-columns section-padding {{ color_scheme }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="columns"
+>
+  <div class="{{ section.settings.width }}">
+    {%- if has_content -%}
+      <div class="grid__heading-holder {{ section.settings.align_heading }}">
+        {%- if heading != blank -%}
+          {%- liquid
+            assign animation_order = animation_order | plus: 1
+            assign heading_tag = 'h2'
+
+            unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+              assign heading_tag = section.settings.heading_tag
+            endunless
+          -%}
+
+          <{{ heading_tag }}
+            class="grid__heading {{ section.settings.heading_font_size }}"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            {{- heading -}}
+          </{{ heading_tag }}>
+        {%- endif -%}
+
+        {%- if description -%}
+          {%- assign animation_order = animation_order | plus: 1 -%}
+
+          <div
+            class="grid__description"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            {{ description }}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if blocks_size > 0 -%}
+      {%- capture columns_content -%}
+        <div class="{{ layout_class }} {{ section.settings.align_columns }} {{ section.settings.align_text }}"
+          {% if request.design_mode %}
+            data-block-scroll
+          {% endif %}
+        >
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign animation_order = animation_order | plus: 1
+              assign column_width = block.settings.column_width | default: column_width
+              assign title = block.settings.title
+              assign text = block.settings.text
+              assign image = block.settings.image
+              assign image_aspect_ratio = block.settings.image_aspect_ratio | default: section.settings.image_aspect_ratio | default: 1
+              assign image_aspect_ratio_mobile = block.settings.mobile_image_aspect_ratio | default: section.settings.mobile_image_aspect_ratio | default: aspect_ratio
+              assign aspect_ratio = 1 | divided_by: image_aspect_ratio
+              assign aspect_ratio_mobile = 1 | divided_by: image_aspect_ratio_mobile
+              assign button_text = block.settings.button_text
+              assign icon_color = block.settings.icon_color
+              assign icon_size = block.settings.icon_size
+
+              if forloop.index > eager_images_limit
+                assign loading = 'lazy'
+              endif
+
+              if one_third_blocks_only
+                assign column_width = 33.333333
+              endif
+
+              assign column_width_multiplier = column_width | times: 0.01
+
+              capture button_classes
+                assign use_default_styles = true
+                if block.settings.custom_button_class != blank
+                  assign use_default_styles = false
+                endif
+
+                if use_default_styles
+                  assign button_style = block.settings.button_style
+                  if button_style == 'btn--text' and block.settings.show_arrow
+                    assign button_style = button_style | append: ' btn--text-no-underline'
+                  endif
+                  echo 'btn ' | append: button_style | append: ' ' | append: block.settings.button_type | append: ' ' | append: block.settings.button_size
+                else
+                  echo block.settings.custom_button_class
+                endif
+              endcapture
+
+              capture image_shape_class
+                case block.settings.image_shape
+                  when 'circle'
+                    echo ' column__image--circle'
+
+                  when 'rounded'
+                    echo ' column__image--rounded'
+
+                  when 'blob-one'
+                    echo ' column__image--blob-one'
+
+                  when 'blob-two'
+                    echo ' column__image--blob-two'
+
+                  when 'blob-three'
+                    echo ' column__image--blob-three'
+                endcase
+              endcapture
+
+              capture image_sizes
+                echo '(min-width: 990px) calc((100vw - 100px) * ' | append: column_width_multiplier | append: '), (min-width: 750px) calc((100vw - 60px) / 2), calc(100vw - 32px - 50px)'
+              endcapture
+
+              capture block_style
+                echo 'style="'
+                echo '--desktop-width: ' | append: column_width | append: '%;'
+
+                if icon_color.alpha != 0.0 and icon_color != blank
+                  echo ' --icons: ' | append: icon_color | append: ';'
+                endif
+
+                echo '"'
+              endcapture
+            -%}
+
+            {%- case block.type -%}
+              {%- when 'image' -%}
+                <div class="grid-item"
+                  {{ block_style }}
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="column__inner"
+                    data-aos="hero"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-order="{{ animation_order }}">
+                    <div class="column__image{{ image_shape_class }}" data-column-image>
+                      {%- liquid
+                        capture column_image
+                          assign class_desktop = ''
+                          assign class_mobile = ''
+
+                          if aspect_ratio != aspect_ratio_mobile
+                            assign class_desktop = 'desktop'
+                            assign class_mobile = 'mobile'
+                          endif
+
+                          if image
+                            render 'image' image: image, sizes: image_sizes, aspect_ratio: aspect_ratio, loading: loading, modifier: class_desktop
+
+                            if aspect_ratio != aspect_ratio_mobile
+                              render 'image' image: image, sizes: image_sizes, aspect_ratio: aspect_ratio_mobile, loading: loading, modifier: class_mobile
+                            endif
+                          else
+                            render 'image' placeholder: 'image', aspect_ratio: aspect_ratio, modifier: class_desktop
+
+                            if aspect_ratio != aspect_ratio_mobile
+                              render 'image' placeholder: 'image', aspect_ratio: aspect_ratio_mobile, modifier: class_mobile
+                            endif
+                          endif
+                        endcapture
+                      -%}
+
+                      {%- if block.settings.button_url != blank and button_text == blank -%}
+                        <a href="{{ block.settings.button_url }}" aria-label="{{ image.alt | default: title | default: text | strip_html | escape }}">
+                          {{ column_image }}
+                        </a>
+                      {%- else -%}
+                        {{ column_image }}
+                      {%- endif -%}
+                    </div>
+
+                    {%- if title != blank or text != blank or button_text != blank -%}
+                      <div class="column__content grid-item__content">
+                        {%- if title != blank -%}
+                          {%- liquid
+                            assign heading_tag = 'h2'
+
+                            unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                              assign heading_tag = block.settings.heading_tag
+                            endunless
+                          -%}
+
+                          <{{ heading_tag }} class="column__heading {{ block.settings.heading_font_size }}">
+                            {{- title -}}
+                          </{{ heading_tag }}>
+                        {%- endif -%}
+
+                        {%- if text != blank -%}
+                          <div class="column__text rte {{ block.settings.text_font_size }}">
+                            {{- text -}}
+                          </div>
+                        {%- endif -%}
+
+                        {%- if button_text != blank -%}
+                          <div class="column__btn">
+                            <a href="{{ block.settings.button_url | default: '#!' }}" class="{{ button_classes }}" aria-label="{{ button_text }}">
+                              <span>{{ button_text }}</span>
+
+                              {%- if use_default_styles and block.settings.show_arrow -%}
+                                {%- render 'icon-nav-arrow-right' -%}
+                              {%- endif -%}
+                            </a>
+                          </div>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              {%- when 'icon' -%}
+                {%- capture icon_style -%}
+                  --icon-size: {{ icon_size }}px;
+
+                  {%- if title != blank -%}
+                    --icon-line-height: calc(1.2 * var(--font-{{ block.settings.heading_font_size | remove: '' }}));
+                  {%- elsif text != blank-%}
+                    --icon-line-height: calc(1.5 * var(--font-{{ block.settings.text_font_size | remove: '' }}));
+                  {%- endif -%}
+                {%- endcapture -%}
+
+                <div class="grid-item"
+                  {{ block_style }}
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="column__inner"
+                    data-aos="hero"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-order="{{ animation_order }}">
+                    <div class="column__icon {{ block.settings.icon_alignment | default: section.settings.icon_alignment }}" style="{{ icon_style }}">
+                      <div class="icon__animated{% if image != blank %} icon__animated--image{% endif %}">
+                        {%- liquid
+                          if image
+                            assign icon_width = icon_size
+                            assign icon_width_retina = icon_width | times: 2
+                            assign icon_sizes = icon_width | append: 'px'
+                            assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+
+                            render 'image' image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, loading: loading
+                          else
+                            render 'animated-icon', filename: block.settings.icon_name
+                          endif
+                        -%}
+                      </div>
+
+                      {%- if title != blank or text != blank -%}
+                        <div class="column__content">
+                          {%- if title != blank -%}
+                            {%- liquid
+                              assign heading_tag = 'h2'
+
+                              unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                                assign heading_tag = block.settings.heading_tag
+                              endunless
+                            -%}
+
+                            <{{ heading_tag }} class="column__heading {{ block.settings.heading_font_size }}">
+                              {{ title }}
+                            </{{ heading_tag }}>
+                          {%- endif -%}
+
+                          {%- if text != blank -%}
+                            <div class="column__text rte {{ block.settings.text_font_size }}">
+                              {{ text }}
+                            </div>
+                          {%- endif -%}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+
+              {%- when 'text' -%}
+                <div class="grid-item"
+                  {{ block_style }}
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="column__inner"
+                    data-aos="hero"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-order="{{ animation_order }}">
+                    <div class="column__content grid-item__content">
+                      {%- if title != blank -%}
+                        {%- liquid
+                          assign heading_tag = 'h2'
+
+                          unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
+                            assign heading_tag = block.settings.heading_tag
+                          endunless
+                        -%}
+
+                        <{{ heading_tag }} class="column__heading {{ block.settings.heading_font_size }}">
+                          {{ title }}
+                        </{{ heading_tag }}>
+                      {%- endif -%}
+
+                      {%- if text != blank -%}
+                        <div class="column__text rte {{ block.settings.text_font_size }}">
+                          {{ text }}
+                        </div>
+                      {%- endif -%}
+
+                      {%- if button_text != blank -%}
+                        <div class="column__btn">
+                          <a href="{{ block.settings.button_url | default: '#!' }}" class="{{ button_classes }}" aria-label="{{ button_text }}">
+                            <span>{{ button_text }}</span>
+
+                            {%- if use_default_styles and block.settings.show_arrow -%}
+                              {%- render 'icon-nav-arrow-right' -%}
+                            {%- endif -%}
+                          </a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+
+              {%- when 'menu' -%}
+                {%- assign menu_linklist = block.settings.menu | default: 'main-menu' -%}
+
+                <div class="grid-item" {{ block_style }} {{ block.shopify_attributes }}>
+                  <div class="column__inner"
+                    data-aos="hero"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-order="{{ animation_order }}">
+                    <div class="column__links font-heading">
+                      {%- for link in linklists[menu_linklist].links -%}
+                        <div class="column__links__item {{ block.settings.heading_font_size }}">
+                          <a href="{{ link.url }}">{{ link.title }}</a>
+                          {%- render 'superscript', link_collection: link -%}
+                        </div>
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                </div>
+
+              {%- when 'product' -%}
+                {%- liquid
+                  capture product_attributes
+                    echo 'data-aos="hero" '
+                    echo 'data-aos-anchor="' | append: animation_anchor | append: '" '
+                    echo 'data-aos-order="' | append: animation_order | append: '" '
+                    echo block_style
+                    echo block.shopify_attributes
+                  endcapture
+
+                  assign product = all_products[block.settings.product]
+                  render 'product-card', product: product, index: forloop.index, attributes: product_attributes
+                -%}
+
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      {%- endcapture -%}
+
+      {{ columns_content }}
+    {%- endif -%}
+
+    {%- if blocks_size == 0 -%}
+      {%- render 'no-blocks' -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Multicolumn",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-medium",
+      "options": [
+        {
+          "value": "heading-mini",
+          "label": "Mini"
+        },
+        {
+          "value": "heading-x-small",
+          "label": "Extra small"
+        },
+        {
+          "value": "heading-small",
+          "label": "Small"
+        },
+        {
+          "value": "heading-medium",
+          "label": "Medium"
+        },
+        {
+          "value": "heading-large",
+          "label": "Large"
+        },
+        {
+          "value": "heading-x-large",
+          "label": "Extra large"
+        }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Text"
+    },
+    {
+      "type": "select",
+      "id": "align_heading",
+      "label": "Heading",
+      "default": "text-left",
+      "options": [
+        {
+          "value": "text-left",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Centered"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "align_text",
+      "label": "Text",
+      "default": "text-left",
+      "options": [
+        {
+          "value": "text-left",
+          "label": "Left"
+        },
+        {
+          "value": "text-center",
+          "label": "Centered"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full-padded",
+      "options": [
+        {
+          "value": "wrapper--full-padded",
+          "label": "Full width padded"
+        },
+        {
+          "value": "wrapper",
+          "label": "Normal"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "align_columns",
+      "label": "Columns",
+      "default": "flex-align-top",
+      "options": [
+        {
+          "value": "flex-align-top",
+          "label": "Top"
+        },
+        {
+          "value": "flex-align-center",
+          "label": "Centered"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "select",
+      "id": "layout_mobile",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 item per row"
+        },
+        {
+          "value": "2",
+          "label": "2 items per row"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "slider"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading SEO tag",
+      "default": "automatic",
+      "options": [
+        {
+          "value": "automatic",
+          "label": "Automatic"
+        },
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "range",
+          "id": "column_width",
+          "label": "Column width",
+          "unit": "%",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 33,
+          "info": "Desktop only"
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "1400 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+        },
+        {
+          "type": "range",
+          "id": "image_aspect_ratio",
+          "min": 0.5,
+          "max": 1.5,
+          "step": 0.1,
+          "unit": ":1",
+          "label": "Desktop aspect ratio",
+          "info": "Wide to tall",
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "mobile_image_aspect_ratio",
+          "min": 0.5,
+          "max": 1.5,
+          "step": 0.1,
+          "unit": ":1",
+          "label": "Mobile aspect ratio",
+          "info": "Wide to tall",
+          "default": 1
+        },
+        {
+          "type": "select",
+          "id": "image_shape",
+          "label": "Image shape",
+          "options": [
+            {
+              "value": "normal",
+              "label": "Normal"
+            },
+            {
+              "value": "circle",
+              "label": "Circle"
+            },
+            {
+              "value": "rounded",
+              "label": "Rounded"
+            },
+            {
+              "value": "blob-one",
+              "label": "Blob one"
+            },
+            {
+              "value": "blob-two",
+              "label": "Blob two"
+            },
+            {
+              "value": "blob-three",
+              "label": "Blob three"
+            }
+          ],
+          "default": "normal",
+          "info": "1:1 aspect ratio recommended"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-small",
+          "options": [
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Applies only when content in Text field is set to Paragraph.",
+          "default": "body-medium",
+          "options": [
+            {
+              "value": "body-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "body-small",
+              "label": "Small"
+            },
+            {
+              "value": "body-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "body-large",
+              "label": "Large"
+            },
+            {
+              "value": "body-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "info": "Leave blank to link entire image"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "button_type",
+          "label": "Color",
+          "default": "btn--primary",
+          "options": [
+            {
+              "value": "btn--black",
+              "label": "Black"
+            },
+            {
+              "value": "btn--white",
+              "label": "White"
+            },
+            {
+              "value": "btn--primary",
+              "label": "Primary"
+            },
+            {
+              "value": "btn--secondary",
+              "label": "Secondary"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Size",
+          "default": "",
+          "options": [
+            {
+              "label": "Small",
+              "value": "btn--small"
+            },
+            {
+              "label": "Medium",
+              "value": ""
+            },
+            {
+              "label": "Large",
+              "value": "btn--large"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Style",
+          "default": "btn--solid",
+          "options": [
+            {
+              "label": "Solid",
+              "value": "btn--solid"
+            },
+            {
+              "label": "Outline",
+              "value": "btn--outline"
+            },
+            {
+              "label": "Text",
+              "value": "btn--text"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_arrow",
+          "label": "Show arrow",
+          "default": false,
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "text",
+          "id": "custom_button_class",
+          "label": "Custom class",
+          "info": "Override all default button styles"
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading SEO tag",
+          "default": "automatic",
+          "options": [
+            {
+              "value": "automatic",
+              "label": "Automatic"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "icon",
+      "name": "Icon",
+      "settings": [
+        {
+          "type": "range",
+          "id": "column_width",
+          "label": "Column width",
+          "unit": "%",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 33,
+          "info": "Desktop only"
+        },
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "icon-domestic-love",
+          "options": [
+            {
+              "label": "Accessibility",
+              "value": "icon-a11y"
+            },
+            {
+              "label": "Add to bag",
+              "value": "icon-bag"
+            },
+            {
+              "label": "Adjustable fit",
+              "value": "icon-fit"
+            },
+            {
+              "label": "Breathable",
+              "value": "icon-breathable"
+            },
+            {
+              "label": "Chat",
+              "value": "icon-chat"
+            },
+            {
+              "label": "Clean beauty",
+              "value": "icon-clean-beauty"
+            },
+            {
+              "label": "Commited to climate action",
+              "value": "icon-climate"
+            },
+            {
+              "label": "Cruelty Free",
+              "value": "icon-cruelty-free"
+            },
+            {
+              "label": "Customer love",
+              "value": "icon-domestic-love"
+            },
+            {
+              "label": "Dermatologist Tested",
+              "value": "icon-derm-test"
+            },
+            {
+              "label": "Designed for running",
+              "value": "icon-design-run"
+            },
+            {
+              "label": "Ethically-Sourced Ingredients",
+              "value": "icon-es-ingredients"
+            },
+            {
+              "label": "Exchanges",
+              "value": "icon-exchange"
+            },
+            {
+              "label": "Favorites",
+              "value": "icon-favs"
+            },
+            {
+              "label": "Filter",
+              "value": "icon-filter"
+            },
+            {
+              "label": "Fragrance Free",
+              "value": "icon-fragnance-free"
+            },
+            {
+              "label": "Gentle Formula",
+              "value": "icon-gentle-formula"
+            },
+            {
+              "label": "Get Help",
+              "value": "icon-get-help"
+            },
+            {
+              "label": "Gift Cards",
+              "value": "icon-gift-cards"
+            },
+            {
+              "label": "Healthy Protein Food",
+              "value": "icon-healthy-food"
+            },
+            {
+              "label": "High Support",
+              "value": "icon-high-support"
+            },
+            {
+              "label": "Kosher",
+              "value": "icon-kosher"
+            },
+            {
+              "label": "Language",
+              "value": "icon-language"
+            },
+            {
+              "label": "Lock",
+              "value": "icon-lock"
+            },
+            {
+              "label": "Medium Support",
+              "value": "icon-medium-support"
+            },
+            {
+              "label": "Minus",
+              "value": "icon-minus"
+            },
+            {
+              "label": "No available",
+              "value": "icon-no-available"
+            },
+            {
+              "label": "No Parabens",
+              "value": "icon-no-parabens"
+            },
+            {
+              "label": "No PEGS",
+              "value": "icon-no-pegs"
+            },
+            {
+              "label": "No Phthalates",
+              "value": "icon-no-phthalates"
+            },
+            {
+              "label": "No preservatives",
+              "value": "icon-no-preservatives"
+            },
+            {
+              "label": "No Silicones",
+              "value": "icon-no-silicones"
+            },
+            {
+              "label": "No talc",
+              "value": "icon-no-talc"
+            },
+            {
+              "label": "Odor control",
+              "value": "icon-odor-control"
+            },
+            {
+              "label": "Payments and invoices",
+              "value": "icon-payments"
+            },
+            {
+              "label": "Play Video",
+              "value": "icon-play-video"
+            },
+            {
+              "label": "Plus",
+              "value": "icon-plus"
+            },
+            {
+              "label": "Product Features",
+              "value": "icon-product-features"
+            },
+            {
+              "label": "Quick dry",
+              "value": "icon-quick-dry"
+            },
+            {
+              "label": "Rating",
+              "value": "icon-rating"
+            },
+            {
+              "label": "Ref Stores",
+              "value": "icon-ref-store"
+            },
+            {
+              "label": "Reload",
+              "value": "icon-reload"
+            },
+            {
+              "label": "Removable cups",
+              "value": "icon-removable-cups"
+            },
+            {
+              "label": "Reviews",
+              "value": "icon-reviews"
+            },
+            {
+              "label": "Sale tag",
+              "value": "icon-sale-tag"
+            },
+            {
+              "label": "Save",
+              "value": "icon-save"
+            },
+            {
+              "label": "Sea food",
+              "value": "icon-sea-food"
+            },
+            {
+              "label": "Search",
+              "value": "icon-search"
+            },
+            {
+              "label": "Share",
+              "value": "icon-share"
+            },
+            {
+              "label": "Shipping",
+              "value": "icon-shipping"
+            },
+            {
+              "label": "Size Guide",
+              "value": "icon-size-guide"
+            },
+            {
+              "label": "Soft, Sleek Fabric",
+              "value": "icon-soft"
+            },
+            {
+              "label": "Spicy",
+              "value": "icon-spicy"
+            },
+            {
+              "label": "Sustainability focused",
+              "value": "icon-sustainability-focused"
+            },
+            {
+              "label": "Telegram",
+              "value": "icon-telegram"
+            },
+            {
+              "label": "Top sales",
+              "value": "icon-top-sales"
+            },
+            {
+              "label": "Trash",
+              "value": "icon-trash"
+            },
+            {
+              "label": "User",
+              "value": "icon-user"
+            },
+            {
+              "label": "Vegan leaping bunny",
+              "value": "icon-vegan-bunny"
+            },
+            {
+              "label": "Vegan food",
+              "value": "icon-vegan-food"
+            },
+            {
+              "label": "Vegan suitable",
+              "value": "icon-vegan-suitable"
+            },
+            {
+              "label": "Warning sign",
+              "value": "icon-warning-sign"
+            },
+            {
+              "label": "Water repellent",
+              "value": "icon-water-repellent"
+            },
+            {
+              "label": "WhatsApp",
+              "value": "icon-whatsapp"
+            },
+            {
+              "label": "Windproof",
+              "value": "icon-windproof"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Size",
+          "unit": "px",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "default": 20
+        },
+        {
+          "type": "select",
+          "id": "icon_alignment",
+          "label": "Placement",
+          "default": "icon--top",
+          "options": [
+            {
+              "value": "icon--top",
+              "label": "Top"
+            },
+            {
+              "value": "icon--left",
+              "label": "Left"
+            }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Alternative icon/image",
+          "info": "160 x 160px .svg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Title"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-small",
+          "options": [
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Share details about your shipping policies, item returns, or customer service.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Applies only when content in Text field is set to Paragraph.",
+          "default": "body-medium",
+          "options": [
+            {
+              "value": "body-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "body-small",
+              "label": "Small"
+            },
+            {
+              "value": "body-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "body-large",
+              "label": "Large"
+            },
+            {
+              "value": "body-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading SEO tag",
+          "default": "automatic",
+          "options": [
+            {
+              "value": "automatic",
+              "label": "Automatic"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "range",
+          "id": "column_width",
+          "label": "Column width",
+          "unit": "%",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 33,
+          "info": "Desktop only"
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Add a title or tagline"
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-medium",
+          "options": [
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to describe products, share details on availability and style, or as a space to display recent reviews or FAQs.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_font_size",
+          "label": "Text size",
+          "info": "Applies only when content in Text field is set to Paragraph.",
+          "default": "body-medium",
+          "options": [
+            {
+              "value": "body-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "body-small",
+              "label": "Small"
+            },
+            {
+              "value": "body-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "body-large",
+              "label": "Large"
+            },
+            {
+              "value": "body-x-large",
+              "label": "Extra large"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "button_type",
+          "label": "Color",
+          "default": "btn--primary",
+          "options": [
+            {
+              "value": "btn--black",
+              "label": "Black"
+            },
+            {
+              "value": "btn--white",
+              "label": "White"
+            },
+            {
+              "value": "btn--primary",
+              "label": "Primary"
+            },
+            {
+              "value": "btn--secondary",
+              "label": "Secondary"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Size",
+          "default": "",
+          "options": [
+            {
+              "label": "Small",
+              "value": "btn--small"
+            },
+            {
+              "label": "Medium",
+              "value": ""
+            },
+            {
+              "label": "Large",
+              "value": "btn--large"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Style",
+          "default": "btn--solid",
+          "options": [
+            {
+              "label": "Solid",
+              "value": "btn--solid"
+            },
+            {
+              "label": "Outline",
+              "value": "btn--outline"
+            },
+            {
+              "label": "Text",
+              "value": "btn--text"
+            }
+          ],
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_arrow",
+          "label": "Show arrow",
+          "default": false,
+          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+        },
+        {
+          "type": "text",
+          "id": "custom_button_class",
+          "label": "Custom class",
+          "info": "Override all default button styles"
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading SEO tag",
+          "default": "automatic",
+          "options": [
+            {
+              "value": "automatic",
+              "label": "Automatic"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "range",
+          "id": "column_width",
+          "label": "Column width",
+          "unit": "%",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 33,
+          "info": "Desktop only"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "This menu won't show dropdown items."
+        },
+        {
+          "type": "select",
+          "id": "heading_font_size",
+          "label": "Heading size",
+          "default": "heading-small",
+          "options": [
+            {
+              "value": "heading-mini",
+              "label": "Mini"
+            },
+            {
+              "value": "heading-x-small",
+              "label": "Extra small"
+            },
+            {
+              "value": "heading-small",
+              "label": "Small"
+            },
+            {
+              "value": "heading-medium",
+              "label": "Medium"
+            },
+            {
+              "value": "heading-large",
+              "label": "Large"
+            },
+            {
+              "value": "heading-x-large",
+              "label": "Extra large"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "range",
+          "id": "column_width",
+          "label": "Column width",
+          "unit": "%",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "default": 33,
+          "info": "Desktop only"
+        },
+        {
+          "label": "Product",
+          "id": "product",
+          "type": "product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Multicolumn",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "icon",
+          "settings": {
+            "title": "Secure transactions",
+            "icon_name": "icon-shield",
+            "text": "<p>Transactions are handled with bank-grade security.</p>"
+          }
+        },
+        {
+          "type": "icon",
+          "settings": {
+            "title": "Simple checkout",
+            "icon_name": "icon-trophy",
+            "text": "<p>Our secure checkout is quick and easy to use.</p>"
+          }
+        },
+        {
+          "type": "icon",
+          "settings": {
+            "title": "Get in touch",
+            "icon_name": "icon-chat",
+            "text": "<p>Have questions? Get in touch with us at any time.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "aside", "footer"]
+  }
+}
+{% endschema %}

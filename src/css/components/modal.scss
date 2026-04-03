@@ -36,6 +36,9 @@ popup-component { display: block; }
 }
 
 .modal__close {
+  --icon: var(--text);
+  --icon-size: 100%;
+
   position: absolute;
   top: 20px;
   right: 20px;
@@ -46,9 +49,6 @@ popup-component { display: block; }
   cursor: pointer;
 
   .icon {
-    fill: var(--text);
-    width: 100%;
-    height: 100%;
     pointer-events: none;
     transition: transform 0.3s;
   }
@@ -63,4 +63,46 @@ popup-component { display: block; }
   .modal__text {
     width: 100%;
   }
+}
+
+.modal__heading { margin: 1rem 0; }
+
+// Modal navigation buttons
+.modal__nav-button {
+  --icon-size: 14px;
+
+  z-index: 20;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  padding: 0;
+  width: var(--nav-btn-size);
+  height: var(--nav-btn-size);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover { opacity: 0.85; }
+  &[disabled] { opacity: 0.3; pointer-events: none; }
+}
+
+.modal__nav-button.modal__close {
+  --icon-size: 24px;
+}
+
+.modal__close.desktop {
+  position: absolute;
+  top: var(--outer, 20px);
+  right: var(--outer, 20px);
+}
+
+.modal__prev,
+.modal__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
