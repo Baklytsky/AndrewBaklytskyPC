@@ -3,12 +3,13 @@
   assign default_content = 'home_page.onboarding.no_content' | t
 
   assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign unique = 'FeaturedPosts--' | append: section.id
 -%}
 
 {%- render 'stylesheet', name: 'section-featured-posts.css' -%}
 
 {%- style -%}
-  #FeaturedPosts--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
@@ -16,7 +17,7 @@
 
 {%- if section.blocks.size > 0 -%}
   <section
-    id="FeaturedPosts--{{ section.id }}"
+    id="{{ unique }}"
     class="featured-posts section-padding {{ color_scheme }}"
     data-section-id="{{ section.id }}"
     data-section-type="blog-section"
@@ -138,10 +139,10 @@
           </swiper-container>
 
           <div class="{{ section.id }}--button swiper-button-prev">
-            {%- render 'animated-icon', filename: 'icon-nav-arrow-left' -%}
+            {%- render 'icon-nav-arrow-left' -%}
           </div>
           <div class="{{ section.id }}--button swiper-button-next">
-            {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+            {%- render 'icon-nav-arrow-right' -%}
           </div>
         </div>
       </div>

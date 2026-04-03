@@ -1,7 +1,8 @@
 <!-- /sections/section-reviews.liquid -->
 
 {%- liquid
-  assign animation_anchor = 'Reviews--' | append: section.id
+  assign unique = 'Reviews--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 0
   assign aspect_ratio = 1 | divided_by: section.settings.image_aspect_ratio
   assign block_count = section.blocks.size | plus: 0
@@ -54,7 +55,7 @@
 {%- render 'stylesheet', name: 'section-reviews.css' -%}
 
 {%- style -%}
-  #Reviews--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
 
@@ -74,7 +75,7 @@
 {%- endif -%}
 
 <div
-  id="Reviews--{{ section.id }}"
+  id="{{ unique }}"
   class="{{ section_classes }} {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="reviews"

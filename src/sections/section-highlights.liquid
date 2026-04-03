@@ -5,9 +5,9 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign unique = section.id
+  assign unique = 'Highlights--' | append: section.id
   assign animation_order = 0
-  assign animation_anchor = 'Highlights--' | append: unique
+  assign animation_anchor = unique
   assign heading = section.settings.heading
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign blocks_style = section.settings.style
@@ -27,7 +27,7 @@
 -%}
 
 {%- style -%}
-  #Highlights--{{ unique }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
 
@@ -42,8 +42,8 @@
 
 <div
   class="highlights section-padding {{ color_scheme }}"
-  id="Highlights--{{ unique }}"
-  data-section-id="{{ unique }}"
+  id="{{ unique }}"
+  data-section-id="{{ section.id }}"
   data-section-type="highlights"
 >
   <div class="{{ section.settings.width }} highlights__container">

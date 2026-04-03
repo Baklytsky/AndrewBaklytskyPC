@@ -1,5 +1,6 @@
 <!-- /sections/section-collection-list.liquid -->
 {%- liquid
+  assign unique = 'CollectionsList--' | append: section.id
   assign title = section.settings.title
   assign description = section.settings.description
   assign button_text = section.settings.button_text
@@ -53,13 +54,13 @@
   endif
 
   assign color_scheme = 'color-' | append: section.settings.color_scheme
-  assign animation_anchor = 'CollectionsList--' | append: section.id
+  assign animation_anchor = unique
 -%}
 
 {%- render 'stylesheet', name: 'collection-cards.css' -%}
 
 {%- style -%}
-  #CollectionsList--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
 
@@ -75,7 +76,7 @@
 {%- endstyle -%}
 
 <section
-  id="CollectionsList--{{ section.id }}"
+  id="{{ unique }}"
   class="section-collection-list section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="list-collections"
@@ -134,7 +135,7 @@
               <span>{{ button_text | escape }}</span>
 
               {%- if use_default_styles and section.settings.show_arrow -%}
-                {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+                {%- render 'icon-nav-arrow-right' -%}
               {%- endif -%}
             </a>
           </div>

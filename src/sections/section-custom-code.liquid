@@ -1,16 +1,21 @@
 <!-- /sections/section-custom-code.liquid -->
 
-{%- assign color_scheme = 'color-' | append: section.settings.color_scheme -%}
+{%- liquid
+  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign unique = 'CustomCode--' | append: section.id
+  assign animation_anchor = unique
+-%}
+{%- assign animation_anchor = unique -%}
 
 {%- style -%}
-  #CustomCode--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
 {%- endstyle -%}
 
 <section
-  id="CustomCode--{{ section.id }}"
+  id="{{ unique }}"
   class="custom-code section-padding {{ section.settings.width }} {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="custom-code"

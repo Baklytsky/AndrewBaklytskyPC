@@ -2,7 +2,8 @@
 {%- liquid
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign default_open = section.settings.default_open
-  assign animation_anchor = 'Faq--' | append: section.id
+  assign unique = 'Faq--' | append: section.id
+  assign animation_anchor = unique
 -%}
 
 {%- if section.blocks.size > 0 -%}
@@ -12,14 +13,14 @@
   <script src="{{ 'collapsible-elements.js' | asset_url }}" defer="defer"></script>
 
   {%- style -%}
-    #Faq--{{ section.id }} {
+    #{{ unique }} {
       --PT: {{ section.settings.padding_top }}px;
       --PB: {{ section.settings.padding_bottom }}px;
     }
   {%- endstyle -%}
 
   <section
-    id="Faq--{{ section.id }}"
+    id="{{ unique }}"
     class="accordion-section section-padding {{ color_scheme }}"
     data-section-id="{{ section.id }}"
     data-section-type="faq"
@@ -77,7 +78,7 @@
 
                 {{ section.settings.title }}
 
-                {%- render 'animated-icon', filename: 'icon-nav-arrow-down' -%}
+                {%- render 'icon-nav-arrow-down' -%}
               </summary>
             {%- endif -%}
 

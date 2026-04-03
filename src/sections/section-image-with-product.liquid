@@ -4,6 +4,8 @@
 {%- enddoc -%}
 
 {%- liquid
+  assign unique = 'ImageWithProduct--' | append: section.id
+  assign animation_anchor = unique
   assign image_1 = section.settings.image_1
   assign banner_link = section.settings.link
   assign product = all_products[section.settings.product]
@@ -83,13 +85,13 @@
 -%}
 
 {%- style -%}
-  #{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ padding_top }}px;
     --PB: {{ padding_bottom }}px;
   }
 
   {% if color_product_text.alpha != 0.0 and color_product_text != blank or color_product_bg.alpha != 0.0 and color_product_bg != blank %}
-    #{{ section.id }} .product-upsell {
+    #{{ unique }} .product-upsell {
       {% if color_product_text.alpha != 0.0 and color_product_text != blank %}
         --text: {{ color_product_text }};
         --text-light: {{ color_product_text | color_mix: bg_color, 70 }};
@@ -104,7 +106,7 @@
 
 <div
   class="index-hero section-padding {{ color_scheme }} no-bg"
-  id="{{ section.id }}"
+  id="{{ unique }}"
   data-section-id="{{ section.id }}"
   data-overlay-header
 >
@@ -181,7 +183,7 @@
                     <{{ heading_tag }}
                       class="hero__title {{ block.settings.heading_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -195,7 +197,7 @@
                     <div
                       class="hero__description {{ block.settings.text_font_size }}"
                       data-aos="hero"
-                      data-aos-anchor="{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -238,7 +240,7 @@
                     <div
                       class="hero__button"
                       data-aos="hero"
-                      data-aos-anchor="{{ section.id }}"
+                      data-aos-anchor="{{ animation_anchor }}"
                       data-aos-order="{{ animation_order }}"
                       {{ block.shopify_attributes }}
                     >
@@ -249,7 +251,7 @@
                         <span>{{ link_text | escape }}</span>
 
                         {%- if use_default_styles and block.settings.show_arrow -%}
-                          {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+                          {%- render 'icon-nav-arrow-right' -%}
                         {%- endif -%}
                       </a>
                     </div>
@@ -265,7 +267,7 @@
                   <div
                     class="hero__custom-code"
                     data-aos="hero"
-                    data-aos-anchor="{{ section.id }}"
+                    data-aos-anchor="{{ animation_anchor }}"
                     data-aos-order="{{ animation_order }}"
                     {{ block.shopify_attributes }}
                   >
@@ -284,7 +286,7 @@
           <div
             class="hero__aside"
             data-aos="hero"
-            data-aos-anchor="{{ section.id }}"
+            data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
           >
             {%- liquid

@@ -7,7 +7,8 @@
   assign show_placeholder = section.settings.show_placeholder
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 
-  assign animation_anchor = 'BrickSection--' | append: section.id
+  assign unique = 'ImageWithTextSlider--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 0
 
   assign autoplay = section.settings.autoplay
@@ -96,7 +97,7 @@
 {%- render 'stylesheet', name: 'section-image-with-text-slider.css' -%}
 
 <section
-  id="BrickSection--{{ section.id }}"
+  id="{{ unique }}"
   data-section-id="{{ section.id }}"
   data-section-type="double"
   class="index-image-text section-padding {{ section.settings.text_alignment }} {{ color_scheme }}"
@@ -214,7 +215,7 @@
                           <span>{{ button_text }}</span>
 
                           {%- if use_default_styles and block.settings.show_arrow -%}
-                            {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+                            {%- render 'icon-nav-arrow-right' -%}
                           {%- endif -%}
                         </a>
                       </div>
@@ -227,10 +228,10 @@
         </swiper-container>
 
         <div class="{{ section.id }}--button swiper-button-prev">
-          {%- render 'animated-icon', filename: 'icon-nav-arrow-left' -%}
+          {%- render 'icon-nav-arrow-left' -%}
         </div>
         <div class="{{ section.id }}--button swiper-button-next">
-          {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+          {%- render 'icon-nav-arrow-right' -%}
         </div>
 
         {% unless settings.dots_style == 'hidden' %}
@@ -301,7 +302,7 @@
                 <span>{{ block.settings.button_text }}</span>
 
                 {%- if use_default_styles and block.settings.show_arrow -%}
-                  {%- render 'animated-icon', filename: 'icon-nav-arrow-right'-%}
+                  {%- render 'icon-nav-arrow-right'-%}
                 {%- endif -%}
               </a>
             </div>

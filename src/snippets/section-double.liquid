@@ -10,7 +10,8 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign show_video_background = false
 
-  assign animation_anchor = 'BrickSection--' | append: section.id
+  assign unique = 'BrickSection--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 0
   assign accordion_blocks = section.blocks | where: 'type', 'accordion'
 
@@ -141,7 +142,7 @@
 {%- endif -%}
 
 <section
-  id="BrickSection--{{ section.id }}"
+  id="{{ unique }}"
   data-section-id="{{ section.id }}"
   data-section-type="double"
   class="index-image-text section-padding {{ section.settings.text_alignment }} {{ color_scheme }}"

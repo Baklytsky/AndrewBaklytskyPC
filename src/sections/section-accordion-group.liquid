@@ -1,7 +1,8 @@
 <!-- /sections/section-accordion-group.liquid -->
 {%- liquid
   assign columns = section.settings.columns
-  assign animation_anchor = 'SectionAccordionGroup--' | append: section.id
+  assign unique = 'SectionAccordionGroup--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 0
   assign color_scheme = 'color-' | append: section.settings.color_scheme
 -%}
@@ -12,7 +13,7 @@
 <script src="{{ 'collapsible-elements.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
-  #SectionAccordionGroup--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
 
@@ -20,7 +21,7 @@
   }
 {%- endstyle -%}
 
-<div id="SectionAccordionGroup--{{ section.id }}" class="accordion-group section-padding {{ color_scheme }}">
+<div id="{{ unique }}" class="accordion-group section-padding {{ color_scheme }}">
   {%- if section.blocks.size > 0 -%}
     <div
       class="{{ section.settings.width }}"
@@ -104,7 +105,7 @@
 
                     {{ title }}
 
-                    {%- render 'animated-icon', filename: 'icon-nav-arrow-down' -%}
+                    {%- render 'icon-nav-arrow-down' -%}
                   </summary>
 
                   <div

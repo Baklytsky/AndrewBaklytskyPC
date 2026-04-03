@@ -11,7 +11,8 @@
   assign show_slider_text = false
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign enable_slider = section.settings.enable_heading_slider
-  assign animation_anchor = 'Logos--' | append: section.id
+  assign unique = 'Logos--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 1
   assign scroll_to_logo_label = 'general.accessibility.scroll_to_logo' | t
 -%}
@@ -21,7 +22,7 @@
 <script src="{{ 'logos-slider.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
-  #Logos--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --logo-opacity: {{ logo_opacity }};
@@ -118,7 +119,7 @@
 {%- endfor -%}
 
 <logos-slider
-  id="Logos--{{ section.id }}"
+  id="{{ unique }}"
   class="logos swiper section-padding{% if enable_slider %} logos-press{% endif %} {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="logos"

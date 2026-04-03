@@ -4,21 +4,22 @@
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign types = ''
   assign has_required_field = false
-  assign animation_anchor = 'ContactForm--' | append: section.id
+  assign unique = 'ContactForm--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 1
 -%}
 
 {%- render 'stylesheet', name: 'section-contact-form.css' -%}
 
 {%- style -%}
-  #ContactForm--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
 {%- endstyle -%}
 
 <section
-  id="ContactForm--{{ section.id }}"
+  id="{{ unique }}"
   class="index-contact section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="contact"

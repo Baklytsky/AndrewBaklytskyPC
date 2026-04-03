@@ -1,7 +1,8 @@
 <!-- /sections/section-before-after.liquid -->
 {%- liquid
+  assign unique = 'SectionBeforeAfter--' | append: section.id
   assign animation_order = 0
-  assign animation_anchor = 'SectionBeforeAfter--' | append: section.id
+  assign animation_anchor = unique
   assign aspect_ratio = 1 | divided_by: section.settings.aspect_ratio
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign blocks_size = section.blocks.size
@@ -19,14 +20,14 @@
 {%- render 'stylesheet', name: 'section-before-after.css' -%}
 
 {%- style -%}
-  #SectionBeforeAfter--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
 {%- endstyle -%}
 
 <section
-  id="SectionBeforeAfter--{{ section.id }}"
+  id="{{ unique }}"
   class="section-before-after section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="before-after"
@@ -107,7 +108,7 @@
                     <span>{{ block.settings.link_text | escape }}</span>
 
                     {%- if use_default_styles and block.settings.show_arrow -%}
-                      {%- render 'animated-icon', filename: 'icon-nav-arrow-right'-%}
+                      {%- render 'icon-nav-arrow-right'-%}
                     {%- endif -%}
                   </a>
                 {%- endcapture -%}

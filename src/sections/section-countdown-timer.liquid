@@ -5,7 +5,8 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign animation_anchor = 'Countdown--' | append: section.id
+  assign unique = 'Countdown--' | append: section.id
+  assign animation_anchor = unique
   assign animation_order = 0
   assign desktop_height = section.settings.height
   assign mobile_height = section.settings.mobile_height
@@ -51,7 +52,7 @@
 
 {%- if style != blank -%}
   {%- style -%}
-    #Countdown--{{ section.id }} {
+    #{{ unique }} {
       {{ style }}
     }
   {%- endstyle -%}
@@ -60,7 +61,7 @@
 {%- render 'stylesheet', name: 'section-countdown.css' -%}
 
 <section
-  id="Countdown--{{ section.id }}"
+  id="{{ unique }}"
   class="section-countdown section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="countdown"
@@ -191,7 +192,7 @@
                           <span>{{ block.settings.button_text }}</span>
 
                           {%- if use_default_styles and block.settings.show_arrow -%}
-                            {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+                            {%- render 'icon-nav-arrow-right' -%}
                           {%- endif -%}
                         </a>
                       </div>

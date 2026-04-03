@@ -3,6 +3,7 @@
   - JS:  video-background.js (conditional), load-photoswipe.js (conditional), video-popup.js (conditional), card-slider.js (conditional)
   - Snippets: brick-image, brick-text, brick-newsletter, product-card, video, compare-images, animated-icon, no-blocks
 {%- enddoc -%}
+
 {%- liquid
   assign desktop_height = section.settings.height
   assign mobile_height = section.settings.mobile_height
@@ -22,7 +23,8 @@
 
   assign selected_color_scheme = section.settings.color_scheme | strip
   assign scheme_bg_color = settings.color_schemes[selected_color_scheme].settings.bg
-  assign animation_anchor = 'BrickSection--' | append: section.id
+  assign unique = 'BrickSection--' | append: section.id
+  assign animation_anchor = unique
 
   assign show_video_popup = false
   assign show_video_background = false
@@ -48,14 +50,14 @@
 {%- endif -%}
 
 {%- style -%}
-  #BrickSection--{{ section.id }} {
+  #{{ unique }} {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
   }
 {%- endstyle -%}
 
 <section
-  id="BrickSection--{{ section.id }}"
+  id="{{ unique }}"
   data-section-id="{{ section.id }}"
   data-section-type="custom-content"
   {% if transparent_header %}
@@ -253,10 +255,10 @@
                 </swiper-container>
 
                 <div class="{{ block.id }}--button swiper-button-prev">
-                  {%- render 'animated-icon', filename: 'icon-nav-arrow-left' -%}
+                  {%- render 'icon-nav-arrow-left' -%}
                 </div>
                 <div class="{{ block.id }}--button swiper-button-next">
-                  {%- render 'animated-icon', filename: 'icon-nav-arrow-right' -%}
+                  {%- render 'icon-nav-arrow-right' -%}
                 </div>
               </card-slider>
             </div>

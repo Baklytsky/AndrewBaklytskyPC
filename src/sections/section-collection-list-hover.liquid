@@ -1,8 +1,9 @@
-<!-- /sections/section-collections-list.liquid -->
+<!-- /sections/section-collection-list-hover.liquid -->
 
 {%- liquid
+  assign unique = 'CollectionsListHover--' | append: section.id
   assign animation_order = 0
-  assign animation_anchor = 'CollectionsListHover--' | append: section.id
+  assign animation_anchor = unique
   assign block_count = section.blocks.size
   assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
   assign show_overlay_text = section.settings.show_overlay_text
@@ -29,7 +30,7 @@
 {%- for block in section.blocks -%}
   {%- liquid
     assign animation_order = forloop.index
-    assign unique = 'CollectionImage--' | append: section.id | append: '-' | append: block.id
+    assign unique_block = 'CollectionImage--' | append: section.id | append: '-' | append: block.id
     assign collection = collections[block.settings.collection]
     assign title_default = 'collections.general.items.heading' | t
     assign title = block.settings.title | default: collection.title | default: title_default
@@ -39,7 +40,7 @@
   {%- capture images -%}
     {{ images }}
 
-    <div class="collections-hover__image {{ mobile_height }}{% if forloop.first %} is-visible{% endif %}" id="{{ unique }}" data-collection-image {{ block.shopify_attributes }}>
+    <div class="collections-hover__image {{ mobile_height }}{% if forloop.first %} is-visible{% endif %}" id="{{ unique_block }}" data-collection-image {{ block.shopify_attributes }}>
       {%- liquid
         if image != blank
           render 'image' image: image, cover: true
@@ -61,13 +62,13 @@
       data-aos-order="{{ animation_order }}"
       data-aos-anchor="{{ animation_anchor }}"
     >
-      <scroll-spy data-scroll-spy-container="#CollectionsListHover--{{ section.id }}">
+      <scroll-spy data-scroll-spy-container="#{{ unique }}">
         <a
           href="{{ collection.url | default: '#!' }}"
           class="collection-hover__button font-heading {{ section.settings.heading_font_size }}{% if forloop.first %} is-selected{% endif %}"
-          data-hover-target="{{ unique }}"
+          data-hover-target="{{ unique_block }}"
           data-scroll-trigger-point="middle"
-          data-scroll-spy="#{{ unique }}"
+          data-scroll-spy="#{{ unique_block }}"
           data-scroll-spy-mobile
         >
           {{- title -}}
@@ -80,7 +81,7 @@
 {%- endfor -%}
 
 <section
-  id="CollectionsListHover--{{ section.id }}"
+  id="{{ unique }}"
   style="{{ style }}"
   class="section-padding {{ color_scheme }}"
   data-overlay-header
@@ -130,7 +131,7 @@
   {%- endif -%}
 
   {%- style -%}
-    #CollectionsListHover--{{ section.id }} .frame { height: 100vh; }
+    #{{ unique }} .frame { height: 100vh; }
   {%- endstyle -%}
 {%- endif -%}
 
