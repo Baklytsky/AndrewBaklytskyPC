@@ -1,0 +1,40 @@
+@use '../globals' as *;
+
+.rich-text-columns__wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: var(--gap);
+}
+
+.rich-text-columns__left {
+  flex: 0 0 calc(var(--rte-column-width-left) - var(--gap) / 2);
+
+  .hero__button-group { justify-content: flex-start; }
+}
+
+.rich-text-columns__right {
+  flex: 0 0 calc(var(--rte-column-width-right) - var(--gap) / 2);
+
+  .text-left .hero__button-group { justify-content: flex-start; }
+  .text-right .hero__button-group { justify-content: flex-end; }
+}
+
+.text-center--mobile .rte-columns-block .hero__button-group {
+  @include media-query ($small) {
+    justify-content: center;
+  }
+}
+
+.text-left--mobile .rte-columns-block .hero__button-group {
+  @include media-query ($small) {
+    justify-content: flex-start;
+  }
+}
+
+.rich-text-columns__left,
+.rich-text-columns__right {
+  @include media-query ($small) {
+    flex: 0 0 100%;
+  }
+}
