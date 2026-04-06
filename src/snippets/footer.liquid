@@ -12,7 +12,8 @@
   assign background_image = section.settings.background_image
   assign inline_blocks = ''
   assign inline_blocks_placeholder = '####inline-blocks@@@@'
-  assign color_scheme = 'color-' | append: section.settings.color_scheme
+  assign selected_color_scheme = section.settings.color_scheme | strip
+  assign color_scheme = 'color-' | append: selected_color_scheme
   assign border_color = section.settings.border_color
   assign one_third_block_count = 0
   assign blocks_code = ''
@@ -25,6 +26,9 @@
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
     --item-count: {{ blocks_size }};
+    {% if background_image == blank and footer_style == 'floating' %}
+      --bg-light: {{ settings.color_schemes[selected_color_scheme].settings.bg_light }};
+    {% endif %}
   }
 
   {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
