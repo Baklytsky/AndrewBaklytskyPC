@@ -2,29 +2,34 @@ if (!customElements.get('compare-images')) {
   customElements.define(
     'compare-images',
     class CompareImages extends HTMLElement {
-      constructor() {
-        super();
-
+      connectedCallback() {
         this.imageHolder = this.querySelector('[data-image-holder]');
         this.imageElement = this.querySelector('[data-image-element]');
         this.rangeButton = this.querySelector('[data-range-button]');
         this.rangeInput = this.querySelector('[data-range-input]');
-        this.setOverlapImageSize = this.setOverlapImageSize.bind(this);
-      }
 
-      connectedCallback() {
-        this.setOverlapImageSize();
-        this.setImagePosition();
-        this.rangeInput.addEventListener('input', () => this.setImagePosition());
+        if (!this.imageHolder || !this.imageElement || !this.rangeButton || !this.rangeInput) return;
 
-        document.addEventListener('theme:resize', this.setOverlapImageSize);
+        this.inputHandler = () => this.setImagePosition();
+        this.rangeInput.addEventListener('input', this.inputHandler);
+
+        this.resizeObserver = new ResizeObserver(() => this.setOverlapImageSize());
+        this.resizeObserver.observe(this);
       }
 
       disconnectedCallback() {
-        document.removeEventListener('theme:resize', this.setOverlapImageSize);
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect();
+        }
+
+        if (this.rangeInput && this.inputHandler) {
+          this.rangeInput.removeEventListener('input', this.inputHandler);
+        }
       }
 
       setImagePosition() {
+        if (!this.imageElement || !this.rangeButton || !this.imageHolder) return;
+
         const value = this.rangeInput.value;
         const imageWidth = this.imageElement.offsetWidth;
         const buttonWidth = this.rangeButton.offsetWidth;
@@ -34,7 +39,11 @@ if (!customElements.get('compare-images')) {
       }
 
       setOverlapImageSize() {
+        if (!this.imageElement) return;
+
         const containerWidth = this.offsetWidth;
+        if (containerWidth === 0) return;
+
         this.imageElement.style.width = `${containerWidth}px`;
         this.setImagePosition();
       }
