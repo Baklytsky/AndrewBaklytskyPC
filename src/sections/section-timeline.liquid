@@ -136,20 +136,11 @@
                           {%- if block.settings.button_text != blank -%}
                             {%- liquid
                               capture button_classes
-                                assign use_default_styles = true
-                                if block.settings.custom_button_class != blank
-                                  assign use_default_styles = false
+                                assign button_style = block.settings.button_style
+                                if button_style == 'btn--text' and block.settings.show_arrow
+                                  assign button_style = button_style | append: ' btn--text-no-underline'
                                 endif
-
-                                if use_default_styles
-                                  assign button_style = block.settings.button_style
-                                  if button_style == 'btn--text' and block.settings.show_arrow
-                                    assign button_style = button_style | append: ' btn--text-no-underline'
-                                  endif
-                                  echo 'btn ' | append: button_style | append: ' ' | append: block.settings.button_type | append: ' ' | append: block.settings.button_size
-                                else
-                                  echo block.settings.custom_button_class
-                                endif
+                                echo 'btn ' | append: button_style | append: ' ' | append: block.settings.button_type | append: ' ' | append: block.settings.button_size
                               endcapture
                             -%}
 
@@ -160,7 +151,7 @@
                               >
                                 <span>{{ block.settings.button_text }}</span>
 
-                                {%- if use_default_styles and block.settings.show_arrow -%}
+                                {%- if block.settings.show_arrow -%}
                                   {%- render 'icon-nav-arrow-right' -%}
                                 {%- endif -%}
                               </a>
@@ -564,8 +555,7 @@
               "value": "btn--secondary",
               "label": "Secondary"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -585,8 +575,7 @@
               "label": "Large",
               "value": "btn--large"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -606,21 +595,13 @@
               "label": "Text",
               "value": "btn--text"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "checkbox",
           "id": "show_arrow",
           "label": "Show arrow",
-          "default": false,
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
-        },
-        {
-          "type": "text",
-          "id": "custom_button_class",
-          "label": "Custom class",
-          "info": "Override all default button styles"
+          "default": false
         },
         {
           "type": "header",

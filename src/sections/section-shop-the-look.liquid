@@ -13,20 +13,11 @@
   assign show_dots = section.settings.show_dots
 
   capture button_classes
-    assign use_default_styles = true
-    if section.settings.custom_button_class != blank
-      assign use_default_styles = false
+    assign button_style = section.settings.button_style
+    if button_style == 'btn--text' and section.settings.show_arrow
+      assign button_style = button_style | append: ' btn--text-no-underline'
     endif
-
-    if use_default_styles
-      assign button_style = section.settings.button_style
-      if button_style == 'btn--text' and section.settings.show_arrow
-        assign button_style = button_style | append: ' btn--text-no-underline'
-      endif
-      echo 'btn ' | append: button_style | append: ' ' | append: section.settings.button_type | append: ' ' | append: section.settings.button_size
-    else
-      echo section.settings.custom_button_class
-    endif
+    echo 'btn ' | append: button_style | append: ' ' | append: section.settings.button_type | append: ' ' | append: section.settings.button_size
   endcapture
 
   unless enable_aspect_ratio
@@ -161,7 +152,7 @@
 
             <span>{{ 'general.shop_the_look.button' | t }}</span>
 
-            {%- if use_default_styles and section.settings.show_arrow -%}
+            {%- if section.settings.show_arrow -%}
               {%- render 'icon-nav-arrow-right' -%}
             {%- endif -%}
           </button>
@@ -349,8 +340,7 @@
           "value": "btn--secondary",
           "label": "Secondary"
         }
-      ],
-      "visible_if": "{{ section.settings.custom_button_class == blank }}"
+      ]
     },
     {
       "type": "select",
@@ -370,8 +360,7 @@
           "label": "Large",
           "value": "btn--large"
         }
-      ],
-      "visible_if": "{{ section.settings.custom_button_class == blank }}"
+      ]
     },
     {
       "type": "select",
@@ -391,21 +380,13 @@
           "label": "Text",
           "value": "btn--text"
         }
-      ],
-      "visible_if": "{{ section.settings.custom_button_class == blank }}"
+      ]
     },
     {
       "type": "checkbox",
       "id": "show_arrow",
       "label": "Show arrow",
-      "default": false,
-      "visible_if": "{{ section.settings.custom_button_class == blank }}"
-    },
-    {
-      "type": "text",
-      "id": "custom_button_class",
-      "label": "Custom class",
-      "info": "Override all default button styles"
+      "default": false
     },
     {
       "type": "header",

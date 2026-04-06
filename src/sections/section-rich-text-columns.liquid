@@ -82,38 +82,20 @@
         {%- when 'buttons' -%}
           {%- liquid
             capture button_classes
-              assign use_default_styles = true
-              if block.settings.custom_button_class != blank
-                assign use_default_styles = false
+              assign button_style = block.settings.button_style
+              if button_style == 'btn--text' and block.settings.show_arrow
+                assign button_style = button_style | append: ' btn--text-no-underline'
               endif
-
-              if use_default_styles
-                assign button_style = block.settings.button_style
-                if button_style == 'btn--text' and block.settings.show_arrow
-                  assign button_style = button_style | append: ' btn--text-no-underline'
-                endif
-                echo 'btn ' | append: button_style | append: ' ' | append: block.settings.button_type | append: ' ' | append: block.settings.button_size
-              else
-                echo block.settings.custom_button_class
-              endif
+              echo 'btn ' | append: button_style | append: ' ' | append: block.settings.button_type | append: ' ' | append: block.settings.button_size
             endcapture
 
             if block.settings.button_secondary_text
               capture button_secondary_classes
-                assign use_default_styles_secondary = true
-                if block.settings.custom_button_secondary_class != blank
-                  assign use_default_styles_secondary = false
+                assign button_secondary_style = block.settings.button_secondary_style
+                if button_secondary_style == 'btn--text' and block.settings.show_secondary_arrow
+                  assign button_secondary_style = button_secondary_style | append: ' btn--text-no-underline'
                 endif
-
-                if use_default_styles_secondary
-                  assign button_secondary_style = block.settings.button_secondary_style
-                  if button_secondary_style == 'btn--text' and block.settings.show_secondary_arrow
-                    assign button_secondary_style = button_secondary_style | append: ' btn--text-no-underline'
-                  endif
-                  echo 'btn ' | append: button_secondary_style | append: ' ' | append: block.settings.button_secondary_type | append: ' ' | append: block.settings.button_secondary_size
-                else
-                  echo block.settings.custom_button_secondary_class
-                endif
+                echo 'btn ' | append: button_secondary_style | append: ' ' | append: block.settings.button_secondary_type | append: ' ' | append: block.settings.button_secondary_size
               endcapture
             endif
           -%}
@@ -131,7 +113,7 @@
               <a href="{{ block.settings.button_url | default: '#!' }}" class="{{ button_classes }}">
                 <span>{{ block.settings.button_text }}</span>
 
-                {%- if use_default_styles and block.settings.show_arrow -%}
+                {%- if block.settings.show_arrow -%}
                   {%- render 'icon-nav-arrow-right' -%}
                 {%- endif -%}
               </a>
@@ -147,7 +129,7 @@
               <a href="{{ block.settings.button_secondary_url | default: '#!' }}" class="{{ button_secondary_classes }}">
                 <span>{{ block.settings.button_secondary_text }}</span>
 
-                {%- if use_default_styles_secondary and block.settings.show_secondary_arrow -%}
+                {%- if block.settings.show_secondary_arrow -%}
                   {%- render 'icon-nav-arrow-right' -%}
                 {%- endif -%}
               </a>
@@ -581,8 +563,7 @@
               "value": "btn--secondary",
               "label": "Secondary"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -602,8 +583,7 @@
               "label": "Large",
               "value": "btn--large"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -623,21 +603,13 @@
               "label": "Text",
               "value": "btn--text"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
+          ]
         },
         {
           "type": "checkbox",
           "id": "show_arrow",
           "label": "Show arrow",
-          "default": false,
-          "visible_if": "{{ block.settings.custom_button_class == blank }}"
-        },
-        {
-          "type": "text",
-          "id": "custom_button_class",
-          "label": "Custom class",
-          "info": "Override all default button styles"
+          "default": false
         },
         {
           "type": "header",
@@ -675,8 +647,7 @@
               "value": "btn--secondary",
               "label": "Secondary"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_secondary_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -696,8 +667,7 @@
               "label": "Large",
               "value": "btn--large"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_secondary_class == blank }}"
+          ]
         },
         {
           "type": "select",
@@ -717,21 +687,13 @@
               "label": "Text",
               "value": "btn--text"
             }
-          ],
-          "visible_if": "{{ block.settings.custom_button_secondary_class == blank }}"
+          ]
         },
         {
           "type": "checkbox",
           "id": "show_secondary_arrow",
           "label": "Show arrow",
-          "default": false,
-          "visible_if": "{{ block.settings.custom_button_secondary_class == blank }}"
-        },
-        {
-          "type": "text",
-          "id": "custom_button_secondary_class",
-          "label": "Custom class",
-          "info": "Override all default button styles"
+          "default": false
         },
         {
           "type": "header",
