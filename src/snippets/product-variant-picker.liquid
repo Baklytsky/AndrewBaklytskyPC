@@ -30,7 +30,6 @@
   endif
 -%}
 
-
 {%- capture size_chart -%}
   {%- if enable_size_chart -%}
     {%- if block.settings.info_page != blank or specific_pages != '' -%}
@@ -430,55 +429,52 @@
                   {%- if form_style == 'modern' -%}
                     <div class="fieldset__column fieldset__column--aside">
                   {%- endif -%}
-            {%- endif -%}
 
-            {%- if picker_type != 'swatch' or show_default_swatches -%}
-              <legend class="radio__legend{% if is_size_option and size_chart_link %} radio__legend--size{% endif %}">
-                <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}" id="{{ uniq_id }}-select-{{ option.name | handle }}-label">
-                  {%- if option_name_string != '' -%}
-                    <span class="radio__legend__option-name">
-                      {{ option_name_string }}
-                    </span>
-                  {%- endif -%}
+                  <legend class="radio__legend{% if is_size_option and size_chart_link %} radio__legend--size{% endif %}">
+                    <span class="radio__legend__label{% if size_style == 'text' %} radio__legend__label--text{% endif %}" id="{{ uniq_id }}-select-{{ option.name | handle }}-label">
+                      {%- if option_name_string != '' -%}
+                        <span class="radio__legend__option-name">
+                          {{ option_name_string }}
+                        </span>
+                      {%- endif -%}
 
-                  {%- if is_size_option -%}
-                    {{- size_chart_link | replace: '<size-chart-button></size-chart-button>', size_button_options -}}
-                  {%- endif -%}
+                      {%- if is_size_option -%}
+                        {{- size_chart_link | replace: '<size-chart-button></size-chart-button>', size_button_options -}}
+                      {%- endif -%}
 
-                  {%- if settings.show_labels -%}
-                    {%- if default_swatches_checked or picker_type != 'swatch' or show_default_swatches -%}
-                      <small class="radio__legend__value">
-                        {%- if default_swatches_checked or picker_type != 'swatch' -%}
-                          <span data-option-value="{{ option.position }}">{{ current_value }}</span>
+                      {%- if settings.show_labels -%}
+                        {%- if default_swatches_checked or picker_type != 'swatch' or show_default_swatches -%}
+                          <small class="radio__legend__value">
+                            {%- if default_swatches_checked or picker_type != 'swatch' -%}
+                              <span data-option-value="{{ option.position }}">{{ current_value }}</span>
+                            {%- endif -%}
+                          </small>
                         {%- endif -%}
-                      </small>
-                    {%- endif -%}
-                  {%- endif -%}
-                </span>
-              </legend>
+                      {%- endif -%}
+                    </span>
+                  </legend>
             {%- endif -%}
 
             {%- if form_style == 'classic' -%}
               {{ options_html }}
               {%- assign options_html = '' -%}
-              {{ swatch_group_html }}
             {%- endif -%}
 
             {%- if picker_type != 'swatch' or show_default_swatches -%}
-              {%- if form_style == 'modern' -%}
-                </div>
+                  {%- if form_style == 'modern' -%}
+                    </div>
 
-                <div class="fieldset__column fieldset__column--content">
-                  {{ options_html }}
-                  {%- assign options_html = '' -%}
-                  {{ swatch_group_html }}
+                    <div class="fieldset__column fieldset__column--content">
+                      {{ options_html }}
+                      {%- assign options_html = '' -%}
+                    </div>
+                  {%- endif -%}
                 </div>
-              {%- endif -%}
-            </div>
-          </fieldset>
-          {%- endif -%}
-          {{ swatch_group_html }}
-        </div>
+              </fieldset>
+            {%- endif -%}
+
+            {{ swatch_group_html }}
+          </div>
         {%- endfor -%}
       </div>
 
