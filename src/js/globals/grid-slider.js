@@ -93,9 +93,10 @@ if (!customElements.get('grid-slider')) {
           // Append buttons outside the slider element
           this.append(buttonsWrap);
           this.buttons = this.querySelectorAll(selectors.buttonArrow);
-          this.buttonPrev = this.querySelector(`[${attributes.buttonPrev}]`);
-          this.buttonNext = this.querySelector(`[${attributes.buttonNext}]`);
         }
+
+        this.buttonPrev = this.querySelector(`[${attributes.buttonPrev}]`);
+        this.buttonNext = this.querySelector(`[${attributes.buttonNext}]`);
 
         this.toggleArrowsObserver();
 
@@ -208,6 +209,8 @@ if (!customElements.get('grid-slider')) {
         this.draggableSlider = null;
         this.slidesObserver?.destroy();
         this.slidesObserver = null;
+        this.firstLastSlidesObserver?.disconnect();
+        this.firstLastSlidesObserver = null;
         this.removeArrows();
 
         document.removeEventListener('theme:resize:width', this.positionArrows);
