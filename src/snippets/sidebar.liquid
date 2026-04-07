@@ -28,7 +28,7 @@
       assign title = block.settings.title
       assign text = block.settings.text
       assign content = block.settings.content
-      assign unique = 'Widget--' | append: section.id | append: '-' | append: block.id
+      assign widget_id = 'Widget--' | append: section.id | append: '-' | append: block.id
     -%}
 
     {%- if anchor_links -%}
@@ -37,11 +37,11 @@
 
         {%- if block.type == 'header' and title != blank -%}
           <li>
-            <scroll-spy data-scroll-spy-container="#{{ unique }}">
+            <scroll-spy data-scroll-spy-container="#{{ widget_id }}">
               <scroll-to-element>
                 <button type="button" class="widget__link{% if first_element_flag %} is-selected{% endif %}"
-                  data-scroll-to="#{{ unique }}"
-                  data-scroll-spy="#{{ unique }}"
+                  data-scroll-to="#{{ widget_id }}"
+                  data-scroll-spy="#{{ widget_id }}"
                   data-scroll-spy-desktop
                   data-scroll-trigger-point="top"
                   {{ block.shopify_attributes }}>
@@ -59,7 +59,7 @@
       {{ content_html }}
 
       {%- if block.type == 'header' and title != blank -%}
-        <h6 class="section-sidebar__title {{ section.settings.heading_font_size }}" id="{{ unique }}" {{ block.shopify_attributes }}>{{ title }}</h6>
+        <h6 class="section-sidebar__title {{ section.settings.heading_font_size }}" id="{{ widget_id }}" {{ block.shopify_attributes }}>{{ title }}</h6>
       {%- endif -%}
 
       {%- if block.type == 'text' and text != blank -%}
