@@ -3,9 +3,11 @@
 
   Accepts:
   - header_style: {String} Header style (required)
+  - toolbar_html: {String} Pre-rendered toolbar block HTML
+  - menu_block_html: {String} Pre-rendered menu block HTML
 
   Usage:
-  {% render 'header', header_style: 'logo_besides' %}
+  {% render 'header', header_style: 'logo_beside', toolbar_html: toolbar_html, menu_block_html: menu_block_html %}
 {% endcomment %}
 
 {%- liquid
@@ -15,10 +17,13 @@
 
   assign header_style = header_style | default: 'logo_beside'
 
-  assign toolbar_block = section.blocks | where: 'type', 'toolbar'
-  assign toolbar_block = toolbar_block[0]
+  assign has_toolbar = false
+  if toolbar_html != blank
+    assign has_toolbar = true
+  endif
   assign show_toolbar_socials = false
-  assign show_toolbar_gift_card = toolbar_block.settings.show_gift_card | default: false
+  # TODO 👇
+  assign show_toolbar_gift_card = false
   assign show_separator_line = section.settings.show_separator_line
   assign show_socials = false
 
@@ -47,8 +52,6 @@
   elsif template.name == 'product' and section.settings.transparent_product_page
     assign transparent_header = true
   endif
-
-  assign main_menu_linklist = section.settings.main_menu_linklist | default: 'main-menu'
 
   assign logo = section.settings.logo
   assign transparent_logo = section.settings.transparent_logo
@@ -96,7 +99,7 @@
     assign header_height_mobile = header_upper_height_mobile | plus: padding_top_mobile | plus: padding_bottom_mobile
   endif
 
-  if toolbar_block
+  if has_toolbar
     assign toolbar_height = 2.25 | times: settings.nav_font_size
 
     assign header_height = header_height | plus: toolbar_height
@@ -128,15 +131,6 @@
 
     if show_icons == false
       echo ' navlink--toplevel'
-    endif
-  endcapture
-
-  assign highlight_item = section.settings.highlight_item
-  assign highlight_item_color = section.settings.highlight_item_color
-
-  capture highlight_style
-    if highlight_item_color != 'rgba(0,0,0,0)' and highlight_item_color != ''
-      echo 'style="--highlight: ' | append: highlight_item_color | append: ';"'
     endif
   endcapture
 -%}
@@ -186,10 +180,6 @@
     .main-content > .shopify-section:first-of-type .backdrop--linear:before { display: none; }
   {%- endunless -%}
 {%- endstyle -%}
-
-{%- capture toolbar -%}
-  {%- render 'header-toolbar' block: toolbar_block -%}
-{%- endcapture -%}
 
 {%- capture logos -%}
   {%- if transparent_header and transparent_logo != blank and logo != blank -%}
@@ -254,38 +244,23 @@
   assign header_popouts = false
 
   assign show_locale_selector = section.settings.show_locale_selector
-  assign show_locale_selector_toolbar = toolbar_block.settings.show_locale_selector
 
   assign show_country_selector = section.settings.show_country_selector
-  assign show_country_selector_toolbar = toolbar_block.settings.show_country_selector
 
   assign show_country_name = section.settings.show_country_name
-  assign show_country_name_toolbar = toolbar_block.settings.show_country_name
 
   assign show_country_flag = section.settings.show_country_flag
-  assign show_country_flag_toolbar = toolbar_block.settings.show_country_flag
 
   if show_locale_selector and localization.available_languages.size > 1
     assign languages = true
-  endif
-
-  if show_locale_selector_toolbar and localization.available_languages.size > 1
-    assign languages_toolbar = true
   endif
 
   if show_country_selector and localization.available_countries.size > 1
     assign countries = true
   endif
 
-  if show_country_selector_toolbar and localization.available_countries.size > 1
-    assign countries_toolbar = true
-  endif
-
   if languages or countries
     assign header_popouts = true
-  endif
-
-  if languages or languages_toolbar or countries or countries_toolbar
     assign header_popouts_mobile = true
   endif
 -%}
@@ -406,17 +381,14 @@
   </div>
 {%- endcapture -%}
 
-{%- capture menu -%}
-  <nav class="header__menu{% if settings.type_nav_caps %} caps{% endif %}">
-    {%- for link in linklists[main_menu_linklist].links -%}
-      {%- render 'nav-item', link: link, index: forloop.index, highlight_item: highlight_item -%}
-    {%- endfor -%}
-
-    <div class="hover__bar"></div>
-
-    <div class="hover__bg"></div>
-  </nav>
-{%- endcapture -%}
+{%- assign drawer_nav_html = '' -%}
+{%- assign drawer_parts = menu_block_html | split: '<!-- DRAWER_NAV -->' -%}
+{%- if drawer_parts.size > 1 -%}
+  {%- assign drawer_nav_html = drawer_parts[1] | split: '<!-- /DRAWER_NAV -->' | first -%}
+  {%- assign menu_html = drawer_parts[0] -%}
+{%- else -%}
+  {%- assign menu_html = menu_block_html -%}
+{%- endif -%}
 
 {%- capture drawer -%}
   <header-drawer class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
@@ -440,10 +412,7 @@
           <div class="drawer__content__scroll" data-scroll-lock-scrollable>
             <nav class="drawer__menu" data-scroll-lock-scrollable data-sliderule-pane="0">
               <div class="drawer__main-menu">
-                {%- for link in linklists[main_menu_linklist].links -%}
-                  {%- assign item_animation_delay = animation_delay_increment | times: forloop.index | plus: animation_delay -%}
-                  {%- render 'nav-item-mobile', link: link, index: forloop.index, forloop_index: forloop.index, highlight_item: highlight_item, animation_delay: item_animation_delay, unique: 'mobile-menu--desktop' -%}
-                {%- endfor -%}
+                {{ drawer_nav_html }}
               </div>
             </nav>
           </div>
@@ -475,12 +444,6 @@
                 data-animation-delay="{{ animation_delay }}"
               >
                 {%- if header_popouts_mobile -%}
-                  {%- liquid
-                    assign show_locale_selector = show_locale_selector | default: show_locale_selector_toolbar
-                    assign show_country_selector = show_country_selector | default: show_country_selector_toolbar
-                    assign show_country_flag = show_country_flag | default: show_country_flag_toolbar
-                    assign show_country_name = show_country_name | default: show_country_name_toolbar
-                  -%}
                   {%- render 'localization' unique: unique, show_locale_selector: show_locale_selector, show_country_selector: show_country_selector, show_country_flag: show_country_flag, show_country_name: show_country_name, class: 'header', short_country_name: true -%}
                 {%- endif -%}
 
@@ -514,7 +477,7 @@
   <script src="{{ 'header-search-popdown.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-{%- if show_toolbar -%}
+{%- if has_toolbar -%}
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -530,15 +493,14 @@
   data-header-style="{{ header_style }}"
   data-section-id="{{ section.id }}"
   data-section-type="header"
-  {{ highlight_style }}
 >
   <header
     class="theme__header{% if show_separator_line %} has-border{% endif %}"
     role="banner"
     data-header-height
   >
-    {%- if toolbar != blank -%}
-      {{ toolbar }}
+    {%- if toolbar_html != blank -%}
+      {{ toolbar_html }}
     {%- endif -%}
 
     <div class="section-padding">
@@ -552,7 +514,7 @@
             <div class="header__desktop__upper" data-takes-space-wrapper>
               <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
+              <div data-child-takes-space class="header__desktop__bar__c">{{ menu_html }}</div>
 
               <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
             </div>
@@ -560,7 +522,7 @@
             <div class="header__desktop__upper header__desktop__upper--reverse" data-takes-space-wrapper>
               <div data-child-takes-space class="header__desktop__bar__l">{{ logos }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
+              <div data-child-takes-space class="header__desktop__bar__c">{{ menu_html }}</div>
 
               <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
             </div>
@@ -579,7 +541,7 @@
               <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
             </div>
             <div class="header__desktop__lower" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__c">{{ menu }}</div>
+              <div data-child-takes-space class="header__desktop__bar__c">{{ menu_html }}</div>
             </div>
         {%- endcase -%}
       </div>
@@ -642,7 +604,7 @@
       }
     }
 
-    {%- if toolbar_block -%}
+    {%- if has_toolbar -%}
       function handleTickerEvent(event, type) {
         const ticker = event.target.matches('ticker-bar')
           ? event.target
@@ -657,20 +619,16 @@
     {%- endif -%}
 
     document.addEventListener('shopify:block:select', (event) => {
-      // Show mega menu on Block select
       handleHoverDisclosureEvent(event, 'select');
 
-      {%- if toolbar_block -%}
-        // Pause ticker on Block select
+      {%- if has_toolbar -%}
         handleTickerEvent(event, 'select');
       {%- endif -%}
     });
     document.addEventListener('shopify:block:deselect', (event) => {
-      // Hide mega menu on Block select
       handleHoverDisclosureEvent(event, 'deselect');
 
-      {%- if toolbar_block -%}
-        // Resume ticker on Block deselect
+      {%- if has_toolbar -%}
         handleTickerEvent(event, 'deselect');
       {%- endif -%}
     });
