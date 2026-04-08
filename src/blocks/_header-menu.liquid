@@ -17,14 +17,14 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- assign end_marker = '<!-- /IMG -->' -%}
+{%- assign end_marker = '</image-data>' -%}
 {%- assign drawer_items = '' -%}
 
 <nav class="header__menu{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
   {%- for link in linklists[main_menu_linklist].links -%}
     {%- assign pos = forloop.index | append: '' -%}
-    {%- assign marker_w = '<!-- IMG:' | append: pos | append: ':W -->' -%}
-    {%- assign marker_n = '<!-- IMG:' | append: pos | append: ':N -->' -%}
+    {%- assign marker_w = '<image-data data-meta-key="' | append: pos | append: ':W" style="display:contents">' -%}
+    {%- assign marker_n = '<image-data data-meta-key="' | append: pos | append: ':N" style="display:contents">' -%}
 
     {%- assign position_images = '' -%}
     {%- assign image_count = 0 -%}
@@ -78,9 +78,9 @@
   <div class="hover__bg"></div>
 </nav>
 
-<!-- DRAWER_NAV -->
-<div {{ highlight_style }}>{{ drawer_items }}</div>
-<!-- /DRAWER_NAV -->
+<menu-data data-meta-drawer-nav style="display:none">
+  <div {{ highlight_style }}>{{ drawer_items }}</div>
+</menu-data>
 
 {% schema %}
 {

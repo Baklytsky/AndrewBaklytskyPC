@@ -416,9 +416,9 @@
 {%- endcapture -%}
 
 {%- assign drawer_nav_html = '' -%}
-{%- assign drawer_parts = menu_block_html | split: '<!-- DRAWER_NAV -->' -%}
+{%- assign drawer_parts = menu_block_html | split: '<menu-data data-meta-drawer-nav style="display:none">' -%}
 {%- if drawer_parts.size > 1 -%}
-  {%- assign drawer_nav_html = drawer_parts[1] | split: '<!-- /DRAWER_NAV -->' | first -%}
+  {%- assign drawer_nav_html = drawer_parts[1] | split: '</menu-data>' | first -%}
   {%- assign menu_html = drawer_parts[0] -%}
 {%- else -%}
   {%- assign menu_html = menu_block_html -%}
