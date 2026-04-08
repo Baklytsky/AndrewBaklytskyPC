@@ -18,12 +18,17 @@
   assign header_style = header_style | default: 'logo_beside'
 
   assign has_toolbar = false
+  assign show_toolbar_socials = false
+  assign show_toolbar_gift_card = false
   if toolbar_html != blank
     assign has_toolbar = true
+    if toolbar_html contains 'data-meta-socials'
+      assign show_toolbar_socials = true
+    endif
+    if toolbar_html contains 'data-meta-gift-card'
+      assign show_toolbar_gift_card = true
+    endif
   endif
-  assign show_toolbar_socials = false
-  # TODO 👇
-  assign show_toolbar_gift_card = false
   assign show_separator_line = section.settings.show_separator_line
   assign show_socials = false
 
@@ -240,27 +245,56 @@
 
 {%- liquid
   assign languages = false
+  assign languages_toolbar = false
   assign countries = false
+  assign countries_toolbar = false
   assign header_popouts = false
+  assign header_popouts_mobile = false
 
   assign show_locale_selector = section.settings.show_locale_selector
-
   assign show_country_selector = section.settings.show_country_selector
-
   assign show_country_name = section.settings.show_country_name
-
   assign show_country_flag = section.settings.show_country_flag
+
+  assign show_locale_selector_toolbar = false
+  assign show_country_selector_toolbar = false
+  assign show_country_name_toolbar = false
+  assign show_country_flag_toolbar = false
+
+  if toolbar_html contains 'data-meta-locale'
+    assign show_locale_selector_toolbar = true
+  endif
+  if toolbar_html contains 'data-meta-country'
+    assign show_country_selector_toolbar = true
+  endif
+  if toolbar_html contains 'data-meta-country-name'
+    assign show_country_name_toolbar = true
+  endif
+  if toolbar_html contains 'data-meta-country-flag'
+    assign show_country_flag_toolbar = true
+  endif
 
   if show_locale_selector and localization.available_languages.size > 1
     assign languages = true
+  endif
+
+  if show_locale_selector_toolbar and localization.available_languages.size > 1
+    assign languages_toolbar = true
   endif
 
   if show_country_selector and localization.available_countries.size > 1
     assign countries = true
   endif
 
+  if show_country_selector_toolbar and localization.available_countries.size > 1
+    assign countries_toolbar = true
+  endif
+
   if languages or countries
     assign header_popouts = true
+  endif
+
+  if languages or languages_toolbar or countries or countries_toolbar
     assign header_popouts_mobile = true
   endif
 -%}
@@ -390,6 +424,24 @@
   {%- assign menu_html = menu_block_html -%}
 {%- endif -%}
 
+{%- assign toolbar_menu = '' -%}
+{%- assign show_toolbar_menu = false -%}
+{%- assign toolbar_menu_parts = toolbar_html | split: '<toolbar-data data-meta-menu style="display:none">' -%}
+{%- if toolbar_menu_parts.size > 1 -%}
+  {%- assign toolbar_menu = toolbar_menu_parts[1] | split: '</toolbar-data>' | first -%}
+  {%- assign show_toolbar_menu = true -%}
+  {%- assign toolbar_after_menu = toolbar_menu_parts[1] | split: '</toolbar-data>' | last -%}
+  {%- assign toolbar_html = toolbar_menu_parts[0] | append: toolbar_after_menu -%}
+{%- endif -%}
+
+{%- capture gift_card_link -%}
+  {%- if show_toolbar_gift_card -%}
+    <div class="toolbar__utility">
+      <a class="gift-card-link" href="{{ routes.root_url }}products/{{ 'layout.header.gift_card_url' | t }}">{{ 'layout.header.gift_card' | t }}</a>
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
 {%- capture drawer -%}
   <header-drawer class="drawer drawer--header{% if settings.type_nav_caps %} caps{% endif %}"
     data-drawer="hamburger"
@@ -444,7 +496,13 @@
                 data-animation-delay="{{ animation_delay }}"
               >
                 {%- if header_popouts_mobile -%}
-                  {%- render 'localization' unique: unique, show_locale_selector: show_locale_selector, show_country_selector: show_country_selector, show_country_flag: show_country_flag, show_country_name: show_country_name, class: 'header', short_country_name: true -%}
+                  {%- liquid
+                    assign drawer_show_locale = show_locale_selector | default: show_locale_selector_toolbar
+                    assign drawer_show_country = show_country_selector | default: show_country_selector_toolbar
+                    assign drawer_show_country_flag = show_country_flag | default: show_country_flag_toolbar
+                    assign drawer_show_country_name = show_country_name | default: show_country_name_toolbar
+                  -%}
+                  {%- render 'localization' unique: unique, show_locale_selector: drawer_show_locale, show_country_selector: drawer_show_country, show_country_flag: drawer_show_country_flag, show_country_name: drawer_show_country_name, class: 'header', short_country_name: true -%}
                 {%- endif -%}
 
                 {%- if show_toolbar_gift_card -%}
