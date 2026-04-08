@@ -689,14 +689,14 @@ class CartItems extends HTMLElement {
       .then(this.cartErrorsHandler)
       .then((response) => response.text())
       .then((response) => {
-        window.carbon = window.carbon || {};
+        window.PresidioPlus = window.PresidioPlus || {};
         let shouldRender = true;
 
         // Check if GWP/BOGO is active in global config
         const isGwpActive = window.GWP_CART_DRAWER_CONFIG || window.BUY_X_GET_Y_CART_DRAWER_CONFIG;
 
         // If GWP is active, and the extension has NOT finished processing yet, STOP rendering.
-        if (isGwpActive && window.carbon.gwpProcessed === false) {
+        if (isGwpActive && window.PresidioPlus.gwpProcessed === false) {
           shouldRender = false;
         }
         const element = document.createElement('div');
@@ -705,7 +705,7 @@ class CartItems extends HTMLElement {
         if (shouldRender) {
           const cleanResponse = element.querySelector(selectors.apiContent);
           this.build(cleanResponse);
-          // CRITICAL FIX: Do NOT reset window.carbon.gwpProcessed = false here.
+          // CRITICAL FIX: Do NOT reset window.PresidioPlus.gwpProcessed = false here.
           // Leaving it true prevents the infinite loop when the extension sees the update.
         }
       })
@@ -722,8 +722,8 @@ class CartItems extends HTMLElement {
    */
 
   addToCart(formData, button) {
-    window.carbon = window.carbon || {};
-    window.carbon.gwpProcessed = false;
+    window.PresidioPlus = window.PresidioPlus || {};
+    window.PresidioPlus.gwpProcessed = false;
 
     let headers = {
       'X-Requested-With': 'XMLHttpRequest',
@@ -833,8 +833,8 @@ class CartItems extends HTMLElement {
    */
 
   updateCart(updateData = {}, currentItem = null) {
-    window.carbon = window.carbon || {};
-    window.carbon.gwpProcessed = false;
+    window.PresidioPlus = window.PresidioPlus || {};
+    window.PresidioPlus.gwpProcessed = false;
 
     this.cart.classList.add(classes.loading);
 
