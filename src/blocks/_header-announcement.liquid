@@ -1,5 +1,5 @@
 {%- liquid
-  assign layout = section.settings.announcement_layout | default: 'marquee'
+  assign layout = block.settings.layout | default: 'marquee'
   assign padding_top = block.settings.padding_top | default: 0
   assign padding_bottom = block.settings.padding_bottom | default: 0
   assign color_scheme = 'color-' | append: block.settings.color_scheme
@@ -73,6 +73,9 @@
       class="announcement__bar-outer section-padding"
       style="--padding-scrolling: {{ block.settings.message_spacing }}px;"
     >
+      {%- assign slide_open = '<slide-data style="display:contents">' -%}
+      {%- assign slide_close = '</slide-data>' -%}
+
       {%- if layout == 'slider' -%}
         <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows %} announcement__bar-holder--arrows{% endif %}">
           <div class="announcement__slider swiper">
@@ -92,7 +95,29 @@
               effect="fade"
               fade-effect-cross-fade="true"
             >
-              {{ bar_markup }}
+              {%- assign slide_fragments = bar_markup | split: slide_open -%}
+              {%- for fragment in slide_fragments -%}
+                {%- unless forloop.first -%}
+                  {%- assign slide_content = fragment | split: slide_close | first -%}
+                  {%- assign device_class = '' -%}
+                  {%- if slide_content contains 'announcement__slide mobile' -%}
+                    {%- assign device_class = ' mobile' -%}
+                  {%- elsif slide_content contains 'announcement__slide desktop' -%}
+                    {%- assign device_class = ' desktop' -%}
+                  {%- endif -%}
+                  <swiper-slide class="announcement__slide announcement__bar{{ device_class }}">
+                    <ticker-bar>
+                      <div class="announcement__message">
+                        <div data-ticker-scale class="announcement__scale ticker--unloaded">
+                          <div data-ticker-text class="announcement__text">
+                            {{ slide_content }}
+                          </div>
+                        </div>
+                      </div>
+                    </ticker-bar>
+                  </swiper-slide>
+                {%- endunless -%}
+              {%- endfor -%}
             </swiper-container>
 
             {% if show_arrows %}
@@ -120,6 +145,15 @@
       {%- endif -%}
 
       {%- if layout == 'marquee' -%}
+        {%- capture clean_markup -%}
+          {%- assign slide_fragments = bar_markup | split: slide_open -%}
+          {%- for fragment in slide_fragments -%}
+            {%- unless forloop.first -%}
+              {{- fragment | split: slide_close | first -}}
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+
         <div class="announcement__bar-holder announcement__bar-holder--marquee">
           <div class="announcement__bar">
             <ticker-bar
@@ -129,7 +163,7 @@
               <div class="announcement__message">
                 <div data-ticker-scale class="announcement__scale ticker--unloaded">
                   <div data-ticker-text class="announcement__text">
-                    {{ bar_markup }}
+                    {{ clean_markup }}
                   </div>
                 </div>
               </div>
@@ -170,6 +204,15 @@
       "id": "show_border",
       "label": "Show border",
       "default": false
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {"value": "slider", "label": "Slider"},
+        {"value": "marquee", "label": "Scrolling text"}
+      ]
     },
     {
       "type": "header",

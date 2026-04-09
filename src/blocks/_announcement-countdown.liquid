@@ -1,34 +1,4 @@
-{%- assign layout = section.settings.announcement_layout | default: 'marquee' -%}
-
-{%- if layout == 'slider' -%}
-  <swiper-slide class="announcement__slide announcement__bar" {{ block.shopify_attributes }}>
-    <ticker-bar>
-      <div class="announcement__message">
-        <div data-ticker-scale class="announcement__scale ticker--unloaded">
-          <div data-ticker-text class="announcement__text">
-            <div class="countdown-block" data-countdown-block>
-              {%- if block.settings.text != blank -%}
-                <div class="countdown-block__text">
-                  {{ block.settings.text }}
-                </div>
-              {%- endif -%}
-
-              <div class="countdown-block__timer">
-                {%- render 'countdown-timer',
-                  end_date: block.settings.end_date,
-                  end_time: block.settings.end_time,
-                  period: block.settings.period,
-                  end_message: block.settings.end_message,
-                  hide_on_complete: block.settings.hide_on_complete
-                -%}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ticker-bar>
-  </swiper-slide>
-{%- else -%}
+<slide-data style="display:contents">
   <div class="announcement__slide" {{ block.shopify_attributes }}>
     <div class="countdown-block" data-countdown-block>
       {%- if block.settings.text != blank -%}
@@ -48,7 +18,7 @@
       </div>
     </div>
   </div>
-{%- endif -%}
+</slide-data>
 
 {% schema %}
 {
