@@ -5,13 +5,13 @@
     if (loaded.has(key)) return;
     loaded.add(key);
 
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
     link.href = href;
     document.head.appendChild(link);
   }
 
-  function watchForSelector({ key, href, selectors, timeoutMs = null, checkFn }) {
+  function watchForSelector({key, href, selectors, timeoutMs = null, checkFn}) {
     const hasMatch = () => {
       // Run custom check function first if provided
       if (checkFn && checkFn()) {
@@ -32,7 +32,7 @@
       loadCssOnce(key, href);
     });
 
-    obs.observe(document.documentElement, { childList: true, subtree: true });
+    obs.observe(document.documentElement, {childList: true, subtree: true});
 
     // Only set timeout if explicitly provided (allows indefinite watching for late-loading widgets)
     if (timeoutMs !== null && timeoutMs !== undefined) {
@@ -42,31 +42,21 @@
 
   const apps = {
     junip: {
-      key: "carbon-junip",
+      key: 'headlands-junip',
       href: window.theme.assets.junipCss,
-      selectors: [
-        ".junip-product-summary",
-        "#junip-product-reviews",
-        "[data-junip-reviews]"
-      ],
+      selectors: ['.junip-product-summary', '#junip-product-reviews', '[data-junip-reviews]'],
       checkFn: () => {
         // Check for window.junip (object) or window.junipLoaded (boolean)
-        return (typeof window.junip === "object" && window.junip !== null) ||
-               window.junipLoaded === true;
+        return (typeof window.junip === 'object' && window.junip !== null) || window.junipLoaded === true;
       },
     },
     recharge: {
-      key: "carbon-recharge",
+      key: 'headlands-recharge',
       href: window.theme.assets.rechargeCss,
-      selectors: [
-        "[data-recharge-subscription-widget]",
-        ".rc-widget",
-        ".recharge-subscription-widget",
-        ".recharge-gifting-widget",
-      ],
+      selectors: ['[data-recharge-subscription-widget]', '.rc-widget', '.recharge-subscription-widget', '.recharge-gifting-widget'],
       checkFn: () => {
-        return typeof window.Recharge === "object" && window.Recharge !== null;
-      }
+        return typeof window.Recharge === 'object' && window.Recharge !== null;
+      },
     },
   };
 
