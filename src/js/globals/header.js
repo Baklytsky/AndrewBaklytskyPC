@@ -1,4 +1,5 @@
 const selectors = {
+  announcementWrapper: '[data-announcement-wrapper]',
   cartDrawer: 'cart-drawer',
   cartToggleButton: '[data-cart-toggle]',
   deadLink: '.navlink[href="#"]',
@@ -183,12 +184,17 @@ if (!customElements.get('header-component')) {
 
         this.isStuck = false;
         this.cls = this.classList;
-        this.headerOffset = document.querySelector(selectors.pageHeader)?.offsetTop;
+        this.headerOffset = this.getHeaderOffset();
         this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
         this.scrollEvent = (e) => this.onScroll(e);
 
         this.listen();
         this.stickOnLoad();
+      }
+
+      getHeaderOffset() {
+        const announcementWrapper = this.closest(selectors.pageHeader)?.querySelector(selectors.announcementWrapper);
+        return announcementWrapper?.offsetHeight ?? 0;
       }
 
       listen() {
@@ -212,7 +218,7 @@ if (!customElements.get('header-component')) {
 
         // Update header offset after any "Header group" section has been changed
         setTimeout(() => {
-          this.headerOffset = document.querySelector(selectors.pageHeader)?.offsetTop;
+          this.headerOffset = this.getHeaderOffset();
         });
       }
 
