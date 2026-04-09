@@ -106,9 +106,10 @@
   endif
 -%}
 
-{%- render 'stylesheet', name: 'countdown-timer.css' -%}
-
-<script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+{%- unless skip_assets -%}
+  {%- render 'stylesheet', name: 'countdown-timer.css' -%}
+  <script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+{%- endunless -%}
 
 <countdown-timer
   data-expiration-behavior="{{ expiration_behaviour }}"
