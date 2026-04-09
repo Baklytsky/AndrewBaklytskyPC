@@ -3,11 +3,12 @@
 
   Accepts:
   - header_style: {String} Header style (required)
+  - announcement_html: {String} Pre-rendered announcement block HTML
   - toolbar_html: {String} Pre-rendered toolbar block HTML
   - menu_block_html: {String} Pre-rendered menu block HTML
 
   Usage:
-  {% render 'header', header_style: 'logo_beside', toolbar_html: toolbar_html, menu_block_html: menu_block_html %}
+  {% render 'header', header_style: 'logo_beside', announcement_html: announcement_html, toolbar_html: toolbar_html, menu_block_html: menu_block_html %}
 {% endcomment %}
 
 {%- liquid
@@ -537,6 +538,10 @@
 
 {%- if has_toolbar -%}
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- if announcement_html != blank -%}
+  {{ announcement_html }}
 {%- endif -%}
 
 <header-component
