@@ -365,9 +365,16 @@ html.supports-touch {
   .swiper-button-next { right: var(--arrow-space-offset); }
 
   ticker-bar { width: 100%; }
+
+  &:has(swiper-slide:only-child) {
+    .swiper-button-prev,
+    .swiper-button-next {
+      display: none;
+    }
+  }
 }
 
-.announcement__bar-holder--arrows .announcement__slider:not(.single-slide) {
+.announcement__bar-holder--arrows .announcement__slider:not(:has(swiper-slide:only-child)) {
   --arrow-space: var(--icon-size);
   --arrow-space-offset: calc(var(--arrow-space) * -1 - 7px); // Adjust the icon with the wrapper padding
 
