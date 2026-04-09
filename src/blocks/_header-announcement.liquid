@@ -52,6 +52,11 @@
   <script src="{{ 'ticker.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'announcement.js' | asset_url }}" defer="defer"></script>
 
+  {%- if bar_markup contains 'data-countdown-block' -%}
+    {%- render 'stylesheet', name: 'countdown-timer.css' -%}
+    <script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
   <div
     id="Announcement--{{ block.id }}"
     class="announcement__wrapper announcement__wrapper--top{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
