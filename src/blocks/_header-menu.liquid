@@ -23,8 +23,8 @@
 <nav class="header__menu{% if settings.type_nav_caps %} caps{% endif %}" {{ highlight_style }}>
   {%- for link in linklists[main_menu_linklist].links -%}
     {%- assign pos = forloop.index | append: '' -%}
-    {%- assign marker_w = '<image-data data-meta-key="' | append: pos | append: ':W" style="display:contents">' -%}
-    {%- assign marker_n = '<image-data data-meta-key="' | append: pos | append: ':N" style="display:contents">' -%}
+    {%- assign marker_w = 'data-meta-key="' | append: pos | append: ':W"' -%}
+    {%- assign marker_n = 'data-meta-key="' | append: pos | append: ':N"' -%}
 
     {%- assign position_images = '' -%}
     {%- assign image_count = 0 -%}
@@ -33,7 +33,8 @@
     {%- assign parts = all_images | split: marker_w -%}
     {%- for part in parts -%}
       {%- unless forloop.first -%}
-        {%- assign img_html = part | split: end_marker | first -%}
+        {%- assign tag_tail = part | split: '>' | first | append: '>' -%}
+        {%- assign img_html = part | remove_first: tag_tail | split: end_marker | first -%}
         {%- assign position_images = position_images | append: img_html -%}
         {%- assign image_count = image_count | plus: 1 -%}
         {%- assign image_wide_count = image_wide_count | plus: 1 -%}
@@ -43,7 +44,8 @@
     {%- assign parts = all_images | split: marker_n -%}
     {%- for part in parts -%}
       {%- unless forloop.first -%}
-        {%- assign img_html = part | split: end_marker | first -%}
+        {%- assign tag_tail = part | split: '>' | first | append: '>' -%}
+        {%- assign img_html = part | remove_first: tag_tail | split: end_marker | first -%}
         {%- assign position_images = position_images | append: img_html -%}
         {%- assign image_count = image_count | plus: 1 -%}
       {%- endunless -%}
