@@ -20,10 +20,14 @@
 
 {%- if show_bar and block.settings.text != blank -%}
   <slide-data style="display:contents">
-    <div class="announcement__slide{{ target_device_class }}" {{ block.shopify_attributes }}>
-      <div style="font-size: var(--text-size)">
-        {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
-      </div>
+    <div
+      style="font-size: var(--text-size)"
+      {% if target_device_class != blank %}
+        data-device="{{ target_device_class | strip }}"
+      {% endif %}
+      {{ block.shopify_attributes }}
+    >
+      {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
     </div>
   </slide-data>
 {%- endif -%}

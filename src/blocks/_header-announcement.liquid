@@ -76,6 +76,8 @@
       {%- assign slide_open = '<slide-data style="display:contents">' -%}
       {%- assign slide_close = '</slide-data>' -%}
 
+      {%- assign slide_fragments = bar_markup | split: slide_open -%}
+
       {%- if layout == 'slider' -%}
         <div class="announcement__bar-holder announcement__bar-holder--slider{% if show_arrows %} announcement__bar-holder--arrows{% endif %}">
           <div class="announcement__slider swiper">
@@ -95,14 +97,13 @@
               effect="fade"
               fade-effect-cross-fade="true"
             >
-              {%- assign slide_fragments = bar_markup | split: slide_open -%}
               {%- for fragment in slide_fragments -%}
                 {%- unless forloop.first -%}
                   {%- assign slide_content = fragment | split: slide_close | first -%}
                   {%- assign device_class = '' -%}
-                  {%- if slide_content contains 'announcement__slide mobile' -%}
+                  {%- if slide_content contains 'data-device="mobile"' -%}
                     {%- assign device_class = ' mobile' -%}
-                  {%- elsif slide_content contains 'announcement__slide desktop' -%}
+                  {%- elsif slide_content contains 'data-device="desktop"' -%}
                     {%- assign device_class = ' desktop' -%}
                   {%- endif -%}
                   <swiper-slide class="announcement__slide announcement__bar{{ device_class }}">
@@ -145,15 +146,6 @@
       {%- endif -%}
 
       {%- if layout == 'marquee' -%}
-        {%- capture clean_markup -%}
-          {%- assign slide_fragments = bar_markup | split: slide_open -%}
-          {%- for fragment in slide_fragments -%}
-            {%- unless forloop.first -%}
-              {{- fragment | split: slide_close | first -}}
-            {%- endunless -%}
-          {%- endfor -%}
-        {%- endcapture -%}
-
         <div class="announcement__bar-holder announcement__bar-holder--marquee">
           <div class="announcement__bar">
             <ticker-bar
@@ -163,7 +155,20 @@
               <div class="announcement__message">
                 <div data-ticker-scale class="announcement__scale ticker--unloaded">
                   <div data-ticker-text class="announcement__text">
-                    {{ clean_markup }}
+                    {%- for fragment in slide_fragments -%}
+                      {%- unless forloop.first -%}
+                        {%- assign slide_content = fragment | split: slide_close | first -%}
+                        {%- assign device_class = '' -%}
+                        {%- if slide_content contains 'data-device="mobile"' -%}
+                          {%- assign device_class = ' mobile' -%}
+                        {%- elsif slide_content contains 'data-device="desktop"' -%}
+                          {%- assign device_class = ' desktop' -%}
+                        {%- endif -%}
+                        <div class="announcement__slide{{ device_class }}">
+                          {{ slide_content }}
+                        </div>
+                      {%- endunless -%}
+                    {%- endfor -%}
                   </div>
                 </div>
               </div>
