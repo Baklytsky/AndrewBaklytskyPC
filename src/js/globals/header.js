@@ -100,6 +100,7 @@ if (!customElements.get('header-component')) {
 
       checkWidth() {
         console.log('checkWidth', this.minWidth);
+        console.log('reset minWidth', this.getMinWidth());
         if (!this.minWidth) return;
 
         // Debounce execution to run at most every 150ms
