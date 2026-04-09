@@ -1,6 +1,5 @@
 {%- liquid
   assign show_bar = true
-  assign layout = section.settings.announcement_layout | default: 'marquee'
 
   if block.settings.target_url_enabled and block.settings.target_url != blank
     assign show_bar = false
@@ -20,27 +19,13 @@
 -%}
 
 {%- if show_bar and block.settings.text != blank -%}
-  {%- if layout == 'slider' -%}
-    <swiper-slide class="announcement__slide announcement__bar{{ target_device_class }}" {{ block.shopify_attributes }}>
-      <ticker-bar>
-        <div class="announcement__message">
-          <div data-ticker-scale class="announcement__scale ticker--unloaded">
-            <div data-ticker-text class="announcement__text">
-              <div style="font-size: var(--text-size)">
-                {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </ticker-bar>
-    </swiper-slide>
-  {%- else -%}
+  <slide-data style="display:contents">
     <div class="announcement__slide{{ target_device_class }}" {{ block.shopify_attributes }}>
       <div style="font-size: var(--text-size)">
         {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
       </div>
     </div>
-  {%- endif -%}
+  </slide-data>
 {%- endif -%}
 
 {% schema %}
