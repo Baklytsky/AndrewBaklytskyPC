@@ -184,17 +184,24 @@ if (!customElements.get('header-component')) {
 
         this.isStuck = false;
         this.cls = this.classList;
-        this.headerOffset = this.getHeaderOffset();
         this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
         this.scrollEvent = (e) => this.onScroll(e);
 
         this.listen();
-        this.stickOnLoad();
+
+        requestAnimationFrame(() => {
+          this.headerOffset = this.getHeaderOffset();
+          this.stickOnLoad();
+        });
       }
 
       getHeaderOffset() {
         const announcementWrapper = this.closest(selectors.pageHeader)?.querySelector(selectors.announcementWrapper);
-        return announcementWrapper?.offsetHeight ?? 0;
+        if (!announcementWrapper) return 0;
+        const style = getComputedStyle(announcementWrapper);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        return marginTop + announcementWrapper.offsetHeight + marginBottom;
       }
 
       listen() {
@@ -204,6 +211,8 @@ if (!customElements.get('header-component')) {
       }
 
       onScroll(e) {
+        if (this.headerOffset == null) return;
+
         if (e.detail.down) {
           if (!this.isStuck && e.detail.position > this.headerOffset) {
             this.stickSimple();
@@ -217,7 +226,7 @@ if (!customElements.get('header-component')) {
         if (!event.target.classList.contains(classes.headerGroup)) return;
 
         // Update header offset after any "Header group" section has been changed
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           this.headerOffset = this.getHeaderOffset();
         });
       }
