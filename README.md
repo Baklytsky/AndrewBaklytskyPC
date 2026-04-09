@@ -1,18 +1,18 @@
-# Carbon
+# Headlands
 
-### [🏷️ Releases](https://github.com/presidiocreative/carbon-internal/releases)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/carbon-internal/issues)
+### [🏷️ Releases](https://github.com/presidiocreative/headlands-internal/releases)&nbsp;&nbsp;&nbsp;⎯⎯&nbsp;&nbsp;&nbsp;[💬 Discussions](https://github.com/presidiocreative/headlands-internal/issues)
 
 ## Installation
 
 #### Clone the repo:
 SSH
 ```
-git clone git@github.com:presidiocreative/carbon-internal.git
+git clone git@github.com:presidiocreative/headlands-internal.git
 ```
 
 HTTPS
 ```
-git clone https://github.com/presidiocreative/carbon-internal.git
+git clone https://github.com/presidiocreative/headlands-internal.git
 ```
 
 #### Check your Node version

@@ -1,7 +1,7 @@
 /*
-* Carbon Theme
+* Headlands Theme
 *
-* Use this file to add custom Javascript to Carbon.
+* Use this file to add custom Javascript to Headlands.
 * In order to use this file you will need to open layout/theme.liquid and add
 * <script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
 */

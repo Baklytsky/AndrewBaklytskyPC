@@ -1,7 +1,7 @@
-# Carbon Theme Customization Guidelines
+# Headlands Theme Customization Guidelines
 
 ## Overview
-This document outlines what can and cannot be modified when customizing the Carbon theme to ensure theme stability, consistency, and maintainability.
+This document outlines what can and cannot be modified when customizing the Headlands theme to ensure theme stability, consistency, and maintainability.
 
 ## 🚫 **CRITICAL: Do NOT Modify**
 
@@ -193,7 +193,7 @@ window.theme = {
   sliderArrows: { /* ... */ },
   moneyFormat: /* ... */,
   info: {
-    name: 'Carbon',
+    name: 'Headlands',
     version: '1.0.0'
   }
 };
@@ -290,4 +290,4 @@ When requesting support:
 
 ---
 
-**Remember**: The Carbon theme is built with a carefully designed system. Maintaining the integrity of core variables, markup patterns, and component structures ensures your customizations will continue to work properly and won't break during theme updates.
+**Remember**: The Headlands theme is built with a carefully designed system. Maintaining the integrity of core variables, markup patterns, and component structures ensures your customizations will continue to work properly and won't break during theme updates.

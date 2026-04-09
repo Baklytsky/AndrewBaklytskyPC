@@ -1,4 +1,4 @@
-name: Deploy /dist to carbon-external
+name: Deploy /dist to headlands-external
 
 on:
   push:
@@ -44,29 +44,29 @@ jobs:
         ssh-keyscan github.com >> ~/.ssh/known_hosts
         pwd
 
-    - name: Remove existing carbon-external folder if it exists
+    - name: Remove existing headlands-external folder if it exists
       run: |
-        if [ -d "carbon-external" ]; then
-          rm -rf carbon-external
+        if [ -d "headlands-external" ]; then
+          rm -rf headlands-external
         fi
 
     - name: Clone target repository
       run: |
         cd ~/
-        git clone git@github.com:presidiocreative/carbon-external.git carbon-external
+        git clone git@github.com:presidiocreative/headlands-external.git headlands-external
 
-    - name: Sync /dist contents to the root of carbon-external repository
+    - name: Sync /dist contents to the root of headlands-external repository
       run: |
         # Ensure the dist folder exists
-        if [ -d ~/work/carbon-internal/carbon-internal/dist ]; then
-          rsync -av --delete --exclude '.git/' ~/work/carbon-internal/carbon-internal/dist/ ~/carbon-external/
+        if [ -d ~/work/headlands-internal/headlands-internal/dist ]; then
+          rsync -av --delete --exclude '.git/' ~/work/headlands-internal/headlands-internal/dist/ ~/headlands-external/
         else
           echo "No dist folder found, skipping sync."
           exit 1
         fi
         # Commit and push changes
-        cd ~/carbon-external
-        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/carbon-external.git
+        cd ~/headlands-external
+        git remote add dist https://x-access-token:${{ secrets.GH_PAT }}@github.com/presidiocreative/headlands-external.git
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .

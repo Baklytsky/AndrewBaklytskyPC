@@ -20,7 +20,7 @@ const inputComponents = glob.sync(path.join(src, 'js/components/*.js'));
 const minifiedComment = `
 /*
 * @license
-* Carbon (c) Presidio Creative
+* Headlands (c) Presidio Creative
 *
 * The contents of this file should not be modified.
 * add any minor changes to assets/custom.js
@@ -31,7 +31,7 @@ const minifiedComment = `
 const developmentComment = `
 /*
 * @license
-* Carbon (c) Presidio Creative
+* Headlands (c) Presidio Creative
 *
 * This file is included for advanced development by
 * Shopify Agencies.  Modified versions of the theme
