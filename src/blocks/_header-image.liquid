@@ -11,44 +11,47 @@
   endif
 -%}
 
-<image-data data-meta-key="{{ block.settings.position }}:{% if block.settings.wide_image %}W{% else %}N{% endif %}" style="display:contents">
-<div
-  class="menu__block {{ width_class }}"
-  {{ block.shopify_attributes }}
+<image-data
+  data-meta-key="{{ block.settings.position }}:{% if block.settings.wide_image %}W{% else %}N{% endif %}"
+  style="display:contents"
 >
   <div
-    class="header__dropdown__image"
-    {% unless text_color == 'rgba(0,0,0,0)' or text_color == blank %}
-      style="--text: {{ text_color }};"
-    {% endunless %}
-    data-stagger-first
+    class="menu__block {{ width_class }}"
+    {{ block.shopify_attributes }}
   >
-    {%- if link != blank -%}
-      <a href="{{ link }}" class="link-over-image">
-    {%- else -%}
-      <div class="link-over-image">
-    {%- endif -%}
-
-    <div class="hero__content__wrapper align--bottom-left">
-      <div class="hero__content hero__content--transparent backdrop--radial">
-        {% content_for 'blocks' %}
-      </div>
-    </div>
-
-    {%- if link != blank -%}
-      </a>
-    {%- else -%}
-      </div>
-    {%- endif -%}
-
     <div
-      class="image-overlay"
-      style="--OVERLAY-BG: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"
-    ></div>
+      class="header__dropdown__image"
+      {% unless text_color == 'rgba(0,0,0,0)' or text_color == blank %}
+        style="--text: {{ text_color }};"
+      {% endunless %}
+      data-stagger-first
+    >
+      {%- if link != blank -%}
+        <a href="{{ link }}" class="link-over-image">
+      {%- else -%}
+        <div class="link-over-image">
+      {%- endif -%}
 
-    {%- render 'image', image: image, aspect_ratio: aspect_ratio, sizes: sizes, loading: 'lazy' -%}
+      <div class="hero__content__wrapper align--bottom-left">
+        <div class="hero__content hero__content--transparent backdrop--radial">
+          {% content_for 'blocks' %}
+        </div>
+      </div>
+
+      {%- if link != blank -%}
+        </a>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+
+      <div
+        class="image-overlay"
+        style="--OVERLAY-BG: {{ block.settings.overlay_color }}; --overlay-opacity: {{ block.settings.overlay_opacity | times: 0.01 }};"
+      ></div>
+
+      {%- render 'image', image: image, aspect_ratio: aspect_ratio, sizes: sizes, loading: 'lazy' -%}
+    </div>
   </div>
-</div>
 </image-data>
 
 {% schema %}
@@ -78,7 +81,7 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image",
-      "info": "1400 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+      "info": "1400 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
     },
     {
       "type": "range",
