@@ -886,6 +886,32 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type) 
   margin-block-start: var(--floating-top);
 }
 
+// Floating: search popdown should match card width, not full viewport
+.header-floating__card header-search-popdown.is-open .search-popdown,
+.header-floating__card header-search-popdown.is-open .predictive-search {
+  width: 100%;
+  padding-right: 0;
+}
+
+// Floating: scroll-lock overrides to preserve inset
+[data-scroll-locked] {
+  .page-header:has(.header-floating) {
+    .toolbar,
+    .announcement__bar-holder--slider,
+    .announcement__bar {
+      padding-right: 0;
+    }
+
+    .announcement__wrapper {
+      width: calc(100vw - var(--floating-inset) * 2 - var(--scrollbar-width)) ;
+    }
+
+    .announcement__bar-outer {
+      width: 100%;
+    }
+  }
+}
+
 // Floating: meganav dropdown aligns within the inset card
 .header-floating .header__dropdown::before {
   height: calc(var(--padding-bottom) + var(--floating-gap) * 2);
