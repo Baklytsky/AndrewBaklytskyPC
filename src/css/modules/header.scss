@@ -903,30 +903,62 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type) 
     max-height: calc(100vh - var(--header-height) - var(--floating-top));
   }
 
-  // Meganav dropdown alignment
+  // Meganav dropdown alignment (positioned relative to .header-floating__card)
+
+  .header__dropdown {
+    top: calc(100% + var(--floating-gap));
+    border-radius: var(--floating-radius);
+  }
+
   .header__dropdown::before {
     height: calc(var(--padding-bottom) + var(--floating-gap) * 2);
   }
 
   .grandparent .header__dropdown {
-    left: var(--floating-inset);
-    width: calc(100% - var(--floating-inset) * 2);
-    max-width: calc(100% - var(--floating-inset) * 2);
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  // Search popdown (positioned relative to .header-floating__card)
+  .theme__header header-search-popdown.is-open .search-popdown,
+  .theme__header header-search-popdown.is-open .predictive-search {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .search-popdown,
+  .predictive-search {
     border-radius: var(--floating-radius);
+  }
+
+  .search-popdown,
+  .search-popdown .wrapper,
+  .search-popdown__main {
+    height: 100%;
+  }
+
+  .predictive-search {
+    --results-max-height: calc(var(--full-screen) - var(--header-card-height) - var(--bar-height) - var(--floating-top));
+
+    top: calc(100% + var(--floating-gap));
+    padding-block-start: var(--floating-top);
+  }
+
+  header-search-popdown.is-open .search-popdown {
+    max-height: calc(var(--full-screen) - var(--bar-height) - var(--floating-top) - var(--floating-gap) * 2);
+  }
+
+  header-search-popdown.is-open .predictive-search {
+    max-height: calc(var(--full-screen) - var(--header-height) - var(--bar-height) - var(--floating-top));
   }
 }
 
 .header-floating__card {
   --bg: var(--COLOR-MENU-BG);
 
+  position: relative;
   background: var(--bg);
-
-  // Search popdown matches card width
-  header-search-popdown.is-open .search-popdown,
-  header-search-popdown.is-open .predictive-search {
-    width: 100%;
-    padding-right: 0;
-  }
 }
 
 // Scroll-lock overrides
