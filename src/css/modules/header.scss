@@ -881,10 +881,13 @@ body:has(.header-floating) {
     margin-block-start: var(--floating-top);
   }
 
-  // When stuck, normalize top margin to the smaller gap
-  .js__header__stuck .toolbar,
-  .js__header__stuck .header-floating__card {
-    margin-block-start: var(--floating-gap);
+  // When stuck, the topmost block gets --floating-top margin
+  .js__header__stuck .toolbar {
+    margin-block-start: var(--floating-top);
+  }
+
+  .js__header__stuck:not(:has(.toolbar)) .header-floating__card {
+    margin-block-start: var(--floating-top);
   }
 }
 

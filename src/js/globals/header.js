@@ -192,7 +192,17 @@ if (!customElements.get('header-component')) {
         const style = getComputedStyle(announcementWrapper);
         const marginTop = parseFloat(style.marginTop) || 0;
         const marginBottom = parseFloat(style.marginBottom) || 0;
-        return marginTop + announcementWrapper.offsetHeight + marginBottom;
+        let offset = marginTop + announcementWrapper.offsetHeight + marginBottom;
+
+        if (this.classList.contains('header-floating')) {
+          const firstBlock = this.querySelector('.toolbar, .header-floating__card');
+          if (firstBlock) {
+            const currentMargin = parseFloat(getComputedStyle(firstBlock).marginTop) || 0;
+            offset -= marginTop - currentMargin;
+          }
+        }
+
+        return offset;
       }
 
       listen() {
