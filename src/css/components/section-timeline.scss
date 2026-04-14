@@ -49,11 +49,19 @@ timeline-component { display: block; }
 }
 
 .timeline__image {
-  position: absolute;
-  inset: 0;
+  @include media-query($medium-up) {
+    position: absolute;
+    inset: 0;
 
-  .is-selected & {
-    z-index: 5;
+    .is-selected & {
+      z-index: 5;
+    }
+  }
+
+  @include media-query($small) {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: var(--aspect-ratio, 1);
   }
 }
 
