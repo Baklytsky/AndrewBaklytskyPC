@@ -852,6 +852,8 @@ body:has(.header-floating) {
 .page-header:has(.header-floating) {
   position: relative;
 
+  --bar-height: var(--announcement-height);
+
   // Shared floating block styles
   .header-floating__card,
   .toolbar,
@@ -860,6 +862,10 @@ body:has(.header-floating) {
     margin-block: var(--floating-gap);
     width: calc(100% - var(--floating-inset) * 2);
     border-radius: var(--floating-radius);
+  }
+
+  &:has(.announcement__wrapper) {
+    --bar-height: calc(var(--announcement-height) + var(--floating-top));
   }
 
   // First visible block gets the larger top margin
@@ -890,7 +896,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type) 
 
   // Meganav dropdown max-height
   .header__dropdown__wrapper {
-    max-height: calc(100vh - var(--header-height) - var(--announcement-height) - var(--floating-top));
+    max-height: calc(100vh - var(--header-height) - var(--bar-height) - var(--floating-top));
   }
 
   &.js__header__stuck .header__dropdown__wrapper {
