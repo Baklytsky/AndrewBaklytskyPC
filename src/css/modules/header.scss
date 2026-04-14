@@ -843,14 +843,11 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 // Floating header
 .page-header:has(.header-floating) {
   position: relative;
-
-  --floating-inset: var(--outer);
-  --floating-radius: 5px;
-  --floating-top: var(--SPACING-SMALL);
-  --floating-gap: calc(var(--SPACING-SMALL) / 2);
 }
 
 body:has(.header-floating) {
+  --floating-inset: var(--SPACING-SMALL);
+  --floating-radius: 5px;
   --floating-top: var(--SPACING-SMALL);
   --floating-gap: calc(var(--SPACING-SMALL) / 2);
 }
@@ -877,12 +874,21 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type) 
 .page-header:has(.header-floating) .toolbar,
 .page-header:has(.header-floating) .announcement__wrapper {
   margin-inline: var(--floating-inset);
-  margin-block: var(--floating-gap) var(--floating-gap);
+  margin-block: var(--floating-gap);
   width: calc(100% - var(--floating-inset) * 2);
   border-radius: var(--floating-radius);
 }
 
+// First visible floating block gets the larger top margin
 .page-header:has(.header-floating) .announcement__wrapper {
+  margin-block: var(--floating-top) 0;
+}
+
+.page-header:has(.header-floating):not(:has([data-announcement-wrapper])) .toolbar {
+  margin-block-start: var(--floating-top);
+}
+
+.page-header:has(.header-floating):not(:has([data-announcement-wrapper])):not(:has(.toolbar)) .header-floating__card {
   margin-block-start: var(--floating-top);
 }
 
