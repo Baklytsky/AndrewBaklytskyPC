@@ -203,6 +203,7 @@ if (!customElements.get('header-component')) {
 
       onScroll(e) {
         if (this.headerOffset == null) return;
+        if (this.alwaysStuck) return;
 
         if (e.detail.down) {
           if (!this.isStuck && e.detail.position > this.headerOffset) {
@@ -216,14 +217,22 @@ if (!customElements.get('header-component')) {
       updateHeaderOffset(event) {
         if (!event.target.classList.contains(classes.headerGroup)) return;
 
-        // Update header offset after any "Header group" section has been changed
         requestAnimationFrame(() => {
           this.headerOffset = this.getHeaderOffset();
+          this.alwaysStuck = this.headerOffset === 0 && this.classList.contains('header-floating');
+
+          if (this.alwaysStuck) {
+            this.stickSimple();
+          } else if (window.scrollY <= this.headerOffset) {
+            this.unstickSimple();
+          }
         });
       }
 
       stickOnLoad() {
-        if (window.scrollY > this.headerOffset) {
+        this.alwaysStuck = this.headerOffset === 0 && this.classList.contains('header-floating');
+
+        if (this.alwaysStuck || window.scrollY > this.headerOffset) {
           this.stickSimple();
         }
       }
