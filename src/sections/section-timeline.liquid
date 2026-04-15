@@ -88,6 +88,7 @@
                 <div
                   class="timeline__row{% if blocks_counter == 1 %} is-selected{% endif %}"
                   data-timeline-row-content
+                  {{ block.shopify_attributes }}
                 >
                   <div class="timeline__content">
                     <div
@@ -220,6 +221,42 @@
     .timeline__wrapper { max-height: 100vh; }
   {%- endif -%}
 {%- endstyle -%}
+
+{%- if request.design_mode -%}
+  <script>
+    const timelineSectionId = '{{ section.id }}';
+    const timelineSectionRoot = document.getElementById('{{ unique }}');
+
+    document.addEventListener('shopify:block:select', (event) => {
+      if (event.detail?.sectionId !== timelineSectionId) return;
+
+      const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
+      if (!timelineComponent) return;
+
+      const row = event.target.closest('[data-timeline-row-content]');
+      if (!row || !timelineSectionRoot.contains(row)) return;
+
+      const index = [...timelineComponent.querySelectorAll('[data-timeline-row-content]')].indexOf(row);
+      if (index === -1) return;
+
+      timelineComponent.setAttribute('data-editor-block-selected', '');
+      timelineComponent.pause();
+      timelineComponent.selectedIndex = index;
+      timelineComponent.clearRowSelection();
+      timelineComponent.applyRowSelection(index);
+    });
+
+    document.addEventListener('shopify:block:deselect', (event) => {
+      if (event.detail?.sectionId !== timelineSectionId) return;
+
+      const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
+      if (!timelineComponent) return;
+
+      timelineComponent.removeAttribute('data-editor-block-selected');
+      timelineComponent.resume();
+    });
+  </script>
+{%- endif -%}
 
 {% schema %}
 {
