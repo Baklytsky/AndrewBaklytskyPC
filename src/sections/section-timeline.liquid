@@ -226,13 +226,12 @@
 
 {%- if request.design_mode -%}
   <script>
-    const timelineSectionId = '{{ section.id }}';
-    const timelineSectionRoot = document.getElementById('{{ unique }}');
-
     document.addEventListener('shopify:block:select', (event) => {
-      if (event.detail?.sectionId !== timelineSectionId) return;
+      if (event.detail?.sectionId !== '{{ section.id }}') return;
 
+      const timelineSectionRoot = event.target.closest('[data-section-id]');
       const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
+
       if (!timelineComponent) return;
 
       const row = event.target.closest('[data-timeline-row-content]');
@@ -249,13 +248,12 @@
     });
 
     document.addEventListener('shopify:block:deselect', (event) => {
-      if (event.detail?.sectionId !== timelineSectionId) return;
-
+      if (event.detail?.sectionId !== '{{ section.id }}') return;
+      const timelineSectionRoot = event.target.closest('[data-section-id]');
       const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
-      if (!timelineComponent) return;
 
-      timelineComponent.removeAttribute('data-editor-block-selected');
-      timelineComponent.resume();
+      timelineComponent?.removeAttribute('data-editor-block-selected');
+      timelineComponent?.resume();
     });
   </script>
 {%- endif -%}

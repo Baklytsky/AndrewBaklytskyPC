@@ -5,15 +5,16 @@ if (!customElements.get('timeline-component')) {
       constructor() {
         super();
 
-        this.contentRows = this.querySelectorAll('[data-timeline-row-content]');
-        this.imageRows = this.querySelectorAll('[data-timeline-row-image]');
-        this.titles = this.querySelectorAll('[data-timeline-title]');
         this.selectedIndex = 0;
         this.intervalId = null;
         this.isPaused = false;
       }
 
       connectedCallback() {
+        this.contentRows = this.querySelectorAll('[data-timeline-row-content]');
+        this.imageRows = this.querySelectorAll('[data-timeline-row-image]');
+        this.titles = this.querySelectorAll('[data-timeline-title]');
+
         if (this.contentRows.length === 0) return;
 
         this.titles.forEach((title) => {
