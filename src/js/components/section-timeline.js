@@ -20,7 +20,17 @@ if (!customElements.get('timeline-component')) {
           title.addEventListener('click', () => {
             const row = title.closest('[data-timeline-row-content]');
             const index = [...this.contentRows].indexOf(row);
-            if (index !== -1) this.selectRow(index);
+            if (index === -1) return;
+
+            if (index === this.selectedIndex) {
+              if (this.isPaused) this.resume();
+              else this.pause();
+            } else {
+              // Touch often fires mouseenter before click, leaving isPaused true; explicit row change should play.
+              this.isPaused = false;
+              this.classList.remove('is-paused');
+              this.selectRow(index);
+            }
           });
         });
 
