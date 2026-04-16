@@ -3,6 +3,7 @@
 
   Accepts:
   - header_style: {String} Header style (required)
+  - is_floating: {Boolean} Enable floating card layout (optional)
   - announcement_html: {String} Pre-rendered announcement block HTML
   - toolbar_html: {String} Pre-rendered toolbar block HTML
   - menu_block_html: {String} Pre-rendered menu block HTML
@@ -17,6 +18,7 @@
   assign animation_delay_increment = 50
 
   assign header_style = header_style | default: 'logo_beside'
+  assign is_floating = is_floating | default: false
 
   assign has_toolbar = false
   assign show_toolbar_socials = false
@@ -105,6 +107,10 @@
     assign header_height_mobile = header_upper_height_mobile | plus: padding_top_mobile | plus: padding_bottom_mobile
   endif
 
+  assign header_card_height = header_height
+  assign header_card_height_medium = header_height_medium
+  assign header_card_height_mobile = header_height_mobile
+
   if has_toolbar
     assign toolbar_height = 2.25 | times: settings.nav_font_size
 
@@ -160,6 +166,9 @@
     --HEADER-HEIGHT: {{ header_height }}px;
     --HEADER-HEIGHT-MEDIUM: {{ header_height_medium }}px;
     --HEADER-HEIGHT-MOBILE: {{ header_height_mobile }}px;
+    --HEADER-CARD-HEIGHT: {{ header_card_height }}px;
+    --HEADER-CARD-HEIGHT-MEDIUM: {{ header_card_height_medium }}px;
+    --HEADER-CARD-HEIGHT-MOBILE: {{ header_card_height_mobile }}px;
 
     {% comment %} --icon-bag variable is used on PGI and Product upsell block {% endcomment %}
     --icon-bag: var(--ICON-BAG);
@@ -320,7 +329,7 @@
 
     {%- if section.settings.enable_search -%}
       <div class="header__mobile__button">
-        <header-search-popdown>
+        <header-search-popdown data-easing="cubic-bezier(0.2, 0, 0, 1)" data-duration="400">
           <details>
             <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}{% if settings.type_nav_caps %} caps{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
               {%- render 'icon-search' -%}
@@ -392,7 +401,7 @@
 
     {%- if section.settings.enable_search -%}
       <div class="header__desktop__button">
-        <header-search-popdown>
+        <header-search-popdown data-easing="cubic-bezier(0.2, 0, 0, 1)" data-duration="400">
           <details>
             <summary class="navlink navlink--search{% if show_icons == false %} navlink--toplevel{% endif %}" aria-haspopup="dialog" title="{{ 'general.search.search' | t }}">
               {%- render 'icon-search' -%}
@@ -545,7 +554,7 @@
 {%- endif -%}
 
 <header-component
-  class="header__wrapper"
+  class="header__wrapper{% if is_floating %} header-floating{% endif %}"
   data-header-wrapper
   {% if transparent_header %}
     data-header-transparent
@@ -566,7 +575,7 @@
       {{ toolbar_html }}
     {%- endif -%}
 
-    <div class="section-padding">
+    <div class="section-padding{% if is_floating %} header-floating__card{% endif %}">
       <div class="header__mobile">
         {{ minimal }}
       </div>

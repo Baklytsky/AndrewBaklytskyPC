@@ -28,8 +28,7 @@ header-search-popdown > details { height: 100%; }
   text-transform: none;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-100%);
-  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   box-shadow: 0 5px 10px rgb(0 0 0 / 10%);
   background: var(--bg);
 
@@ -73,8 +72,7 @@ header-search-popdown > details { height: 100%; }
 
 header-search-popdown.is-open .search-popdown {
   opacity: 1;
-  transform: none;
-  transition-delay: 0s; // Remove visibility delay
+  transition-delay: 0s;
   visibility: unset;
   max-height: calc(100vh - var(--announcement-height));
 }
@@ -86,7 +84,6 @@ header-search-popdown.is-open .search-popdown {
   justify-content: space-between;
   align-items: center;
   background: var(--bg);
-  transition: transform 0.5s ease;
 }
 
 .search-popdown__close {
@@ -94,6 +91,10 @@ header-search-popdown.is-open .search-popdown {
   min-width: var(--icon-size, 24px);
   height: 100%;
   display: flex;
+
+  .drawer__close {
+    transition: none;
+  }
 }
 
 .search-popdown__close__button {
@@ -107,7 +108,7 @@ header-search-popdown.is-open .search-popdown {
 }
 
 .search-popdown__submit {
-  --icon-size: 24px;
+  --icon-size: 32px; // equals .navlink icon size
 
   display: flex;
   align-items: center;
@@ -115,4 +116,48 @@ header-search-popdown.is-open .search-popdown {
   width: 36px;
   margin-left: -8px;
   padding: 0;
+}
+
+.search-popdown__submit--flip-hidden .icon-search { opacity: 0; }
+
+.flip-clone {
+  position: fixed;
+  z-index: 6003;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  color: var(--link);
+}
+
+header-search-popdown.is-animating .search-popdown {
+  visibility: unset;
+  transition: none;
+  will-change: clip-path, opacity;
+}
+
+// Preserve layout during close so the close button doesn't shift before fading
+.theme__header header-search-popdown.is-animating:not(.is-open) .search-popdown {
+  width: 100vw;
+  padding-right: var(--scrollbar-width);
+}
+
+.header-floating header-search-popdown.is-animating:not(.is-open) .search-popdown {
+  width: 100%;
+  padding-right: 0;
+}
+
+header-search-popdown.is-animating:not(.is-open) [data-popdown-close] {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+header-search-popdown.is-animating .predictive-search,
+header-search-popdown.is-animating .predictive-search--empty {
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
 }
