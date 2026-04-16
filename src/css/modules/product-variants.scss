@@ -448,6 +448,11 @@
   box-shadow: 0 0 0 2px var(--bg), inset 0 0 0 1px var(--border);
 }
 
+.swatch__button.swatch-black .swatch__link.is-selected,
+.swatch__button.swatch-black input:checked ~ label {
+  box-shadow: 0 0 0 2px var(--bg), inset 0 0 2px #FFF;
+}
+
 .swatch__button .swatch__link.is-selected::after,
 .swatch__button input:checked ~ label::after {
   opacity: 1;
@@ -469,7 +474,7 @@
 // Prevent tooltip showing up while product quick add drawer is in a loading state
 .is-loading .swatch__button { pointer-events: none; }
 
-// White/Black color swatches
+// White color swatches
 .swatch-white input ~ label,
 .swatch-clear input ~ label,
 .swatch-white .swatch__link,
@@ -488,6 +493,22 @@
   }
 }
 
+.swatch__button.swatch-white .swatch-input__label,
+.swatch__button.swatch-clear .swatch-input__label {
+  box-shadow: inset 0 0 0 1px var(--border);
+
+  &::after { background: var(--border); }
+}
+
+
+// Black color swatches
+.swatch-black input ~ label,
+.swatch-black .swatch__link,
+.swatch-black .sibling__link,
+.swatch-black.swatch__button--filter {
+  box-shadow: inset 0 0 2px #FFF;
+}
+
 .swatch__button.swatch-black input.visually-disabled ~ label::before,
 .swatch__button.swatch-black input:disabled ~ label::before,
 .swatch__button input.visually-disabled ~ label[data-swatch="black" i]::before,
@@ -495,16 +516,14 @@
   background: #FFF;
 }
 
+.swatch__button.swatch-black .swatch__link.is-selected::after,
+.swatch__button.swatch-black input:checked ~ label::after {
+  box-shadow: inset 0 0 2px #FFF;
+}
+
 .swatch__button input.visually-disabled ~ label[data-swatch="white" i]::before,
 .swatch__button input:disabled ~ label[data-swatch="white" i]::before {
   background: var(--text-dark);
-}
-
-.swatch__button.swatch-white .swatch-input__label,
-.swatch__button.swatch-clear .swatch-input__label {
-  box-shadow: inset 0 0 0 1px var(--border);
-
-  &::after { background: var(--border); }
 }
 
 // Circle swatch style
