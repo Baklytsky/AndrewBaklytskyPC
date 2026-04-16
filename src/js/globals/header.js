@@ -1,4 +1,5 @@
 const selectors = {
+  announcementWrapper: '[data-announcement-wrapper]',
   cartDrawer: 'cart-drawer',
   cartToggleButton: '[data-cart-toggle]',
   deadLink: '.navlink[href="#"]',
@@ -174,12 +175,34 @@ if (!customElements.get('header-component')) {
 
         this.isStuck = false;
         this.cls = this.classList;
-        this.headerOffset = document.querySelector(selectors.pageHeader)?.offsetTop;
         this.updateHeaderOffset = this.updateHeaderOffset.bind(this);
         this.scrollEvent = (e) => this.onScroll(e);
 
         this.listen();
-        this.stickOnLoad();
+
+        requestAnimationFrame(() => {
+          this.headerOffset = this.getHeaderOffset();
+          this.stickOnLoad();
+        });
+      }
+
+      getHeaderOffset() {
+        const announcementWrapper = this.closest(selectors.pageHeader)?.querySelector(selectors.announcementWrapper);
+        if (!announcementWrapper) return 0;
+        const style = getComputedStyle(announcementWrapper);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        let offset = marginTop + announcementWrapper.offsetHeight + marginBottom;
+
+        if (this.classList.contains('header-floating')) {
+          const firstBlock = this.querySelector('.toolbar, .header-floating__card');
+          if (firstBlock) {
+            const currentMargin = parseFloat(getComputedStyle(firstBlock).marginTop) || 0;
+            offset -= marginTop - currentMargin;
+          }
+        }
+
+        return offset;
       }
 
       listen() {
@@ -189,6 +212,9 @@ if (!customElements.get('header-component')) {
       }
 
       onScroll(e) {
+        if (this.headerOffset == null) return;
+        if (this.alwaysStuck) return;
+
         if (e.detail.down) {
           if (!this.isStuck && e.detail.position > this.headerOffset) {
             this.stickSimple();
@@ -201,14 +227,22 @@ if (!customElements.get('header-component')) {
       updateHeaderOffset(event) {
         if (!event.target.classList.contains(classes.headerGroup)) return;
 
-        // Update header offset after any "Header group" section has been changed
-        setTimeout(() => {
-          this.headerOffset = document.querySelector(selectors.pageHeader)?.offsetTop;
+        requestAnimationFrame(() => {
+          this.headerOffset = this.getHeaderOffset();
+          this.alwaysStuck = this.headerOffset === 0 && this.classList.contains('header-floating');
+
+          if (this.alwaysStuck) {
+            this.stickSimple();
+          } else if (window.scrollY <= this.headerOffset) {
+            this.unstickSimple();
+          }
         });
       }
 
       stickOnLoad() {
-        if (window.scrollY > this.headerOffset) {
+        this.alwaysStuck = this.headerOffset === 0 && this.classList.contains('header-floating');
+
+        if (this.alwaysStuck || window.scrollY > this.headerOffset) {
           this.stickSimple();
         }
       }

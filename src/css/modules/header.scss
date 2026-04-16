@@ -6,8 +6,6 @@ hover-disclosure { display: block; }
 .header-group {
   display: flex;
   flex-direction: column;
-
-  .page-announcement { order: -1; } // Make sure Announcement bar is always shown as a first section
 }
 
 .header__wrapper {
@@ -515,6 +513,8 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) {
     .toolbar { --bg: var(--TRANSPARENT); }
 
+    .header-floating__card { --bg: var(--TRANSPARENT); }
+
     .parent .navlink--toplevel::after { content: none; }
 
     .header__logo--has-transparent {
@@ -838,4 +838,180 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   position: absolute;
   opacity: 0;
   visibility: hidden;
+}
+
+//  Floating header
+
+body:has(.header-floating) {
+  --floating-inset: var(--SPACING-SMALL);
+  --floating-radius: 5px;
+  --floating-top: var(--SPACING-SMALL);
+  --floating-gap: calc(var(--SPACING-SMALL) / 2);
+}
+
+.page-header:has(.header-floating) {
+  position: relative;
+
+  --bar-height: var(--announcement-height);
+
+  // Shared floating block styles
+  .header-floating__card,
+  .toolbar,
+  .announcement__wrapper {
+    margin-inline: var(--floating-inset);
+    margin-block: var(--floating-gap);
+    width: calc(100% - var(--floating-inset) * 2);
+    border-radius: var(--floating-radius);
+  }
+
+  // Full border around floating blocks when border setting is enabled
+  .announcement__wrapper--borders {
+    border: 1px solid var(--border);
+  }
+
+  .toolbar.has-border {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+
+    &::before { content: none; }
+  }
+
+  .theme__header.has-border .header-floating__card {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .theme__header.has-border::before { content: none; }
+
+  &:has(.announcement__wrapper) {
+    --bar-height: calc(var(--announcement-height) + var(--floating-top));
+  }
+
+  // First visible block gets the larger top margin
+  .announcement__wrapper {
+    margin-block: var(--floating-top) 0;
+  }
+
+  &:not(:has([data-announcement-wrapper])) .toolbar {
+    margin-block-start: var(--floating-top);
+  }
+
+  &:not(:has([data-announcement-wrapper])):not(:has(.toolbar)) .header-floating__card {
+    margin-block-start: var(--floating-top);
+  }
+
+  // When stuck, the topmost block gets --floating-top margin
+  .js__header__stuck .toolbar {
+    margin-block-start: var(--floating-top);
+  }
+
+  .js__header__stuck:not(:has(.toolbar)) .header-floating__card {
+    margin-block-start: var(--floating-top);
+  }
+}
+
+// Overlay: pull entire .page-header out of flow
+body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-header:has(.header-floating) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5500;
+}
+
+.header-floating {
+  --bg: transparent;
+
+  // Meganav dropdown max-height
+  .header__dropdown__wrapper {
+    max-height: calc(100vh - var(--header-height) - var(--bar-height) - var(--floating-top));
+  }
+
+  &.js__header__stuck .header__dropdown__wrapper {
+    max-height: calc(100vh - var(--header-height) - var(--floating-top));
+  }
+
+  // Meganav dropdown alignment (positioned relative to .header-floating__card)
+
+  .header__dropdown {
+    top: calc(100% + var(--floating-gap));
+    border-radius: var(--floating-radius);
+  }
+
+  .theme__header.has-border .header__dropdown {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .header__dropdown::before {
+    height: calc(var(--padding-bottom) + var(--floating-gap) * 2);
+  }
+
+  .grandparent .header__dropdown {
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  // Search popdown (positioned relative to .header-floating__card)
+  .theme__header header-search-popdown.is-open .search-popdown,
+  .theme__header header-search-popdown.is-open .predictive-search {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .search-popdown,
+  .predictive-search {
+    border-radius: var(--floating-radius);
+  }
+
+  .theme__header.has-border .predictive-search {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .search-popdown,
+  .search-popdown .wrapper,
+  .search-popdown__main {
+    height: 100%;
+  }
+
+  .predictive-search {
+    --results-max-height: calc(var(--full-screen) - var(--header-card-height) - var(--bar-height) - var(--floating-top));
+
+    top: calc(100% + var(--floating-gap));
+    padding-block-start: var(--floating-top);
+  }
+
+  header-search-popdown.is-open .search-popdown {
+    max-height: calc(var(--full-screen) - var(--bar-height) - var(--floating-top) - var(--floating-gap) * 2);
+  }
+
+  header-search-popdown.is-open .predictive-search {
+    max-height: calc(var(--full-screen) - var(--header-height) - var(--bar-height) - var(--floating-top));
+  }
+
+  &.js__header__stuck header-search-popdown.is-open .predictive-search {
+    max-height: calc(var(--full-screen) - var(--header-height) - var(--floating-top));
+  }
+}
+
+.header-floating__card {
+  --bg: var(--COLOR-MENU-BG);
+
+  position: relative;
+  background: var(--bg);
+}
+
+// Scroll-lock overrides
+[data-scroll-locked] .page-header:has(.header-floating) {
+  .toolbar,
+  .announcement__bar-holder--slider,
+  .announcement__bar {
+    padding-right: 0;
+  }
+
+  .announcement__wrapper {
+    width: calc(100vw - var(--floating-inset) * 2 - var(--scrollbar-width));
+  }
+
+  .announcement__bar-outer {
+    width: 100%;
+  }
 }

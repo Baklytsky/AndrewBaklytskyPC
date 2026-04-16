@@ -1,11 +1,4 @@
 {%- liquid
-  assign is_top = false
-  assign show_browser_error = false
-  if section.location == 'header'
-    assign is_top = true
-    assign show_browser_error = true
-  endif
-
   assign layout = section.settings.layout | default: 'marquee'
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
@@ -15,9 +8,6 @@
   assign border_color = section.settings.border_color
   assign text_font_size = section.settings.text_font_size
   assign show_border = section.settings.show_border
-  if section.location == 'header' and section.blocks.size == 0
-    assign show_border = false
-  endif
   assign show_arrows = section.settings.show_arrows | default: false
   assign text_align = section.settings.text_alignment | default: 'center'
   assign justify_content = 'flex-start'
@@ -28,9 +18,7 @@
   assign blocks_counter = 0
   assign block_count_desktop = 0
   assign block_count_mobile = 0
-  assign announcement_height = 'max(calc(var(--font-' | append: text_font_size | append: ') * var(--line-height-normal)), 36px)'
   assign announcement_modifier = ''
-  assign style_root = ''
 -%}
 
 {%- for block in section.blocks -%}
@@ -135,34 +123,10 @@
                 {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
               {%- endif -%}
 
-            {%- when 'message' -%}
-              {%- if block.settings.message -%}
-                {%- render 'free-shipping' block: block, show_progress_bar: false -%}
-              {%- endif -%}
-
             {%- when 'code' -%}
               {%- if block.settings.code != blank -%}
                 {{ block.settings.code }}
               {%- endif -%}
-
-            {%- when 'countdown' -%}
-              <div class="countdown-block" data-countdown-block>
-                <div class="countdown-block__text">
-                  {%- if block.settings.text != blank -%}
-                    {{ block.settings.text }}
-                  {%- endif -%}
-                </div>
-
-                <div class="countdown-block__timer">
-                  {%- render 'countdown-timer',
-                    end_date: block.settings.end_date,
-                    end_time: block.settings.end_time,
-                    period: block.settings.period,
-                    end_message: block.settings.end_message,
-                    hide_on_complete: block.settings.hide_on_complete,
-                  -%}
-                </div>
-              </div>
 
             {%- when 'collection' -%}
               {%- assign collection = collections[block.settings.collection] -%}
@@ -264,40 +228,10 @@
   --justify-content: {{ justify_content }};
 {%- endcapture -%}
 
-{%- if blocks_counter == 0 -%}
-  {%- capture style_root -%}
-    {{ style_root }}
-    --ANNOUNCEMENT-HEIGHT-DESKTOP: 0px;
-    --ANNOUNCEMENT-HEIGHT-MOBILE: 0px;
-  {%- endcapture -%}
-{%- elsif blocks_counter == block_count_desktop -%}
+{%- if blocks_counter == block_count_desktop and blocks_counter > 0 -%}
   {%- assign announcement_modifier = ' announcement__bar-outer--desktop' -%}
-  {%- capture style_root -%}
-    {{ style_root }}
-    --ANNOUNCEMENT-HEIGHT-DESKTOP: {{ announcement_height }};
-    --ANNOUNCEMENT-HEIGHT-MOBILE: 0px;
-  {%- endcapture -%}
-{%- elsif blocks_counter == block_count_mobile -%}
+{%- elsif blocks_counter == block_count_mobile and blocks_counter > 0 -%}
   {%- assign announcement_modifier = ' announcement__bar-outer--mobile' -%}
-  {%- capture style_root -%}
-    {{ style_root }}
-    --ANNOUNCEMENT-HEIGHT-DESKTOP: 0px;
-    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height }};
-  {%- endcapture -%}
-{%- else -%}
-  {%- capture style_root -%}
-    {{ style_root }}
-    --ANNOUNCEMENT-HEIGHT-DESKTOP: {{ announcement_height }};
-    --ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height }};
-  {%- endcapture -%}
-{%- endif -%}
-
-{%- if is_top -%}
-  {%- style -%}
-    :root {
-      {{ style_root }}
-    }
-  {%- endstyle -%}
 {%- endif -%}
 
 {%- render 'stylesheet', name: 'section-announcement.css' -%}
@@ -307,23 +241,13 @@
 
 <div
   id="Announcement--{{ section.id }}"
-  class="announcement__wrapper{% if is_top %} announcement__wrapper--top{% endif %}{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
+  class="announcement__wrapper{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
   data-announcement-wrapper
   data-section-id="{{ section.id }}"
   data-section-type="announcement"
   style="{{ style }}"
 >
-  {%- if show_browser_error -%}
-    <div class="announcement__bar announcement__bar--error section-padding">
-      <div class="announcement__message">
-        <div class="announcement__text {{ text_font_size }}">
-          <div class="announcement__main">{{ 'general.ie11_support_message' | t }}</div>
-        </div>
-      </div>
-    </div>
-  {%- endif -%}
-
-  {%- if is_top == false and section.settings.background_image != blank -%}
+  {%- if section.settings.background_image != blank -%}
     <div class="announcement__bg-image">
       {%- render 'image', image: section.settings.background_image, sizes: '100vw', cover: true -%}
     </div>
@@ -404,7 +328,7 @@
         {%- endif -%}
       </announcement-bar>
     {%- endif -%}
-  {%- elsif is_top == false -%}
+  {%- else -%}
     {%- render 'no-blocks' -%}
   {%- endif -%}
 </div>
