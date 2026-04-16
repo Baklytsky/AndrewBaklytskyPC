@@ -10,7 +10,8 @@ if (!customElements.get('header-search-popdown')) {
     const flip = Math.round(Math.max(base, Math.min(base + distance * perPixel, max)));
     const container = Math.round(flip * 0.9);
     const textReveal = Math.round(distance > 400 ? flip * 0.7 : flip * 0.4);
-    return {flip, container, textReveal};
+    const textRevealOut = Math.round(distance > 400 ? 0 : 100);
+    return {flip, container, textReveal, textRevealOut};
   }
 
   class SearchPopdownAnimator {
@@ -201,6 +202,17 @@ if (!customElements.get('header-search-popdown')) {
       const timing = getDurations(distance, el.config);
       const closeDuration = Math.round(timing.flip * 0.8);
 
+      // Hide input text immediately (reverse of the open reveal)
+      if (el.inputHolder) {
+        this.textRevealAnimation = el.inputHolder.animate(
+          [
+            {opacity: 1, transform: 'translateX(0)'},
+            {opacity: 0, transform: 'translateX(-8px)'},
+          ],
+          {duration: timing.textRevealOut, easing: 'ease-in', fill: 'forwards'}
+        );
+      }
+
       //  Reverse icon FLIP
       const clone = this.createClippedClone(el.destIcon, firstIconRect);
       el.submitButton.classList.add('search-popdown__submit--flip-hidden');
@@ -235,13 +247,16 @@ if (!customElements.get('header-search-popdown')) {
           this.flipAnimation?.cancel();
           this.containerAnimation?.cancel();
           this.closeButtonAnimation?.cancel();
+          this.textRevealAnimation?.cancel();
           this.flipAnimation = null;
           this.containerAnimation = null;
           this.closeButtonAnimation = null;
+          this.textRevealAnimation = null;
           document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
           el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
           el.triggerIcon.style.opacity = '';
           el.popdownClose.style.opacity = '';
+          if (el.inputHolder) el.inputHolder.style.opacity = '';
           el.popdown.style.clipPath = '';
           el.popdown.style.opacity = '';
           el.classList.remove('is-animating');
