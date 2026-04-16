@@ -100,7 +100,6 @@ if (!customElements.get('header-component')) {
       }
 
       checkWidth() {
-        console.log('checkWidth', this.minWidth);
         if (!this.minWidth) return;
 
         // Debounce execution to run at most every 150ms
@@ -110,9 +109,6 @@ if (!customElements.get('header-component')) {
           clearTimeout(this._resizeDebounce);
           this._resizeDebounce = setTimeout(() => {
             const isHamburgerMenu = theme.windowWidth < this.minWidth;
-            console.log('theme.windowWidth', theme.windowWidth);
-            console.log('this.minWidth', this.minWidth);
-            console.log('isHamburgerMenu', isHamburgerMenu);
 
             this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
 
@@ -136,8 +132,6 @@ if (!customElements.get('header-component')) {
 
           let total = 0;
           children.forEach((el) => {
-            console.log('el', el);
-            console.log('el.offsetWidth', el.offsetWidth);
             // Only include visible elements
             if (el.offsetParent !== null) {
               total += el.offsetWidth;
@@ -150,9 +144,6 @@ if (!customElements.get('header-component')) {
             minWidth = total;
             spacing = space;
           }
-
-          console.log('total', total);
-          console.log('space', space);
         });
 
         return minWidth + spacing;

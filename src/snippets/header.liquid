@@ -594,14 +594,22 @@
           {%- else -%}
             {%- comment -%} 'logo_above' is default case, this covers migrated settings {%- endcomment -%}
             <div class="header__desktop__upper" data-takes-space-wrapper>
-              <div data-child-takes-space class="header__desktop__bar__l">
+              <div class="header__desktop__bar__l">
                 {%- if show_socials -%}
-                  {%- render 'social-icons' -%}
+                  <div data-child-takes-space>
+                    {%- render 'social-icons' -%}
+                  </div>
                 {%- endif -%}
               </div>
               <div data-child-takes-space class="header__desktop__bar__c">{{ logos }}</div>
 
-              <div data-child-takes-space class="header__desktop__bar__r">{{ buttons }}</div>
+              <div class="header__desktop__bar__r">
+                {%- if buttons != blank -%}
+                  <div data-child-takes-space>
+                    {{ buttons }}
+                  </div>
+                {%- endif -%}
+              </div>
             </div>
             <div class="header__desktop__lower" data-takes-space-wrapper>
               <div data-child-takes-space class="header__desktop__bar__c">{{ menu_html }}</div>

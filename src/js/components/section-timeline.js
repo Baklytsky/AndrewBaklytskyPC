@@ -5,27 +5,41 @@ if (!customElements.get('timeline-component')) {
       constructor() {
         super();
 
-        this.contentRows = this.querySelectorAll('[data-timeline-row-content]');
-        this.imageRows = this.querySelectorAll('[data-timeline-row-image]');
-        this.titles = this.querySelectorAll('[data-timeline-title]');
         this.selectedIndex = 0;
         this.intervalId = null;
         this.isPaused = false;
       }
 
       connectedCallback() {
+        this.contentRows = this.querySelectorAll('[data-timeline-row-content]');
+        this.imageRows = this.querySelectorAll('[data-timeline-row-image]');
+        this.titles = this.querySelectorAll('[data-timeline-title]');
+
         if (this.contentRows.length === 0) return;
 
         this.titles.forEach((title) => {
           title.addEventListener('click', () => {
             const row = title.closest('[data-timeline-row-content]');
             const index = [...this.contentRows].indexOf(row);
-            if (index !== -1) this.selectRow(index);
+            if (index === -1) return;
+
+            if (index === this.selectedIndex) {
+              if (this.isPaused) this.resume();
+              else this.pause();
+            } else {
+              // Touch often fires mouseenter before click, leaving isPaused true; explicit row change should play.
+              this.isPaused = false;
+              this.classList.remove('is-paused');
+              this.selectRow(index);
+            }
           });
         });
 
         this.addEventListener('mouseenter', () => this.pause());
-        this.addEventListener('mouseleave', () => this.resume());
+        this.addEventListener('mouseleave', () => {
+          if (this.hasAttribute('data-editor-block-selected')) return;
+          this.resume();
+        });
 
         this.startAutoplay();
       }
