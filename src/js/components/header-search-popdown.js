@@ -25,12 +25,14 @@ if (!customElements.get('header-search-popdown')) {
         this.triggerIcon = this.querySelector('summary .icon-search');
         this.submitButton = this.popdown.querySelector('.search-popdown__submit');
         this.destIcon = this.submitButton?.querySelector('.icon-search');
+        this.inputHolder = this.popdown.querySelector('.input-holder');
         this.detailsToggleCallback = this.detailsToggleCallback.bind(this);
         this.mobileMenu = this.closest('mobile-menu');
         this.a11y = window.theme.a11y;
         this.flipAnimation = null;
         this.containerAnimation = null;
         this.closeButtonAnimation = null;
+        this.textRevealAnimation = null;
         this.config = {
           easing: this.dataset.easing || DEFAULT_EASING,
           duration: parseInt(this.dataset.duration, 10) || DEFAULT_DURATION,
@@ -62,6 +64,10 @@ if (!customElements.get('header-search-popdown')) {
           this.closeButtonAnimation.cancel();
           this.closeButtonAnimation = null;
         }
+        if (this.textRevealAnimation) {
+          this.textRevealAnimation.cancel();
+          this.textRevealAnimation = null;
+        }
         this.cleanup();
       }
 
@@ -73,6 +79,7 @@ if (!customElements.get('header-search-popdown')) {
         this.popdown.style.opacity = '';
         if (this.triggerIcon) this.triggerIcon.style.opacity = '';
         if (this.popdownClose) this.popdownClose.style.opacity = '';
+        if (this.inputHolder) this.inputHolder.style.opacity = '';
       }
 
       getContainerInset(triggerRect, popdownRect) {
@@ -142,6 +149,7 @@ if (!customElements.get('header-search-popdown')) {
         const firstIconRect = this.triggerIcon.getBoundingClientRect();
 
         // Force popdown visible to measure destination layout
+        if (this.inputHolder) this.inputHolder.style.opacity = '0';
         this.classList.add('is-animating');
         this.classList.add('is-open');
         // eslint-disable-next-line no-unused-expressions
@@ -183,8 +191,21 @@ if (!customElements.get('header-search-popdown')) {
           {duration: timing.container, easing: this.config.easing, fill: 'forwards'}
         );
 
-        // Cleanup after both animations settle
-        const allDone = Promise.all([this.flipAnimation.finished, this.containerAnimation.finished]);
+        // Reveal input text once icon arrives (delayed to start after flip)
+        if (this.inputHolder) {
+          this.textRevealAnimation = this.inputHolder.animate(
+            [
+              {opacity: 0, transform: 'translateX(-8px)'},
+              {opacity: 1, transform: 'translateX(0)'},
+            ],
+            {duration: 250, delay: timing.flip * 0.8, easing: 'ease-out', fill: 'forwards'}
+          );
+        }
+
+        // Cleanup after all animations settle
+        const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
+        if (this.textRevealAnimation) animations.push(this.textRevealAnimation.finished);
+        const allDone = Promise.all(animations);
 
         allDone
           .then(() => {
@@ -194,11 +215,14 @@ if (!customElements.get('header-search-popdown')) {
 
             this.flipAnimation?.cancel();
             this.containerAnimation?.cancel();
+            this.textRevealAnimation?.cancel();
             this.flipAnimation = null;
             this.containerAnimation = null;
+            this.textRevealAnimation = null;
 
             this.popdown.style.clipPath = '';
             this.popdown.style.opacity = '';
+            if (this.inputHolder) this.inputHolder.style.opacity = '';
             this.classList.remove('is-animating');
             this.a11y.trapFocus(this.popdown, {
               elementToFocus: this.popdown.querySelector('input:not([type="hidden"])'),
