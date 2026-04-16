@@ -1,6 +1,6 @@
 if (!customElements.get('header-search-popdown')) {
-  const DEFAULT_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
-  const DEFAULT_DURATION = 400;
+  const defaultEasing = 'cubic-bezier(0.2, 0, 0, 1)';
+  const defaultDuration = 400;
   const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function getDurations(distance, config) {
@@ -9,9 +9,10 @@ if (!customElements.get('header-search-popdown')) {
     const max = base + 300;
     const flip = Math.round(Math.max(base, Math.min(base + distance * perPixel, max)));
     const container = Math.round(flip * 0.9);
+    const close = Math.round(flip * 0.8);
     const textReveal = Math.round(distance > 400 ? flip * 0.7 : flip * 0.4);
     const textRevealOut = Math.round(distance > 400 ? 0 : 100);
-    return {flip, container, textReveal, textRevealOut};
+    return {flip, container, close, textReveal, textRevealOut};
   }
 
   class SearchPopdownAnimator {
@@ -200,7 +201,6 @@ if (!customElements.get('header-search-popdown')) {
       const dy = lastIconRect.top + (lastIconRect.height - firstIconRect.height) / 2 - firstIconRect.top;
       const distance = Math.hypot(dx, dy);
       const timing = getDurations(distance, el.config);
-      const closeDuration = Math.round(timing.flip * 0.8);
 
       // Hide input text immediately (reverse of the open reveal)
       if (el.inputHolder) {
@@ -221,7 +221,7 @@ if (!customElements.get('header-search-popdown')) {
       const scale = lastIconRect.width / firstIconRect.width;
 
       this.flipAnimation = clone.animate([{transform: 'translate(0, 0) scale(1)'}, {transform: `translate(${dx}px, ${dy}px) scale(${scale})`}], {
-        duration: closeDuration,
+        duration: timing.close,
         easing: el.config.easing,
         fill: 'forwards',
       });
@@ -239,7 +239,7 @@ if (!customElements.get('header-search-popdown')) {
           {clipPath: startClip, opacity: 1},
           {clipPath: endClip, opacity: 0.4},
         ],
-        {duration: closeDuration, easing: el.config.easing, fill: 'forwards'}
+        {duration: timing.close, easing: el.config.easing, fill: 'forwards'}
       );
 
       return Promise.all([this.flipAnimation.finished, this.containerAnimation.finished, this.closeButtonAnimation.finished])
@@ -283,8 +283,8 @@ if (!customElements.get('header-search-popdown')) {
         this.mobileMenu = this.closest('mobile-menu');
         this.a11y = window.theme.a11y;
         this.config = {
-          easing: this.dataset.easing || DEFAULT_EASING,
-          duration: parseInt(this.dataset.duration, 10) || DEFAULT_DURATION,
+          easing: this.dataset.easing || defaultEasing,
+          duration: parseInt(this.dataset.duration, 10) || defaultDuration,
         };
         this.animator = new SearchPopdownAnimator(this);
       }
