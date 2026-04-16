@@ -12,8 +12,7 @@ if (!customElements.get('header-search-popdown')) {
     const close = Math.round(flip * 0.8);
     const textReveal = Math.round(distance > 400 ? flip * 0.7 : flip * 0.4);
     const textRevealOut = Math.round(distance > 400 ? 0 : 100);
-    const resultsReveal = textReveal;
-    return {flip, container, close, textReveal, textRevealOut, resultsReveal};
+    return {flip, container, close, textReveal, textRevealOut};
   }
 
   class SearchPopdownAnimator {
@@ -23,7 +22,6 @@ if (!customElements.get('header-search-popdown')) {
       this.containerAnimation = null;
       this.closeButtonAnimation = null;
       this.textRevealAnimation = null;
-      this.resultsAnimation = null;
     }
 
     cancel() {
@@ -43,10 +41,6 @@ if (!customElements.get('header-search-popdown')) {
         this.textRevealAnimation.cancel();
         this.textRevealAnimation = null;
       }
-      if (this.resultsAnimation) {
-        this.resultsAnimation.cancel();
-        this.resultsAnimation = null;
-      }
       this.cleanup();
     }
 
@@ -60,11 +54,6 @@ if (!customElements.get('header-search-popdown')) {
       if (el.triggerIcon) el.triggerIcon.style.opacity = '';
       if (el.popdownClose) el.popdownClose.style.opacity = '';
       if (el.inputHolder) el.inputHolder.style.opacity = '';
-      if (el.predictiveSearchContainer) {
-        el.predictiveSearchContainer.style.opacity = '';
-        el.predictiveSearchContainer.style.visibility = '';
-        el.predictiveSearchContainer.style.transition = '';
-      }
     }
 
     getContainerInset(triggerRect, popdownRect) {
@@ -168,11 +157,6 @@ if (!customElements.get('header-search-popdown')) {
         );
       }
 
-      // Check if results should be revealed after the FLIP completes
-      const searchInput = el.popdown.querySelector('input[type="search"]');
-      const hasSearchValue = searchInput && searchInput.value.trim().length > 0;
-      const predictiveSearchEl = el.popdown.querySelector('predictive-search');
-
       // Wait for all animations to settle, then clean up
       const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
       if (this.textRevealAnimation) animations.push(this.textRevealAnimation.finished);
@@ -192,26 +176,6 @@ if (!customElements.get('header-search-popdown')) {
           el.popdown.style.opacity = '';
           if (el.inputHolder) el.inputHolder.style.opacity = '';
           el.classList.remove('is-animating');
-
-          // Reveal results AFTER clip-path is removed (clip-path clips absolute children)
-          if (hasSearchValue && el.predictiveSearchContainer && predictiveSearchEl) {
-            el.predictiveSearchContainer.style.transition = 'none';
-            el.predictiveSearchContainer.style.opacity = '0';
-            el.predictiveSearchContainer.style.visibility = 'visible';
-            predictiveSearchEl.setAttribute('open', 'true');
-            this.resultsAnimation = el.predictiveSearchContainer.animate([{opacity: 0}, {opacity: 1}], {duration: timing.resultsReveal, easing: 'ease-out', fill: 'forwards'});
-            this.resultsAnimation.finished
-              .then(() => {
-                this.resultsAnimation?.cancel();
-                this.resultsAnimation = null;
-                if (el.predictiveSearchContainer) {
-                  el.predictiveSearchContainer.style.opacity = '';
-                  el.predictiveSearchContainer.style.visibility = '';
-                  el.predictiveSearchContainer.style.transition = '';
-                }
-              })
-              .catch(() => {});
-          }
         })
         .catch(() => {});
     }
@@ -284,22 +248,15 @@ if (!customElements.get('header-search-popdown')) {
           this.containerAnimation?.cancel();
           this.closeButtonAnimation?.cancel();
           this.textRevealAnimation?.cancel();
-          this.resultsAnimation?.cancel();
           this.flipAnimation = null;
           this.containerAnimation = null;
           this.closeButtonAnimation = null;
           this.textRevealAnimation = null;
-          this.resultsAnimation = null;
           document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
           el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
           el.triggerIcon.style.opacity = '';
           el.popdownClose.style.opacity = '';
           if (el.inputHolder) el.inputHolder.style.opacity = '';
-          if (el.predictiveSearchContainer) {
-            el.predictiveSearchContainer.style.opacity = '';
-            el.predictiveSearchContainer.style.visibility = '';
-            el.predictiveSearchContainer.style.transition = '';
-          }
           el.popdown.style.clipPath = '';
           el.popdown.style.opacity = '';
           el.classList.remove('is-animating');
@@ -322,7 +279,6 @@ if (!customElements.get('header-search-popdown')) {
         this.submitButton = this.popdown.querySelector('.search-popdown__submit');
         this.destIcon = this.submitButton?.querySelector('.icon-search');
         this.inputHolder = this.popdown.querySelector('.input-holder');
-        this.predictiveSearchContainer = this.popdown.querySelector('.predictive-search');
         this.detailsToggleCallback = this.detailsToggleCallback.bind(this);
         this.mobileMenu = this.closest('mobile-menu');
         this.a11y = window.theme.a11y;
@@ -384,7 +340,6 @@ if (!customElements.get('header-search-popdown')) {
 
         this.animator.cancel();
         document.body.removeEventListener('click', this.onBodyClickEvent);
-        this.closePredictiveSearch();
 
         if (prefersReducedMotion() || !this.triggerIcon || !this.destIcon) {
           this.classList.remove('is-open');
@@ -399,14 +354,6 @@ if (!customElements.get('header-search-popdown')) {
           this.a11y.removeTrapFocus();
           this.unlockScroll();
         });
-      }
-
-      closePredictiveSearch() {
-        const predictiveSearch = this.popdown.querySelector('predictive-search');
-        if (!predictiveSearch) return;
-        if (predictiveSearch.isOpen || predictiveSearch.hasAttribute('open')) {
-          predictiveSearch.close();
-        }
       }
     }
   );
