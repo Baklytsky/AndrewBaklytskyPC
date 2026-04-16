@@ -139,6 +139,22 @@ header-search-popdown.is-animating .search-popdown {
   will-change: clip-path, opacity;
 }
 
+// Preserve layout during close so the close button doesn't shift before fading
+.theme__header header-search-popdown.is-animating:not(.is-open) .search-popdown {
+  width: 100vw;
+  padding-right: var(--scrollbar-width);
+}
+
+.header-floating header-search-popdown.is-animating:not(.is-open) .search-popdown {
+  width: 100%;
+  padding-right: 0;
+}
+
+header-search-popdown.is-animating:not(.is-open) [data-popdown-close] {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
 header-search-popdown.is-animating .predictive-search,
 header-search-popdown.is-animating .predictive-search--empty {
   opacity: 0;

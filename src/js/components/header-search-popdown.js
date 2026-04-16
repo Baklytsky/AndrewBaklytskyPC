@@ -20,7 +20,6 @@ if (!customElements.get('header-search-popdown')) {
       this.host = host;
       this.flipAnimation = null;
       this.containerAnimation = null;
-      this.closeButtonAnimation = null;
       this.textRevealAnimation = null;
     }
 
@@ -32,10 +31,6 @@ if (!customElements.get('header-search-popdown')) {
       if (this.containerAnimation) {
         this.containerAnimation.cancel();
         this.containerAnimation = null;
-      }
-      if (this.closeButtonAnimation) {
-        this.closeButtonAnimation.cancel();
-        this.closeButtonAnimation = null;
       }
       if (this.textRevealAnimation) {
         this.textRevealAnimation.cancel();
@@ -52,7 +47,6 @@ if (!customElements.get('header-search-popdown')) {
       el.popdown.style.clipPath = '';
       el.popdown.style.opacity = '';
       if (el.triggerIcon) el.triggerIcon.style.opacity = '';
-      if (el.popdownClose) el.popdownClose.style.opacity = '';
       if (el.inputHolder) el.inputHolder.style.opacity = '';
     }
 
@@ -189,9 +183,6 @@ if (!customElements.get('header-search-popdown')) {
       const triggerRect = el.summary.getBoundingClientRect();
       const lastIconRect = el.triggerIcon.getBoundingClientRect();
 
-      // Fade out close button immediately so it doesn't snap
-      this.closeButtonAnimation = el.popdownClose.animate([{opacity: 1}, {opacity: 0}], {duration: 120, easing: 'ease-out', fill: 'forwards'});
-
       // Keep popdown visible during the close animation
       el.classList.add('is-animating');
       el.classList.remove('is-open');
@@ -242,20 +233,17 @@ if (!customElements.get('header-search-popdown')) {
         {duration: timing.close, easing: el.config.easing, fill: 'forwards'}
       );
 
-      return Promise.all([this.flipAnimation.finished, this.containerAnimation.finished, this.closeButtonAnimation.finished])
+      return Promise.all([this.flipAnimation.finished, this.containerAnimation.finished])
         .then(() => {
           this.flipAnimation?.cancel();
           this.containerAnimation?.cancel();
-          this.closeButtonAnimation?.cancel();
           this.textRevealAnimation?.cancel();
           this.flipAnimation = null;
           this.containerAnimation = null;
-          this.closeButtonAnimation = null;
           this.textRevealAnimation = null;
           document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
           el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
           el.triggerIcon.style.opacity = '';
-          el.popdownClose.style.opacity = '';
           if (el.inputHolder) el.inputHolder.style.opacity = '';
           el.popdown.style.clipPath = '';
           el.popdown.style.opacity = '';
