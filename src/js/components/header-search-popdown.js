@@ -2,46 +2,81 @@ if (!customElements.get('header-search-popdown')) {
   const defaultEasing = 'cubic-bezier(0.2, 0, 0, 1)';
   const defaultDuration = 400;
   const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function getDurations(distance, config) {
+  const clamp = (v, min, max) => Math.max(min, Math.min(v, max));
+  /*
+   *  Animation timeline: includes all durations, delays
+   *  and easings. Each entry is `{duration, delay, easing}` and can be
+   *  spread directly into `element.animate()` options.
+   *
+   *  Open sequence           ──┬── swap ─────────── swap + flight ──▶
+   *    [0 → swap]              │   triggerSwap    (text scales down, clone scales up in place)
+   *    [swap → swap+flight]    │   flight         (clone translates to the popdown icon)
+   *    [swap → swap+container] │   container      (clip-path + opacity expansion)
+   *    [swap+inputWait → …]    │   inputReveal    (search placeholder fades in)
+   *
+   *  Close sequence          ──┬── closeFlight ──── closeFlight + swap ──▶
+   *    [0 → closeFlight]       │   flight, container, inputHide  (run in parallel)
+   *    [closeFlight → +swap]   │   triggerSwap    (clone scales down, text scales up)
+   *
+   *  `swap` is non-zero only when the trigger is text (show_icons = false).
+   *  For icon triggers it collapses to 0, reducing each sequence to a single
+   *  phase identical to the original icon-only animation.
+   */
+  function buildTimeline({distance, config, isTextMode}) {
     const base = config.duration;
-    const perPixel = 0.35;
-    const max = base + 300;
-    const flip = Math.round(Math.max(base, Math.min(base + distance * perPixel, max)));
-    const container = Math.round(flip * 0.9);
-    const close = Math.round(flip * 0.8);
-    const textReveal = Math.round(distance > 400 ? flip * 0.7 : flip * 0.4);
-    const textRevealOut = Math.round(distance > 400 ? 0 : 100);
-    return {flip, container, close, textReveal, textRevealOut};
+    const longFlight = distance > 400;
+
+    // Flight duration scales with travel distance, clamped to a sane range.
+    const flight = Math.round(clamp(base + distance * 0.35, base, base + 300));
+    // Close is a touch snappier than open.
+    const closeFlight = Math.round(flight * 0.8);
+    // Container lags slightly behind the flight for a natural arrival.
+    const container = Math.round(flight * 0.9);
+    // Text ↔ icon morph phase; only present when trigger is text.
+    const swap = isTextMode ? 200 : 0;
+    // Search placeholder timing.
+    const inputReveal = 250;
+    const inputHide = longFlight ? 0 : 100;
+    // Placeholder starts revealing later on long flights (icon close to destination).
+    const inputWait = Math.round(longFlight ? flight * 0.7 : flight * 0.4);
+
+    return {
+      open: {
+        triggerSwap: {duration: swap, delay: 0, easing: 'ease-in'},
+        flight: {duration: flight, delay: swap, easing: config.easing},
+        container: {duration: container, delay: swap, easing: config.easing},
+        inputReveal: {duration: inputReveal, delay: swap + inputWait, easing: 'ease-out'},
+      },
+      close: {
+        flight: {duration: closeFlight, delay: 0, easing: config.easing},
+        container: {duration: closeFlight, delay: 0, easing: config.easing},
+        inputHide: {duration: inputHide, delay: 0, easing: 'ease-in'},
+        triggerSwap: {duration: swap, delay: closeFlight, easing: 'ease-out'},
+      },
+    };
   }
 
   class SearchPopdownAnimator {
     constructor(host) {
       this.host = host;
-      this.flipAnimation = null;
-      this.containerAnimation = null;
-      this.textRevealAnimation = null;
-      this.triggerFadeAnimation = null;
+      // All running WAAPI animations live on this object. Makes cancel /
+      // waitForAnimations trivial and keeps related state together.
+      this.animations = {flip: null, container: null, inputReveal: null, triggerSwap: null};
     }
 
     cancel() {
-      if (this.flipAnimation) {
-        this.flipAnimation.cancel();
-        this.flipAnimation = null;
-      }
-      if (this.containerAnimation) {
-        this.containerAnimation.cancel();
-        this.containerAnimation = null;
-      }
-      if (this.textRevealAnimation) {
-        this.textRevealAnimation.cancel();
-        this.textRevealAnimation = null;
-      }
-      if (this.triggerFadeAnimation) {
-        this.triggerFadeAnimation.cancel();
-        this.triggerFadeAnimation = null;
-      }
+      Object.keys(this.animations).forEach((key) => {
+        this.animations[key]?.cancel();
+        this.animations[key] = null;
+      });
       this.cleanup();
+    }
+
+    waitForAnimations() {
+      const pending = Object.values(this.animations)
+        .filter(Boolean)
+        .map((a) => a.finished);
+      return Promise.all(pending);
     }
 
     cleanup() {
@@ -114,8 +149,9 @@ if (!customElements.get('header-search-popdown')) {
     open() {
       const el = this.host;
 
-      // FIRST: measure visible trigger (icon or text) before layout change
+      // First: measure visible trigger (icon or text) before layout change
       const trigger = el.getVisibleTrigger();
+      const isTextMode = trigger.mode !== 'icon';
       const triggerRect = el.summary.getBoundingClientRect();
       const firstRect = trigger.rect;
 
@@ -124,113 +160,137 @@ if (!customElements.get('header-search-popdown')) {
       el.classList.add('is-animating');
       el.classList.add('is-open');
 
-      // LAST: measure expanded popdown and destination icon
+      // Last: measure expanded popdown and destination icon
       const popdownRect = el.popdown.getBoundingClientRect();
       const lastIconRect = el.destIcon.getBoundingClientRect();
 
-      // Flight endpoints: clone is anchored next to the trigger (text) or on it (icon)
+      // Flight endpoints: calculate the destination center point for the icon
       const destCX = lastIconRect.left + lastIconRect.width / 2;
       const destCY = lastIconRect.top + lastIconRect.height / 2;
       const anchor = this.getFlightAnchor(trigger);
       const dx = destCX - anchor.cx;
       const dy = destCY - anchor.cy;
       const distance = Math.hypot(dx, dy);
-      const timing = getDurations(distance, el.config);
+      const {open: t} = buildTimeline({distance, config: el.config, isTextMode});
 
-      // Always clone the destination icon, placed at the flight anchor
-      const clonePlacement = {
+      // Create the clone of the destination icon
+      const clone = this.createClone(el.destIcon, {
         width: lastIconRect.width,
         height: lastIconRect.height,
         top: anchor.cy - lastIconRect.height / 2,
         left: anchor.cx - lastIconRect.width / 2,
-      };
-      const clone = this.createClone(el.destIcon, clonePlacement);
+      });
       el.submitButton.classList.add('search-popdown__submit--flip-hidden');
 
-      // Text mode: run a pre-flight swap (text shrinks, icon grows) before the flight.
-      // Icon mode: the flight itself carries the scale.
-      const isTextMode = trigger.mode !== 'icon';
-      const swapPhase = isTextMode ? Math.min(150, Math.round(timing.flip * 0.25)) : 0;
-
+      // Clone flight:
+      // icon mode: single translate + scale
+      // text mode: scale-up in place during `swap`, then translate during `flight`.
       if (!isTextMode) {
         el.triggerIcon.style.opacity = '0';
         const startScale = firstRect.width / lastIconRect.width;
-        this.flipAnimation = clone.animate([{transform: `translate(0, 0) scale(${startScale})`}, {transform: `translate(${dx}px, ${dy}px) scale(1)`}], {
-          duration: timing.flip,
-          easing: el.config.easing,
-          fill: 'forwards',
-        });
-      } else {
-        // Clone: scale 0 → 1 at origin during swap, then fly to destination
-        const flipTotal = timing.flip + swapPhase;
-        const swapEnd = swapPhase / flipTotal;
-        this.flipAnimation = clone.animate(
+        this.animations.flip = clone.animate(
           [
-            {transform: 'translate(0, 0) scale(0)', offset: 0, easing: 'ease-out'},
-            {transform: 'translate(0, 0) scale(1)', offset: swapEnd, easing: el.config.easing},
-            {transform: `translate(${dx}px, ${dy}px) scale(1)`, offset: 1},
+            {
+              transform: `translate(0, 0) scale(${startScale})`,
+            },
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(1)`,
+            },
           ],
-          {duration: flipTotal, fill: 'forwards'}
+          {
+            ...t.flight,
+            fill: 'forwards',
+          }
         );
-
-        // Text: scale 1 → 0 during the swap phase
-        this.triggerFadeAnimation = trigger.el.animate([{transform: 'scale(1)'}, {transform: 'scale(0)'}], {duration: swapPhase, easing: 'ease-in', fill: 'forwards'});
+      } else {
+        const total = t.triggerSwap.duration + t.flight.duration;
+        const swapEnd = t.triggerSwap.duration / total;
+        this.animations.flip = clone.animate(
+          [
+            {
+              transform: 'translate(0, 0) scale(0)',
+              offset: 0,
+              easing: t.triggerSwap.easing,
+            },
+            {
+              transform: 'translate(0, 0) scale(1)',
+              offset: swapEnd,
+              easing: t.flight.easing,
+            },
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(1)`,
+              offset: 1,
+            },
+          ],
+          {
+            duration: total,
+            fill: 'forwards',
+          }
+        );
+        // Trigger text: scales down during the swap phase.
+        this.animations.triggerSwap = trigger.el.animate(
+          [
+            {
+              transform: 'scale(1)',
+            },
+            {
+              transform: 'scale(0)',
+            },
+          ],
+          {
+            ...t.triggerSwap,
+            fill: 'forwards',
+          }
+        );
       }
 
-      //  Container expansion via clip-path (X-axis only). In text mode the
-      //  container is held invisible during the swap phase and only starts
-      //  expanding (and fading in) strictly after the swap completes.
+      // Container:
+      // clip-path + opacity expansion. Held invisible during the
+      // swap phase so it only appears strictly after the morph completes.
       const inset = this.getContainerInset(triggerRect, popdownRect);
       const startClip = `inset(0px ${inset.right}px 0px ${inset.left}px round 6px)`;
       const endClip = 'inset(0px 0px 0px 0px round 0px)';
-
-      this.containerAnimation = el.popdown.animate(
+      this.animations.container = el.popdown.animate(
         [
-          {clipPath: startClip, opacity: isTextMode ? 0 : 0.8},
-          {clipPath: endClip, opacity: 1},
+          {
+            clipPath: startClip,
+            opacity: isTextMode ? 0 : 0.8,
+          },
+          {
+            clipPath: endClip,
+            opacity: 1,
+          },
         ],
-        {duration: timing.container, delay: swapPhase, easing: el.config.easing, fill: isTextMode ? 'both' : 'forwards'}
+        {
+          ...t.container,
+          fill: isTextMode ? 'both' : 'forwards',
+        }
       );
 
-      // Reveal input text once icon arrives (delayed to start after flip).
-      // In text mode, shift the delay to run relative to when the flight starts.
+      // Input placeholder: fades in as the icon nears the destination.
       if (el.inputHolder) {
-        this.textRevealAnimation = el.inputHolder.animate(
+        this.animations.inputReveal = el.inputHolder.animate(
           [
-            {opacity: 0, transform: 'translateX(-8px)'},
-            {opacity: 1, transform: 'translateX(0)'},
+            {
+              opacity: 0,
+              transform: 'translateX(-8px)',
+            },
+            {
+              opacity: 1,
+              transform: 'translateX(0)',
+            },
           ],
-          {duration: 250, delay: swapPhase + timing.textReveal, easing: 'ease-out', fill: 'forwards'}
+          {
+            ...t.inputReveal,
+            fill: 'forwards',
+          }
         );
       }
 
-      // Wait for all animations to settle, then clean up
-      const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
-      if (this.textRevealAnimation) animations.push(this.textRevealAnimation.finished);
-      if (this.triggerFadeAnimation) animations.push(this.triggerFadeAnimation.finished);
-
-      return Promise.all(animations)
+      return this.waitForAnimations()
         .then(() => {
           if (!el.classList.contains('is-open')) return;
-          clone.remove();
-          el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
-          this.flipAnimation?.cancel();
-          this.containerAnimation?.cancel();
-          this.textRevealAnimation?.cancel();
-          this.triggerFadeAnimation?.cancel();
-          this.flipAnimation = null;
-          this.containerAnimation = null;
-          this.textRevealAnimation = null;
-          this.triggerFadeAnimation = null;
-          el.popdown.style.clipPath = '';
-          el.popdown.style.opacity = '';
-          if (el.triggerIcon) el.triggerIcon.style.opacity = '';
-          if (el.triggerText) {
-            el.triggerText.style.opacity = '';
-            el.triggerText.style.transform = '';
-          }
-          if (el.inputHolder) el.inputHolder.style.opacity = '';
-          el.classList.remove('is-animating');
+          this.cancel();
         })
         .catch(() => {});
     }
@@ -238,109 +298,136 @@ if (!customElements.get('header-search-popdown')) {
     close() {
       const el = this.host;
 
-      // Measure current state while popdown is still visible
       const trigger = el.getVisibleTrigger();
+      const isTextMode = trigger.mode !== 'icon';
       const popdownRect = el.popdown.getBoundingClientRect();
       const firstIconRect = el.destIcon.getBoundingClientRect();
       const triggerRect = el.summary.getBoundingClientRect();
 
-      // Keep popdown visible during the close animation
       el.classList.add('is-animating');
       el.classList.remove('is-open');
 
-      // Flight endpoints: clone lands next to the trigger (text) or on it (icon)
       const destCX = firstIconRect.left + firstIconRect.width / 2;
       const destCY = firstIconRect.top + firstIconRect.height / 2;
       const anchor = this.getFlightAnchor(trigger);
       const dx = anchor.cx - destCX;
       const dy = anchor.cy - destCY;
       const distance = Math.hypot(dx, dy);
-      const timing = getDurations(distance, el.config);
+      const {close: t} = buildTimeline({distance, config: el.config, isTextMode});
 
-      // Hide input text immediately (reverse of the open reveal)
+      // Input placeholder: hide immediately (reverse of open reveal).
       if (el.inputHolder) {
-        this.textRevealAnimation = el.inputHolder.animate(
+        this.animations.inputReveal = el.inputHolder.animate(
           [
-            {opacity: 1, transform: 'translateX(0)'},
-            {opacity: 0, transform: 'translateX(-8px)'},
+            {
+              opacity: 1,
+              transform: 'translateX(0)',
+            },
+            {
+              opacity: 0,
+              transform: 'translateX(-8px)',
+            },
           ],
-          {duration: timing.textRevealOut, easing: 'ease-in', fill: 'forwards'}
+          {
+            ...t.inputHide,
+            fill: 'forwards',
+          }
         );
       }
 
-      //  Reverse icon FLIP: clone dest icon at its current position
       const clone = this.createClippedClone(el.destIcon, firstIconRect);
       el.submitButton.classList.add('search-popdown__submit--flip-hidden');
 
-      // Icon mode: fly with a linear scale.
-      // Text mode: fly first, then run a swap (clone shrinks, text grows).
-      if (trigger.mode === 'icon') {
+      // Clone flight:
+      // icon mode: single translate+scale; text mode: flight
+      // during `flight`, then shrink during `triggerSwap`.
+      if (!isTextMode) {
         el.triggerIcon.style.opacity = '0';
         const endScale = trigger.rect.width / firstIconRect.width;
-        this.flipAnimation = clone.animate([{transform: 'translate(0, 0) scale(1)'}, {transform: `translate(${dx}px, ${dy}px) scale(${endScale})`}], {
-          duration: timing.close,
-          easing: el.config.easing,
-          fill: 'forwards',
-        });
-      } else {
-        const swapPhase = Math.min(150, Math.round(timing.close * 0.25));
-        const flipTotal = timing.close + swapPhase;
-        const flightEnd = timing.close / flipTotal;
-        this.flipAnimation = clone.animate(
+        this.animations.flip = clone.animate(
           [
-            {transform: 'translate(0, 0) scale(1)', offset: 0, easing: el.config.easing},
-            {transform: `translate(${dx}px, ${dy}px) scale(1)`, offset: flightEnd, easing: 'ease-in'},
-            {transform: `translate(${dx}px, ${dy}px) scale(0)`, offset: 1},
+            {
+              transform: 'translate(0, 0) scale(1)',
+            },
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(${endScale})`,
+            },
           ],
-          {duration: flipTotal, fill: 'forwards'}
+          {
+            ...t.flight,
+            fill: 'forwards',
+          }
         );
-
-        // Text: kept at scale 0 during the flight, scales back to 1 during the swap phase
+      } else {
+        const total = t.flight.duration + t.triggerSwap.duration;
+        const flightEnd = t.flight.duration / total;
+        this.animations.flip = clone.animate(
+          [
+            {
+              transform: 'translate(0, 0) scale(1)',
+              offset: 0,
+              easing: t.flight.easing,
+            },
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(1)`,
+              offset: flightEnd,
+              easing: t.triggerSwap.easing,
+            },
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(0)`,
+              offset: 1,
+            },
+          ],
+          {
+            duration: total,
+            fill: 'forwards',
+          }
+        );
+        // Trigger text: hidden during flight, scales back to 1 during swap.
         trigger.el.style.transform = 'scale(0)';
-        this.triggerFadeAnimation = trigger.el.animate([{transform: 'scale(0)'}, {transform: 'scale(1)'}], {duration: swapPhase, delay: timing.close, easing: 'ease-out', fill: 'forwards'});
+        this.animations.triggerSwap = trigger.el.animate(
+          [
+            {
+              transform: 'scale(0)',
+            },
+            {
+              transform: 'scale(1)',
+            },
+          ],
+          {
+            ...t.triggerSwap,
+            fill: 'forwards',
+          }
+        );
       }
 
-      //  Container contraction via clip-path (X-axis only, matching open)
+      // Container:
+      // clip-path contraction matching the open expansion.
       const inset = this.getContainerInset(triggerRect, popdownRect);
       const headerEl = el.closest('[data-header-height]');
       const headerRect = headerEl ? headerEl.getBoundingClientRect() : null;
       const bottomClip = headerRect ? Math.max(0, popdownRect.bottom - headerRect.bottom) : 0;
       const startClip = `inset(0px 0px ${bottomClip}px 0px round 0px)`;
       const endClip = `inset(0px ${inset.right}px ${bottomClip}px ${inset.left}px round 6px)`;
-
-      this.containerAnimation = el.popdown.animate(
+      this.animations.container = el.popdown.animate(
         [
-          {clipPath: startClip, opacity: 1},
-          {clipPath: endClip, opacity: 0.4},
+          {
+            clipPath: startClip,
+            opacity: 1,
+          },
+          {
+            clipPath: endClip,
+            opacity: 0.4,
+          },
         ],
-        {duration: timing.close, easing: el.config.easing, fill: 'forwards'}
+        {
+          ...t.container,
+          fill: 'forwards',
+        }
       );
 
-      const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
-      if (this.triggerFadeAnimation) animations.push(this.triggerFadeAnimation.finished);
-
-      return Promise.all(animations)
-        .then(() => {
-          this.flipAnimation?.cancel();
-          this.containerAnimation?.cancel();
-          this.textRevealAnimation?.cancel();
-          this.triggerFadeAnimation?.cancel();
-          this.flipAnimation = null;
-          this.containerAnimation = null;
-          this.textRevealAnimation = null;
-          this.triggerFadeAnimation = null;
-          document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
-          el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
-          if (el.triggerIcon) el.triggerIcon.style.opacity = '';
-          if (el.triggerText) {
-            el.triggerText.style.opacity = '';
-            el.triggerText.style.transform = '';
-          }
-          if (el.inputHolder) el.inputHolder.style.opacity = '';
-          el.popdown.style.clipPath = '';
-          el.popdown.style.opacity = '';
-          el.classList.remove('is-animating');
-        })
+      return this.waitForAnimations()
+        .then(() => this.cancel())
         .catch(() => {});
     }
   }
