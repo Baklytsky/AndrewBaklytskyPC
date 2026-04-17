@@ -21,6 +21,7 @@ if (!customElements.get('header-search-popdown')) {
       this.flipAnimation = null;
       this.containerAnimation = null;
       this.textRevealAnimation = null;
+      this.triggerFadeAnimation = null;
     }
 
     cancel() {
@@ -36,6 +37,10 @@ if (!customElements.get('header-search-popdown')) {
         this.textRevealAnimation.cancel();
         this.textRevealAnimation = null;
       }
+      if (this.triggerFadeAnimation) {
+        this.triggerFadeAnimation.cancel();
+        this.triggerFadeAnimation = null;
+      }
       this.cleanup();
     }
 
@@ -47,6 +52,10 @@ if (!customElements.get('header-search-popdown')) {
       el.popdown.style.clipPath = '';
       el.popdown.style.opacity = '';
       if (el.triggerIcon) el.triggerIcon.style.opacity = '';
+      if (el.triggerText) {
+        el.triggerText.style.opacity = '';
+        el.triggerText.style.transform = '';
+      }
       if (el.inputHolder) el.inputHolder.style.opacity = '';
     }
 
@@ -56,6 +65,16 @@ if (!customElements.get('header-search-popdown')) {
         right: Math.max(0, popdownRect.right - triggerRect.right),
         bottom: Math.max(0, popdownRect.bottom - triggerRect.bottom),
         left: Math.max(0, triggerRect.left - popdownRect.left),
+      };
+    }
+
+    // Where the clone sits at the trigger-side end of the flight.
+    // Always centered on the visible trigger (icon or text).
+    getFlightAnchor(trigger) {
+      const rect = trigger.rect;
+      return {
+        cx: rect.left + rect.width / 2,
+        cy: rect.top + rect.height / 2,
       };
     }
 
@@ -95,9 +114,10 @@ if (!customElements.get('header-search-popdown')) {
     open() {
       const el = this.host;
 
-      // FIRST: measure trigger positions before layout change
+      // FIRST: measure visible trigger (icon or text) before layout change
+      const trigger = el.getVisibleTrigger();
       const triggerRect = el.summary.getBoundingClientRect();
-      const firstIconRect = el.triggerIcon.getBoundingClientRect();
+      const firstRect = trigger.rect;
 
       // Hide input text before popdown becomes visible
       if (el.inputHolder) el.inputHolder.style.opacity = '0';
@@ -108,52 +128,86 @@ if (!customElements.get('header-search-popdown')) {
       const popdownRect = el.popdown.getBoundingClientRect();
       const lastIconRect = el.destIcon.getBoundingClientRect();
 
-      // Calculate travel distance for adaptive timing
-      const dx = lastIconRect.left + (lastIconRect.width - firstIconRect.width) / 2 - firstIconRect.left;
-      const dy = lastIconRect.top + (lastIconRect.height - firstIconRect.height) / 2 - firstIconRect.top;
+      // Flight endpoints: clone is anchored next to the trigger (text) or on it (icon)
+      const destCX = lastIconRect.left + lastIconRect.width / 2;
+      const destCY = lastIconRect.top + lastIconRect.height / 2;
+      const anchor = this.getFlightAnchor(trigger);
+      const dx = destCX - anchor.cx;
+      const dy = destCY - anchor.cy;
       const distance = Math.hypot(dx, dy);
       const timing = getDurations(distance, el.config);
 
-      //  Icon FLIP (trigger icon size might be different than destination icon)
-      const clone = this.createClone(el.triggerIcon, firstIconRect);
-      el.triggerIcon.style.opacity = '0';
+      // Always clone the destination icon, placed at the flight anchor
+      const clonePlacement = {
+        width: lastIconRect.width,
+        height: lastIconRect.height,
+        top: anchor.cy - lastIconRect.height / 2,
+        left: anchor.cx - lastIconRect.width / 2,
+      };
+      const clone = this.createClone(el.destIcon, clonePlacement);
       el.submitButton.classList.add('search-popdown__submit--flip-hidden');
 
-      const scale = lastIconRect.width / firstIconRect.width;
+      // Text mode: run a pre-flight swap (text shrinks, icon grows) before the flight.
+      // Icon mode: the flight itself carries the scale.
+      const isTextMode = trigger.mode !== 'icon';
+      const swapPhase = isTextMode ? Math.min(150, Math.round(timing.flip * 0.25)) : 0;
 
-      this.flipAnimation = clone.animate([{transform: 'translate(0, 0) scale(1)'}, {transform: `translate(${dx}px, ${dy}px) scale(${scale})`}], {
-        duration: timing.flip,
-        easing: el.config.easing,
-        fill: 'forwards',
-      });
+      if (!isTextMode) {
+        el.triggerIcon.style.opacity = '0';
+        const startScale = firstRect.width / lastIconRect.width;
+        this.flipAnimation = clone.animate([{transform: `translate(0, 0) scale(${startScale})`}, {transform: `translate(${dx}px, ${dy}px) scale(1)`}], {
+          duration: timing.flip,
+          easing: el.config.easing,
+          fill: 'forwards',
+        });
+      } else {
+        // Clone: scale 0 → 1 at origin during swap, then fly to destination
+        const flipTotal = timing.flip + swapPhase;
+        const swapEnd = swapPhase / flipTotal;
+        this.flipAnimation = clone.animate(
+          [
+            {transform: 'translate(0, 0) scale(0)', offset: 0, easing: 'ease-out'},
+            {transform: 'translate(0, 0) scale(1)', offset: swapEnd, easing: el.config.easing},
+            {transform: `translate(${dx}px, ${dy}px) scale(1)`, offset: 1},
+          ],
+          {duration: flipTotal, fill: 'forwards'}
+        );
 
-      //  Container expansion via clip-path (X-axis only)
+        // Text: scale 1 → 0 during the swap phase
+        this.triggerFadeAnimation = trigger.el.animate([{transform: 'scale(1)'}, {transform: 'scale(0)'}], {duration: swapPhase, easing: 'ease-in', fill: 'forwards'});
+      }
+
+      //  Container expansion via clip-path (X-axis only). In text mode the
+      //  container is held invisible during the swap phase and only starts
+      //  expanding (and fading in) strictly after the swap completes.
       const inset = this.getContainerInset(triggerRect, popdownRect);
       const startClip = `inset(0px ${inset.right}px 0px ${inset.left}px round 6px)`;
       const endClip = 'inset(0px 0px 0px 0px round 0px)';
 
       this.containerAnimation = el.popdown.animate(
         [
-          {clipPath: startClip, opacity: 0.8},
+          {clipPath: startClip, opacity: isTextMode ? 0 : 0.8},
           {clipPath: endClip, opacity: 1},
         ],
-        {duration: timing.container, easing: el.config.easing, fill: 'forwards'}
+        {duration: timing.container, delay: swapPhase, easing: el.config.easing, fill: isTextMode ? 'both' : 'forwards'}
       );
 
-      // Reveal input text once icon arrives (delayed to start after flip)
+      // Reveal input text once icon arrives (delayed to start after flip).
+      // In text mode, shift the delay to run relative to when the flight starts.
       if (el.inputHolder) {
         this.textRevealAnimation = el.inputHolder.animate(
           [
             {opacity: 0, transform: 'translateX(-8px)'},
             {opacity: 1, transform: 'translateX(0)'},
           ],
-          {duration: 250, delay: timing.textReveal, easing: 'ease-out', fill: 'forwards'}
+          {duration: 250, delay: swapPhase + timing.textReveal, easing: 'ease-out', fill: 'forwards'}
         );
       }
 
       // Wait for all animations to settle, then clean up
       const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
       if (this.textRevealAnimation) animations.push(this.textRevealAnimation.finished);
+      if (this.triggerFadeAnimation) animations.push(this.triggerFadeAnimation.finished);
 
       return Promise.all(animations)
         .then(() => {
@@ -163,11 +217,18 @@ if (!customElements.get('header-search-popdown')) {
           this.flipAnimation?.cancel();
           this.containerAnimation?.cancel();
           this.textRevealAnimation?.cancel();
+          this.triggerFadeAnimation?.cancel();
           this.flipAnimation = null;
           this.containerAnimation = null;
           this.textRevealAnimation = null;
+          this.triggerFadeAnimation = null;
           el.popdown.style.clipPath = '';
           el.popdown.style.opacity = '';
+          if (el.triggerIcon) el.triggerIcon.style.opacity = '';
+          if (el.triggerText) {
+            el.triggerText.style.opacity = '';
+            el.triggerText.style.transform = '';
+          }
           if (el.inputHolder) el.inputHolder.style.opacity = '';
           el.classList.remove('is-animating');
         })
@@ -178,18 +239,21 @@ if (!customElements.get('header-search-popdown')) {
       const el = this.host;
 
       // Measure current state while popdown is still visible
+      const trigger = el.getVisibleTrigger();
       const popdownRect = el.popdown.getBoundingClientRect();
       const firstIconRect = el.destIcon.getBoundingClientRect();
       const triggerRect = el.summary.getBoundingClientRect();
-      const lastIconRect = el.triggerIcon.getBoundingClientRect();
 
       // Keep popdown visible during the close animation
       el.classList.add('is-animating');
       el.classList.remove('is-open');
 
-      // Calculate travel distance for adaptive timing
-      const dx = lastIconRect.left + (lastIconRect.width - firstIconRect.width) / 2 - firstIconRect.left;
-      const dy = lastIconRect.top + (lastIconRect.height - firstIconRect.height) / 2 - firstIconRect.top;
+      // Flight endpoints: clone lands next to the trigger (text) or on it (icon)
+      const destCX = firstIconRect.left + firstIconRect.width / 2;
+      const destCY = firstIconRect.top + firstIconRect.height / 2;
+      const anchor = this.getFlightAnchor(trigger);
+      const dx = anchor.cx - destCX;
+      const dy = anchor.cy - destCY;
       const distance = Math.hypot(dx, dy);
       const timing = getDurations(distance, el.config);
 
@@ -204,18 +268,37 @@ if (!customElements.get('header-search-popdown')) {
         );
       }
 
-      //  Reverse icon FLIP
+      //  Reverse icon FLIP: clone dest icon at its current position
       const clone = this.createClippedClone(el.destIcon, firstIconRect);
       el.submitButton.classList.add('search-popdown__submit--flip-hidden');
-      el.triggerIcon.style.opacity = '0';
 
-      const scale = lastIconRect.width / firstIconRect.width;
+      // Icon mode: fly with a linear scale.
+      // Text mode: fly first, then run a swap (clone shrinks, text grows).
+      if (trigger.mode === 'icon') {
+        el.triggerIcon.style.opacity = '0';
+        const endScale = trigger.rect.width / firstIconRect.width;
+        this.flipAnimation = clone.animate([{transform: 'translate(0, 0) scale(1)'}, {transform: `translate(${dx}px, ${dy}px) scale(${endScale})`}], {
+          duration: timing.close,
+          easing: el.config.easing,
+          fill: 'forwards',
+        });
+      } else {
+        const swapPhase = Math.min(150, Math.round(timing.close * 0.25));
+        const flipTotal = timing.close + swapPhase;
+        const flightEnd = timing.close / flipTotal;
+        this.flipAnimation = clone.animate(
+          [
+            {transform: 'translate(0, 0) scale(1)', offset: 0, easing: el.config.easing},
+            {transform: `translate(${dx}px, ${dy}px) scale(1)`, offset: flightEnd, easing: 'ease-in'},
+            {transform: `translate(${dx}px, ${dy}px) scale(0)`, offset: 1},
+          ],
+          {duration: flipTotal, fill: 'forwards'}
+        );
 
-      this.flipAnimation = clone.animate([{transform: 'translate(0, 0) scale(1)'}, {transform: `translate(${dx}px, ${dy}px) scale(${scale})`}], {
-        duration: timing.close,
-        easing: el.config.easing,
-        fill: 'forwards',
-      });
+        // Text: kept at scale 0 during the flight, scales back to 1 during the swap phase
+        trigger.el.style.transform = 'scale(0)';
+        this.triggerFadeAnimation = trigger.el.animate([{transform: 'scale(0)'}, {transform: 'scale(1)'}], {duration: swapPhase, delay: timing.close, easing: 'ease-out', fill: 'forwards'});
+      }
 
       //  Container contraction via clip-path (X-axis only, matching open)
       const inset = this.getContainerInset(triggerRect, popdownRect);
@@ -233,17 +316,26 @@ if (!customElements.get('header-search-popdown')) {
         {duration: timing.close, easing: el.config.easing, fill: 'forwards'}
       );
 
-      return Promise.all([this.flipAnimation.finished, this.containerAnimation.finished])
+      const animations = [this.flipAnimation.finished, this.containerAnimation.finished];
+      if (this.triggerFadeAnimation) animations.push(this.triggerFadeAnimation.finished);
+
+      return Promise.all(animations)
         .then(() => {
           this.flipAnimation?.cancel();
           this.containerAnimation?.cancel();
           this.textRevealAnimation?.cancel();
+          this.triggerFadeAnimation?.cancel();
           this.flipAnimation = null;
           this.containerAnimation = null;
           this.textRevealAnimation = null;
+          this.triggerFadeAnimation = null;
           document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
           el.submitButton.classList.remove('search-popdown__submit--flip-hidden');
-          el.triggerIcon.style.opacity = '';
+          if (el.triggerIcon) el.triggerIcon.style.opacity = '';
+          if (el.triggerText) {
+            el.triggerText.style.opacity = '';
+            el.triggerText.style.transform = '';
+          }
           if (el.inputHolder) el.inputHolder.style.opacity = '';
           el.popdown.style.clipPath = '';
           el.popdown.style.opacity = '';
@@ -264,6 +356,7 @@ if (!customElements.get('header-search-popdown')) {
         this.popdownClose = this.querySelector('[data-popdown-close]');
         this.summary = this.querySelector('summary');
         this.triggerIcon = this.querySelector('summary .icon-search');
+        this.triggerText = this.querySelector('summary .navtext');
         this.submitButton = this.popdown.querySelector('.search-popdown__submit');
         this.destIcon = this.submitButton?.querySelector('.icon-search');
         this.inputHolder = this.popdown.querySelector('.input-holder');
@@ -289,6 +382,18 @@ if (!customElements.get('header-search-popdown')) {
         }
       }
 
+      getVisibleTrigger() {
+        const iconRect = this.triggerIcon?.getBoundingClientRect();
+        if (iconRect && iconRect.width > 0 && iconRect.height > 0) {
+          return {el: this.triggerIcon, rect: iconRect, mode: 'icon'};
+        }
+        const textRect = this.triggerText?.getBoundingClientRect();
+        if (this.triggerText && textRect.width > 0 && textRect.height > 0) {
+          return {el: this.triggerText, rect: textRect, mode: 'text'};
+        }
+        return {el: this.summary, rect: this.summary.getBoundingClientRect(), mode: 'summary'};
+      }
+
       onBodyClick(event) {
         if (!this.contains(event.target) || event.target.hasAttribute('data-popdown-underlay')) this.close();
       }
@@ -302,7 +407,7 @@ if (!customElements.get('header-search-popdown')) {
           document.dispatchEvent(new CustomEvent('theme:scroll:lock', {bubbles: true}));
         }
 
-        if (prefersReducedMotion() || !this.triggerIcon || !this.destIcon) {
+        if (prefersReducedMotion() || !this.destIcon || this.getVisibleTrigger().mode === 'summary') {
           this.classList.add('is-open');
           this.a11y.trapFocus(this.popdown, {
             elementToFocus: this.popdown.querySelector('input:not([type="hidden"])'),
@@ -329,7 +434,7 @@ if (!customElements.get('header-search-popdown')) {
         this.animator.cancel();
         document.body.removeEventListener('click', this.onBodyClickEvent);
 
-        if (prefersReducedMotion() || !this.triggerIcon || !this.destIcon) {
+        if (prefersReducedMotion() || !this.destIcon || this.getVisibleTrigger().mode === 'summary') {
           this.classList.remove('is-open');
           this.popdownContainer.removeAttribute('open');
           this.a11y.removeTrapFocus();
