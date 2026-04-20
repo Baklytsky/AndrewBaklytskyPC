@@ -2,7 +2,6 @@ const selectors = {
   relatedSection: '[data-related-section]',
   aos: '[data-aos]',
   tabsLi: '[data-tab]',
-  tabLink: '.tab-link',
   tabLinkRecent: '.tab-link__recent',
   tabContent: '.tab-content',
 };
@@ -35,6 +34,9 @@ if (!customElements.get('tabs-component')) {
 
         this.addEventListener('theme:tab:check', () => this.checkRecentTab());
         this.addEventListener('theme:tab:hide', () => this.hideRelatedTab());
+        document.addEventListener('theme:resize:width', () => this.calculateActiveBounds());
+
+        this.calculateActiveBounds();
 
         tabsNavList?.forEach((element) => {
           const tabId = parseInt(element.getAttribute(attributes.dataTab));
@@ -50,6 +52,14 @@ if (!customElements.get('tabs-component')) {
             }
           });
         });
+      }
+
+      calculateActiveBounds() {
+        const currentTab = this.querySelector(`${selectors.tabsLi}.${classes.current}`);
+        const parent = currentTab?.parentElement;
+
+        parent?.style.setProperty('--active-width', `${currentTab.offsetWidth}px`);
+        parent?.style.setProperty('--active-left', `${currentTab.offsetLeft}px`);
       }
 
       tabChange(element, tab) {
@@ -69,6 +79,8 @@ if (!customElements.get('tabs-component')) {
         if (element.classList.contains(classes.hidden)) {
           tab.classList.add(classes.hidden);
         }
+
+        this.calculateActiveBounds();
 
         this.a11y.removeTrapFocus();
 
