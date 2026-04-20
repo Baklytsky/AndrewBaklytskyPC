@@ -1411,6 +1411,83 @@
     ]
   },
   {
+    "name": "Product card tags",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Product card tags are configured using metaobjects. [Learn more](https://help.shopify.com/en/manual/custom-data/metaobjects)"
+      },
+      {
+        "type": "text",
+        "id": "theme_collection_tags",
+        "label": "Metaobject type",
+        "default": "collection_tags",
+        "info": "When referencing a custom or app created \"metaobject type\", the definition must exist on the shop and be available to the storefront"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_product_card_tags",
+        "label": "Show on product cards",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "product_card_tags_max",
+        "visible_if": "{{ settings.show_product_card_tags == true }}",
+        "label": "Maximum tags per card",
+        "min": 1,
+        "max": 6,
+        "step": 1,
+        "default": 3
+      },
+      {
+        "type": "select",
+        "id": "product_card_tags_font_size",
+        "visible_if": "{{ settings.show_product_card_tags == true }}",
+        "label": "Text size",
+        "default": "body-x-small",
+        "options": [
+          { "value": "body-x-small", "label": "Extra small" },
+          { "value": "body-small", "label": "Small" },
+          { "value": "body-medium", "label": "Medium" },
+          { "value": "body-large", "label": "Large" },
+          { "value": "body-x-large", "label": "Extra large" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "product_card_tags_shape",
+        "visible_if": "{{ settings.show_product_card_tags == true }}",
+        "label": "Shape",
+        "default": "rounded",
+        "options": [
+          { "value": "rounded", "label": "Rounded" },
+          { "value": "square", "label": "Square" },
+          { "value": "pill", "label": "Pill" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Default colors",
+        "info": "Used when a metaobject entry doesn't provide its own colors"
+      },
+      {
+        "type": "color",
+        "id": "product_card_tags_bg_color",
+        "visible_if": "{{ settings.show_product_card_tags == true }}",
+        "label": "Background",
+        "info": "Leave empty to use the color palette's light background"
+      },
+      {
+        "type": "color",
+        "id": "product_card_tags_text_color",
+        "visible_if": "{{ settings.show_product_card_tags == true }}",
+        "label": "Text",
+        "info": "Leave empty to use the color palette's main text color"
+      }
+    ]
+  },
+  {
     "name": "Siblings",
     "settings": [
       {
