@@ -9,17 +9,24 @@
   When the product is empty, placeholder tags ("Tag 1", "Tag 2", ...) are rendered instead.
 
   @param {object} product - The product object
+  @param {string} [placement] - Rendering context. Pass `'block'` when rendered from the reorderable theme block wrapper. Leave empty for the legacy section-block path
   @param {string} [shopify_attributes] - Optional theme editor attributes
 {%- enddoc -%}
 
 {%- liquid
   assign shopify_attributes = shopify_attributes | default: ''
+  assign placement = placement | default: ''
 
   if settings.show_product_card_tags == false
     break
   endif
 
   assign tags_max = settings.product_card_tags_max | default: 3
+
+  assign placement_class = ''
+  if placement == 'block'
+    assign placement_class = 'product-card__tags--block'
+  endif
 
   assign is_onboarding = false
   if product == empty
@@ -29,7 +36,7 @@
 
 {%- if is_onboarding -%}
   <ul
-    class="product-card__tags {{ settings.product_card_tags_shape }} {{ settings.product_card_tags_font_size }}"
+    class="product-card__tags {{ placement_class }} {{ settings.product_card_tags_shape }} {{ settings.product_card_tags_font_size }}"
     {{ shopify_attributes }}
   >
     {%- for i in (1..tags_max) -%}
@@ -105,7 +112,7 @@
 
   {%- if tags_shown > 0 -%}
     <ul
-      class="product-card__tags {{ settings.product_card_tags_shape }} {{ settings.product_card_tags_font_size }}"
+      class="product-card__tags {{ placement_class }} {{ settings.product_card_tags_shape }} {{ settings.product_card_tags_font_size }}"
       {{ shopify_attributes }}
     >
       {{- tags_html -}}
