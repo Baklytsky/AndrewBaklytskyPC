@@ -36,7 +36,14 @@ if (!customElements.get('tabs-component')) {
         this.addEventListener('theme:tab:hide', () => this.hideRelatedTab());
         document.addEventListener('theme:resize:width', () => this.calculateActiveBounds());
 
-        this.calculateActiveBounds();
+        // Fix loading issue of active tab for design mode
+        if (window.Shopify.designMode) {
+          setTimeout(() => {
+            this.calculateActiveBounds();
+          }, 2000);
+        } else {
+          this.calculateActiveBounds();
+        }
 
         tabsNavList?.forEach((element) => {
           const tabId = parseInt(element.getAttribute(attributes.dataTab));
