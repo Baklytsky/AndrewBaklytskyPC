@@ -843,10 +843,10 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 //  Floating header
 
 body:has(.header-floating) {
-  --floating-inset: var(--SPACING-SMALL);
-  --floating-radius: 5px;
-  --floating-top: var(--SPACING-SMALL);
-  --floating-gap: calc(var(--SPACING-SMALL) / 2);
+  --floating-inset: var(--outer);
+  --floating-radius: var(--ROUNDED-CORNERS, 5px); // TODO
+  --floating-top: var(--LAYOUT-GAP-SMALL);
+  --floating-gap: calc(var(--LAYOUT-GAP-SMALL) / 2);
 }
 
 .page-header:has(.header-floating) {
@@ -858,10 +858,19 @@ body:has(.header-floating) {
   .header-floating__card,
   .toolbar,
   .announcement__wrapper {
-    margin-inline: var(--floating-inset);
+    margin-inline: auto;
     margin-block: var(--floating-gap);
     width: calc(100% - var(--floating-inset) * 2);
+    max-width: calc(var(--WIDTH-FULL-PADDED, 100%) - var(--floating-inset) * 2);
     border-radius: var(--floating-radius);
+  }
+
+  @include media-query($small) {
+    .header-floating__card,
+    .toolbar,
+    .announcement__wrapper {
+      max-width: calc(var(--WIDTH-FULL-PADDED-MOBILE, 100%) - var(--floating-inset) * 2);
+    }
   }
 
   // Full border around floating blocks when border setting is enabled
