@@ -77,9 +77,9 @@
     assign show_header_backdrop = true
   endif
 
-  assign animation_order = 1
-
   if upsell_product != blank
+    assign upsell_animation_order = section.blocks.size | plus: 1
+
     if flex_align_desktop == 'align--top-right-desktop' or flex_align_desktop == 'align--middle-right-desktop' or flex_align_desktop == 'align--bottom-right-desktop'
       assign upsell_position = 'left'
     endif
@@ -90,6 +90,7 @@
 
     if flex_align_desktop == 'align--bottom-center-desktop'
       assign upsell_position = 'top'
+      assign upsell_animation_order = 0
     endif
 
     if flex_align_desktop == 'align--middle-center-desktop'
@@ -164,24 +165,22 @@
             {% comment %} Blocks for Image banner {% endcomment %}
             {% content_for 'blocks' %}
           </div>
-        </div>
-      {%- endif -%}
 
-      {%- if upsell_product != blank -%}
-        <div class="hero__aside__wrapper frame__item{% if flex_align_desktop == 'align--bottom-center-desktop' or flex_align_desktop == 'align--middle-center-desktop' %} align--top-center-desktop{% else %} align--bottom-left-desktop{% endif %}">
-          <div
-            class="hero__aside"
-            data-aos="hero"
-            data-aos-anchor="{{ animation_anchor }}"
-            data-aos-order="{{ animation_order }}"
-          >
-            {%- render 'upsell-product',
-              upsell_product: upsell_product,
-              upsell_modifier: 'product-upsell__holder--mini-mobile',
-              unique_id: section.id,
-              is_compact: true
-            -%}
-          </div>
+          {%- if upsell_product != blank -%}
+            <div
+              class="hero__content__aside"
+              data-aos="hero"
+              data-aos-anchor="{{ section.id }}"
+              data-aos-order="{{ upsell_animation_order }}"
+            >
+              {%- render 'upsell-product',
+                upsell_product: upsell_product,
+                upsell_modifier: 'product-upsell__holder--mini-mobile',
+                unique_id: section.id,
+                is_compact: true
+              -%}
+            </div>
+          {%- endif -%}
         </div>
       {%- endif -%}
     </div>
