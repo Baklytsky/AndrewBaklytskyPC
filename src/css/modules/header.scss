@@ -925,6 +925,10 @@ body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-
   right: 0;
   z-index: 5500;
 
+  // When scroll is locked, the <body> receives `padding-right: scrollbar-width`.
+  // This absolute .page-header bypasses that gap on the right, so without compensating for it
+  // its children (card/toolbar/announcement) would render scrollbar-width wider than the sections below.
+  // Pulling in the header's right edge by the same amount keeps everything aligned.
   [data-scroll-locked] & {
     right: var(--scrollbar-width);
   }
