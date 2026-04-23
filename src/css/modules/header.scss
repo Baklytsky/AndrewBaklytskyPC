@@ -442,11 +442,18 @@ hover-disclosure { display: block; }
   flex: 1 0 0;
   justify-content: flex-end;
 }
-.header__desktop__bar__r .header__menu { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--text { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: -11px; }
+// Cancel the last (or first, in reverse layouts) child's internal horizontal
+// padding so the visible content aligns flush with the outer `--outer` gutter.
+// Each base value mirrors the padding applied to the corresponding edge child:
+//   -15px -> `.navlink--toplevel` horizontal padding (--link-padding)
+//   -11px -> cart/popout edge padding + optical nudge in icon mode
+// All three track `--header-spacing-scale` so the compensation follows the
+// same grid-style / grid-override scaling as the paddings themselves.
+.header__desktop__bar__r .header__menu { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--text { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: calc(-11px * var(--header-spacing-scale, 1)); }
 
-.header__desktop__upper--reverse .header__menu { margin-left: -15px; }
+.header__desktop__upper--reverse .header__menu { margin-left: calc(-15px * var(--header-spacing-scale, 1)); }
 
 .theme__header .socials { flex-wrap: nowrap; }
 
@@ -797,7 +804,9 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   @include nav-bold;
 
   position: relative;
-  margin-right: -22px;
+  // Cancels `.toolbar__utility`'s trailing `margin-right`
+  // so the last utility sits flush against `var(--outer)`
+  margin-right: calc(-22px * var(--header-spacing-scale, 1));
   margin-left: var(--outer);
 
   @include media-query($medium-up) {
