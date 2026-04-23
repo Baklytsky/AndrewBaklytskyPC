@@ -1,5 +1,16 @@
 @use '../globals' as *;
 
+:root {
+  // Header spacing scale
+  // `--HEADER-SPACING-SCALE-MOBILE` is only emitted in grid_override mode;
+  // for preset grid_style modes we fall through to the single `--HEADER-SPACING-SCALE`.
+  --header-spacing-scale: var(--HEADER-SPACING-SCALE, 1);
+
+  @include media-query($small) {
+    --header-spacing-scale: var(--HEADER-SPACING-SCALE-MOBILE, var(--HEADER-SPACING-SCALE, 1));
+  }
+}
+
 header-component,
 hover-disclosure { display: block; }
 
@@ -326,12 +337,11 @@ hover-disclosure { display: block; }
 
 .header__mobile__button .navlink:not(.navlink--toplevel),
 .header__desktop__button .navlink:not(.navlink--toplevel) {
-  padding: 5px;
+  padding: 5px calc(5px * var(--header-spacing-scale, 1));
   transition: color 0.25s $ease-out-fast;
 
   @include media-query($medium-up) {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-inline: calc(8px * var(--header-spacing-scale, 1));
   }
 }
 
@@ -366,10 +376,10 @@ hover-disclosure { display: block; }
 }
 
 .navlink--toplevel {
-  --link-padding: 15px;
+  --link-padding: calc(15px * var(--header-spacing-scale, 1));
 
   position: relative;
-  padding: 5px 9px;
+  padding: 5px calc(9px * var(--header-spacing-scale, 1));
   z-index: 6;
 
   @include media-query($medium-up) {
@@ -811,7 +821,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
   display: flex;
   align-items: center;
-  margin-right: 22px;
+  margin-right: calc(22px * var(--header-spacing-scale, 1));
 
   @include media-query($small) {
     margin-right: 0;
