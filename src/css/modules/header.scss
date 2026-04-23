@@ -675,7 +675,12 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 .navlink--cart--icon {
   --icon-size: 28px;
 
-  .header__cart__status { @include header-cart-status; }
+  .header__cart__status {
+    @include header-cart-status;
+
+    // Nudge the cart badge inward as --header-spacing-scale shrinks
+    right: calc(-2px - 4px * min(var(--header-spacing-scale, 1), 1));
+  }
   .header__cart__status[data-cart-count="0"] { display: none; }
 }
 
