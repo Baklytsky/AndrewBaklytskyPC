@@ -1,153 +1,147 @@
-const selectors = {
-  collapsible: '[data-collapsible]',
-  trigger: '[data-collapsible-trigger]',
-  body: '[data-collapsible-body]',
-  content: '[data-collapsible-content]',
-};
+if (!customElements.get('collapsible-elements')) {
+  customElements.define(
+    'collapsible-elements',
+    class CollapsibleElements extends HTMLElement {
+      constructor() {
+        super();
 
-const attributes = {
-  desktop: 'desktop',
-  disabled: 'disabled',
-  mobile: 'mobile',
-  open: 'open',
-  single: 'single',
-};
-
-class CollapsibleElements extends HTMLElement {
-  constructor() {
-    super();
-
-    this.collapsibles = this.querySelectorAll(selectors.collapsible);
-    this.single = this.hasAttribute(attributes.single);
-    this.toggle = this.toggle.bind(this);
-  }
-
-  connectedCallback() {
-    this.toggle();
-    document.addEventListener('theme:resize:width', this.toggle);
-
-    this.collapsibles.forEach((collapsible) => {
-      const trigger = collapsible.querySelector(selectors.trigger);
-      const body = collapsible.querySelector(selectors.body);
-
-      trigger?.addEventListener('click', (event) => this.onCollapsibleClick(event));
-
-      body?.addEventListener('transitionend', (event) => {
-        if (event.target !== body) return;
-
-        if (collapsible.getAttribute(attributes.open) == 'true') {
-          this.setBodyHeight(body, 'auto');
-        }
-
-        if (collapsible.getAttribute(attributes.open) == 'false') {
-          collapsible.removeAttribute(attributes.open);
-          this.setBodyHeight(body, '');
-        }
-      });
-    });
-  }
-
-  disconnectedCallback() {
-    document.removeEventListener('theme:resize:width', this.toggle);
-  }
-
-  toggle() {
-    const isDesktopView = !theme.isMobile;
-
-    this.collapsibles.forEach((collapsible) => {
-      if (!collapsible.hasAttribute(attributes.desktop) && !collapsible.hasAttribute(attributes.mobile)) return;
-
-      const enableDesktop = collapsible.hasAttribute(attributes.desktop) ? collapsible.getAttribute(attributes.desktop) : 'true';
-      const enableMobile = collapsible.hasAttribute(attributes.mobile) ? collapsible.getAttribute(attributes.mobile) : 'true';
-      const isEligible = (isDesktopView && enableDesktop == 'true') || (!isDesktopView && enableMobile == 'true');
-      const body = collapsible.querySelector(selectors.body);
-
-      if (isEligible) {
-        collapsible.removeAttribute(attributes.disabled);
-        collapsible.querySelector(selectors.trigger).removeAttribute('tabindex');
-        collapsible.removeAttribute(attributes.open);
-
-        this.setBodyHeight(body, '');
-      } else {
-        collapsible.setAttribute(attributes.disabled, '');
-        collapsible.setAttribute('open', true);
-        collapsible.querySelector(selectors.trigger).setAttribute('tabindex', -1);
+        this.collapsibles = this.querySelectorAll('[data-collapsible]');
+        this.single = this.hasAttribute('single');
+        this.toggle = this.toggle.bind(this);
       }
-    });
-  }
 
-  open(collapsible) {
-    if (collapsible.getAttribute('open') == 'true') return;
+      connectedCallback() {
+        if (window.CarbonApp?.ready) {
+          this.onReady();
+        } else {
+          document.addEventListener('CarbonApp:ready', () => this.onReady(), {once: true});
+        }
+      }
 
-    const body = collapsible.querySelector(selectors.body);
-    const content = collapsible.querySelector(selectors.content);
+      onReady() {
+        this.toggle();
+        document.addEventListener('theme:resize:width', this.toggle);
 
-    collapsible.setAttribute('open', true);
+        this.collapsibles.forEach((collapsible) => {
+          const trigger = collapsible.querySelector('[data-collapsible-trigger]');
+          const body = collapsible.querySelector('[data-collapsible-body]');
 
-    this.setBodyHeight(body, content.offsetHeight);
-  }
+          trigger?.addEventListener('click', (event) => this.onCollapsibleClick(event));
 
-  close(collapsible) {
-    if (!collapsible.hasAttribute('open')) return;
+          body?.addEventListener('transitionend', (event) => {
+            if (event.target !== body) return;
 
-    const body = collapsible.querySelector(selectors.body);
-    const content = collapsible.querySelector(selectors.content);
+            if (collapsible.getAttribute('open') == 'true') {
+              this.setBodyHeight(body, 'auto');
+            }
 
-    this.setBodyHeight(body, content.offsetHeight);
+            if (collapsible.getAttribute('open') == 'false') {
+              collapsible.removeAttribute('open');
+              this.setBodyHeight(body, '');
+            }
+          });
+        });
+      }
 
-    collapsible.setAttribute('open', false);
+      disconnectedCallback() {
+        document.removeEventListener('theme:resize:width', this.toggle);
+      }
 
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        this.setBodyHeight(body, 0);
-      });
-    });
-  }
+      toggle() {
+        const isDesktopView = !theme.isMobile;
 
-  setBodyHeight(body, contentHeight) {
-    body.style.height = contentHeight !== 'auto' && contentHeight !== '' ? `${contentHeight}px` : contentHeight;
-  }
+        this.collapsibles.forEach((collapsible) => {
+          if (!collapsible.hasAttribute('desktop') && !collapsible.hasAttribute('mobile')) return;
 
-  onCollapsibleClick(event) {
-    event.preventDefault();
+          const enableDesktop = collapsible.hasAttribute('desktop') ? collapsible.getAttribute('desktop') : 'true';
+          const enableMobile = collapsible.hasAttribute('mobile') ? collapsible.getAttribute('mobile') : 'true';
+          const isEligible = (isDesktopView && enableDesktop == 'true') || (!isDesktopView && enableMobile == 'true');
+          const body = collapsible.querySelector('[data-collapsible-body]');
 
-    const trigger = event.target;
-    const collapsible = trigger.closest(selectors.collapsible);
+          if (isEligible) {
+            collapsible.removeAttribute('disabled');
+            collapsible.querySelector('[data-collapsible-trigger]').removeAttribute('tabindex');
+            collapsible.removeAttribute('open');
 
-    // When we want only one item expanded at the same time
-    if (this.single) {
-      this.collapsibles.forEach((otherCollapsible) => {
-        // if otherCollapsible has attribute open and it's not the one we clicked on, remove the open attribute
-        if (otherCollapsible.hasAttribute(attributes.open) && otherCollapsible != collapsible) {
+            this.setBodyHeight(body, '');
+          } else {
+            collapsible.setAttribute('disabled', '');
+            collapsible.setAttribute('open', true);
+            collapsible.querySelector('[data-collapsible-trigger]').setAttribute('tabindex', -1);
+          }
+        });
+      }
+
+      open(collapsible) {
+        if (collapsible.getAttribute('open') == 'true') return;
+
+        const body = collapsible.querySelector('[data-collapsible-body]');
+        const content = collapsible.querySelector('[data-collapsible-content]');
+
+        collapsible.setAttribute('open', true);
+
+        this.setBodyHeight(body, content.offsetHeight);
+      }
+
+      close(collapsible) {
+        if (!collapsible.hasAttribute('open')) return;
+
+        const body = collapsible.querySelector('[data-collapsible-body]');
+        const content = collapsible.querySelector('[data-collapsible-content]');
+
+        this.setBodyHeight(body, content.offsetHeight);
+
+        collapsible.setAttribute('open', false);
+
+        setTimeout(() => {
           requestAnimationFrame(() => {
-            this.close(otherCollapsible);
+            this.setBodyHeight(body, 0);
+          });
+        });
+      }
+
+      setBodyHeight(body, contentHeight) {
+        body.style.height = contentHeight !== 'auto' && contentHeight !== '' ? `${contentHeight}px` : contentHeight;
+      }
+
+      onCollapsibleClick(event) {
+        event.preventDefault();
+
+        const trigger = event.target;
+        const collapsible = trigger.closest('[data-collapsible]');
+
+        // When we want only one item expanded at the same time
+        if (this.single) {
+          this.collapsibles.forEach((otherCollapsible) => {
+            // if otherCollapsible has attribute open and it's not the one we clicked on, remove the open attribute
+            if (otherCollapsible.hasAttribute('open') && otherCollapsible != collapsible) {
+              requestAnimationFrame(() => {
+                this.close(otherCollapsible);
+              });
+            }
           });
         }
-      });
+
+        if (collapsible.hasAttribute('open')) {
+          this.close(collapsible);
+        } else {
+          this.open(collapsible);
+        }
+
+        collapsible.dispatchEvent(
+          new CustomEvent('theme:form:sticky', {
+            bubbles: true,
+            detail: {
+              element: 'accordion',
+            },
+          })
+        );
+        collapsible.dispatchEvent(
+          new CustomEvent('theme:collapsible:toggle', {
+            bubbles: true,
+          })
+        );
+      }
     }
-
-    if (collapsible.hasAttribute(attributes.open)) {
-      this.close(collapsible);
-    } else {
-      this.open(collapsible);
-    }
-
-    collapsible.dispatchEvent(
-      new CustomEvent('theme:form:sticky', {
-        bubbles: true,
-        detail: {
-          element: 'accordion',
-        },
-      })
-    );
-    collapsible.dispatchEvent(
-      new CustomEvent('theme:collapsible:toggle', {
-        bubbles: true,
-      })
-    );
-  }
-}
-
-if (!customElements.get('collapsible-elements')) {
-  customElements.define('collapsible-elements', CollapsibleElements);
+  );
 }
