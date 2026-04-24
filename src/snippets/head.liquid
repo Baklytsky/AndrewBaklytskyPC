@@ -407,6 +407,21 @@
     --COLOR-PREORDER-BG: {{ settings.preorder_bg_color }};
     --COLOR-PREORDER-TEXT: {{ settings.preorder_text_color }};
 
+    /*** Product card tags ***/
+    {%- if settings.product_card_tags_bg_color.alpha > 0.0 -%}
+      --COLOR-PRODUCT-CARD-TAGS-BG: {{ settings.product_card_tags_bg_color }};
+    {%- endif -%}
+    {%- if settings.product_card_tags_text_color.alpha > 0.0 -%}
+      --COLOR-PRODUCT-CARD-TAGS-TEXT: {{ settings.product_card_tags_text_color }};
+    {%- endif -%}
+    {% if settings.product_card_tags_shape == 'rounded' %}
+      --TAG-RADIUS: 3px;
+    {% elsif settings.product_card_tags_shape == 'pill' %}
+      --TAG-RADIUS: 300px;
+    {% else %}
+      --TAG-RADIUS: 0px;
+    {% endif %}
+
     /*** Quick Add ***/
     {%- assign quick_add_lightness = settings.quick_add_bg_color | color_extract: 'lightness' -%}
     {%- assign quick_add_bg_hover = settings.quick_add_bg_color -%}
