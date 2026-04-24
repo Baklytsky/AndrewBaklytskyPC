@@ -108,7 +108,7 @@ if (!customElements.get('header-component')) {
         this._resizeTimeout = requestAnimationFrame(() => {
           clearTimeout(this._resizeDebounce);
           this._resizeDebounce = setTimeout(() => {
-            const isHamburgerMenu = theme.windowWidth < this.minWidth;
+            const isHamburgerMenu = this.getAvailableWidth() < this.minWidth;
 
             this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
 
@@ -125,6 +125,7 @@ if (!customElements.get('header-component')) {
         const wrappers = this.querySelectorAll(selectors.widthContentWrapper);
         let minWidth = 0;
         let spacing = 0;
+        let widest = null;
 
         wrappers.forEach((wrapper) => {
           const children = wrapper.querySelectorAll(selectors.widthContent);
@@ -143,10 +144,29 @@ if (!customElements.get('header-component')) {
           if (total + space > minWidth) {
             minWidth = total;
             spacing = space;
+            widest = wrapper;
           }
         });
 
+        this._measuredWrapper = widest;
+
         return minWidth + spacing;
+      }
+
+      // Returns the horizontal space actually available to the bars, which
+      // equals the measured wrapper's clientWidth minus its inline padding.
+      // This accounts for .header__padded (var(--outer)) and the floating
+      // card's inset (which narrows the wrapper via its parent).
+      getAvailableWidth() {
+        const wrapper = this._measuredWrapper;
+        if (!wrapper) return theme.windowWidth;
+
+        const style = getComputedStyle(wrapper);
+        const paddingX =
+          (parseFloat(style.paddingLeft) || 0) +
+          (parseFloat(style.paddingRight) || 0);
+
+        return wrapper.clientWidth - paddingX;
       }
 
       cartToggleEvent() {
