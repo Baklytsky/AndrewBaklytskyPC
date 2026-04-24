@@ -81,11 +81,17 @@
     display: grid;
     grid-row-gap: 1.5em;
     position: relative;
+
+    // Outer gutter is split 50/50 between the grid container and each family
+    // so every row's visual edge ends up with the full `--outer` on the outside,
+    // while adjacent families only use `var(--outer) / 2` each, thus having `var(--outer)` between them.
+    padding-left: calc(var(--outer) / 2);
+    padding-right: calc(var(--outer) / 2);
   }
 
   .dropdown__family {
-    padding-left: var(--outer);
-    padding-right: var(--outer);
+    padding-left: calc(var(--outer) / 2);
+    padding-right: calc(var(--outer) / 2);
   }
 
   .menu__blocks {
@@ -775,7 +781,6 @@ mobile-menu {
     --link-hover: inherit;
 
     box-shadow: none;
-    transform: none;
   }
 
   .search-popdown__main { height: 44px; }

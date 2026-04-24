@@ -1,8 +1,26 @@
-{% render 'header', header_style: 'logo_beside' %}
+{%- capture announcement_html -%}
+  {% content_for "block", type: "_header-announcement", id: "announcement" %}
+{%- endcapture -%}
+
+{%- capture toolbar_html -%}
+  {% content_for "block", type: "_header-toolbar", id: "toolbar" %}
+{%- endcapture -%}
+
+{%- capture menu_block_html -%}
+  {% content_for "block", type: "_header-menu", id: "menu" %}
+{%- endcapture -%}
+
+{% render 'header',
+  header_style: 'logo_center_menu_left',
+  is_floating: true,
+  announcement_html: announcement_html,
+  toolbar_html: toolbar_html,
+  menu_block_html: menu_block_html
+%}
 
 {% schema %}
 {
-  "name": "Header - Logo beside menu",
+  "name": "Header - Floating",
   "class": "page-header",
   "settings": [
     {
@@ -55,7 +73,7 @@
       "type": "image_picker",
       "id": "logo",
       "label": "Image",
-      "info": "300 x 90px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+      "info": "300 x 90px .jpg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
     },
     {
       "type": "header",
@@ -80,15 +98,6 @@
       "unit": "px",
       "label": "Mobile width",
       "default": 120
-    },
-    {
-      "type": "header",
-      "content": "Navigation"
-    },
-    {
-      "type": "link_list",
-      "label": "Main menu",
-      "id": "main_menu_linklist"
     },
     {
       "type": "checkbox",
@@ -138,29 +147,13 @@
     },
     {
       "type": "header",
-      "content": "Highlight link"
-    },
-    {
-      "type": "text",
-      "id": "highlight_item",
-      "label": "Menu item",
-      "default": "Sale"
-    },
-    {
-      "type": "color",
-      "id": "highlight_item_color",
-      "label": "Color",
-      "default": "#D02E2E"
-    },
-    {
-      "type": "header",
       "content": "Transparent header"
     },
     {
       "type": "image_picker",
       "id": "transparent_logo",
       "label": "Logo",
-      "info": "300 x 90px .png recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+      "info": "300 x 90px .png recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
     },
     {
       "type": "checkbox",
@@ -197,7 +190,7 @@
       "type": "image_picker",
       "id": "transparent_logo_pdp",
       "label": "Product pages logo",
-      "info": "300 x 90px .png recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+      "info": "300 x 90px .png recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
     },
     {
       "type": "header",
@@ -222,264 +215,6 @@
       "unit": "px",
       "label": "Bottom",
       "default": 15
-    }
-  ],
-  "blocks": [
-    {
-      "name": "Image",
-      "type": "image",
-      "settings": [
-        {
-          "type": "select",
-          "id": "position",
-          "label": "Link position in main menu",
-          "default": "1",
-          "options": [
-            {"value": "1", "label": "Item 1"},
-            {"value": "2", "label": "Item 2"},
-            {"value": "3", "label": "Item 3"},
-            {"value": "4", "label": "Item 4"},
-            {"value": "5", "label": "Item 5"},
-            {"value": "6", "label": "Item 6"},
-            {"value": "7", "label": "Item 7"},
-            {"value": "8", "label": "Item 8"},
-            {"value": "9", "label": "Item 9"},
-            {"value": "10", "label": "Item 10"}
-          ]
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image",
-          "info": "1400 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
-        },
-        {
-          "type": "range",
-          "id": "aspect_ratio",
-          "min": 0.5,
-          "max": 1.5,
-          "step": 0.1,
-          "unit": ":1",
-          "label": "Image scaling ratio",
-          "info": "Wide to tall",
-          "default": 0.5
-        },
-        {
-          "type": "checkbox",
-          "id": "wide_image",
-          "label": "Wide image",
-          "default": true
-        },
-        {
-          "type": "header",
-          "content": "Overlay"
-        },
-        {
-          "type": "range",
-          "id": "overlay_opacity",
-          "label": "Overlay opacity",
-          "info": "Increase contrast for legible text.",
-          "unit": "%",
-          "min": 0,
-          "max": 100,
-          "step": 5,
-          "default": 0
-        },
-        {
-          "type": "color",
-          "id": "overlay_color",
-          "label": "Overlay color",
-          "default": "#000"
-        },
-        {
-          "type": "header",
-          "content": "Typography"
-        },
-        {
-          "type": "text",
-          "id": "subheading",
-          "label": "Subheading"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Heading"
-        },
-        {
-          "type": "select",
-          "id": "heading_font_size",
-          "label": "Heading size",
-          "default": "heading-medium",
-          "options": [
-            {"value": "heading-mini", "label": "Mini"},
-            {"value": "heading-x-small", "label": "Extra small"},
-            {"value": "heading-small", "label": "Small"},
-            {"value": "heading-medium", "label": "Medium"},
-            {"value": "heading-large", "label": "Large"},
-            {"value": "heading-x-large", "label": "Extra large"}
-          ]
-        },
-        {
-          "type": "text",
-          "id": "link_text",
-          "label": "Text"
-        },
-        {
-          "type": "select",
-          "id": "text_font_size",
-          "label": "Text size",
-          "default": "body-medium",
-          "options": [
-            {"value": "body-x-small", "label": "Extra small"},
-            {"value": "body-small", "label": "Small"},
-            {"value": "body-medium", "label": "Medium"},
-            {"value": "body-large", "label": "Large"},
-            {"value": "body-x-large", "label": "Extra large"}
-          ]
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Link"
-        },
-        {
-          "type": "header",
-          "content": "Color"
-        },
-        {
-          "type": "paragraph",
-          "content": "Overrides color scheme. Set to Transparent to revert back to using color schemes."
-        },
-        {
-          "type": "color",
-          "id": "text_color",
-          "label": "Text"
-        }
-      ]
-    },
-    {
-      "name": "Toolbar",
-      "type": "toolbar",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "richtext",
-          "id": "text",
-          "label": "Text",
-          "default": "<p>Toolbar</p>"
-        },
-        {
-          "type": "link_list",
-          "id": "menu",
-          "label": "Menu",
-          "info": "These menus won't show dropdown items."
-        },
-        {
-          "type": "checkbox",
-          "id": "show_border",
-          "label": "Show border",
-          "default": false
-        },
-        {
-          "type": "range",
-          "id": "border_opacity",
-          "label": "Border opacity",
-          "unit": "%",
-          "min": 0,
-          "max": 100,
-          "step": 5,
-          "default": 50
-        },
-        {
-          "type": "header",
-          "content": "Social media icons"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_social_links",
-          "label": "Show social icons",
-          "info": "Edit your social settings and accounts in [Theme settings](/admin/themes/current/editor?context=theme)",
-          "default": false
-        },
-        {
-          "type": "header",
-          "content": "Gift card"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_gift_card",
-          "label": "Show gift card",
-          "default": false
-        },
-        {
-          "type": "header",
-          "content": "Language selector",
-          "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_locale_selector",
-          "label": "Show language selector",
-          "default": true
-        },
-        {
-          "type": "header",
-          "content": "Country/Region selector",
-          "info": "To add a country/region, go to your [markets settings](/admin/settings/markets)."
-        },
-        {
-          "type": "checkbox",
-          "id": "show_country_selector",
-          "label": "Show country/region selector",
-          "default": true
-        },
-        {
-          "type": "checkbox",
-          "id": "show_country_name",
-          "label": "Show country name",
-          "default": false
-        },
-        {
-          "type": "checkbox",
-          "id": "show_country_flag",
-          "label": "Show country flag",
-          "default": true
-        },
-        {
-          "type": "header",
-          "content": "Colors"
-        },
-        {
-          "type": "color_scheme",
-          "id": "color_scheme",
-          "default": "scheme_1",
-          "label": "Color scheme"
-        },
-        {
-          "type": "header",
-          "content": "Padding"
-        },
-        {
-          "type": "range",
-          "id": "padding_top",
-          "min": 0,
-          "max": 15,
-          "step": 1,
-          "unit": "px",
-          "label": "Top",
-          "default": 0
-        },
-        {
-          "type": "range",
-          "id": "padding_bottom",
-          "min": 0,
-          "max": 15,
-          "step": 1,
-          "unit": "px",
-          "label": "Bottom",
-          "default": 0
-        }
-      ]
     }
   ],
   "enabled_on": {

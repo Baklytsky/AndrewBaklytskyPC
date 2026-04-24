@@ -1,13 +1,22 @@
 @use '../globals' as *;
 
+:root {
+  // Header spacing scale
+  // `--HEADER-SPACING-SCALE-MOBILE` is only emitted in grid_override mode;
+  // for preset grid_style modes we fall through to the single `--HEADER-SPACING-SCALE`.
+  --header-spacing-scale: var(--HEADER-SPACING-SCALE, 1);
+
+  @include media-query($small) {
+    --header-spacing-scale: var(--HEADER-SPACING-SCALE-MOBILE, var(--HEADER-SPACING-SCALE, 1));
+  }
+}
+
 header-component,
 hover-disclosure { display: block; }
 
 .header-group {
   display: flex;
   flex-direction: column;
-
-  .page-announcement { order: -1; } // Make sure Announcement bar is always shown as a first section
 }
 
 .header__wrapper {
@@ -272,11 +281,9 @@ hover-disclosure { display: block; }
 .header__mobile__button:last-child .header__mobile__hamburger,
 .header__mobile__button:last-child .navlink { margin-right: 0; }
 
-.header__desktop__upper,
-.header__desktop__lower,
-.header__mobile {
-  padding-left: var(--outer);
-  padding-right: var(--outer);
+// Shared side spacing for header blocks
+.header__padded {
+  padding-inline: var(--outer);
 }
 
 .header__desktop__upper,
@@ -330,12 +337,11 @@ hover-disclosure { display: block; }
 
 .header__mobile__button .navlink:not(.navlink--toplevel),
 .header__desktop__button .navlink:not(.navlink--toplevel) {
-  padding: 5px;
+  padding: 5px calc(5px * var(--header-spacing-scale, 1));
   transition: color 0.25s $ease-out-fast;
 
   @include media-query($medium-up) {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-inline: calc(8px * var(--header-spacing-scale, 1));
   }
 }
 
@@ -370,10 +376,10 @@ hover-disclosure { display: block; }
 }
 
 .navlink--toplevel {
-  --link-padding: 15px;
+  --link-padding: calc(15px * var(--header-spacing-scale, 1));
 
   position: relative;
-  padding: 5px 9px;
+  padding: 5px calc(9px * var(--header-spacing-scale, 1));
   z-index: 6;
 
   @include media-query($medium-up) {
@@ -436,11 +442,18 @@ hover-disclosure { display: block; }
   flex: 1 0 0;
   justify-content: flex-end;
 }
-.header__desktop__bar__r .header__menu { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--text { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: -11px; }
+// Cancel the last (or first, in reverse layouts) child's internal horizontal
+// padding so the visible content aligns flush with the outer `--outer` gutter.
+// Each base value mirrors the padding applied to the corresponding edge child:
+//   -15px -> `.navlink--toplevel` horizontal padding (--link-padding)
+//   -11px -> cart/popout edge padding + optical nudge in icon mode
+// All three track `--header-spacing-scale` so the compensation follows the
+// same grid-style / grid-override scaling as the paddings themselves.
+.header__desktop__bar__r .header__menu { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--text { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: calc(-11px * var(--header-spacing-scale, 1)); }
 
-.header__desktop__upper--reverse .header__menu { margin-left: -15px; }
+.header__desktop__upper--reverse .header__menu { margin-left: calc(-15px * var(--header-spacing-scale, 1)); }
 
 .theme__header .socials { flex-wrap: nowrap; }
 
@@ -514,6 +527,8 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
   [data-header-transparent]:not(.meganav--visible):not(.js__header__stuck) {
     .toolbar { --bg: var(--TRANSPARENT); }
+
+    .header-floating__card { --bg: var(--TRANSPARENT); }
 
     .parent .navlink--toplevel::after { content: none; }
 
@@ -667,7 +682,12 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 .navlink--cart--icon {
   --icon-size: 28px;
 
-  .header__cart__status { @include header-cart-status; }
+  .header__cart__status {
+    @include header-cart-status;
+
+    // Nudge the cart badge inward as --header-spacing-scale shrinks
+    right: calc(-2px - 4px * min(var(--header-spacing-scale, 1), 1));
+  }
   .header__cart__status[data-cart-count="0"] { display: none; }
 }
 
@@ -784,7 +804,9 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   @include nav-bold;
 
   position: relative;
-  margin-right: -22px;
+  // Cancels `.toolbar__utility`'s trailing `margin-right`
+  // so the last utility sits flush against `var(--outer)`
+  margin-right: calc(-22px * var(--header-spacing-scale, 1));
   margin-left: var(--outer);
 
   @include media-query($medium-up) {
@@ -813,7 +835,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
   display: flex;
   align-items: center;
-  margin-right: 22px;
+  margin-right: calc(22px * var(--header-spacing-scale, 1));
 
   @include media-query($small) {
     margin-right: 0;
@@ -838,4 +860,193 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   position: absolute;
   opacity: 0;
   visibility: hidden;
+}
+
+//  Floating header
+
+body:has(.header-floating) {
+  --floating-inset: var(--outer);
+  --floating-radius: var(--ROUNDED-CORNERS, 5px); // TODO
+  --floating-top: var(--LAYOUT-GAP-SMALL);
+  --floating-gap: calc(var(--LAYOUT-GAP-SMALL) / 2);
+}
+
+.page-header:has(.header-floating) {
+  position: relative;
+
+  --bar-height: var(--announcement-height);
+
+  // Shared floating block styles
+  .header-floating__card,
+  .toolbar,
+  .announcement__wrapper {
+    margin-inline: auto;
+    margin-block: var(--floating-gap);
+    width: calc(100% - var(--floating-inset) * 2);
+    max-width: calc(var(--WIDTH-FULL-PADDED, 100%) - var(--floating-inset) * 2);
+    border-radius: var(--floating-radius);
+  }
+
+  @include media-query($small) {
+    .header-floating__card,
+    .toolbar,
+    .announcement__wrapper {
+      max-width: calc(var(--WIDTH-FULL-PADDED-MOBILE, 100%) - var(--floating-inset) * 2);
+    }
+  }
+
+  // Full border around floating blocks when border setting is enabled
+  .announcement__wrapper--borders {
+    border: 1px solid var(--border);
+  }
+
+  .toolbar.has-border {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+
+    &::before { content: none; }
+  }
+
+  .theme__header.has-border .header-floating__card {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .theme__header.has-border::before { content: none; }
+
+  &:has(.announcement__wrapper) {
+    --bar-height: calc(var(--announcement-height) + var(--floating-top));
+  }
+
+  // First visible block gets the larger top margin
+  .announcement__wrapper {
+    margin-block: var(--floating-top) 0;
+  }
+
+  &:not(:has([data-announcement-wrapper])) .toolbar {
+    margin-block-start: var(--floating-top);
+  }
+
+  &:not(:has([data-announcement-wrapper])):not(:has(.toolbar)) .header-floating__card {
+    margin-block-start: var(--floating-top);
+  }
+
+  // When stuck, the topmost block gets --floating-top margin
+  .js__header__stuck .toolbar {
+    margin-block-start: var(--floating-top);
+  }
+
+  .js__header__stuck:not(:has(.toolbar)) .header-floating__card {
+    margin-block-start: var(--floating-top);
+  }
+}
+
+// Overlay: pull entire .page-header out of flow
+body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-header:has(.header-floating) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5500;
+
+  // When scroll is locked, the <body> receives `padding-right: scrollbar-width`.
+  // This absolute .page-header bypasses that gap on the right, so without compensating for it
+  // its children (card/toolbar/announcement) would render scrollbar-width wider than the sections below.
+  // Pulling in the header's right edge by the same amount keeps everything aligned.
+  [data-scroll-locked] & {
+    right: var(--scrollbar-width);
+  }
+}
+
+.header-floating {
+  --bg: transparent;
+
+  // Meganav dropdown max-height
+  .header__dropdown__wrapper {
+    max-height: calc(100vh - var(--header-height) - var(--bar-height) - var(--floating-top));
+  }
+
+  &.js__header__stuck .header__dropdown__wrapper {
+    max-height: calc(100vh - var(--header-height) - var(--floating-top));
+  }
+
+  // Meganav dropdown alignment (positioned relative to .header-floating__card)
+
+  .header__dropdown {
+    top: calc(100% + var(--floating-gap));
+    border-radius: var(--floating-radius);
+  }
+
+  .theme__header.has-border .header__dropdown {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .header__dropdown::before {
+    height: calc(var(--padding-bottom) + var(--floating-gap) * 2);
+  }
+
+  .grandparent .header__dropdown {
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  // Search popdown (positioned relative to .header-floating__card)
+  .theme__header header-search-popdown.is-open .search-popdown,
+  .theme__header header-search-popdown.is-open .predictive-search {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .search-popdown,
+  .predictive-search {
+    border-radius: var(--floating-radius);
+  }
+
+  .theme__header.has-border .predictive-search {
+    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
+  }
+
+  .search-popdown,
+  .search-popdown .wrapper,
+  .search-popdown__main {
+    height: 100%;
+  }
+
+  .predictive-search {
+    --results-max-height: calc(var(--full-screen) - var(--header-card-height) - var(--bar-height) - var(--floating-top));
+
+    top: calc(100% + var(--floating-gap));
+    padding-block-start: var(--floating-top);
+  }
+
+  header-search-popdown.is-open .search-popdown {
+    max-height: calc(var(--full-screen) - var(--bar-height) - var(--floating-top) - var(--floating-gap) * 2);
+  }
+
+  header-search-popdown.is-open .predictive-search {
+    max-height: calc(var(--full-screen) - var(--header-height) - var(--bar-height) - var(--floating-top));
+  }
+
+  &.js__header__stuck header-search-popdown.is-open .predictive-search {
+    max-height: calc(var(--full-screen) - var(--header-height) - var(--floating-top));
+  }
+}
+
+.header-floating__card {
+  --bg: var(--COLOR-MENU-BG);
+
+  position: relative;
+  background: var(--bg);
+}
+
+// Scroll-lock overrides
+[data-scroll-locked] .page-header:has(.header-floating) {
+  .toolbar,
+  .announcement__bar-holder--slider,
+  .announcement__bar {
+    padding-right: 0;
+  }
+
+  .announcement__bar-outer {
+    width: 100%;
+  }
 }

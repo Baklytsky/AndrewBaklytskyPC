@@ -96,6 +96,9 @@ if (!customElements.get('product-card')) {
       handleChange(event) {
         if (!this.contains(event.target)) return;
 
+        // Let collection tags with their own link navigate naturally without triggering a product swap
+        if (event.target.closest('[data-prevent-card-link]')) return;
+
         const element = event.target.closest(selectors.swapHandle);
         const targetUrl = element.dataset.swapUrl;
         const productUrl = `${window.Shopify.routes.root}products/${element.dataset.swapHandle}`;

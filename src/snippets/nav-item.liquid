@@ -19,23 +19,21 @@
   endif
 
   assign index = index | append: ''
-  assign image_count = 0
-  assign image_wide_count = 0
-  assign images_space = 0
-  for block in section.blocks
-    if block.settings.position == index
-      assign grandparent = true
-      assign image_count = image_count | plus: 1
-      assign image_space = 1
-
-      if block.settings.wide_image
-        assign image_space = 3
-        assign image_wide_count = image_wide_count | plus: 1
-      endif
-
-      assign images_space = images_space | plus: image_space
+  assign image_count = image_count | default: 0
+  assign image_wide_count = image_wide_count | default: 0
+  assign has_images = false
+  assign only_images = false
+  if image_count > 0
+    assign has_images = true
+    assign grandparent = true
+    assign narrow_count = image_count | minus: image_wide_count
+    assign images_space = image_wide_count | times: 3 | plus: narrow_count
+    if image_count == 2 and image_wide_count == 1
+      assign images_space = images_space | minus: 1
+    elsif image_count == 2 and image_wide_count == 2
+      assign images_space = images_space | minus: 2
     endif
-  endfor
+  endif
 
   if parent or grandparent
     assign expands = true
@@ -46,17 +44,31 @@
     assign child_count = child_count | plus: 1
   endif
 
-  if image_count and child_count == 0
-    assign only_images = ' grandparent--all-images'
+  if has_images and child_count == 0
+    assign only_images = true
   endif
 
   assign item_tag = 'div'
   if expands
     assign item_tag = 'hover-disclosure'
   endif
--%}
 
-{% capture classes %}{% if grandparent %} grandparent kids-{{ child_count }}{% if image_count > 0 %} images-{{ image_count }}{% endif %} {{ only_images }} {% elsif parent %} parent{% else %} child{% endif %}{% endcapture %}
+  capture classes
+    if grandparent
+      echo ' grandparent kids-' | append: child_count
+      if has_images
+        echo ' images-' | append: image_count
+      endif
+      if only_images
+        echo ' grandparent--all-images'
+      endif
+    elsif parent
+      echo ' parent'
+    else
+      echo ' child'
+    endif
+  endcapture
+-%}
 
 <{{ item_tag }}
   class="menu__item {{ classes }}"
@@ -136,28 +148,13 @@
               </div>
             {%- endunless -%}
 
-            {%- if image_count > 0 -%}
-              {%- liquid
-                if image_count == 2 and image_wide_count == 1
-                  assign images_space = images_space | minus: 1
-                elsif image_count == 2 and image_wide_count == 2
-                  assign images_space = images_space | minus: 2
-                endif
-              -%}
-
+            {%- if has_images -%}
               <div class="menu__blocks" style="--images-space: {{ images_space }};">
-                {%- liquid
-                  for block in section.blocks
-                    if block.settings.position == index
-                      render 'header-block', block: block, image_count: image_count, only_images: only_images, link_columns: link.links.size
-                    endif
-                  endfor
-                -%}
+                {{ images_html }}
               </div>
             {%- endif -%}
 
-          {%- else -%}
-            {% comment %} Simple dropdown {% endcomment %}
+          {%- elsif parent -%}
             {% for link in link.links %}
               {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
               <a

@@ -88,6 +88,7 @@
                 <div
                   class="timeline__row{% if blocks_counter == 1 %} is-selected{% endif %}"
                   data-timeline-row-content
+                  {{ block.shopify_attributes }}
                 >
                   <div class="timeline__content">
                     <div
@@ -157,6 +158,15 @@
                               </a>
                             </div>
                           {%- endif -%}
+
+                          {%- if show_images -%}
+                            <div class="timeline__image mobile">
+                              {%- liquid
+                                assign image_modifier = 'timeline__image-figure'
+                                render 'image', image: block.settings.image, sizes: '100vw', widths: '254, 308, 360, 462, 512, 620, 670, 720, 924, 1024, 1240, 1340, 1440', modifier: image_modifier, cover: true
+                              -%}
+                            </div>
+                          {%- endif -%}
                         </div>
                       </div>
                     </div>
@@ -187,7 +197,7 @@
           </div>
 
           {%- if show_images -%}
-            <div class="timeline__row__images">
+            <div class="timeline__row__images desktop">
               {{ row_images }}
             </div>
           {%- endif -%}
@@ -213,6 +223,40 @@
     .timeline__wrapper { max-height: 100vh; }
   {%- endif -%}
 {%- endstyle -%}
+
+{%- if request.design_mode -%}
+  <script>
+    document.addEventListener('shopify:block:select', (event) => {
+      if (event.detail?.sectionId !== '{{ section.id }}') return;
+
+      const timelineSectionRoot = event.target.closest('[data-section-id]');
+      const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
+
+      if (!timelineComponent) return;
+
+      const row = event.target.closest('[data-timeline-row-content]');
+      if (!row || !timelineSectionRoot.contains(row)) return;
+
+      const index = [...timelineComponent.querySelectorAll('[data-timeline-row-content]')].indexOf(row);
+      if (index === -1) return;
+
+      timelineComponent.setAttribute('data-editor-block-selected', '');
+      timelineComponent.pause();
+      timelineComponent.selectedIndex = index;
+      timelineComponent.clearRowSelection();
+      timelineComponent.applyRowSelection(index);
+    });
+
+    document.addEventListener('shopify:block:deselect', (event) => {
+      if (event.detail?.sectionId !== '{{ section.id }}') return;
+      const timelineSectionRoot = event.target.closest('[data-section-id]');
+      const timelineComponent = timelineSectionRoot?.querySelector('timeline-component');
+
+      timelineComponent?.removeAttribute('data-editor-block-selected');
+      timelineComponent?.resume();
+    });
+  </script>
+{%- endif -%}
 
 {% schema %}
 {
@@ -433,7 +477,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "2000 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/carbon/images)"
+          "info": "2000 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
         },
         {
           "type": "header",
