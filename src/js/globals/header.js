@@ -51,6 +51,10 @@ if (!customElements.get('header-component')) {
 
         if (this.headerStyle !== 'drawer' && this.desktop) {
           this.minWidth = this.getMinWidth();
+          // Apply the initial state synchronously so the correct variant
+          // (desktop vs mobile) is visible on the first paint, avoiding
+          // the flash of mismatched layout on page load / theme-editor save.
+          this.applyCollapseState();
           this.listenWidth();
         }
       }
@@ -108,20 +112,30 @@ if (!customElements.get('header-component')) {
         this._resizeTimeout = requestAnimationFrame(() => {
           clearTimeout(this._resizeDebounce);
           this._resizeDebounce = setTimeout(() => {
-            const isHamburgerMenu = this.getAvailableWidth() < this.minWidth;
-
-            this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
-
-            if (isHamburgerMenu) {
-              const {headerHeight} = window.theme.readHeights();
-              document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
-            }
+            this.applyCollapseState();
           }, 150);
         });
       }
 
+      applyCollapseState() {
+        const isHamburgerMenu = this.getAvailableWidth() < this.minWidth;
+
+        this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
+
+        if (isHamburgerMenu) {
+          const {headerHeight} = window.theme.readHeights();
+          document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+        }
+
+        return isHamburgerMenu;
+      }
+
       getMinWidth() {
-        // Measure actual visible header content instead of cloning
+        // Measure the bars' intrinsic content width (not their flex-distributed
+        // width). Without this, bars with flex-grow would report whatever
+        // width the current viewport allocates them, which is equal to the
+        // wrapper's inner width — making the comparison in checkWidth()
+        // collapse the header unconditionally.
         const wrappers = this.querySelectorAll(selectors.widthContentWrapper);
         let minWidth = 0;
         let spacing = 0;
@@ -131,12 +145,22 @@ if (!customElements.get('header-component')) {
           const children = wrapper.querySelectorAll(selectors.widthContent);
           if (!children.length) return;
 
+          // Force intrinsic sizing during measurement, then restore.
+          const originalFlex = [];
+          children.forEach((el) => {
+            originalFlex.push(el.style.flex);
+            el.style.flex = '0 0 auto';
+          });
+
           let total = 0;
           children.forEach((el) => {
-            // Only include visible elements
             if (el.offsetParent !== null) {
               total += el.offsetWidth;
             }
+          });
+
+          children.forEach((el, i) => {
+            el.style.flex = originalFlex[i];
           });
 
           const space = children.length * 20;
