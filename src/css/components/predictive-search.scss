@@ -51,12 +51,9 @@ predictive-search {
 
 .predictive-search--empty { z-index: 3999; }
 
-header-search-form ~ .predictive-search--empty,
-predictive-search:not([open]):not([results]) ~ .predictive-search--empty {
-  opacity: 1;
-  visibility: visible;
-  max-height: var(--results-height, var(--results-max-height));
-}
+// Note: the popular-searches ("empty") visible state is defined in
+// `header-search-popdown.scss`, scoped to `.is-open:not(.is-animating)` so
+// the fade syncs with the search popdown FLIP timeline.
 
 predictive-search[open="true"] .predictive-search {
   opacity: 1;
