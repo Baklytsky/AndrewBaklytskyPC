@@ -233,7 +233,6 @@
   &.frame__item { z-index: 20; }
 }
 
-a ~ .hero__aside__wrapper,
 a ~ .hero__content__wrapper {
   pointer-events: none;
 
@@ -266,41 +265,14 @@ a ~ .hero__content__wrapper {
   bottom: 0;
 }
 
-.hero__aside__wrapper { display: flex; }
-
-.hero__aside__wrapper.frame__item {
-  z-index: 20;
-  margin-left: auto;
-}
-
-.hero__aside {
-  width: 100%;
+.hero__wrapper--upsell .hero__content__aside {
+  flex: 0 1 100%;
   padding: var(--outer);
 }
 
 @include media-query($large-up) {
   // Limits content wrapper width for hero sections
-  .hero__aside__wrapper.frame__item,
   .index-hero .hero__content { max-width: var(--hero-content-width, 50%); }
-
-  .hero__aside .product-upsell__holder {
-    max-width: 500px;
-    margin-left: auto;
-  }
-}
-
-@include media-query($medium-down) {
-  .index-hero .hero__aside__wrapper.frame__item {
-    grid-row-start: 2;
-    color: var(--text-dark);
-  }
-
-  .index-hero .wrapper--full .hero__aside__wrapper.frame__item .hero__aside { padding: 0; }
-
-  .index-hero .wrapper--full-padded .hero__aside__wrapper.frame__item .hero__aside {
-    padding-left: 0;
-    padding-right: 0;
-  }
 }
 
 @include media-query($medium-up) {
@@ -308,9 +280,56 @@ a ~ .hero__content__wrapper {
     .hero__content__wrapper,
     .hero__button { justify-content: center; }
   }
+
+  .hero__wrapper--upsell .hero__content__aside {
+    display: flex;
+    flex: 0 1 auto;
+  }
+
+  .hero__wrapper--upsell .product-upsell__holder {
+    width: 320px;
+  }
+
+  .hero__wrapper--upsell-right .hero__content__aside {
+    margin-left: auto;
+  }
+
+  .hero__wrapper--upsell-left .hero__content__aside {
+    order: -1;
+    margin-right: auto;
+  }
+
+  .hero__wrapper--upsell-top .hero__content__wrapper,
+  .hero__wrapper--upsell-bottom .hero__content__wrapper {
+    flex-wrap: wrap;
+  }
+
+  .hero__wrapper--upsell-top .hero__content__aside,
+  .hero__wrapper--upsell-bottom .hero__content__aside {
+    flex: 0 1 100%;
+    justify-content: center;
+  }
+
+  .hero__wrapper--upsell-bottom .hero__content__aside {
+    margin-top: auto;
+  }
+
+  .hero__wrapper--upsell-top .hero__content__aside {
+    order: -1;
+    margin-bottom: auto;
+  }
+
+  .hero__wrapper--upsell-center .hero__content__wrapper {
+    flex-direction: column;
+  }
 }
 
 @include media-query($small) {
+  .hero__wrapper--upsell .hero__content__wrapper {
+    flex-wrap: wrap;
+    align-content: var(--alignment-align-items);
+  }
+
   .text-center--mobile {
     .hero__content__wrapper,
     .hero__button { justify-content: center; }

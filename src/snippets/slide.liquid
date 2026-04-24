@@ -19,6 +19,10 @@
   assign text = ''
   assign hero_class = 'hero__image'
   assign video = block.settings.video
+  assign flex_align_desktop = block.settings.flex_align_desktop
+  assign flex_align_mobile = block.settings.flex_align_mobile
+  assign upsell_product = block.settings.product
+  assign upsell_position = 'right'
 
   if video != blank
     assign hero_class = 'hero__video'
@@ -53,6 +57,28 @@
   capture slide_image
     render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, alt: alt, loading: loading, fetchpriority: fetchpriority, preload: preload, aspect_ratio: image_desktop.aspect_ratio, aspect_ratio_mobile: image_mobile.aspect_ratio
   endcapture
+
+  if upsell_product != blank
+    assign unique_id = section.id | append: '-upsell-' | append: block.id
+    assign upsell_animation_order = 'auto'
+
+    if flex_align_desktop == 'align--top-right-desktop' or flex_align_desktop == 'align--middle-right-desktop' or flex_align_desktop == 'align--bottom-right-desktop'
+      assign upsell_position = 'left'
+    endif
+
+    if flex_align_desktop == 'align--top-center-desktop'
+      assign upsell_position = 'bottom'
+    endif
+
+    if flex_align_desktop == 'align--bottom-center-desktop'
+      assign upsell_position = 'top'
+      assign upsell_animation_order = 0
+    endif
+
+    if flex_align_desktop == 'align--middle-center-desktop'
+      assign upsell_position = 'center'
+    endif
+  endif
 -%}
 
 {%- capture slide_style -%}
@@ -75,7 +101,7 @@
 {%- endcapture -%}
 
 <swiper-slide
-  class="frame {{ section.settings.height }} {{ section.settings.mobile_height }}"
+  class="frame {{ section.settings.height }} {{ section.settings.mobile_height }} hero__wrapper{% if upsell_product != blank %} hero__wrapper--upsell hero__wrapper--upsell-{{ upsell_position }}{% endif %}"
   data-slide="{{ block.id }}"
   data-slide-text-color="{{ text_color }}"
   style="{{ slide_style }}"
@@ -126,7 +152,7 @@
   {%- endif -%}
 
   {%- if block.type != blank -%}
-    <div class="hero__content__wrapper frame__item {{ block.settings.flex_align_desktop }} {{ block.settings.flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}">
+    <div class="hero__content__wrapper frame__item {{ flex_align_desktop }} {{ flex_align_mobile }}{% if show_header_backdrop %} backdrop--linear{% endif %}">
       {%- capture hero_content_style -%}
         {%- unless hero_transparent -%}background: var(--bg); color: var(--text);{%- endunless -%}
         {%- if show_header_backdrop -%} --overlay-opacity: {{ overlay_opacity }};{%- endif -%}
@@ -140,6 +166,22 @@
       >
         {{ content_blocks }}
       </div>
+
+      {%- if upsell_product != blank -%}
+        <div
+          class="hero__content__aside"
+          data-aos="hero"
+          data-aos-order="{{ upsell_animation_order }}"
+          data-aos-anchor="{{ section.id }}"
+        >
+          {%- render 'upsell-product',
+            upsell_product: upsell_product,
+            upsell_modifier: 'product-upsell__holder--mini-mobile',
+            unique_id: unique_id,
+            is_compact: true
+          -%}
+        </div>
+      {%- endif -%}
     </div>
   {%- endif -%}
 </swiper-slide>
