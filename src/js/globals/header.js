@@ -136,6 +136,17 @@ if (!customElements.get('header-component')) {
         // width the current viewport allocates them, which is equal to the
         // wrapper's inner width — making the comparison in checkWidth()
         // collapse the header unconditionally.
+        //
+        // The `[data-child-takes-space]` elements that may be flex-grown and
+        // therefore need intrinsic measurement are defined in the CSS:
+        //   - .header__desktop__bar__l  — `flex: 1 0 0`
+        //   - .header__desktop__bar__c  — `flex-grow: 0`
+        //   - .header__desktop__bar__r  — `flex: 1 0 0`
+        // If any of those flex rules are renamed, removed, or marked
+        // `!important`, the inline override below will no longer cancel the
+        // grow and the "collapse to hamburger" threshold will be wrong.
+        // Keep the rules above flex-based and without `!important`, or update
+        // the inline override here accordingly.
         const wrappers = this.querySelectorAll(selectors.widthContentWrapper);
         let minWidth = 0;
         let spacing = 0;
@@ -145,7 +156,9 @@ if (!customElements.get('header-component')) {
           const children = wrapper.querySelectorAll(selectors.widthContent);
           if (!children.length) return;
 
-          // Force intrinsic sizing during measurement, then restore.
+          // Force intrinsic sizing during measurement, then restore the
+          // original inline value (so CSS rules resume controlling the bars).
+          // `0 0 auto` = don't grow, don't shrink, basis = content size.
           const originalFlex = [];
           children.forEach((el) => {
             originalFlex.push(el.style.flex);
@@ -186,9 +199,7 @@ if (!customElements.get('header-component')) {
         if (!wrapper) return theme.windowWidth;
 
         const style = getComputedStyle(wrapper);
-        const paddingX =
-          (parseFloat(style.paddingLeft) || 0) +
-          (parseFloat(style.paddingRight) || 0);
+        const paddingX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
 
         return wrapper.clientWidth - paddingX;
       }
