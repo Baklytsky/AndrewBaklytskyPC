@@ -157,55 +157,6 @@
 
       {%- capture block_content -%}
         {%- case block.type -%}
-          {%- when 'text-slide' -%}
-            {%- if block.settings.subheading != blank -%}
-              <p class="hero__subheading">
-                {{ block.settings.subheading }}
-              </p>
-            {%- endif -%}
-
-            {%- if block.settings.title != blank -%}
-              {%- liquid
-                assign heading_tag = 'h2'
-
-                unless block.settings.heading_tag == 'automatic' or block.settings.heading_tag == blank
-                  assign heading_tag = block.settings.heading_tag
-                endunless
-              -%}
-
-              <{{ heading_tag }} class="hero__title {{ block.settings.heading_font_size }}">
-                {{ block.settings.title }}
-              </{{ heading_tag }}>
-            {%- endif -%}
-
-            {%- if block.settings.text != blank -%}
-              <div class="hero__rte {{ block.settings.text_font_size }}">
-                {{ block.settings.text }}
-              </div>
-            {%- endif -%}
-
-            {%- if block.settings.button_text != blank -%}
-              {%- liquid
-                assign button_style = block.settings.button_style
-                if button_style == 'btn--text' and block.settings.show_arrow
-                  assign button_style = button_style | append: ' btn--text-no-underline'
-                endif
-              -%}
-
-              <div class="hero__button">
-                <a
-                  href="{{ block.settings.button_url | default: '#!' }}"
-                  class="btn {{ button_style }} {{ block.settings.button_size }} {{ block.settings.button_type }}"
-                >
-                  <span>{{ block.settings.button_text }}</span>
-
-                  {%- if block.settings.show_arrow -%}
-                    {%- render 'icon-nav-arrow-right' -%}
-                  {%- endif -%}
-                </a>
-              </div>
-            {%- endif -%}
-
           {%- when 'heading' -%}
             {%- if block.settings.title != blank -%}
               {%- liquid
@@ -233,7 +184,7 @@
             {%- if block.settings.subheading != blank -%}
               {%- assign animation_order = animation_order | plus: 1 -%}
               <p
-                class="hero__subheading {{ block.settings.text_font_size }} block-padding"
+                class="hero__subheading {{ block.settings.text_font_size }} block-padding{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
                 data-aos="hero"
                 data-aos-anchor="{{ animation_anchor }}"
                 data-aos-order="{{ animation_order }}"
