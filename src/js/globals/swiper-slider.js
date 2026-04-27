@@ -28,8 +28,9 @@ const handleBreakpoints = () => {
 
 /**
  * Drive the line-style pagination progress bar via the autoplayTimeLeft event.
- * Appends a span.bullet-fill child to each pagination bullet and animates its
- * width — bypasses the background/transition rules that affect ::part(bullet).
+ * Updates --line-progress on the swiper-container each frame; the CSS rule in
+ * head.liquid reads it via background-size on ::part(bullet-active).
+ * No DOM mutations — pure CSS custom property updates.
  */
 const initLineProgress = (el, swiper) => {
   // Guard: only autoplay swipers, and only once per element (prevents duplicate
@@ -39,56 +40,31 @@ const initLineProgress = (el, swiper) => {
 
   el.classList.add('has-line-progress');
 
-  swiper.on('touchStart', () => { el.dataset.swiperDragging = '1'; });
-  swiper.on('touchEnd',   () => { delete el.dataset.swiperDragging; });
+  swiper.on('touchStart', () => {
+    el.dataset.swiperDragging = '1';
+  });
+  swiper.on('touchEnd', () => {
+    delete el.dataset.swiperDragging;
+  });
 
-  // Animate a real <span> child's width — the same pattern as a plain <div>
-  // fill bar. Avoids all CSS transition, ::part(), and shadow-DOM cascade issues.
-  const FILL_CSS =
-    'position:absolute;left:0;top:0;height:100%;width:0;background:var(--text);pointer-events:none;';
-
-  const ensureFillChildren = () => {
-    const bullets = swiper.pagination?.bullets;
-    if (!bullets?.length) return;
-    bullets.forEach((b) => {
-      if (b.querySelector('.bullet-fill')) return;
-      b.style.position = 'relative';
-      b.style.overflow = 'hidden';
-      const fill = document.createElement('span');
-      fill.className = 'bullet-fill';
-      fill.style.cssText = FILL_CSS;
-      b.appendChild(fill);
-    });
-  };
-
-  // Inject fill spans once at init — deferred by one frame so pagination is
-  // rendered. Keeping DOM mutations out of event handlers prevents them from
-  // interfering with Swiper's mid-transition pagination updates.
-  requestAnimationFrame(ensureFillChildren);
-
-  const setFill = (pct) => {
+  // Write --line-progress to the active BULLET element, NOT the swiper-container.
+  // The swiper-container's style attribute is watched by Swiper's internal
+  // MutationObserver (force-enabled by the swiper-element bundle), so 60fps
+  // writes there trigger swiper.update() in a tight loop and prevent autoplay
+  // from running. Bullets live in shadow DOM and are not observed.
+  swiper.on('autoplayTimeLeft', (_s, _t, percentage) => {
+    if (el.dataset.swiperDragging) return;
     const bullets = swiper.pagination?.bullets;
     if (!bullets?.length) return;
     const active = bullets[swiper.realIndex % bullets.length];
-    const fill = active?.querySelector('.bullet-fill');
-    if (fill) fill.style.width = `${pct}%`;
-  };
-
-  const resetFill = () => {
-    const bullets = swiper.pagination?.bullets;
-    if (!bullets) return;
-    bullets.forEach((b) => {
-      const f = b.querySelector('.bullet-fill');
-      if (f) f.style.width = '0%';
-    });
-  };
-
-  swiper.on('autoplayTimeLeft', (_s, _t, percentage) => {
-    if (el.dataset.swiperDragging) return;
-    setFill(((1 - percentage) * 100).toFixed(2));
+    if (active) active.style.setProperty('--line-progress', `${((1 - percentage) * 100).toFixed(2)}%`);
   });
 
-  swiper.on('slideChangeTransitionStart', resetFill);
+  swiper.on('slideChangeTransitionStart', () => {
+    const bullets = swiper.pagination?.bullets;
+    if (!bullets?.length) return;
+    bullets.forEach((b) => b.style.removeProperty('--line-progress'));
+  });
 };
 
 /**

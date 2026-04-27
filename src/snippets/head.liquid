@@ -859,16 +859,23 @@
     swiper-container::part(bullet),
     swiper-container::part(bullet-active),
     .swiper-pagination-bullet {
-      --swiper-pagination-bullet-width: 40px;
+      --swiper-pagination-bullet-width: 50px;
       --swiper-pagination-bullet-height: 3px;
       --swiper-pagination-bullet-radius: initial;
       --swiper-pagination-bullet-inactive-opacity: 0.25;
-      border: none !important;
+      --swiper-pagination-bullet-border: none;
+      background: var(--text);
     }
 
     swiper-container.has-line-progress::part(bullet-active) {
-      --swiper-pagination-bullet-bg: transparent;
-      background: transparent;
+      /* Layer 1: progress fill growing left → right via --line-progress.
+         Layer 2: faded track (matches inactive-bullet opacity) showing full width.
+         transition drops 'background' so per-frame background-size updates
+         from JS are instant — the swiper.scss 0.3s background ease caused the
+         fill to appear frozen when updated at 60fps. */
+      background:
+        linear-gradient(var(--text), var(--text)) left center / var(--line-progress, 0%) 100% no-repeat,
+        color-mix(in srgb, var(--text) 25%, transparent);
       transition: opacity 0.3s ease;
     }
   {% else %}
