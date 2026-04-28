@@ -5,18 +5,16 @@
   @param {string} style - The style of the icon (regular, light)
 
   @example
-  {% render 'icon', name: 'list' %}
-  {% render 'icon', name: 'list', style: 'regular' %}
-  {% render 'icon', name: 'list', style: 'light' -%}
+  {% render 'icon', name: 'acorn' %}
 {%- enddoc -%}
 
 {%- liquid
   assign icon_key = name | default: '' | strip
-  assign icon_style = style | default: 'regular' | strip
+  assign icon_style = settings.icon_style | default: 'regular' | strip
 
   capture icon_html
     case icon_style
-      when 'regular' or blank
+      when 'regular', blank
         render 'icons-regular', name: icon_key
       when 'light'
         render 'icons-light', name: icon_key
@@ -24,9 +22,10 @@
   endcapture
 
   unless icon_html contains 'class='
-    assign icon_class = 'icon icon-' | append: name
-    assign icon_html | replace: '<svg', '<svg class="' | append: icon_class | append: '"'
-  endif
+    assign class_attribute = 'class="icon icon-' | append: name | append: '"'
+    assign class_attribute_html = '<svg ' | append: class_attribute | append: ' '
+    assign icon_html = icon_html | replace: '<svg', class_attribute_html
+  endunless
 -%}
 
 {{- icon_html -}}

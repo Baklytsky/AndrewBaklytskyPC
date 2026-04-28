@@ -477,15 +477,17 @@
     --underlay-bg: {{ backdrop_bg }};
     --header-overlay-color: transparent;
 
-    /*** Custom Cursor ***/
-    --ICON-ZOOM-IN: url( "{{ 'icon-plus.svg' | asset_url }}" );
-    --ICON-ZOOM-OUT: url( "{{ 'icon-minus.svg' | asset_url }}" );
-
     /*** Custom Icons ***/
-    --ICON-BAG: url( "{{ 'icon-bag.svg' | asset_url }}" );
-    --ICON-ARROW-LEFT: url( "{{ 'icon-nav-arrow-left.svg' | asset_url }}" );
-    --ICON-ARROW-RIGHT: url( "{{ 'icon-nav-arrow-right.svg' | asset_url }}" );
-    --ICON-SELECT: url("{{ 'icon-nav-arrow-down.svg' | asset_url }}");
+    {%- liquid
+      assign icon_asset_suffix = ''
+      if settings.icon_style == 'light'
+        assign icon_asset_suffix = '-light'
+      endif
+    -%}
+    --ICON-BAG: url( "{{ 'shopping-bag' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
+    --ICON-ARROW-LEFT: url( "{{ 'caret-left' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
+    --ICON-ARROW-RIGHT: url( "{{ 'caret-right' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
+    --ICON-SELECT: url("{{ 'caret-down' | append: icon_asset_suffix | append: '.svg' | asset_url }}");
 
     /*** Product card ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
