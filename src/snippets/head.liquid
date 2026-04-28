@@ -859,11 +859,18 @@
     swiper-container::part(bullet),
     swiper-container::part(bullet-active),
     .swiper-pagination-bullet {
-      --swiper-pagination-bullet-width: 50px;
-      --swiper-pagination-bullet-height: 3px;
-      --swiper-pagination-bullet-radius: initial;
-      --swiper-pagination-bullet-inactive-opacity: 0.25;
+      --swiper-pagination-bullet-width: 250px;
+      --swiper-pagination-bullet-height: 10px;
+      --swiper-pagination-bullet-radius: 5px;
+      /* --swiper-pagination-bullet-width: 50px; */
+      /* --swiper-pagination-bullet-height: 4px; */
+      /* --swiper-pagination-bullet-radius: 2px; */
+      --swiper-pagination-bullet-inactive-opacity: 25%;
       --swiper-pagination-bullet-border: none;
+      background: var(--text);
+    }
+
+    swiper-container.has-line-progress::part(bullet) {
       background: var(--text);
     }
 
@@ -875,7 +882,7 @@
          fill to appear frozen when updated at 60fps. */
       background:
         linear-gradient(var(--text), var(--text)) left center / var(--line-progress, 0%) 100% no-repeat,
-        color-mix(in srgb, var(--text) 25%, transparent);
+        color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-inactive-opacity), transparent);
       transition: opacity 0.3s ease;
     }
   {% else %}
