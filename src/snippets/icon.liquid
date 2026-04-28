@@ -15,13 +15,12 @@
   assign icon_style = style | default: 'regular' | strip
 
   capture icon_html
-    if icon_style == 'regular' or icon_style == blank
-      render 'icons-regular', name: icon_key
-    endif
-
-    if icon_style == 'light'
-      render 'icons-light', name: icon_key
-    endif
+    case icon_style
+      when 'regular' or blank
+        render 'icons-regular', name: icon_key
+      when 'light'
+        render 'icons-light', name: icon_key
+    endcase
   endcapture
 
   unless icon_html contains 'class='
