@@ -854,6 +854,7 @@
       --swiper-pagination-bullet-height: 10px;
       --swiper-pagination-bullet-radius: 50%;
       --swiper-pagination-bullet-inactive-opacity: 1;
+      --swiper-pagination-bullet-bg: transparent;
     }
   {% elsif settings.dots_style == 'line' %}
     swiper-container::part(bullet),
@@ -867,28 +868,28 @@
       /* --swiper-pagination-bullet-radius: 2px; */
       --swiper-pagination-bullet-inactive-opacity: 25%;
       --swiper-pagination-bullet-border: none;
-      background: var(--text);
-    }
-
-    swiper-container.has-line-progress::part(bullet) {
-      background: var(--text);
-    }
-
-    swiper-container.has-line-progress::part(bullet-active) {
-      /* Layer 1: progress fill growing left → right via --line-progress.
-         Layer 2: faded track (matches inactive-bullet opacity) showing full width.
-         transition drops 'background' so per-frame background-size updates
-         from JS are instant — the swiper.scss 0.3s background ease caused the
-         fill to appear frozen when updated at 60fps. */
-      background:
-        linear-gradient(var(--text), var(--text)) left center / var(--line-progress, 0%) 100% no-repeat,
-        color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-inactive-opacity), transparent);
-      transition: opacity 0.3s ease;
+      --swiper-pagination-bullet-bg: var(--text);
     }
   {% else %}
     swiper-container::part(pagination),
     .swiper-pagination,
     .swiper-pagination-bullet { display: none; }
+  {% endif %}
+
+  {% if settings.dots_style != 'hidden' %}
+    /* Shared bullet-progress styling: every bullet of an autoplay slider gets
+       the color-mix track; the active bullet additionally shows the growing
+       fill via --bullet-progress (set inline 60fps from JS) */
+    swiper-container[autoplay="true"]::part(bullet) {
+      transition: none;
+      --swiper-pagination-bullet-bg: var(--text);
+    }
+
+    swiper-container[autoplay="true"]::part(bullet-active) {
+      --swiper-pagination-bullet-bg: linear-gradient(var(--text), var(--text)) left center / var(--bullet-progress, 0%) 100% no-repeat,
+      color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
+      opacity: 1;
+    }
   {% endif %}
 {% endstyle %}
 

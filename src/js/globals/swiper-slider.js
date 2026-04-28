@@ -27,18 +27,18 @@ const handleBreakpoints = () => {
 };
 
 /**
- * Drive the line-style pagination progress bar via the autoplayTimeLeft event.
- * Updates --line-progress on the swiper-container each frame; the CSS rule in
- * head.liquid reads it via background-size on ::part(bullet-active).
+ * Drive the bullet pagination progress fill via the autoplayTimeLeft event.
+ * Sets --bullet-progress on the active bullet each frame; the CSS rule in
+ * head.liquid reads it via background-size on ::part(bullet) for any
+ * autoplay="true" swiper. Works for both line and circle styles.
  * No DOM mutations — pure CSS custom property updates.
  */
-const initLineProgress = (el, swiper) => {
-  // Guard: only autoplay swipers, and only once per element (prevents duplicate
-  // listeners when afterSwiperInit re-runs on shopify:section:select).
-  if (!el.hasAttribute('autoplay') || el.dataset.lineProgressInit) return;
-  el.dataset.lineProgressInit = '1';
-
-  el.classList.add('has-line-progress');
+const initBulletProgress = (el, swiper) => {
+  // Guard: only sliders with autoplay="true" (excludes autoplay="false" cases),
+  // and only once per element (prevents duplicate listeners when
+  // afterSwiperInit re-runs on shopify:section:select).
+  if (el.getAttribute('autoplay') !== 'true' || el.dataset.bulletProgressInit) return;
+  el.dataset.bulletProgressInit = '1';
 
   swiper.on('touchStart', () => {
     el.dataset.swiperDragging = '1';
@@ -47,7 +47,7 @@ const initLineProgress = (el, swiper) => {
     delete el.dataset.swiperDragging;
   });
 
-  // Write --line-progress to the active BULLET element, NOT the swiper-container.
+  // Write --bullet-progress to the active BULLET element, NOT the swiper-container.
   // The swiper-container's style attribute is watched by Swiper's internal
   // MutationObserver (force-enabled by the swiper-element bundle), so 60fps
   // writes there trigger swiper.update() in a tight loop and prevent autoplay
@@ -57,13 +57,13 @@ const initLineProgress = (el, swiper) => {
     const bullets = swiper.pagination?.bullets;
     if (!bullets?.length) return;
     const active = bullets[swiper.realIndex % bullets.length];
-    if (active) active.style.setProperty('--line-progress', `${((1 - percentage) * 100).toFixed(2)}%`);
+    if (active) active.style.setProperty('--bullet-progress', `${((1 - percentage) * 100).toFixed(2)}%`);
   });
 
   swiper.on('slideChangeTransitionStart', () => {
     const bullets = swiper.pagination?.bullets;
     if (!bullets?.length) return;
-    bullets.forEach((b) => b.style.removeProperty('--line-progress'));
+    bullets.forEach((b) => b.style.removeProperty('--bullet-progress'));
   });
 };
 
@@ -77,13 +77,14 @@ const afterSwiperInit = () => {
     const initAll = () => {
       document.querySelectorAll('swiper-container').forEach((el) => {
         el.classList.add('is-initialized');
+        if (el.getAttribute('autoplay') !== 'true') return;
         const swiper = el.swiper;
         if (swiper) {
-          initLineProgress(el, swiper);
+          initBulletProgress(el, swiper);
         } else {
           // Swiper instance not ready yet — retry on the next frame.
           requestAnimationFrame(() => {
-            if (el.swiper) initLineProgress(el, el.swiper);
+            if (el.swiper) initBulletProgress(el, el.swiper);
           });
         }
       });
