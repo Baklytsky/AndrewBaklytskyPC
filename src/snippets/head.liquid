@@ -850,11 +850,14 @@
     swiper-container::part(bullet),
     swiper-container::part(bullet-active),
     .swiper-pagination-bullet {
-      --swiper-pagination-bullet-width: 10px;
-      --swiper-pagination-bullet-height: 10px;
+      --swiper-pagination-bullet-width: 50px;
+      --swiper-pagination-bullet-height: 50px;
+      /* --swiper-pagination-bullet-width: 10px;
+      --swiper-pagination-bullet-height: 10px; */
       --swiper-pagination-bullet-radius: 50%;
       --swiper-pagination-bullet-inactive-opacity: 1;
       --swiper-pagination-bullet-bg: transparent;
+      --bullet-progress-fill: conic-gradient(var(--text) var(--bullet-progress, 0%), transparent 0%);
     }
   {% elsif settings.dots_style == 'line' %}
     swiper-container::part(bullet),
@@ -863,12 +866,13 @@
       --swiper-pagination-bullet-width: 250px;
       --swiper-pagination-bullet-height: 10px;
       --swiper-pagination-bullet-radius: 5px;
-      /* --swiper-pagination-bullet-width: 50px; */
-      /* --swiper-pagination-bullet-height: 4px; */
-      /* --swiper-pagination-bullet-radius: 2px; */
+      /* --swiper-pagination-bullet-width: 50px;
+      --swiper-pagination-bullet-height: 4px;
+      --swiper-pagination-bullet-radius: 2px; */
       --swiper-pagination-bullet-inactive-opacity: 25%;
       --swiper-pagination-bullet-border: none;
       --swiper-pagination-bullet-bg: var(--text);
+      --bullet-progress-fill: linear-gradient(var(--text), var(--text)) left center / var(--bullet-progress, 0%) 100% no-repeat;
     }
   {% else %}
     swiper-container::part(pagination),
@@ -886,8 +890,9 @@
     }
 
     swiper-container[autoplay="true"]::part(bullet-active) {
-      --swiper-pagination-bullet-bg: linear-gradient(var(--text), var(--text)) left center / var(--bullet-progress, 0%) 100% no-repeat,
-      color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
+      --swiper-pagination-bullet-bg:
+        var(--bullet-progress-fill),
+        color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
       opacity: 1;
     }
   {% endif %}
