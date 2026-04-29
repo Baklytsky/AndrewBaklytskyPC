@@ -1,17 +1,15 @@
 {% comment %} Icon block for Product page & Cart drawer/page {% endcomment %}
 {%- liquid
-  assign heading = heading | default: block.settings.heading
-  assign text = text | default: block.settings.text
+  assign text = block.settings.text
+  assign align_text = align_text | default: block.settings.align_text | default: ''
   assign prev_index = index | minus: 1
   assign next_index = index | plus: 1
   assign prev_block = section.blocks[prev_index]
   assign next_block = section.blocks[next_index]
-  assign image = image | default: block.settings.image
-  assign icon_name = icon_name | default: block.settings.icon_name
-  assign icon_color = icon_color | default: block.settings.icon_color
-  assign padding_bottom = padding_bottom | default: block.settings.padding_bottom | default: 0
-  assign alignment = alignment | default: block.settings.alignment | default: ''
-  assign not_block = not_block | default: false
+  assign image = block.settings.image
+  assign icon_color = block.settings.icon_color
+  assign padding_bottom = block.settings.padding_bottom | default: 0
+  assign alignment = block.settings.alignment | default: ''
 
   case block.settings.width
     when 'full'
@@ -41,11 +39,9 @@
 {%- endif -%}
 
 <div
-  class="block__icon__container{% unless not_block %} product__block block-padding{% endunless %}{{ width }}{% if alignment != '' %} {{ alignment }}{% endif %}"
-  {% unless not_block %}
-    {{ block.shopify_attributes }}
-    {{ block_style }}
-  {% endunless %}
+  class="product__block block__icon__container{{ width }} block-padding{% if alignment != '' %} {{ alignment }}{% endif %}"
+  {{ block.shopify_attributes }}
+  {{ block_style }}
 >
   {%- liquid
     assign icon_size = block.settings.icon_size
@@ -69,31 +65,21 @@
 
         render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
       else
-        render 'animated-icon', filename: icon_name
+        render 'animated-icon', filename: block.settings.icon_name
       endif
     -%}
   </div>
 
-  {%- if heading != blank or text != blank -%}
-    <div class="block__icon__content">
-      {%- if heading != blank -%}
-        <h3 class="block__icon__heading {{ block.settings.heading_font_size | default: '' }}" data-aos="fade">
-          {{ heading }}
-        </h3>
-      {%- endif -%}
+  {%- if text != blank -%}
+    {%- assign icon_text_tag = 'p' -%}
+    {%- if text contains '<p>' -%}
+      {%- assign icon_text_tag = 'div' -%}
+    {%- endif -%}
 
-      {%- if text != blank -%}
-        {%- assign icon_text_tag = 'p' -%}
-        {%- if text contains '<p>' -%}
-          {%- assign icon_text_tag = 'div' -%}
-        {%- endif -%}
-
-        <div class="block__icon__text" data-aos="fade">
-          <{{ icon_text_tag }} class="{{ block.settings.text_font_size | default: 'subheading' }}">
-            {{- text -}}
-          </{{ icon_text_tag }}>
-        </div>
-      {%- endif -%}
+    <div class="block__icon__text" data-aos="fade">
+      <{{ icon_text_tag }} class="{{ block.settings.text_font_size | default: 'subheading' }}">
+        {{- text -}}
+      </{{ icon_text_tag }}>
     </div>
   {%- endif -%}
 </div>
