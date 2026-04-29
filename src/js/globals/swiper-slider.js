@@ -50,6 +50,29 @@ const initBulletProgress = (el, swiper) => {
     const active = bullets[swiper.realIndex % bullets.length];
     if (active) active.style.setProperty('--bullet-progress', `${((1 - percentage) * 100).toFixed(2)}%`);
   });
+
+  // Mirror the active slide's --text onto the swiper-container host as
+  // --bullet-color. Bullets (in shadow DOM) inherit it because the registered
+  // @property has inherits: true, so the host's value is the single source of
+  // truth — avoiding the awkward cascade between ::part rules and inline-on-
+  // bullet declarations for registered custom properties.
+  //
+  // One host-write per slide change is safe: this version of swiper-element
+  // (12.1.2) only attaches Swiper's MutationObserver when params.observer is
+  // true (we don't set it), and attributeChangedCallback only reacts to
+  // Swiper config attributes — neither watches `style`.
+  const syncBulletColor = () => {
+    const slide = swiper.slides?.[swiper.activeIndex];
+    if (!slide) return;
+    const color = getComputedStyle(slide).getPropertyValue('--text').trim();
+    if (!color) return;
+    el.style.setProperty('--bullet-color', color);
+  };
+  // First-slide color: defer one frame so Swiper has applied initial classes.
+  requestAnimationFrame(syncBulletColor);
+  // Loop-safe: activeIndex resolves to the visible slide (incl. loop clones,
+  // which carry the same inline --text from slide.liquid).
+  swiper.on('slideChange', syncBulletColor);
 };
 
 /**

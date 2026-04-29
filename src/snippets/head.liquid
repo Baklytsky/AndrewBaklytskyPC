@@ -846,34 +846,43 @@
     min-width: 320px;
   }
 
+  /* Registered custom property so --bullet-color can be interpolated via
+     `transition`. Initial value is a sane fallback; bullets seed it from
+     var(--text) below, and JS overrides it per active slide for live syncing. */
+  @property --bullet-color {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #000;
+  }
+
   {% if settings.dots_style == 'circle' %}
     swiper-container::part(bullet),
     swiper-container::part(bullet-active),
     .swiper-pagination-bullet {
-      /* --swiper-pagination-bullet-width: 50px;
-      --swiper-pagination-bullet-height: 50px; */
-      --swiper-pagination-bullet-width: 10px;
-      --swiper-pagination-bullet-height: 10px;
+      --swiper-pagination-bullet-width: 50px;
+      --swiper-pagination-bullet-height: 50px;
+      /* --swiper-pagination-bullet-width: 10px;
+      --swiper-pagination-bullet-height: 10px; */
       --swiper-pagination-bullet-radius: 50%;
       --swiper-pagination-bullet-inactive-opacity: 1;
       --swiper-pagination-bullet-border: none;
-      --swiper-pagination-bullet-bg: color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
-      --bullet-progress-fill: conic-gradient(var(--text) var(--bullet-progress, 0%), transparent 0%);
+      --swiper-pagination-bullet-bg: color-mix(in srgb, var(--bullet-color) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
+      --bullet-progress-fill: conic-gradient(var(--bullet-color) var(--bullet-progress, 0%), transparent 0%);
     }
   {% elsif settings.dots_style == 'line' %}
     swiper-container::part(bullet),
     swiper-container::part(bullet-active),
     .swiper-pagination-bullet {
-      /* --swiper-pagination-bullet-width: 250px;
+      --swiper-pagination-bullet-width: 250px;
       --swiper-pagination-bullet-height: 10px;
-      --swiper-pagination-bullet-radius: 5px; */
-      --swiper-pagination-bullet-width: 50px;
+      --swiper-pagination-bullet-radius: 5px;
+      /* --swiper-pagination-bullet-width: 50px;
       --swiper-pagination-bullet-height: 4px;
-      --swiper-pagination-bullet-radius: 2px;
+      --swiper-pagination-bullet-radius: 2px; */
       --swiper-pagination-bullet-inactive-opacity: 25%;
       --swiper-pagination-bullet-border: none;
-      --swiper-pagination-bullet-bg: var(--text);
-      --bullet-progress-fill: linear-gradient(var(--text), var(--text)) left center / var(--bullet-progress, 0%) 100% no-repeat;
+      --swiper-pagination-bullet-bg: var(--bullet-color);
+      --bullet-progress-fill: linear-gradient(var(--bullet-color), var(--bullet-color)) left center / var(--bullet-progress, 0%) 100% no-repeat;
     }
   {% else %}
     swiper-container::part(pagination),
@@ -882,13 +891,27 @@
   {% endif %}
 
   {% if settings.dots_style != 'hidden' %}
+    /* Per-slide color, seeded from the inherited --text and interpolated via
+       the registered @property above. We declare it on the host (and the
+       legacy .swiper wrapper) so bullets inherit it through shadow DOM —
+       registered custom properties with inherits: true cross the boundary.
+       JS (initBulletProgress) writes --bullet-color inline on the host on
+       every slide change; inheritance + @property gives bullets a smooth
+       cross-fade without any per-bullet writes (which interact awkwardly
+       with the ::part cascade for inline styles). */
+    swiper-container,
+    .swiper {
+      --bullet-color: var(--text);
+      transition: --bullet-color 0.3s ease;
+    }
+
     /* Active bullet of an autoplay slider: layered background where the first
        layer is the per-style growing fill (--bullet-progress-fill, set by each
        dots_style block) and the second is the color-mix track shared by both. */
     swiper-container[autoplay="true"]::part(bullet-active) {
       --swiper-pagination-bullet-bg:
         var(--bullet-progress-fill),
-        color-mix(in srgb, var(--text) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
+        color-mix(in srgb, var(--bullet-color) var(--swiper-pagination-bullet-track-opacity, 25%), transparent);
       opacity: 1;
     }
   {% endif %}
