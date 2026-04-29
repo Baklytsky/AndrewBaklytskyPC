@@ -41,11 +41,14 @@ const initBullets = (el, swiper) => {
   // ── Per-slide color sync (all sliders):
   // Mirror the active slide's --text onto the swiper-container host as
   // --bullet-color. Bullets in shadow DOM inherit it because the registered
-  // @property has inherits: true, so the host's value is the single source of truth
-  // One host-write per slide change is safe: this version of swiper-element
-  // (12.1.2) only attaches Swiper's MutationObserver when params.observer is true,
-  // and attributeChangedCallback only reacts to
-  // Swiper config attributes — neither watches `style`.
+  // @property has inherits: true, so the host's value is the single source of truth.
+  //
+  // One host-write per slide change is safe even though the swiper-element bundle
+  // force-enables Swiper's MutationObserver on the host (observer: true is set by
+  // default unless virtual is enabled — see swiper-element-bundle.mjs). Its
+  // callback (observerUpdate → calcSlideSlots) is tolerable at slide-change
+  // frequency. Per-frame host-writes would not be safe — that's exactly why the
+  // 60fps --bullet-progress write below targets the bullet element instead.
   const syncBulletColor = () => {
     const slide = swiper.slides?.[swiper.activeIndex];
     if (!slide) return;
