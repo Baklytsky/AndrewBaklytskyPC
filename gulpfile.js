@@ -138,9 +138,16 @@ function compileAssets() {
 
 // Minify SVGs, replace .liquid extension, and output to dist/snippets
 function compileIcons() {
+  const iconDirectory = path.join(__dirname, 'src/icons');
+
+  if (!fs.existsSync(iconDirectory)) {
+    log(colors.yellow('Skipping SVG compilation: src/icons not found'));
+    return Promise.resolve();
+  }
+
   log(colors.white('Processing SVGs'));
 
-  return src(config.src.icons)
+  return src(config.src.icons, {allowEmpty: true})
     .pipe(
       newer({
         dest: config.dist.snippets,
