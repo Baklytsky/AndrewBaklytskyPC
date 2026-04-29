@@ -32,6 +32,27 @@
 -%}
 
 <popup-component class="product__block block-padding" {{ block_style }}>
+  <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
+    <form method="dialog">
+      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
+    </form>
+
+    <div class="product-modal__outer">
+      <div class="product-modal__content small" data-scroll-lock-scrollable>
+        <button
+          type="button"
+          class="product-modal__close"
+          data-popup-close
+          aria-label="{{ 'general.accessibility.close' | t }}"
+        >
+          {%- render 'icon', name: 'x' -%}
+        </button>
+
+        {{ popup_content }}
+      </div>
+    </div>
+  </dialog>
+
   <div class="block__icon__container block__icon__container--full">
     <div class="block__icon" data-aos="img-in" {{ icon_style }}>
       {%- liquid
@@ -57,25 +78,4 @@
       {{ link_text | escape }}
     </a>
   </div>
-
-  <dialog class="product-modal" aria-hidden="true" inert data-scroll-lock-required>
-    <form method="dialog">
-      <button class="visually-hidden" aria-label="{{ 'general.accessibility.close' | t }}"></button>
-    </form>
-
-    <div class="product-modal__outer">
-      <div class="product-modal__content small" data-scroll-lock-scrollable>
-        <button
-          type="button"
-          class="product-modal__close"
-          data-popup-close
-          aria-label="{{ 'general.accessibility.close' | t }}"
-        >
-          {%- render 'icon', name: 'x' -%}
-        </button>
-
-        {{ popup_content }}
-      </div>
-    </div>
-  </dialog>
 </popup-component>

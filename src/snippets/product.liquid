@@ -533,7 +533,7 @@
                     -%}
 
                   {%- when 'feature' -%}
-                    {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
+                    {%- render 'icon-block', block: block, index: forloop.index0, is_product: true -%}
 
                   {%- when 'features' -%}
                     {%- assign accordion_heading = block.settings.heading -%}
@@ -555,7 +555,7 @@
                               <summary class="accordion__title" data-collapsible-trigger>
                                 {{ accordion_heading }}
 
-                                {%- render 'icon-nav-arrow-down' -%}
+                                {%- render 'icon', name: 'caret-down' -%}
                               </summary>
 
                               <div
@@ -567,18 +567,18 @@
                               >
                                 <div class="accordion__content" data-collapsible-content>
                                   {%- for idx in (1..3) -%}
-                                    {%- assign heading_key = 'heading_' | append: idx -%}
-                                    {%- assign heading = block.settings[heading_key] -%}
-                                    {%- assign text_key = 'text_' | append: idx -%}
-                                    {%- assign text = block.settings[text_key] -%}
-                                    {%- assign icon_name_key = 'icon_name_' | append: idx -%}
-                                    {%- assign icon_name = block.settings[icon_name_key] -%}
+                                    {%- assign heading_id = 'heading_' | append: idx -%}
+                                    {%- assign heading = block.settings[heading_id] -%}
+                                    {%- assign text_id = 'text_' | append: idx -%}
+                                    {%- assign text = block.settings[text_id] -%}
+                                    {%- assign icon_key_id = 'icon_key_' | append: idx -%}
+                                    {%- assign icon_key = block.settings[icon_key_id] -%}
 
-                                    {%- render 'icon',
+                                    {%- render 'icon-block',
                                       block: block,
                                       heading: heading,
                                       text: text,
-                                      icon_name: icon_name,
+                                      icon_key: icon_key,
                                       not_block: true
                                     -%}
                                   {%- endfor -%}
