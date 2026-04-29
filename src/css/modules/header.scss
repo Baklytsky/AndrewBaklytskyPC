@@ -1,5 +1,16 @@
 @use '../globals' as *;
 
+:root {
+  // Header spacing scale
+  // `--HEADER-SPACING-SCALE-MOBILE` is only emitted in grid_override mode;
+  // for preset grid_style modes we fall through to the single `--HEADER-SPACING-SCALE`.
+  --header-spacing-scale: var(--HEADER-SPACING-SCALE, 1);
+
+  @include media-query($small) {
+    --header-spacing-scale: var(--HEADER-SPACING-SCALE-MOBILE, var(--HEADER-SPACING-SCALE, 1));
+  }
+}
+
 header-component,
 hover-disclosure { display: block; }
 
@@ -108,7 +119,7 @@ hover-disclosure { display: block; }
 }
 
 .header__mobile__hamburger {
-  --icon-size: 44px;
+  --icon-size: 28px;
 
   position: relative;
   display: flex;
@@ -116,7 +127,7 @@ hover-disclosure { display: block; }
   justify-content: center;
   height: 100%;
   left: 0;
-  padding: 0;
+  padding-inline: 8px;
   margin-left: -12px;
   cursor: pointer;
 }
@@ -270,11 +281,9 @@ hover-disclosure { display: block; }
 .header__mobile__button:last-child .header__mobile__hamburger,
 .header__mobile__button:last-child .navlink { margin-right: 0; }
 
-.header__desktop__upper,
-.header__desktop__lower,
-.header__mobile {
-  padding-left: var(--outer);
-  padding-right: var(--outer);
+// Shared side spacing for header blocks
+.header__padded {
+  padding-inline: var(--outer);
 }
 
 .header__desktop__upper,
@@ -328,12 +337,11 @@ hover-disclosure { display: block; }
 
 .header__mobile__button .navlink:not(.navlink--toplevel),
 .header__desktop__button .navlink:not(.navlink--toplevel) {
-  padding: 5px;
+  padding: 5px calc(5px * var(--header-spacing-scale, 1));
   transition: color 0.25s $ease-out-fast;
 
   @include media-query($medium-up) {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-inline: calc(8px * var(--header-spacing-scale, 1));
   }
 }
 
@@ -341,8 +349,6 @@ hover-disclosure { display: block; }
 .header__desktop__button .popout-header { margin: 0; }
 
 .navlink {
-  --icon-size: 32px;
-
   @include nav;
 
   line-height: 1.2;
@@ -357,7 +363,7 @@ hover-disclosure { display: block; }
 .navlink--search {
   cursor: pointer;
 
-  .icon-close { display: none; }
+  .icon-x { display: none; }
 }
 
 .navlink--child,
@@ -368,10 +374,10 @@ hover-disclosure { display: block; }
 }
 
 .navlink--toplevel {
-  --link-padding: 15px;
+  --link-padding: calc(15px * var(--header-spacing-scale, 1));
 
   position: relative;
-  padding: 5px 9px;
+  padding: 5px calc(9px * var(--header-spacing-scale, 1));
   z-index: 6;
 
   @include media-query($medium-up) {
@@ -434,11 +440,18 @@ hover-disclosure { display: block; }
   flex: 1 0 0;
   justify-content: flex-end;
 }
-.header__desktop__bar__r .header__menu { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--text { margin-right: -15px; }
-.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: -11px; }
+// Cancel the last (or first, in reverse layouts) child's internal horizontal
+// padding so the visible content aligns flush with the outer `--outer` gutter.
+// Each base value mirrors the padding applied to the corresponding edge child:
+//   -15px -> `.navlink--toplevel` horizontal padding (--link-padding)
+//   -11px -> cart/popout edge padding + optical nudge in icon mode
+// All three track `--header-spacing-scale` so the compensation follows the
+// same grid-style / grid-override scaling as the paddings themselves.
+.header__desktop__bar__r .header__menu { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--text { margin-right: calc(-15px * var(--header-spacing-scale, 1)); }
+.header__desktop__bar__r .header__desktop__buttons--icons { margin-right: calc(-11px * var(--header-spacing-scale, 1)); }
 
-.header__desktop__upper--reverse .header__menu { margin-left: -15px; }
+.header__desktop__upper--reverse .header__menu { margin-left: calc(-15px * var(--header-spacing-scale, 1)); }
 
 .theme__header .socials { flex-wrap: nowrap; }
 
@@ -665,9 +678,12 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 }
 
 .navlink--cart--icon {
-  --icon-size: 28px;
+  .header__cart__status {
+    @include header-cart-status;
 
-  .header__cart__status { @include header-cart-status; }
+    // Nudge the cart badge inward as --header-spacing-scale shrinks
+    right: calc(-2px - 4px * min(var(--header-spacing-scale, 1), 1));
+  }
   .header__cart__status[data-cart-count="0"] { display: none; }
 }
 
@@ -784,7 +800,9 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   @include nav-bold;
 
   position: relative;
-  margin-right: -22px;
+  // Cancels `.toolbar__utility`'s trailing `margin-right`
+  // so the last utility sits flush against `var(--outer)`
+  margin-right: calc(-22px * var(--header-spacing-scale, 1));
   margin-left: var(--outer);
 
   @include media-query($medium-up) {
@@ -813,7 +831,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
   display: flex;
   align-items: center;
-  margin-right: 22px;
+  margin-right: calc(22px * var(--header-spacing-scale, 1));
 
   @include media-query($small) {
     margin-right: 0;
@@ -843,10 +861,10 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 //  Floating header
 
 body:has(.header-floating) {
-  --floating-inset: var(--SPACING-SMALL);
-  --floating-radius: 5px;
-  --floating-top: var(--SPACING-SMALL);
-  --floating-gap: calc(var(--SPACING-SMALL) / 2);
+  --floating-inset: var(--outer);
+  --floating-radius: var(--ROUNDED-CORNERS, 5px); // TODO
+  --floating-top: var(--LAYOUT-GAP-SMALL);
+  --floating-gap: calc(var(--LAYOUT-GAP-SMALL) / 2);
 }
 
 .page-header:has(.header-floating) {
@@ -858,10 +876,19 @@ body:has(.header-floating) {
   .header-floating__card,
   .toolbar,
   .announcement__wrapper {
-    margin-inline: var(--floating-inset);
+    margin-inline: auto;
     margin-block: var(--floating-gap);
     width: calc(100% - var(--floating-inset) * 2);
+    max-width: calc(var(--WIDTH-FULL-PADDED, 100%) - var(--floating-inset) * 2);
     border-radius: var(--floating-radius);
+  }
+
+  @include media-query($small) {
+    .header-floating__card,
+    .toolbar,
+    .announcement__wrapper {
+      max-width: calc(var(--WIDTH-FULL-PADDED-MOBILE, 100%) - var(--floating-inset) * 2);
+    }
   }
 
   // Full border around floating blocks when border setting is enabled
@@ -915,6 +942,14 @@ body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-
   left: 0;
   right: 0;
   z-index: 5500;
+
+  // When scroll is locked, the <body> receives `padding-right: scrollbar-width`.
+  // This absolute .page-header bypasses that gap on the right, so without compensating for it
+  // its children (card/toolbar/announcement) would render scrollbar-width wider than the sections below.
+  // Pulling in the header's right edge by the same amount keeps everything aligned.
+  [data-scroll-locked] & {
+    right: var(--scrollbar-width);
+  }
 }
 
 .header-floating {
@@ -1005,10 +1040,6 @@ body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-
   .announcement__bar-holder--slider,
   .announcement__bar {
     padding-right: 0;
-  }
-
-  .announcement__wrapper {
-    width: calc(100vw - var(--floating-inset) * 2 - var(--scrollbar-width));
   }
 
   .announcement__bar-outer {

@@ -234,11 +234,11 @@
                 {%- if product.media.size > 1 -%}
                   <div class="{{ section.id }}--button swiper-button-prev" data-aria-controls="swiper-{{ section.id }}">
                     <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
-                    {%- render 'icon-nav-arrow-left' -%}
+                    {%- render 'icon', name: 'caret-left' -%}
                   </div>
                   <div class="{{ section.id }}--button swiper-button-next" data-aria-controls="swiper-{{ section.id }}">
                     <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
-                    {%- render 'icon-nav-arrow-right' -%}
+                    {%- render 'icon', name: 'caret-right' -%}
                   </div>
                 {%- endif -%}
               </div>
@@ -253,7 +253,7 @@
                 data-shopify-title="{{ product.title | strip_html }}"
                 data-shopify-xr-hidden
               >
-                {%- render 'icon-media-model' -%}
+                {%- render 'icon', name: 'cube' -%}
 
                 <span class="product-single__view-in-space-text">{{ 'products.general.view_space' | t }}</span>
               </button>
@@ -309,7 +309,7 @@
                   data-thumbs-arrow-prev
                   disabled
                 >
-                  {%- render 'icon-nav-arrow-left' -%}
+                  {%- render 'icon', name: 'caret-left' -%}
                   <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
                 </button>
 
@@ -319,7 +319,7 @@
                   data-thumbs-arrow-next
                   disabled
                 >
-                  {%- render 'icon-nav-arrow-right' -%}
+                  {%- render 'icon', name: 'caret-right' -%}
                   <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
                 </button>
               </div>
@@ -474,7 +474,7 @@
                     >
                       <template>
                         <pickup-availability-preview class="pickup__preview">
-                          {%- render 'icon-close' -%}
+                          {%- render 'icon', name: 'x' -%}
                           <div class="pickup__info">
                             <p class="pickup__info__text">
                               {{ 'products.product.pickup_availability.unavailable' | t }}
@@ -512,7 +512,7 @@
                     {%- render 'product-block-text', block: block, block_style: block_style -%}
 
                   {%- when 'icon' -%}
-                    {%- render 'icon', block: block, index: forloop.index0, is_product: true -%}
+                    {%- render 'icon-block', block: block, index: forloop.index0, is_product: true -%}
 
                   {%- when 'sharing' -%}
                     <div class="product__block block-padding" {{ block.shopify_attributes }} {{ block_style }}>

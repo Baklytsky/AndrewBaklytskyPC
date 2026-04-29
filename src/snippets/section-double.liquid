@@ -111,21 +111,13 @@
   -%}
 
   {%- if image_1 != blank or overlapping_images -%}
-    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} brick__block__image--offset{% endif %}"
-      {% unless enable_slider %}
-        data-slide="1"
-      {% endunless %}
-    >
+    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} brick__block__image--offset{% endif %}">
       {%- render 'image-hero' image: image_1, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: image_aspect_ratio, loading: loading, fetchpriority: fetchpriority, preload: preload -%}
     </div>
   {%- endif -%}
 
   {%- if image_2 != blank or overlapping_images -%}
-    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} desktop{% endif %}"
-      {% unless enable_slider %}
-        data-slide="2"
-      {% endunless %}
-    >
+    <div class="brick__block__image{% if overlapping_images and hide_secondary_image %} desktop{% endif %}">
     {%- render 'image-hero' image: image_2, sizes: sizes, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: image_aspect_ratio, loading: loading, fetchpriority: fetchpriority, preload: preload -%}
     </div>
   {%- endif -%}
@@ -208,7 +200,7 @@
                   <span>{{ block.settings.button_text }}</span>
 
                   {%- if block.settings.show_arrow -%}
-                    {%- render 'icon-nav-arrow-right' -%}
+                    {%- render 'icon', name: 'caret-right' -%}
                   {%- endif -%}
                 </a>
               </div>
@@ -310,7 +302,7 @@
                   <span>{{ block.settings.button_text }}</span>
 
                   {%- if block.settings.show_arrow -%}
-                    {%- render 'icon-nav-arrow-right' -%}
+                    {%- render 'icon', name: 'caret-right' -%}
                   {%- endif -%}
                 </a>
               </div>
@@ -373,7 +365,7 @@
 
                           render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
                         else
-                          render 'animated-icon', filename: block.settings.icon_name
+                          render 'icon', name: block.settings.icon_key
                         endif
                       -%}
                     </div>
@@ -381,7 +373,7 @@
 
                   {{ title }}
 
-                  {%- render 'icon-nav-arrow-down' -%}
+                  {%- render 'icon', name: 'caret-down' -%}
                 </summary>
 
                 <div class="accordion__body rte" data-collapsible-body>
@@ -589,7 +581,7 @@
                             <span>{{ button_text }}</span>
 
                             {%- if show_arrow -%}
-                              {%- render 'icon-nav-arrow-right' -%}
+                              {%- render 'icon', name: 'caret-right' -%}
                             {%- endif -%}
                           </a>
                         </div>
@@ -689,23 +681,10 @@
     {%- endfor -%}
 
     <div class="brick__section{% if section.settings.layout == 'is-reversed' %} brick__section--reversed{% endif %}{% if section.settings.reverse_blocks %} brick__section--reversed-mobile{% endif %}{% if accordion_blocks.size > 0 %} brick__section--accordion{% endif %} {{ width }} {{ desktop_height }} {{ mobile_height }}">
-      {%- liquid
-        assign block_images_tag = 'div'
-        if image_1 != blank and image_2 != blank and overlapping_images == false
-          assign block_images_tag = 'slider-component'
-        endif
-      -%}
-
-      <{{ block_images_tag }}
+      <div
         class="brick__block {{ figure_width_class }} {% if overlapping_images %}brick__block--overlap{% else %}brick__block--images{% endif %}"
         {% if overlapping_images %}
           style="--image-offset-value: {{ images_offset }}px;"
-        {% endif %}
-        {% if image_1 != blank and image_2 != blank and overlapping_images == false %}
-          data-slider
-          data-slider-fullwidth
-          data-dots="{{ settings.dots_style }}"
-          data-options='{"watchCSS": true, "pageDots": false, "prevNextButtons": false, "autoPlay": 4000, "pauseAutoPlayOnHover": false}'
         {% endif %}
       >
         {%- if image_1 != blank or image_2 != blank or show_placeholder -%}
@@ -715,7 +694,18 @@
             {{ 'products.general.missing_metafield_image' | t }}
           </div>
         {%- endif -%}
-      </{{ block_images_tag }}>
+
+        {%- if section.settings.product != blank -%}
+          <div class="brick__block__upsell">
+            {%- render 'upsell-product',
+              upsell_product: section.settings.product,
+              upsell_modifier: 'product-upsell__holder--mini-mobile',
+              unique_id: section.id,
+              is_compact: true
+            -%}
+          </div>
+        {%- endif -%}
+      </div>
 
       <div
         class="brick__block brick__block--text {% if blocks_markup_bottom != '' %} brick__block--pin{% endif %}"

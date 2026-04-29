@@ -15,6 +15,8 @@
   assign selected_color_scheme = section.settings.color_scheme | strip
   assign color_scheme = 'color-' | append: selected_color_scheme
   assign border_color = section.settings.border_color
+  assign bg_color = section.settings.bg_color
+  assign bg_color_exist = false
   assign one_third_block_count = 0
   assign blocks_code = ''
   assign blocks_width = 0
@@ -25,10 +27,12 @@
   .site-footer-wrapper {
     --PT: {{ section.settings.padding_top }}px;
     --PB: {{ section.settings.padding_bottom }}px;
-    --item-count: {{ blocks_size }};
-    {% if background_image == blank and footer_style == 'floating' %}
-      --bg-light: {{ settings.color_schemes[selected_color_scheme].settings.bg_light }};
-    {% endif %}
+    {%- if background_image == blank -%}
+      {%- unless bg_color == 'rgba(0,0,0,0)' or bg_color == blank -%}
+        {% assign bg_color_exist = true %}
+        --bg-custom: {{ bg_color }};
+      {%- endunless -%}
+    {%- endif -%}
   }
 
   {% unless border_color == 'rgba(0,0,0,0)' or border_color == blank %}
@@ -38,7 +42,7 @@
 {%- endstyle -%}
 
 <footer
-  class="site-footer-wrapper section-padding{% unless background_image != blank %} {{ color_scheme }}{% endunless %}"
+  class="site-footer-wrapper{% if footer_style == 'floating' %} site-footer-wrapper--floating{% endif %}{% if background_image != blank or bg_color_exist %} site-footer-wrapper--bg{% endif %} section-padding {{ color_scheme }}"
   data-section-id="{{ section.id }}"
   data-section-type="footer"
 >
@@ -54,7 +58,7 @@
       -%}
     {%- endif -%}
 
-    <div class="site-footer{% if background_image != blank %} {{ color_scheme }}{% endif %}">
+    <div class="site-footer">
       {%- if logo -%}
         {%- liquid
           assign logo_width = section.settings.logo_image_width
@@ -129,7 +133,7 @@
                           &nbsp;
                         {%- endif -%}
 
-                        {%- render 'icon-nav-arrow-down' -%}
+                        {%- render 'icon', name: 'caret-down' -%}
                       </summary>
 
                       {%- if linklist != blank -%}
@@ -155,7 +159,7 @@
                             {{ shop.name }}
                           {%- endif -%}
 
-                          {%- render 'icon-nav-arrow-down' -%}
+                          {%- render 'icon', name: 'caret-down' -%}
                         </summary>
 
                         <div data-collapsible-body>
@@ -171,7 +175,7 @@
                             {{ page.title | escape }}
                           {%- endif -%}
 
-                          {%- render 'icon-nav-arrow-down' -%}
+                          {%- render 'icon', name: 'caret-down' -%}
                         </summary>
 
                         <div data-collapsible-body>
@@ -189,7 +193,7 @@
                           &nbsp;
                         {%- endif -%}
 
-                        {%- render 'icon-nav-arrow-down' -%}
+                        {%- render 'icon', name: 'caret-down' -%}
                       </summary>
 
                       <div data-collapsible-body>
@@ -212,7 +216,7 @@
                           &nbsp;
                         {%- endif -%}
 
-                        {%- render 'icon-nav-arrow-down' -%}
+                        {%- render 'icon', name: 'caret-down' -%}
                       </summary>
 
                       <div data-collapsible-body>
@@ -312,7 +316,7 @@
     </div>
 
     {%- if footer_style == 'floating' -%}
-      <div class="footer__bar {{ color_scheme }}">
+      <div class="footer__bar">
         <ul class="supporting-menu">
           <li>
             <a href="{{ shop.secure_url }}"

@@ -98,8 +98,6 @@ header-search-popdown.is-open .search-popdown {
 }
 
 .search-popdown__close__button {
-  --icon-size: 24px;
-
   font-size: var(--FONT-SIZE-NAV);
   cursor: pointer;
   padding: 20px 5px;
@@ -108,8 +106,6 @@ header-search-popdown.is-open .search-popdown {
 }
 
 .search-popdown__submit {
-  --icon-size: 32px; // equals .navlink icon size
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,9 +151,21 @@ header-search-popdown.is-animating:not(.is-open) [data-popdown-close] {
   transition: opacity 120ms ease-out;
 }
 
-header-search-popdown.is-animating .predictive-search,
-header-search-popdown.is-animating .predictive-search--empty {
+// Lock the main results container hidden during the FLIP so its
+// `predictive-search[open="true"]` fade doesn't race the timeline. Popular
+// searches is excluded so its base transition stays stable for the fade below.
+header-search-popdown.is-animating .predictive-search:not(.predictive-search--empty) {
   opacity: 0;
   visibility: hidden;
   transition: none;
+}
+
+// Popular searches reveal. Scoped to `.is-open:not(.is-animating)` so it
+// fades in via the base `.predictive-search` transition only once the FLIP
+// finishes. Sibling conditions hide it when predictive results are populated.
+header-search-popdown.is-open:not(.is-animating) header-search-form ~ .predictive-search--empty,
+header-search-popdown.is-open:not(.is-animating) predictive-search:not([open]):not([results]) ~ .predictive-search--empty {
+  opacity: 1;
+  visibility: visible;
+  max-height: var(--results-height, var(--results-max-height));
 }

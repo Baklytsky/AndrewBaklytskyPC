@@ -1,0 +1,58 @@
+@use '../globals' as *;
+
+.product-card__tags {
+  --tag-bg: var(--COLOR-PRODUCT-CARD-TAGS-BG, var(--bg-accent));
+  --tag-text: var(--COLOR-PRODUCT-CARD-TAGS-TEXT, var(--text));
+  --tag-gap: 0.35em;
+  --tag-padding-block: var(--tag-gap);
+  --tag-padding-inline: calc(var(--tag-padding-block) * 2);
+  --tag-outer-gap: 6px;
+
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: var(--PRODUCT-CARD-ALIGNMENT, flex-start);
+  gap: var(--tag-gap);
+  margin: 0;
+  padding: 0 0 var(--tag-outer-gap);
+}
+
+.product-card__tags--block {
+  padding: var(--tag-outer-gap) 0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.product-card__tags-item {
+  margin: 0;
+  display: inline-flex;
+  min-width: 0;
+}
+
+.product-card__tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--tag-padding-block) var(--tag-padding-inline);
+  border-radius: var(--TAG-RADIUS);
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: inherit;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--tag-text);
+    }
+  }
+}

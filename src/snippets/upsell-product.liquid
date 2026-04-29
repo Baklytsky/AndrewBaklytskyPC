@@ -191,7 +191,7 @@
 
   <quick-add-product>
     <div
-      class="{{ holder_classes }}"
+      class="{{ holder_classes }}{% if upsell_modifier != '' %} {{ upsell_modifier }}{% endif %}"
       {% unless onboarding %}
         data-quick-add-holder="{{ upsell_product.id }}"
         data-product-handle="{{ upsell_product.handle }}"
@@ -199,7 +199,7 @@
     >
       <div data-cart-errors-container class="product-upsell__errors"></div>
 
-      <div class="product-upsell{% if upsell_modifier != '' %} {{ upsell_modifier }}{% endif %}">
+      <div class="product-upsell">
         <div class="product-upsell__image">
           {%- if upsell_error or onboarding -%}
             <div
@@ -217,8 +217,8 @@
               <div class="product-upsell__image__thumb{% if settings.show_image_bg != 'none' %} show-gray-bg{% endif %}">
                 {%- render 'image',
                   image: upsell_variant_image,
-                  widths: '120, 180, 240, 360',
-                  width: '240',
+                  widths: '104, 208, 312, 416',
+                  width: 208,
                   sizes: '120px',
                   cover: true
                 -%}
@@ -472,7 +472,7 @@
                               data-scrollbar-arrow-prev
                               disabled
                             >
-                              {%- render 'icon-nav-arrow-left' -%}
+                              {%- render 'icon', name: 'caret-left' -%}
                               <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
                             </button>
                             <button
@@ -481,7 +481,7 @@
                               data-scrollbar-arrow-next
                               disabled
                             >
-                              {% render 'icon-nav-arrow-right' %}
+                              {% render 'icon', name: 'caret-right' %}
                               <span class="visually-hidden">{{ 'products.general.see_all' | t }}</span>
                             </button>
                           </div>
@@ -500,7 +500,7 @@
                             data-popout-toggle
                           >
                             <span data-popout-toggle-text>{{ upsell_variant.options[0] }}</span>
-                            {%- render 'icon-nav-arrow-down' -%}
+                            {%- render 'icon', name: 'caret-down' -%}
                           </button>
 
                           <ul
