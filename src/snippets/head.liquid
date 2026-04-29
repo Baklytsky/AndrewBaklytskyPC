@@ -892,17 +892,11 @@
 
   {% if settings.dots_style != 'hidden' %}
     /* Per-slide color, seeded from the inherited --text and interpolated via
-       the registered @property above. We declare it on the host (and the
-       legacy .swiper wrapper) so bullets inherit it through shadow DOM —
-       registered custom properties with inherits: true cross the boundary.
-       JS (initBulletProgress) writes --bullet-color inline on the host on
-       every slide change; inheritance + @property gives bullets a smooth
-       cross-fade without any per-bullet writes (which interact awkwardly
-       with the ::part cascade for inline styles). */
+       the registered @property above. Declared on the host on every slide change and bullets inherit it through shadow DOM */
     swiper-container,
     .swiper {
       --bullet-color: var(--text);
-      transition: --bullet-color 0.3s ease;
+      transition: --bullet-color 1s ease;
     }
 
     /* Active bullet of an autoplay slider: layered background where the first

@@ -27,17 +27,39 @@ const handleBreakpoints = () => {
 };
 
 /**
- * Drive the bullet pagination progress fill via the autoplayTimeLeft event.
- * Sets --bullet-progress on the active bullet each frame; the CSS rule in
- * head.liquid reads it via background-size on ::part(bullet) for any
- * autoplay="true" swiper. Works for both line and circle styles.
+ * Bullet pagination behavior:
+ *   - Per-slide color sync (--bullet-color) for any swiper-container, regardless
+ *     of autoplay or dots_style (circle/line). One host-write per slideChange.
+ *   - Progress fill (--bullet-progress) only for autoplay="true" sliders.
  */
-const initBulletProgress = (el, swiper) => {
-  // Guard: only sliders with autoplay="true" (excludes autoplay="false" cases),
-  // and only once per element (prevents duplicate listeners when
-  // afterSwiperInit re-runs on shopify:section:select).
-  if (el.getAttribute('autoplay') !== 'true' || el.dataset.bulletProgressInit) return;
-  el.dataset.bulletProgressInit = '1';
+const initBullets = (el, swiper) => {
+  // Init once per element (prevents duplicate listeners when afterSwiperInit
+  // re-runs on shopify:section:select).
+  if (el.dataset.bulletInit) return;
+  el.dataset.bulletInit = '1';
+
+  // ── Per-slide color sync (all sliders):
+  // Mirror the active slide's --text onto the swiper-container host as
+  // --bullet-color. Bullets in shadow DOM inherit it because the registered
+  // @property has inherits: true, so the host's value is the single source of truth
+  // One host-write per slide change is safe: this version of swiper-element
+  // (12.1.2) only attaches Swiper's MutationObserver when params.observer is true,
+  // and attributeChangedCallback only reacts to
+  // Swiper config attributes — neither watches `style`.
+  const syncBulletColor = () => {
+    const slide = swiper.slides?.[swiper.activeIndex];
+    if (!slide) return;
+    const color = getComputedStyle(slide).getPropertyValue('--text').trim();
+    if (!color) return;
+    el.style.setProperty('--bullet-color', color);
+  };
+
+  requestAnimationFrame(syncBulletColor);
+
+  swiper.on('slideChange', syncBulletColor);
+
+  // ── Progress fill (autoplay sliders only):
+  if (el.getAttribute('autoplay') !== 'true') return;
 
   // Write --bullet-progress to the active bullet element, not the swiper-container.
   // The swiper-container's style attribute is watched by Swiper's internal
@@ -50,29 +72,6 @@ const initBulletProgress = (el, swiper) => {
     const active = bullets[swiper.realIndex % bullets.length];
     if (active) active.style.setProperty('--bullet-progress', `${((1 - percentage) * 100).toFixed(2)}%`);
   });
-
-  // Mirror the active slide's --text onto the swiper-container host as
-  // --bullet-color. Bullets (in shadow DOM) inherit it because the registered
-  // @property has inherits: true, so the host's value is the single source of
-  // truth — avoiding the awkward cascade between ::part rules and inline-on-
-  // bullet declarations for registered custom properties.
-  //
-  // One host-write per slide change is safe: this version of swiper-element
-  // (12.1.2) only attaches Swiper's MutationObserver when params.observer is
-  // true (we don't set it), and attributeChangedCallback only reacts to
-  // Swiper config attributes — neither watches `style`.
-  const syncBulletColor = () => {
-    const slide = swiper.slides?.[swiper.activeIndex];
-    if (!slide) return;
-    const color = getComputedStyle(slide).getPropertyValue('--text').trim();
-    if (!color) return;
-    el.style.setProperty('--bullet-color', color);
-  };
-  // First-slide color: defer one frame so Swiper has applied initial classes.
-  requestAnimationFrame(syncBulletColor);
-  // Loop-safe: activeIndex resolves to the visible slide (incl. loop clones,
-  // which carry the same inline --text from slide.liquid).
-  swiper.on('slideChange', syncBulletColor);
 };
 
 /**
@@ -84,9 +83,10 @@ const afterSwiperInit = () => {
       document.querySelectorAll('swiper-container').forEach((el) => {
         el.classList.add('is-initialized');
 
-        if (el.getAttribute('autoplay') !== 'true') return;
+        // Defer one frame so el.swiper
+        // is available even when this runs synchronously after registration.
         requestAnimationFrame(() => {
-          if (el.swiper) initBulletProgress(el, el.swiper);
+          if (el.swiper) initBullets(el, el.swiper);
         });
       });
     };
