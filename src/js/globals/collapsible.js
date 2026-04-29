@@ -11,14 +11,6 @@ if (!customElements.get('collapsible-elements')) {
       }
 
       connectedCallback() {
-        if (window.CarbonApp?.ready) {
-          this.onReady();
-        } else {
-          document.addEventListener('CarbonApp:ready', () => this.onReady(), {once: true});
-        }
-      }
-
-      onReady() {
         this.toggle();
         document.addEventListener('theme:resize:width', this.toggle);
 

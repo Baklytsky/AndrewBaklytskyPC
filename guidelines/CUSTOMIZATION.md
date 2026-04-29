@@ -114,7 +114,7 @@ The following CSS variables defined in `src/snippets/head.liquid` are **CRITICAL
 <a class="btn {{ size }} {{ style }} {{ type }}" href="{{ link }}">
   <span>{{ text | escape }}</span>
   {% if show_arrow %}
-    {% render 'icon-nav-arrow-right' %}
+    {% render 'icon-caret-right' %}
   {% endif %}
 </a>
 ```
