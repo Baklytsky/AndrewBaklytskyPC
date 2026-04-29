@@ -38,37 +38,45 @@ const initBullets = (el, swiper) => {
   if (el.dataset.bulletInit) return;
   el.dataset.bulletInit = '1';
 
-  // ── Per-slide color sync (all sliders):
-  // Mirror the active slide's --text onto the swiper-container host as
-  // --bullet-color. Bullets in shadow DOM inherit it because the registered
-  // @property has inherits: true, so the host's value is the single source of truth.
-  //
-  // One host-write per slide change is safe even though the swiper-element bundle
-  // force-enables Swiper's MutationObserver on the host (observer: true is set by
-  // default unless virtual is enabled — see swiper-element-bundle.mjs). Its
-  // callback (observerUpdate → calcSlideSlots) is tolerable at slide-change
-  // frequency. Per-frame host-writes would not be safe — that's exactly why the
-  // 60fps --bullet-progress write below targets the bullet element instead.
+  // Per-slide color sync:
+  //  - Mirrors the active slide's --text onto both the swiper-container host and
+  //    its closest .swiper ancestor as --bullet-color.
+  //  - Writing to both keeps the bullets in shadow DOM and the arrows in light DOM
+  //    in lockstep, all driven from the same source value via var(--bullet-color).
+  //  - The registered @property (inherits: true) handles the smooth transition
+  //    independently on each target.
+  //  - Writes per slideChange are safe even though the swiper-element bundle
+  //    force-enables Swiper's MutationObserver on the host (observer: true is set
+  //    by default unless virtual is enabled — see swiper-element-bundle.mjs). Its
+  //    callback (observerUpdate → calcSlideSlots) is tolerable at slide-change
+  //    frequency. Per-frame writes on observed elements would not be safe —
+  //    that's exactly why the 60fps --bullet-progress write below targets the
+  //    bullet element (in shadow DOM, not observed) instead.
+  const colorTargets = [el];
+  const wrapper = el.closest('.swiper');
+  if (wrapper && wrapper !== el) colorTargets.push(wrapper);
   const syncBulletColor = () => {
     const slide = swiper.slides?.[swiper.activeIndex];
     if (!slide) return;
     const color = getComputedStyle(slide).getPropertyValue('--text').trim();
     if (!color) return;
-    el.style.setProperty('--bullet-color', color);
+    for (const target of colorTargets) {
+      target.style.setProperty('--bullet-color', color);
+    }
   };
 
   requestAnimationFrame(syncBulletColor);
 
   swiper.on('slideChange', syncBulletColor);
 
-  // ── Progress fill (autoplay sliders only):
+  // Progress fill (autoplay sliders only):
   if (el.getAttribute('autoplay') !== 'true') return;
 
-  // Write --bullet-progress to the active bullet element, not the swiper-container.
-  // The swiper-container's style attribute is watched by Swiper's internal
-  // MutationObserver (force-enabled by the swiper-element bundle), so 60fps
-  // writes there trigger swiper.update() in a tight loop and prevent autoplay
-  // from running. Bullets live in shadow DOM and are not observed.
+  //  - Write --bullet-progress to the active bullet element, not the swiper-container.
+  //  - The swiper-container's style attribute is watched by Swiper's internal
+  //    MutationObserver (force-enabled by the swiper-element bundle), so 60fps
+  //    writes there trigger swiper.update() in a tight loop and prevent autoplay
+  //    from running. Bullets live in shadow DOM and are not observed.
   swiper.on('autoplayTimeLeft', (_s, _t, percentage) => {
     const bullets = swiper.pagination?.bullets;
     if (!bullets?.length) return;
