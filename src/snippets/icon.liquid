@@ -11,6 +11,7 @@
   assign icon_color = icon_color | default: block.settings.icon_color
   assign padding_bottom = padding_bottom | default: block.settings.padding_bottom | default: 0
   assign alignment = alignment | default: block.settings.alignment | default: ''
+  assign not_block = not_block | default: false
 
   case block.settings.width
     when 'full'
@@ -40,9 +41,11 @@
 {%- endif -%}
 
 <div
-  class="product__block block__icon__container{{ width }} block-padding{% if alignment != '' %} {{ alignment }}{% endif %}"
-  {{ block.shopify_attributes }}
-  {{ block_style }}
+  class="block__icon__container{% unless not_block %} product__block block-padding{% endunless %}{{ width }}{% if alignment != '' %} {{ alignment }}{% endif %}"
+  {% unless not_block %}
+    {{ block.shopify_attributes }}
+    {{ block_style }}
+  {% endunless %}
 >
   {%- liquid
     assign icon_size = block.settings.icon_size
