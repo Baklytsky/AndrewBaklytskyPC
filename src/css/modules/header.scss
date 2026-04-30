@@ -295,6 +295,12 @@ hover-disclosure { display: block; }
   flex-wrap: nowrap;
 }
 
+// NOTE: The flex rules on `.header__desktop__bar__{l,c,r}` below are read by
+// `HeaderComponent.getMinWidth()` in src/js/globals/header.js — it temporarily
+// overrides `flex` on these bars to measure their intrinsic content width
+// (used to decide when to collapse the desktop header into the hamburger).
+// Keep them as plain flex declarations without `!important`; otherwise the
+// inline override in JS won't apply and the collapse threshold will be wrong.
 .header__desktop__bar__l,
 .header__desktop__bar__c,
 .header__desktop__bar__r {

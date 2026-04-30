@@ -51,6 +51,10 @@ if (!customElements.get('header-component')) {
 
         if (this.headerStyle !== 'drawer' && this.desktop) {
           this.minWidth = this.getMinWidth();
+          // Apply the initial state synchronously so the correct variant
+          // (desktop vs mobile) is visible on the first paint, avoiding
+          // the flash of mismatched layout on page load / theme-editor save.
+          this.applyCollapseState();
           this.listenWidth();
         }
       }
@@ -108,20 +112,41 @@ if (!customElements.get('header-component')) {
         this._resizeTimeout = requestAnimationFrame(() => {
           clearTimeout(this._resizeDebounce);
           this._resizeDebounce = setTimeout(() => {
-            const isHamburgerMenu = this.getAvailableWidth() < this.minWidth;
-
-            this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
-
-            if (isHamburgerMenu) {
-              const {headerHeight} = window.theme.readHeights();
-              document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
-            }
+            this.applyCollapseState();
           }, 150);
         });
       }
 
+      applyCollapseState() {
+        const isHamburgerMenu = this.getAvailableWidth() < this.minWidth;
+
+        this.classList.toggle(classes.showMobileClass, isHamburgerMenu);
+
+        if (isHamburgerMenu) {
+          const {headerHeight} = window.theme.readHeights();
+          document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+        }
+
+        return isHamburgerMenu;
+      }
+
       getMinWidth() {
-        // Measure actual visible header content instead of cloning
+        // Measure the bars' intrinsic content width (not their flex-distributed
+        // width). Without this, bars with flex-grow would report whatever
+        // width the current viewport allocates them, which is equal to the
+        // wrapper's inner width — making the comparison in checkWidth()
+        // collapse the header unconditionally.
+        //
+        // The `[data-child-takes-space]` elements that may be flex-grown and
+        // therefore need intrinsic measurement are defined in the CSS:
+        //   - .header__desktop__bar__l  — `flex: 1 0 0`
+        //   - .header__desktop__bar__c  — `flex-grow: 0`
+        //   - .header__desktop__bar__r  — `flex: 1 0 0`
+        // If any of those flex rules are renamed, removed, or marked
+        // `!important`, the inline override below will no longer cancel the
+        // grow and the "collapse to hamburger" threshold will be wrong.
+        // Keep the rules above flex-based and without `!important`, or update
+        // the inline override here accordingly.
         const wrappers = this.querySelectorAll(selectors.widthContentWrapper);
         let minWidth = 0;
         let spacing = 0;
@@ -131,12 +156,24 @@ if (!customElements.get('header-component')) {
           const children = wrapper.querySelectorAll(selectors.widthContent);
           if (!children.length) return;
 
+          // Force intrinsic sizing during measurement, then restore the
+          // original inline value (so CSS rules resume controlling the bars).
+          // `0 0 auto` = don't grow, don't shrink, basis = content size.
+          const originalFlex = [];
+          children.forEach((el) => {
+            originalFlex.push(el.style.flex);
+            el.style.flex = '0 0 auto';
+          });
+
           let total = 0;
           children.forEach((el) => {
-            // Only include visible elements
             if (el.offsetParent !== null) {
               total += el.offsetWidth;
             }
+          });
+
+          children.forEach((el, i) => {
+            el.style.flex = originalFlex[i];
           });
 
           const space = children.length * 20;
@@ -162,9 +199,7 @@ if (!customElements.get('header-component')) {
         if (!wrapper) return theme.windowWidth;
 
         const style = getComputedStyle(wrapper);
-        const paddingX =
-          (parseFloat(style.paddingLeft) || 0) +
-          (parseFloat(style.paddingRight) || 0);
+        const paddingX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
 
         return wrapper.clientWidth - paddingX;
       }
