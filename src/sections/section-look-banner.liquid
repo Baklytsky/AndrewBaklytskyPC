@@ -84,16 +84,22 @@
       <div class="hotspot__info-bubble">
         <div class="hotspot__content">
           <div class="hotspot__product-image">
-            {%- render 'image',
-              image: hotspot_image,
-              width: 60,
-              sizes: '30px',
-              widths: '30, 60, 90'
-            -%}
+            <a href="{{ hotspot_url }}" aria-label="{{ aria_label | strip_html | escape }}">
+              {%- assign aspect_ratio = 1 | divided_by: settings.product_grid_aspect_ratio -%}
+              {%- render 'image',
+                image: hotspot_image,
+                width: 60,
+                sizes: '30px',
+                widths: '30, 60, 90',
+                aspect_ratio: aspect_ratio
+              -%}
+            </a>
           </div>
           <div class="hotspot__product-details">
             <h4 class="hotspot__product-title h5">
-              {{ hotspot_title }}
+              <a href="{{ hotspot_url }}">
+                {{- hotspot_title -}}
+              </a>
             </h4>
             <p class="hotspot__product-price body-x-small">
               <span class="{% if is_on_sale %}hotspot__product-price-sale{% endif %}">{{ hotspot_price | money }}</span>
@@ -106,23 +112,42 @@
             </p>
           </div>
           <div class="hotspot__product-actions">
-            <quick-add-product>
-              <div data-quick-add-holder="{{ product.id }}">
-                {%- if product.variants.size == 1 -%}
-                  {%- assign product_form_id = 'ProductForm-' | append: unique -%}
-                  {%- form 'product', product, id: product_form_id -%}
-                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+            {%- unless product == blank -%}
+              <quick-add-product>
+                <div data-quick-add-holder="{{ product.id }}">
+                  {%- if product.variants.size == 1 -%}
+                    {%- assign product_form_id = 'ProductForm-' | append: unique -%}
+                    {%- form 'product', product, id: product_form_id -%}
+                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
 
+                      <button class="btn btn--small btn--secondary btn--outline"
+                        id="ProductSubmitButton-{{ section_id }}"
+                        type="submit"
+                        name="add"
+                        aria-label="{{ 'products.general.quick_add' | t }}"
+                        data-add-to-cart
+                      >
+                        <span class="btn__text">
+                          {{- 'products.general.add' | t -}}
+                        </span>
+                        <span class="btn__added">&nbsp;</span>
+                        <span class="btn__loader">
+                          <svg height="18" width="18" class="svg-loader">
+                            <circle r="7" cx="9" cy="9" />
+                            <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                          </svg>
+                        </span>
+                        <span class="btn__error" data-message-error>&nbsp;</span>
+                      </button>
+                    {%- endform -%}
+                  {%- else -%}
                     <button class="btn btn--small btn--secondary btn--outline"
-                      id="ProductSubmitButton-{{ section_id }}"
-                      type="submit"
-                      name="add"
+                      type="button"
                       aria-label="{{ 'products.general.quick_add' | t }}"
-                      data-add-to-cart
+                      data-quick-add-btn
+                      data-quick-add-modal-handle="{{ product.handle }}"
                     >
-                      <span class="btn__text">
-                        {{- 'products.general.add' | t -}}
-                      </span>
+                      <span class="btn__text">{{- 'products.general.add' | t -}}</span>
                       <span class="btn__added">&nbsp;</span>
                       <span class="btn__loader">
                         <svg height="18" width="18" class="svg-loader">
@@ -130,32 +155,22 @@
                           <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
                         </svg>
                       </span>
-                      <span class="btn__error" data-message-error>&nbsp;</span>
                     </button>
-                  {%- endform -%}
-                {%- else -%}
-                  <button class="btn btn--small btn--secondary btn--outline"
-                    type="button"
-                    aria-label="{{ 'products.general.quick_add' | t }}"
-                    data-quick-add-btn
-                    data-quick-add-modal-handle="{{ product.handle }}"
-                  >
-                    <span class="btn__text">{{- 'products.general.add' | t -}}</span>
-                    <span class="btn__added">&nbsp;</span>
-                    <span class="btn__loader">
-                      <svg height="18" width="18" class="svg-loader">
-                        <circle r="7" cx="9" cy="9" />
-                        <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
-                      </svg>
-                    </span>
-                  </button>
-                {%- endif -%}
+                  {%- endif -%}
 
-                {%- unless product.has_only_default_variant -%}
-                  {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
-                {%- endunless -%}
+                  {%- unless product.has_only_default_variant -%}
+                    {%- render 'product-quick-add-modal-template', product_id: product.id, unique: unique -%}
+                  {%- endunless -%}
                 </div>
-            </quick-add-product>
+              </quick-add-product>
+            {%- else -%}
+              <button class="btn btn--small btn--secondary btn--outline"
+                type="button"
+                aria-label="{{ 'products.general.quick_add' | t }}"
+              >
+                <span class="btn__text">{{- 'products.general.add' | t -}}</span>
+              </button>
+            {%- endunless -%}
           </div>
         </div>
       </div>
@@ -173,13 +188,12 @@
       data-aos-anchor="{{ unique }}"
       {% if forloop.first %}aria-current="true"{% endif %}
     >
-      <a href="{{ hotspot_url }}"
+      <div
         class="hotspot__button"
-        aria-label="{{ aria_label | strip_html | escape }}"
         {{ block.shopify_attributes }}
       >
         {{- hotspot_elements -}}
-      </a>
+      </div>
     </div>
   {%- endcapture -%}
 {%- endfor -%}
@@ -602,7 +616,7 @@
           "step": 5,
           "label": "Placement",
           "unit": "min",
-          "default": 30
+          "default": 45
         },
         {
           "type": "paragraph",
@@ -616,7 +630,7 @@
           "step": 5,
           "label": "Placement",
           "unit": "min",
-          "default": 30
+          "default": 45
         }
       ]
     }
@@ -625,6 +639,17 @@
     {
       "name": "Shop the look banner",
       "blocks": [
+        {
+          "type": "product",
+          "settings": {
+            "position_x_desktop": 36,
+            "position_y_desktop": 55,
+            "position_x_mobile": 46,
+            "position_y_mobile": 55,
+            "info_bubbles_position_desktop": 45,
+            "info_bubbles_position_mobile": 45
+          }
+        },
         {
           "type": "product",
           "settings": {

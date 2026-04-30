@@ -26,7 +26,6 @@
   border: 0;
   border-radius: 50%;
   appearance: none;
-  cursor: pointer;
 }
 
 @include media-query($small) {
@@ -36,44 +35,6 @@
 @media (hover: hover) {
   .hotspot__button:hover .hotspot::before { animation-iteration-count: 1; }
   .hotspot__button:hover .hotspot::after { animation: prePulseDotHover 1.5s linear infinite; }
-}
-
-.hotspot {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 100;
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &::after,
-  &::before {
-    content: "";
-    width: 35px;
-    height: 35px;
-    background-color: inherit;
-    border-radius: inherit;
-    opacity: 0.3;
-    position: absolute;
-    top: -6px;
-    left: -6px;
-  }
-
-  &::before { opacity: 0; }
-}
-
-.hotspot__icon {
-  background-color: var(--accent);
-  mask-image: var(--icon-bag);
-  mask-size: contain;
-  width: 100%;
-  height: 100%;
-  display: inline-block;
 }
 
 .hotspot-item {
@@ -149,7 +110,6 @@
   inset-inline: var(--info-bubble-inset-inline);
   justify-content: var(--info-bubble-justify);
   align-items: var(--info-bubble-align, baseline);
-  pointer-events: none;
 }
 
 .hotspot__content {
@@ -167,8 +127,6 @@
   text-align: left;
   color: var(--text);
   background: var(--bg);
-  pointer-events: all;
-  cursor: pointer;
   min-width: 140px;
 
   @include media-query ($large-up) {
@@ -196,7 +154,19 @@
 
 .hotspot__product-image {
   width: 30px;
+
+  a {
+    display: block;
+    position: relative;
+    padding-top: var(--PRODUCT-GRID-ASPECT-RATIO);
+  }
+
+  .image-wrapper {
+    position: absolute;
+    inset: 0;
+  }
 }
+.hotspot__product-actions { margin-left: auto; }
 
 .hotspot__icon-toggle {
   display: flex;
