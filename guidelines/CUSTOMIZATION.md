@@ -81,7 +81,7 @@ The following CSS variables defined in `src/snippets/head.liquid` are **CRITICAL
 --RADIUS, --RADIUS-SELECT
 
 /* Icon variables - DO NOT MODIFY */
---ICON-ZOOM-IN, --ICON-ZOOM-OUT, --ICON-BAG, --ICON-ARROW-LEFT, --ICON-ARROW-RIGHT, --ICON-SELECT
+--ICON-BAG, --ICON-ARROW-LEFT, --ICON-ARROW-RIGHT, --ICON-SELECT
 
 /* Drawer variables - DO NOT MODIFY */
 --DRAWER-WIDTH, --DRAWER-WIDTH-MOBILE
@@ -114,7 +114,7 @@ The following CSS variables defined in `src/snippets/head.liquid` are **CRITICAL
 <a class="btn {{ size }} {{ style }} {{ type }}" href="{{ link }}">
   <span>{{ text | escape }}</span>
   {% if show_arrow %}
-    {% render 'icon-nav-arrow-right' %}
+    {% render 'icon', name: 'caret-right' %}
   {% endif %}
 </a>
 ```

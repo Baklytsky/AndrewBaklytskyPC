@@ -95,7 +95,7 @@
 
                             render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths
                           else
-                            render 'animated-icon', filename: block.settings.icon_name
+                            render 'icon', name: block.settings.icon_key
                           endif
                         -%}
                       </div>
@@ -103,7 +103,7 @@
 
                     {{ title }}
 
-                    {%- render 'icon-nav-arrow-down' -%}
+                    {%- render 'icon', name: 'caret-down' -%}
                   </summary>
 
                   <div
@@ -322,269 +322,573 @@
         },
         {
           "type": "select",
-          "id": "icon_name",
+          "id": "icon_key",
           "label": "Icon",
-          "default": "icon-domestic-love",
+          "default": "heart-straight",
           "options": [
             {
-              "label": "Accessibility",
-              "value": "icon-a11y"
+              "label": "Acorn",
+              "value": "acorn"
             },
             {
-              "label": "Add to bag",
-              "value": "icon-bag"
+              "label": "Airplane Tilt",
+              "value": "airplane-tilt"
             },
             {
-              "label": "Adjustable fit",
-              "value": "icon-fit"
+              "label": "Alarm",
+              "value": "alarm"
             },
             {
-              "label": "Breathable",
-              "value": "icon-breathable"
+              "label": "Alien",
+              "value": "alien"
             },
             {
-              "label": "Chat",
-              "value": "icon-chat"
+              "label": "Anchor",
+              "value": "anchor"
             },
             {
-              "label": "Clean beauty",
-              "value": "icon-clean-beauty"
+              "label": "Approximate Equals",
+              "value": "approximate-equals"
             },
             {
-              "label": "Commited to climate action",
-              "value": "icon-climate"
+              "label": "Archive",
+              "value": "archive"
             },
             {
-              "label": "Cruelty Free",
-              "value": "icon-cruelty-free"
+              "label": "Armchair",
+              "value": "armchair"
             },
             {
-              "label": "Customer love",
-              "value": "icon-domestic-love"
+              "label": "Arrow Circle Up Right",
+              "value": "arrow-circle-up-right"
             },
             {
-              "label": "Dermatologist Tested",
-              "value": "icon-derm-test"
+              "label": "Arrow Up Right",
+              "value": "arrow-up-right"
             },
             {
-              "label": "Designed for running",
-              "value": "icon-design-run"
+              "label": "Asterisk",
+              "value": "asterisk"
             },
             {
-              "label": "Ethically-Sourced Ingredients",
-              "value": "icon-es-ingredients"
+              "label": "Avocado",
+              "value": "avocado"
             },
             {
-              "label": "Exchanges",
-              "value": "icon-exchange"
+              "label": "Axe",
+              "value": "axe"
             },
             {
-              "label": "Favorites",
-              "value": "icon-favs"
+              "label": "Baby Carriage",
+              "value": "baby-carriage"
             },
             {
-              "label": "Filter",
-              "value": "icon-filter"
+              "label": "Baby",
+              "value": "baby"
             },
             {
-              "label": "Fragrance Free",
-              "value": "icon-fragnance-free"
+              "label": "Barbell",
+              "value": "barbell"
             },
             {
-              "label": "Gentle Formula",
-              "value": "icon-gentle-formula"
+              "label": "Barn",
+              "value": "barn"
             },
             {
-              "label": "Get Help",
-              "value": "icon-get-help"
+              "label": "Baseball Cap",
+              "value": "baseball-cap"
             },
             {
-              "label": "Gift Cards",
-              "value": "icon-gift-cards"
+              "label": "Bathtub",
+              "value": "bathtub"
             },
             {
-              "label": "Healthy Protein Food",
-              "value": "icon-healthy-food"
+              "label": "Bell",
+              "value": "bell"
             },
             {
-              "label": "High Support",
-              "value": "icon-high-support"
+              "label": "Bicycle",
+              "value": "bicycle"
             },
             {
-              "label": "Kosher",
-              "value": "icon-kosher"
+              "label": "Bird",
+              "value": "bird"
             },
             {
-              "label": "Language",
-              "value": "icon-language"
+              "label": "Bone",
+              "value": "bone"
             },
             {
-              "label": "Lock",
-              "value": "icon-lock"
+              "label": "Bookmark Simple",
+              "value": "bookmark-simple"
             },
             {
-              "label": "Medium Support",
-              "value": "icon-medium-support"
+              "label": "Butterfly",
+              "value": "butterfly"
             },
             {
-              "label": "Minus",
-              "value": "icon-minus"
+              "label": "Cactus",
+              "value": "cactus"
             },
             {
-              "label": "No available",
-              "value": "icon-no-available"
+              "label": "Camera",
+              "value": "camera"
             },
             {
-              "label": "No Parabens",
-              "value": "icon-no-parabens"
+              "label": "Carrot",
+              "value": "carrot"
             },
             {
-              "label": "No PEGS",
-              "value": "icon-no-pegs"
+              "label": "Cat",
+              "value": "cat"
             },
             {
-              "label": "No Phthalates",
-              "value": "icon-no-phthalates"
+              "label": "Champagne",
+              "value": "champagne"
             },
             {
-              "label": "No preservatives",
-              "value": "icon-no-preservatives"
+              "label": "Check Circle",
+              "value": "check-circle"
             },
             {
-              "label": "No Silicones",
-              "value": "icon-no-silicones"
+              "label": "Check Square",
+              "value": "check-square"
             },
             {
-              "label": "No talc",
-              "value": "icon-no-talc"
+              "label": "Check",
+              "value": "check"
             },
             {
-              "label": "Odor control",
-              "value": "icon-odor-control"
+              "label": "Cheers",
+              "value": "cheers"
             },
             {
-              "label": "Payments and invoices",
-              "value": "icon-payments"
+              "label": "Cherries",
+              "value": "cherries"
             },
             {
-              "label": "Play Video",
-              "value": "icon-play-video"
+              "label": "Cloud Moon",
+              "value": "cloud-moon"
             },
             {
-              "label": "Plus",
-              "value": "icon-plus"
+              "label": "Cloud Sun",
+              "value": "cloud-sun"
             },
             {
-              "label": "Product Features",
-              "value": "icon-product-features"
+              "label": "Clover",
+              "value": "clover"
             },
             {
-              "label": "Quick dry",
-              "value": "icon-quick-dry"
+              "label": "Coat Hanger",
+              "value": "coat-hanger"
             },
             {
-              "label": "Rating",
-              "value": "icon-rating"
+              "label": "Coffee",
+              "value": "coffee"
             },
             {
-              "label": "Ref Stores",
-              "value": "icon-ref-store"
+              "label": "Confetti",
+              "value": "confetti"
             },
             {
-              "label": "Reload",
-              "value": "icon-reload"
+              "label": "Cookie",
+              "value": "cookie"
             },
             {
-              "label": "Removable cups",
-              "value": "icon-removable-cups"
+              "label": "Cow",
+              "value": "cow"
             },
             {
-              "label": "Reviews",
-              "value": "icon-reviews"
+              "label": "Cowboy Hat",
+              "value": "cowboy-hat"
             },
             {
-              "label": "Sale tag",
-              "value": "icon-sale-tag"
+              "label": "Crown Simple",
+              "value": "crown-simple"
             },
             {
-              "label": "Save",
-              "value": "icon-save"
+              "label": "Disco Ball",
+              "value": "disco-ball"
             },
             {
-              "label": "Sea food",
-              "value": "icon-sea-food"
+              "label": "Dog",
+              "value": "dog"
             },
             {
-              "label": "Search",
-              "value": "icon-search"
+              "label": "Dress",
+              "value": "dress"
             },
             {
-              "label": "Share",
-              "value": "icon-share"
+              "label": "Drop",
+              "value": "drop"
             },
             {
-              "label": "Shipping",
-              "value": "icon-shipping"
+              "label": "Eye",
+              "value": "eye"
             },
             {
-              "label": "Size Guide",
-              "value": "icon-size-guide"
+              "label": "Eyedropper",
+              "value": "eyedropper"
             },
             {
-              "label": "Soft, Sleek Fabric",
-              "value": "icon-soft"
+              "label": "Facebook Logo",
+              "value": "facebook-logo"
             },
             {
-              "label": "Spicy",
-              "value": "icon-spicy"
+              "label": "Farm",
+              "value": "farm"
             },
             {
-              "label": "Sustainability focused",
-              "value": "icon-sustainability-focused"
+              "label": "Fire",
+              "value": "fire"
             },
             {
-              "label": "Telegram",
-              "value": "icon-telegram"
+              "label": "Fish",
+              "value": "fish"
             },
             {
-              "label": "Top sales",
-              "value": "icon-top-sales"
+              "label": "Flag",
+              "value": "flag"
             },
             {
-              "label": "Trash",
-              "value": "icon-trash"
+              "label": "Flower Lotus",
+              "value": "flower-lotus"
+            },
+            {
+              "label": "Flower Tulip",
+              "value": "flower-tulip"
+            },
+            {
+              "label": "Flower",
+              "value": "flower"
+            },
+            {
+              "label": "Flying Saucer",
+              "value": "flying-saucer"
+            },
+            {
+              "label": "Football",
+              "value": "football"
+            },
+            {
+              "label": "Footprints",
+              "value": "footprints"
+            },
+            {
+              "label": "Ghost",
+              "value": "ghost"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Globe Hemisphere East",
+              "value": "globe-hemisphere-east"
+            },
+            {
+              "label": "Grains",
+              "value": "grains"
+            },
+            {
+              "label": "Hair Dryer",
+              "value": "hair-dryer"
+            },
+            {
+              "label": "Hamburger",
+              "value": "hamburger"
+            },
+            {
+              "label": "Hammer",
+              "value": "hammer"
+            },
+            {
+              "label": "Hand Heart",
+              "value": "hand-heart"
+            },
+            {
+              "label": "Hands Clapping",
+              "value": "hands-clapping"
+            },
+            {
+              "label": "Heart Straight",
+              "value": "heart-straight"
+            },
+            {
+              "label": "Heart",
+              "value": "heart"
+            },
+            {
+              "label": "Hourglass",
+              "value": "hourglass"
+            },
+            {
+              "label": "Info",
+              "value": "info"
+            },
+            {
+              "label": "Instagram Logo",
+              "value": "instagram-logo"
+            },
+            {
+              "label": "Jar Label",
+              "value": "jar-label"
+            },
+            {
+              "label": "Key",
+              "value": "key"
+            },
+            {
+              "label": "Lamp",
+              "value": "lamp"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Lifebuoy",
+              "value": "lifebuoy"
+            },
+            {
+              "label": "Lightning",
+              "value": "lightning"
+            },
+            {
+              "label": "Linkedin Logo",
+              "value": "linkedin-logo"
+            },
+            {
+              "label": "List",
+              "value": "list"
+            },
+            {
+              "label": "Lock Simple",
+              "value": "lock-simple"
+            },
+            {
+              "label": "Magic Wand",
+              "value": "magic-wand"
+            },
+            {
+              "label": "Magnifying Glass",
+              "value": "magnifying-glass"
+            },
+            {
+              "label": "Martini",
+              "value": "martini"
+            },
+            {
+              "label": "Megaphone",
+              "value": "megaphone"
+            },
+            {
+              "label": "Minus Circle",
+              "value": "minus-circle"
+            },
+            {
+              "label": "Moon Stars",
+              "value": "moon-stars"
+            },
+            {
+              "label": "Moon",
+              "value": "moon"
+            },
+            {
+              "label": "Mountains",
+              "value": "mountains"
+            },
+            {
+              "label": "Orange Slice",
+              "value": "orange-slice"
+            },
+            {
+              "label": "Orange",
+              "value": "orange"
+            },
+            {
+              "label": "Package",
+              "value": "package"
+            },
+            {
+              "label": "Paint Brush Household",
+              "value": "paint-brush-household"
+            },
+            {
+              "label": "Paperclip",
+              "value": "paperclip"
+            },
+            {
+              "label": "Paw Print",
+              "value": "paw-print"
+            },
+            {
+              "label": "Pepper",
+              "value": "pepper"
+            },
+            {
+              "label": "Percent",
+              "value": "percent"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Pill",
+              "value": "pill"
+            },
+            {
+              "label": "Pinterest Logo",
+              "value": "pinterest-logo"
+            },
+            {
+              "label": "Pizza",
+              "value": "pizza"
+            },
+            {
+              "label": "Planet",
+              "value": "planet"
+            },
+            {
+              "label": "Plant",
+              "value": "plant"
+            },
+            {
+              "label": "Plus Circle",
+              "value": "plus-circle"
+            },
+            {
+              "label": "Push Pin",
+              "value": "push-pin"
+            },
+            {
+              "label": "Question Mark",
+              "value": "question-mark"
+            },
+            {
+              "label": "Question",
+              "value": "question"
+            },
+            {
+              "label": "Rabbit",
+              "value": "rabbit"
+            },
+            {
+              "label": "Rainbow Cloud",
+              "value": "rainbow-cloud"
+            },
+            {
+              "label": "Rocket",
+              "value": "rocket"
+            },
+            {
+              "label": "Sailboat",
+              "value": "sailboat"
+            },
+            {
+              "label": "Shooting Star",
+              "value": "shooting-star"
+            },
+            {
+              "label": "Shopping Bag",
+              "value": "shopping-bag"
+            },
+            {
+              "label": "Smiley",
+              "value": "smiley"
+            },
+            {
+              "label": "Snapchat Logo",
+              "value": "snapchat-logo"
+            },
+            {
+              "label": "Sparkle",
+              "value": "sparkle"
+            },
+            {
+              "label": "Spiral",
+              "value": "spiral"
+            },
+            {
+              "label": "Star And Crescent",
+              "value": "star-and-crescent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Sun",
+              "value": "sun"
+            },
+            {
+              "label": "Swatches",
+              "value": "swatches"
+            },
+            {
+              "label": "Tag",
+              "value": "tag"
+            },
+            {
+              "label": "Tiktok Logo",
+              "value": "tiktok-logo"
+            },
+            {
+              "label": "Timer",
+              "value": "timer"
+            },
+            {
+              "label": "Tree Evergreen",
+              "value": "tree-evergreen"
+            },
+            {
+              "label": "Tree Palm",
+              "value": "tree-palm"
+            },
+            {
+              "label": "Tree",
+              "value": "tree"
+            },
+            {
+              "label": "Trophy",
+              "value": "trophy"
+            },
+            {
+              "label": "Umbrella",
+              "value": "umbrella"
             },
             {
               "label": "User",
-              "value": "icon-user"
+              "value": "user"
             },
             {
-              "label": "Vegan leaping bunny",
-              "value": "icon-vegan-bunny"
+              "label": "Warning Circle",
+              "value": "warning-circle"
             },
             {
-              "label": "Vegan food",
-              "value": "icon-vegan-food"
+              "label": "Watch",
+              "value": "watch"
             },
             {
-              "label": "Vegan suitable",
-              "value": "icon-vegan-suitable"
+              "label": "Wine",
+              "value": "wine"
             },
             {
-              "label": "Warning sign",
-              "value": "icon-warning-sign"
+              "label": "Wrench",
+              "value": "wrench"
             },
             {
-              "label": "Water repellent",
-              "value": "icon-water-repellent"
+              "label": "X Logo",
+              "value": "x-logo"
             },
             {
-              "label": "WhatsApp",
-              "value": "icon-whatsapp"
+              "label": "Yarn",
+              "value": "yarn"
             },
             {
-              "label": "Windproof",
-              "value": "icon-windproof"
+              "label": "Youtube Logo",
+              "value": "youtube-logo"
             }
           ]
         },
