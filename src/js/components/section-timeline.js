@@ -35,12 +35,6 @@ if (!customElements.get('timeline-component')) {
           });
         });
 
-        this.addEventListener('mouseenter', () => this.pause());
-        this.addEventListener('mouseleave', () => {
-          if (this.hasAttribute('data-editor-block-selected')) return;
-          this.resume();
-        });
-
         this.startAutoplay();
       }
 
