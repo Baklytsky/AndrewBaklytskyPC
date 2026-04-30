@@ -38,6 +38,10 @@ if (!customElements.get('grid-slider')) {
         this.firstLastSlidesObserver = null;
         this.isDragging = false;
         this.toggleSlider = this.toggleSlider.bind(this);
+
+        this.progressInitialized = false;
+        this.scrollFrame = null;
+        this.onScroll = this.onScroll.bind(this);
       }
 
       connectedCallback() {
@@ -52,6 +56,14 @@ if (!customElements.get('grid-slider')) {
         this.slider.classList.add(classes.scrollSnapDisabled);
         this.toggleSlider();
         document.addEventListener('theme:resize:width', this.toggleSlider);
+
+        // Progress + counter run regardless of `toggleSlider`'s isEnabled state:
+        // native scroll on the scroller works on touch/mobile even when the JS
+        // arrow + observer + draggable wiring is disabled, and the progress UI
+        // should reflect that scroll position.
+        if (this.getAttribute('variant') === 'progress') {
+          this.initProgress();
+        }
 
         window.theme
           .waitForAllAnimationsEnd(this)
@@ -198,8 +210,105 @@ if (!customElements.get('grid-slider')) {
         document.addEventListener('theme:resize:width', this.positionArrows);
       }
 
+      /*
+       * variant="progress" — display scroll progress bar + slide counter
+       */
+      initProgress() {
+        if (this.progressInitialized) return;
+        this.progressEl = this.querySelector('[data-slider-progress]');
+        this.progressFill = this.querySelector('[data-slider-progress-fill]');
+        this.counter = this.querySelector('[data-slider-counter]');
+        if (!this.progressEl || !this.slider) return;
+
+        this.slider.addEventListener('scroll', this.onScroll, {passive: true});
+        document.addEventListener('theme:resize:width', this.onScroll);
+        this.progressInitialized = true;
+
+        this.onScroll();
+      }
+
+      /*
+       * Update progress bar and slide counter on scroll
+       */
+      onScroll() {
+        if (this.scrollFrame) return;
+
+        // rAF-throttled scroll handler so layout reads + writes happen at most
+        // once per frame regardless of how many `scroll` events the browser fires
+        this.scrollFrame = requestAnimationFrame(() => {
+          this.scrollFrame = null;
+          this.updateProgress();
+          this.updateCounter();
+        });
+      }
+
+      updateProgress() {
+        if (!this.progressEl || !this.slider) return;
+        const max = this.slider.scrollWidth - this.slider.clientWidth;
+        const isScrollable = max > 1;
+        // Hide the whole progress block when there's nothing to scroll (e.g.
+        // few enough items to fit, or breakpoints where the grid renders as a
+        // static layout instead of a slider).
+        this.progressEl.hidden = !isScrollable;
+        if (!this.progressFill) return;
+        const ratio = isScrollable ? Math.max(0, Math.min(1, this.slider.scrollLeft / max)) : 0;
+        this.progressFill.style.setProperty('--slider-progress', ratio.toFixed(4));
+      }
+
+      updateCounter() {
+        if (!this.counter || !this.slides?.length) return;
+        const total = this.slides.length;
+        const tolerance = 1;
+        const left = this.slider.scrollLeft - tolerance;
+        const right = left + this.slider.clientWidth + tolerance * 2;
+
+        let first = -1;
+        let last = -1;
+        this.slides.forEach((slide, i) => {
+          const slideLeft = slide.offsetLeft;
+          const slideRight = slideLeft + slide.offsetWidth;
+          if (slideLeft >= left && slideRight <= right) {
+            if (first === -1) first = i;
+            last = i;
+          }
+        });
+
+        // Mid-scroll fallback: when no slide is fully in view, mark the slide
+        // under the viewport's horizontal centre so the counter never blanks.
+        if (first === -1) {
+          const mid = this.slider.scrollLeft + this.slider.clientWidth / 2;
+          for (let i = 0; i < total; i++) {
+            const s = this.slides[i];
+            if (s.offsetLeft <= mid && s.offsetLeft + s.offsetWidth >= mid) {
+              first = last = i;
+              break;
+            }
+          }
+          if (first === -1) {
+            first = 0;
+            last = 0;
+          }
+        }
+
+        const ofWord = window.theme?.sliderCounterOf || 'of';
+        const range = first === last ? `${first + 1}` : `${first + 1}-${last + 1}`;
+        this.counter.textContent = `${range} ${ofWord} ${total}`;
+      }
+
+      destroyProgress() {
+        if (!this.progressInitialized) return;
+        this.slider?.removeEventListener('scroll', this.onScroll);
+        document.removeEventListener('theme:resize:width', this.onScroll);
+        if (this.scrollFrame) {
+          cancelAnimationFrame(this.scrollFrame);
+          this.scrollFrame = null;
+        }
+        this.progressInitialized = false;
+      }
+
       disconnectedCallback() {
         this.destroy();
+        this.destroyProgress();
         document.removeEventListener('theme:resize:width', this.toggleSlider);
       }
 
