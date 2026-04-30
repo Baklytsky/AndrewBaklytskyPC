@@ -442,10 +442,10 @@ if (!customElements.get('header-search-popdown')) {
         this.popdownContainer = this.querySelector('details');
         this.popdownClose = this.querySelector('[data-popdown-close]');
         this.summary = this.querySelector('summary');
-        this.triggerIcon = this.querySelector('summary .icon-magnifying-glass, summary .icon-search');
+        this.triggerIcon = this.querySelector('[data-search-popdown-trigger-icon]');
         this.triggerText = this.querySelector('summary .navtext');
         this.submitButton = this.popdown.querySelector('.search-popdown__submit');
-        this.destIcon = this.submitButton?.querySelector('.icon-magnifying-glass, .icon-search');
+        this.destIcon = this.submitButton?.querySelector('[data-search-popdown-dest-icon]');
         this.inputHolder = this.popdown.querySelector('.input-holder');
         this.detailsToggleCallback = this.detailsToggleCallback.bind(this);
         this.mobileMenu = this.closest('mobile-menu');
