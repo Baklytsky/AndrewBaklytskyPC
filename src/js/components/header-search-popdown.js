@@ -81,7 +81,7 @@ if (!customElements.get('header-search-popdown')) {
 
     cleanup() {
       const el = this.host;
-      document.querySelectorAll('.flip-clone, .flip-clone-wrapper').forEach((node) => node.remove());
+      document.querySelectorAll('[data-search-popdown-clone], [data-search-popdown-clone-wrapper]').forEach((node) => node.remove());
       el.submitButton?.classList.remove('search-popdown__submit--flip-hidden');
       el.classList.remove('is-animating');
       el.popdown.style.clipPath = '';
@@ -115,7 +115,7 @@ if (!customElements.get('header-search-popdown')) {
 
     createClone(iconEl, rect) {
       const clone = iconEl.cloneNode(true);
-      clone.classList.add('flip-clone');
+      clone.setAttribute('data-search-popdown-clone', '');
       clone.style.width = `${rect.width}px`;
       clone.style.height = `${rect.height}px`;
       clone.style.top = `${rect.top}px`;
@@ -130,11 +130,11 @@ if (!customElements.get('header-search-popdown')) {
       const clipRect = headerEl ? headerEl.getBoundingClientRect() : el.popdown.getBoundingClientRect();
 
       const wrapper = document.createElement('div');
-      wrapper.classList.add('flip-clone-wrapper');
+      wrapper.setAttribute('data-search-popdown-clone-wrapper', '');
       wrapper.style.cssText = `position:fixed;top:${clipRect.top}px;left:${clipRect.left}px;width:${clipRect.width}px;height:${clipRect.height}px;overflow:hidden;z-index:6003;pointer-events:none;`;
 
       const clone = iconEl.cloneNode(true);
-      clone.classList.add('flip-clone');
+      clone.setAttribute('data-search-popdown-clone', '');
       clone.style.position = 'absolute';
       clone.style.width = `${iconRect.width}px`;
       clone.style.height = `${iconRect.height}px`;
@@ -442,11 +442,11 @@ if (!customElements.get('header-search-popdown')) {
         this.popdownContainer = this.querySelector('details');
         this.popdownClose = this.querySelector('[data-popdown-close]');
         this.summary = this.querySelector('summary');
-        this.triggerIcon = this.querySelector('summary .icon-search');
-        this.triggerText = this.querySelector('summary .navtext');
-        this.submitButton = this.popdown.querySelector('.search-popdown__submit');
-        this.destIcon = this.submitButton?.querySelector('.icon-search');
-        this.inputHolder = this.popdown.querySelector('.input-holder');
+        this.triggerIcon = this.querySelector('[data-search-popdown-trigger-icon]');
+        this.triggerText = this.querySelector('[data-search-popdown-trigger-text]');
+        this.submitButton = this.popdown.querySelector('[data-search-popdown-submit]');
+        this.destIcon = this.submitButton?.querySelector('[data-search-popdown-dest-icon]');
+        this.inputHolder = this.popdown.querySelector('[data-search-popdown-input-holder]');
         this.detailsToggleCallback = this.detailsToggleCallback.bind(this);
         this.mobileMenu = this.closest('mobile-menu');
         this.a11y = window.theme.a11y;
