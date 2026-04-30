@@ -75,6 +75,8 @@
   }
 }
 
+.look-banner .hotspot-item:hover { z-index: 100; }
+
 .hotspot__line {
   position: absolute;
   z-index: 3;
@@ -96,6 +98,49 @@
     width: min(var(--hotspot-size), var(--title-height));
     height: 100%;
     background-color: var(--bg);
+  }
+}
+
+.look-banner {
+  .hotspot__line,
+  .hotspot__info-bubble {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.25s ease 0.12s,
+      visibility 0s linear 0.37s;
+  }
+
+  .hotspot__info-bubble {
+    pointer-events: none;
+    transform: translateY(4px);
+    transition:
+      opacity 0.25s ease 0.12s,
+      visibility 0s linear 0.37s,
+      transform 0.25s ease 0.12s;
+  }
+
+  .hotspot__line { pointer-events: auto; }
+
+  .hotspot__info-bubble::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+  }
+
+  .hotspot-item:hover,
+  .hotspot-item:focus-within {
+    .hotspot__line,
+    .hotspot__info-bubble {
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s;
+    }
+
+    .hotspot__info-bubble {
+      pointer-events: auto;
+      transform: translateY(0);
+    }
   }
 }
 
