@@ -72,6 +72,11 @@
   data-section-id="{{ section.id }}"
   data-section-type="list-collections"
 >
+  {%- if layout == 'slider' -%}
+    <script src="{{ 'grid-slider.js' | asset_url }}" defer="defer"></script>
+    <grid-slider variant="progress">
+  {%- endif -%}
+
   <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--inline{% endif %}">
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% else %} grid__heading-holder--sticky{% endif %}">
@@ -131,6 +136,36 @@
             </a>
           </div>
         {%- endif -%}
+
+        {%- if layout == 'slider' -%}
+          {%- assign animation_order = animation_order | plus: 1 -%}
+          <div
+            class="slider__arrows"
+            data-aos="hero"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-order="{{ animation_order }}"
+          >
+            <button
+              type="button"
+              class="slider__button slider__button--prev"
+              data-button-arrow
+              data-button-prev
+              aria-label="{{ 'general.pagination.prev' | t }}"
+            >
+              {%- render 'icon', name: 'caret-left' -%}
+            </button>
+
+            <button
+              type="button"
+              class="slider__button slider__button--next"
+              data-button-arrow
+              data-button-next
+              aria-label="{{ 'general.pagination.next' | t }}"
+            >
+              {%- render 'icon', name: 'caret-right' -%}
+            </button>
+          </div>
+        {%- endif -%}
       </div>
     {%- endif -%}
 
@@ -159,36 +194,22 @@
         -%}
 
         {%- if layout == 'slider' -%}
-          <grid-slider align-arrows>
-            <div class="slider__arrows">
-              <button
-                type="button"
-                class="slider__button slider__button--prev"
-                data-button-arrow
-                data-button-prev
-              >
-                {{ 'general.pagination.prev' | t }}
-              </button>
-              <button
-                type="button"
-                class="slider__button slider__button--next"
-                data-button-arrow
-                data-button-next
-              >
-                {{ 'general.pagination.next' | t }}
-              </button>
-            </div>
+          <div
+            class="collection-list {{ grid_classes }}"
+            data-grid-slider
+            {% if request.design_mode %}
+              data-block-scroll
+            {% endif %}
+          >
+            {{ collection_items }}
+          </div>
 
-            <div
-              class="collection-list {{ grid_classes }}"
-              data-grid-slider
-              {% if request.design_mode %}
-                data-block-scroll
-              {% endif %}
-            >
-              {{ collection_items }}
+          <div class="slider__progress" data-slider-progress>
+            <div class="slider__progress-track">
+              <div class="slider__progress-fill" style="--slider-progress: 0;"></div>
             </div>
-          </grid-slider>
+            <div class="slider__counter" data-slider-counter aria-live="polite"></div>
+          </div>
         {%- else -%}
           <div class="collection-list {{ grid_classes }}">
             {{ collection_items }}
@@ -197,6 +218,10 @@
       </div>
     </div>
   </div>
+
+  {%- if layout == 'slider' -%}
+    </grid-slider>
+  {%- endif -%}
 </section>
 
 {% schema %}
