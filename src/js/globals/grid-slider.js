@@ -224,7 +224,36 @@ if (!customElements.get('grid-slider')) {
         document.addEventListener('theme:resize:width', this.onScroll);
         this.progressInitialized = true;
 
+        // Reserve the worst-case width before the first paint so the track
+        // doesn't shift when the visible range cycles (e.g. "2 of 4" vs
+        // "3-4 of 4"). Only re-measure on document.fonts.ready when fonts are
+        // still loading — otherwise the promise resolves immediately on the
+        // microtask queue and we'd just be measuring the same box twice.
+        this.reserveCounterSpace();
+        if (document.fonts && document.fonts.status !== 'loaded') {
+          document.fonts.ready.then(() => this.reserveCounterSpace());
+        }
+
         this.onScroll();
+      }
+
+      /*
+       * Lock the counter's min-width to the widest label it can ever render
+       * for the current slide count. The widest case is the (last-1)-(last)
+       * range, e.g. "11-12 of 12"; for a single slide it's just "1 of 1".
+       */
+      reserveCounterSpace() {
+        if (!this.counter || !this.slides?.length) return;
+        const total = this.slides.length;
+        const ofWord = window.theme?.sliderCounterOf || 'of';
+        const widestLabel = total === 1 ? `1 ${ofWord} 1` : `${total - 1}-${total} ${ofWord} ${total}`;
+
+        const previous = this.counter.textContent;
+        this.counter.style.minWidth = '';
+        this.counter.textContent = widestLabel;
+        const width = this.counter.getBoundingClientRect().width;
+        this.counter.textContent = previous;
+        if (width > 0) this.counter.style.minWidth = `${Math.ceil(width)}px`;
       }
 
       /*
