@@ -631,6 +631,57 @@ p a {
   }
 }
 
+.grid-container--split {
+  @include media-query($medium-up) {
+    display: flex;
+    align-items: stretch;
+    padding-inline: var(--outer);
+
+    .grid-outer {
+      padding-left: 0; // Prevent items partly showing on the left side
+      overflow: hidden;
+
+      &:only-child { max-width: none; }
+    }
+
+    .grid__items-holder {
+      flex: 1 0 auto;
+      margin-right: var(--outer-offset);
+      max-width: calc(100% - var(--content-width));
+    }
+
+    .grid__heading-holder {
+      flex: 0 0 var(--content-width);
+      margin: 0 var(--SPACING-SMALL) 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: calc(var(--inner) * 2);
+      background: var(--bg-accent);
+    }
+
+    .grid__heading-text { width: auto; }
+
+    .grid--slider .grid-item { width: var(--item-width); }
+  }
+
+  @include media-query($large-up) {
+    --content-width: 28%;
+    --item-width: 38% !important;
+
+    .grid__heading-holder { padding: calc(var(--inner) * 3); }
+  }
+
+  @include media-query($medium) {
+    --content-width: 28%;
+    --item-width: 72% !important;
+  }
+
+  @include media-query($small) {
+    .grid__heading-holder { padding-block: var(--inner); }
+  }
+}
+
 .grid-container.wrapper--full {
   @include media-query($medium-up) {
     .grid { gap: 0; }
