@@ -41,7 +41,12 @@ if (!customElements.get('grid-slider')) {
 
         this.progressInitialized = false;
         this.scrollFrame = null;
+        // true - emit the single-slide intermediate ("2 of 4") on that frame.
+        // false - hold the previous range label until a new range fully settles, jumping straight from "1-2 of 4" to "2-3 of 4".
+        this.showSingleDigitDuringTransition = false;
+        this.counterMaxFit = 0;
         this.onScroll = this.onScroll.bind(this);
+        this.onResize = this.onResize.bind(this);
       }
 
       connectedCallback() {
@@ -221,14 +226,12 @@ if (!customElements.get('grid-slider')) {
         if (!this.progressEl || !this.slider) return;
 
         this.slider.addEventListener('scroll', this.onScroll, {passive: true});
-        document.addEventListener('theme:resize:width', this.onScroll);
+        document.addEventListener('theme:resize:width', this.onResize);
         this.progressInitialized = true;
 
         // Reserve the worst-case width before the first paint so the track
         // doesn't shift when the visible range cycles (e.g. "2 of 4" vs
-        // "3-4 of 4"). Only re-measure on document.fonts.ready when fonts are
-        // still loading — otherwise the promise resolves immediately on the
-        // microtask queue and we'd just be measuring the same box twice.
+        // "3-4 of 4")
         this.reserveCounterSpace();
         if (document.fonts && document.fonts.status !== 'loaded') {
           document.fonts.ready.then(() => this.reserveCounterSpace());
@@ -254,6 +257,16 @@ if (!customElements.get('grid-slider')) {
         const width = this.counter.getBoundingClientRect().width;
         this.counter.textContent = previous;
         if (width > 0) this.counter.style.minWidth = `${Math.ceil(width)}px`;
+      }
+
+      /*
+       * Width-only resize handler. The slider's natural in-view capacity can
+       * change across breakpoints (e.g. 2-up → 1-up), so we drop the cached
+       * maxFit before recomputing progress + counter for the new layout.
+       */
+      onResize() {
+        this.counterMaxFit = 0;
+        this.onScroll();
       }
 
       /*
@@ -302,6 +315,24 @@ if (!customElements.get('grid-slider')) {
           }
         });
 
+        // Track the largest simultaneous in-view count we've seen for the
+        // current viewport. Any later frame where the count drops below this
+        // maxFit is a transition between two adjacent ranges (e.g. between
+        // "1-2 of 4" and "2-3 of 4"); see `showSingleDigitDuringTransition`.
+        const count = first === -1 ? 0 : last - first + 1;
+        if (count > this.counterMaxFit) this.counterMaxFit = count;
+
+        // A "transition" frame is either (a) no slide fully in view at all
+        // (extreme edge case — narrow viewports, fractional rounding), or
+        // (b) the strict pass collapsed to a single slide despite the slider
+        // naturally fitting more. In both cases we may want to hold the
+        // previously rendered range label rather than flash an intermediate.
+        const isTransition = first === -1 || (first === last && this.counterMaxFit > 1);
+
+        if (isTransition && !this.showSingleDigitDuringTransition && this.counter.textContent) {
+          return;
+        }
+
         // Mid-scroll fallback: when no slide is fully in view, mark the slide
         // under the viewport's horizontal centre so the counter never blanks.
         if (first === -1) {
@@ -327,11 +358,12 @@ if (!customElements.get('grid-slider')) {
       destroyProgress() {
         if (!this.progressInitialized) return;
         this.slider?.removeEventListener('scroll', this.onScroll);
-        document.removeEventListener('theme:resize:width', this.onScroll);
+        document.removeEventListener('theme:resize:width', this.onResize);
         if (this.scrollFrame) {
           cancelAnimationFrame(this.scrollFrame);
           this.scrollFrame = null;
         }
+        this.counterMaxFit = 0;
         this.progressInitialized = false;
       }
 
