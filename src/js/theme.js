@@ -23,6 +23,7 @@ import './globals/cart-count';
 import './globals/collapsible';
 import './globals/deferred-media';
 import './globals/grid-slider';
+import './globals/slider-progress';
 import './globals/has-open-modals';
 import './globals/header';
 import './globals/header-hover-disclosure';

@@ -23,6 +23,14 @@
   assign limit_onboarding = grid_columns
   assign layout = section.settings.layout
   assign layout_mobile = section.settings.layout_mobile
+
+  assign has_slider = false
+  if layout == 'slider' or layout_mobile == 'slider'
+    assign has_slider = true
+  endif
+
+  assign scroller_id = unique | append: '-scroller'
+
   capture grid_classes
     echo 'grid'
 
@@ -72,9 +80,13 @@
   data-section-id="{{ section.id }}"
   data-section-type="list-collections"
 >
+  {%- if has_slider -%}
+    <script src="{{ 'slider-progress.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
   {%- if layout == 'slider' -%}
     <script src="{{ 'grid-slider.js' | asset_url }}" defer="defer"></script>
-    <grid-slider variant="progress">
+    <grid-slider>
   {%- endif -%}
 
   <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--split{% endif %}">
@@ -142,7 +154,7 @@
         {%- if layout == 'slider' -%}
           {%- assign animation_order = animation_order | plus: 1 -%}
           <div
-            class="slider__arrows"
+            class="slider__arrows slider__arrows--inline"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
@@ -195,27 +207,28 @@
           endcapture
         -%}
 
-        {%- if layout == 'slider' -%}
-          <div
-            class="collection-list {{ grid_classes }}"
+        <div
+          class="collection-list {{ grid_classes }}"
+          {% if has_slider %}
+            id="{{ scroller_id }}"
             data-grid-slider
             {% if request.design_mode %}
               data-block-scroll
             {% endif %}
-          >
-            {{ collection_items }}
-          </div>
+          {% endif %}
+        >
+          {{ collection_items }}
+        </div>
 
-          <div class="slider__progress" data-slider-progress>
-            <div class="slider__progress-track">
-              <div class="slider__progress-fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
+        {%- if has_slider -%}
+          <slider-progress for="{{ scroller_id }}">
+            <div class="slider-progress__container" data-slider-progress>
+              <div class="slider-progress__track">
+                <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
+              </div>
+              <div class="slider-progress__counter" data-slider-counter aria-live="polite"></div>
             </div>
-            <div class="slider__counter" data-slider-counter aria-live="polite"></div>
-          </div>
-        {%- else -%}
-          <div class="collection-list {{ grid_classes }}">
-            {{ collection_items }}
-          </div>
+          </slider-progress>
         {%- endif -%}
       </div>
     </div>

@@ -218,20 +218,18 @@ body:not(.is-focused) .slider__button:focus {
   outline: none;
 }
 
-// variant="progress"
-grid-slider[variant="progress"] {
-  .slider__arrows {
-    position: relative;
-    inset: auto;
-    display: inline-flex;
-    gap: 4px;
-    margin-block-start: auto;
-    overflow: visible;
-    pointer-events: auto;
+// Inline arrows
+.slider__arrows--inline {
+  position: relative;
+  inset: auto;
+  display: inline-flex;
+  gap: 4px;
+  margin-block-start: auto;
+  overflow: visible;
+  pointer-events: auto;
 
-    @include media-query($small) {
-      display: none;
-    }
+  @include media-query($small) {
+    display: none;
   }
 
   .slider__button {
@@ -259,50 +257,5 @@ grid-slider[variant="progress"] {
     .icon {
       pointer-events: none;
     }
-  }
-
-  .slider__progress {
-    display: flex;
-    align-items: center;
-    gap: var(--gap);
-    margin-top: var(--gap);
-
-    // JS toggles `hidden` whenever the scroller has nothing to scroll.
-    &[hidden] {
-      display: none;
-    }
-
-    @include media-query($small) {
-      margin-left: var(--grid-outer);
-      margin-right: var(--grid-outer);
-    }
-  }
-
-  .slider__progress-track {
-    position: relative;
-    flex: 1 1 auto;
-    height: 1px;
-    background: color-mix(in srgb, currentcolor 25%, transparent);
-    overflow: hidden;
-  }
-
-  .slider__progress-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: calc(var(--slider-progress, 0) * 100%);
-    background: currentcolor;
-    transition: width 0.2s linear;
-  }
-
-  .slider__counter {
-    flex: 0 0 auto;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    opacity: 0.7;
-    // Stable digit widths so single-digit values don't render narrower than double-digit ones
-    font-variant-numeric: tabular-nums;
-    text-align: end;
   }
 }
