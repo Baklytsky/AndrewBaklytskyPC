@@ -637,6 +637,8 @@ p a {
     align-items: stretch;
     padding-inline: var(--outer);
 
+    &:has(.slider__arrows) .grid__heading-content { margin-bottom: var(--outer); }
+
     .grid-outer {
       padding-left: 0; // Prevent items partly showing on the left side
       overflow: hidden;
@@ -668,8 +670,6 @@ p a {
   @include media-query($large-up) {
     --content-width: 28%;
     --item-width: 38% !important;
-
-    .grid__heading-holder { padding: calc(var(--inner) * 3); }
   }
 
   @include media-query($medium) {
@@ -677,8 +677,8 @@ p a {
     --item-width: 72% !important;
   }
 
-  @include media-query($small) {
-    .grid__heading-holder { padding-block: var(--inner); }
+  @include media-query($widescreen) {
+    .grid__heading-holder { padding: calc(var(--inner) * 3); }
   }
 }
 
@@ -690,6 +690,7 @@ p a {
   }
 }
 
+.grid-container--split.wrapper--full .grid__items-holder,
 .grid-container--inline.wrapper--full .grid__items-holder {
   margin-left: 0;
   margin-right: 0;

@@ -225,44 +225,28 @@ grid-slider[variant="progress"] {
     inset: auto;
     display: inline-flex;
     gap: 4px;
-    margin-top: calc(var(--gap) / 2);
+    margin-block-start: auto;
     overflow: visible;
     pointer-events: auto;
+
+    @include media-query($small) {
+      display: none;
+    }
   }
 
   .slider__button {
     --btn-size: 32px;
-    --icon-size: 12px;
+    --icon-size: 19px;
 
     position: relative;
     top: auto;
     left: auto;
     right: auto;
     margin: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid currentcolor;
-    border-radius: 50%;
-    background: transparent;
-    color: inherit;
     opacity: 1;
     visibility: visible;
     transform: none;
     text-indent: 0;
-    font-size: 0;
-    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-
-    @include media-query($small) {
-      display: inline-flex;
-    }
-
-    @media (hover: hover) {
-      &:not(:disabled):hover {
-        background-color: var(--text);
-        color: var(--bg);
-      }
-    }
 
     &:disabled {
       opacity: 0.35;
@@ -273,8 +257,7 @@ grid-slider[variant="progress"] {
     &::before { display: none; }
 
     .icon {
-      width: var(--icon-size);
-      height: var(--icon-size);
+      pointer-events: none;
     }
   }
 

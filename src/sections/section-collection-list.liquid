@@ -80,62 +80,64 @@
   <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--split{% endif %}">
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% endif %}">
-        {%- if title != blank or description != blank -%}
-          <div class="grid__heading-text">
-            {%- if title != blank -%}
-              {%- liquid
-                assign animation_order = animation_order | plus: 1
-                assign heading_tag = 'h2'
+        <div class="grid__heading-content">
+          {%- if title != blank or description != blank -%}
+            <div class="grid__heading-text">
+              {%- if title != blank -%}
+                {%- liquid
+                  assign animation_order = animation_order | plus: 1
+                  assign heading_tag = 'h2'
 
-                unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
-                  assign heading_tag = section.settings.heading_tag
-                endunless
-              -%}
+                  unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+                    assign heading_tag = section.settings.heading_tag
+                  endunless
+                -%}
 
-              <{{ heading_tag }}
-                class="grid__heading {{ section.settings.heading_font_size }}"
-                data-aos="hero"
-                data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}"
-              >
-                {{- title -}}
-              </{{ heading_tag }}>
-            {%- endif -%}
-
-            {%- if description != blank -%}
-              {%- assign animation_order = animation_order | plus: 1 -%}
-              <div
-                class="grid__description {{ section.settings.text_font_size }}"
-                data-aos="hero"
-                data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}"
-              >
-                {{ description }}
-              </div>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-
-        {%- if button_text != blank -%}
-          {%- assign animation_order = animation_order | plus: 1 -%}
-          <div
-            class="grid__heading-actions"
-            data-aos="hero"
-            data-aos-anchor="{{ animation_anchor }}"
-            data-aos-order="{{ animation_order }}"
-          >
-            <a
-              class="{{ button_classes }}"
-              href="{{ section.settings.button_url }}"
-            >
-              <span>{{ button_text | escape }}</span>
-
-              {%- if section.settings.show_arrow -%}
-                {%- render 'icon', name: 'caret-right' -%}
+                <{{ heading_tag }}
+                  class="grid__heading {{ section.settings.heading_font_size }}"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {{- title -}}
+                </{{ heading_tag }}>
               {%- endif -%}
-            </a>
-          </div>
-        {%- endif -%}
+
+              {%- if description != blank -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+                <div
+                  class="grid__description {{ section.settings.text_font_size }}"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {{ description }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if button_text != blank -%}
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <div
+              class="grid__heading-actions"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              <a
+                class="{{ button_classes }}"
+                href="{{ section.settings.button_url }}"
+              >
+                <span>{{ button_text | escape }}</span>
+
+                {%- if section.settings.show_arrow -%}
+                  {%- render 'icon', name: 'caret-right' -%}
+                {%- endif -%}
+              </a>
+            </div>
+          {%- endif -%}
+        </div>
 
         {%- if layout == 'slider' -%}
           {%- assign animation_order = animation_order | plus: 1 -%}
@@ -280,7 +282,7 @@
       "id": "text_font_size",
       "label": "Text size",
       "info": "Applies only when content in Text field is set to Paragraph.",
-      "default": "body-medium",
+      "default": "body-large",
       "options": [
         {
           "value": "body-x-small",
