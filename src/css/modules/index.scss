@@ -897,6 +897,11 @@ variant-selects {
 
 // Slider progress component
 slider-progress {
+  --progress-height: 6px;
+  --progress-radius: var(--progress-height);
+  --progress-track-bg: var(--COLOR-BG-ACCENT);
+  --progress-fill-bg: var(--COLOR-ACCENT);
+
   display: contents;
 }
 
@@ -920,26 +925,25 @@ slider-progress {
 .slider-progress__track {
   position: relative;
   flex: 1 1 auto;
-  height: 1px;
-  background: color-mix(in srgb, currentcolor 25%, transparent);
+  height: var(--progress-height);
+  background: var(--progress-track-bg);
+  border-radius: var(--progress-radius);
   overflow: hidden;
 }
 
 .slider-progress__fill {
   position: absolute;
   inset: 0 auto 0 0;
+  border-radius: var(--progress-radius);
   width: calc(var(--slider-progress, 0) * 100%);
-  background: currentcolor;
+  background: var(--progress-fill-bg);
   transition: width 0.2s linear;
 }
 
 .slider-progress__counter {
   flex: 0 0 auto;
-  font-size: 12px;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
-  opacity: 0.7;
   // Stable digit widths so single-digit values don't render narrower than double-digit ones
   font-variant-numeric: tabular-nums;
   text-align: end;
