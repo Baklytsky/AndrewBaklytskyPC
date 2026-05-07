@@ -13,6 +13,8 @@ if (!customElements.get('slider-progress')) {
         this.counter = null;
 
         this.scrollFrame = null;
+        this.mutationObserver = null;
+        this.lastSlideCount = 0;
         this.counterMaxFit = 0;
         // true - emit the single-slide intermediate ("2 of 4") on that frame.
         // false - hold the previous range label until a new range fully settles, jumping straight from "1-2 of 4" to "2-3 of 4".
@@ -45,6 +47,16 @@ if (!customElements.get('slider-progress')) {
 
         this.scroller.addEventListener('scroll', this.onScroll, {passive: true});
         document.addEventListener('theme:resize:width', this.onResize);
+
+        // Only observe DOM mutations for sections whose scroller is populated asynchronously after init
+        if (this.hasAttribute('data-dynamic')) {
+          this.mutationObserver = new MutationObserver(() => {
+            this.counterMaxFit = 0;
+            this.onScroll();
+          });
+          this.mutationObserver.observe(this.scroller, {childList: true});
+        }
+
         this.initialized = true;
 
         // Reserve the worst-case width before the first paint so the track
@@ -129,8 +141,7 @@ if (!customElements.get('slider-progress')) {
         // for sections that explicitly declare mobile as a slider
         // (`data-mobile-slider`).
         const isMobile = window.innerWidth < window.theme.sizes.small;
-        const mobileIsSlider =
-          this.hasAttribute('data-slider-always') || this.hasAttribute('data-mobile-slider');
+        const mobileIsSlider = this.hasAttribute('data-slider-always') || this.hasAttribute('data-mobile-slider');
         if (isMobile && !mobileIsSlider) {
           this.progressEl.hidden = true;
           return;
@@ -148,8 +159,23 @@ if (!customElements.get('slider-progress')) {
       }
 
       updateCounter() {
-        if (!this.counter || !this.slides?.length) return;
-        const total = this.slides.length;
+        if (!this.counter || !this.scroller) return;
+
+        // For dynamic sections, re-query on every frame so the component
+        // self-heals when items are appended after init
+        if (this.hasAttribute('data-dynamic')) {
+          this.slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
+        }
+        const total = this.slides?.length ?? 0;
+        if (!total) return;
+
+        // When the count changes, re-run the worst-case width reservation so
+        // the counter track doesn't shift as the range label cycles.
+        if (total !== this.lastSlideCount) {
+          this.lastSlideCount = total;
+          this.reserveCounterSpace();
+        }
+
         const tolerance = 1;
         const left = this.scroller.scrollLeft - tolerance;
         const right = left + this.scroller.clientWidth + tolerance * 2;
@@ -211,6 +237,8 @@ if (!customElements.get('slider-progress')) {
         if (!this.initialized) return;
         this.scroller?.removeEventListener('scroll', this.onScroll);
         document.removeEventListener('theme:resize:width', this.onResize);
+        this.mutationObserver?.disconnect();
+        this.mutationObserver = null;
         if (this.scrollFrame) {
           cancelAnimationFrame(this.scrollFrame);
           this.scrollFrame = null;
