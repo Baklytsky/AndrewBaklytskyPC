@@ -48,25 +48,7 @@ if (!customElements.get('slider-progress')) {
         document.addEventListener('theme:resize:width', this.onResize);
 
         // Only observe DOM mutations for sections whose scroller is populated asynchronously after init
-        if (this.hasAttribute('data-dynamic')) {
-          this.mutationObserver = new MutationObserver(() => {
-            // Items arrive via fetch one-by-one while the scroller still carries a `hidden` CSS class.
-            // The class is removed only after all items are appended (in `finalize()`).
-            // We therefore watch both childList and the class attribute, and only trigger the progress update
-            // and disconnect the observer once we have slides and the scroller is visible.
-            const slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
-
-            if (!slides.length || this.scroller.classList.contains('hidden')) return;
-
-            this.slides = slides;
-            this.counterMaxFit = 0;
-            this.reserveCounterSpace();
-            this.onScroll();
-            this.mutationObserver.disconnect();
-            this.mutationObserver = null;
-          });
-          this.mutationObserver.observe(this.scroller, {childList: true, attributes: true, attributeFilter: ['class']});
-        }
+        this.observeDynamicContent();
 
         this.initialized = true;
 
@@ -93,6 +75,30 @@ if (!customElements.get('slider-progress')) {
           if (target) return target;
         }
         return this.parentElement?.querySelector('[data-grid-slider]') || null;
+      }
+
+      /*
+       * Watch for items and visibility on scrollers populated asynchronously via fetch (e.g. <recently-viewed>)
+       * Items arrive via fetch one-by-one while the scroller still carries a `hidden` CSS class.
+       * The class is removed only after all items are appended (in `finalize()`).
+       * We therefore watch both childList and the class attribute, and only trigger the progress update
+       * and disconnect the observer once we have slides and the scroller is visible.
+       */
+      observeDynamicContent() {
+        if (!this.hasAttribute('data-dynamic')) return;
+
+        this.mutationObserver = new MutationObserver(() => {
+          const slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
+          if (!slides.length || this.scroller.classList.contains('hidden')) return;
+
+          this.slides = slides;
+          this.counterMaxFit = 0;
+          this.reserveCounterSpace();
+          this.onScroll();
+          this.mutationObserver.disconnect();
+          this.mutationObserver = null;
+        });
+        this.mutationObserver.observe(this.scroller, {childList: true, attributes: true, attributeFilter: ['class']});
       }
 
       /*
