@@ -41,6 +41,11 @@
       echo ' grid--slider'
     endif
   endcapture
+
+  assign has_slider = false
+  if layout_desktop == 'slider' or layout_mobile == 'slider'
+    assign has_slider = true
+  endif
 -%}
 
 {%- capture text -%}
@@ -352,6 +357,20 @@
                   {%- endif -%}
                 {%- endcapture -%}
 
+                {%- assign scroller_id = unique | append: '-scroller-' | append: block.id -%}
+
+                {%- capture grid_markup -%}
+                  <div
+                    class="{{ product_grid_classes }}"
+                    {% if has_slider %}
+                      id="{{ scroller_id }}"
+                      data-grid-slider
+                    {% endif %}
+                  >
+                    {{ product_items }}
+                  </div>
+                {%- endcapture -%}
+
                 {%- if layout_desktop == 'slider' -%}
                   <grid-slider align-arrows>
                     <div class="slider__arrows">
@@ -373,23 +392,21 @@
                       </button>
                     </div>
 
-                    <div class="{{ product_grid_classes }}" data-grid-slider>
-                      {{ product_items }}
-                    </div>
-
-                    <slider-progress>
-                      <div class="slider-progress__container" data-slider-progress>
-                        <div class="slider-progress__track">
-                          <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
-                        </div>
-                        <div class="slider-progress__counter body-x-small" data-slider-counter aria-live="polite"></div>
-                      </div>
-                    </slider-progress>
+                    {{ grid_markup }}
                   </grid-slider>
                 {%- else -%}
-                  <div class="{{ product_grid_classes }}">
-                    {{ product_items }}
-                  </div>
+                  {{ grid_markup }}
+                {%- endif -%}
+
+                {%- if has_slider -%}
+                  <slider-progress for="{{ scroller_id }}"{% if layout_mobile == 'slider' %} data-mobile-slider{% endif %}>
+                    <div class="slider-progress__container" data-slider-progress hidden>
+                      <div class="slider-progress__track">
+                        <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
+                      </div>
+                      <div class="slider-progress__counter body-x-small" data-slider-counter aria-live="polite"></div>
+                    </div>
+                  </slider-progress>
                 {%- endif -%}
               </div>
             </div>
