@@ -118,13 +118,20 @@ if (!customElements.get('slider-progress')) {
       updateProgress() {
         if (!this.progressEl || !this.scroller) return;
 
-        // When the mobile layout is a static grid (no `data-mobile-slider`
-        // attribute), force the bar hidden on mobile viewports without
-        // measuring scroll geometry. This bypasses timing issues where a
-        // scroller inside a `content-visibility: hidden` tab returns zero
-        // or stale dimensions, leaving the bar incorrectly visible.
+        // When the mobile layout is a static grid, force the bar hidden on
+        // mobile viewports without measuring scroll geometry. This bypasses
+        // timing issues where a scroller inside a `content-visibility: hidden`
+        // tab returns zero or stale dimensions, leaving the bar incorrectly
+        // visible.
+        //
+        // Skip this guard for sections that have no layout_mobile option and
+        // are always a slider at every breakpoint (`data-slider-always`), or
+        // for sections that explicitly declare mobile as a slider
+        // (`data-mobile-slider`).
         const isMobile = window.innerWidth < window.theme.sizes.small;
-        if (isMobile && !this.hasAttribute('data-mobile-slider')) {
+        const mobileIsSlider =
+          this.hasAttribute('data-slider-always') || this.hasAttribute('data-mobile-slider');
+        if (isMobile && !mobileIsSlider) {
           this.progressEl.hidden = true;
           return;
         }

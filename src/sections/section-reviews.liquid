@@ -127,7 +127,7 @@
               endif
             -%}
 
-            <div class="reviews__grid-item" data-grid-item {{ block.shopify_attributes }}>
+            <div class="reviews__grid-item" data-grid-item data-slider-progress-item {{ block.shopify_attributes }}>
               {%- if review_url != blank -%}
                 <a href="{{ review_url }}" class="{{ review_block_classes }}" rel="noopener" target="_blank">
               {%- else -%}
@@ -231,6 +231,15 @@
             </div>
           {%- endfor -%}
         </div>
+
+        <slider-progress data-slider-always>
+          <div class="slider-progress__container" data-slider-progress hidden>
+            <div class="slider-progress__track">
+              <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
+            </div>
+            <div class="slider-progress__counter body-x-small" data-slider-counter aria-live="polite"></div>
+          </div>
+        </slider-progress>
       </grid-slider>
     {%- else -%}
       {%- render 'no-blocks' -%}
