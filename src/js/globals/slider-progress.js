@@ -14,7 +14,6 @@ if (!customElements.get('slider-progress')) {
 
         this.scrollFrame = null;
         this.mutationObserver = null;
-        this.lastSlideCount = 0;
         this.counterMaxFit = 0;
         // true - emit the single-slide intermediate ("2 of 4") on that frame.
         // false - hold the previous range label until a new range fully settles, jumping straight from "1-2 of 4" to "2-3 of 4".
@@ -51,10 +50,22 @@ if (!customElements.get('slider-progress')) {
         // Only observe DOM mutations for sections whose scroller is populated asynchronously after init
         if (this.hasAttribute('data-dynamic')) {
           this.mutationObserver = new MutationObserver(() => {
+            // Items arrive via fetch one-by-one while the scroller still carries a `hidden` CSS class.
+            // The class is removed only after all items are appended (in `finalize()`).
+            // We therefore watch both childList and the class attribute, and only trigger the progress update
+            // and disconnect the observer once we have slides and the scroller is visible.
+            const slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
+
+            if (!slides.length || this.scroller.classList.contains('hidden')) return;
+
+            this.slides = slides;
             this.counterMaxFit = 0;
+            this.reserveCounterSpace();
             this.onScroll();
+            this.mutationObserver.disconnect();
+            this.mutationObserver = null;
           });
-          this.mutationObserver.observe(this.scroller, {childList: true});
+          this.mutationObserver.observe(this.scroller, {childList: true, attributes: true, attributeFilter: ['class']});
         }
 
         this.initialized = true;
@@ -159,22 +170,10 @@ if (!customElements.get('slider-progress')) {
       }
 
       updateCounter() {
-        if (!this.counter || !this.scroller) return;
+        if (!this.counter) return;
 
-        // For dynamic sections, re-query on every frame so the component
-        // self-heals when items are appended after init
-        if (this.hasAttribute('data-dynamic')) {
-          this.slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
-        }
         const total = this.slides?.length ?? 0;
         if (!total) return;
-
-        // When the count changes, re-run the worst-case width reservation so
-        // the counter track doesn't shift as the range label cycles.
-        if (total !== this.lastSlideCount) {
-          this.lastSlideCount = total;
-          this.reserveCounterSpace();
-        }
 
         const tolerance = 1;
         const left = this.scroller.scrollLeft - tolerance;
