@@ -23,6 +23,14 @@
   assign limit_onboarding = grid_columns
   assign layout = section.settings.layout
   assign layout_mobile = section.settings.layout_mobile
+
+  assign has_slider = false
+  if layout == 'slider' or layout_mobile == 'slider'
+    assign has_slider = true
+  endif
+
+  assign scroller_id = unique | append: '-scroller'
+
   capture grid_classes
     echo 'grid'
 
@@ -72,63 +80,95 @@
   data-section-id="{{ section.id }}"
   data-section-type="list-collections"
 >
-  <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--inline{% endif %}">
+  <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--split{% endif %}">
     {%- if has_content -%}
-      <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% else %} grid__heading-holder--sticky{% endif %}">
-        {%- if title != blank or description != blank -%}
-          <div class="grid__heading-text">
-            {%- if title != blank -%}
-              {%- liquid
-                assign animation_order = animation_order | plus: 1
-                assign heading_tag = 'h2'
+      <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% endif %}">
+        <div class="grid__heading-content">
+          {%- if title != blank or description != blank -%}
+            <div class="grid__heading-text">
+              {%- if title != blank -%}
+                {%- liquid
+                  assign animation_order = animation_order | plus: 1
+                  assign heading_tag = 'h2'
 
-                unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
-                  assign heading_tag = section.settings.heading_tag
-                endunless
-              -%}
+                  unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+                    assign heading_tag = section.settings.heading_tag
+                  endunless
+                -%}
 
-              <{{ heading_tag }}
-                class="grid__heading {{ section.settings.heading_font_size }}"
-                data-aos="hero"
-                data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}"
+                <{{ heading_tag }}
+                  class="grid__heading {{ section.settings.heading_font_size }}"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {{- title -}}
+                </{{ heading_tag }}>
+              {%- endif -%}
+
+              {%- if description != blank -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+                <div
+                  class="grid__description {{ section.settings.text_font_size }}"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {{ description }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if button_text != blank -%}
+            {%- assign animation_order = animation_order | plus: 1 -%}
+            <div
+              class="grid__heading-actions"
+              data-aos="hero"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-order="{{ animation_order }}"
+            >
+              <a
+                class="{{ button_classes }}"
+                href="{{ section.settings.button_url }}"
               >
-                {{- title -}}
-              </{{ heading_tag }}>
-            {%- endif -%}
+                <span>{{ button_text | escape }}</span>
 
-            {%- if description != blank -%}
-              {%- assign animation_order = animation_order | plus: 1 -%}
-              <div
-                class="grid__description {{ section.settings.text_font_size }}"
-                data-aos="hero"
-                data-aos-anchor="{{ animation_anchor }}"
-                data-aos-order="{{ animation_order }}"
-              >
-                {{ description }}
-              </div>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
+                {%- if section.settings.show_arrow -%}
+                  {%- render 'icon', name: 'caret-right' -%}
+                {%- endif -%}
+              </a>
+            </div>
+          {%- endif -%}
+        </div>
 
-        {%- if button_text != blank -%}
+        {%- if layout == 'slider' -%}
           {%- assign animation_order = animation_order | plus: 1 -%}
           <div
-            class="grid__heading-actions"
+            class="slider__arrows slider__arrows--inline"
             data-aos="hero"
             data-aos-anchor="{{ animation_anchor }}"
             data-aos-order="{{ animation_order }}"
           >
-            <a
-              class="{{ button_classes }}"
-              href="{{ section.settings.button_url }}"
+            <button
+              type="button"
+              class="slider__button slider__button--prev"
+              data-button-arrow
+              data-button-prev
+              aria-label="{{ 'general.pagination.prev' | t }}"
             >
-              <span>{{ button_text | escape }}</span>
+              {%- render 'icon', name: 'caret-left' -%}
+            </button>
 
-              {%- if section.settings.show_arrow -%}
-                {%- render 'icon', name: 'caret-right' -%}
-              {%- endif -%}
-            </a>
+            <button
+              type="button"
+              class="slider__button slider__button--next"
+              data-button-arrow
+              data-button-next
+              aria-label="{{ 'general.pagination.next' | t }}"
+            >
+              {%- render 'icon', name: 'caret-right' -%}
+            </button>
           </div>
         {%- endif -%}
       </div>
@@ -158,45 +198,36 @@
           endcapture
         -%}
 
-        {%- if layout == 'slider' -%}
-          <grid-slider align-arrows>
-            <div class="slider__arrows">
-              <button
-                type="button"
-                class="slider__button slider__button--prev"
-                data-button-arrow
-                data-button-prev
-              >
-                {{ 'general.pagination.prev' | t }}
-              </button>
-              <button
-                type="button"
-                class="slider__button slider__button--next"
-                data-button-arrow
-                data-button-next
-              >
-                {{ 'general.pagination.next' | t }}
-              </button>
-            </div>
+        <div
+          class="collection-list {{ grid_classes }}"
+          {% if has_slider %}
+            id="{{ scroller_id }}"
+            data-grid-slider
+            {% if request.design_mode %}
+              data-block-scroll
+            {% endif %}
+          {% endif %}
+        >
+          {{ collection_items }}
+        </div>
 
-            <div
-              class="collection-list {{ grid_classes }}"
-              data-grid-slider
-              {% if request.design_mode %}
-                data-block-scroll
-              {% endif %}
-            >
-              {{ collection_items }}
+        {%- if has_slider -%}
+          <slider-progress for="{{ scroller_id }}">
+            <div class="slider-progress__container" data-slider-progress>
+              <div class="slider-progress__track">
+                <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
+              </div>
+              <div class="slider-progress__counter body-x-small" data-slider-counter aria-live="polite"></div>
             </div>
-          </grid-slider>
-        {%- else -%}
-          <div class="collection-list {{ grid_classes }}">
-            {{ collection_items }}
-          </div>
+          </slider-progress>
         {%- endif -%}
       </div>
     </div>
   </div>
+
+  {%- if layout == 'slider' -%}
+    </grid-slider>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -255,7 +286,7 @@
       "id": "text_font_size",
       "label": "Text size",
       "info": "Applies only when content in Text field is set to Paragraph.",
-      "default": "body-medium",
+      "default": "body-large",
       "options": [
         {
           "value": "body-x-small",
