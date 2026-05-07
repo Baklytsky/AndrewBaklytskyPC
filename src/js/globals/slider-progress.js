@@ -41,7 +41,7 @@ if (!customElements.get('slider-progress')) {
 
         if (!this.scroller || !this.progressEl) return;
 
-        this.slides = this.scroller.querySelectorAll('[data-grid-item]');
+        this.slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
 
         this.scroller.addEventListener('scroll', this.onScroll, {passive: true});
         document.addEventListener('theme:resize:width', this.onResize);
