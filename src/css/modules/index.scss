@@ -649,7 +649,7 @@ p a {
     .grid__items-holder {
       flex: 1 0 auto;
       margin-right: var(--outer-offset);
-      max-width: calc(100% - var(--content-width));
+      max-width: calc(100% - var(--content-width) + var(--outer) - var(--SPACING-SMALL));
     }
 
     .grid__heading-holder {
@@ -663,6 +663,22 @@ p a {
     }
 
     .grid__heading-text { width: auto; }
+
+    .grid--slider {
+      @include media-query($medium-up) {
+        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--SPACING-SMALL)) * 0.38);
+
+        padding-left: var(--SPACING-SMALL);
+        padding-right: var(--grid-outer);
+        margin-left: calc(var(--SPACING-SMALL) * -1);
+        margin-right: var(--grid-outer-offset);
+        scroll-padding: var(--grid-outer);
+      }
+
+      @include media-query ($large-up) {
+        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--SPACING-SMALL)) * 0.28);
+      }
+    }
 
     .grid--slider .grid-item { width: var(--item-width); }
   }
