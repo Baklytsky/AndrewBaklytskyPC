@@ -80,6 +80,10 @@
   data-section-id="{{ section.id }}"
   data-section-type="list-collections"
 >
+  {%- if layout == 'slider' -%}
+    <grid-slider>
+  {%- endif -%}
+
   <div class="grid-container{% if section.settings.layout == 'slider' and has_content %} grid-container--split{% endif %}">
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% endif %}">
@@ -212,7 +216,12 @@
         </div>
 
         {%- if has_slider -%}
-          <slider-progress for="{{ scroller_id }}"{% if layout_mobile == 'slider' %} data-mobile-slider{% endif %}>
+          <slider-progress
+            for="{{ scroller_id }}"
+            {% if layout_mobile == 'slider' %}
+              data-mobile-slider
+            {% endif %}
+          >
             <div class="slider-progress__container" data-slider-progress hidden>
               <div class="slider-progress__track">
                 <div class="slider-progress__fill" data-slider-progress-fill style="--slider-progress: 0;"></div>
