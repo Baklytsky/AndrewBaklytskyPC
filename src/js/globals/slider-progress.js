@@ -13,6 +13,7 @@ if (!customElements.get('slider-progress')) {
         this.counter = null;
 
         this.scrollFrame = null;
+        this.mutationObserver = null;
         this.counterMaxFit = 0;
         // true - emit the single-slide intermediate ("2 of 4") on that frame.
         // false - hold the previous range label until a new range fully settles, jumping straight from "1-2 of 4" to "2-3 of 4".
@@ -41,10 +42,14 @@ if (!customElements.get('slider-progress')) {
 
         if (!this.scroller || !this.progressEl) return;
 
-        this.slides = this.scroller.querySelectorAll('[data-grid-item]');
+        this.slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
 
         this.scroller.addEventListener('scroll', this.onScroll, {passive: true});
         document.addEventListener('theme:resize:width', this.onResize);
+
+        // Only observe DOM mutations for sections whose scroller is populated asynchronously after init
+        this.observeDynamicContent();
+
         this.initialized = true;
 
         // Reserve the worst-case width before the first paint so the track
@@ -70,6 +75,30 @@ if (!customElements.get('slider-progress')) {
           if (target) return target;
         }
         return this.parentElement?.querySelector('[data-grid-slider]') || null;
+      }
+
+      /*
+       * Watch for items and visibility on scrollers populated asynchronously via fetch (e.g. <recently-viewed>)
+       * Items arrive via fetch one-by-one while the scroller still carries a `hidden` CSS class.
+       * The class is removed only after all items are appended (in `finalize()`).
+       * We therefore watch both childList and the class attribute, and only trigger the progress update
+       * and disconnect the observer once we have slides and the scroller is visible.
+       */
+      observeDynamicContent() {
+        if (!this.hasAttribute('data-dynamic')) return;
+
+        this.mutationObserver = new MutationObserver(() => {
+          const slides = this.scroller.querySelectorAll('[data-slider-progress-item]');
+          if (!slides.length || this.scroller.classList.contains('hidden')) return;
+
+          this.slides = slides;
+          this.counterMaxFit = 0;
+          this.reserveCounterSpace();
+          this.onScroll();
+          this.mutationObserver.disconnect();
+          this.mutationObserver = null;
+        });
+        this.mutationObserver.observe(this.scroller, {childList: true, attributes: true, attributeFilter: ['class']});
       }
 
       /*
@@ -117,6 +146,24 @@ if (!customElements.get('slider-progress')) {
 
       updateProgress() {
         if (!this.progressEl || !this.scroller) return;
+
+        // When the mobile layout is a static grid, force the bar hidden on
+        // mobile viewports without measuring scroll geometry. This bypasses
+        // timing issues where a scroller inside a `content-visibility: hidden`
+        // tab returns zero or stale dimensions, leaving the bar incorrectly
+        // visible.
+        //
+        // Skip this guard for sections that have no layout_mobile option and
+        // are always a slider at every breakpoint (`data-slider-always`), or
+        // for sections that explicitly declare mobile as a slider
+        // (`data-mobile-slider`).
+        const isMobile = window.innerWidth < window.theme.sizes.small;
+        const mobileIsSlider = this.hasAttribute('data-slider-always') || this.hasAttribute('data-mobile-slider');
+        if (isMobile && !mobileIsSlider) {
+          this.progressEl.hidden = true;
+          return;
+        }
+
         const max = this.scroller.scrollWidth - this.scroller.clientWidth;
         const isScrollable = max > 1;
         // Hide the whole progress block when there's nothing to scroll (e.g.
@@ -129,8 +176,11 @@ if (!customElements.get('slider-progress')) {
       }
 
       updateCounter() {
-        if (!this.counter || !this.slides?.length) return;
-        const total = this.slides.length;
+        if (!this.counter) return;
+
+        const total = this.slides?.length ?? 0;
+        if (!total) return;
+
         const tolerance = 1;
         const left = this.scroller.scrollLeft - tolerance;
         const right = left + this.scroller.clientWidth + tolerance * 2;
@@ -192,6 +242,8 @@ if (!customElements.get('slider-progress')) {
         if (!this.initialized) return;
         this.scroller?.removeEventListener('scroll', this.onScroll);
         document.removeEventListener('theme:resize:width', this.onResize);
+        this.mutationObserver?.disconnect();
+        this.mutationObserver = null;
         if (this.scrollFrame) {
           cancelAnimationFrame(this.scrollFrame);
           this.scrollFrame = null;

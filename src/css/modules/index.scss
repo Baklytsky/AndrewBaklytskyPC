@@ -633,6 +633,8 @@ p a {
 
 .grid-container--split {
   @include media-query($medium-up) {
+    --container-gap: max(calc(var(--outer) / 3.125), var(--SPACING-SMALL));
+
     display: flex;
     align-items: stretch;
     padding-inline: var(--outer);
@@ -649,12 +651,12 @@ p a {
     .grid__items-holder {
       flex: 1 0 auto;
       margin-right: var(--outer-offset);
-      max-width: calc(100% - var(--content-width));
+      max-width: calc(100% - var(--content-width) + var(--outer) - var(--container-gap));
     }
 
     .grid__heading-holder {
       flex: 0 0 var(--content-width);
-      margin: 0 var(--SPACING-SMALL) 0 0;
+      margin: 0 var(--container-gap) 0 0;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -664,7 +666,28 @@ p a {
 
     .grid__heading-text { width: auto; }
 
+    .grid--slider {
+      @include media-query($medium-up) {
+        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.38);
+
+        padding-left: var(--container-gap);
+        margin-left: calc(var(--container-gap) * -1);
+      }
+
+      @include media-query ($large-up) {
+        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.28);
+      }
+    }
+
     .grid--slider .grid-item { width: var(--item-width); }
+  }
+
+  .grid-style--compact & .slider-progress__container {
+    margin-inline: 0 var(--outer);
+
+    @include media-query($small) {
+      margin-inline: var(--outer);
+    }
   }
 
   @include media-query($large-up) {
