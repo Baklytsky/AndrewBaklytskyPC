@@ -7,6 +7,7 @@
   assign show_overlay_text = section.settings.show_overlay_text
   assign animation_anchor = 'Rte--' | append: section.id
   assign animation_order = 0
+  assign headings_inline = section.settings.headings_inline | default: false
 -%}
 
 {%- style -%}
@@ -44,6 +45,11 @@
       >
         {%- for block in section.blocks -%}
           {%- liquid
+            assign prev_index = forloop.index0 | minus: 1
+            assign next_index = forloop.index0 | plus: 1
+            assign prev_block = section.blocks[prev_index]
+            assign next_block = section.blocks[next_index]
+
             capture block_style
               echo 'style="'
               echo '--block-padding-bottom:' | append: block.settings.padding_bottom | append: 'px;'
@@ -73,11 +79,25 @@
                 >
                   {{ block.settings.title }}
                 </{{ heading_tag }}>
+
+                {%- if headings_inline
+                  and prev_block.type == 'subheading'
+                  and prev_block.settings.subheading != blank
+                -%}
+                  </div>
+                {%- endif -%}
               {%- endif -%}
 
             {%- when 'subheading' -%}
               {%- if block.settings.subheading != blank -%}
                 {%- assign animation_order = animation_order | plus: 1 -%}
+
+                {%- if headings_inline and next_block.type == 'heading' and next_block.settings.title != blank -%}
+                  <div
+                    class="hero__headings block-padding"
+                    style="--block-padding-bottom: {{ next_block.settings.padding_bottom }}px;"
+                  >
+                {%- endif -%}
                 <p
                   class="hero__subheading block-padding{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
                   data-aos="hero"
@@ -154,13 +174,8 @@
               -%}
 
               {%- if block.settings.button_text != blank -%}
-                {%- liquid
-                  assign prev_index = forloop.index0 | minus: 1
-                  assign next_index = forloop.index0 | plus: 1
-                  assign prev_block = section.blocks[prev_index]
-                  assign next_block = section.blocks[next_index]
-                  assign animation_order = animation_order | plus: 1
-                -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+
                 {%- if next_block.type == 'buttons'
                   and forloop.index0 == 0
                   or prev_block.type != 'buttons'
@@ -236,6 +251,13 @@
         {"value": "text-left", "label": "Left"},
         {"value": "text-center", "label": "Centered"}
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "headings_inline",
+      "label": "Headings inline",
+      "default": false,
+      "info": "Applies only when a subheading is followed by a heading"
     },
     {
       "type": "header",
