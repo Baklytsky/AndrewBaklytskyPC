@@ -45,6 +45,11 @@
       >
         {%- for block in section.blocks -%}
           {%- liquid
+            assign prev_index = forloop.index0 | minus: 1
+            assign next_index = forloop.index0 | plus: 1
+            assign prev_block = section.blocks[prev_index]
+            assign next_block = section.blocks[next_index]
+
             capture block_style
               echo 'style="'
               echo '--block-padding-bottom:' | append: block.settings.padding_bottom | append: 'px;'
@@ -56,10 +61,6 @@
             {%- when 'heading' -%}
               {%- if block.settings.title != blank -%}
                 {%- liquid
-                  assign prev_index = forloop.index0 | minus: 1
-                  assign next_index = forloop.index0 | plus: 1
-                  assign prev_block = section.blocks[prev_index]
-                  assign next_block = section.blocks[next_index]
                   assign animation_order = animation_order | plus: 1
                   assign heading_tag = 'h2'
 
@@ -89,13 +90,8 @@
 
             {%- when 'subheading' -%}
               {%- if block.settings.subheading != blank -%}
-                {%- liquid
-                  assign prev_index = forloop.index0 | minus: 1
-                  assign next_index = forloop.index0 | plus: 1
-                  assign prev_block = section.blocks[prev_index]
-                  assign next_block = section.blocks[next_index]
-                  assign animation_order = animation_order | plus: 1
-                -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+
                 {%- if headings_inline and next_block.type == 'heading' and next_block.settings.title != blank -%}
                   <div
                     class="hero__headings block-padding"
@@ -178,13 +174,8 @@
               -%}
 
               {%- if block.settings.button_text != blank -%}
-                {%- liquid
-                  assign prev_index = forloop.index0 | minus: 1
-                  assign next_index = forloop.index0 | plus: 1
-                  assign prev_block = section.blocks[prev_index]
-                  assign next_block = section.blocks[next_index]
-                  assign animation_order = animation_order | plus: 1
-                -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+
                 {%- if next_block.type == 'buttons'
                   and forloop.index0 == 0
                   or prev_block.type != 'buttons'
