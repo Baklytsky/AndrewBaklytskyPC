@@ -42,22 +42,6 @@ hover-disclosure { display: block; }
   .icon { --icons: currentcolor; }
 }
 
-.toolbar,
-.theme__header {
-  &.has-border::before {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    pointer-events: none;
-    transition: border-color 0.2s ease;
-    border-bottom: 1px solid var(--link);
-    opacity: var(--border-opacity, 1);
-  }
-}
-
 .header__mobile {
   --text: var(--COLOR-HEADER-LINK);
   --link: var(--COLOR-HEADER-LINK);
@@ -865,14 +849,6 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 }
 
 //  Floating header
-
-body:has(.header-floating) {
-  --floating-inset: var(--outer);
-  --floating-radius: var(--ROUNDED-CORNERS, 5px); // TODO
-  --floating-top: var(--LAYOUT-GAP-SMALL);
-  --floating-gap: calc(var(--LAYOUT-GAP-SMALL) / 2);
-}
-
 .page-header:has(.header-floating) {
   position: relative;
 
@@ -886,6 +862,16 @@ body:has(.header-floating) {
     margin-block: var(--floating-gap);
     width: calc(100% - var(--floating-inset) * 2);
     max-width: calc(var(--WIDTH-FULL-PADDED, 100%) - var(--floating-inset) * 2);
+  }
+
+  .header-floating__card,
+  .toolbar,
+  .announcement__wrapper,
+  .header__dropdown,
+  .search-popdown,
+  .predictive-search {
+    // --header-border is a CSS inset shadow
+    box-shadow: var(--header-border);
     border-radius: var(--floating-radius);
   }
 
@@ -896,23 +882,6 @@ body:has(.header-floating) {
       max-width: calc(var(--WIDTH-FULL-PADDED-MOBILE, 100%) - var(--floating-inset) * 2);
     }
   }
-
-  // Full border around floating blocks when border setting is enabled
-  .announcement__wrapper--borders {
-    border: 1px solid var(--border);
-  }
-
-  .toolbar.has-border {
-    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
-
-    &::before { content: none; }
-  }
-
-  .theme__header.has-border .header-floating__card {
-    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
-  }
-
-  .theme__header.has-border::before { content: none; }
 
   &:has(.announcement__wrapper) {
     --bar-height: calc(var(--announcement-height) + var(--floating-top));
@@ -974,11 +943,6 @@ body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-
 
   .header__dropdown {
     top: calc(100% + var(--floating-gap));
-    border-radius: var(--floating-radius);
-  }
-
-  .theme__header.has-border .header__dropdown {
-    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
   }
 
   .header__dropdown::before {
@@ -996,15 +960,6 @@ body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-
   .theme__header header-search-popdown.is-open .predictive-search {
     width: 100%;
     padding-right: 0;
-  }
-
-  .search-popdown,
-  .predictive-search {
-    border-radius: var(--floating-radius);
-  }
-
-  .theme__header.has-border .predictive-search {
-    border: 1px solid color-mix(in srgb, var(--link) calc(var(--border-opacity, 1) * 100%), transparent);
   }
 
   .search-popdown,

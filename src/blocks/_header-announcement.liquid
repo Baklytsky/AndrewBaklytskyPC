@@ -5,7 +5,6 @@
   assign color_scheme = 'color-' | append: block.settings.color_scheme
   assign border_color = block.settings.border_color
   assign text_font_size = block.settings.text_font_size | default: 'body-small'
-  assign show_border = block.settings.show_border
   assign show_arrows = block.settings.show_arrows | default: false
   assign text_align = block.settings.text_alignment | default: 'center'
   assign justify_content = 'flex-start'
@@ -59,7 +58,7 @@
 
   <div
     id="Announcement--{{ block.id }}"
-    class="announcement__wrapper announcement__wrapper--top{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
+    class="announcement__wrapper announcement__wrapper--top {{ color_scheme }}"
     data-announcement-wrapper
     data-section-id="{{ section.id }}"
     data-section-type="announcement"
@@ -208,12 +207,6 @@
     {
       "type": "header",
       "content": "Layout"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_border",
-      "label": "Show border",
-      "default": false
     },
     {
       "type": "select",
