@@ -3,27 +3,25 @@
   Accepts:
   - id: {String} unique input id
   - type: {String} input type. Accepts 'radio' or 'checkbox', defaults to 'radio' (optional)
-  - name: {String} input name,
+  - name: {String} input name
   - value: {ProductOptionValueDrop} input value
   - swatch: {SwatchDrop} the swatch drop
-  - product_form_id: {String} id of the form associted with the input
+  - product_form_id: {String} id of the form associated with the input
   - checked: {Boolean} default checked status
   - disabled: {Boolean} default disabled status (optional)
   - visually_disabled: {Boolean} style the swatch as disabled, but leave the input enabled (optional)
   - help_text: {String} additional content to render inside the label (optional)
   - additional_props: {String} additional properties to attach to the input (optional)
   - metaobject_color_entries: {Array} metaobjects[settings.theme_color].values
-  - is_theme_swatch_option: {Boolean} is it a theme swatch
-  - is_native_swatch_option: {Boolean} is it a native swatch
+      filtered with `| where: 'name'`. Pass nil if not available; priority 1
+      (metaobject) will be skipped but the snippet still renders.
 
   Usage:
    {% render 'swatch-input',
       id: input_id,
       name: input_name,
-      value: input_value,
+      value: value,
       swatch: swatch,
-      is_theme_swatch_option: is_theme_swatch_option,
-      is_native_swatch_option: is_native_swatch_option,
       metaobject_color_entries: metaobject_color_entries,
       product_form_id: product_form_id,
       checked: checked
