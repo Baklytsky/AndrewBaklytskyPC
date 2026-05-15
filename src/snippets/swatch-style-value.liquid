@@ -1,0 +1,88 @@
+{%- comment -%}
+  Returns the CSS value for the --swatch custom property, following the
+  unified swatch priority order (highest to lowest):
+    1. Metaobject color (settings.theme_color)
+    2. Native Shopify swatch (value.swatch.image / .color)
+    3. settings.swatch_color_list textarea  ┐ resolved via CSS
+    4. swatches.css hardcoded colors     ┘ variable cascade
+
+  Sources 1 and 2 are resolved here to actual inline values (hex string or
+  url()), completely bypassing the CSS variable layer. This means the CSS
+  cascade ordering between swatches.css and the inline <style> from
+  swatch-color-list.liquid is irrelevant for those two sources.
+
+  Sources 3 and 4 are still resolved via var(--handle). Both live inside
+  the .swatches selector and swatch-color-list.liquid writes the textarea
+  values before the metaobject values, so within that layer textarea still
+  overrides swatches.css.
+
+  Accepts:
+  - value: {ProductOptionValueDrop} the option value (must respond to
+    `| handle` and may have a `.swatch` SwatchDrop)
+  - metaobject_entries: {Array} the metaobjects[settings.theme_color].values
+    array, pre-filtered with `| where: 'name'`. Pass nil or empty when
+    swatches are disabled or no metaobject is configured; the snippet still
+    works but priority 1 is skipped.
+  - image_width: {Integer} requested image width for the CDN URL. Defaults
+    to 96. The same width is used for both metaobject images and native
+    swatch images.
+
+  Output: a CSS value ready to embed in style="--swatch: <output>;", e.g.
+    #000000
+    url(https://cdn.shopify.com/…/black-swatch.jpg?width=96)
+    var(--navy)
+
+  Usage (capture once, strip whitespace):
+    {%- capture swatch_value -%}
+      {%- render 'swatch-style-value',
+            value: value,
+            metaobject_entries: metaobject_color_entries,
+            image_width: 48
+      -%}
+    {%- endcapture -%}
+    {%- assign swatch_value = swatch_value | strip -%}
+    style="--swatch: {{ swatch_value }};"
+{%- endcomment -%}
+{%- liquid
+  assign image_width = image_width | default: 96
+  assign value_handle = value | handle
+
+  assign mo_hex = null
+  assign mo_image_url = null
+
+  for entry in metaobject_entries
+    assign entry_handle = entry.name | handle
+    if entry_handle == value_handle
+      if entry.image != blank
+        assign mo_image_url = entry.image | image_url: width: image_width
+      endif
+      if entry.hex_code != blank
+        assign mo_hex = entry.hex_code
+      endif
+      break
+    endif
+  endfor
+-%}
+{%- comment -%}
+  Priority 1 — metaobject (image beats hex within the same entry, matching
+  the behaviour of swatch-color-list.liquid which writes image last).
+{%- endcomment -%}
+{%- if mo_image_url != null -%}
+  url({{ mo_image_url }})
+{%- elsif mo_hex != null -%}
+  {{ mo_hex }}
+  {%- comment -%}
+    Priority 2 — native Shopify swatch (image beats color within the same value).
+    value.swatch.color is a hex string (e.g. #40e0d0) — output it directly.
+  {%- endcomment -%}
+{%- elsif value.swatch.image -%}
+  url({{ value.swatch.image | image_url: width: image_width }})
+{%- elsif value.swatch.color -%}
+  {{ value.swatch.color }}
+  {%- comment -%}
+    Priority 3/4 — CSS variable fallback (textarea > swatches.css, enforced by
+    the cascade inside swatch-color-list.liquid).
+  {%- endcomment -%}
+{%- else -%}
+  var(--{{ value_handle }})
+{%- endif -%}
