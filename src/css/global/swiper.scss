@@ -165,6 +165,17 @@ swiper-container::part(bullet-active),
   transition-property: transform, opacity;
 }
 
+// Prevent CLS before the swiper is initialized
+swiper-container:not(.is-initialized) {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  @include hide-scrollbar;
+
+  swiper-slide { min-width: 100%; }
+}
+
 // Disabled Swiper instance
 swiper-container.swiper-disabled::part(wrapper) { transform: none !important; }
 .swiper:has(.swiper-disabled) .swiper-pagination { display: none; }
