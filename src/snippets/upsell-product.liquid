@@ -147,6 +147,11 @@
     endif
   endif
 
+  assign metaobject_color_entries = null
+  if settings.enable_swatches and is_color_option
+    assign metaobject_color_entries = metaobjects[settings.theme_color].values | where: 'name'
+  endif
+
   capture holder_classes
     echo 'product-upsell__holder'
     if upsell_error or onboarding
@@ -356,24 +361,14 @@
                           data-scrollbar
                         >
                           {%- for value in single_option.values -%}
-                            {%- liquid
-                              assign swatch_value = null
-                              if value.swatch
-                                if value.swatch.image
-                                  assign image_url = value.swatch.image | image_url: width: 40
-                                  assign swatch_value = 'url(' | append: image_url | append: ')'
-                                elsif value.swatch.color
-                                  assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
-                                endif
-                              else
-                                assign swatch_value = value | handle
-                              endif
+                            {%- capture swatch_value -%}
+                              {%- render 'swatch-style-value', value: value, metaobject_entries: metaobject_color_entries, image_width: 40 -%}
+                            {%- endcapture -%}
+                            {%- assign swatch_value = swatch_value | strip -%}
 
+                            {%- liquid
                               capture swatch_style
-                                if is_swatch_option
-                                  assign swatch_handle = value | handle
-                                  echo '--swatch: var(--' | append: swatch_handle | append: ');'
-                                elsif is_native_swatch_option and swatch_value != null and swatch_value != ''
+                                if swatch_value != blank
                                   echo '--swatch: ' | append: swatch_value | append: ';'
                                 endif
                               endcapture

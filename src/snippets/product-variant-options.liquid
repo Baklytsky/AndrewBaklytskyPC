@@ -8,6 +8,10 @@
   - picker_type: {String} type of picker to display
   - is_theme_swatch_option: {Boolean} is it a theme swatch
   - is_native_swatch_option: {Boolean} is it a native swatch
+  - metaobject_color_entries: {Array} metaobjects[settings.theme_color].values
+      filtered with `| where: 'name'`. Computed once in product-variant-picker
+      and passed through. The swatch priority resolver uses it to output actual
+      inline values for metaobject colors.
 
   Usage:
   {% render 'product-variant-options',
@@ -16,7 +20,8 @@
     option: option,
     picker_type: picker_type,
     is_theme_swatch_option: is_theme_swatch_option,
-    is_native_swatch_option: is_native_swatch_option
+    is_native_swatch_option: is_native_swatch_option,
+    metaobject_color_entries: metaobject_color_entries
   %}
 {% endcomment %}
 
@@ -42,7 +47,8 @@
     option: option,
     picker_type: picker_type,
     is_theme_swatch_option: is_theme_swatch_option,
-    is_native_swatch_option: is_native_swatch_option
+    is_native_swatch_option: is_native_swatch_option,
+    metaobject_color_entries: metaobject_color_entries
   %}
 {%- endfor -%}
 {%- if picker_type == 'dropdown' -%}

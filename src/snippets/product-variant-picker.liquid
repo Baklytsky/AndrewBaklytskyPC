@@ -15,6 +15,11 @@
   assign size_style = block.settings.size_chart_style
   assign specific_pages = ''
 
+  assign metaobject_color_entries = null
+  if settings.enable_swatches
+    assign metaobject_color_entries = metaobjects[settings.theme_color].values | where: 'name'
+  endif
+
   if block.settings.info_page != blank
     assign size_translation = 'general.size_chart.size' | t
     assign info_page = pages[block.settings.info_page]
@@ -262,7 +267,8 @@
                   option: option,
                   picker_type: picker_type,
                   is_theme_swatch_option: is_theme_swatch_option,
-                  is_native_swatch_option: is_native_swatch_option
+                  is_native_swatch_option: is_native_swatch_option,
+                  metaobject_color_entries: metaobject_color_entries
                 %}
               {%- endcapture -%}
 
@@ -307,7 +313,8 @@
                       product: product,
                       product_form_id: product_form_id,
                       option: option,
-                      picker_type: picker_type
+                      picker_type: picker_type,
+                      metaobject_color_entries: metaobject_color_entries
                     %}
                   </fieldset>
                 {%- elsif picker_type == 'dropdown' -%}
@@ -330,7 +337,8 @@
                       product: product,
                       product_form_id: product_form_id,
                       option: option,
-                      picker_type: picker_type
+                      picker_type: picker_type,
+                      metaobject_color_entries: metaobject_color_entries
                     %}
 
                     <span class="svg-wrapper">
