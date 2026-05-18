@@ -15,6 +15,8 @@
   - metaobject_color_entries: {Array} metaobjects[settings.theme_color].values
       filtered with `| where: 'name'`. Pass nil if not available; priority 1
       (metaobject) will be skipped but the snippet still renders.
+  - product: {ProductDrop} the product being rendered. Forwarded to the
+      swatch priority resolver to scope metaobject entries by product_list.
 
   Usage:
    {% render 'swatch-input',
@@ -22,6 +24,7 @@
       name: input_name,
       value: value,
       swatch: swatch,
+      product: product,
       metaobject_color_entries: metaobject_color_entries,
       product_form_id: product_form_id,
       checked: checked
@@ -29,7 +32,7 @@
 {% endcomment %}
 {%- liquid
   capture swatch_value
-    render 'swatch-style-value', value: value, metaobject_entries: metaobject_color_entries, image_width: 96
+    render 'swatch-style-value', value: value, product: product, metaobject_entries: metaobject_color_entries, image_width: 96
   endcapture
   assign swatch_value = swatch_value | strip
 

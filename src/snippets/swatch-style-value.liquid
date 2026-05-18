@@ -19,6 +19,11 @@
   Accepts:
   - value: {ProductOptionValueDrop} the option value (must respond to
     `| handle` and may have a `.swatch` SwatchDrop)
+  - product: {ProductDrop} the product being rendered. Used to scope
+    metaobject entries to specific products via their `product_list` field:
+      - Entry has no products in product_list → applies to all products (global)
+      - Entry has products in product_list   → applies only to those products
+    Pass nil if the product is not available; priority 1 will apply globally.
   - metaobject_entries: {Array} the metaobjects[settings.theme_color].values
     array, pre-filtered with `| where: 'name'`. Pass nil or empty when
     swatches are disabled or no metaobject is configured; the snippet still
@@ -36,6 +41,7 @@
     {%- capture swatch_value -%}
       {%- render 'swatch-style-value',
             value: value,
+            product: product,
             metaobject_entries: metaobject_color_entries,
             image_width: 48
       -%}
@@ -53,11 +59,25 @@
   for entry in metaobject_entries
     assign entry_handle = entry.name | handle
     if entry_handle == value_handle
-      if entry.image != blank
-        assign mo_image_url = entry.image | image_url: width: image_width
+      comment
+        Scope check: if the entry's product_list has entries, only apply
+        this metaobject color to products explicitly listed. If the list is
+        empty the entry is treated as global and applies to all products.
+        When no product is passed, apply globally.
+      endcomment
+      assign entry_products = entry.product_list.value
+      assign entry_applies = true
+      if entry_products != blank and product != null
+        assign entry_applies = entry_products | has: 'id', product.id
       endif
-      if entry.hex_code != blank
-        assign mo_hex = entry.hex_code
+
+      if entry_applies
+        if entry.image != blank
+          assign mo_image_url = entry.image | image_url: width: image_width
+        endif
+        if entry.hex_code != blank
+          assign mo_hex = entry.hex_code
+        endif
       endif
       break
     endif
