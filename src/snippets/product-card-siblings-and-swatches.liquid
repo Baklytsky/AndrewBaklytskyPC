@@ -24,6 +24,7 @@
     assign swatch_count = 0
     assign count_string_one = 'collections.general.colors_with_count.one' | t
     assign count_string_other = 'collections.general.colors_with_count.other' | t
+    assign metaobject_color_entries = metaobjects[settings.theme_color].values | where: 'name'
   -%}
 
   {%- capture swatches -%}
@@ -36,20 +37,10 @@
         {%- assign swatch_count = option.values.size -%}
         {%- capture swatch_values -%}
           {%- for value in option.values -%}
-            {%- liquid
-              assign swatch_value = nil
-              if value.swatch
-                if value.swatch.image
-                  assign image_url = value.swatch.image | image_url: width: 48
-                  assign swatch_value = 'url(' | append: image_url | append: ')'
-                elsif value.swatch.color
-                  assign swatch_value = value.swatch.color
-                endif
-              endif
-              if swatch_value == nil
-                assign swatch_value = value | handle
-              endif
-            -%}
+            {%- capture swatch_value -%}
+              {%- render 'swatch-style-value', value: value, product: product, metaobject_entries: metaobject_color_entries, image_width: 48 -%}
+            {%- endcapture -%}
+            {%- assign swatch_value = swatch_value | strip -%}
             {{- value -}}: {{- swatch_value -}}
             {%- unless forloop.last -%}, {%- endunless -%}
           {%- endfor -%}
@@ -97,13 +88,10 @@
                     -%}
 
                     {%- for option_value in option.values limit: limit -%}
-                      {%- if option_value.swatch.image -%}
-                        {%- assign swatch = option_value.swatch.image | image_url: width: 48 | prepend: 'url(' | append: ')' -%}
-                      {%- elsif option_value.swatch.color -%}
-                        {%- assign swatch = option_value.swatch.color -%}
-                      {%- else -%}
-                        {%- assign swatch = option_value | handleize | prepend: 'var(--' | append: ');' -%}
-                      {%- endif -%}
+                      {%- capture swatch -%}
+                        {%- render 'swatch-style-value', value: option_value, product: product, metaobject_entries: metaobject_color_entries, image_width: 48 -%}
+                      {%- endcapture -%}
+                      {%- assign swatch = swatch | strip -%}
 
                       {%- assign swatch_style = '--swatch: ' | append: swatch | append: ';' -%}
                       {%- assign animation_delay = forloop.index0 | times: 100.0 | divided_by: 1250.0 -%}
