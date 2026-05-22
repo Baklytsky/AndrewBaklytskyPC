@@ -35,15 +35,25 @@ if (!customElements.get('predictive-search')) {
         this.searchPopdown = this.closest(selectors.searchPopdown);
         this.popularSearches = this.searchPopdown?.querySelector(selectors.popularSearches);
         this.searchTerm = '';
+        this.pointerDownOutside = false;
       }
 
       connectedCallback() {
+        this.onDocumentPointerDownHandler = (event) => {
+          this.pointerDownOutside = !this.searchPopdown?.contains(event.target);
+        };
+
         this.input.addEventListener('focus', this.onFocus.bind(this));
         this.input.form.addEventListener('submit', this.onFormSubmit.bind(this));
 
         this.addEventListener('focusout', this.onFocusOut.bind(this));
         this.addEventListener('keyup', this.onKeyup.bind(this));
         this.addEventListener('keydown', this.onKeydown.bind(this));
+        document.addEventListener('pointerdown', this.onDocumentPointerDownHandler);
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('pointerdown', this.onDocumentPointerDownHandler);
       }
 
       getQuery() {
@@ -106,9 +116,23 @@ if (!customElements.get('predictive-search')) {
         }
       }
 
-      onFocusOut() {
+      onFocusOut(event) {
+        const hadPointerDownOutside = this.pointerDownOutside;
+        const {relatedTarget} = event;
+
+        this.pointerDownOutside = false;
+
         setTimeout(() => {
-          if (!this.searchPopdown.contains(document.activeElement)) this.close();
+          if (this.searchPopdown?.contains(document.activeElement)) return;
+
+          if (hadPointerDownOutside) {
+            this.close();
+            return;
+          }
+
+          if (relatedTarget && !this.searchPopdown?.contains(relatedTarget)) {
+            this.close();
+          }
         });
       }
 
