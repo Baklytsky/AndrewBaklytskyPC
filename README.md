@@ -16,10 +16,9 @@ git clone https://github.com/presidiocreative/headlands-internal.git
 ```
 
 #### Check your Node version
-⚠️ The recommended version is Node v20.9.x
+⚠️ The recommended version is Node v22 or higher (see `.nvmrc`)
 
-Our build process uses `fs.cp` to copy files from src to dist. This node library requires node `v20.9` or higher.
-If you are running an older version of node, use `nvm install 20` then `nvm use 20` to upgrade to the latest stable node 20 build.
+Our build process uses `fs.cp` to copy files from src to dist, and the Shopify CLI requires a current LTS release. If you are running an older version of node, use `nvm install 22` then `nvm use 22` to upgrade to the latest stable Node 22 build.
 
 #### Install packages
 
@@ -28,11 +27,11 @@ yarn install
 ```
 
 
-#### Setup Shopify CLI3
+#### Setup Shopify CLI 4
 
 Install Shopify CLI with instructions [here](https://shopify.dev/themes/tools/cli/installation#macos)
 
-⚠️ If you have version 3 of the CLI, check [here](https://shopify.dev/themes/tools/cli/migrate) for upgrade instructions
+⚠️ If you have an older version of the CLI, check [here](https://shopify.dev/themes/tools/cli/migrate) for upgrade instructions
 
 
 
@@ -85,6 +84,26 @@ To setup different environments create a `shopify.theme.toml` file and add entri
 Then, start your dev environment with `yarn start --env=my-env` or  `yarn start -e my-env`. This will effectively just call `shopify theme dev dist --store=my-store.myshopify.com --theme=12345`
 
 Or, you can start multiple shopify processes for multiple dev environments with `yarn start --env=my-env,my-other-env`
+
+
+## Troubleshooting
+
+### Can't log into a store
+
+If `shopify theme dev` / `yarn start` won't authorize you against a store ("You aren't authorized to edit this store" or similar), the CLI has likely cached an incorrect account session. If your email already matches the store owner's address but you are still getting blocked, force a clean link:
+
+1. Log out completely from the terminal:
+
+   ```
+   shopify auth logout
+   ```
+
+2. Open your browser, navigate directly to your permanent store URL (e.g. `your-store.myshopify.com/admin`), and log in there first.
+3. Return to the terminal and start the dev server using your raw `.myshopify.com` handle (avoid custom vanity domains):
+
+   ```
+   shopify theme dev --store=your-store.myshopify.com
+   ```
 
 
 ## Deployment
