@@ -1,10 +1,7 @@
 const selectors = {
-  animates: 'data-animates',
   sliderule: '[data-sliderule]',
-  slideruleOpen: 'data-sliderule-open',
-  slideruleClose: 'data-sliderule-close',
-  sliderulePane: 'data-sliderule-pane',
   drawerContent: '[data-drawer-content]',
+  stagger: '[data-stagger-first]',
   focusable: 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   children: `:scope > [data-animates],
              :scope > * > [data-animates],
@@ -21,6 +18,19 @@ const classes = {
   scrolling: 'is-scrolling',
 };
 
+const attributes = {
+  animates: 'data-animates',
+  animation: 'data-animation',
+  animationDelay: 'data-animation-delay',
+  sliderule: 'data-sliderule',
+  slideruleOpen: 'data-sliderule-open',
+  slideruleClose: 'data-sliderule-close',
+  sliderulePane: 'data-sliderule-pane',
+  slideruleLinksCount: 'data-sliderule-links-count',
+  slideruleAnimationDefault: 'data-sliderule-animation-default',
+  slideruleAnimationStep: 'data-sliderule-animation-step',
+};
+
 if (!customElements.get('mobile-sliderule')) {
   customElements.define(
     'mobile-sliderule',
@@ -31,11 +41,11 @@ if (!customElements.get('mobile-sliderule')) {
 
         this.key = this.id;
         this.sliderule = this.querySelector(selectors.sliderule);
-        const btnSelector = `[${selectors.slideruleOpen}='${this.key}']`;
-        this.exitSelector = `[${selectors.slideruleClose}='${this.key}']`;
+        const btnSelector = `[${attributes.slideruleOpen}='${this.key}']`;
+        this.exitSelector = `[${attributes.slideruleClose}='${this.key}']`;
         this.trigger = this.querySelector(btnSelector);
         this.exit = document.querySelectorAll(this.exitSelector);
-        this.pane = this.trigger.closest(`[${selectors.sliderulePane}]`);
+        this.pane = this.trigger.closest(`[${attributes.sliderulePane}]`);
         this.childrenElements = this.querySelectorAll(selectors.children);
         this.mobileMenuBlock = this.closest(selectors.mobileMenuBlock);
         this.drawerContent = this.closest(selectors.drawerContent);
@@ -90,11 +100,11 @@ if (!customElements.get('mobile-sliderule')) {
 
       hideSliderule(close = false) {
         const newPosition = parseInt(this.pane.dataset.sliderulePane, 10) - 1;
-        this.pane.setAttribute(selectors.sliderulePane, newPosition);
+        this.pane.setAttribute(attributes.sliderulePane, newPosition);
         this.pane.classList.add(classes.isHiding);
         this.mobileMenuBlock?.style.removeProperty('--menu-height');
         this.sliderule.classList.add(classes.isHiding);
-        const hiddenSelector = close ? `[${selectors.animates}].${classes.isHidden}` : `[${selectors.animates}="${newPosition}"]`;
+        const hiddenSelector = close ? `[${attributes.animates}].${classes.isHidden}` : `[${attributes.animates}="${newPosition}"]`;
         const hiddenItems = this.pane.querySelectorAll(hiddenSelector);
         if (hiddenItems.length) {
           hiddenItems.forEach((element) => {
@@ -111,7 +121,7 @@ if (!customElements.get('mobile-sliderule')) {
             this.pane.classList.remove(classes.isHiding);
           }
           const removeHidingClass = () => {
-            if (parseInt(this.pane.getAttribute(selectors.sliderulePane)) === newPosition) {
+            if (parseInt(this.pane.getAttribute(attributes.sliderulePane)) === newPosition) {
               this.sliderule.classList.remove(classes.isVisible);
             }
             this.sliderule.classList.remove(classes.isHiding);
@@ -169,17 +179,17 @@ if (!customElements.get('mobile-sliderule')) {
         const newPosition = oldPosition + 1;
 
         this.sliderule.classList.add(classes.isVisible);
-        this.pane.setAttribute(selectors.sliderulePane, newPosition);
+        this.pane.setAttribute(attributes.sliderulePane, newPosition);
         this.mobileMenuBlock?.style.setProperty('--menu-height', this.sliderule.offsetHeight + 'px');
 
-        const hiddenItems = this.pane.querySelectorAll(`[${selectors.animates}="${oldPosition}"]`);
+        const hiddenItems = this.pane.querySelectorAll(`[${attributes.animates}="${oldPosition}"]`);
         if (hiddenItems.length) {
           hiddenItems.forEach((element, index) => {
             const lastElement = hiddenItems.length - 1 == index;
             element.classList.add(classes.isHiding);
             const removeHidingClass = () => {
               element.classList.remove(classes.isHiding);
-              if (parseInt(this.pane.getAttribute(selectors.sliderulePane)) !== oldPosition) {
+              if (parseInt(this.pane.getAttribute(attributes.sliderulePane)) !== oldPosition) {
                 element.classList.add(classes.isHidden);
               }
 
@@ -196,13 +206,27 @@ if (!customElements.get('mobile-sliderule')) {
             }
           });
         }
+
+        const notAnimatedImages = this.sliderule.querySelectorAll(`${selectors.stagger}:not([${attributes.animates}])`);
+        if (notAnimatedImages.length) {
+          const linksBeforeImagesCount = parseInt(this.sliderule.getAttribute(attributes.slideruleLinksCount) || 0, 10);
+          const defaultDelayMs = parseInt(this.sliderule.getAttribute(attributes.slideruleAnimationDefault) || 200, 10);
+          const stepMs = parseInt(this.sliderule.getAttribute(attributes.slideruleAnimationStep) || 50, 10);
+          const linksDelayMs = linksBeforeImagesCount * stepMs;
+          const startMs = defaultDelayMs + stepMs + linksDelayMs;
+          notAnimatedImages.forEach((element, index) => {
+            element.setAttribute(`${attributes.animates}`, this.sliderule.getAttribute(attributes.sliderule) || 1);
+            element.setAttribute(`${attributes.animation}`, 'drawer-items-fade');
+            element.setAttribute(`${attributes.animationDelay}`, startMs + index * stepMs);
+          });
+        }
       }
 
       closeSliderule() {
-        if (this.pane && this.pane.hasAttribute(selectors.sliderulePane) && parseInt(this.pane.getAttribute(selectors.sliderulePane)) > 0) {
+        if (this.pane && this.pane.hasAttribute(attributes.sliderulePane) && parseInt(this.pane.getAttribute(attributes.sliderulePane)) > 0) {
           this.hideSliderule(true);
-          if (parseInt(this.pane.getAttribute(selectors.sliderulePane)) > 0) {
-            this.pane.setAttribute(selectors.sliderulePane, 0);
+          if (parseInt(this.pane.getAttribute(attributes.sliderulePane)) > 0) {
+            this.pane.setAttribute(attributes.sliderulePane, 0);
           }
         }
       }
