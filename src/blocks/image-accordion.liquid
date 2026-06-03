@@ -1,0 +1,119 @@
+{%- liquid
+  assign title = block.settings.title
+  assign subheading = block.settings.subheading
+  assign has_heading = false
+  assign content = block.settings.content
+  assign icon_image = block.settings.icon_image
+
+  if title != blank or subheading != blank
+    assign has_heading = true
+  endif
+-%}
+
+{%- if has_heading and content != blank -%}
+  <details
+    class="accordion block-padding"
+    data-collapsible
+    data-aos="hero"
+    data-aos-anchor="{{ section.id }}"
+    data-aos-order="auto"
+    style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+    {{ block.shopify_attributes }}
+  >
+    <summary
+      class="accordion__title"
+      data-collapsible-trigger
+    >
+      {%- if icon_image != blank -%}
+        {%- assign icon_size = 80 -%}
+        <div
+          class="icon__animated icon__animated--circle icon__animated--{{ block.id }}"
+          style="--icon-size: {{ icon_size }}px;"
+        >
+          {%- liquid
+            assign icon_width = icon_size
+            assign icon_width_retina = icon_width | times: 2
+            assign icon_sizes = icon_width_retina | append: 'px'
+            assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+
+            render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, cover: true
+          -%}
+        </div>
+      {%- endif -%}
+
+      <div class="accordion__title__text">
+        {%- if title != blank -%}
+          <h4 class="accordion__title__heading heading-small">
+            {{ title }}
+          </h4>
+        {%- endif -%}
+
+        {%- if subheading != blank -%}
+          <p class="accordion__title__subheading body-small">
+            {{ subheading }}
+          </p>
+        {%- endif -%}
+      </div>
+
+      {%- render 'icon', name: 'caret-down' -%}
+    </summary>
+
+    <div class="accordion__body rte" data-collapsible-body>
+      <div class="accordion__content" data-collapsible-content>
+        {{ content }}
+      </div>
+    </div>
+  </details>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Image accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Text",
+      "default": "<p>Share details about your shipping policies, item returns, or customer service.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_image",
+      "label": "Image",
+      "info": "160 x 160px .svg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Bottom",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image accordion"
+    }
+  ]
+}
+{% endschema %}
