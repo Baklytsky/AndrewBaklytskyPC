@@ -158,8 +158,14 @@ if (!customElements.get('slider-progress')) {
         // for sections that explicitly declare mobile as a slider
         // (`data-mobile-slider`).
         const isMobile = window.innerWidth < window.theme.sizes.small;
-        const mobileIsSlider = this.hasAttribute('data-slider-always') || this.hasAttribute('data-mobile-slider');
+        const alwaysSlider = this.hasAttribute('data-slider-always');
+        const mobileIsSlider = alwaysSlider || this.hasAttribute('data-mobile-slider');
+        const desktopIsSlider = alwaysSlider || this.hasAttribute('data-desktop-slider');
         if (isMobile && !mobileIsSlider) {
+          this.progressEl.hidden = true;
+          return;
+        }
+        if (!isMobile && !desktopIsSlider) {
           this.progressEl.hidden = true;
           return;
         }
