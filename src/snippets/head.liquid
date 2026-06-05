@@ -161,9 +161,11 @@
   assign white = '#ffffff'
   assign black = '#000000'
 
-  assign product_grid_alignment = ''
+  assign product_grid_align = 'left'
+  assign product_grid_justify = 'flex-start'
   if settings.product_grid_center
-    assign product_grid_alignment = 'center'
+    assign product_grid_align = 'center'
+    assign product_grid_justify = 'center'
   endif
 -%}
 
@@ -494,7 +496,8 @@
 
     /*** Product card ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
-    --PRODUCT-CARD-ALIGNMENT: {{ product_grid_alignment }};
+    --PRODUCT-CARD-ALIGN: {{ product_grid_align }};
+    --PRODUCT-CARD-JUSTIFY: {{ product_grid_justify }};
 
     /*** Typography ***/
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
