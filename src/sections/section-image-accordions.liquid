@@ -1,6 +1,50 @@
 <!-- /sections/section-image-accordions.liquid -->
 
+{%- liquid
+  assign subheading = section.settings.subheading
+  assign title = section.settings.title
+  assign text = section.settings.text
+  assign heading_tag = 'h2'
+
+  unless section.settings.heading_tag == 'automatic' or section.settings.heading_tag == blank
+    assign heading_tag = section.settings.heading_tag
+  endunless
+-%}
+
 {%- capture content_blocks -%}
+    {%- if subheading != blank -%}
+      <p
+        class="hero__subheading{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
+        data-aos="hero"
+        data-aos-order="auto"
+        data-aos-anchor="{{ section.id }}"
+      >
+        {{ subheading }}
+      </p>
+    {%- endif -%}
+
+    {% if title != blank %}
+      <{{ heading_tag }}
+        class="hero__title {{ section.settings.heading_font_size }}"
+        data-aos="hero"
+        data-aos-anchor="{{ section.id }}"
+        data-aos-order="auto"
+      >
+        {{ title }}
+      </{{ heading_tag }}>
+    {%- endif -%}
+
+    {%- if text != blank -%}
+      <div
+        class="hero__rte {{ section.settings.text_font_size }}"
+        data-aos="hero"
+        data-aos-anchor="{{ section.id }}"
+        data-aos-order="auto"
+      >
+        {{ text }}
+      </div>
+    {%- endif -%}
+
     {%- content_for 'blocks' -%}
 {%- endcapture -%}
 
@@ -10,7 +54,7 @@
 {
   "name": "Image accordions",
   "class": "section-overlay-header",
-  "blocks": [{"type": "heading"}, {"type": "subheading"}, {"type": "text"}, {"type": "image-accordion"}],
+  "blocks": [{"type": "image-accordion"}],
   "settings": [
     {
       "type": "header",
@@ -40,16 +84,53 @@
     },
     {
       "type": "header",
-      "content": "Product"
-    },
-    {
-      "type": "product",
-      "id": "product",
-      "label": "Product"
-    },
-    {
-      "type": "header",
       "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "default": "heading-x-large",
+      "options": [
+        {"value": "heading-mini", "label": "Mini"},
+        {"value": "heading-x-small", "label": "Extra small"},
+        {"value": "heading-small", "label": "Small"},
+        {"value": "heading-medium", "label": "Medium"},
+        {"value": "heading-large", "label": "Large"},
+        {"value": "heading-x-large", "label": "Extra large"}
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Use this text to describe products, share details on availability and style, or as a space to display recent reviews or FAQs.</p>"
+    },
+    {
+      "type": "select",
+      "id": "text_font_size",
+      "label": "Text size",
+      "info": "Applies only when content in Text field is set to Paragraph.",
+      "default": "body-medium",
+      "options": [
+        {"value": "body-x-small", "label": "Extra small"},
+        {"value": "body-small", "label": "Small"},
+        {"value": "body-medium", "label": "Medium"},
+        {"value": "body-large", "label": "Large"},
+        {"value": "body-x-large", "label": "Extra large"}
+      ]
     },
     {
       "type": "select",
@@ -180,6 +261,21 @@
       "label": "Show placeholder image",
       "info": "Disable if using a metafield",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading SEO tag",
+      "default": "automatic",
+      "options": [
+        {"value": "automatic", "label": "Automatic"},
+        {"value": "h1", "label": "H1"},
+        {"value": "h2", "label": "H2"},
+        {"value": "h3", "label": "H3"},
+        {"value": "h4", "label": "H4"},
+        {"value": "h5", "label": "H5"},
+        {"value": "h6", "label": "H6"}
+      ]
     }
   ],
   "presets": [
@@ -188,10 +284,7 @@
       "category": "Image",
       "blocks": [
         {
-          "type": "subheading"
-        },
-        {
-          "type": "heading"
+          "type": "image-accordion"
         }
       ]
     }
