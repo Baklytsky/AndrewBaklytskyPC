@@ -145,7 +145,7 @@
   class="index-image-text section-padding {{ section.settings.text_alignment }} {{ color_scheme }}"
   style="{{ style }}"
 >
-  {%- if section.blocks.size > 0 -%}
+  {%- if section.blocks.size > 0 or content_blocks != blank -%}
     {%- liquid
       assign blocks_markup_top = ''
       assign blocks_markup_bottom = ''
@@ -155,7 +155,7 @@
       {%- capture blocks_markup_top -%}
         {{ content_blocks }}
       {%- endcapture -%}
-    {%- else -%}
+    {%- elsif section.blocks.size > 0 -%}
       {%- for block in section.blocks -%}
         {%- liquid
           assign block_content = ''
