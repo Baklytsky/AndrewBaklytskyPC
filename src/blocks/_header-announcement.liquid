@@ -58,7 +58,7 @@
 
   <div
     id="Announcement--{{ block.id }}"
-    class="announcement__wrapper announcement__wrapper--top {{ color_scheme }}"
+    class="announcement__wrapper announcement__wrapper--top{% if show_border %} announcement__wrapper--borders{% endif %}{% if block.settings.type_font_caps %} uppercase{% endif %} {{ color_scheme }}"
     data-announcement-wrapper
     data-section-id="{{ section.id }}"
     data-section-type="announcement"
@@ -296,6 +296,12 @@
         {"value": "body-large", "label": "Large"},
         {"value": "body-x-large", "label": "Extra large"}
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "type_font_caps",
+      "label": "Uppercase text",
+      "default": false
     },
     {
       "type": "header",

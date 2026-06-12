@@ -1,6 +1,6 @@
 {%- liquid
   assign animation_name = 'drawer-items-fade'
-  assign animation_delay_min = 50
+  assign animation_delay_step = 50
   assign animation_delay_additional = 200
   assign highlight_item = highlight_item | downcase | strip_html | escape
   assign link_title_lowercase = link.title | downcase | strip_html | escape
@@ -72,6 +72,9 @@
       <div
         class="mobile__menu__dropdown sliderule__panel"
         data-sliderule="{{ link_level_next }}"
+        data-sliderule-links-count="{{ link.links.size }}"
+        data-sliderule-animation-default="{{ animation_delay_additional }}"
+        data-sliderule-animation-step="{{ animation_delay_step }}"
         data-scroll-lock-scrollable
       >
         <div
