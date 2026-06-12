@@ -1,6 +1,7 @@
 <!-- /sections/section-image-accordions.liquid -->
 
 {%- liquid
+  assign accordions = ''
   assign subheading = section.settings.subheading
   assign title = section.settings.title
   assign text = section.settings.text
@@ -11,46 +12,58 @@
   endunless
 -%}
 
-{%- capture content_blocks -%}
-    {%- if subheading != blank -%}
-      <p
-        class="hero__subheading{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
-        data-aos="hero"
-        data-aos-order="auto"
-        data-aos-anchor="{{ section.id }}"
-      >
-        {{ subheading }}
-      </p>
-    {%- endif -%}
+{%- capture children -%}
+  {%- if subheading != blank -%}
+    <p
+      class="hero__subheading{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
+      data-aos="hero"
+      data-aos-order="auto"
+      data-aos-anchor="{{ section.id }}"
+    >
+      {{ subheading }}
+    </p>
+  {%- endif -%}
 
-    {% if title != blank %}
-      <{{ heading_tag }}
-        class="hero__title {{ section.settings.heading_font_size }}"
-        data-aos="hero"
-        data-aos-anchor="{{ section.id }}"
-        data-aos-order="auto"
-      >
-        {{ title }}
-      </{{ heading_tag }}>
-    {%- endif -%}
+  {% if title != blank %}
+    <{{ heading_tag }}
+      class="hero__title {{ section.settings.heading_font_size }}"
+      data-aos="hero"
+      data-aos-anchor="{{ section.id }}"
+      data-aos-order="auto"
+    >
+      {{ title }}
+    </{{ heading_tag }}>
+  {%- endif -%}
 
-    {%- if text != blank -%}
-      <div
-        class="hero__rte {{ section.settings.text_font_size }}"
-        data-aos="hero"
-        data-aos-anchor="{{ section.id }}"
-        data-aos-order="auto"
-      >
-        {{ text }}
-      </div>
-    {%- endif -%}
+  {%- if text != blank -%}
+    <div
+      class="hero__rte {{ section.settings.text_font_size }}"
+      data-aos="hero"
+      data-aos-anchor="{{ section.id }}"
+      data-aos-order="auto"
+    >
+      {{ text }}
+    </div>
+  {%- endif -%}
 
-    {%- if section.blocks.size > 0 -%}
+  {%- if section.blocks.size > 0 -%}
+    {%- capture accordions -%}
       {%- content_for 'blocks' -%}
+    {%- endcapture -%}
+
+    {%- if accordions contains 'data-collapsible' -%}
+      <collapsible-elements single="true"
+        data-aos="hero"
+        data-aos-anchor="{{ section.id }}"
+        data-aos-order="auto"
+      >
+        {{ accordions }}
+      </collapsible-elements>
     {%- endif -%}
+  {%- endif -%}
 {%- endcapture -%}
 
-{%- render 'section-double', content_blocks: content_blocks -%}
+{%- render 'brick-section', children: children -%}
 
 {% schema %}
 {
@@ -64,25 +77,9 @@
     },
     {
       "type": "image_picker",
-      "id": "image_1",
-      "label": "Primary image",
+      "id": "image",
+      "label": "Image",
       "info": "2000 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
-    },
-    {
-      "type": "image_picker",
-      "id": "image_2",
-      "label": "Secondary image",
-      "info": "Displays both images at a 50% width. 2000 x 1400px .jpg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
-    },
-    {
-      "type": "select",
-      "id": "image_width",
-      "label": "Image width",
-      "default": "one-half",
-      "options": [
-        {"value": "one-half", "label": "50%"},
-        {"value": "three-quarters", "label": "75%"}
-      ]
     },
     {
       "type": "header",
