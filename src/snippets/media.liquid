@@ -15,7 +15,9 @@
 {% endcomment %}
 {%- liquid
   assign product_modal = product_modal | default: false
-  assign image_size = '1024x1024'
+  assign product_image_size = section.settings.image_size | default: 'normal'
+  assign product_image_layout = section.settings.image_layout | default: 'thumbnails'
+  assign media_preview_size = '1024x1024'
   assign media_aspect_ratio = media.aspect_ratio
   unless media_aspect_ratio
     assign media_aspect_ratio = 1
@@ -37,7 +39,27 @@
       assign attributes = attributes | append: ' data-variant="' | append: media.alt | append: '"'
     endif
 
-    assign image_sizes = '(min-width: 1400px) ' | append: image_width | append: 'px, (min-width: 750px) calc(50vw - 30px), calc(100vw - 32px)'
+    assign thumb_offset = 0
+    if image_layout == 'thumbnails-left' or image_layout == 'thumbnails-right'
+      assign thumb_offset = 90
+    endif
+    assign desktop_image_width = image_width | minus: thumb_offset
+    assign col_offset = 30 | plus: thumb_offset
+    if product_image_size == 'small'
+      assign sizes_medium = 'calc(37.5vw - ' | append: col_offset | append: 'px)'
+    else
+      assign sizes_medium = 'calc(50vw - ' | append: col_offset | append: 'px)'
+    endif
+    if image_layout == 'grid-1' or image_layout == 'grid-2'
+      if media == featured_media
+        assign image_sizes = '(min-width: 1400px) ' | append: desktop_image_width | append: 'px, (min-width: 750px) ' | append: sizes_medium | append: ', calc(100vw - 32px)'
+      else
+        assign half_width = desktop_image_width | divided_by: 2
+        assign image_sizes = '(min-width: 1400px) ' | append: half_width | append: 'px, (min-width: 990px) calc(25vw - 15px), (min-width: 750px) ' | append: sizes_medium | append: ', calc(100vw - 32px)'
+      endif
+    else
+      assign image_sizes = '(min-width: 1400px) ' | append: desktop_image_width | append: 'px, (min-width: 750px) ' | append: sizes_medium | append: ', calc(100vw - 32px)'
+    endif
 
     render 'image', image: media.preview_image, sizes: image_sizes, loading: loading, fetchpriority: fetchpriority, attributes: attributes, aspect_ratio: media_aspect_ratio, cover: cover
   endcapture
@@ -113,9 +135,9 @@
       {%- liquid
         case media.media_type
           when 'model'
-            echo media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id
+            echo media | model_viewer_tag: image_size: media_preview_size, toggleable: true, data-model-id: media.id
           when 'video'
-            echo media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
+            echo media | media_tag: image_size: media_preview_size, class: 'media-video', autoplay: true, loop: enable_video_looping, controls: true, preload: 'none'
           when 'external_video'
             if media.host == 'youtube'
               echo media | external_video_url: autoplay: true, playsinline: true, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy', data-host: media.host
