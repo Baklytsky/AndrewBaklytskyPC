@@ -43,4 +43,3 @@ import './globals/toggle-ellipsis';
 import './globals/tooltip';
 import './globals/variant-selects';
 import './globals/upsell-block';
-import './globals/shopify-actions';
