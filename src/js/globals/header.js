@@ -1,5 +1,6 @@
 const selectors = {
   announcementWrapper: '[data-announcement-wrapper]',
+  pageAnnouncement: '.page-announcement',
   cartDrawer: 'cart-drawer',
   cartToggleButton: '[data-cart-toggle]',
   deadLink: '.navlink[href="#"]',
@@ -242,19 +243,27 @@ if (!customElements.get('header-component')) {
       }
 
       getHeaderOffset() {
+        const announcementTop = document.querySelector(selectors.pageAnnouncement);
         const announcementWrapper = this.closest(selectors.pageHeader)?.querySelector(selectors.announcementWrapper);
-        if (!announcementWrapper) return 0;
-        const style = getComputedStyle(announcementWrapper);
-        const marginTop = parseFloat(style.marginTop) || 0;
-        const marginBottom = parseFloat(style.marginBottom) || 0;
-        let offset = marginTop + announcementWrapper.offsetHeight + marginBottom;
+        let offset = 0;
 
-        if (this.classList.contains('header-floating')) {
-          const firstBlock = this.querySelector('.toolbar, .header-floating__card');
-          if (firstBlock) {
-            const currentMargin = parseFloat(getComputedStyle(firstBlock).marginTop) || 0;
-            offset -= marginTop - currentMargin;
+        if (announcementWrapper) {
+          const style = getComputedStyle(announcementWrapper);
+          const marginTop = parseFloat(style.marginTop) || 0;
+          const marginBottom = parseFloat(style.marginBottom) || 0;
+          offset = marginTop + announcementWrapper.offsetHeight + marginBottom;
+
+          if (this.classList.contains('header-floating')) {
+            const firstBlock = this.querySelector('.toolbar, .header-floating__card');
+            if (firstBlock) {
+              const currentMargin = parseFloat(getComputedStyle(firstBlock).marginTop) || 0;
+              offset -= marginTop - currentMargin;
+            }
           }
+        }
+
+        if (announcementTop) {
+          offset += announcementTop.offsetHeight;
         }
 
         return offset;

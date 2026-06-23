@@ -11,6 +11,7 @@
   --header-card-height: 80px;
   --header-sticky-height: 0px;
   --announcement-height: 0px;
+  --top-announcement-height: 0px;
   --content-min: calc(var(--full-height, 100vh) - var(--header-height) - var(--announcement-height));
 
   @include media-query($large-up) {
@@ -20,6 +21,7 @@
 
   @include media-query($medium-up) {
     --announcement-height: var(--ANNOUNCEMENT-HEIGHT-DESKTOP, 0px);
+    --top-announcement-height: var(--TOP-ANNOUNCEMENT-HEIGHT-DESKTOP, 0px);
   }
 
   @include media-query($medium) {
@@ -31,17 +33,20 @@
     --header-height: var(--HEADER-HEIGHT-MOBILE, 0px);
     --header-card-height: var(--HEADER-CARD-HEIGHT-MOBILE, var(--header-height));
     --announcement-height: var(--ANNOUNCEMENT-HEIGHT-MOBILE, 0px);
+    --top-announcement-height: var(--TOP-ANNOUNCEMENT-HEIGHT-MOBILE, 0px);
   }
 }
 
 .main-content > .shopify-section:first-of-type { --full-screen: calc(var(--full-height) - var(--header-height) - var(--announcement-height)); }
 
 // Sticky header - all sections
-body:has([data-header-sticky]) .main-content > .shopify-section { --full-screen: calc(var(--full-height) - var(--header-height)); }
+body:has([data-header-sticky]:not(.header-floating)) .main-content > .shopify-section { --full-screen: calc(var(--full-height) - var(--header-height)); }
 // Sticky header - first section
-body:has([data-header-sticky]) .main-content > .shopify-section:first-of-type { --full-screen: calc(var(--full-height) - var(--header-height) - var(--announcement-height)); }
+body:has([data-header-sticky]:not(.header-floating)) .main-content > .shopify-section:first-of-type { --full-screen: calc(var(--full-height) - var(--header-height) - var(--announcement-height)); }
 // Transparent header - first section
-body:has([data-header-transparent]) .main-content > .shopify-section:first-of-type { --full-screen: calc(var(--full-height) - var(--announcement-height)); }
+body:has([data-header-transparent]:not(.header-floating)) .main-content > .shopify-section:first-of-type { --full-screen: calc(var(--full-height) - var(--announcement-height)); }
+// Floating header - first section
+body:has(.header-floating) .main-content > .shopify-section.section-floating:first-of-type { --full-screen: calc(var(--full-height) - var(--top-announcement-height)); }
 
 .has-header-sticky {
   --header-sticky-height: var(--header-height);
