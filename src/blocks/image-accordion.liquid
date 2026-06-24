@@ -3,7 +3,8 @@
   assign subheading = block.settings.subheading
   assign has_heading = false
   assign content = block.settings.content
-  assign icon_image = block.settings.icon_image
+  assign image = block.settings.image
+  assign image_size = 80
 
   if title != blank or subheading != blank
     assign has_heading = true
@@ -18,25 +19,25 @@
     data-aos-anchor="{{ section.id }}"
     data-aos-order="auto"
     style="--block-padding-bottom: {{ block.settings.padding_bottom }}px;"
+    id="{{ block.id }}"
     {{ block.shopify_attributes }}
   >
     <summary
       class="accordion__title"
       data-collapsible-trigger
     >
-      {%- if icon_image != blank -%}
-        {%- assign icon_size = 80 -%}
+      {%- if image != blank -%}
         <div
-          class="icon__animated icon__animated--circle icon__animated--{{ block.id }}"
-          style="--icon-size: {{ icon_size }}px;"
+          class="accordion__title-image accordion__title-image--circle"
+          style="--image-size: {{ image_size }}px;"
         >
           {%- liquid
-            assign icon_width = icon_size
-            assign icon_width_retina = icon_width | times: 2
-            assign icon_sizes = icon_width_retina | append: 'px'
-            assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+            assign image_width = image_size
+            assign image_width_retina = image_width | times: 2
+            assign image_sizes = image_width_retina | append: 'px'
+            assign image_widths = image_width | append: ', ' | append: image_width_retina
 
-            render 'image', image: icon_image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, cover: true
+            render 'image', image: image, width: image_width_retina, sizes: image_sizes, widths: image_widths, cover: true
           -%}
         </div>
       {%- endif -%}
@@ -64,6 +65,8 @@
       </div>
     </div>
   </details>
+{%- elsif request.design_mode -%}
+  <div {{ block.shopify_attributes }}>No content added</div>
 {%- endif -%}
 
 {% schema %}
@@ -91,7 +94,7 @@
     },
     {
       "type": "image_picker",
-      "id": "icon_image",
+      "id": "image",
       "label": "Image",
       "info": "160 x 160px .svg recommended. [Learn more](http://presidiodev.com/link/headlands/images)"
     },
