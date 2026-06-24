@@ -139,7 +139,11 @@ $px-only: false !default;
     }
   }
 
-  @return if(list.length($result) == 1, list.nth($result, 1), $result);
+  @if list.length($result) == 1 {
+    @return list.nth($result, 1);
+  }
+
+  @return $result;
 }
 
 @function convert($values...) {
@@ -234,6 +238,19 @@ $px-only: false !default;
   font-weight: var(--FONT-WEIGHT-SUBHEADING);
   letter-spacing: var(--LETTER-SPACING-SUBHEADING);
   text-transform: var(--FONT-UPPERCASE-SUBHEADING);
+}
+
+@mixin flourish-dot($content-var, $margin-var) {
+  &::before {
+    content: var(#{$content-var});
+    display: inline-block;
+    width: var(--FLOURISH-DOT-SIZE);
+    height: var(--FLOURISH-DOT-SIZE);
+    border-radius: 50%;
+    margin-right: var(#{$margin-var});
+    background: var(--text, currentColor);
+    vertical-align: middle;
+  }
 }
 
 @mixin body {

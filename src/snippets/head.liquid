@@ -161,9 +161,11 @@
   assign white = '#ffffff'
   assign black = '#000000'
 
-  assign product_grid_alignment = ''
+  assign product_grid_align = 'left'
+  assign product_grid_justify = 'flex-start'
   if settings.product_grid_center
-    assign product_grid_alignment = 'center'
+    assign product_grid_align = 'center'
+    assign product_grid_justify = 'center'
   endif
 -%}
 
@@ -422,6 +424,13 @@
       --TAG-RADIUS: 0px;
     {% endif %}
 
+    /*** Flourish dots ***/
+    --FLOURISH-DOT-SIZE: 8px;
+    --FLOURISH-SUBHEADING-MARGIN: 10px;
+    --FLOURISH-BADGE-MARGIN: 6px;
+    --FLOURISH-SUBHEADING-CONTENT: {% if settings.subheading_flourish_enable %}""{% else %}none{% endif %};
+    --FLOURISH-BADGE-CONTENT: {% if settings.badge_flourish_enable %}""{% else %}none{% endif %};
+
     /*** Quick Add ***/
     {%- assign quick_add_lightness = settings.quick_add_bg_color | color_extract: 'lightness' -%}
     {%- assign quick_add_bg_hover = settings.quick_add_bg_color -%}
@@ -479,19 +488,23 @@
 
     /*** Custom Icons ***/
     {%- liquid
+      assign icon_graph_stroke_width = 2
       assign icon_asset_suffix = ''
       if settings.icon_style == 'light'
         assign icon_asset_suffix = '-light'
+        assign icon_graph_stroke_width = 1
       endif
     -%}
     --ICON-BAG: url( "{{ 'shopping-bag' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-ARROW-LEFT: url( "{{ 'caret-left' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-ARROW-RIGHT: url( "{{ 'caret-right' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-SELECT: url("{{ 'caret-down' | append: icon_asset_suffix | append: '.svg' | asset_url }}");
+    --ICON-GRAPH-STROKE-WIDTH: {{  icon_graph_stroke_width }};
 
     /*** Product card ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
-    --PRODUCT-CARD-ALIGNMENT: {{ product_grid_alignment }};
+    --PRODUCT-CARD-ALIGN: {{ product_grid_align }};
+    --PRODUCT-CARD-JUSTIFY: {{ product_grid_justify }};
 
     /*** Typography ***/
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
