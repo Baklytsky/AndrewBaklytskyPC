@@ -835,7 +835,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 .page-header:has(.header-floating) {
   position: relative;
 
-  --bar-height: var(--announcement-height);
+  --bar-height: calc(var(--announcement-height) + var(--top-announcement-height));
 
   // Shared floating block styles
   .header-floating__card,
@@ -867,7 +867,7 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
   }
 
   &:has(.announcement__wrapper) {
-    --bar-height: calc(var(--announcement-height) + var(--floating-top));
+    --bar-height: calc(var(--announcement-height) + var(--floating-top) + var(--top-announcement-height));
   }
 
   // First visible block gets the larger top margin
@@ -895,8 +895,10 @@ body:has(.main-content > .shopify-section.section-overlay-header:first-of-type):
 
 // Overlay: pull entire .page-header out of flow
 body:has(.main-content > .shopify-section.section-floating:first-of-type) .page-header:has(.header-floating) {
+  --top: var(--top-announcement-height);
+
   position: absolute;
-  top: 0;
+  top: var(--top, 0);
   left: 0;
   right: 0;
   z-index: 5500;
