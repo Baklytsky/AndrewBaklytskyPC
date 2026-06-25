@@ -5,9 +5,9 @@ The theme needed a global rounded-corners option and follow-up fixes for layout 
 ## The Solution
 
 > [!NOTE]
-> TLDR: Adds a global `enable_rounded_corners` setting, applies `--ROUNDED-CORNERS` across shared media/header/card surfaces, and tightens layout stability around header/search/Swiper/height behavior.
+> TLDR: Adds a global `enable_rounded_corners` setting, applies `--RADIUS` across shared media/header/card surfaces, and tightens layout stability around header/search/Swiper/height behavior.
 
-- Added `settings.enable_rounded_corners` in `src/config/settings_schema.json` and exposed `--ROUNDED-CORNERS` from `src/snippets/head.liquid`.
+- Added `settings.enable_rounded_corners` in `src/config/settings_schema.json` and exposed `--RADIUS` from `src/snippets/head.liquid`.
 - Applied the rounded radius to shared image wrappers, product cards, collection cards, drawers, footer wrappers, timeline images, tabs, and floating header surfaces.
 - Refactored floating header border/radius variables into `src/snippets/header.liquid` and `src/css/modules/header.scss` so floating header cards, dropdowns, search popdowns, and predictive search can share the same inset border and radius.
 - Updated `src/js/globals/height.js` to cache root CSS variable writes, use `visualViewport` when available, throttle height updates with `requestAnimationFrame`, and expose `window.theme.readHeights`.
@@ -22,7 +22,7 @@ The theme needed a global rounded-corners option and follow-up fixes for layout 
 
 | Area | Before | After |
 | --- | --- | --- |
-| Rounded corners | Hardcoded or absent radii across theme surfaces | Controlled by global `--ROUNDED-CORNERS` |
+| Rounded corners | Hardcoded or absent radii across theme surfaces | Controlled by global `--RADIUS` |
 | Product card alignment | `text-align` value reused for flex `justify-content` | Dedicated alignment and justify CSS variables |
 | Height variables | Direct root writes on every update | Cached writes through `requestAnimationFrame` |
 | Swiper before init | Slides could stack or shift before initialization | `swiper-container:not(.is-initialized)` lays out slides horizontally |

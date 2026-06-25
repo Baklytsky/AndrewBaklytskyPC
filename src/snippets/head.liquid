@@ -167,10 +167,16 @@
     assign product_grid_align = 'center'
     assign product_grid_justify = 'center'
   endif
-  
-  assign rounded_corners_radius = 0
+
+  assign global_radius = 0
+  assign swatch_radius = 0
   if settings.enable_rounded_corners
-    assign rounded_corners_radius = '5px'
+    assign global_radius = '5px'
+    assign swatch_radius = '3px'
+  endif
+
+  if settings.swatch_style == 'circle'
+    assign swatch_radius = '50%'
   endif
 -%}
 
@@ -394,8 +400,6 @@
   :root {
     --scrollbar-width: 0px;
 
-    --ROUNDED-CORNERS: {{ rounded_corners_radius }};
-
     /*** Product grid badges ***/
     --COLOR-BADGE-BG: {{ settings.badge_bg_color }};
     --COLOR-BADGE-TEXT: {{ settings.badge_text_color }};
@@ -423,13 +427,6 @@
     {%- if settings.product_card_tags_text_color.alpha > 0.0 -%}
       --COLOR-PRODUCT-CARD-TAGS-TEXT: {{ settings.product_card_tags_text_color }};
     {%- endif -%}
-    {% if settings.product_card_tags_shape == 'rounded' %}
-      --TAG-RADIUS: 3px;
-    {% elsif settings.product_card_tags_shape == 'pill' %}
-      --TAG-RADIUS: 300px;
-    {% else %}
-      --TAG-RADIUS: 0px;
-    {% endif %}
 
     /*** Flourish dots ***/
     --FLOURISH-DOT-SIZE: 8px;
@@ -462,17 +459,6 @@
     --COLOR-SUCCESS: #56AD6A;
     --COLOR-SUCCESS-BG: rgba(86, 173, 106, 0.2);
 
-    {% if settings.btn_border_style == 'rounded' %}
-      --RADIUS: 3px;
-      --RADIUS-SELECT: 3px;
-    {% elsif settings.btn_border_style == 'pill' %}
-      --RADIUS: 300px;
-      --RADIUS-SELECT: 22px;
-    {% else %}
-      --RADIUS: 0px;
-      --RADIUS-SELECT: 0px;
-    {% endif %}
-
     --COLOR-HEADER-LINK: {{ settings.header_link }};
     --COLOR-HEADER-LINK-HOVER: {{ settings.header_link }};
 
@@ -486,6 +472,24 @@
     --COLOR-MENU-TRANSPARENT-HOVER: {{ settings.menu_transparent_color }};
 
     --TRANSPARENT: rgba(255, 255, 255, 0);
+
+    /*** Rounded corners ***/
+    --RADIUS: {{ global_radius }};
+    --RADIUS-SWATCH: {{ swatch_radius }};
+
+    {% if settings.btn_border_style == 'rounded' %}
+      --RADIUS-TAG: 3px;
+      --RADIUS-SELECT: 3px;
+      --RADIUS-BUTTON: 3px;
+    {% elsif settings.btn_border_style == 'pill' %}
+      --RADIUS-TAG: 300px;
+      --RADIUS-SELECT: 28px;
+      --RADIUS-BUTTON: 28px;
+    {% else %}
+      --RADIUS-TAG: 0px;
+      --RADIUS-SELECT: 0px;
+      --RADIUS-BUTTON: 0px;
+    {% endif %}
 
     /*** Default overlay opacity ***/
     --overlay-opacity: 0;
