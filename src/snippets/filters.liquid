@@ -1,15 +1,6 @@
 {%- liquid
   assign filters_default = search.filters | default: collection.filters
   assign default_open = section.settings.default_open
-
-  capture swatch_button_style
-    case settings.swatch_style
-      when 'square'
-        echo 'swatch__button--square'
-      when 'circle'
-        echo 'swatch__button--circle'
-    endcase
-  endcapture
 -%}
 
 <collapsible-elements>
@@ -183,7 +174,7 @@
                                   -%}
 
                                   <div
-                                    class="swatch__button swatch__button--filter {{ swatch_button_style }} swatch-{{ filter_value.label | handleize }}"
+                                    class="swatch__button swatch__button--filter swatch-{{ filter_value.label | handleize }}"
                                     style="background-color: {{ filter_value.swatch.color }};"
                                   ></div>
                                 {%- else -%}

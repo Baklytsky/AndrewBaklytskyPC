@@ -5,7 +5,6 @@
   assign color_scheme = 'color-' | append: block.settings.color_scheme
   assign border_color = block.settings.border_color
   assign text_font_size = block.settings.text_font_size | default: 'body-small'
-  assign show_border = block.settings.show_border
   assign show_arrows = block.settings.show_arrows | default: false
   assign text_align = block.settings.text_alignment | default: 'center'
   assign justify_content = 'flex-start'
@@ -27,6 +26,7 @@
   --text-size: var(--font-{{ text_font_size }});
   --text-align: {{ text_align }};
   --justify-content: {{ justify_content }};
+  --announcement-min-height: {{ announcement_height }};
 
   {%- unless border_color == 'rgba(0,0,0,0)' or border_color == blank -%}
     --border: {{ border_color }};
@@ -208,12 +208,6 @@
     {
       "type": "header",
       "content": "Layout"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_border",
-      "label": "Show border",
-      "default": false
     },
     {
       "type": "select",

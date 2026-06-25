@@ -66,7 +66,7 @@ The siblings feature allows customers to switch between related products (typica
   - `.product-card__bg__sibling` class and `is-visible` state
   - `.sibling__link`, `.sibling__link--current`, `.sibling__link--sold-out` classes
   - Image fade animations: `.is-fade` class
-  - Swatch style classes: `.swatch__button--circle`, `.swatch__button--square`
+
 
 ---
 
@@ -214,8 +214,6 @@ These CSS classes are used by JavaScript and styles, and **MUST NOT** be changed
 - `.product__siblings` - Siblings container on product pages
 - `.is-visible` - Shows sibling fieldset (used by JavaScript)
 - `.is-fade` - Image fade animation class
-- `.swatch__button--circle` - Circle swatch style
-- `.swatch__button--square` - Square swatch style
 
 ---
 

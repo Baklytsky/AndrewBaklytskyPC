@@ -72,7 +72,6 @@ The color swatches feature allows customers to select product variants (typicall
 - **Purpose:** Styles for swatch buttons and variant pickers
 - **Critical Elements:**
   - `.swatch__button` class and all its variants
-  - `.swatch__button--circle` and `.swatch__button--square` style classes
   - `.swatch__button--sale` for sale indicators
   - `.radio__fieldset--swatches` for swatch container
   - `.radio__fieldset--swatches.is-visible` for visibility state
@@ -147,24 +146,10 @@ The color swatches feature allows customers to select product variants (typicall
 **Status:** 🟡 **MODIFY WITH CAUTION**
 - Must preserve the variant picker render that includes swatch support
 
-### Filter Integration
-
-#### 11. `src/snippets/filters.liquid`
-**Status:** 🟡 **MODIFY WITH CAUTION**
-- **Lines 6-10:** Must preserve swatch style detection:
-  ```liquid
-  case settings.swatch_style
-    when 'square'
-      echo 'swatch__button--square'
-    when 'circle'
-      echo 'swatch__button--circle'
-  endcase
-  ```
-- **Lines 165-191:** Must preserve swatch filter rendering with correct classes
 
 ### Upsell Integration
 
-#### 12. `src/snippets/upsell-product.liquid`
+#### 11. `src/snippets/upsell-product.liquid`
 **Status:** 🟡 **MODIFY WITH CAUTION**
 - **Lines 107-136:** Must preserve swatch option detection
 - **Lines 352-394:** Must preserve swatch button structure with data attributes
@@ -172,7 +157,7 @@ The color swatches feature allows customers to select product variants (typicall
 
 ### Configuration Files
 
-#### 13. `src/config/settings_schema.json`
+#### 12. `src/config/settings_schema.json`
 **Status:** 🟡 **MODIFY WITH CAUTION**
 - **Lines 1140-1188:** Must preserve the "Swatches" settings section:
   - `theme_color` setting ID (line 1148)
@@ -183,7 +168,7 @@ The color swatches feature allows customers to select product variants (typicall
   - `collection_swatch_style` setting ID (line 1189)
 - **Line 1040:** Must preserve `show_grid_swatches` setting ID
 
-#### 14. `src/snippets/head.liquid`
+#### 13. `src/snippets/head.liquid`
 **Status:** 🟡 **MODIFY WITH CAUTION**
 - **Lines 147-155:** Must preserve swatch size calculations:
   ```liquid
@@ -251,8 +236,6 @@ These CSS classes are used by JavaScript and styles, and **MUST NOT** be changed
 
 - `.swatches` - Base class for all swatch containers (generates CSS variables)
 - `.swatch__button` - Individual swatch button container
-- `.swatch__button--circle` - Circle swatch style
-- `.swatch__button--square` - Square swatch style
 - `.swatch__button--sale` - Sale indicator on swatch
 - `.swatch__button--empty` - Empty swatch state
 - `.swatch-input__input` - Swatch input element
@@ -262,8 +245,6 @@ These CSS classes are used by JavaScript and styles, and **MUST NOT** be changed
 ### Container Classes
 
 - `.product-card__swatches__holder` - Main swatch container on product cards
-- `.product-card__swatches__holder--circle` - Circle style modifier
-- `.product-card__swatches__holder--square` - Square style modifier
 - `.product-card__swatches__holder--{{ collection_swatch_style }}` - Collection style modifier
 - `.product-card__swatches__count` - Swatch count display container
 - `.radio__fieldset--swatches` - Swatch fieldset container
