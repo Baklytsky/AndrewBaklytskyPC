@@ -8,6 +8,7 @@ if (!customElements.get('collapsible-elements')) {
         this.collapsibles = this.querySelectorAll('[data-collapsible]');
         this.single = this.hasAttribute('single');
         this.toggle = this.toggle.bind(this);
+        this.siblings = [...this.parentElement.children].filter((el) => el !== this && el.matches('[data-collapsible-element]')).flatMap((el) => [...el.querySelectorAll('[data-collapsible]')]);
       }
 
       connectedCallback() {
@@ -104,7 +105,9 @@ if (!customElements.get('collapsible-elements')) {
 
         // When we want only one item expanded at the same time
         if (this.single) {
-          this.collapsibles.forEach((otherCollapsible) => {
+          const collapsibles = this.siblings.length ? this.siblings : this.collapsibles;
+
+          collapsibles.forEach((otherCollapsible) => {
             // if otherCollapsible has attribute open and it's not the one we clicked on, remove the open attribute
             if (otherCollapsible.hasAttribute('open') && otherCollapsible != collapsible) {
               requestAnimationFrame(() => {

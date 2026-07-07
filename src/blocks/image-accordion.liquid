@@ -12,9 +12,10 @@
 -%}
 
 {%- if has_heading and content != blank -%}
-  <details
-    class="accordion block-padding"
-    data-collapsible
+  <collapsible-elements
+    class="accordion-element block-padding"
+    single="true"
+    data-collapsible-element
     data-aos="hero"
     data-aos-anchor="{{ section.id }}"
     data-aos-order="auto"
@@ -22,49 +23,54 @@
     id="{{ block.id }}"
     {{ block.shopify_attributes }}
   >
-    <summary
-      class="accordion__title"
-      data-collapsible-trigger
+    <details
+      class="accordion"
+      data-collapsible
     >
-      {%- if image != blank -%}
-        <div
-          class="accordion__title-image accordion__title-image--circle"
-          style="--image-size: {{ image_size }}px;"
-        >
-          {%- liquid
-            assign image_width = image_size
-            assign image_width_retina = image_width | times: 2
-            assign image_sizes = image_width_retina | append: 'px'
-            assign image_widths = image_width | append: ', ' | append: image_width_retina
+      <summary
+        class="accordion__title"
+        data-collapsible-trigger
+      >
+        {%- if image != blank -%}
+          <div
+            class="accordion__title-image accordion__title-image--circle"
+            style="--image-size: {{ image_size }}px;"
+          >
+            {%- liquid
+              assign image_width = image_size
+              assign image_width_retina = image_width | times: 2
+              assign image_sizes = image_width_retina | append: 'px'
+              assign image_widths = image_width | append: ', ' | append: image_width_retina
 
-            render 'image', image: image, width: image_width_retina, sizes: image_sizes, widths: image_widths, cover: true
-          -%}
+              render 'image', image: image, width: image_width_retina, sizes: image_sizes, widths: image_widths, cover: true
+            -%}
+          </div>
+        {%- endif -%}
+
+        <div class="accordion__title__text">
+          {%- if title != blank -%}
+            <h4 class="accordion__title__heading heading-small">
+              {{ title }}
+            </h4>
+          {%- endif -%}
+
+          {%- if subheading != blank -%}
+            <p class="accordion__title__subheading body-small">
+              {{ subheading }}
+            </p>
+          {%- endif -%}
         </div>
-      {%- endif -%}
 
-      <div class="accordion__title__text">
-        {%- if title != blank -%}
-          <h4 class="accordion__title__heading heading-small">
-            {{ title }}
-          </h4>
-        {%- endif -%}
+        {%- render 'icon', name: 'caret-down' -%}
+      </summary>
 
-        {%- if subheading != blank -%}
-          <p class="accordion__title__subheading body-small">
-            {{ subheading }}
-          </p>
-        {%- endif -%}
+      <div class="accordion__body rte" data-collapsible-body>
+        <div class="accordion__content" data-collapsible-content>
+          {{ content }}
+        </div>
       </div>
-
-      {%- render 'icon', name: 'caret-down' -%}
-    </summary>
-
-    <div class="accordion__body rte" data-collapsible-body>
-      <div class="accordion__content" data-collapsible-content>
-        {{ content }}
-      </div>
-    </div>
-  </details>
+    </details>
+  </collapsible-elements>
 {%- elsif request.design_mode -%}
   <div {{ block.shopify_attributes }}>No content added</div>
 {%- endif -%}
