@@ -25,6 +25,8 @@
   .select-popout__toggle {
     @include body;
 
+    --radius-open: var(--RADIUS-SELECT-OPEN-SMALL);
+
     min-height: var(--min-h, 26px);
     padding: min(var(--SPACING-MICRO), 3px) calc(var(--SPACING-SMALL) * 2) min(var(--SPACING-MICRO), 3px) var(--SPACING-TINY);
     font-size: var(--font-body-small);
@@ -44,13 +46,15 @@
 }
 
 .select-popout__toggle {
+  --radius-open: var(--RADIUS-SELECT-OPEN);
+
   position: relative;
   overflow: hidden;
   display: block;
   width: 100%;
   padding: var(--form-top) calc(var(--form-left) * 2) var(--form-top) var(--form-left);
   border: 1px solid var(--border);
-  border-radius: var(--RADIUS-SELECT);
+  border-radius: var(--radius-open);
   line-height: var(--line-height-normal);
   text-align: inherit;
   white-space: nowrap;
@@ -69,9 +73,9 @@
   height: 100%;
   transition: transform 0.3s ease;
 }
-.select-popout__toggle[aria-expanded="true"] { border-radius: var(--RADIUS-SELECT) var(--RADIUS-SELECT) 0 0; }
+.select-popout__toggle[aria-expanded="true"] { border-radius: var(--radius-open) var(--radius-open) 0 0; }
 .select-popout__toggle[aria-expanded="true"] .icon-caret-down { transform: rotateX(180deg); }
-.select-popout:has(.popout-list--top) .select-popout__toggle[aria-expanded="true"] { border-radius: 0 0 var(--RADIUS-SELECT) var(--RADIUS-SELECT); }
+.select-popout:has(.popout-list--top) .select-popout__toggle[aria-expanded="true"] { border-radius: 0 0 var(--radius-open) var(--radius-open); }
 
 .select-popout__list {
   position: absolute;
