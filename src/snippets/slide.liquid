@@ -59,7 +59,7 @@
   assign video_modifier = ''
   if section_width == 'wrapper--full'
     assign image_modifier = 'image-square'
-    assign video_modifier = ' video__player--square'
+    assign video_modifier = 'video__player--square'
   endif
 
   capture slide_image
@@ -135,8 +135,9 @@
       <div class="video__poster">
         {{ slide_image }}
       </div>
+
       <video-background
-        class="video__player{{ video_modifier }} is-loading"
+        class="video__player{% if video_modifier != '' %} {{ video_modifier }}{% endif %} is-loading"
         data-video-player
         data-video-id="{{ section.id }}-video-background"
       >
