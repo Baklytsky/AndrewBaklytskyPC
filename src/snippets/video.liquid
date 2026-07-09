@@ -59,8 +59,13 @@
 {%- endif -%}
 
 {%- liquid
+  assign image_modifier = ''
+  if block_settings.width == 'wrapper--full'
+    assign image_modifier = 'image-square'
+  endif
+
   capture video_poster
-    render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: video.aspect_ratio, aspect_ratio_mobile: video.aspect_ratio
+    render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile, desktop_height: desktop_height, mobile_height: mobile_height, aspect_ratio: video.aspect_ratio, aspect_ratio_mobile: video.aspect_ratio, modifier: image_modifier
   endcapture
 -%}
 
@@ -72,8 +77,9 @@
     <div class="video__poster">
       {{ video_poster }}
     </div>
+
     <video-background
-      class="video__player is-loading"
+      class="video__player{% if block_settings.width == 'wrapper--full' %} video__player--square{% endif %} is-loading"
       data-video-player
       data-video-id="{{ section.id }}-video-background"
     >

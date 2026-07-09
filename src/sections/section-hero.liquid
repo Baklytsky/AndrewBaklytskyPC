@@ -121,6 +121,11 @@
       {%- endif -%}
 
       {%- if render_image -%}
+        {%- assign image_modifier = '' -%}
+        {%- if section_width == 'wrapper--full' -%}
+          {%- assign image_modifier = 'image-square' -%}
+        {%- endif -%}
+
         <div class="hero__split-image{% if image == blank %} hero__split-image--blank{% endif %}">
           {%- render 'image-hero',
             image_desktop: image,
@@ -130,7 +135,8 @@
             preload: preload,
             fetchpriority: fetchpriority,
             desktop_height: desktop_height,
-            mobile_height: mobile_height
+            mobile_height: mobile_height,
+            modifier: image_modifier
           -%}
         </div>
       {%- endif -%}
