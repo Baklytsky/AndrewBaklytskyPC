@@ -67,10 +67,9 @@
             name="q"
             value="{{ search.terms | escape }}"
             placeholder="{{ 'general.search.search' | t }}"
-            role="combobox"
             aria-label="{{ 'general.search.placeholder' | t }}"
-            aria-owns="predictive-search-results"
-            aria-controls="predictive-search-results"
+            aria-owns="predictive-search-results-{{ unique }}"
+            aria-controls="predictive-search-results-{{ unique }}"
             aria-expanded="false"
             aria-haspopup="listbox"
             aria-autocomplete="list"
@@ -92,6 +91,7 @@
         {%- if settings.predictive_search_enabled -%}
           <div
             class="predictive-search"
+            id="predictive-search-results-{{ unique }}"
             data-predictive-search-results
             data-scroll-lock-scrollable
           >
