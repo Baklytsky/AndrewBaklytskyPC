@@ -5,6 +5,7 @@
   assign content = block.settings.content
   assign image = block.settings.image
   assign image_size = 80
+  assign image_circle = block.settings.image_style | default: section.settings.image_style | default: 'square'
 
   if title != blank or subheading != blank
     assign has_heading = true
@@ -33,7 +34,7 @@
       >
         {%- if image != blank -%}
           <div
-            class="accordion__title-image accordion__title-image--circle"
+            class="accordion__title-image{% if image_circle == 'circle' %} accordion__title-image--circle{% endif %}"
             style="--image-size: {{ image_size }}px;"
           >
             {%- liquid
