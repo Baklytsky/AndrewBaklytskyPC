@@ -47,19 +47,7 @@
   {%- endif -%}
 
   {%- if section.blocks.size > 0 -%}
-    {%- capture accordions -%}
-      {%- content_for 'blocks' -%}
-    {%- endcapture -%}
-
-    {%- if accordions contains 'data-collapsible' -%}
-      <collapsible-elements single="true"
-        data-aos="hero"
-        data-aos-anchor="{{ section.id }}"
-        data-aos-order="auto"
-      >
-        {{ accordions }}
-      </collapsible-elements>
-    {%- endif -%}
+    {%- content_for 'blocks' -%}
   {%- endif -%}
 {%- endcapture -%}
 
@@ -215,6 +203,20 @@
       "id": "reverse_blocks",
       "label": "Reverse block placement",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Accordion"
+    },
+    {
+      "type": "select",
+      "id": "image_style",
+      "label": "Image style",
+      "default": "square",
+      "options": [
+        {"value": "square", "label": "Square"},
+        {"value": "circle", "label": "Circle"}
+      ]
     },
     {
       "type": "header",

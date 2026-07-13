@@ -267,12 +267,17 @@
       <div class="look-banner__hero">
         <div class="look-banner__image">
           {%- assign animation_order = animation_order | at_least: 1 -%}
+          {%- assign image_modifier = 'aspect-ratio' -%}
+          {%- if section_width == 'wrapper--full' -%}
+            {%- assign image_modifier = image_modifier | append: ' image-square' -%}
+          {%- endif -%}
+
           {%- render 'image-hero',
             image_desktop: image_desktop,
             image_mobile: image_mobile,
             sizes: sizes,
             widths: '294, 336, 385, 422, 588, 654, 672, 770, 844, 900, 1236, 1308, 1540, 1688, 1800, 2472',
-            modifier: 'aspect-ratio',
+            modifier: image_modifier,
             animation_delay: animation_order,
             aspect_ratio: aspect_ratio_desktop,
             aspect_ratio_mobile: aspect_ratio_mobile,
