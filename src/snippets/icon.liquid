@@ -26,6 +26,14 @@
     assign class_attribute_html = '<svg ' | append: class_attribute | append: ' '
     assign icon_html = icon_html | replace: '<svg', class_attribute_html
   endunless
+
+  comment
+    Icons are decorative by default; hide them from assistive tech and keep them out of the tab order.
+    When an icon is the only content of a control, give that control an aria-label instead.
+  endcomment
+  unless icon_html contains 'aria-hidden'
+    assign icon_html = icon_html | replace_first: '<svg', '<svg aria-hidden="true" focusable="false"'
+  endunless
 -%}
 
 {{- icon_html -}}

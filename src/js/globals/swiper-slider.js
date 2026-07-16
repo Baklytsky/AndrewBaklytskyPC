@@ -86,6 +86,43 @@ const initBullets = (el, swiper) => {
 };
 
 /**
+ * Fix accessibility issues introduced by Swiper's built-in a11y module on the
+ * external navigation buttons (light DOM):
+ *   - It sets aria-controls to the .swiper-wrapper id, which lives inside the
+ *     web component's shadow DOM and can't be resolved from the light DOM. That
+ *     dangling idref fails axe's aria-valid-attr-value check, so we drop it.
+ *   - It overwrites the button's aria-label with its English default message, so
+ *     we restore the localized label from window.theme.strings.
+ *
+ * Buttons carrying data-aria-controls are left for their own component
+ * (slideshow / product gallery) to rewire to a valid, light-DOM id.
+ * Idempotent, so it's safe to re-run on every (re)initialization.
+ */
+const fixNavA11y = (swiper) => {
+  const nav = swiper.navigation;
+  if (!nav) return;
+
+  const strings = window.theme?.strings || {};
+  const targets = [
+    {els: nav.prevEl, label: strings.previousSlide},
+    {els: nav.nextEl, label: strings.nextSlide},
+  ];
+
+  targets.forEach(({els, label}) => {
+    const list = Array.isArray(els) ? els : els ? [els] : [];
+    list.forEach((navEl) => {
+      if (!navEl.hasAttribute('data-aria-controls')) {
+        const controls = navEl.getAttribute('aria-controls');
+        if (controls && !document.getElementById(controls)) {
+          navEl.removeAttribute('aria-controls');
+        }
+      }
+      if (label) navEl.setAttribute('aria-label', label);
+    });
+  });
+};
+
+/**
  * Additionals after '<swiper-container>' custom element is defined.
  */
 const afterSwiperInit = () => {
@@ -97,7 +134,9 @@ const afterSwiperInit = () => {
         // Defer one frame so el.swiper
         // is available even when this runs synchronously after registration.
         requestAnimationFrame(() => {
-          if (el.swiper) initBullets(el, el.swiper);
+          if (!el.swiper) return;
+          initBullets(el, el.swiper);
+          fixNavA11y(el.swiper);
         });
       });
     };
