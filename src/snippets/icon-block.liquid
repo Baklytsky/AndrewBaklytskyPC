@@ -1,5 +1,6 @@
 {% comment %} Icon block for Product page & Cart drawer/page {% endcomment %}
 {%- liquid
+  assign is_product = is_product | default: false
   assign heading = heading | default: block.settings.heading
   assign text = text | default: block.settings.text
   assign prev_index = index | minus: 1
@@ -55,20 +56,23 @@
       echo '"'
     endcapture
   -%}
-  <div class="block__icon" data-aos="img-in" {{ icon_style }}>
-    {%- liquid
-      if image
-        assign icon_width = icon_size
-        assign icon_width_retina = icon_width | times: 2
-        assign icon_sizes = icon_width | append: 'px'
-        assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-        render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
-      else
-        render 'icon', name: icon_key
-      endif
-    -%}
-  </div>
+  {%- unless is_product and heading == blank and text == blank -%}
+    <div class="block__icon" data-aos="img-in" {{ icon_style }}>
+      {%- liquid
+        if image
+          assign icon_width = icon_size
+          assign icon_width_retina = icon_width | times: 2
+          assign icon_sizes = icon_width | append: 'px'
+          assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+
+          render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+        else
+          render 'icon', name: icon_key
+        endif
+      -%}
+    </div>
+  {%- endunless -%}
 
   {%- if heading != blank or text != blank -%}
     <div class="block__icon__content">
