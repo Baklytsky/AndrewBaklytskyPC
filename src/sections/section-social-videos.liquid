@@ -89,8 +89,15 @@
                   assign popup_next_id = section.id | append: '-popup-' | append: next_index
                 endunless
 
-                capture video_poster
-                  render 'image', image: video.preview_image, alt: video.alt, aspect_ratio: aspect_ratio, aspect_ratio_mobile: aspect_ratio, placeholder: 'product-1'
+                assign video_card_poster_sizes = '(min-width: 990px) calc(100vw / 6), (min-width: 750px) calc(100vw / 4), (min-width: 480px) calc(100vw / 2.4), calc(100vw / 1.6)'
+                assign video_modal_poster_sizes = '(min-width: 750px) 340px, calc(100vw - 32px)'
+
+                capture video_card_poster
+                  render 'image', sizes: video_card_poster_sizes, image: video.preview_image, alt: video.alt, aspect_ratio: aspect_ratio, aspect_ratio_mobile: aspect_ratio, placeholder: 'product-1'
+                endcapture
+
+                capture video_modal_poster
+                  render 'image', sizes: video_modal_poster_sizes, image: video.preview_image, alt: video.alt, aspect_ratio: aspect_ratio, aspect_ratio_mobile: aspect_ratio, placeholder: 'product-1'
                 endcapture
               -%}
 
@@ -108,7 +115,7 @@
                     type="button"
                     data-popup-open
                   >
-                    {{- video_poster -}}
+                    {{- video_card_poster -}}
                     {%- render 'icon', name: 'play' -%}
                   </button>
 
@@ -172,7 +179,7 @@
                               style="--aspect-ratio: {{ aspect_ratio }};"
                             >
                               <div class="video__poster">
-                                {{ video_poster }}
+                                {{ video_modal_poster }}
                               </div>
 
                               <video-background
@@ -247,12 +254,20 @@
             {%- endfor -%}
           </swiper-container>
 
-          <div class="{{ section.id }}--button swiper-button-prev">
+          <button
+            type="button"
+            class="{{ section.id }}--button swiper-button-prev"
+            aria-label="{{ 'general.accessibility.previous_slide' | t }}"
+          >
             {%- render 'icon', name: 'caret-left' -%}
-          </div>
-          <div class="{{ section.id }}--button swiper-button-next">
+          </button>
+          <button
+            type="button"
+            class="{{ section.id }}--button swiper-button-next"
+            aria-label="{{ 'general.accessibility.next_slide' | t }}"
+          >
             {%- render 'icon', name: 'caret-right' -%}
-          </div>
+          </button>
         </div>
       {%- else -%}
         {%- render 'no-blocks' -%}

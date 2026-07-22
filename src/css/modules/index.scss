@@ -47,8 +47,83 @@
   left: 0;
   right: 0;
   z-index: 10;
-  background-color: var(--OVERLAY-BG);
+  background-color: var(--overlay-bg);
   opacity: var(--overlay-opacity);
+}
+
+.tabs {
+  --duration: 0.3s;
+  --active-width: 0px;
+  --active-left: 0px;
+
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
+  width: fit-content;
+  padding: 4px 2px;
+  border-radius: var(--RADIUS);
+  margin: 0;
+  list-style: none;
+  position: relative;
+  background: var(--bg-accent);
+
+  @include hide-scrollbar;
+}
+
+.tabs::before {
+  content: '';
+  background: var(--bg);
+  position: absolute;
+  top: 4px;
+  left: 0;
+  bottom: 4px;
+  width: var(--active-width);
+  border-radius: var(--RADIUS);
+  transform: translateX(var(--active-left));
+  transition: width var(--duration) ease, transform var(--duration) ease;
+}
+
+.tabs.text-center { margin: 0 auto; }
+
+.tabs > li {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 5px 12px;
+  margin: 0 2px;
+  border-radius: var(--RADIUS);
+  cursor: pointer;
+  vertical-align: bottom;
+}
+
+// Fix background color of current tab on load in popup
+.tabs > li:first-child::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--RADIUS);
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  content: '';
+}
+
+.tabs > li.current {
+  &:only-child { cursor: default; }
+  &:only-child span { background: none; }
+}
+
+.tabs > li.current:first-child::before {
+  opacity: 1;
+  transition: opacity 0s var(--duration);
+}
+
+.tabs > li > *:not(span) {
+  margin: 0;
 }
 
 [class*="align--"] {
@@ -350,8 +425,8 @@ body:has([data-header-transparent]):has(.main-content > .shopify-section.section
 
 // Floating header overlay: same behavior as transparent but triggered by .header-floating
 body:has(.header-floating):has(.main-content > .shopify-section.section-floating:first-of-type) .header__backfill { display: none; }
-body:has(.header-floating):has(.main-content > .shopify-section.section-floating:first-of-type) .main-content > .shopify-section.section-floating:first-of-type .hero__content__wrapper { padding-top: calc(var(--header-height) + var(--ANNOUNCEMENT-HEIGHT-DESKTOP, 0px) + var(--floating-top, 0px) + var(--floating-gap, 0px)); }
-body:has(.header-floating):has(.main-content > .shopify-section.section-floating:first-of-type) .main-content > .shopify-section.section-floating:first-of-type .index-image-text .brick__block--text { padding: calc(var(--header-height) + var(--ANNOUNCEMENT-HEIGHT-DESKTOP, 0px) + var(--floating-top, 0px) + var(--floating-gap, 0px)) 0; }
+body:has(.header-floating):has(.main-content > .shopify-section.section-floating:first-of-type) .main-content > .shopify-section.section-floating:first-of-type .hero__content__wrapper { padding-top: calc(var(--header-height) + var(--announcement-height) + var(--floating-top, 0px) + var(--floating-gap, 0px)); }
+body:has(.header-floating):has(.main-content > .shopify-section.section-floating:first-of-type) .main-content > .shopify-section.section-floating:first-of-type .index-image-text .brick__block--text { padding: calc(var(--header-height) + var(--announcement-height) + var(--floating-top, 0px) + var(--floating-gap, 0px)) 0; }
 
 .swiper-slide {
   color: var(--text);
@@ -379,10 +454,6 @@ body:has(.header-floating):has(.main-content > .shopify-section.section-floating
   padding: var(--outer) var(--outer) calc(var(--outer) - var(--line));
   background: var(--bg);
   overflow-wrap: break-word;
-
-  .accordion { margin: 0 0 var(--line); }
-
-  .accordion + .accordion { margin-top: calc(var(--line-offset) - 1px); }
 }
 
 .hero__content--padding-default {
@@ -504,20 +575,13 @@ p a {
   --link-hover: currentcolor;
 }
 
-.flourish-dot {
-  --dot-size: 8px;
-  --dot-margin: 10px;
-
-  &::before {
-    content: "";
-    display: inline-block;
-    width: var(--dot-size);
-    height: var(--dot-size);
-    border-radius: 50%;
-    margin-right: var(--dot-margin);
-    background: var(--text, var(--text, currentColor));
-    vertical-align: middle;
-  }
+.hero__subheading,
+.editorial__subheading,
+.logos__title,
+.look__title,
+.review__author__subheading,
+.badge-box {
+  @include flourish-dot(--FLOURISH-SUBHEADING-CONTENT, --FLOURISH-SUBHEADING-MARGIN);
 }
 
 .hero__button-group {
@@ -669,6 +733,7 @@ p a {
       flex-direction: column;
       justify-content: space-between;
       padding: calc(var(--inner) * 2);
+      border-radius: var(--RADIUS);
       background: var(--bg-accent);
     }
 
@@ -849,6 +914,7 @@ p a {
   overflow: hidden;
   transition: opacity 0.5s ease;
 }
+.video__player:not(.video__player--square) { border-radius: var(--RADIUS); }
 .video__player.is-loading { opacity: 0; }
 
 .video__player video {

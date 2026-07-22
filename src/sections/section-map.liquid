@@ -5,6 +5,7 @@
   assign unique = 'Map--' | append: section.id
   assign desktop_height = section.settings.height
   assign mobile_height = section.settings.mobile_height
+  assign content_exist = false
 
   capture button_classes
     assign button_style = section.settings.button_style
@@ -61,6 +62,7 @@
   <div class="{{ section.settings.width }}">
     <div class="{{ columns_container_class }}" {{ block.shopify_attributes }}>
       {%- if section.settings.title != blank and section.settings.address != blank and section.settings.button -%}
+        {%- assign content_exist = true -%}
         <div class="map__column map__column--content">
           <div class="hero__content__wrapper align--middle-center">
             <div class="hero__content hero__content--compact text-center">
@@ -124,19 +126,27 @@
       {%- endif -%}
 
       <div class="map__column map__column--map">
+        {%- assign image_modifier = '' -%}
+        {%- assign map_modifier = '' -%}
+        {%- if section.settings.width == 'wrapper--full' and content_exist == false -%}
+          {%- assign image_modifier = 'image-square' -%}
+          {%- assign map_modifier = 'map-component--square' -%}
+        {%- endif -%}
         {%- capture sizes -%}
           (min-width: 990px) 66.66vw, 50vw
         {%- endcapture -%}
+
         {%- render 'image-hero',
           image: section.settings.image,
           desktop_height: desktop_height,
           mobile_height: mobile_height,
-          sizes: sizes
+          sizes: sizes,
+          modifier: image_modifier
         -%}
 
         {%- if display_map -%}
           <map-component
-            class="{{ desktop_height }} {{ mobile_height }}"
+            class="{{ desktop_height }} {{ mobile_height }}{% if map_modifier != '' %} {{ map_modifier }}{% endif %}"
             data-zoom="{{ section.settings.zoom }}"
             data-style="{{ section.settings.style }}"
             data-address="{{ section.settings.map_address | escape }}"
@@ -365,6 +375,26 @@
     },
     {
       "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full",
+      "options": [
+        {
+          "value": "wrapper--full",
+          "label": "Full width"
+        },
+        {
+          "value": "wrapper--full-padded",
+          "label": "Full width padded"
+        }
+      ]
+    },
+    {
+      "type": "header",
       "content": "Desktop"
     },
     {
@@ -476,22 +506,6 @@
       "id": "color_scheme",
       "default": "scheme-1",
       "label": "Color scheme"
-    },
-    {
-      "type": "select",
-      "id": "width",
-      "label": "Width",
-      "default": "wrapper--full",
-      "options": [
-        {
-          "value": "wrapper--full",
-          "label": "Full width"
-        },
-        {
-          "value": "wrapper--full-padded",
-          "label": "Full width padded"
-        }
-      ]
     },
     {
       "type": "header",

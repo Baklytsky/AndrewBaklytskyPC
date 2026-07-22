@@ -73,6 +73,10 @@
   transition: none;
 }
 
+body:not(.is-focused) input,
+body:not(.is-focused) select,
+body:not(.is-focused) textarea { outline: none; }
+
 // Only show when user is tabbing through the site
 body.is-focused .checkbox input:focus~ label::before,
 .no-touch body.is-focused .double__image .product-card__link:focus .product-card__bg__under,
@@ -91,6 +95,9 @@ body.is-focused a.frame__item:focus img {
 
 body.is-focused *:focus {
   outline-color: var(--accent);
+  outline-width: 1px;
+  outline-offset: 1px;
+  outline-style: solid;
 }
 
 body.is-focused .checkbox input:focus~ label::before,
@@ -132,26 +139,27 @@ body.is-focused .highlights__item:focus {
   outline-offset: 2px !important;
 }
 
-[data-scroll-locked] {
-  .js__header__stuck,
-  .theme__header,
-  .filters__nav,
-  .announcement__wrapper,
-  .announcement__bar-outer,
-  .toolbar {
-    width: 100vw;
-  }
+// TODO
+// [data-scroll-locked] {
+//   .js__header__stuck,
+//   .theme__header,
+//   .filters__nav,
+//   .announcement__wrapper,
+//   .announcement__bar-outer,
+//   .toolbar {
+//     width: calc(100% - var(--scrollbar-width));
+//   }
 
-  .js__header__stuck,
-  .theme__header,
-  .filters__nav,
-  .announcement__bar,
-  .announcement__bar-holder--slider,
-  .cart-bar,
-  .toolbar {
-    padding-right: var(--scrollbar-width);
-  }
-}
+//   .js__header__stuck,
+//   .theme__header,
+//   .filters__nav,
+//   .announcement__bar,
+//   .announcement__bar-holder--slider,
+//   .cart-bar,
+//   .toolbar {
+//     padding-right: var(--scrollbar-width);
+//   }
+// }
 
 #challenge .shopify-challenge__container,
 #challenge .shopify-challenge__button.btn {

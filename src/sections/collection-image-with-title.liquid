@@ -86,13 +86,19 @@
       {{ image_overlay }}
 
       <div class="hero__image{% if banner_layout == 'overlay' %} frame__item{% endif %}">
+        {%- assign image_modifier = '' -%}
+        {%- if banner_layout == 'overlay' -%}
+          {%- assign image_modifier = 'image-square' -%}
+        {%- endif -%}
+
         {%- render 'image-hero',
           image: collection.image,
           desktop_height: section.settings.height,
           mobile_height: section.settings.mobile_height,
           loading: 'eager',
           fetchpriority: 'high',
-          preload: true
+          preload: true,
+          modifier: image_modifier
         -%}
       </div>
     </div>

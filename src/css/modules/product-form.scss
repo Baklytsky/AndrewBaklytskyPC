@@ -257,6 +257,8 @@ quantity-input,
 
 /* Make Quantity picker height to always match the Add to cart button height */
 .product__submit__item--inline .select-popout__toggle {
+  --radius-open: var(--RADIUS-SELECT-OPEN-INLINE);
+
   height: 100%;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -274,7 +276,7 @@ shopify-accelerated-checkout,
 shopify-accelerated-checkout-cart {
   --checkout-button-border-height: 1px;
   --shopify-accelerated-checkout-button-block-size: calc(var(--BTN-FONT-SIZE) * var(--line-height-normal) + 2 * var(--btn-top) + 2 * var(--checkout-button-border-height));
-  --shopify-accelerated-checkout-button-border-radius: var(--btn-radius);
+  --shopify-accelerated-checkout-button-border-radius: var(--RADIUS-BUTTON);
   --shopify-accelerated-checkout-row-gap: calc(var(--inner) / 2);
 }
 
@@ -306,6 +308,19 @@ shopify-accelerated-checkout-cart {
   color: var(--btn-text);
   background: var(--btn-bg);
   border-color: var(--btn-border);
+  border-radius: var(--RADIUS-BUTTON);
+
+  // The @extend above doesn't reliably carry the button typography onto
+  // Shopify's dynamic-checkout button, so set it explicitly to match `.btn`
+  // (and the Add to cart button) — caps, weight, font and centering.
+  font-size: var(--BTN-FONT-SIZE);
+  font-family: var(--FONT-STACK-BTN);
+  font-style: var(--FONT-STYLE-BTN);
+  font-weight: var(--FONT-WEIGHT-BTN);
+  letter-spacing: var(--BTN-LETTER-SPACING);
+  text-transform: var(--BTN-UPPERCASE);
+  text-align: center;
+  padding: 0;
 
   &:hover:not([disabled]) {
     color: var(--btn-text-hover);

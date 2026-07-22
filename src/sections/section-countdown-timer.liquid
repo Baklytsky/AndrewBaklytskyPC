@@ -70,7 +70,11 @@
     {%- if image_desktop or image_mobile -%}
       <div class="hero__bg">
         <div class="hero__image">
-          {%- render 'image-hero', image_desktop: image_desktop, image_mobile: image_mobile -%}
+          {%- render 'image-hero',
+            image_desktop: image_desktop,
+            image_mobile: image_mobile,
+            modifier: 'image-square'
+          -%}
         </div>
 
         {%- unless show_overlay_text or overlay_opacity == 0.0 -%}
@@ -117,7 +121,7 @@
                     {%- if block.settings.subheading != blank -%}
                       {%- assign animation_order = animation_order | plus: 1 -%}
                       <p
-                        class="hero__subheading{% if settings.subheading_flourish_enable %} flourish-dot{% endif %}"
+                        class="hero__subheading"
                         data-aos="hero"
                         data-aos-anchor="{{ animation_anchor }}"
                         data-aos-order="{{ animation_order }}"

@@ -1,4 +1,9 @@
 {%- liquid
+  assign is_top = false
+  if section.location == 'header'
+    assign is_top = true
+  endif
+
   assign layout = section.settings.layout | default: 'marquee'
   assign padding_top = section.settings.padding_top | default: 0
   assign padding_bottom = section.settings.padding_bottom | default: 0
@@ -6,7 +11,7 @@
   assign text_color = section.settings.color
   assign color_scheme = 'color-' | append: section.settings.color_scheme
   assign border_color = section.settings.border_color
-  assign text_font_size = section.settings.text_font_size
+  assign text_font_size = section.settings.text_font_size | default: 'body-small'
   assign show_border = section.settings.show_border
   assign show_arrows = section.settings.show_arrows | default: false
   assign text_align = section.settings.text_alignment | default: 'center'
@@ -19,6 +24,7 @@
   assign block_count_desktop = 0
   assign block_count_mobile = 0
   assign announcement_modifier = ''
+  assign announcement_height = 'max(calc(var(--font-' | append: text_font_size | append: ') * var(--line-height-normal)), 36px)'
 -%}
 
 {%- for block in section.blocks -%}
@@ -146,7 +152,7 @@
                 {%- assign scrolling_font = block.settings.type_font -%}
 
                 {%- style -%}
-                  #Announcement--{{ section.id }} .announcement__content--{{ block.id }} {
+                  #announcement__content--{{ block.id }} {
                     --scrolling-font-family: {{ scrolling_font.family }}, {{ scrolling_font.fallback_families }};
                     --scrolling-font-size: {{ block.settings.text_font_size_px }}px;
                     --scrolling-font-style: {{ scrolling_font.style }};
@@ -156,7 +162,7 @@
                   {{ scrolling_font | font_face: font_display: 'swap' }}
                 {%- endstyle -%}
 
-                <div class="announcement__content announcement__content--{{ block.id }}">
+                <div class="announcement__content" id="announcement__content--{{ block.id }}">
                   {{ block.settings.text | replace: '|', '<span class="announcement__divider"></span>' }}
                 </div>
               {%- endif -%}
@@ -226,12 +232,22 @@
   --text-size: var(--font-{{ text_font_size }});
   --text-align: {{ text_align }};
   --justify-content: {{ justify_content }};
+  --announcement-min-height: {{ announcement_height }};
 {%- endcapture -%}
 
 {%- if blocks_counter == block_count_desktop and blocks_counter > 0 -%}
   {%- assign announcement_modifier = ' announcement__bar-outer--desktop' -%}
 {%- elsif blocks_counter == block_count_mobile and blocks_counter > 0 -%}
   {%- assign announcement_modifier = ' announcement__bar-outer--mobile' -%}
+{%- endif -%}
+
+{%- if is_top -%}
+  {%- style -%}
+    :root {
+      --TOP-ANNOUNCEMENT-HEIGHT-DESKTOP: {{ announcement_height }};
+      --TOP-ANNOUNCEMENT-HEIGHT-MOBILE: {{ announcement_height }};
+    }
+  {%- endstyle -%}
 {%- endif -%}
 
 {%- render 'stylesheet', name: 'section-announcement.css' -%}
@@ -293,12 +309,20 @@
                   }
                 {%- endstyle -%}
 
-                <div class="{{ section.id }}--button swiper-button-prev">
+                <button
+                  type="button"
+                  class="{{ section.id }}--button swiper-button-prev"
+                  aria-label="{{ 'general.accessibility.previous_slide' | t }}"
+                >
                   {%- render 'icon', name: 'caret-left' -%}
-                </div>
-                <div class="{{ section.id }}--button swiper-button-next">
+                </button>
+                <button
+                  type="button"
+                  class="{{ section.id }}--button swiper-button-next"
+                  aria-label="{{ 'general.accessibility.next_slide' | t }}"
+                >
                   {%- render 'icon', name: 'caret-right' -%}
-                </div>
+                </button>
               {% endif %}
             </div>
           </div>

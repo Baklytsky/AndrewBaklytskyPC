@@ -69,13 +69,14 @@ tabs-component { display: block; }
   --active-width: 0px;
   --active-left: 0px;
 
+  font-size: var(--font-body-small);
   display: block;
   overflow-x: auto;
   white-space: nowrap;
   max-width: 100%;
   width: fit-content;
   padding: 4px 2px;
-  border-radius: 5px;
+  border-radius: var(--RADIUS-BUTTON);
   margin: 0;
   list-style: none;
   position: relative;
@@ -84,7 +85,7 @@ tabs-component { display: block; }
   @include hide-scrollbar;
 }
 
-.tabs:before {
+.tabs::before {
   content: '';
   background: var(--bg);
   position: absolute;
@@ -92,7 +93,7 @@ tabs-component { display: block; }
   left: 0;
   bottom: 4px;
   width: var(--active-width);
-  border-radius: 5px;
+  border-radius: var(--RADIUS-BUTTON);
   transform: translateX(var(--active-left));
   transition: width var(--duration) ease, transform var(--duration) ease;
 }
@@ -105,20 +106,20 @@ tabs-component { display: block; }
   display: inline-block;
   padding: 5px 12px;
   margin: 0 2px;
-  border-radius: 5px;
+  border-radius: var(--RADIUS-BUTTON);
   cursor: pointer;
   vertical-align: bottom;
 }
 
 // Fix background color of current tab on load in popup
-.tabs > li:first-child:before {
+.tabs > li:first-child::before {
   position: absolute;
   top: 0;
   left: 0;
   z-index: -1;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-radius: var(--RADIUS-BUTTON);
   background: var(--bg);
   opacity: 0;
   pointer-events: none;
@@ -130,7 +131,7 @@ tabs-component { display: block; }
   &:only-child span { background: none; }
 }
 
-.tabs > li.current:first-child:before {
+.tabs > li.current:first-child::before {
   opacity: 1;
   transition: opacity 0s var(--duration);
 }
@@ -165,6 +166,7 @@ tabs-component { display: block; }
 .tab__title { padding: 0 var(--outer); }
 .tab__title:not(:last-child) { margin-bottom: var(--gap); }
 
+// TODO: Move these to the product css component
 /* Product Tabs */
 .product-tabs {
   max-width: 100%;

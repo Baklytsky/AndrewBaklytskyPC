@@ -161,9 +161,22 @@
   assign white = '#ffffff'
   assign black = '#000000'
 
-  assign product_grid_alignment = ''
+  assign product_grid_align = 'left'
+  assign product_grid_justify = 'flex-start'
   if settings.product_grid_center
-    assign product_grid_alignment = 'center'
+    assign product_grid_align = 'center'
+    assign product_grid_justify = 'center'
+  endif
+
+  assign global_radius = 0
+  assign swatch_radius = 0
+  if settings.enable_rounded_corners
+    assign global_radius = '5px'
+    assign swatch_radius = '3px'
+  endif
+
+  if settings.swatch_style == 'circle'
+    assign swatch_radius = '50%'
   endif
 -%}
 
@@ -414,13 +427,13 @@
     {%- if settings.product_card_tags_text_color.alpha > 0.0 -%}
       --COLOR-PRODUCT-CARD-TAGS-TEXT: {{ settings.product_card_tags_text_color }};
     {%- endif -%}
-    {% if settings.product_card_tags_shape == 'rounded' %}
-      --TAG-RADIUS: 3px;
-    {% elsif settings.product_card_tags_shape == 'pill' %}
-      --TAG-RADIUS: 300px;
-    {% else %}
-      --TAG-RADIUS: 0px;
-    {% endif %}
+
+    /*** Flourish dots ***/
+    --FLOURISH-DOT-SIZE: 8px;
+    --FLOURISH-SUBHEADING-MARGIN: 10px;
+    --FLOURISH-BADGE-MARGIN: 6px;
+    --FLOURISH-SUBHEADING-CONTENT: {% if settings.subheading_flourish_enable %}""{% else %}none{% endif %};
+    --FLOURISH-BADGE-CONTENT: {% if settings.badge_flourish_enable %}""{% else %}none{% endif %};
 
     /*** Quick Add ***/
     {%- assign quick_add_lightness = settings.quick_add_bg_color | color_extract: 'lightness' -%}
@@ -446,17 +459,6 @@
     --COLOR-SUCCESS: #56AD6A;
     --COLOR-SUCCESS-BG: rgba(86, 173, 106, 0.2);
 
-    {% if settings.btn_border_style == 'rounded' %}
-      --RADIUS: 3px;
-      --RADIUS-SELECT: 3px;
-    {% elsif settings.btn_border_style == 'pill' %}
-      --RADIUS: 300px;
-      --RADIUS-SELECT: 22px;
-    {% else %}
-      --RADIUS: 0px;
-      --RADIUS-SELECT: 0px;
-    {% endif %}
-
     --COLOR-HEADER-LINK: {{ settings.header_link }};
     --COLOR-HEADER-LINK-HOVER: {{ settings.header_link }};
 
@@ -471,6 +473,28 @@
 
     --TRANSPARENT: rgba(255, 255, 255, 0);
 
+    /*** Rounded corners ***/
+    --RADIUS: {{ global_radius }};
+    --RADIUS-SWATCH: {{ swatch_radius }};
+
+    {% if settings.btn_border_style == 'rounded' %}
+      --RADIUS-TAG: 3px;
+      --RADIUS-SELECT: 3px;
+      --RADIUS-BUTTON: 3px;
+    {% elsif settings.btn_border_style == 'pill' %}
+      --RADIUS-TAG: 300px;
+      --RADIUS-SELECT: 28px;
+      --RADIUS-BUTTON: 28px;
+    {% else %}
+      --RADIUS-TAG: 0px;
+      --RADIUS-SELECT: 0px;
+      --RADIUS-BUTTON: 0px;
+    {% endif %}
+
+    --RADIUS-SELECT-OPEN: min(var(--RADIUS-SELECT), calc((var(--form-top) * 2 + 2px + var(--BTN-FONT-SIZE-BODY) * var(--line-height-normal)) / 2));
+    --RADIUS-SELECT-OPEN-SMALL: min(var(--RADIUS-SELECT), calc(var(--min-h, 26px) / 2));
+    --RADIUS-SELECT-OPEN-INLINE: min(var(--RADIUS-SELECT), calc((var(--btn-top) * 2 + var(--BTN-FONT-SIZE) * var(--line-height-normal) + 2px) / 2));
+
     /*** Default overlay opacity ***/
     --overlay-opacity: 0;
     --underlay-opacity: {{ backdrop_opacity }};
@@ -479,19 +503,23 @@
 
     /*** Custom Icons ***/
     {%- liquid
+      assign icon_graph_stroke_width = 2
       assign icon_asset_suffix = ''
       if settings.icon_style == 'light'
         assign icon_asset_suffix = '-light'
+        assign icon_graph_stroke_width = 1
       endif
     -%}
     --ICON-BAG: url( "{{ 'shopping-bag' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-ARROW-LEFT: url( "{{ 'caret-left' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-ARROW-RIGHT: url( "{{ 'caret-right' | append: icon_asset_suffix | append: '.svg' | asset_url }}" );
     --ICON-SELECT: url("{{ 'caret-down' | append: icon_asset_suffix | append: '.svg' | asset_url }}");
+    --ICON-GRAPH-STROKE-WIDTH: {{  icon_graph_stroke_width }};
 
     /*** Product card ***/
     --PRODUCT-GRID-ASPECT-RATIO: {{ settings.product_grid_aspect_ratio | times: 100 }}%;
-    --PRODUCT-CARD-ALIGNMENT: {{ product_grid_alignment }};
+    --PRODUCT-CARD-ALIGN: {{ product_grid_align }};
+    --PRODUCT-CARD-JUSTIFY: {{ product_grid_justify }};
 
     /*** Typography ***/
     --FONT-SIZE-BASE: {{ settings.base_font_size | append: 'px' }};
@@ -1003,6 +1031,8 @@
         discount_already_applied: {{ 'cart.general.discount_already_applied' | t | json }},
         discount_not_applicable: {{ 'cart.general.discount_not_applicable' | t | json }},
         shipping_discounts_at_checkout: {{ 'cart.general.shipping_discounts_at_checkout' | t | json }},
+        previousSlide: {{ 'general.accessibility.previous_slide' | t | json }},
+        nextSlide: {{ 'general.accessibility.next_slide' | t | json }},
       },
       settings: {
         cartType: {{ settings.cart_type | json }},

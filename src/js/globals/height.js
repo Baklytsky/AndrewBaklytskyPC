@@ -1,58 +1,80 @@
 let screenOrientation = getScreenOrientation();
 let firstLoad = true;
+let frame = null;
 
-window.theme.readHeights = function () {
-  const h = {};
-  h.windowHeight = Math.min(window.screen.height, theme.windowHeight);
-  h.headerHeight = getHeight('[data-header-height]');
-  h.stickyHeaderHeight = document.querySelector('[data-header-sticky]') ? h.headerHeight : 0;
-  h.collectionNavHeight = getHeight('[data-filters-nav]');
+const root = document.documentElement;
+const cachedVars = {};
 
-  return h;
-};
+function getScreenOrientation() {
+  return window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape';
+}
+
+function getViewportHeight() {
+  return window.visualViewport?.height || window.innerHeight || theme.windowHeight;
+}
+
+function getHeight(selector) {
+  return document.querySelector(selector)?.offsetHeight || 0;
+}
+
+function setRootVar(name, value) {
+  const nextValue = `${Math.round(value)}px`;
+
+  if (cachedVars[name] === nextValue) return;
+
+  root.style.setProperty(name, nextValue);
+  cachedVars[name] = nextValue;
+}
+
+function readHeights() {
+  const headerHeight = getHeight('[data-header-height]');
+
+  return {
+    windowHeight: getViewportHeight(),
+    headerHeight,
+    stickyHeaderHeight: document.querySelector('[data-header-sticky]') ? headerHeight : 0,
+    collectionNavHeight: getHeight('[data-filters-nav]'),
+  };
+}
+
+window.theme.readHeights = readHeights;
 
 function setVars() {
-  const {windowHeight, headerHeight, collectionNavHeight} = window.theme.readHeights();
+  const heights = readHeights();
   const currentScreenOrientation = getScreenOrientation();
 
-  if (!firstLoad || currentScreenOrientation !== screenOrientation || theme.windowWidth > window.theme.sizes.mobile) {
-    // Only update the heights on screen orientation change or larger than mobile devices
-    document.documentElement.style.setProperty('--full-height', `${windowHeight}px`);
-    document.documentElement.style.setProperty('--three-quarters', `${windowHeight * (3 / 4)}px`);
-    document.documentElement.style.setProperty('--two-thirds', `${windowHeight * (2 / 3)}px`);
-    document.documentElement.style.setProperty('--one-half', `${windowHeight / 2}px`);
-    document.documentElement.style.setProperty('--one-third', `${windowHeight / 3}px`);
+  const shouldUpdateViewportHeights = firstLoad || currentScreenOrientation !== screenOrientation || theme.windowWidth > window.theme.sizes.mobile;
 
-    // Update the screen orientation state
+  if (shouldUpdateViewportHeights) {
+    setRootVar('--full-height', heights.windowHeight);
+    setRootVar('--three-quarters', heights.windowHeight * 0.75);
+    setRootVar('--two-thirds', heights.windowHeight * (2 / 3));
+    setRootVar('--one-half', heights.windowHeight * 0.5);
+    setRootVar('--one-third', heights.windowHeight / 3);
+
     screenOrientation = currentScreenOrientation;
     firstLoad = false;
   }
 
-  document.documentElement.style.setProperty('--filters-nav-height', `${collectionNavHeight}px`);
-  document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+  setRootVar('--filters-nav-height', heights.collectionNavHeight);
+  setRootVar('--header-height', heights.headerHeight);
 }
 
-function getScreenOrientation() {
-  if (window.matchMedia('(orientation: portrait)').matches) {
-    return 'portrait';
-  }
+function requestSetVars() {
+  if (frame) return;
 
-  if (window.matchMedia('(orientation: landscape)').matches) {
-    return 'landscape';
-  }
+  frame = requestAnimationFrame(() => {
+    frame = null;
+    setVars();
+  });
 }
 
-function getHeight(selector) {
-  const el = document.querySelector(selector);
-  if (el) {
-    return el.offsetHeight;
-  } else {
-    return 0;
-  }
+requestSetVars();
+
+window.addEventListener('DOMContentLoaded', requestSetVars);
+document.addEventListener('theme:resize', requestSetVars);
+document.addEventListener('shopify:section:load', requestSetVars);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', requestSetVars);
 }
-
-setVars();
-
-window.addEventListener('DOMContentLoaded', setVars);
-document.addEventListener('theme:resize', setVars);
-document.addEventListener('shopify:section:load', setVars);

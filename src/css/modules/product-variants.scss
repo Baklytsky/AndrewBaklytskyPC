@@ -171,7 +171,7 @@
     color: inherit;
     background-color: transparent;
     border: 1px solid var(--text-a35);
-    border-radius: min(var(--RADIUS), 20px);
+    border-radius: min(var(--RADIUS-BUTTON), 20px);
     transition: color 0.5s $ease-out-fast, background 0.5s $ease-out-fast, border 0.5s $ease-out-fast;
 
     &:hover,
@@ -527,67 +527,31 @@
 }
 
 // Circle swatch style
-.swatch__button--circle { border-radius: 50%; }
-
-.swatch__button--circle .sibling__link,
-.swatch__button--circle .swatch__link,
-.swatch__button--circle input ~ label {
+.swatch__button .sibling__link,
+.swatch__button .swatch__link,
+.swatch__button input ~ label {
   height: var(--swatch-size);
   width: var(--swatch-size);
-  border-radius: 50%;
+  border-radius: var(--RADIUS-SWATCH);
   background: var(--swatch, var(--swatch-default));
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
 
-.swatch__button--circle .sibling__link::after,
-.swatch__button--circle .swatch__link::after,
-.swatch__button--circle input ~ label::after {
+.swatch__button .sibling__link::after,
+.swatch__button .swatch__link::after,
+.swatch__button input ~ label::after {
   top: calc(var(--swatch-outline-offset) * -1);
   left: calc(var(--swatch-outline-offset) * -1);
   width: calc(var(--swatch-size) + var(--swatch-outline-offset) * 2);
   height: calc(var(--swatch-size) + var(--swatch-outline-offset) * 2);
-  border-radius: 50%;
+  border-radius: var(--RADIUS-SWATCH);
 }
 
-.swatch__button--circle input.visually-disabled + label::before,
-.swatch__button--circle input:disabled + label::before {
+.swatch__button input.visually-disabled + label::before,
+.swatch__button input:disabled + label::before {
   height: var(--swatch-size);
-  transform: rotate(-45deg) translate(-50%, -50%);
-}
-
-// Square swatch style
-
-.swatch__button--square input ~ label,
-.swatch__button--square .sibling__link,
-.swatch__button--square .swatch__link {
-  height: var(--swatch-size);
-  width: var(--swatch-size);
-}
-
-.swatch__button--square .sibling__link::after,
-.swatch__button--square .swatch__link::after,
-.swatch__button--square input ~ label::after {
-  top: calc(var(--swatch-outline-offset) * -1);
-  left: calc(var(--swatch-outline-offset) * -1);
-  height: calc(var(--swatch-size) + var(--swatch-outline-offset) * 2);
-  width: calc(var(--swatch-size) + var(--swatch-outline-offset) * 2);
-}
-
-.swatch__button--square .swatch__link,
-.swatch__button--square input:checked ~ label { margin: 0; }
-
-.swatch__button--square .sibling__link--current {
-  height: var(--swatch-size);
-  width: var(--swatch-size);
-  margin: 0;
-}
-
-.swatch__button--square .sibling__link--sold-out::before,
-.swatch__button--square input:disabled + label::before,
-.swatch__button--square input.visually-disabled + label::before {
-  height: calc(1.375 * var(--swatch-size));
   transform: rotate(-45deg) translate(-50%, -50%);
 }
 

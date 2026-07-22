@@ -7,7 +7,7 @@
 
 .swiper-button-prev,
 .swiper-button-next {
-  --icon-size: 14px;
+  --icon-size: 24px;
   --icons: var(--bullet-color);
   --btn-size: 40px;
   --swiper-navigation-sides-offset: calc(var(--btn-size) / 2);
@@ -17,9 +17,13 @@
   height: var(--btn-size);
   padding: 0;
   background: none;
+  border: 0;
   box-shadow: none;
   border-radius: 0;
   overflow: hidden;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
 
   @include media-query($small) {
     display: none;
@@ -164,6 +168,17 @@ swiper-container::part(bullet-active),
 .swiper .swiper-slide {
   transition-property: transform, opacity;
 }
+
+// Prevent CLS before the swiper is initialized
+swiper-container:not(.is-initialized) {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  @include hide-scrollbar;
+}
+.slideshow swiper-container:not(.is-initialized) swiper-slide { min-width: 100%; }
+
 
 // Disabled Swiper instance
 swiper-container.swiper-disabled::part(wrapper) { transform: none !important; }

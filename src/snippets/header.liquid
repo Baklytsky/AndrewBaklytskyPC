@@ -172,15 +172,45 @@
 
     {% comment %} --icon-bag variable is used on PGI and Product upsell block {% endcomment %}
     --icon-bag: var(--ICON-BAG);
+
+    {%- if is_floating -%}
+      --floating-inset: var(--outer);
+      --floating-radius: var(--RADIUS, 0px);
+      --floating-top: var(--LAYOUT-GAP-SMALL);
+      --floating-gap: calc(var(--LAYOUT-GAP-SMALL) / 2);
+    {%- endif -%}
   }
+
+  {%- if show_separator_line -%}
+    .page-header {
+      --header-border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
+      --header-border: inset 0 0 0 1px color-mix(in srgb, var(--link) calc(var(--header-border-opacity, 1) * 100%), transparent);
+    }
+
+    {%- unless is_floating -%}
+      .toolbar::before,
+      .theme__header::before {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        pointer-events: none;
+        transition: border-color 0.2s ease;
+        border-bottom: 1px solid var(--link);
+        opacity: var(--header-border-opacity, 1);
+      }
+    {%- endunless -%}
+  {%- else -%}
+    .page-header {
+      --header-border: none;
+    }
+  {%- endif -%}
 
   .theme__header {
     --PT: {{ padding_top }}px;
     --PB: {{ padding_bottom }}px;
-
-    {% if show_separator_line %}
-      --border-opacity: {{ section.settings.separator_opacity | times: 0.01 }};
-    {% endif %}
   }
 
   {%- if logo != blank -%}
@@ -246,7 +276,9 @@
         {{ cart_item_count }}
       </cart-count>
 
-      {%- if cart_icon_as_circle == false -%}
+      {%- if cart_icon_as_circle -%}
+        {%- render 'icon', name: 'circle' -%}
+      {%- else -%}
         {%- render 'icon', name: 'shopping-bag' -%}
       {%- endif -%}
     </span>
@@ -475,7 +507,7 @@
     data-drawer="hamburger"
     id="header-menu">
     <div class="drawer__inner" data-drawer-inner>
-      <header class="drawer__head">
+      <div class="drawer__head">
         <button class="drawer__close"
           data-drawer-close
           aria-label="{{ 'general.accessibility.show_menu' | t }}"
@@ -485,7 +517,7 @@
 
           {%- render 'icon', name: 'x' -%}
         </button>
-      </header>
+      </div>
 
       <div class="drawer__body">
         <div class="drawer__content" data-drawer-content>
@@ -585,7 +617,7 @@
   data-section-type="header"
 >
   <header
-    class="theme__header{% if show_separator_line %} has-border{% endif %}"
+    class="theme__header"
     role="banner"
     data-header-height
   >

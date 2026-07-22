@@ -5,7 +5,6 @@
   assign color_scheme = 'color-' | append: block.settings.color_scheme
   assign border_color = block.settings.border_color
   assign text_font_size = block.settings.text_font_size | default: 'body-small'
-  assign show_border = block.settings.show_border
   assign show_arrows = block.settings.show_arrows | default: false
   assign text_align = block.settings.text_alignment | default: 'center'
   assign justify_content = 'flex-start'
@@ -27,6 +26,7 @@
   --text-size: var(--font-{{ text_font_size }});
   --text-align: {{ text_align }};
   --justify-content: {{ justify_content }};
+  --announcement-min-height: {{ announcement_height }};
 
   {%- unless border_color == 'rgba(0,0,0,0)' or border_color == blank -%}
     --border: {{ border_color }};
@@ -59,7 +59,7 @@
 
   <div
     id="Announcement--{{ block.id }}"
-    class="announcement__wrapper announcement__wrapper--top{% if show_border %} announcement__wrapper--borders{% endif %} {{ color_scheme }}"
+    class="announcement__wrapper announcement__wrapper--top{% if show_border %} announcement__wrapper--borders{% endif %}{% if block.settings.use_nav_font %} announcement__wrapper--nav-font{% endif %} {{ color_scheme }}"
     data-announcement-wrapper
     data-section-id="{{ section.id }}"
     data-section-type="announcement"
@@ -139,12 +139,20 @@
                 }
               {%- endstyle -%}
 
-              <div class="{{ block.id }}--button swiper-button-prev">
+              <button
+                type="button"
+                class="{{ block.id }}--button swiper-button-prev"
+                aria-label="{{ 'general.accessibility.previous_slide' | t }}"
+              >
                 {%- render 'icon', name: 'caret-left' -%}
-              </div>
-              <div class="{{ block.id }}--button swiper-button-next">
+              </button>
+              <button
+                type="button"
+                class="{{ block.id }}--button swiper-button-next"
+                aria-label="{{ 'general.accessibility.next_slide' | t }}"
+              >
                 {%- render 'icon', name: 'caret-right' -%}
-              </div>
+              </button>
             {% endif %}
           </div>
         </div>
@@ -208,12 +216,6 @@
     {
       "type": "header",
       "content": "Layout"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_border",
-      "label": "Show border",
-      "default": false
     },
     {
       "type": "select",
@@ -303,6 +305,12 @@
         {"value": "body-large", "label": "Large"},
         {"value": "body-x-large", "label": "Extra large"}
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "use_nav_font",
+      "label": "Use header navigation font",
+      "default": true
     },
     {
       "type": "header",

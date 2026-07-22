@@ -18,6 +18,7 @@ ticker-bar {
   --icon-offset: 0.2;
   --icon-size: max(var(--text-size) * 0.8, 22px);
   --btn-size: var(--icon-size);
+  --announcement-min-height: 0;
 
   position: relative;
   overflow: hidden;
@@ -78,7 +79,7 @@ ticker-bar {
 
 .announcement__slide> div {
   display: flex;
-  min-height: var(--announcement-height);
+  min-height: var(--announcement-min-height);
   align-items: center;
   justify-content: var(--justify-content, center);
 }
@@ -158,17 +159,35 @@ ticker-bar {
   flex-flow: row nowrap;
   align-items: center;
   white-space: nowrap;
-  min-height: var(--announcement-height);
+  min-height: var(--announcement-min-height);
 
-  p,
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6 {
-    font-size: var(--text-size);
+  h6,
+  p {
     margin: 0;
+    font-size: var(--text-size);
+    line-height: 1.2;
+    text-transform: inherit;
+  }
+}
+
+.announcement__wrapper--nav-font .announcement__text {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    font-size: calc(var(--font-nav-small) * var(--FONT-SIZE-NAV));
+    font-family: var(--FONT-STACK-NAV);
+    font-style: var(--FONT-STYLE-NAV);
+    font-weight: var(--FONT-WEIGHT-NAV);
+    letter-spacing: var(--LETTER-SPACING-NAV);
   }
 }
 
@@ -189,7 +208,7 @@ ticker-bar {
 }
 
 .announcement__bar-holder--marquee .announcement__slide {
-  min-height: var(--announcement-height);
+  min-height: var(--announcement-min-height);
 }
 
 .announcement__text> div {
