@@ -26,14 +26,17 @@ if (!customElements.get('parallax-hero')) {
         this.rellax = new Rellax(imageSelector, this.defaultOptions);
 
         document.addEventListener('theme:resize', this.refreshEvent);
+
+        customElements.whenDefined('carbon-mix-and-match').then(this.refreshEvent);
       }
 
       refresh() {
-        this.rellax.refresh();
+        this.rellax?.refresh();
       }
 
       disconnectedCallback() {
-        this.rellax.destroy();
+        this.rellax?.destroy();
+        this.rellax = null;
         document.removeEventListener('theme:resize', this.refreshEvent);
       }
     }
