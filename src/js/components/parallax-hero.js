@@ -27,7 +27,7 @@ if (!customElements.get('parallax-hero')) {
 
         document.addEventListener('theme:resize', this.refreshEvent);
 
-        customElements.whenDefined('carbon-mix-and-match').then(this.refreshEvent);
+        customElements.whenDefined('pre-mix-and-match').then(this.refreshEvent);
       }
 
       refresh() {
