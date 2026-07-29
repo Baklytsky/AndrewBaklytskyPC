@@ -1,6 +1,7 @@
 <!-- /sections/section-collection-list.liquid -->
 {%- liquid
   assign unique = 'CollectionsList--' | append: section.id
+  assign subheading = section.settings.subheading
   assign title = section.settings.title
   assign description = section.settings.description
   assign button_text = section.settings.button_text
@@ -13,7 +14,7 @@
   endcapture
 
   assign has_content = false
-  if title != blank or description != blank or button_text != blank
+  if subheading != blank or title != blank or description != blank or button_text != blank
     assign has_content = true
   endif
 
@@ -88,8 +89,21 @@
     {%- if has_content -%}
       <div class="grid__heading-holder{% if layout == 'grid' %} text-center{% endif %}">
         <div class="grid__heading-content">
-          {%- if title != blank or description != blank -%}
+          {%- if subheading != blank or title != blank or description != blank -%}
             <div class="grid__heading-text">
+              {%- if subheading != blank -%}
+                {%- assign animation_order = animation_order | plus: 1 -%}
+
+                <p
+                  class="grid__subheading subheading"
+                  data-aos="hero"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-order="{{ animation_order }}"
+                >
+                  {{ subheading }}
+                </p>
+              {%- endif -%}
+
               {%- if title != blank -%}
                 {%- liquid
                   assign animation_order = animation_order | plus: 1
@@ -249,6 +263,11 @@
     {
       "type": "header",
       "content": "Typography"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
     },
     {
       "type": "text",
