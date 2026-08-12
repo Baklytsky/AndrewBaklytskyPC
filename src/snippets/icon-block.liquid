@@ -1,5 +1,7 @@
 {% comment %} Icon block for Product page & Cart drawer/page {% endcomment %}
 {%- liquid
+  assign is_product = is_product | default: false
+  assign icon_with_text = icon_with_text | default: false
   assign heading = heading | default: block.settings.heading
   assign text = text | default: block.settings.text
   assign prev_index = index | minus: 1
@@ -33,7 +35,7 @@
 -%}
 
 {%- if is_product -%}
-  {%- if index == 0 or prev_block.type != 'icon' -%}
+  {%- if index == 0 or prev_block.type != 'icon' and prev_block.type != 'icon-text' -%}
     <div class="product__block block__icon__row">
   {%- endif -%}
 {%- endif -%}
@@ -55,20 +57,23 @@
       echo '"'
     endcapture
   -%}
-  <div class="block__icon" data-aos="img-in" {{ icon_style }}>
-    {%- liquid
-      if image
-        assign icon_width = icon_size
-        assign icon_width_retina = icon_width | times: 2
-        assign icon_sizes = icon_width | append: 'px'
-        assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
 
-        render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
-      else
-        render 'icon', name: icon_key
-      endif
-    -%}
-  </div>
+  {%- unless icon_with_text and is_product and heading == blank and text == blank -%}
+    <div class="block__icon" data-aos="img-in" {{ icon_style }}>
+      {%- liquid
+        if image
+          assign icon_width = icon_size
+          assign icon_width_retina = icon_width | times: 2
+          assign icon_sizes = icon_width | append: 'px'
+          assign icon_widths = icon_width | append: ', ' | append: icon_width_retina
+
+          render 'image', image: image, width: icon_width_retina, sizes: icon_sizes, widths: icon_widths, show_backfill: false
+        else
+          render 'icon', name: icon_key
+        endif
+      -%}
+    </div>
+  {%- endunless -%}
 
   {%- if heading != blank or text != blank -%}
     <div class="block__icon__content">
@@ -95,8 +100,7 @@
 </div>
 
 {%- if is_product -%}
-  {%- assign blocks_size = section.blocks.size | minus: 1 -%}
-  {%- if index == section.blocks.size or next_block.type != 'icon' -%}
+  {%- if next_block.type != 'icon' and next_block.type != 'icon-text' -%}
     </div>
   {%- endif -%}
 {%- endif -%}

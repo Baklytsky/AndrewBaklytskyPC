@@ -232,11 +232,19 @@
                 </swiper-container>
 
                 {%- if product.media.size > 1 -%}
-                  <button type="button" class="{{ section.id }}--button swiper-button-prev" data-aria-controls="swiper-{{ section.id }}">
+                  <button
+                    type="button"
+                    class="{{ section.id }}--button swiper-button-prev"
+                    data-aria-controls="swiper-{{ section.id }}"
+                  >
                     <span class="visually-hidden">{{ 'general.pagination.prev' | t }}</span>
                     {%- render 'icon', name: 'caret-left' -%}
                   </button>
-                  <button type="button" class="{{ section.id }}--button swiper-button-next" data-aria-controls="swiper-{{ section.id }}">
+                  <button
+                    type="button"
+                    class="{{ section.id }}--button swiper-button-next"
+                    data-aria-controls="swiper-{{ section.id }}"
+                  >
                     <span class="visually-hidden">{{ 'general.pagination.next' | t }}</span>
                     {%- render 'icon', name: 'caret-right' -%}
                   </button>
@@ -513,6 +521,14 @@
 
                   {%- when 'icon' -%}
                     {%- render 'icon-block', block: block, index: forloop.index0, is_product: true -%}
+
+                  {%- when 'icon-text' -%}
+                    {%- render 'icon-block',
+                      block: block,
+                      index: forloop.index0,
+                      is_product: true,
+                      icon_with_text: true
+                    -%}
 
                   {%- when 'sharing' -%}
                     <div class="product__block block-padding" {{ block.shopify_attributes }} {{ block_style }}>

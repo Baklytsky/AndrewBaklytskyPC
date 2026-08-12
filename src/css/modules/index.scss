@@ -575,6 +575,7 @@ p a {
   --link-hover: currentcolor;
 }
 
+.grid__subheading,
 .hero__subheading,
 .editorial__subheading,
 .logos__title,
@@ -704,6 +705,13 @@ p a {
 }
 
 .grid-container--split {
+  .grid__heading-holder {
+    padding: calc(var(--inner) * 2);
+    margin-left: var(--grid-outer);
+    margin-right: var(--grid-outer);
+    background: var(--bg-accent);
+  }
+
   @include media-query($medium-up) {
     --container-gap: max(calc(var(--outer) / 3.125), var(--SPACING-SMALL));
 
@@ -732,24 +740,16 @@ p a {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: calc(var(--inner) * 2);
       border-radius: var(--RADIUS);
-      background: var(--bg-accent);
     }
 
     .grid__heading-text { width: auto; }
 
     .grid--slider {
-      @include media-query($medium-up) {
-        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.38);
+      --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.38);
 
-        padding-left: var(--container-gap);
-        margin-left: calc(var(--container-gap) * -1);
-      }
-
-      @include media-query ($large-up) {
-        --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.28);
-      }
+      padding-left: var(--container-gap);
+      margin-left: calc(var(--container-gap) * -1);
     }
 
     .grid--slider .grid-item { width: var(--item-width); }
@@ -766,6 +766,10 @@ p a {
   @include media-query($large-up) {
     --content-width: 28%;
     --item-width: 38% !important;
+
+    .grid--slider {
+      --item-width: calc((100vw - var(--scrollbar-width) - var(--grid-outer) - var(--container-gap)) * 0.28);
+    }
   }
 
   @include media-query($medium) {
